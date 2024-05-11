@@ -1,14 +1,14 @@
 /* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { DeviceTypes, PlatformConfig, PlatformConfigValue, WindowCovering, WindowCoveringCluster } from 'matterbridge';
+import { DeviceTypes, OnOffCluster, PlatformConfig, PlatformConfigValue, PowerSource, WindowCovering, WindowCoveringCluster, onOffSwitch } from 'matterbridge';
 import { Matterbridge, MatterbridgeDevice, MatterbridgeDynamicPlatform } from 'matterbridge';
 import { AnsiLogger, debugStringify, dn, hk, nf, rs, wr, zb } from 'node-ansi-logger';
 import { NodeStorage, NodeStorageManager } from 'node-persist-manager';
 
 // import shellies, { Device } from 'shellies';
 
-import { Device, DeviceId, DeviceIdentifiers, DeviceDiscoverer, MdnsDeviceDiscoverer, Shellies, WiFiAttributes, WiFi, Ethernet } from 'shellies-ng';
+import { Device, DeviceId, DeviceIdentifiers, DeviceDiscoverer, MdnsDeviceDiscoverer, Shellies, WiFiAttributes, WiFi, Ethernet, Switch, Input } from 'shellies-ng';
 
 import path from 'path';
 
@@ -17,8 +17,8 @@ type DeviceIp = {
 };
 
 export class ShellyPlatform extends MatterbridgeDynamicPlatform {
-  private shellyDevices: DeviceIdentifiers[] = [];
-  private bridgedDevices: MatterbridgeDevice[] = [];
+  private shellyDevices = new Map<DeviceId, DeviceIdentifiers>();
+  private bridgedDevices = new Map<DeviceId, MatterbridgeDevice>();
 
   // NodeStorageManager
   private nodeStorageManager?: NodeStorageManager;
@@ -89,11 +89,65 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         this.log.debug('Device does not have an Ethernet component');
       }
       if (hostname) {
-        this.shellyDevices.push({ deviceId: device.id, hostname: hostname });
-        await this.nodeStorage?.set<DeviceIdentifiers[]>('DeviceIdentifiers', this.shellyDevices);
+        this.shellyDevices.set(device.id, { deviceId: device.id, hostname: hostname });
+        await this.saveShellyDevices();
         this.log.info(`**Stored deviceId: ${hk}${device.id}${nf} hostname: ${zb}${hostname}${nf}`);
-      } else this.log.error('Failed to retrieve device hostname');
+      } else {
+        this.log.error('Failed to retrieve device hostname');
+        return;
+      }
+      console.log('Device:', device);
 
+      for (const [key, component] of device) {
+        if (component.name === 'Input') {
+          const inputComponent = device.getComponent(key) as Input;
+          if (inputComponent) {
+            this.log.info(`${hk}${device.id}${nf} - Input status:`, inputComponent.state);
+          } else {
+            this.log.error('Failed to retrieve Input component');
+          }
+        }
+        if (component.name === 'Switch') {
+          const switchComponent = device.getComponent(key) as Switch;
+          if (switchComponent) {
+            switchComponent.set(true);
+            this.log.info(`${hk}${device.id}${nf} - Switch status:`, switchComponent.output);
+            if (switchComponent.voltage !== undefined) this.log.info(`${hk}${device.id}${nf} - Switch voltage:`, switchComponent.voltage);
+            if (switchComponent.current !== undefined) this.log.info(`${hk}${device.id}${nf} - Switch current:`, switchComponent.current);
+            if (switchComponent.apower !== undefined) this.log.info(`${hk}${device.id}${nf} - Switch power:`, switchComponent.apower);
+            if (switchComponent.aenergy && switchComponent.aenergy.total !== undefined) this.log.info(`${hk}${device.id}${nf} - Switch energy:`, switchComponent.aenergy.total);
+
+            // Create a new Matterbridge device for the switch
+            const switchDevice = new MatterbridgeDevice(onOffSwitch);
+            switchDevice.createDefaultIdentifyClusterServer();
+            switchDevice.createDefaultGroupsClusterServer();
+            switchDevice.createDefaultScenesClusterServer();
+            switchDevice.createDefaultBridgedDeviceBasicInformationClusterServer(device.id, device.id, 0xfff1, 'Luligu', 'Shelly device');
+            switchDevice.createDefaultPowerSourceWiredClusterServer(PowerSource.WiredCurrentType.Ac);
+            switchDevice.createDefaultOnOffClusterServer(switchComponent.output);
+            await this.registerDevice(switchDevice);
+            switchDevice.addCommandHandler('on', async () => {
+              switchDevice.getClusterServer(OnOffCluster)?.setOnOffAttribute(true);
+              const device = this.shellies?.get(switchDevice.serialNumber!);
+              const switchComponent = device?.getComponent('switch:0') as Switch;
+              switchComponent?.set(true);
+              if (this.shellies && device && switchComponent) this.log.info('Command on called for device:', device?.id);
+              else this.log.error('Failed to send command to device:', device?.id);
+            });
+            switchDevice.addCommandHandler('off', async () => {
+              switchDevice.getClusterServer(OnOffCluster)?.setOnOffAttribute(false);
+              const device = this.shellies?.get(switchDevice.serialNumber!);
+              const switchComponent = device?.getComponent('switch:0') as Switch;
+              switchComponent?.set(false);
+              if (this.shellies && device && switchComponent) this.log.info('Command off called for device:', device?.id);
+              else this.log.error('Failed to send command to device:', device?.id);
+            });
+            this.bridgedDevices.set(device.id, switchDevice);
+          } else {
+            this.log.error('Failed to retrieve Switch component');
+          }
+        }
+      }
       // eslint-disable-next-line no-console
       // console.log('Device:', device);
     });
@@ -115,7 +169,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
 
     // Handle unknown
     this.shellies.on('unknown', (deviceId: DeviceId, model: string, identifiers: DeviceIdentifiers) => {
-      this.log.warn(`Shellies removed device with ID: ${deviceId}, model: ${model} hostname: ${identifiers.hostname}`);
+      this.log.warn(`Shellies unknown device with ID: ${deviceId}, model: ${model} hostname: ${identifiers.hostname}`);
     });
 
     this.log.info('Finished initializing platform:', this.config.name);
@@ -139,11 +193,11 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     }
 
     // create a storage device discoverer and register it with the shellies client
-    this.storageDiscoverer = new StorageDeviceDiscoverer(this.shellyDevices, this.nodeStorage);
+    this.storageDiscoverer = new StorageDeviceDiscoverer(this.nodeStorage);
     this.shellies?.registerDiscoverer(this.storageDiscoverer);
 
     // create a config device discoverer and register it with the shellies client
-    this.configDiscoverer = new ConfigDeviceDiscoverer(this.shellyDevices, this.config);
+    this.configDiscoverer = new ConfigDeviceDiscoverer(this.config);
     this.shellies?.registerDiscoverer(this.configDiscoverer);
 
     // log errors
@@ -174,7 +228,24 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
   override async onShutdown(reason?: string) {
     this.log.info('onShutdown called with reason:', reason ?? 'none');
 
+    this.mdnsDiscoverer?.removeAllListeners();
+    this.storageDiscoverer?.removeAllListeners();
+    this.configDiscoverer?.removeAllListeners();
+
     if (this.config.unregisterOnShutdown === true) await this.unregisterAllDevices();
+  }
+
+  private async saveShellyDevices() {
+    await this.nodeStorage?.set<DeviceIdentifiers[]>('DeviceIdentifiers', Array.from(this.shellyDevices.values()));
+  }
+
+  private async loadShellyDevices() {
+    if (!this.nodeStorage) {
+      this.log.error('NodeStorage is not initialized');
+      return;
+    }
+    const shellyDevices: DeviceIdentifiers[] = await this.nodeStorage.get<DeviceIdentifiers[]>('DeviceIdentifiers', []);
+    return shellyDevices;
   }
 
   public validateWhiteBlackList(entityName: string) {
@@ -191,39 +262,36 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
 }
 
 export class StorageDeviceDiscoverer extends DeviceDiscoverer {
-  private shellyDevices: DeviceIdentifiers[] = [];
   private nodeStorage: NodeStorage;
 
-  constructor(shellyDevices: DeviceIdentifiers[], nodeStorage: NodeStorage) {
+  constructor(nodeStorage: NodeStorage) {
     super();
-    this.shellyDevices = shellyDevices;
     this.nodeStorage = nodeStorage;
   }
 
   async start() {
-    this.shellyDevices = await this.nodeStorage.get<DeviceIdentifiers[]>('DeviceIdentifiers', []);
-    this.shellyDevices.forEach((device) => {
+    const shellyDevices = await this.nodeStorage.get<DeviceIdentifiers[]>('DeviceIdentifiers', []);
+    shellyDevices.forEach((device) => {
       // eslint-disable-next-line no-console
-      console.log(`${nf}**Storage deviceId: ${hk}${device.deviceId}${nf} hostname: ${zb}${device.hostname}${nf}`);
+      console.log(`${nf}Storage deviceId: ${hk}${device.deviceId}${nf} hostname: ${zb}${device.hostname}${nf}`);
       this.handleDiscoveredDevice({ deviceId: device.deviceId, hostname: device.hostname });
     });
   }
 }
 
 export class ConfigDeviceDiscoverer extends DeviceDiscoverer {
-  private shellyDevices: DeviceIdentifiers[] = [];
   private config: PlatformConfig;
 
-  constructor(shellyDevices: DeviceIdentifiers[], config: PlatformConfig) {
+  constructor(config: PlatformConfig) {
     super();
-    this.shellyDevices = shellyDevices;
     this.config = config;
   }
 
   async start() {
     if (!this.config.deviceIp) return;
     Object.entries(this.config.deviceIp as Record<string, PlatformConfigValue>).forEach(([key, value]) => {
-      console.log(`${nf}**Config deviceId: ${hk}${key}${nf} hostname: ${zb}${value}${nf}`);
+      // eslint-disable-next-line no-console
+      console.log(`${nf}Config deviceId: ${hk}${key}${nf} hostname: ${zb}${value}${nf}`);
       this.handleDiscoveredDevice({ deviceId: key, hostname: value as string });
     });
   }
