@@ -1,5 +1,5 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { AnsiLogger, TimestampFormat, debugStringify, dn, hk, nf, rs, wr, zb } from 'node-ansi-logger';
+import { AnsiLogger, TimestampFormat, db, debugStringify, dn, hk, nf, rs, wr, zb } from 'node-ansi-logger';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import noble from '@stoprocent/noble';
 import type { Peripheral } from '@stoprocent/noble';
@@ -122,8 +122,8 @@ export class NobleBleClient {
       return;
     }
 
-    this.log.debug(`Found peripheral ${peripheral.address} (${peripheral.addressType}) name ${peripheral.advertisement.localName} connectable ${peripheral.connectable}`);
-    this.log.debug(`- rssi ${peripheral.rssi} mtu ${peripheral.mtu} state ${peripheral.state} connectable ${peripheral.connectable} `, peripheral.services);
+    this.log.debug(`Found peripheral ${peripheral.address} (${peripheral.addressType}) name ${hk}${peripheral.advertisement.localName}${db} connectable ${peripheral.connectable}`);
+    this.log.debug(`- rssi ${peripheral.rssi} mtu ${peripheral.mtu} state ${peripheral.state}`, peripheral.services);
     this.log.debug(`- advertisement: ${JSON.stringify(peripheral.advertisement)}`);
     this.log.debug(`- serviceUuids: ${JSON.stringify(peripheral.advertisement.serviceUuids)}`);
 
