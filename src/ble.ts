@@ -1,8 +1,13 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { AnsiLogger, TimestampFormat, db, debugStringify, dn, hk, nf, rs, wr, zb } from 'node-ansi-logger';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import noble from '@stoprocent/noble';
+
+import { createRequire } from 'module';
 import type { Peripheral } from '@stoprocent/noble';
+
+const require = createRequire(import.meta.url);
+let noble: typeof import('@stoprocent/noble');
+
+//import noble from '@stoprocent/noble';
 
 // $env:BLUETOOTH_HCI_SOCKET_USB_VID = '8087'  # Vendor ID for Intel Corporation
 // $env:BLUETOOTH_HCI_SOCKET_USB_PID = '0026'  # Product ID
@@ -39,6 +44,24 @@ process.on('SIGTERM', async function () {
   process.exit();
 });
 
+function loadNoble(hciId?: number) {
+  // load noble driver with the correct device selected
+  if (hciId !== undefined) {
+    process.env.NOBLE_HCI_DEVICE_ID = hciId.toString();
+  }
+  noble = require('@stoprocent/noble');
+  /*
+  if (typeof noble.on !== 'function') {
+    // The following commit broke the default exported instance of noble:
+    // https://github.com/abandonware/noble/commit/b67eea246f719947fc45b1b52b856e61637a8a8e
+    // eslint-disable-next-line no-console
+    console.log('Noble is not a function, trying to use default export');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    noble = (noble as any)({ extended: false });
+  }
+  */
+}
+
 export class NobleBleClient {
   private readonly discoveredPeripherals = new Map<
     string,
@@ -57,6 +80,7 @@ export class NobleBleClient {
   constructor() {
     this.log = new AnsiLogger({ logName: 'bleShellyDiscover', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: true });
 
+    loadNoble();
     try {
       noble.reset();
     } catch (error: unknown) {
