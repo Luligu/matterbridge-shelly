@@ -84,7 +84,7 @@ export class NobleBleClient {
     try {
       noble.reset();
     } catch (error: unknown) {
-      this.log.debug(`Error resetting BLE device via noble (can be ignored, we just tried): ${(error as unknown as Error).message}`);
+      this.log.debug(`Error resetting Noble (can be ignored): ${(error as unknown as Error).message}`);
     }
     noble.on('stateChange', (state) => {
       this.nobleState = state;
@@ -113,21 +113,22 @@ export class NobleBleClient {
 
   public async startScanning() {
     if (this.isScanning) return;
-
+    this.log.debug('Starting BLE scanning for Shelly Devices ...');
     this.shouldScan = true;
     if (this.nobleState === 'poweredOn') {
-      this.log.debug('Start BLE scanning for Shelly Devices ...');
       //await noble.startScanningAsync([BLE_SHELLY_SERVICE_UUID], false);
       await noble.startScanningAsync(undefined, false);
+      this.log.debug('Started BLE scanning for Shelly Devices');
     } else {
-      this.log.debug('noble state is not poweredOn ... delay scanning till poweredOn');
+      this.log.debug('Noble state is not poweredOn ... delay scanning till Noble state is poweredOn');
     }
   }
 
   public async stopScanning() {
     this.shouldScan = false;
-    this.log.debug('Stop BLE scanning for Shelly Devices ...');
+    this.log.debug('Stopping BLE scanning for Shelly Devices ...');
     await noble.stopScanningAsync();
+    this.log.debug('Stoped BLE scanning for Shelly Devices');
   }
 
   private async handleDiscoveredDevice(peripheral: Peripheral) {
@@ -145,6 +146,10 @@ export class NobleBleClient {
       this.log.debug(`Peripheral ${peripheral.address} is not connectable ... ignoring`);
       return;
     }
+    if (peripheral.addressType === 'public') {
+      this.log.debug(`Peripheral ${peripheral.address} addressType is not public ... ignoring`);
+      //return;
+    }
     if (!peripheral.advertisement.localName) {
       this.log.debug(`Peripheral ${peripheral.address} has no localName ... ignoring`);
       //return;
@@ -155,7 +160,10 @@ export class NobleBleClient {
     );
     this.log.debug(`- rssi ${peripheral.rssi} mtu ${peripheral.mtu} state ${peripheral.state}`);
     this.log.debug(`- advertisement: ${JSON.stringify(peripheral.advertisement)}`);
-    this.log.debug(`- serviceUuids: ${JSON.stringify(peripheral.advertisement.serviceUuids)}`);
+    this.log.debug(`- txPowerLevel: ${peripheral.advertisement.txPowerLevel}`);
+    this.log.debug(`- manufacturerData: ${JSON.stringify(peripheral.advertisement.manufacturerData)}`);
+    this.log.debug(`- serviceData: ${peripheral.advertisement.serviceData.length > 0 ? zb : ''}${JSON.stringify(peripheral.advertisement.serviceData)}`);
+    this.log.debug(`- serviceUuids: ${peripheral.advertisement.serviceUuids.length > 0 ? zb : ''}${JSON.stringify(peripheral.advertisement.serviceUuids)}`);
 
     const manufacturerData = peripheral.advertisement.manufacturerData?.toString('hex');
     if (!manufacturerData || !manufacturerData.startsWith('a90b')) {
@@ -173,9 +181,9 @@ export class NobleBleClient {
     if (!this.discoveredPeripherals.has(peripheral.address)) {
       this.log.warn(`Exploring peripheral ${peripheral.address} and adding to discovered devices ...`);
       this.discoveredPeripherals.set(peripheral.address, { peripheral, manufacturerData, serviceUuids: peripheral.advertisement.serviceUuids });
-      await this.stopScanning();
+      //await this.stopScanning();
       await this.explore(peripheral);
-      await this.startScanning();
+      //await this.startScanning();
     }
   }
 
