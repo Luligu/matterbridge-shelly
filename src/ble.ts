@@ -115,16 +115,18 @@ export class NobleBleClient {
     // Shelly 15 0xa90b0105000b01100a1897d6931744
     // [16:04:47.990] [bleShellyDiscover] Found peripheral 44:17:93:d6:97:1a (): {"localName":"","txPowerLevel":-1284976214,
     // "manufacturerData":{"type":"Buffer","data":[169,11,1,5,0,11,1,16,10,24,151,214,147,23,68]},"serviceData":[],"serviceUuids":[]}
-    this.log.debug(`Found peripheral ${peripheral.address} (${peripheral.addressType}) name ${peripheral.advertisement.localName} connectable ${peripheral.connectable}`);
-    this.log.debug(`- rssi ${peripheral.rssi} mtu ${peripheral.mtu} state ${peripheral.state} connectable ${peripheral.connectable} `, peripheral.services);
-    this.log.debug(`- advertisement: ${JSON.stringify(peripheral.advertisement)}`);
-    this.log.debug(`- serviceUuids: ${JSON.stringify(peripheral.advertisement.serviceUuids)}`);
 
     // console.log(peripheral.advertisement);
     if (!peripheral.connectable) {
       this.log.debug(`Peripheral ${peripheral.address} is not connectable ... ignoring`);
       return;
     }
+
+    this.log.debug(`Found peripheral ${peripheral.address} (${peripheral.addressType}) name ${peripheral.advertisement.localName} connectable ${peripheral.connectable}`);
+    this.log.debug(`- rssi ${peripheral.rssi} mtu ${peripheral.mtu} state ${peripheral.state} connectable ${peripheral.connectable} `, peripheral.services);
+    this.log.debug(`- advertisement: ${JSON.stringify(peripheral.advertisement)}`);
+    this.log.debug(`- serviceUuids: ${JSON.stringify(peripheral.advertisement.serviceUuids)}`);
+
     const manufacturerData = peripheral.advertisement.manufacturerData?.toString('hex');
     if (!manufacturerData || !manufacturerData.startsWith('a90b')) {
       this.log.debug(`Peripheral ${peripheral.address} is not a Shelly device ... ignoring`);
