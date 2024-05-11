@@ -126,7 +126,7 @@ export class NobleBleClient {
       return;
     }
     const manufacturerData = peripheral.advertisement.manufacturerData?.toString('hex');
-    if (!manufacturerData.startsWith('a90b')) {
+    if (!manufacturerData || !manufacturerData.startsWith('a90b')) {
       this.log.debug(`Peripheral ${peripheral.address} is not a Shelly device ... ignoring`);
       return;
     }
