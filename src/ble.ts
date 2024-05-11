@@ -98,7 +98,7 @@ export class NobleBleClient {
       }
     });
     noble.on('discover', async (peripheral) => {
-      this.log.debug('Noble discover...');
+      //this.log.debug('Noble discover...');
       await this.handleDiscoveredDevice(peripheral);
     });
     noble.on('scanStart', () => {
@@ -150,11 +150,11 @@ export class NobleBleClient {
       return;
     }
     if (peripheral.addressType === 'public') {
-      this.log.debug(`Peripheral ${peripheral.address} addressType is not public ... ignoring`);
+      //this.log.debug(`Peripheral ${peripheral.address} addressType is not public ... ignoring`);
       //return;
     }
     if (!peripheral.advertisement.localName) {
-      this.log.debug(`Peripheral ${peripheral.address} has no localName ... ignoring`);
+      //this.log.debug(`Peripheral ${peripheral.address} has no localName ... ignoring`);
       //return;
     }
 
