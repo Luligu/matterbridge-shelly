@@ -111,16 +111,17 @@ export class NobleBleClient {
     });
   }
 
-  public async startScanning() {
+  public async startScanning(serviceUUIDs?: string[] | undefined, allowDuplicates?: boolean | undefined) {
     if (this.isScanning) {
       this.log.debug('Scanning already in progress ...');
       return;
     }
-    this.log.debug('Starting BLE scanning for Shelly Devices ...');
+    this.log.debug('Starting BLE scanning for Shelly Devices for ...');
     this.shouldScan = true;
     if (this.nobleState === 'poweredOn') {
+      await noble.startScanningAsync(undefined, true);
       //await noble.startScanningAsync([BLE_SHELLY_SERVICE_UUID], false);
-      await noble.startScanningAsync(undefined, false);
+      //await noble.startScanningAsync(serviceUUIDs, allowDuplicates);
       this.log.debug('Started BLE scanning for Shelly Devices');
     } else {
       this.log.debug('Noble state is not poweredOn ... delay scanning till Noble state is poweredOn');
@@ -211,6 +212,7 @@ export class NobleBleClient {
     this.log.warn(`Connected to ${peripheral.address}`);
 
     // Once connected, discover services
+    if (peripheral.state !== 'connected') return;
     const services = await peripheral.discoverServicesAsync([]);
     for (const service of services) {
       // Update the map with new services
@@ -223,6 +225,7 @@ export class NobleBleClient {
       this.log.info(`- discovered service ${serviceInfo}`);
 
       // Discover characteristics
+      if (peripheral.state !== 'connected') return;
       const characteristics = await service.discoverCharacteristicsAsync([]);
       for (const characteristic of characteristics) {
         let characteristicInfo = characteristic.uuid;
@@ -230,6 +233,7 @@ export class NobleBleClient {
         if (characteristic.type) characteristicInfo += ` type: ${characteristic.type}`;
         this.log.info(`  - discovered characteristic ${characteristicInfo} properties ${characteristic.properties.join(', ')}`);
         if (characteristic.properties.includes('read')) {
+          if (peripheral.state !== 'connected') return;
           const data = await characteristic.readAsync();
           if (data) {
             const string = data.toString('ascii');
@@ -240,12 +244,14 @@ export class NobleBleClient {
             }
           }
         }
+        if (peripheral.state !== 'connected') return;
         const descriptors = await characteristic.discoverDescriptorsAsync();
         for (const descriptor of descriptors) {
           let descriptorInfo = descriptor.uuid;
           if (descriptor.name) descriptorInfo += ` (${descriptor.name})`;
 
           this.log.info(`    - discovered descriptor ${descriptorInfo}`);
+          if (peripheral.state !== 'connected') return;
           const data = await descriptor.readValueAsync();
           if (data) {
             this.log.info(`      - read: ${data.toString()}`);
@@ -273,4 +279,4 @@ export class NobleBleClient {
 }
 
 const bleDiscover = new NobleBleClient();
-await bleDiscover.startScanning();
+await bleDiscover.startScanning([], true);
