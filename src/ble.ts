@@ -186,6 +186,7 @@ export class NobleBleClient {
       this.discoveredPeripherals.set(peripheral.address, { peripheral, manufacturerData, serviceUuids: peripheral.advertisement.serviceUuids });
       await this.stopScanning();
       await this.explore(peripheral);
+      this.isScanning = false;
       await this.startScanning();
     }
   }
