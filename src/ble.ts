@@ -112,7 +112,10 @@ export class NobleBleClient {
   }
 
   public async startScanning() {
-    if (this.isScanning) return;
+    if (this.isScanning) {
+      this.log.debug('Scanning already in progress ...');
+      return;
+    }
     this.log.debug('Starting BLE scanning for Shelly Devices ...');
     this.shouldScan = true;
     if (this.nobleState === 'poweredOn') {
@@ -128,7 +131,7 @@ export class NobleBleClient {
     this.shouldScan = false;
     this.log.debug('Stopping BLE scanning for Shelly Devices ...');
     await noble.stopScanningAsync();
-    this.log.debug('Stoped BLE scanning for Shelly Devices');
+    this.log.debug('Stopped BLE scanning for Shelly Devices');
   }
 
   private async handleDiscoveredDevice(peripheral: Peripheral) {
