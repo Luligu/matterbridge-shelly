@@ -2,7 +2,7 @@
 import { AnsiLogger, TimestampFormat, db, debugStringify, dn, hk, nf, rs, wr, zb } from 'node-ansi-logger';
 
 import { createRequire } from 'module';
-import type { Peripheral } from '@stoprocent/noble';
+import type { Peripheral, Service } from '@stoprocent/noble';
 
 const require = createRequire(import.meta.url);
 let noble: typeof import('@stoprocent/noble');
@@ -194,6 +194,18 @@ export class NobleBleClient {
   async explore(peripheral: Peripheral) {
     const entry = this.discoveredPeripherals.get(peripheral.address);
 
+    peripheral.on('connect', (error: string) => {
+      if (error) this.log.error(`Peripheral ${peripheral.address} connect error ${error}`);
+      else this.log.debug(`Peripheral ${peripheral.address} connected`);
+    });
+    peripheral.on('disconnect', (error: string) => {
+      if (error) this.log.error(`Peripheral ${peripheral.address} disconnect error ${error}`);
+      else this.log.debug(`Peripheral ${peripheral.address} disconnected`);
+    });
+    peripheral.on('servicesDiscover', (services: Service[]) => {
+      this.log.debug(`Peripheral ${peripheral.address} servicesDiscover services ${services.length}`);
+    });
+
     // Connect to the peripheral
     await peripheral.connectAsync();
     this.log.warn(`Connected to ${peripheral.address}`);
@@ -247,6 +259,7 @@ export class NobleBleClient {
     if (entry) this.discoveredPeripherals.set(peripheral.address, entry);
 
     await peripheral.disconnectAsync();
+    peripheral.removeAllListeners();
     this.log.warn(`Disconnected from ${peripheral.address}`);
   }
 
