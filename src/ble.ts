@@ -147,7 +147,7 @@ export class NobleBleClient {
     }
     if (!peripheral.advertisement.localName) {
       this.log.debug(`Peripheral ${peripheral.address} has no localName ... ignoring`);
-      return;
+      //return;
     }
 
     this.log.debug(
@@ -189,6 +189,7 @@ export class NobleBleClient {
     // Once connected, discover services
     const services = await peripheral.discoverServicesAsync([]);
     for (const service of services) {
+      // Update the map with new services
       if (entry && !entry.serviceUuids.find((uuid) => uuid === service.uuid)) {
         entry.serviceUuids.push(service.uuid);
         this.log.info(`Added service ${service.uuid}`);
@@ -200,7 +201,7 @@ export class NobleBleClient {
       // Discover characteristics
       const characteristics = await service.discoverCharacteristicsAsync([]);
       for (const characteristic of characteristics) {
-        let characteristicInfo = `  ${characteristic.uuid}`;
+        let characteristicInfo = characteristic.uuid;
         if (characteristic.name) characteristicInfo += ` (${characteristic.name})`;
         if (characteristic.type) characteristicInfo += ` type: ${characteristic.type}`;
         this.log.info(`  - discovered characteristic ${characteristicInfo} properties ${characteristic.properties.join(', ')}`);
@@ -208,7 +209,8 @@ export class NobleBleClient {
           const data = await characteristic.readAsync();
           if (data) {
             const string = data.toString('ascii');
-            this.log.info(`    - read ${string}`);
+            this.log.info(`    - read: ${string}`);
+            // Update the map with the name of the peripheral name
             if (entry && service.uuid === '1800' && characteristic.uuid === '2a00') {
               entry.name = string;
             }
@@ -216,10 +218,13 @@ export class NobleBleClient {
         }
         const descriptors = await characteristic.discoverDescriptorsAsync();
         for (const descriptor of descriptors) {
-          this.log.info(`    - discovered descriptor ${descriptor.uuid} (${descriptor.name})`);
+          let descriptorInfo = descriptor.uuid;
+          if (descriptor.name) descriptorInfo += ` (${descriptor.name})`;
+
+          this.log.info(`    - discovered descriptor ${descriptorInfo}`);
           const data = await descriptor.readValueAsync();
           if (data) {
-            this.log.info(`      - read ${data.toString()}`);
+            this.log.info(`      - read: ${data.toString()}`);
           }
         }
         //console.log(characteristic);
