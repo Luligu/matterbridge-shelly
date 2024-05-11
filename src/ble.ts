@@ -171,12 +171,12 @@ export class NobleBleClient {
     this.log.debug(`- serviceUuids: ${peripheral.advertisement.serviceUuids.length > 0 ? zb : ''}${JSON.stringify(peripheral.advertisement.serviceUuids)}`);
 
     const manufacturerData = peripheral.advertisement.manufacturerData?.toString('hex');
-    if (peripheral.advertisement.localName !== 'EveEnergy5125F') {
-      if (!manufacturerData || !manufacturerData.startsWith('a90b')) {
-        this.log.debug(`Peripheral ${peripheral.address} is not a Shelly device ... ignoring`);
-        return;
-      }
+    //if (peripheral.advertisement.localName !== 'EveEnergy5125F') {
+    if (!manufacturerData || !manufacturerData.startsWith('a90b')) {
+      this.log.debug(`Peripheral ${peripheral.address} is not a Shelly device ... ignoring`);
+      return;
     }
+    //}
     /*
     const matterServiceData = peripheral.advertisement.serviceData.find((serviceData) => serviceData.uuid === BLE_SHELLY_SERVICE_UUID);
     if (matterServiceData === undefined || matterServiceData.data.length !== 8) {
