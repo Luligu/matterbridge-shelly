@@ -111,6 +111,7 @@ export class NobleBleClient {
     });
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public async startScanning(serviceUUIDs?: string[] | undefined, allowDuplicates?: boolean | undefined) {
     if (this.isScanning) {
       this.log.debug('Scanning already in progress ...');
@@ -170,9 +171,11 @@ export class NobleBleClient {
     this.log.debug(`- serviceUuids: ${peripheral.advertisement.serviceUuids.length > 0 ? zb : ''}${JSON.stringify(peripheral.advertisement.serviceUuids)}`);
 
     const manufacturerData = peripheral.advertisement.manufacturerData?.toString('hex');
-    if (!manufacturerData || !manufacturerData.startsWith('a90b')) {
-      this.log.debug(`Peripheral ${peripheral.address} is not a Shelly device ... ignoring`);
-      return;
+    if (peripheral.advertisement.localName !== 'EveEnergy5125F') {
+      if (!manufacturerData || !manufacturerData.startsWith('a90b')) {
+        this.log.debug(`Peripheral ${peripheral.address} is not a Shelly device ... ignoring`);
+        return;
+      }
     }
     /*
     const matterServiceData = peripheral.advertisement.serviceData.find((serviceData) => serviceData.uuid === BLE_SHELLY_SERVICE_UUID);
