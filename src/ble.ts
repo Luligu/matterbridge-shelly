@@ -181,9 +181,9 @@ export class NobleBleClient {
     if (!this.discoveredPeripherals.has(peripheral.address)) {
       this.log.warn(`Exploring peripheral ${peripheral.address} and adding to discovered devices ...`);
       this.discoveredPeripherals.set(peripheral.address, { peripheral, manufacturerData, serviceUuids: peripheral.advertisement.serviceUuids });
-      //await this.stopScanning();
+      await this.stopScanning();
       await this.explore(peripheral);
-      //await this.startScanning();
+      await this.startScanning();
     }
   }
 
