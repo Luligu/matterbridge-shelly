@@ -121,9 +121,15 @@ export class NobleBleClient {
       this.log.debug(`Peripheral ${peripheral.address} is not connectable ... ignoring`);
       return;
     }
+    if (!peripheral.advertisement.localName) {
+      this.log.debug(`Peripheral ${peripheral.address} has no localName ... ignoring`);
+      return;
+    }
 
-    this.log.debug(`Found peripheral ${peripheral.address} (${peripheral.addressType}) name ${hk}${peripheral.advertisement.localName}${db} connectable ${peripheral.connectable}`);
-    this.log.debug(`- rssi ${peripheral.rssi} mtu ${peripheral.mtu} state ${peripheral.state}`, peripheral.services);
+    this.log.debug(
+      `Found peripheral ${zb}${peripheral.address}${db} (${peripheral.addressType}) name ${hk}${peripheral.advertisement.localName}${db} connectable ${peripheral.connectable}`,
+    );
+    this.log.debug(`- rssi ${peripheral.rssi} mtu ${peripheral.mtu} state ${peripheral.state}`);
     this.log.debug(`- advertisement: ${JSON.stringify(peripheral.advertisement)}`);
     this.log.debug(`- serviceUuids: ${JSON.stringify(peripheral.advertisement.serviceUuids)}`);
 
