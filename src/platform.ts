@@ -15,12 +15,25 @@ import {
   onOffSwitch,
 } from 'matterbridge';
 import { Matterbridge, MatterbridgeDevice, MatterbridgeDynamicPlatform } from 'matterbridge';
-import { AnsiLogger, debugStringify, dn, hk, idn, nf, or, rs, wr, zb } from 'node-ansi-logger';
+import { AnsiLogger, db, debugStringify, dn, hk, idn, nf, or, rs, wr, zb } from 'node-ansi-logger';
 import { NodeStorage, NodeStorageManager } from 'node-persist-manager';
 
 // import shellies, { Device } from 'shellies';
 
-import { Device, DeviceId, DeviceIdentifiers, DeviceDiscoverer, MdnsDeviceDiscoverer, Shellies, WiFiAttributes, WiFi, Ethernet, Switch, Input } from 'shellies-ng';
+import {
+  Device,
+  DeviceId,
+  DeviceIdentifiers,
+  DeviceDiscoverer,
+  MdnsDeviceDiscoverer,
+  Shellies,
+  WiFiAttributes,
+  WiFi,
+  Ethernet,
+  Switch,
+  Input,
+  CharacteristicValue,
+} from 'shellies-ng';
 
 import path from 'path';
 
@@ -130,8 +143,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             if (switchComponent.aenergy && switchComponent.aenergy.total !== undefined) this.log.info(`${hk}${device.id}${nf} - Switch energy:`, switchComponent.aenergy.total);
 
             // Create a new Matterbridge device for the switch
-            const switchDevice = new MatterbridgeDevice(DeviceTypes.BRIDGED_NODE);
-            switchDevice.createDefaultIdentifyClusterServer();
+            const switchDevice = new MatterbridgeDevice(DeviceTypes.BRIDGED_DEVICE_WITH_POWERSOURCE_INFO);
+            // switchDevice.createDefaultIdentifyClusterServer();
             switchDevice.createDefaultBridgedDeviceBasicInformationClusterServer(
               device.id,
               device.id,
@@ -141,18 +154,27 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               Number(device.firmware.version?.replace(/\D/g, '')),
               device.firmware.version,
             );
+            switchDevice.createDefaultPowerSourceConfigurationClusterServer();
             switchDevice.createDefaultPowerSourceWiredClusterServer(PowerSource.WiredCurrentType.Ac);
             switchDevice.addFixedLabel('composed', component.name);
             const child = switchDevice.addChildDeviceTypeWithClusterServer(key, [onOffSwitch], [OnOff.Complete.id]);
             await this.registerDevice(switchDevice);
+
+            // Save the MatterbridgeDevice in the bridgedDevices map
+            this.bridgedDevices.set(device.id, switchDevice);
+
+            // Add event handler
+            switchComponent.on('change', (characteristic: string, value: CharacteristicValue) => {
+              this.shellySwitchUpdateHandler(switchDevice, device, key, characteristic, value);
+            });
+
+            // Add command handlers
             switchDevice.addCommandHandler('on', async (data) => {
               this.shellySwitchCommandHandler(switchDevice, 'on', data.endpoint.number, true);
             });
             switchDevice.addCommandHandler('off', async (data) => {
               this.shellySwitchCommandHandler(switchDevice, 'off', data.endpoint.number, false);
             });
-            // Save the MatterbridgeDevice in the bridgedDevices map
-            this.bridgedDevices.set(device.id, switchDevice);
           } else {
             this.log.error('Failed to retrieve Switch component');
           }
@@ -258,6 +280,41 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     return shellyDevices;
   }
 
+  private shellySwitchUpdateHandler(matterbridgeDevice: MatterbridgeDevice, shellyDevice: Device, switchId: string, characteristic: string, value: CharacteristicValue): boolean {
+    this.log.info(`${db}Shelly message for device ${idn}${shellyDevice.id}${rs}${db} ${hk}${switchId}${db} ${zb}${characteristic}${db}:${rs}`, value);
+    if (characteristic !== 'output') {
+      return false;
+    }
+    const endpoints = matterbridgeDevice.getChildEndpoints();
+    for (const endpoint of endpoints) {
+      const labelList = endpoint.getClusterServer(FixedLabelCluster)?.getLabelListAttribute();
+      if (!labelList) {
+        this.log.error('shellySwitchUpdateHandler error: labelList undefined');
+        return false;
+      }
+      let endpointName = '';
+      for (const entry of labelList) {
+        if (entry.label === 'endpointName') endpointName = entry.value;
+      }
+      if (endpointName === switchId) {
+        const cluster = endpoint.getClusterServer(OnOffCluster);
+        if (!cluster) {
+          this.log.error('shellySwitchUpdateHandler error: cluster not found');
+          return false;
+        }
+        cluster.setOnOffAttribute(value as boolean);
+        this.log.info(
+          // eslint-disable-next-line max-len
+          `${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}OnOff-onOff${db} for device ${dn}${shellyDevice.id}${db} ${hk}${switchId}${db} ${zb}${characteristic}${db}:${rs}`,
+          value,
+        );
+        return true;
+      }
+    }
+    this.log.error('shellySwitchUpdateHandler error: endpointName not found');
+    return false;
+  }
+
   private shellySwitchCommandHandler(matterbridgeDevice: MatterbridgeDevice, command: string, endpointNumber: EndpointNumber | undefined, state: boolean): boolean {
     if (!endpointNumber) {
       this.log.error('shellyCommandHandler error: endpointNumber undefined');
@@ -292,8 +349,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     const switchComponent = shellyDevice?.getComponent(endpointName) as Switch;
     switchComponent?.set(state);
     if (this.shellies && shellyDevice && switchComponent)
-      this.log.info(`Command ${command} called for endpoint: ${or}${endpointNumber}${nf} cluster: ${cluster.name} for shelly: ${shellyDevice?.id}`);
-    else this.log.error(`Failed to send ${command} command for endpoint: ${or}${endpointNumber}${nf} cluster: ${cluster?.name} for shelly: ${shellyDevice?.id}`);
+      this.log.info(`Command ${command} called for endpoint: ${or}${endpointNumber}${nf} cluster: ${cluster.name} for shelly: ${hk}${shellyDevice?.id}${nf}`);
+    else this.log.error(`Failed to send ${command} command for endpoint: ${or}${endpointNumber}${nf} cluster: ${cluster?.name} for shelly: ${hk}${shellyDevice?.id}${nf}`);
     return true;
   }
 
