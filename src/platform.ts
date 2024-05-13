@@ -1,41 +1,14 @@
-/* eslint-disable no-console */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import {
-  DeviceTypes,
-  EndpointNumber,
-  FixedLabelCluster,
-  OnOff,
-  OnOffCluster,
-  PlatformConfig,
-  PlatformConfigValue,
-  PowerSource,
-  WindowCovering,
-  WindowCoveringCluster,
-  onOffSwitch,
-} from 'matterbridge';
+import { DeviceTypes, EndpointNumber, FixedLabelCluster, OnOff, OnOffCluster, PlatformConfig, PlatformConfigValue, PowerSource, onOffSwitch } from 'matterbridge';
 import { Matterbridge, MatterbridgeDevice, MatterbridgeDynamicPlatform } from 'matterbridge';
 import { AnsiLogger, db, debugStringify, dn, hk, idn, nf, or, rs, wr, zb } from 'node-ansi-logger';
 import { NodeStorage, NodeStorageManager } from 'node-persist-manager';
 
-// import shellies, { Device } from 'shellies';
+//import shellies1g, { Device as Device1g } from 'shellies';
 
-import {
-  Device,
-  DeviceId,
-  DeviceIdentifiers,
-  DeviceDiscoverer,
-  MdnsDeviceDiscoverer,
-  Shellies,
-  WiFiAttributes,
-  WiFi,
-  Ethernet,
-  Switch,
-  Input,
-  CharacteristicValue,
-} from 'shellies-ng';
+import { Device, DeviceId, DeviceIdentifiers, DeviceDiscoverer, Shellies, WiFi, Ethernet, Switch, CharacteristicValue } from 'shellies-ng';
 
 import path from 'path';
+import { MdnsScanner } from './mdnsScanner.js';
 
 type DeviceIp = {
   [key: string]: string;
@@ -49,7 +22,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
   private nodeStorageManager?: NodeStorageManager;
   private nodeStorage?: NodeStorage;
 
-  // Shelly
+  // Shelly 2+
   private shellies?: Shellies;
   private mdnsDiscoverer?: MdnsDeviceDiscoverer;
   private storageDiscoverer?: StorageDeviceDiscoverer;
@@ -70,6 +43,24 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     if (config.whiteList) this.whiteList = config.whiteList as string[];
     if (config.blackList) this.blackList = config.blackList as string[];
     if (config.deviceIp) this.deviceIp = config.deviceIp as DeviceIp;
+
+    /*/ create Shelly 1 
+    shellies1g.on('discover', (device: Device1g) => {
+      // a new device has been discovered
+      this.log.info('Discovered device with ID', device.id, 'and type', device.type);
+
+      device.on('change', (prop, newValue, oldValue) => {
+        // a property on the device has changed
+        this.log.info(prop, 'changed from', oldValue, 'to', newValue);
+      });
+
+      device.on('offline', () => {
+        // the device went offline
+        this.log.info('Device with ID', device.id, 'went offline');
+      });
+    });
+    shellies1g.start();
+    */
 
     // create Shelly client
     this.shellies = new Shellies();
@@ -121,10 +112,25 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         this.log.error('Failed to retrieve device hostname');
         return;
       }
-      console.log('Device:', device);
+      // console.log('Device:', device);
 
-      // Create a new Matterbridge device for the shelly device
+      // Create a new Matterbridge device for the switch
+      const switchDevice = new MatterbridgeDevice(DeviceTypes.BRIDGED_DEVICE_WITH_POWERSOURCE_INFO);
+      switchDevice.createDefaultBridgedDeviceBasicInformationClusterServer(
+        device.id,
+        device.id,
+        0xfff1,
+        'Shelly',
+        device.modelName,
+        Number(device.firmware.version?.replace(/\D/g, '')),
+        device.firmware.version,
+      );
+      switchDevice.createDefaultPowerSourceConfigurationClusterServer();
+      switchDevice.createDefaultPowerSourceWiredClusterServer(PowerSource.WiredCurrentType.Ac);
+
+      // Scan the device components
       for (const [key, component] of device) {
+        /*
         if (component.name === 'Input') {
           const inputComponent = device.getComponent(key) as Input;
           if (inputComponent) {
@@ -133,38 +139,24 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             this.log.error('Failed to retrieve Input component');
           }
         }
+        */
         if (component.name === 'Switch') {
           const switchComponent = device.getComponent(key) as Switch;
           if (switchComponent) {
-            this.log.info(`${hk}${device.id}${nf} - Switch status:`, switchComponent.output);
-            if (switchComponent.voltage !== undefined) this.log.info(`${hk}${device.id}${nf} - Switch voltage:`, switchComponent.voltage);
-            if (switchComponent.current !== undefined) this.log.info(`${hk}${device.id}${nf} - Switch current:`, switchComponent.current);
-            if (switchComponent.apower !== undefined) this.log.info(`${hk}${device.id}${nf} - Switch power:`, switchComponent.apower);
-            if (switchComponent.aenergy && switchComponent.aenergy.total !== undefined) this.log.info(`${hk}${device.id}${nf} - Switch energy:`, switchComponent.aenergy.total);
+            this.log.info(`${hk}${device.id}${nf} - Switch status: ${switchComponent.output}`);
+            if (switchComponent.voltage !== undefined) this.log.info(`${hk}${device.id}${nf} - Switch voltage: ${switchComponent.voltage}`);
+            if (switchComponent.current !== undefined) this.log.info(`${hk}${device.id}${nf} - Switch current: ${switchComponent.current}`);
+            if (switchComponent.apower !== undefined) this.log.info(`${hk}${device.id}${nf} - Switch power: ${switchComponent.apower}`);
+            if (switchComponent.aenergy && switchComponent.aenergy.total !== undefined) this.log.info(`${hk}${device.id}${nf} - Switch energy: ${switchComponent.aenergy.total}`);
 
-            // Create a new Matterbridge device for the switch
-            const switchDevice = new MatterbridgeDevice(DeviceTypes.BRIDGED_DEVICE_WITH_POWERSOURCE_INFO);
-            // switchDevice.createDefaultIdentifyClusterServer();
-            switchDevice.createDefaultBridgedDeviceBasicInformationClusterServer(
-              device.id,
-              device.id,
-              0xfff1,
-              'Shelly',
-              device.modelName,
-              Number(device.firmware.version?.replace(/\D/g, '')),
-              device.firmware.version,
-            );
-            switchDevice.createDefaultPowerSourceConfigurationClusterServer();
-            switchDevice.createDefaultPowerSourceWiredClusterServer(PowerSource.WiredCurrentType.Ac);
-            switchDevice.addFixedLabel('composed', component.name);
+            // Add a child enpoint for each switch
             const child = switchDevice.addChildDeviceTypeWithClusterServer(key, [onOffSwitch], [OnOff.Complete.id]);
-            await this.registerDevice(switchDevice);
-
-            // Save the MatterbridgeDevice in the bridgedDevices map
-            this.bridgedDevices.set(device.id, switchDevice);
+            // Set the OnOff attribute
+            child.getClusterServer(OnOffCluster)?.setOnOffAttribute(switchComponent.output);
 
             // Add event handler
             switchComponent.on('change', (characteristic: string, value: CharacteristicValue) => {
+              // console.log(characteristic, value);
               this.shellySwitchUpdateHandler(switchDevice, device, key, characteristic, value);
             });
 
@@ -179,9 +171,14 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             this.log.error('Failed to retrieve Switch component');
           }
         }
+        switchDevice.addFixedLabel('composed', component.name);
       }
-      // eslint-disable-next-line no-console
-      // console.log('Device:', device);
+
+      // Register the device with Matterbridge
+      await this.registerDevice(switchDevice);
+
+      // Save the MatterbridgeDevice in the bridgedDevices map
+      this.bridgedDevices.set(device.id, switchDevice);
     });
 
     // Handle remove device
@@ -218,8 +215,15 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     this.nodeStorage = await this.nodeStorageManager.createStorage('devices');
 
     // create an mDNS device discoverer and register it with the shellies client
+    /*
     if (this.config.enableMdnsDiscover === true) {
       this.log.info('Loading mdns discover...');
+      this.mdnsDiscoverer = new MdnsDeviceDiscoverer();
+      this.shellies?.registerDiscoverer(this.mdnsDiscoverer);
+    }
+    */
+    // create an mDNS device discoverer and register it with the shellies client
+    if (this.config.enableMdnsDiscover === true) {
       this.mdnsDiscoverer = new MdnsDeviceDiscoverer();
       this.shellies?.registerDiscoverer(this.mdnsDiscoverer);
     }
@@ -249,8 +253,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     // start discovering devices
     this.log.info('Discovering Shellies...');
     await this.mdnsDiscoverer?.start();
-    await this.storageDiscoverer.start();
-    await this.configDiscoverer.start();
+    //await this.storageDiscoverer.start();
+    //await this.configDiscoverer.start();
   }
 
   override async onConfigure() {
@@ -281,7 +285,10 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
   }
 
   private shellySwitchUpdateHandler(matterbridgeDevice: MatterbridgeDevice, shellyDevice: Device, switchId: string, characteristic: string, value: CharacteristicValue): boolean {
-    this.log.info(`${db}Shelly message for device ${idn}${shellyDevice.id}${rs}${db} ${hk}${switchId}${db} ${zb}${characteristic}${db}:${rs}`, value);
+    this.log.info(
+      `${db}Shelly message for device ${idn}${shellyDevice.id}${rs}${db} ${hk}${switchId}${db} ` +
+        `${zb}${characteristic}${db}:${typeof value === 'object' ? debugStringify(value as object) : value}${rs}`,
+    );
     if (characteristic !== 'output') {
       return false;
     }
@@ -349,8 +356,11 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     const switchComponent = shellyDevice?.getComponent(endpointName) as Switch;
     switchComponent?.set(state);
     if (this.shellies && shellyDevice && switchComponent)
-      this.log.info(`Command ${command} called for endpoint: ${or}${endpointNumber}${nf} cluster: ${cluster.name} for shelly: ${hk}${shellyDevice?.id}${nf}`);
-    else this.log.error(`Failed to send ${command} command for endpoint: ${or}${endpointNumber}${nf} cluster: ${cluster?.name} for shelly: ${hk}${shellyDevice?.id}${nf}`);
+      this.log.info(`Command ${command} for endpoint ${or}${endpointNumber}${nf} attribute ${hk}${cluster.name}-onOff${nf} for shelly device ${dn}${shellyDevice.id}${nf}`);
+    else
+      this.log.error(
+        `Failed to send ${command} command for endpoint ${or}${endpointNumber}${nf} attribute ${hk}${cluster.name}-onOff${nf} for shelly device ${dn}${shellyDevice?.id}${nf}`,
+      );
     return true;
   }
 
@@ -364,6 +374,25 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       return false;
     }
     return true;
+  }
+}
+
+export class MdnsDeviceDiscoverer extends DeviceDiscoverer {
+  private mdnsScanner: MdnsScanner;
+
+  constructor() {
+    super();
+    this.mdnsScanner = new MdnsScanner();
+  }
+
+  async start() {
+    this.mdnsScanner.start((id: string, host: string, gen: number) => {
+      if (gen === 2) this.handleDiscoveredDevice({ deviceId: id.toLowerCase(), hostname: host });
+    }, 60);
+  }
+
+  async stop() {
+    this.mdnsScanner.stop();
   }
 }
 

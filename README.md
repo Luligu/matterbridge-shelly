@@ -11,7 +11,7 @@
 
 ---
 
-This plugin allows to expose the shelly devices. 
+This plugin allows to expose the shelly gen 1 and gen 2+ devices . 
 
 ## Prerequisites
 

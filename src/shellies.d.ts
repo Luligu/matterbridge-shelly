@@ -12,9 +12,24 @@ declare module 'shellies' {
 
   class Shellies extends EventEmitter {
     constructor();
-    start(): void;
+
+    readonly size: number;
+    readonly running: boolean;
+
+    [Symbol.iterator](): Iterator<Device>;
+
+    setAuthCredentials(username: string, password: string): void;
+
+    async start(): void;
     stop(): void;
     on(event: 'discover', listener: (device: Device) => void): this;
+
+    getDevice(type: string, id: string): Device | undefined;
+    hasDevice(device: Device): boolean;
+    addDevice(device: Device): void;
+    removeDevice(device: Device): void;
+    removeAllDevices(): void;
+    isUnknownDevice(device: Device): boolean;
   }
   const shellies: Shellies;
   export default shellies;
