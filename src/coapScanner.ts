@@ -190,7 +190,9 @@ export class CoapScanner {
         agent: this.coapAgent,
       })
       .on('response', (res) => {
-        console.log('response', res);
+        // console.log('Multicast response:', res);
+        this.log.warn(`Parsing device status response from ${COAP_MULTICAST_ADDRESS}...`);
+        this.parseShellyMessage(res);
       })
       .on('error', (err) => {
         console.log('error', err);
