@@ -177,8 +177,8 @@ export class CoapScanner {
         this.stop();
       }, timeout * 1000);
     }
-    this.getDeviceDescription('192.168.1.219');
-    this.getDeviceStatus('192.168.1.219');
+    //this.getDeviceDescription('192.168.1.219');
+    //this.getDeviceStatus('192.168.1.219');
 
     coap
       .request({
