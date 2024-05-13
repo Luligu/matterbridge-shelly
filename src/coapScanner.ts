@@ -172,7 +172,7 @@ export class CoapScanner {
   listenForStatusUpdates(networkInterface: string) {
     this.coapServer = coap.createServer({
       multicastAddress: COAP_MULTICAST_ADDRESS,
-      multicastInterface: '192.168.1.189',
+      multicastInterface: '192.168.1.213',
     });
 
     // insert our own middleware right before requests are handled (the last step)
