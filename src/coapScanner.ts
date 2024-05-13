@@ -186,7 +186,7 @@ export class CoapScanner {
         method: 'GET',
         pathname: '/cit/d',
         multicast: true,
-        multicastTimeout: 30000,
+        multicastTimeout: 60 * 1000,
         agent: this.coapAgent,
       })
       .on('response', (res) => {
