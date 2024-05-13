@@ -2,7 +2,7 @@
 /* eslint-disable no-console */
 import { AnsiLogger, CYAN, GREEN, TimestampFormat, db, debugStringify, dn, hk, nf, rs, wr, zb } from 'node-ansi-logger';
 
-import coap from 'coap';
+import coap, { Server, IncomingMessage, OutgoingMessage } from 'coap';
 
 const COIOT_OPTION_GLOBAL_DEVID = '3332';
 const COIOT_OPTION_STATUS_VALIDITY = '3412';
@@ -14,6 +14,7 @@ export class CoapScanner {
   private discoveredPeripherals = new Map<string, { id: string; host: string; gen: number }>();
   private log;
   private coapAgent;
+  private coapServer: Server | undefined;
   private _isScanning = false;
   private scannerTimeout?: NodeJS.Timeout;
 
@@ -168,6 +169,42 @@ export class CoapScanner {
     console.log('payload', payload);
   }
 
+  listenForStatusUpdates(networkInterface: string) {
+    this.coapServer = coap.createServer({
+      multicastAddress: COAP_MULTICAST_ADDRESS,
+      multicastInterface: '192.168.1.189',
+    });
+
+    // insert our own middleware right before requests are handled (the last step)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    this.coapServer._middlewares.splice(Math.max(this.coapServer._middlewares.length - 1, 0), 0, (req: any, next: any) => {
+      this.log.warn('Server middleware got a messagge ...', req, req.packet.options);
+      // Unicast messages from Shelly devices will have the 2.05 code, which the
+      // server will silently drop (since its a response code and not a request
+      // code). To avoid this, we change it to 0.30 here.
+      if (req.packet.code === '2.05') {
+        req.packet.code = '0.30';
+      }
+      next();
+    });
+
+    this.coapServer.on('request', (msg: IncomingMessage, res: OutgoingMessage) => {
+      this.log.warn('Server got a messagge ...', msg, msg.payload.toString());
+      if (msg.code === '0.30' && msg.url === '/cit/s') {
+        this.log.warn('Parsing device status update ...');
+        this.parseShellyMessage(msg);
+      }
+    });
+
+    this.coapServer.listen((err) => {
+      if (err) {
+        this.log.warn('Error while listening ...', err);
+      } else {
+        this.log.warn('Server is listening ...');
+      }
+    });
+  }
+
   start(callback?: (id: string, host: string, gen: number) => void, timeout?: number) {
     this.log.info('Starting mDNS query service for shelly devices...');
     this._isScanning = true;
@@ -177,14 +214,16 @@ export class CoapScanner {
         this.stop();
       }, timeout * 1000);
     }
-    //this.getDeviceDescription('192.168.1.219');
-    //this.getDeviceStatus('192.168.1.219');
+    this.getDeviceDescription('192.168.1.219');
+    this.getDeviceStatus('192.168.1.219');
+    this.listenForStatusUpdates('');
 
+    /*
     coap
       .request({
         host: COAP_MULTICAST_ADDRESS,
-        method: 'GET',
-        pathname: '/cit/d',
+        // method: 'GET',
+        pathname: '/cit/s',
         multicast: true,
         multicastTimeout: 60 * 1000,
         agent: this.coapAgent,
@@ -198,7 +237,7 @@ export class CoapScanner {
         console.log('error', err);
       })
       .end();
-
+    */
     this.log.info('Started mDNS query service for shelly devices.');
   }
 
@@ -207,6 +246,7 @@ export class CoapScanner {
     if (this.scannerTimeout) clearTimeout(this.scannerTimeout);
     this._isScanning = false;
     this.scannerTimeout = undefined;
+    if (this.coapServer) this.coapServer.close();
     this.logPeripheral();
     this.log.info('Stopped mDNS query service.');
   }
