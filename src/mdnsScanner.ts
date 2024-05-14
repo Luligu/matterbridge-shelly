@@ -11,25 +11,31 @@ export class MdnsScanner {
   private _isScanning = false;
   private scannerTimeout?: NodeJS.Timeout;
 
-  private callback?: (id: string, host: string, gen: number) => void;
+  private callback?: (id: string, host: string, gen: number) => Promise<void>;
 
   constructor() {
     this.log = new AnsiLogger({ logName: 'mdnsShellyDiscover', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: true });
 
-    this.scanner.on('response', (response: ResponsePacket) => {
+    this.scanner.on('response', async (response: ResponsePacket) => {
       for (const answer of response.answers) {
-        if (answer.type === 'A') {
-          if (answer.name.startsWith('shelly')) {
-            this.log.info(`Discovered shelly gen ${CYAN}1${nf} device id: ${hk}${answer.name.replace('.local', '')}${nf} host: ${zb}${answer.data}${nf}`);
-            if (!this.discoveredPeripherals.has(answer.name.replace('.local', '')) && this.callback) this.callback(answer.name.replace('.local', ''), answer.data, 1);
+        if (answer.type === 'PTR') {
+          console.log('[PTR] Name:', answer.name, answer.data.toString());
+        }
+        if (answer.type === 'A' && answer.name.startsWith('shelly')) {
+          this.log.info(`Discovered shelly gen ${CYAN}1${nf} device id: ${hk}${answer.name.replace('.local', '')}${nf} host: ${zb}${answer.data}${nf}`);
+          if (!this.discoveredPeripherals.has(answer.name.replace('.local', ''))) {
             this.discoveredPeripherals.set(answer.name.replace('.local', ''), { id: answer.name.replace('.local', ''), host: answer.data, gen: 1 });
+            if (this.callback) await this.callback(answer.name.replace('.local', ''), answer.data, 1);
           }
         }
         /*
-        if (answer.type === 'SRV') {
+        if (answer.type === 'NSEC' && answer.name.startsWith('shelly')) {
+          console.log('[NSEC] Name:', answer.name, answer.data);
+        }
+        if (answer.type === 'SRV' && answer.name.startsWith('shelly')) {
           console.log('[SRV] Name:', answer.name, answer.data);
         }
-        if (answer.type === 'TXT') {
+        if (answer.type === 'TXT' && answer.name.startsWith('shelly')) {
           console.log('[TXT] Name:', answer.name, answer.data.toString());
         }
         if (answer.type === 'PTR' && answer.name === '_http._tcp.local') {
@@ -41,11 +47,18 @@ export class MdnsScanner {
         */
       }
       for (const additional of response.additionals) {
-        if (additional.type === 'A') {
-          if (additional.name.startsWith('Shelly')) {
-            this.log.info(`Discovered shelly gen ${CYAN}2${nf} device id: ${hk}${additional.name.replace('.local', '')}${nf} host: ${zb}${additional.data}${nf}`);
-            if (!this.discoveredPeripherals.has(additional.name.replace('.local', '')) && this.callback) this.callback(additional.name.replace('.local', ''), additional.data, 2);
-            this.discoveredPeripherals.set(additional.name.replace('.local', ''), { id: additional.name.replace('.local', ''), host: additional.data, gen: 2 });
+        if (additional.type === 'PTR') {
+          console.log('[PTR] Name:', additional.name, additional.data.toString());
+        }
+        if (additional.type === 'A' && additional.name.startsWith('Shelly')) {
+          this.log.info(`Discovered shelly gen ${CYAN}2${nf} device id: ${hk}${additional.name.replace('.local', '').toLowerCase()}${nf} host: ${zb}${additional.data}${nf}`);
+          if (!this.discoveredPeripherals.has(additional.name.replace('.local', '').toLowerCase())) {
+            this.discoveredPeripherals.set(additional.name.replace('.local', '').toLowerCase(), {
+              id: additional.name.replace('.local', '').toLowerCase(),
+              host: additional.data,
+              gen: 2,
+            });
+            if (this.callback) await this.callback(additional.name.replace('.local', '').toLowerCase(), additional.data, 2);
           }
         }
         /*
@@ -65,10 +78,12 @@ export class MdnsScanner {
     return this._isScanning;
   }
 
-  start(callback?: (id: string, host: string, gen: number) => void, timeout?: number) {
+  start(callback?: (id: string, host: string, gen: number) => Promise<void>, timeout?: number) {
     this.log.info('Starting mDNS query service for shelly devices...');
     this._isScanning = true;
     this.callback = callback;
+    this.scanner.query('_http._tcp.local', 'PTR');
+    /*
     this.scanner.query({
       questions: [
         {
@@ -77,6 +92,7 @@ export class MdnsScanner {
         },
       ],
     });
+    */
     if (timeout && timeout > 0) {
       this.scannerTimeout = setTimeout(() => {
         this.stop();
@@ -104,13 +120,10 @@ export class MdnsScanner {
   }
 }
 
-/*
 const mdnsScanner = new MdnsScanner();
 mdnsScanner.start();
 
 process.on('SIGINT', async function () {
   mdnsScanner.stop();
-  mdnsScanner.logPeripheral();
   process.exit();
 });
-*/

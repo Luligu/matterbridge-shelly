@@ -3,20 +3,32 @@ import { Matterbridge, MatterbridgeDevice, MatterbridgeDynamicPlatform } from 'm
 import { AnsiLogger, db, debugStringify, dn, hk, idn, nf, or, rs, wr, zb } from 'node-ansi-logger';
 import { NodeStorage, NodeStorageManager } from 'node-persist-manager';
 
-//import shellies1g, { Device as Device1g } from 'shellies';
+// Shellyies gen 1
+import shellies1g, { Device as Device1g } from 'shellies';
 
-import { Device, DeviceId, DeviceIdentifiers, DeviceDiscoverer, Shellies, WiFi, Ethernet, Switch, CharacteristicValue } from 'shellies-ng';
+// Shellyies gen 2
+import { Device, DeviceId, DeviceIdentifiers, DeviceDiscoverer, Shellies, Switch, CharacteristicValue } from 'shellies-ng';
 
 import path from 'path';
+import fetch from 'node-fetch';
+
 import { MdnsScanner } from './mdnsScanner.js';
 
-type DeviceIp = {
+type ConfigDeviceIp = {
   [key: string]: string;
 };
 
+// Shelly device map
+type ShellyDeviceId = string;
+
+interface ShellyDevice {
+  id: ShellyDeviceId; // ID: shellyplus1pm-441793d69718
+  hostname: string; // IP address: 192.168.1.xxx
+}
+
 export class ShellyPlatform extends MatterbridgeDynamicPlatform {
-  private shellyDevices = new Map<DeviceId, DeviceIdentifiers>();
-  private bridgedDevices = new Map<DeviceId, MatterbridgeDevice>();
+  public shellyDevices = new Map<ShellyDeviceId, ShellyDevice>();
+  public bridgedDevices = new Map<ShellyDeviceId, MatterbridgeDevice>();
 
   // NodeStorageManager
   private nodeStorageManager?: NodeStorageManager;
@@ -33,7 +45,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
   private password = '';
   private whiteList: string[] = [];
   private blackList: string[] = [];
-  private deviceIp: DeviceIp = {};
+  private deviceIp: ConfigDeviceIp = {};
 
   constructor(matterbridge: Matterbridge, log: AnsiLogger, config: PlatformConfig) {
     super(matterbridge, log, config);
@@ -42,38 +54,64 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     if (config.password) this.password = config.password as string;
     if (config.whiteList) this.whiteList = config.whiteList as string[];
     if (config.blackList) this.blackList = config.blackList as string[];
-    if (config.deviceIp) this.deviceIp = config.deviceIp as DeviceIp;
+    if (config.deviceIp) this.deviceIp = config.deviceIp as ConfigDeviceIp;
 
-    /*/ create Shelly 1 
+    // create Shelly gen 1 client
+    /*
     shellies1g.on('discover', (device: Device1g) => {
       // a new device has been discovered
-      this.log.info('Discovered device with ID', device.id, 'and type', device.type);
+      this.log.warn('Discovered device with ID', device.id, 'host', device.host, 'and type', device.type);
+      // eslint-disable-next-line no-console
+      console.log('Device:', device);
 
       device.on('change', (prop, newValue, oldValue) => {
         // a property on the device has changed
-        this.log.info(prop, 'changed from', oldValue, 'to', newValue);
+        this.log.info(
+          `${db}Shelly message for device ${idn}${device.modelName.replace(/ /g, '')}-${device.id}${rs}${db} (${device.type}) ${hk}${device.modelName}${db} ` +
+            `${zb}${prop}${db}:${typeof newValue === 'object' ? debugStringify(newValue as object) : newValue}${rs}`,
+        );
+
+        this.log.warn(prop, 'changed from', oldValue, 'to', newValue);
       });
 
       device.on('offline', () => {
         // the device went offline
-        this.log.info('Device with ID', device.id, 'went offline');
+        this.log.warn('Device with ID', device.id, 'went offline');
       });
     });
-    shellies1g.start();
     */
+    shellies1g.on('add', (device: Device1g) => {
+      // a new device has been discovered
+      this.log.info(`Shellies gen 1 added device with ID ${idn}${device.id}${rs}${nf}, host ${device.host} and type ${device.type}`);
+      // eslint-disable-next-line no-console
+      // console.log('Device:', device);
 
-    // create Shelly client
+      device.on('change', (prop, newValue, oldValue) => {
+        this.log.info(
+          `${db}Shelly message for device ${idn}${device.modelName.replace(/ /g, '')}-${device.id}${rs}${db} (${device.type}) ${hk}${device.modelName}${db} ` +
+            `${zb}${prop}${db}:${typeof newValue === 'object' ? debugStringify(newValue as object) : newValue}${rs}`,
+        );
+        this.log.info(prop, 'changed from', oldValue, 'to', newValue);
+      });
+
+      device.on('offline', () => {
+        this.log.warn('Device with ID', device.id, 'went offline');
+      });
+    });
+    //shellies1g.start();
+
+    // create Shelly gen 2 client
     this.shellies = new Shellies();
-
     // Handle when a new device has been discovered
     this.shellies.on('add', async (device: Device) => {
-      this.log.info(`Shellies discovered device with ID: ${idn}${device.id}${rs}${nf}, model: ${hk}${device.modelName}${nf} (${device.model})`);
+      this.log.info(`Shellies gen 2 added device with ID: ${idn}${device.id}${rs}${nf}, model: ${hk}${device.modelName}${nf} (${device.model})`);
       this.log.info(`- macAddress: ${device.macAddress}`);
       this.log.info(`- firmware: ${device.firmware.version} (${device.firmware.id})`);
       this.log.info('- components:');
       for (const [key, component] of device) {
         this.log.info(`  - ${component.name} (${key})`);
       }
+      /*
       let hostname: string | undefined;
       if (device.hasComponent('wifi')) {
         const wifiComponent = device.getComponent('wifi') as WiFi;
@@ -105,13 +143,12 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         this.log.debug('Device does not have an Ethernet component');
       }
       if (hostname) {
-        this.shellyDevices.set(device.id, { deviceId: device.id, hostname: hostname });
-        await this.saveShellyDevices();
         this.log.info(`Stored deviceId: ${hk}${device.id}${nf} hostname: ${zb}${hostname}${nf}`);
       } else {
         this.log.error('Failed to retrieve device hostname');
         return;
       }
+      */
       // console.log('Device:', device);
 
       // Create a new Matterbridge device for the switch
@@ -130,16 +167,6 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
 
       // Scan the device components
       for (const [key, component] of device) {
-        /*
-        if (component.name === 'Input') {
-          const inputComponent = device.getComponent(key) as Input;
-          if (inputComponent) {
-            this.log.info(`${hk}${device.id}${nf} - Input status:`, inputComponent.state);
-          } else {
-            this.log.error('Failed to retrieve Input component');
-          }
-        }
-        */
         if (component.name === 'Switch') {
           const switchComponent = device.getComponent(key) as Switch;
           if (switchComponent) {
@@ -213,48 +240,47 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       logging: false,
     });
     this.nodeStorage = await this.nodeStorageManager.createStorage('devices');
+    await this.loadShellyDevices();
 
     // create an mDNS device discoverer and register it with the shellies client
-    /*
     if (this.config.enableMdnsDiscover === true) {
-      this.log.info('Loading mdns discover...');
-      this.mdnsDiscoverer = new MdnsDeviceDiscoverer();
-      this.shellies?.registerDiscoverer(this.mdnsDiscoverer);
-    }
-    */
-    // create an mDNS device discoverer and register it with the shellies client
-    if (this.config.enableMdnsDiscover === true) {
-      this.mdnsDiscoverer = new MdnsDeviceDiscoverer();
+      this.mdnsDiscoverer = new MdnsDeviceDiscoverer(this, this.log);
       this.shellies?.registerDiscoverer(this.mdnsDiscoverer);
     }
 
     // create a storage device discoverer and register it with the shellies client
-    this.storageDiscoverer = new StorageDeviceDiscoverer(this.nodeStorage);
-    this.shellies?.registerDiscoverer(this.storageDiscoverer);
+    if (this.config.enableStorageDiscover === true) {
+      this.storageDiscoverer = new StorageDeviceDiscoverer(this.log, this.nodeStorage);
+      this.shellies?.registerDiscoverer(this.storageDiscoverer);
+    }
 
     // create a config device discoverer and register it with the shellies client
-    this.configDiscoverer = new ConfigDeviceDiscoverer(this.config);
-    this.shellies?.registerDiscoverer(this.configDiscoverer);
+    if (this.config.enableConfigDiscover === true) {
+      this.configDiscoverer = new ConfigDeviceDiscoverer(this.log, this.config);
+      this.shellies?.registerDiscoverer(this.configDiscoverer);
+    }
 
     // log errors
     this.mdnsDiscoverer?.on('error', (error: Error) => {
       this.log.error('An error occurred in the mDNS device discovery service:', error.message);
       this.log.debug(error.stack || '');
     });
-    this.storageDiscoverer.on('error', (error: Error) => {
+    this.storageDiscoverer?.on('error', (error: Error) => {
       this.log.error('An error occurred in the storage device discovery service:', error.message);
       this.log.debug(error.stack || '');
     });
-    this.configDiscoverer.on('error', (error: Error) => {
+    this.configDiscoverer?.on('error', (error: Error) => {
       this.log.error('An error occurred in the config device discovery service:', error.message);
       this.log.debug(error.stack || '');
     });
 
     // start discovering devices
     this.log.info('Discovering Shellies...');
-    await this.mdnsDiscoverer?.start();
-    //await this.storageDiscoverer.start();
-    //await this.configDiscoverer.start();
+    setTimeout(async () => {
+      await this.mdnsDiscoverer?.start();
+      await this.storageDiscoverer?.start();
+      await this.configDiscoverer?.start();
+    }, 10000);
   }
 
   override async onConfigure() {
@@ -271,17 +297,22 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     if (this.config.unregisterOnShutdown === true) await this.unregisterAllDevices();
   }
 
-  private async saveShellyDevices() {
-    await this.nodeStorage?.set<DeviceIdentifiers[]>('DeviceIdentifiers', Array.from(this.shellyDevices.values()));
+  public async saveShellyDevices() {
+    this.log.info(`Saving ${this.shellyDevices.size} Shelly devices`);
+    await this.nodeStorage?.set<ShellyDevice[]>('DeviceIdentifiers', Array.from(this.shellyDevices.values()));
   }
 
-  private async loadShellyDevices() {
+  private async loadShellyDevices(): Promise<boolean> {
     if (!this.nodeStorage) {
       this.log.error('NodeStorage is not initialized');
-      return;
+      return false;
     }
-    const shellyDevices: DeviceIdentifiers[] = await this.nodeStorage.get<DeviceIdentifiers[]>('DeviceIdentifiers', []);
-    return shellyDevices;
+    const shellyDevices = await this.nodeStorage.get<ShellyDevice[]>('DeviceIdentifiers', []);
+    for (const device of shellyDevices) {
+      this.shellyDevices.set(device.id, device);
+    }
+    this.log.info(`Loaded ${this.shellyDevices.size} Shelly devices`);
+    return true;
   }
 
   private shellySwitchUpdateHandler(matterbridgeDevice: MatterbridgeDevice, shellyDevice: Device, switchId: string, characteristic: string, value: CharacteristicValue): boolean {
@@ -379,16 +410,44 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
 
 export class MdnsDeviceDiscoverer extends DeviceDiscoverer {
   private mdnsScanner: MdnsScanner;
+  private log: AnsiLogger;
+  private timeout: number;
+  private platform: ShellyPlatform;
 
-  constructor() {
+  constructor(platform: ShellyPlatform, log: AnsiLogger, timeout = 600) {
     super();
+    this.platform = platform;
+    this.log = log;
+    this.timeout = timeout;
     this.mdnsScanner = new MdnsScanner();
   }
 
   async start() {
-    this.mdnsScanner.start((id: string, host: string, gen: number) => {
-      if (gen === 2) this.handleDiscoveredDevice({ deviceId: id.toLowerCase(), hostname: host });
-    }, 60);
+    this.mdnsScanner.start(async (id: string, host: string, gen: number) => {
+      // We get id: shellydimmer2-98CDAC0D01BB host: 192.168.1.219 gen:1
+      // We get id: shellyplus1pm-441793d69718 host: 192.168.1.217 gen:2
+      const shellyData = (await getShelly(host)) as { type: string; model: string; mac: string };
+      if (shellyData) console.log(shellyData);
+      if (gen === 1) {
+        if (shellyData) {
+          this.log.info(`mdnsScanner discovered shelly gen 1 ${id} model ${shellyData.type} mac ${shellyData.mac} host ${host}`);
+          this.platform.shellyDevices.set(id, { id, hostname: host });
+          await this.platform.saveShellyDevices();
+          // We need type SHDM-2 mac 98CDAC0D01BB host 192.168.1.219
+          const device = shellies1g.createDevice(shellyData.type, shellyData.mac, host);
+          if (!shellies1g.hasDevice(device)) shellies1g.addDevice(device);
+        }
+      }
+      if (gen === 2) {
+        if (shellyData) {
+          this.log.info(`mdnsScanner discovered shelly gen 2 ${id} model ${shellyData.model} mac ${shellyData.mac} host ${host}`);
+          this.platform.shellyDevices.set(id, { id, hostname: host });
+          await this.platform.saveShellyDevices();
+          // We need deviceId shellyplus1pm-441793d69718 hostname 192.168.1.217
+          this.handleDiscoveredDevice({ deviceId: id, hostname: host });
+        }
+      }
+    }, this.timeout);
   }
 
   async stop() {
@@ -398,36 +457,129 @@ export class MdnsDeviceDiscoverer extends DeviceDiscoverer {
 
 export class StorageDeviceDiscoverer extends DeviceDiscoverer {
   private nodeStorage: NodeStorage;
+  private log: AnsiLogger;
 
-  constructor(nodeStorage: NodeStorage) {
+  constructor(log: AnsiLogger, nodeStorage: NodeStorage) {
     super();
+    this.log = log;
     this.nodeStorage = nodeStorage;
   }
 
   async start() {
-    const shellyDevices = await this.nodeStorage.get<DeviceIdentifiers[]>('DeviceIdentifiers', []);
-    shellyDevices.forEach((device) => {
-      // eslint-disable-next-line no-console
-      console.log(`${nf}StorageDeviceDiscoverer deviceId: ${hk}${device.deviceId}${nf} hostname: ${zb}${device.hostname}${nf}`);
-      this.handleDiscoveredDevice({ deviceId: device.deviceId, hostname: device.hostname });
+    const shellyDevices = await this.nodeStorage.get<ShellyDevice[]>('DeviceIdentifiers', []);
+    shellyDevices.forEach(async (device) => {
+      this.log.info(`${nf}StorageDeviceDiscoverer deviceId: ${hk}${device.id}${nf} hostname: ${zb}${device.hostname}${nf}`);
+      const shellyData = (await getShelly(device.hostname)) as { type: string; model: string; mac: string; gen: number };
+      if (shellyData) console.log(shellyData);
+      if (!shellyData) {
+        this.log.error(`Failed to retrieve shelly data for device ${device.id}`);
+        return;
+      }
+      if (shellyData.gen === undefined) {
+        // We need type SHDM-2 mac 98CDAC0D01BB host 192.168.1.219
+        const device1g = shellies1g.createDevice(shellyData.type, shellyData.mac, device.hostname);
+        if (!shellies1g.hasDevice(device1g)) shellies1g.addDevice(device1g);
+      }
+      if (shellyData.gen === 2) {
+        // We need deviceId shellyplus1pm-441793d69718 hostname 192.168.1.217
+        this.handleDiscoveredDevice({ deviceId: device.id, hostname: device.hostname });
+      }
     });
   }
 }
 
 export class ConfigDeviceDiscoverer extends DeviceDiscoverer {
   private config: PlatformConfig;
+  private log: AnsiLogger;
 
-  constructor(config: PlatformConfig) {
+  constructor(log: AnsiLogger, config: PlatformConfig) {
     super();
+    this.log = log;
     this.config = config;
   }
 
   async start() {
     if (!this.config.deviceIp) return;
-    Object.entries(this.config.deviceIp as Record<string, PlatformConfigValue>).forEach(([key, value]) => {
-      // eslint-disable-next-line no-console
-      console.log(`${nf}ConfigDeviceDiscoverer deviceId: ${hk}${key}${nf} hostname: ${zb}${value}${nf}`);
-      this.handleDiscoveredDevice({ deviceId: key, hostname: value as string });
+    Object.entries(this.config.deviceIp as Record<string, PlatformConfigValue>).forEach(async ([key, value]) => {
+      this.log.info(`${nf}ConfigDeviceDiscoverer deviceId: ${hk}${key}${nf} hostname: ${zb}${value}${nf}`);
+      const shellyData = (await getShelly(value as string)) as { type: string; model: string; mac: string; gen: number };
+      if (shellyData) console.log(shellyData);
+      if (!shellyData) {
+        this.log.error(`Failed to retrieve shelly data for device ${key}`);
+        return;
+      }
+      if (shellyData.gen === undefined) {
+        // We need type SHDM-2 mac 98CDAC0D01BB host 192.168.1.219
+        const device1g = shellies1g.createDevice(shellyData.type, shellyData.mac, value as string);
+        if (!shellies1g.hasDevice(device1g)) shellies1g.addDevice(device1g);
+      }
+      if (shellyData.gen === 2) {
+        // We need deviceId shellyplus1pm-441793d69718 hostname 192.168.1.217
+        this.handleDiscoveredDevice({ deviceId: key, hostname: value as string });
+      }
     });
+  }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+async function getShelly(hostname: string): Promise<unknown | null> {
+  try {
+    // Replace the URL with your target URL
+    const response = await fetch(`http://${hostname}/shelly`);
+    if (!response.ok) {
+      // eslint-disable-next-line no-console
+      console.error('Error fetching shelly:');
+      return null;
+    }
+    const data = await response.json();
+    // eslint-disable-next-line no-console
+    // console.log(data);
+    return data;
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error('Error fetching shelly:', error);
+    return null;
+  }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+async function getSettings(hostname: string): Promise<unknown | null> {
+  try {
+    // Replace the URL with your target URL
+    const response = await fetch(`http://${hostname}/settings`);
+    if (!response.ok) {
+      // eslint-disable-next-line no-console
+      console.error('Error fetching settings:');
+      return null;
+    }
+    const data = await response.json();
+    // eslint-disable-next-line no-console
+    // console.log(data);
+    return data;
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error('Error fetching settings:', error);
+    return null;
+  }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+async function getStatus(hostname: string): Promise<unknown | null> {
+  try {
+    // Replace the URL with your target URL
+    const response = await fetch(`http://${hostname}/status`);
+    if (!response.ok) {
+      // eslint-disable-next-line no-console
+      console.error('Error fetching status:');
+      return null;
+    }
+    const data = await response.json();
+    // eslint-disable-next-line no-console
+    // console.log(data);
+    return data;
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error('Error fetching status:', error);
+    return null;
   }
 }

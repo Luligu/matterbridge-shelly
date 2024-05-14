@@ -172,9 +172,9 @@ export class CoapScanner {
   listenForStatusUpdates(networkInterface: string) {
     this.coapServer = coap.createServer({
       multicastAddress: COAP_MULTICAST_ADDRESS,
-      multicastInterface: '192.168.1.213',
     });
 
+    /*
     // insert our own middleware right before requests are handled (the last step)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     this.coapServer._middlewares.splice(Math.max(this.coapServer._middlewares.length - 1, 0), 0, (req: any, next: any) => {
@@ -182,14 +182,15 @@ export class CoapScanner {
       // Unicast messages from Shelly devices will have the 2.05 code, which the
       // server will silently drop (since its a response code and not a request
       // code). To avoid this, we change it to 0.30 here.
-      if (req.packet.code === '2.05') {
+      if (req.packet.code === 'XX2.05') {
         req.packet.code = '0.30';
       }
       next();
     });
+    */
 
     this.coapServer.on('request', (msg: IncomingMessage, res: OutgoingMessage) => {
-      this.log.warn('Server got a messagge ...', msg, msg.payload.toString());
+      this.log.warn('Server got a messagge ...' /*, msg, msg.payload.toString()*/);
       if (msg.code === '0.30' && msg.url === '/cit/s') {
         this.log.warn('Parsing device status update ...');
         this.parseShellyMessage(msg);
@@ -206,7 +207,7 @@ export class CoapScanner {
   }
 
   start(callback?: (id: string, host: string, gen: number) => void, timeout?: number) {
-    this.log.info('Starting mDNS query service for shelly devices...');
+    this.log.info('Starting CoIoT service for shelly devices...');
     this._isScanning = true;
     this.callback = callback;
     if (timeout && timeout > 0) {
@@ -222,7 +223,6 @@ export class CoapScanner {
     coap
       .request({
         host: COAP_MULTICAST_ADDRESS,
-        // method: 'GET',
         pathname: '/cit/s',
         multicast: true,
         multicastTimeout: 60 * 1000,
@@ -237,18 +237,19 @@ export class CoapScanner {
         console.log('error', err);
       })
       .end();
+
+    this.log.info('Started CoIoT service for shelly devices.');
     */
-    this.log.info('Started mDNS query service for shelly devices.');
   }
 
   stop() {
-    this.log.info('Stopping mDNS query service...');
+    this.log.info('Stopping CoIoT service...');
     if (this.scannerTimeout) clearTimeout(this.scannerTimeout);
     this._isScanning = false;
     this.scannerTimeout = undefined;
     if (this.coapServer) this.coapServer.close();
     this.logPeripheral();
-    this.log.info('Stopped mDNS query service.');
+    this.log.info('Stopped CoIoT service.');
   }
 
   logPeripheral() {
