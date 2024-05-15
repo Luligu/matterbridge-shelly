@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
-import { AnsiLogger, CYAN, GREEN, TimestampFormat, db, debugStringify, dn, hk, nf, rs, wr, zb } from 'node-ansi-logger';
+import { AnsiLogger, BLUE, BRIGHT, CYAN, GREEN, TimestampFormat, db, debugStringify, dn, hk, idn, nf, rs, wr, zb } from 'node-ansi-logger';
 
 import mdns, { ResponsePacket, QueryPacket } from 'multicast-dns';
 
 export class MdnsScanner {
   private discoveredPeripherals = new Map<string, { id: string; host: string; gen: number }>();
   private log;
-  private scanner = mdns();
+  private scanner?: mdns.MulticastDNS;
   private _isScanning = false;
   private scannerTimeout?: NodeJS.Timeout;
 
@@ -15,74 +15,91 @@ export class MdnsScanner {
 
   constructor() {
     this.log = new AnsiLogger({ logName: 'mdnsShellyDiscover', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: true });
-
-    this.scanner.on('response', async (response: ResponsePacket) => {
-      for (const answer of response.answers) {
-        if (answer.type === 'PTR') {
-          console.log('[PTR] Name:', answer.name, answer.data.toString());
-        }
-        if (answer.type === 'A' && answer.name.startsWith('shelly')) {
-          this.log.info(`Discovered shelly gen ${CYAN}1${nf} device id: ${hk}${answer.name.replace('.local', '')}${nf} host: ${zb}${answer.data}${nf}`);
-          if (!this.discoveredPeripherals.has(answer.name.replace('.local', ''))) {
-            this.discoveredPeripherals.set(answer.name.replace('.local', ''), { id: answer.name.replace('.local', ''), host: answer.data, gen: 1 });
-            if (this.callback) await this.callback(answer.name.replace('.local', ''), answer.data, 1);
-          }
-        }
-        /*
-        if (answer.type === 'NSEC' && answer.name.startsWith('shelly')) {
-          console.log('[NSEC] Name:', answer.name, answer.data);
-        }
-        if (answer.type === 'SRV' && answer.name.startsWith('shelly')) {
-          console.log('[SRV] Name:', answer.name, answer.data);
-        }
-        if (answer.type === 'TXT' && answer.name.startsWith('shelly')) {
-          console.log('[TXT] Name:', answer.name, answer.data.toString());
-        }
-        if (answer.type === 'PTR' && answer.name === '_http._tcp.local') {
-          console.log('[PTR] Name:', answer.name, answer.data);
-          if (answer.data.startsWith('shelly')) {
-            console.log('Shelly:', response);
-          }
-        }
-        */
-      }
-      for (const additional of response.additionals) {
-        if (additional.type === 'PTR') {
-          console.log('[PTR] Name:', additional.name, additional.data.toString());
-        }
-        if (additional.type === 'A' && additional.name.startsWith('Shelly')) {
-          this.log.info(`Discovered shelly gen ${CYAN}2${nf} device id: ${hk}${additional.name.replace('.local', '').toLowerCase()}${nf} host: ${zb}${additional.data}${nf}`);
-          if (!this.discoveredPeripherals.has(additional.name.replace('.local', '').toLowerCase())) {
-            this.discoveredPeripherals.set(additional.name.replace('.local', '').toLowerCase(), {
-              id: additional.name.replace('.local', '').toLowerCase(),
-              host: additional.data,
-              gen: 2,
-            });
-            if (this.callback) await this.callback(additional.name.replace('.local', '').toLowerCase(), additional.data, 2);
-          }
-        }
-        /*
-        if (additional.type === 'SRV') {
-          console.log('[SRV] Name:', additional.name, additional.data);
-        }
-        if (additional.type === 'TXT') {
-          console.log('[TXT] Name:', additional.name, additional.data.toString());
-        }
-        */
-      }
-      // console.log(response);
-    });
   }
 
   get isScanning() {
     return this._isScanning;
   }
 
-  start(callback?: (id: string, host: string, gen: number) => Promise<void>, timeout?: number) {
+  start(callback?: (id: string, host: string, gen: number) => Promise<void>, timeout?: number, log = false) {
     this.log.info('Starting mDNS query service for shelly devices...');
     this._isScanning = true;
     this.callback = callback;
+
+    this.scanner = mdns();
+    this.scanner.on('response', async (response: ResponsePacket) => {
+      let port = 0;
+      for (const a of response.answers) {
+        if (log && a.type === 'PTR') {
+          this.log.debug(`[${idn}${a.type}${rs}${db}] Name: ${CYAN}${a.name}${db} data: ${typeof a.data === 'string' ? a.data : debugStringify(a.data)}`);
+        }
+        if (log && a.type === 'PTR' && a.name === '_http._tcp.local') {
+          this.log.debug(`[${BLUE}${a.type}${db}] Name: ${CYAN}${a.name}${db} data: ${typeof a.data === 'string' ? a.data : debugStringify(a.data)}`);
+        }
+        if (log && a.type === 'A' && a.name.startsWith('shelly')) {
+          this.log.debug(`[${BLUE}${a.type}${db}] Name: ${CYAN}${a.name}${db} data: ${typeof a.data === 'string' ? a.data : debugStringify(a.data)}`);
+        }
+        if (log && a.type === 'NSEC' && a.name.startsWith('shelly')) {
+          this.log.debug(`[${BLUE}${a.type}${db}] Name: ${CYAN}${a.name}${db} data: ${typeof a.data === 'string' ? a.data : debugStringify(a.data)}`);
+        }
+        if (log && a.type === 'SRV' && a.name.startsWith('shelly')) {
+          this.log.debug(`[${BLUE}${a.type}${db}] Name: ${CYAN}${a.name}${db} data: ${typeof a.data === 'string' ? a.data : debugStringify(a.data)}`);
+        }
+        if (log && a.type === 'TXT' && a.name.startsWith('shelly')) {
+          this.log.debug(`[${BLUE}${a.type}${db}] Name: ${CYAN}${a.name}${db} data: ${a.data}`);
+        }
+        if (a.type === 'SRV' && a.name.startsWith('shelly')) {
+          port = a.data.port;
+        }
+        if (a.type === 'A' && a.name.startsWith('shelly')) {
+          this.log.info(`Discovered shelly gen ${CYAN}1${nf} device id: ${hk}${a.name.replace('.local', '')}${nf} host: ${zb}${a.data}${nf} port: ${zb}${port}${nf}`);
+          if (!this.discoveredPeripherals.has(a.name.replace('.local', ''))) {
+            this.discoveredPeripherals.set(a.name.replace('.local', ''), { id: a.name.replace('.local', ''), host: a.data, gen: 1 });
+            if (this.callback) await this.callback(a.name.replace('.local', ''), a.data, 1);
+          }
+        }
+      }
+      for (const a of response.additionals) {
+        if (log && a.type === 'PTR') {
+          this.log.debug(`[${idn}${a.type}${rs}${db}] Name: ${CYAN}${a.name}${db} data: ${typeof a.data === 'string' ? a.data : debugStringify(a.data)}`);
+        }
+        if (log && a.type === 'PTR' && a.name === '_http._tcp.local') {
+          this.log.debug(`[${BLUE}${a.type}${db}] Name: ${CYAN}${a.name}${db} data: ${typeof a.data === 'string' ? a.data : debugStringify(a.data)}`);
+        }
+        if (log && a.type === 'A' && a.name.startsWith('shelly')) {
+          this.log.debug(`[${BLUE}${a.type}${db}] Name: ${CYAN}${a.name}${db} data: ${typeof a.data === 'string' ? a.data : debugStringify(a.data)}`);
+        }
+        if (log && a.type === 'NSEC' && a.name.startsWith('shelly')) {
+          this.log.debug(`[${BLUE}${a.type}${db}] Name: ${CYAN}${a.name}${db} data: ${typeof a.data === 'string' ? a.data : debugStringify(a.data)}`);
+        }
+        if (log && a.type === 'SRV') {
+          this.log.debug(`[${BLUE}${a.type}${db}] Name: ${CYAN}${a.name}${db} data: ${typeof a.data === 'string' ? a.data : debugStringify(a.data)}`);
+        }
+        if (log && a.type === 'TXT') {
+          this.log.debug(`[${BLUE}${a.type}${db}] Name: ${CYAN}${a.name}${db} data: ${a.data}`);
+        }
+        if (a.type === 'SRV' && a.name.startsWith('shelly')) {
+          port = a.data.port;
+        }
+        if (a.type === 'A' && a.name.startsWith('Shelly')) {
+          this.log.info(`Discovered shelly gen ${CYAN}2${nf} device id: ${hk}${a.name.replace('.local', '').toLowerCase()}${nf} host: ${zb}${a.data}${nf} port: ${zb}${port}${nf}`);
+          if (!this.discoveredPeripherals.has(a.name.replace('.local', '').toLowerCase())) {
+            this.discoveredPeripherals.set(a.name.replace('.local', '').toLowerCase(), {
+              id: a.name.replace('.local', '').toLowerCase(),
+              host: a.data,
+              gen: 2,
+            });
+            if (this.callback) await this.callback(a.name.replace('.local', '').toLowerCase(), a.data, 2);
+          }
+        }
+      }
+      // console.log(response);
+    });
+
     this.scanner.query('_http._tcp.local', 'PTR');
+    setInterval(() => {
+      this.scanner?.query('_http._tcp.local', 'PTR');
+    }, 10000);
     /*
     this.scanner.query({
       questions: [
@@ -106,7 +123,8 @@ export class MdnsScanner {
     if (this.scannerTimeout) clearTimeout(this.scannerTimeout);
     this._isScanning = false;
     this.scannerTimeout = undefined;
-    this.scanner.destroy();
+    this.scanner?.destroy();
+    this.scanner = undefined;
     this.logPeripheral();
     this.log.info('Stopped mDNS query service.');
   }
@@ -120,10 +138,13 @@ export class MdnsScanner {
   }
 }
 
+/*
 const mdnsScanner = new MdnsScanner();
-mdnsScanner.start();
+mdnsScanner.start(undefined, undefined, true);
+//mdnsScanner.start();
 
 process.on('SIGINT', async function () {
   mdnsScanner.stop();
   process.exit();
 });
+*/

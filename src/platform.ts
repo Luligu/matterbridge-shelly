@@ -423,31 +423,35 @@ export class MdnsDeviceDiscoverer extends DeviceDiscoverer {
   }
 
   async start() {
-    this.mdnsScanner.start(async (id: string, host: string, gen: number) => {
-      // We get id: shellydimmer2-98CDAC0D01BB host: 192.168.1.219 gen:1
-      // We get id: shellyplus1pm-441793d69718 host: 192.168.1.217 gen:2
-      const shellyData = (await getShelly(host)) as { type: string; model: string; mac: string };
-      if (shellyData) console.log(shellyData);
-      if (gen === 1) {
-        if (shellyData) {
-          this.log.info(`mdnsScanner discovered shelly gen 1 ${id} model ${shellyData.type} mac ${shellyData.mac} host ${host}`);
-          this.platform.shellyDevices.set(id, { id, hostname: host });
-          await this.platform.saveShellyDevices();
-          // We need type SHDM-2 mac 98CDAC0D01BB host 192.168.1.219
-          const device = shellies1g.createDevice(shellyData.type, shellyData.mac, host);
-          if (!shellies1g.hasDevice(device)) shellies1g.addDevice(device);
+    this.mdnsScanner.start(
+      async (id: string, host: string, gen: number) => {
+        // We get id: shellydimmer2-98CDAC0D01BB host: 192.168.1.219 gen:1
+        // We get id: shellyplus1pm-441793d69718 host: 192.168.1.217 gen:2
+        const shellyData = (await getShelly(host)) as { type: string; model: string; mac: string };
+        if (shellyData) console.log(shellyData);
+        if (gen === 1) {
+          if (shellyData) {
+            this.log.info(`mdnsScanner discovered shelly gen 1 ${id} model ${shellyData.type} mac ${shellyData.mac} host ${host}`);
+            this.platform.shellyDevices.set(id, { id, hostname: host });
+            await this.platform.saveShellyDevices();
+            // We need type SHDM-2 mac 98CDAC0D01BB host 192.168.1.219
+            const device = shellies1g.createDevice(shellyData.type, shellyData.mac, host);
+            if (!shellies1g.hasDevice(device)) shellies1g.addDevice(device);
+          }
         }
-      }
-      if (gen === 2) {
-        if (shellyData) {
-          this.log.info(`mdnsScanner discovered shelly gen 2 ${id} model ${shellyData.model} mac ${shellyData.mac} host ${host}`);
-          this.platform.shellyDevices.set(id, { id, hostname: host });
-          await this.platform.saveShellyDevices();
-          // We need deviceId shellyplus1pm-441793d69718 hostname 192.168.1.217
-          this.handleDiscoveredDevice({ deviceId: id, hostname: host });
+        if (gen === 2) {
+          if (shellyData) {
+            this.log.info(`mdnsScanner discovered shelly gen 2 ${id} model ${shellyData.model} mac ${shellyData.mac} host ${host}`);
+            this.platform.shellyDevices.set(id, { id, hostname: host });
+            await this.platform.saveShellyDevices();
+            // We need deviceId shellyplus1pm-441793d69718 hostname 192.168.1.217
+            this.handleDiscoveredDevice({ deviceId: id, hostname: host });
+          }
         }
-      }
-    }, this.timeout);
+      },
+      this.timeout,
+      false,
+    );
   }
 
   async stop() {

@@ -1,3 +1,4 @@
+/*
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { AnsiLogger, TimestampFormat, db, debugStringify, dn, hk, nf, rs, wr, zb } from 'node-ansi-logger';
 
@@ -50,16 +51,6 @@ function loadNoble(hciId?: number) {
     process.env.NOBLE_HCI_DEVICE_ID = hciId.toString();
   }
   noble = require('@stoprocent/noble');
-  /*
-  if (typeof noble.on !== 'function') {
-    // The following commit broke the default exported instance of noble:
-    // https://github.com/abandonware/noble/commit/b67eea246f719947fc45b1b52b856e61637a8a8e
-    // eslint-disable-next-line no-console
-    console.log('Noble is not a function, trying to use default export');
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    noble = (noble as any)({ extended: false });
-  }
-  */
 }
 
 export class NobleBleClient {
@@ -177,13 +168,13 @@ export class NobleBleClient {
       return;
     }
     //}
-    /*
-    const matterServiceData = peripheral.advertisement.serviceData.find((serviceData) => serviceData.uuid === BLE_SHELLY_SERVICE_UUID);
-    if (matterServiceData === undefined || matterServiceData.data.length !== 8) {
-      this.log.info(`Peripheral ${peripheral.address} does not advertise Shelly Service ... ignoring`);
-      return;
-    }
-    */
+    
+    //const matterServiceData = peripheral.advertisement.serviceData.find((serviceData) => serviceData.uuid === BLE_SHELLY_SERVICE_UUID);
+    //if (matterServiceData === undefined || matterServiceData.data.length !== 8) {
+    //  this.log.info(`Peripheral ${peripheral.address} does not advertise Shelly Service ... ignoring`);
+    //  return;
+    //}
+    
 
     if (!this.discoveredPeripherals.has(peripheral.address)) {
       this.log.warn(`Exploring peripheral ${peripheral.address} and adding to discovered devices ...`);
@@ -283,3 +274,4 @@ export class NobleBleClient {
 
 const bleDiscover = new NobleBleClient();
 await bleDiscover.startScanning([], true);
+*/
