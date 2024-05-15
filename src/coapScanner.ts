@@ -305,7 +305,7 @@ export class CoapScanner {
     //this.getDeviceStatus('192.168.1.219');
     //this.getMulticastDeviceStatus();
     //this.listenForStatusUpdates();
-    this.startDgramServer();
+    if (process.argv.includes('receiver')) this.startDgramServer();
     if (process.argv.includes('sender')) this.startDgramSender();
 
     this.log.info('Started CoIoT service for shelly devices.');
