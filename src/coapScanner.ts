@@ -267,6 +267,7 @@ export class CoapScanner {
   }
 
   startDgramSender() {
+    this.log.info('Starting CoIoT multicast sender...');
     const MULTICAST_ADDRESS = '224.0.1.187';
     const PORT = 5683;
     const message = Buffer.from('Test multicast message');
@@ -302,8 +303,8 @@ export class CoapScanner {
     //this.getDeviceStatus('192.168.1.219');
     //this.getMulticastDeviceStatus();
     //this.listenForStatusUpdates();
-    // this.startDgramServer();
-    this.startDgramSender();
+    this.startDgramServer();
+    if (process.argv.includes('sender')) this.startDgramSender();
 
     this.log.info('Started CoIoT service for shelly devices.');
   }
