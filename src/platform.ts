@@ -428,6 +428,7 @@ export class MdnsDeviceDiscoverer extends DeviceDiscoverer {
         // We get id: shellydimmer2-98CDAC0D01BB host: 192.168.1.219 gen:1
         // We get id: shellyplus1pm-441793d69718 host: 192.168.1.217 gen:2
         const shellyData = (await getShelly(host)) as { type: string; model: string; mac: string };
+        // eslint-disable-next-line no-console
         if (shellyData) console.log(shellyData);
         if (gen === 1) {
           if (shellyData) {
@@ -474,6 +475,7 @@ export class StorageDeviceDiscoverer extends DeviceDiscoverer {
     shellyDevices.forEach(async (device) => {
       this.log.info(`${nf}StorageDeviceDiscoverer deviceId: ${hk}${device.id}${nf} hostname: ${zb}${device.hostname}${nf}`);
       const shellyData = (await getShelly(device.hostname)) as { type: string; model: string; mac: string; gen: number };
+      // eslint-disable-next-line no-console
       if (shellyData) console.log(shellyData);
       if (!shellyData) {
         this.log.error(`Failed to retrieve shelly data for device ${device.id}`);
@@ -507,6 +509,7 @@ export class ConfigDeviceDiscoverer extends DeviceDiscoverer {
     Object.entries(this.config.deviceIp as Record<string, PlatformConfigValue>).forEach(async ([key, value]) => {
       this.log.info(`${nf}ConfigDeviceDiscoverer deviceId: ${hk}${key}${nf} hostname: ${zb}${value}${nf}`);
       const shellyData = (await getShelly(value as string)) as { type: string; model: string; mac: string; gen: number };
+      // eslint-disable-next-line no-console
       if (shellyData) console.log(shellyData);
       if (!shellyData) {
         this.log.error(`Failed to retrieve shelly data for device ${key}`);
