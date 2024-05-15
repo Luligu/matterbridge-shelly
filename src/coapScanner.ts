@@ -234,7 +234,7 @@ export class CoapScanner {
   startDgramServer() {
     const MULTICAST_ADDRESS = '224.0.1.187';
     const PORT = 5683;
-    const INTERFACE = '192.168.1.189';
+    const INTERFACE = '192.168.1.213';
 
     const socket = dgram.createSocket({ type: 'udp4', reuseAddr: true });
 
