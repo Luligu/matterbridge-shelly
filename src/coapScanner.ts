@@ -270,6 +270,8 @@ export class CoapScanner {
     this.log.info('Starting CoIoT multicast sender...');
     const MULTICAST_ADDRESS = '224.0.1.187';
     const PORT = 5683;
+    const INTERFACE = '192.168.1.213';
+
     const message = Buffer.from('Test multicast message');
 
     const client = dgram.createSocket({ type: 'udp4', reuseAddr: true });
@@ -277,7 +279,7 @@ export class CoapScanner {
     client.bind(() => {
       client.setBroadcast(true);
       client.setMulticastTTL(128);
-      client.addMembership(MULTICAST_ADDRESS);
+      client.addMembership(MULTICAST_ADDRESS, INTERFACE);
       setInterval(() => {
         client.send(message, 0, message.length, PORT, MULTICAST_ADDRESS, (err) => {
           if (err) {
