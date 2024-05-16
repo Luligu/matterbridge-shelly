@@ -64,6 +64,8 @@ declare module 'shellies' {
 
     [Symbol.iterator](): Iterator<Device>;
 
+    _statusUpdateHandler(msg);
+
     setAuthCredentials(username: string, password: string): void;
 
     async start(networkInterface: string = null): void;

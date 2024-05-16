@@ -4,7 +4,7 @@ import { AnsiLogger, db, debugStringify, dn, hk, idn, nf, or, rs, wr, zb } from 
 import { NodeStorage, NodeStorageManager } from 'node-persist-manager';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { CoapScanner } from './coapScanner.js';
+import { CoapMessage, CoapServer } from './coapScanner.js';
 
 // Shellyies gen 1
 import shellies1g, { Device as Device1g } from 'shellies';
@@ -37,6 +37,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
   private nodeStorageManager?: NodeStorageManager;
   private nodeStorage?: NodeStorage;
 
+  // Shelly 1
+  private shellies1g = shellies1g;
   // Shelly 2+
   private shellies?: Shellies;
   private mdnsDiscoverer?: MdnsDeviceDiscoverer;
@@ -59,35 +61,11 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     if (config.blackList) this.blackList = config.blackList as string[];
     if (config.deviceIp) this.deviceIp = config.deviceIp as ConfigDeviceIp;
 
-    // create Shelly gen 1 client
-    /*
-    shellies1g.on('discover', (device: Device1g) => {
-      // a new device has been discovered
-      this.log.warn('Discovered device with ID', device.id, 'host', device.host, 'and type', device.type);
-      // eslint-disable-next-line no-console
-      console.log('Device:', device);
-
-      device.on('change', (prop, newValue, oldValue) => {
-        // a property on the device has changed
-        this.log.info(
-          `${db}Shelly message for device ${idn}${device.modelName.replace(/ /g, '')}-${device.id}${rs}${db} (${device.type}) ${hk}${device.modelName}${db} ` +
-            `${zb}${prop}${db}:${typeof newValue === 'object' ? debugStringify(newValue as object) : newValue}${rs}`,
-        );
-
-        this.log.warn(prop, 'changed from', oldValue, 'to', newValue);
-      });
-
-      device.on('offline', () => {
-        // the device went offline
-        this.log.warn('Device with ID', device.id, 'went offline');
-      });
-    });
-    */
-    shellies1g.on('add', (device: Device1g) => {
-      // a new device has been discovered
+    // Use Shelly gen 1 client
+    this.shellies1g.on('add', (device: Device1g) => {
       this.log.info(`Shellies gen 1 added device with ID ${idn}${device.id}${rs}${nf}, host ${device.host} and type ${device.type}`);
       // eslint-disable-next-line no-console
-      // console.log('Device:', device);
+      console.log('Device:', device);
 
       device.on('change', (prop, newValue, oldValue) => {
         this.log.info(
@@ -101,11 +79,9 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         this.log.warn('Device with ID', device.id, 'went offline');
       });
     });
-    //shellies1g.start();
 
     // create Shelly gen 2 client
     this.shellies = new Shellies();
-    // Handle when a new device has been discovered
     this.shellies.on('add', async (device: Device) => {
       this.log.info(`Shellies gen 2 added device with ID: ${idn}${device.id}${rs}${nf}, model: ${hk}${device.modelName}${nf} (${device.model})`);
       this.log.info(`- macAddress: ${device.macAddress}`);
@@ -114,44 +90,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       for (const [key, component] of device) {
         this.log.info(`  - ${component.name} (${key})`);
       }
-      /*
-      let hostname: string | undefined;
-      if (device.hasComponent('wifi')) {
-        const wifiComponent = device.getComponent('wifi') as WiFi;
-        if (wifiComponent) {
-          this.log.info('- WiFi IP address:', zb, wifiComponent.sta_ip, nf);
-          this.log.info('- WiFi status:', wifiComponent.status);
-          this.log.info('- WiFi SSID:', wifiComponent.ssid);
-          this.log.info('- WiFi signal strength:', wifiComponent.rssi);
-          if (wifiComponent.status === 'got ip' && wifiComponent.sta_ip) {
-            hostname = wifiComponent.sta_ip;
-          } else this.log.error('WiFi status is not "got ip" or IP address is not set');
-        } else {
-          this.log.error('Failed to retrieve WiFi component');
-        }
-      } else {
-        this.log.debug('Device does not have a WiFi component');
-      }
-      if (device.hasComponent('eth')) {
-        const ethComponent = device.getComponent('eth') as Ethernet;
-        if (ethComponent) {
-          this.log.info('- Ethernet IP address:', zb, ethComponent.ip, nf);
-          if (ethComponent.ip) {
-            hostname = ethComponent.ip;
-          } else this.log.error('Ethernet IP address is not set');
-        } else {
-          this.log.error('Failed to retrieve Ethernet component');
-        }
-      } else {
-        this.log.debug('Device does not have an Ethernet component');
-      }
-      if (hostname) {
-        this.log.info(`Stored deviceId: ${hk}${device.id}${nf} hostname: ${zb}${hostname}${nf}`);
-      } else {
-        this.log.error('Failed to retrieve device hostname');
-        return;
-      }
-      */
+      // eslint-disable-next-line no-console
       // console.log('Device:', device);
 
       // Create a new Matterbridge device for the switch
@@ -277,19 +216,17 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       this.log.debug(error.stack || '');
     });
 
-    /*
-    const scanner = new CoapScanner();
-    scanner.start((msg) => {
-      this.log.info('CoAP message:', msg.code);
-    });
-    */
-
     // start discovering devices
     this.log.info('Discovering Shellies...');
     setTimeout(async () => {
       await this.mdnsDiscoverer?.start();
       await this.storageDiscoverer?.start();
       await this.configDiscoverer?.start();
+      const server = new CoapServer();
+      server.start((msg: CoapMessage) => {
+        this.log.info(`CoAP message from: ${msg.host}`);
+        shellies1g._statusUpdateHandler(msg);
+      });
     }, 10000);
   }
 

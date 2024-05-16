@@ -12,18 +12,30 @@ const COIOT_OPTION_STATUS_SERIAL = '3420';
 
 const COAP_MULTICAST_ADDRESS = '224.0.1.187';
 
-export class CoapScanner {
-  private discoveredPeripherals = new Map<string, { id: string; host: string; gen: number }>();
+export interface CoapMessage {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  msg: any;
+  host: string;
+  deviceType: string;
+  deviceId: string;
+  protocolRevision: string;
+  validFor: number;
+  serial: number;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  payload: any;
+}
+
+export class CoapServer {
   private log;
   private coapAgent;
   private coapServer: Server | undefined;
   private _isScanning = false;
   private scannerTimeout?: NodeJS.Timeout;
 
-  private callback?: (msg: IncomingMessage) => void;
+  private callback?: (msg: CoapMessage) => void;
 
   constructor() {
-    this.log = new AnsiLogger({ logName: 'mdnsShellyDiscover', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: true });
+    this.log = new AnsiLogger({ logName: 'coapServer', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: true });
 
     this.registerShellyOptions();
 
@@ -184,6 +196,7 @@ export class CoapScanner {
     } catch (e) {
       payload = msg.payload.toString();
     }
+    /*
     this.log.info('host', host);
     this.log.info('deviceType', deviceType);
     this.log.info('deviceId', deviceId);
@@ -191,6 +204,8 @@ export class CoapScanner {
     this.log.info('validFor', validFor);
     this.log.info('serial', serial);
     this.log.info('payload', payload);
+    */
+    return { msg, host, deviceType, deviceId, protocolRevision, validFor, serial, payload };
   }
 
   listenForStatusUpdates(networkInterface?: string) {
@@ -215,11 +230,11 @@ export class CoapScanner {
     */
 
     this.coapServer.on('request', (msg: IncomingMessage, res: OutgoingMessage) => {
-      this.log.warn(`Server got a messagge code ${msg.code} url ${msg.url} rsinfo ${debugStringify(msg.rsinfo)}...`);
+      this.log.warn(`Coap server got a messagge code ${msg.code} url ${msg.url} rsinfo ${debugStringify(msg.rsinfo)}...`);
       if (msg.code === '0.30' && msg.url === '/cit/s') {
-        this.log.warn('Parsing device status update ...');
-        this.parseShellyMessage(msg);
-        this.callback && this.callback(msg);
+        this.log.warn('Parsing coap message...');
+        const coapMessage = this.parseShellyMessage(msg);
+        this.callback && this.callback(coapMessage);
       } else {
         console.log(msg);
       }
@@ -313,8 +328,8 @@ export class CoapScanner {
     });
   }
 
-  start(callback?: (msg: IncomingMessage) => void, timeout?: number) {
-    this.log.info('Starting CoIoT service for shelly devices...');
+  start(callback?: (msg: CoapMessage) => void, timeout?: number) {
+    this.log.info('Starting CoIoT server for shelly devices...');
     this._isScanning = true;
     this.callback = callback;
     if (timeout && timeout > 0) {
@@ -324,45 +339,35 @@ export class CoapScanner {
     }
     //this.getDeviceDescription('192.168.1.219');
     //this.getDeviceStatus('192.168.1.219');
-    this.getMulticastDeviceStatus();
+    //this.getMulticastDeviceStatus();
     this.listenForStatusUpdates();
     // if (process.argv.includes('receiver')) this.startDgramServer();
     // if (process.argv.includes('sender')) this.startDgramSender();
 
-    this.log.info('Started CoIoT service for shelly devices.');
+    this.log.info('Started CoIoT server for shelly devices.');
   }
 
   stop() {
-    this.log.info('Stopping CoIoT service...');
+    this.log.info('Stopping CoIoT server for shelly devices...');
     if (this.scannerTimeout) clearTimeout(this.scannerTimeout);
     this._isScanning = false;
     this.scannerTimeout = undefined;
     if (this.coapServer) this.coapServer.close();
-    this.logPeripheral();
-    this.log.info('Stopped CoIoT service.');
-  }
-
-  logPeripheral() {
-    this.log.info(`Discovered ${this.discoveredPeripherals.size} shelly devices:`);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    for (const [name, { id, host, gen }] of this.discoveredPeripherals) {
-      this.log.info(`- id: ${hk}${name}${nf} host: ${zb}${host}${nf} gen: ${CYAN}${gen}${nf}`);
-    }
+    this.log.info('Stopped CoIoT server for shelly devices.');
   }
 }
 
 if (process.argv.includes('coapServer') || process.argv.includes('coapSender') || process.argv.includes('coapReceiver')) {
-  const coapScanner = new CoapScanner();
+  const coapServer = new CoapServer();
 
-  if (process.argv.includes('coapReceiver')) coapScanner.startDgramServer();
+  if (process.argv.includes('coapReceiver')) coapServer.startDgramServer();
 
-  if (process.argv.includes('coapSender')) coapScanner.startDgramSender();
+  if (process.argv.includes('coapSender')) coapServer.startDgramSender();
 
-  if (process.argv.includes('coapServer')) coapScanner.start();
+  if (process.argv.includes('coapServer')) coapServer.start();
 
   process.on('SIGINT', async function () {
-    coapScanner.stop();
-    coapScanner.logPeripheral();
+    coapServer.stop();
     process.exit();
   });
 }
