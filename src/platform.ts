@@ -83,7 +83,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
 
       for (const [property, value] of device) {
         //this.log.info(`  - ${property}: ${value}`);
-        if (property.startsWith('switch')) {
+        if (property.startsWith('switch') || property.startsWith('relay')) {
           // Add a child enpoint for each switch
           const child = switchDevice.addChildDeviceTypeWithClusterServer(property, [onOffSwitch], [OnOff.Complete.id]);
           // Set the OnOff attribute
@@ -253,7 +253,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       await this.configDiscoverer?.start();
       const server = new CoapServer();
       server.start((msg: CoapMessage) => {
-        this.log.info(`CoAP message from: ${msg.host}`);
+        this.log.info(`CoIoT message received from: ${msg.host}`);
         shellies1g._statusUpdateHandler(msg);
       });
     }, 10000);
