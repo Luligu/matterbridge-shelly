@@ -2,21 +2,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // shellies.d.ts
 declare module 'shellies' {
-  /*
-  interface Device {
-    id: string;
-    lastSeen: Date | null;
-    _online: boolean;
-    _ttl: number;
-    _ttlTimer: NodeJS.Timer | null;
-    _name: string | null;
-    _props: Map<string, Map<number, string>>;
-    _request: any; // Type as necessary
-    host: string; // Assuming getters and setters imply a simple type
-    settings: any; // Type as necessary
-    [key: string]: any; // Allowing for dynamic access to other properties
+  interface Request extends superagent.SuperAgentRequest {
+    // You can add additional properties or methods if needed
+    query(params: object): this;
   }
-  */
+
+  interface SuperAgentStatic extends superagent.SuperAgentStatic {
+    timeout(ms: number): this;
+    set(field: string, val: string): this;
+    get(url: string): Request;
+    // Include other methods from superagent if needed
+  }
 
   export class Device extends EventEmitter {
     constructor(id: string, host: string);
@@ -30,7 +26,9 @@ declare module 'shellies' {
     online: boolean;
     ttl: number;
     name: string;
-    readonly request: string;
+
+    request: SuperAgentStatic;
+    //async request(endpoint: string): Promise<void>;
 
     *[Symbol.iterator](): Iterator<[string, any]> {
       if (this._props.has('*')) {

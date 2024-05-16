@@ -8,9 +8,37 @@ type ShellyData = {
   [key: string]: string | number | boolean | null | undefined | object;
 };
 
-export interface ShellyComponent {
+export class ShellyProperty {
+  key: string;
+  value: string;
+  constructor(key: string, value: string) {
+    this.key = key;
+    this.value = value;
+  }
+}
+
+export class ShellyComponent {
   key: string;
   name: string;
+  properties = new Map<string, ShellyProperty>();
+  hasProperty(key: string): boolean {
+    return this.properties.has(key);
+  }
+  getProperty(key: string): ShellyProperty | undefined {
+    return this.properties.get(key);
+  }
+  addProperty(property: ShellyProperty) {
+    return this.properties.set(property.key, property);
+  }
+  *[Symbol.iterator](): IterableIterator<[string, ShellyProperty]> {
+    for (const [key, property] of this.properties.entries()) {
+      yield [key, property];
+    }
+  }
+  constructor(key: string, name: string) {
+    this.key = key;
+    this.name = name;
+  }
   //device: Device;
   //update(data: Record<string, unknown>);
   //handleEvent(event: RpcEvent);
@@ -68,14 +96,23 @@ export class ShellyDevice extends EventEmitter {
       device.id = (settings.device as ShellyData).hostname as string;
       device.firmware = (shelly.fw as string).split('/')[1];
       device.auth = shelly.auth as boolean;
+
+      device.addComponent(new ShellyComponent('wifi_ap', 'WiFi'));
       for (const key in settings) {
-        if (key === 'wifi_ap') device.addComponent({ key, name: 'WiFi' });
-        if (key === 'wifi_sta') device.addComponent({ key, name: 'WiFi' });
-        if (key === 'wifi_sta1') device.addComponent({ key, name: 'WiFi' });
-        if (key === 'mqtt') device.addComponent({ key, name: 'MQTT' });
-        if (key === 'coiot') device.addComponent({ key, name: 'CoIoT' });
-        if (key === 'sntp') device.addComponent({ key, name: 'Sntp' });
-        if (key === 'cloud') device.addComponent({ key, name: 'Cloud' });
+        if (key === 'wifi_ap') device.addComponent(new ShellyComponent(key, 'WiFi'));
+        if (key === 'wifi_sta') device.addComponent(new ShellyComponent(key, 'WiFi'));
+        if (key === 'wifi_sta1') device.addComponent(new ShellyComponent(key, 'WiFi'));
+        if (key === 'mqtt') device.addComponent(new ShellyComponent(key, 'MQTT'));
+        if (key === 'coiot') device.addComponent(new ShellyComponent(key, 'CoIoT'));
+        if (key === 'sntp') device.addComponent(new ShellyComponent(key, 'Sntp'));
+        if (key === 'cloud') device.addComponent(new ShellyComponent(key, 'Cloud'));
+        if (key === 'lights') {
+          const lights = settings[key] as ShellyData[];
+          let index = 0;
+          for (const light of lights) {
+            device.addComponent(new ShellyComponent(`light:${index++}`, 'Light'));
+          }
+        }
       }
     }
     if (shelly.gen === 2) {
@@ -88,17 +125,25 @@ export class ShellyDevice extends EventEmitter {
       for (const key in settings) {
         if (key === 'wifi') {
           const wifi = settings[key] as ShellyData;
-          if (wifi.ap) device.addComponent({ key: 'wifi_ap', name: 'WiFi' }); //Ok
-          if (wifi.sta) device.addComponent({ key: 'wifi_sta', name: 'WiFi' }); //Ok
-          if (wifi.sta1) device.addComponent({ key: 'wifi_sta1', name: 'WiFi' }); //Ok
+          if (wifi.ap) device.addComponent(new ShellyComponent('wifi_ap', 'WiFi')); //Ok
+          if (wifi.sta) device.addComponent(new ShellyComponent('wifi_sta', 'WiFi')); //Ok
+          if (wifi.sta1) device.addComponent(new ShellyComponent('wifi_sta1', 'WiFi')); //Ok
         }
         if (key === 'sys') {
           const sys = settings[key] as ShellyData;
-          if (sys.sntp) device.addComponent({ key: 'sntp', name: 'Sntp' }); //Ok
+          if (sys.sntp) device.addComponent(new ShellyComponent('sntp', 'Sntp')); //Ok
         }
-        if (key === 'mqtt') device.addComponent({ key, name: 'MQTT' }); //Ok
-        if (key === 'ws') device.addComponent({ key, name: 'WebSocket' }); // Ok
-        if (key === 'cloud') device.addComponent({ key, name: 'Cloud' }); // Ok
+        if (key === 'mqtt') device.addComponent(new ShellyComponent(key, 'MQTT')); //Ok
+        if (key === 'ws') device.addComponent(new ShellyComponent(key, 'WebSocket')); // Ok
+        if (key === 'cloud') device.addComponent(new ShellyComponent(key, 'Cloud')); // Ok
+        if (key.startsWith('switch:')) {
+          device.addComponent(new ShellyComponent(key, 'Switch'));
+          const component = device.getComponent(key);
+          const properties = settings[key] as ShellyData;
+          for (const prop in properties) {
+            component?.addProperty(new ShellyProperty(prop, properties[prop] as string));
+          }
+        }
       }
     }
     return device;
@@ -119,25 +164,55 @@ export class ShellyDevice extends EventEmitter {
       return null;
     }
   }
+
+  static async sendCommand(hostname: string, service: string, index: number, command: string): Promise<unknown | null> {
+    try {
+      // Replace the URL with your target URL
+      const response = await fetch(`http://${hostname}/${service}/${index}?${command}`);
+      if (!response.ok) {
+        // eslint-disable-next-line no-console
+        console.error('Error fetching shelly:');
+        return null;
+      }
+      const data = await response.json();
+      // eslint-disable-next-line no-console
+      // console.log(data);
+      return data;
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Error fetching shelly:', error);
+      return null;
+    }
+  }
 }
 
 if (process.argv.includes('shelly')) {
   const log = new AnsiLogger({ logName: 'shellyDevice', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: true });
+
   let shelly = await ShellyDevice.create(log, '192.168.1.217');
-  // eslint-disable-next-line no-console
-  console.log('Shelly:', shelly);
-  shelly = await ShellyDevice.create(log, '192.168.1.218');
-  // eslint-disable-next-line no-console
-  console.log('Shelly:', shelly);
-  shelly = await ShellyDevice.create(log, '192.168.1.219');
-  // eslint-disable-next-line no-console
   if (shelly) {
-    shelly.addComponent({ key: 'switch:0', name: 'Switch' });
     console.log('Shelly:', shelly);
     for (const [key, component] of shelly) {
       console.log(`  - ${component.name} (${key})`);
     }
   }
+
+  shelly = await ShellyDevice.create(log, '192.168.1.218');
+  if (shelly) {
+    console.log('Shelly:', shelly);
+    for (const [key, component] of shelly) {
+      console.log(`  - ${component.name} (${key})`);
+    }
+  }
+
+  shelly = await ShellyDevice.create(log, '192.168.1.219');
+  if (shelly) {
+    console.log('Shelly:', shelly);
+    for (const [key, component] of shelly) {
+      console.log(`  - ${component.name} (${key})`);
+    }
+  }
+  //await ShellyDevice.sendCommand('192.168.1.219', 'light', 0, 'turn=on');
 }
 
 /* Sample output for host/shelly:

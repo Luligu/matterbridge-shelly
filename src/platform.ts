@@ -65,7 +65,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     this.shellies1g.on('add', async (device: Device1g) => {
       this.log.info(`Shellies gen 1 added device with ID ${idn}${device.id}${rs}${nf}, host ${device.host} and type ${device.type}`);
       // eslint-disable-next-line no-console
-      //console.log('Device:', device);
+      // console.log('Device:', device);
       this.log.info(`- macAddress: ${device.id}`);
       this.log.info(`- host: ${device.host}`);
       //this.log.info(`- status: ${debugStringify(await device.getStatus())}`);
@@ -89,9 +89,18 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           // Set the OnOff attribute
           child.getClusterServer(OnOffCluster)?.setOnOffAttribute(value);
 
+          // Add event handler
           device.on('change', (prop, newValue, oldValue) => {
             this.log.info('', prop, 'changed from', oldValue, 'to', newValue);
             this.shellySwitchUpdateHandler(switchDevice, device, property, prop, newValue);
+          });
+
+          // Add command handlers http://192.168.1.219/light/0?brightness=100
+          switchDevice.addCommandHandler('on', async (data) => {
+            this.shellySwitchCommandHandler(switchDevice, device, 'on', data.endpoint.number, true);
+          });
+          switchDevice.addCommandHandler('off', async (data) => {
+            this.shellySwitchCommandHandler(switchDevice, device, 'off', data.endpoint.number, false);
           });
 
           switchDevice.addFixedLabel('composed', 'Switch');
@@ -160,10 +169,10 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
 
             // Add command handlers
             switchDevice.addCommandHandler('on', async (data) => {
-              this.shellySwitchCommandHandler(switchDevice, 'on', data.endpoint.number, true);
+              this.shellySwitchCommandHandler(switchDevice, device, 'on', data.endpoint.number, true);
             });
             switchDevice.addCommandHandler('off', async (data) => {
-              this.shellySwitchCommandHandler(switchDevice, 'off', data.endpoint.number, false);
+              this.shellySwitchCommandHandler(switchDevice, device, 'off', data.endpoint.number, false);
             });
           } else {
             this.log.error('Failed to retrieve Switch component');
@@ -302,10 +311,10 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       `${db}Shelly message for device ${idn}${shellyDevice.id}${rs}${db} ${hk}${switchId}${db} ` +
         `${zb}${characteristic}${db}:${typeof value === 'object' ? debugStringify(value as object) : value}${rs}`,
     );
-    if (shellyDevice instanceof Device && characteristic !== 'output') {
+    if (!(shellyDevice instanceof Device) && !(characteristic.startsWith('switch') || characteristic.startsWith('relay'))) {
       return false;
     }
-    if (!(shellyDevice instanceof Device) && !characteristic.startsWith('switch')) {
+    if (shellyDevice instanceof Device && characteristic !== 'output') {
       return false;
     }
     const endpoints = matterbridgeDevice.getChildEndpoints();
@@ -332,13 +341,19 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           value,
         );
         return true;
-      } else this.log.error(`shellySwitchUpdateHandler error: endpointName ${switchId} not found`);
+      }
     }
-    this.log.error('shellySwitchUpdateHandler error: endpointName not found');
+    this.log.error(`shellySwitchUpdateHandler error: endpointName ${switchId} not found`);
     return false;
   }
 
-  private shellySwitchCommandHandler(matterbridgeDevice: MatterbridgeDevice, command: string, endpointNumber: EndpointNumber | undefined, state: boolean): boolean {
+  private shellySwitchCommandHandler(
+    matterbridgeDevice: MatterbridgeDevice,
+    shellyDevice: Device | Device1g,
+    command: string,
+    endpointNumber: EndpointNumber | undefined,
+    state: boolean,
+  ): boolean {
     if (!endpointNumber) {
       this.log.error('shellyCommandHandler error: endpointNumber undefined');
       return false;
@@ -368,14 +383,22 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       return false;
     }
     cluster?.setOnOffAttribute(true);
-    const shellyDevice = this.shellies?.get(matterbridgeDevice.serialNumber!);
-    const switchComponent = shellyDevice?.getComponent(endpointName) as Switch;
-    switchComponent?.set(state);
-    if (this.shellies && shellyDevice && switchComponent)
-      this.log.info(`Command ${command} for endpoint ${or}${endpointNumber}${nf} attribute ${hk}${cluster.name}-onOff${nf} for shelly device ${dn}${shellyDevice.id}${nf}`);
+    if (!(shellyDevice instanceof Device)) {
+      sendCommand(shellyDevice.host, endpointName.startsWith('switch') ? 'light' : 'relay', 0, state ? 'turn=on' : 'turn=off'); // Dimmer switch->light relay->relay
+    }
+    if (shellyDevice instanceof Device) {
+      const switchComponent = shellyDevice?.getComponent(endpointName) as Switch;
+      switchComponent?.set(state);
+    }
+    if (this.shellies && shellyDevice)
+      this.log.info(
+        `Command ${command} for endpoint ${or}${endpointNumber}${nf} attribute ${hk}${cluster.name}-onOff${nf} ` +
+          `for shelly device ${dn}${shellyDevice.id}${nf} component ${endpointName}${nf}`,
+      );
     else
       this.log.error(
-        `Failed to send ${command} command for endpoint ${or}${endpointNumber}${nf} attribute ${hk}${cluster.name}-onOff${nf} for shelly device ${dn}${shellyDevice?.id}${nf}`,
+        `Failed to send ${command} command for endpoint ${or}${endpointNumber}${nf} attribute ${hk}${cluster.name}-onOff${nf} ` +
+          `for shelly device ${dn}${shellyDevice?.id}${nf} component ${endpointName}${nf}`,
       );
     return true;
   }
@@ -510,6 +533,27 @@ export class ConfigDeviceDiscoverer extends DeviceDiscoverer {
         this.handleDiscoveredDevice({ deviceId: key, hostname: value as string });
       }
     });
+  }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+async function sendCommand(hostname: string, service: string, index: number, command: string): Promise<unknown | null> {
+  try {
+    // Replace the URL with your target URL
+    const response = await fetch(`http://${hostname}/${service}/${index}?${command}`);
+    if (!response.ok) {
+      // eslint-disable-next-line no-console
+      console.error('Error fetching shelly:');
+      return null;
+    }
+    const data = await response.json();
+    // eslint-disable-next-line no-console
+    // console.log(data);
+    return data;
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error('Error fetching shelly:', error);
+    return null;
   }
 }
 
