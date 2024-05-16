@@ -20,7 +20,7 @@ export class CoapScanner {
   private _isScanning = false;
   private scannerTimeout?: NodeJS.Timeout;
 
-  private callback?: (id: string, host: string, gen: number) => void;
+  private callback?: (msg: IncomingMessage) => void;
 
   constructor() {
     this.log = new AnsiLogger({ logName: 'mdnsShellyDiscover', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: true });
@@ -198,6 +198,7 @@ export class CoapScanner {
       multicastAddress: COAP_MULTICAST_ADDRESS,
     });
 
+    /*
     // 192.168.1.189:5683
     // insert our own middleware right before requests are handled (the last step)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -211,12 +212,14 @@ export class CoapScanner {
       }
       next();
     });
+    */
 
     this.coapServer.on('request', (msg: IncomingMessage, res: OutgoingMessage) => {
       this.log.warn(`Server got a messagge code ${msg.code} url ${msg.url} rsinfo ${debugStringify(msg.rsinfo)}...`);
       if (msg.code === '0.30' && msg.url === '/cit/s') {
         this.log.warn('Parsing device status update ...');
         this.parseShellyMessage(msg);
+        this.callback && this.callback(msg);
       } else {
         console.log(msg);
       }
@@ -231,16 +234,35 @@ export class CoapScanner {
     });
   }
 
+  getInterfaceAddress() {
+    let INTERFACE = 'Not found';
+    const networkInterfaces = os.networkInterfaces();
+    // console.log('Available Network Interfaces:', networkInterfaces);
+    for (const interfaceDetails of Object.values(networkInterfaces)) {
+      if (!interfaceDetails) {
+        break;
+      }
+      for (const detail of interfaceDetails) {
+        if (detail.family === 'IPv4' && !detail.internal && INTERFACE === 'Not found') {
+          INTERFACE = detail.address;
+        }
+      }
+      // Break if both addresses are found to improve efficiency
+      if (INTERFACE !== 'Not found') {
+        break;
+      }
+    }
+    console.log('Selected Network Interfaces:', INTERFACE);
+    return INTERFACE;
+  }
+
   startDgramServer() {
+    this.log.info('Starting CoIoT multicast receiver...');
     const MULTICAST_ADDRESS = '224.0.1.187';
     const PORT = 5683;
-    const INTERFACE = '192.168.1.213';
+    const INTERFACE = this.getInterfaceAddress();
 
     const socket = dgram.createSocket({ type: 'udp4', reuseAddr: true });
-
-    // Log available network interfaces
-    const interfaces = os.networkInterfaces();
-    console.log('Available Network Interfaces:', interfaces);
 
     socket.on('error', (err) => {
       console.error(`Socket error:\n${err.stack}`);
@@ -261,7 +283,6 @@ export class CoapScanner {
     socket.bind(PORT, INTERFACE, () => {
       socket.setBroadcast(true);
       socket.setMulticastTTL(128);
-      //socket.addMembership(MULTICAST_ADDRESS);
       console.log(`Joined multicast group: ${MULTICAST_ADDRESS}`);
     });
   }
@@ -270,7 +291,7 @@ export class CoapScanner {
     this.log.info('Starting CoIoT multicast sender...');
     const MULTICAST_ADDRESS = '224.0.1.187';
     const PORT = 5683;
-    const INTERFACE = '192.168.1.213';
+    const INTERFACE = this.getInterfaceAddress();
 
     const message = Buffer.from('Test multicast message');
 
@@ -292,7 +313,7 @@ export class CoapScanner {
     });
   }
 
-  start(callback?: (id: string, host: string, gen: number) => void, timeout?: number) {
+  start(callback?: (msg: IncomingMessage) => void, timeout?: number) {
     this.log.info('Starting CoIoT service for shelly devices...');
     this._isScanning = true;
     this.callback = callback;
@@ -303,10 +324,10 @@ export class CoapScanner {
     }
     //this.getDeviceDescription('192.168.1.219');
     //this.getDeviceStatus('192.168.1.219');
-    //this.getMulticastDeviceStatus();
-    //this.listenForStatusUpdates();
-    if (process.argv.includes('receiver')) this.startDgramServer();
-    if (process.argv.includes('sender')) this.startDgramSender();
+    this.getMulticastDeviceStatus();
+    this.listenForStatusUpdates();
+    // if (process.argv.includes('receiver')) this.startDgramServer();
+    // if (process.argv.includes('sender')) this.startDgramSender();
 
     this.log.info('Started CoIoT service for shelly devices.');
   }
@@ -330,11 +351,18 @@ export class CoapScanner {
   }
 }
 
-const coapScanner = new CoapScanner();
-coapScanner.start();
+if (process.argv.includes('coapServer') || process.argv.includes('coapSender') || process.argv.includes('coapReceiver')) {
+  const coapScanner = new CoapScanner();
 
-process.on('SIGINT', async function () {
-  coapScanner.stop();
-  coapScanner.logPeripheral();
-  process.exit();
-});
+  if (process.argv.includes('coapReceiver')) coapScanner.startDgramServer();
+
+  if (process.argv.includes('coapSender')) coapScanner.startDgramSender();
+
+  if (process.argv.includes('coapServer')) coapScanner.start();
+
+  process.on('SIGINT', async function () {
+    coapScanner.stop();
+    coapScanner.logPeripheral();
+    process.exit();
+  });
+}

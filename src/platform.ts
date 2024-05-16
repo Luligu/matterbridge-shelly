@@ -3,6 +3,9 @@ import { Matterbridge, MatterbridgeDevice, MatterbridgeDynamicPlatform } from 'm
 import { AnsiLogger, db, debugStringify, dn, hk, idn, nf, or, rs, wr, zb } from 'node-ansi-logger';
 import { NodeStorage, NodeStorageManager } from 'node-persist-manager';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { CoapScanner } from './coapScanner.js';
+
 // Shellyies gen 1
 import shellies1g, { Device as Device1g } from 'shellies';
 
@@ -273,6 +276,13 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       this.log.error('An error occurred in the config device discovery service:', error.message);
       this.log.debug(error.stack || '');
     });
+
+    /*
+    const scanner = new CoapScanner();
+    scanner.start((msg) => {
+      this.log.info('CoAP message:', msg.code);
+    });
+    */
 
     // start discovering devices
     this.log.info('Discovering Shellies...');
