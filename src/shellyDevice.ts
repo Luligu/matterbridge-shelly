@@ -13,10 +13,14 @@ export type ShellyDataType = string | number | boolean | null | undefined | obje
 
 export class ShellyProperty {
   key: string;
-  value: ShellyDataType;
+  _value: ShellyDataType;
   constructor(readonly key: string, value: ShellyDataType) {
     this.key = key;
-    this.value = value;
+    this._value = value;
+  }
+  
+  get value(): string {
+    return this._value;
   }
 }
 
