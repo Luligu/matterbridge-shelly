@@ -34,7 +34,7 @@ export class ShellyComponent {
   getProperty(key: string): ShellyProperty | undefined {
     return this.properties.get(key);
   }
-  addProperty(property: ShellyProperty) {
+  addProperty(property: ShellyProperty): ShellyComponent {
     this.properties.set(property.key, property);
     return this;
   }
