@@ -14,7 +14,7 @@ export type ShellyDataType = string | number | boolean | null | undefined | obje
 export class ShellyProperty {
   key: string;
   value: ShellyDataType;
-  constructor(key: string, value: ShellyDataType) {
+  constructor(readonly key: string, value: ShellyDataType) {
     this.key = key;
     this.value = value;
   }
@@ -31,14 +31,15 @@ export class ShellyComponent {
     return this.properties.get(key);
   }
   addProperty(property: ShellyProperty) {
-    return this.properties.set(property.key, property);
+    this.properties.set(property.key, property);
+    return this;
   }
   *[Symbol.iterator](): IterableIterator<[string, ShellyProperty]> {
     for (const [key, property] of this.properties.entries()) {
       yield [key, property];
     }
   }
-  constructor(key: string, name: string) {
+  constructor(readonly key: string, name: string) {
     this.key = key;
     this.name = name;
   }
