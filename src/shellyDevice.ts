@@ -19,7 +19,7 @@ export class ShellyProperty {
     this._value = value;
   }
   
-  get value(): string {
+  get value(): ShellyDataType {
     return this._value;
   }
 }
