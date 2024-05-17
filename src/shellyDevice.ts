@@ -5,14 +5,16 @@ import { EventEmitter } from 'events';
 import { promises as fs } from 'fs';
 import fetch from 'node-fetch';
 
-type ShellyData = {
-  [key: string]: string | number | boolean | null | undefined | object;
+export type ShellyData = {
+  [key: string]: ShellyDataType;
 };
+
+export type ShellyDataType = string | number | boolean | null | undefined | object;
 
 export class ShellyProperty {
   key: string;
-  value: string;
-  constructor(key: string, value: string) {
+  value: ShellyDataType;
+  constructor(key: string, value: ShellyDataType) {
     this.key = key;
     this.value = value;
   }
