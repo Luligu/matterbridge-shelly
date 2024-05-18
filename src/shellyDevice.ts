@@ -1,13 +1,13 @@
 /* eslint-disable no-console */
-/* eslint-disable @typescript-eslint/no-unused-vars */
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { AnsiLogger, TimestampFormat, db, debugStringify, dn, hk, idn, nf, or, rs, wr, zb } from 'node-ansi-logger';
 import { EventEmitter } from 'events';
 import { promises as fs } from 'fs';
-//import { default as fetch } from 'node-fetch';
 import fetch from 'node-fetch';
 
 export type ShellyData = {
-  [key: string]: ShellyDataType;
+  [key: string]: ShellyDataType
 };
 
 export type ShellyDataType = string | number | boolean | null | undefined | object;
@@ -58,9 +58,9 @@ export class ShellyComponent {
       yield [key, property];
     }
   }
-  //device: Device;
-  //update(data: Record<string, unknown>);
-  //handleEvent(event: RpcEvent);
+  // device: Device;
+  // update(data: Record<string, unknown>);
+  // handleEvent(event: RpcEvent);
 }
 
 export class ShellyDevice extends EventEmitter {
@@ -111,7 +111,7 @@ export class ShellyDevice extends EventEmitter {
       log.error(`Error creating device from host ${host}. No shelly data found.`);
       return undefined;
     }
-    //console.log('Shelly:', shelly);
+    // console.log('Shelly:', shelly);
 
     const device = new ShellyDevice(log, host.replace('mock.', ''));
     device.mac = shelly.mac as string;
@@ -162,19 +162,19 @@ export class ShellyDevice extends EventEmitter {
       for (const key in settings) {
         if (key === 'wifi') {
           const wifi = settings[key] as ShellyData;
-          if (wifi.ap) device.addComponent(new ShellyComponent('wifi_ap', 'WiFi')); //Ok
-          if (wifi.sta) device.addComponent(new ShellyComponent('wifi_sta', 'WiFi')); //Ok
-          if (wifi.sta1) device.addComponent(new ShellyComponent('wifi_sta1', 'WiFi')); //Ok
+          if (wifi.ap) device.addComponent(new ShellyComponent('wifi_ap', 'WiFi')); // Ok
+          if (wifi.sta) device.addComponent(new ShellyComponent('wifi_sta', 'WiFi')); // Ok
+          if (wifi.sta1) device.addComponent(new ShellyComponent('wifi_sta1', 'WiFi')); // Ok
         }
         if (key === 'sys') {
           const sys = settings[key] as ShellyData;
           if (sys.sntp) {
-            device.addComponent(new ShellyComponent('sntp', 'Sntp')); //Ok
+            device.addComponent(new ShellyComponent('sntp', 'Sntp')); // Ok
             const dev = sys.device as ShellyData;
             device.name = dev.name as string;
           }
         }
-        if (key === 'mqtt') device.addComponent(new ShellyComponent(key, 'MQTT')); //Ok
+        if (key === 'mqtt') device.addComponent(new ShellyComponent(key, 'MQTT')); // Ok
         if (key === 'ws') device.addComponent(new ShellyComponent(key, 'WebSocket')); // Ok
         if (key === 'cloud') device.addComponent(new ShellyComponent(key, 'Cloud')); // Ok
         if (key.startsWith('switch:')) {
@@ -205,7 +205,8 @@ export class ShellyDevice extends EventEmitter {
       const data = await response.json();
       // console.log(data);
       return data as ShellyData;
-    } catch (error) {
+    }
+    catch (error) {
       console.error(`Error fetching shelly ${url}:`, error);
       return null;
     }
@@ -216,16 +217,15 @@ export class ShellyDevice extends EventEmitter {
       // Replace the URL with your target URL
       const response = await fetch(`http://${hostname}/${component}/${index}?${command}`);
       if (!response.ok) {
-        // eslint-disable-next-line no-console
         console.error('Error fetching shelly:');
         return null;
       }
       const data = await response.json();
-      // eslint-disable-next-line no-console
+
       // console.log(data);
       return data;
-    } catch (error) {
-      // eslint-disable-next-line no-console
+    }
+    catch (error) {
       console.error('Error fetching shelly:', error);
       return null;
     }

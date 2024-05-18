@@ -168,13 +168,12 @@ export class NobleBleClient {
       return;
     }
     //}
-    
+
     //const matterServiceData = peripheral.advertisement.serviceData.find((serviceData) => serviceData.uuid === BLE_SHELLY_SERVICE_UUID);
     //if (matterServiceData === undefined || matterServiceData.data.length !== 8) {
     //  this.log.info(`Peripheral ${peripheral.address} does not advertise Shelly Service ... ignoring`);
     //  return;
     //}
-    
 
     if (!this.discoveredPeripherals.has(peripheral.address)) {
       this.log.warn(`Exploring peripheral ${peripheral.address} and adding to discovered devices ...`);

@@ -1,11 +1,10 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable no-console */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { AnsiLogger, BLUE, BRIGHT, CYAN, GREEN, TimestampFormat, db, debugStringify, dn, hk, idn, nf, rs, wr, zb } from 'node-ansi-logger';
-
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import mdns, { ResponsePacket, QueryPacket } from 'multicast-dns';
 
 export class MdnsScanner {
-  private discoveredPeripherals = new Map<string, { id: string; host: string; gen: number }>();
+  private discoveredPeripherals = new Map<string, { id: string, host: string, gen: number }>();
   private log;
   private scanner?: mdns.MulticastDNS;
   private _isScanning = false;

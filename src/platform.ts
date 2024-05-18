@@ -3,7 +3,6 @@ import { Matterbridge, MatterbridgeDevice, MatterbridgeDynamicPlatform } from 'm
 import { AnsiLogger, db, debugStringify, dn, hk, idn, nf, or, rs, wr, zb } from 'node-ansi-logger';
 import { NodeStorage, NodeStorageManager } from 'node-persist-manager';
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { CoapMessage, CoapServer } from './coapScanner.js';
 
 // Shellyies gen 1
@@ -18,15 +17,15 @@ import fetch from 'node-fetch';
 import { MdnsScanner } from './mdnsScanner.js';
 
 type ConfigDeviceIp = {
-  [key: string]: string;
+  [key: string]: string
 };
 
 // Shelly device map
 type ShellyDeviceId = string;
 
 interface ShellyDevice {
-  id: ShellyDeviceId; // ID: shellyplus1pm-441793d69718
-  hostname: string; // IP address: 192.168.1.xxx
+  id: ShellyDeviceId, // ID: shellyplus1pm-441793d69718
+  hostname: string // IP address: 192.168.1.xxx
 }
 
 export class ShellyPlatform extends MatterbridgeDynamicPlatform {
@@ -64,12 +63,12 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     // Use Shelly gen 1 client
     this.shellies1g.on('add', async (device: Device1g) => {
       this.log.info(`Shellies gen 1 added device with ID ${idn}${device.id}${rs}${nf}, host ${device.host} and type ${device.type}`);
-      // eslint-disable-next-line no-console
+
       // console.log('Device:', device);
       this.log.info(`- macAddress: ${device.id}`);
       this.log.info(`- host: ${device.host}`);
-      //this.log.info(`- status: ${debugStringify(await device.getStatus())}`);
-      //this.log.info(`- settings: ${debugStringify(await device.getSettings())}`);
+      // this.log.info(`- status: ${debugStringify(await device.getStatus())}`);
+      // this.log.info(`- settings: ${debugStringify(await device.getSettings())}`);
       this.log.info('- properties:');
       for (const [property, value] of device) {
         this.log.info(`  - ${property}: ${value}`);
@@ -82,7 +81,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       switchDevice.createDefaultPowerSourceWiredClusterServer(PowerSource.WiredCurrentType.Ac);
 
       for (const [property, value] of device) {
-        //this.log.info(`  - ${property}: ${value}`);
+        // this.log.info(`  - ${property}: ${value}`);
         if (property.startsWith('switch') || property.startsWith('relay')) {
           // Add a child enpoint for each switch
           const child = switchDevice.addChildDeviceTypeWithClusterServer(property, [onOffSwitch], [OnOff.Complete.id]);
@@ -128,7 +127,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       for (const [key, component] of device) {
         this.log.info(`  - ${component.name} (${key})`);
       }
-      // eslint-disable-next-line no-console
+
       // console.log('Device:', device);
 
       // Create a new Matterbridge device for the switch
@@ -174,7 +173,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             switchDevice.addCommandHandler('off', async (data) => {
               this.shellySwitchCommandHandler(switchDevice, device, 'off', data.endpoint.number, false);
             });
-          } else {
+          }
+          else {
             this.log.error('Failed to retrieve Switch component');
           }
           switchDevice.addFixedLabel('composed', component.name);
@@ -308,8 +308,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     value: CharacteristicValue,
   ): boolean {
     this.log.info(
-      `${db}Shelly message for device ${idn}${shellyDevice.id}${rs}${db} ${hk}${switchId}${db} ` +
-        `${zb}${characteristic}${db}:${typeof value === 'object' ? debugStringify(value as object) : value}${rs}`,
+      `${db}Shelly message for device ${idn}${shellyDevice.id}${rs}${db} ${hk}${switchId}${db} `
+      + `${zb}${characteristic}${db}:${typeof value === 'object' ? debugStringify(value as object) : value}${rs}`,
     );
     if (!(shellyDevice instanceof Device) && !(characteristic.startsWith('switch') || characteristic.startsWith('relay'))) {
       return false;
@@ -335,11 +335,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           return false;
         }
         cluster.setOnOffAttribute(value as boolean);
-        this.log.info(
-          // eslint-disable-next-line max-len
-          `${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}OnOff-onOff${db} for device ${dn}${shellyDevice.id}${db} ${hk}${switchId}${db} ${zb}${characteristic}${db}:${rs}`,
-          value,
-        );
+        this.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}OnOff-onOff${db} for device ${dn}${shellyDevice.id}${db}`
+          + ` ${hk}${switchId}${db} ${zb}${characteristic}${db}:${rs}`, value);
         return true;
       }
     }
@@ -392,23 +389,23 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     }
     if (this.shellies && shellyDevice)
       this.log.info(
-        `Command ${command} for endpoint ${or}${endpointNumber}${nf} attribute ${hk}${cluster.name}-onOff${nf} ` +
-          `for shelly device ${dn}${shellyDevice.id}${nf} component ${endpointName}${nf}`,
+        `Command ${command} for endpoint ${or}${endpointNumber}${nf} attribute ${hk}${cluster.name}-onOff${nf} `
+        + `for shelly device ${dn}${shellyDevice.id}${nf} component ${endpointName}${nf}`,
       );
     else
       this.log.error(
-        `Failed to send ${command} command for endpoint ${or}${endpointNumber}${nf} attribute ${hk}${cluster.name}-onOff${nf} ` +
-          `for shelly device ${dn}${shellyDevice?.id}${nf} component ${endpointName}${nf}`,
+        `Failed to send ${command} command for endpoint ${or}${endpointNumber}${nf} attribute ${hk}${cluster.name}-onOff${nf} `
+        + `for shelly device ${dn}${shellyDevice?.id}${nf} component ${endpointName}${nf}`,
       );
     return true;
   }
 
   private validateWhiteBlackList(entityName: string) {
-    if (this.whiteList.length > 0 && !this.whiteList.find((name) => name === entityName)) {
+    if (this.whiteList.length > 0 && !this.whiteList.find(name => name === entityName)) {
       this.log.warn(`Skipping ${dn}${entityName}${wr} because not in whitelist`);
       return false;
     }
-    if (this.blackList.length > 0 && this.blackList.find((name) => name === entityName)) {
+    if (this.blackList.length > 0 && this.blackList.find(name => name === entityName)) {
       this.log.warn(`Skipping ${dn}${entityName}${wr} because in blacklist`);
       return false;
     }
@@ -435,7 +432,7 @@ export class MdnsDeviceDiscoverer extends DeviceDiscoverer {
       async (id: string, host: string, gen: number) => {
         // We get id: shellydimmer2-98CDAC0D01BB host: 192.168.1.219 gen:1
         // We get id: shellyplus1pm-441793d69718 host: 192.168.1.217 gen:2
-        const shellyData = (await getShelly(host)) as { type: string; model: string; mac: string };
+        const shellyData = (await getShelly(host)) as { type: string, model: string, mac: string };
         // eslint-disable-next-line no-console
         if (shellyData) console.log(shellyData);
         if (gen === 1) {
@@ -482,7 +479,7 @@ export class StorageDeviceDiscoverer extends DeviceDiscoverer {
     const shellyDevices = await this.nodeStorage.get<ShellyDevice[]>('DeviceIdentifiers', []);
     shellyDevices.forEach(async (device) => {
       this.log.info(`${nf}StorageDeviceDiscoverer deviceId: ${hk}${device.id}${nf} hostname: ${zb}${device.hostname}${nf}`);
-      const shellyData = (await getShelly(device.hostname)) as { type: string; model: string; mac: string; gen: number };
+      const shellyData = (await getShelly(device.hostname)) as { type: string, model: string, mac: string, gen: number };
       // eslint-disable-next-line no-console
       if (shellyData) console.log(shellyData);
       if (!shellyData) {
@@ -516,7 +513,7 @@ export class ConfigDeviceDiscoverer extends DeviceDiscoverer {
     if (!this.config.deviceIp) return;
     Object.entries(this.config.deviceIp as Record<string, PlatformConfigValue>).forEach(async ([key, value]) => {
       this.log.info(`${nf}ConfigDeviceDiscoverer deviceId: ${hk}${key}${nf} hostname: ${zb}${value}${nf}`);
-      const shellyData = (await getShelly(value as string)) as { type: string; model: string; mac: string; gen: number };
+      const shellyData = (await getShelly(value as string)) as { type: string, model: string, mac: string, gen: number };
       // eslint-disable-next-line no-console
       if (shellyData) console.log(shellyData);
       if (!shellyData) {
@@ -536,7 +533,6 @@ export class ConfigDeviceDiscoverer extends DeviceDiscoverer {
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function sendCommand(hostname: string, service: string, index: number, command: string): Promise<unknown | null> {
   try {
     // Replace the URL with your target URL
@@ -547,17 +543,17 @@ async function sendCommand(hostname: string, service: string, index: number, com
       return null;
     }
     const data = await response.json();
-    // eslint-disable-next-line no-console
+
     // console.log(data);
     return data;
-  } catch (error) {
+  }
+  catch (error) {
     // eslint-disable-next-line no-console
     console.error('Error fetching shelly:', error);
     return null;
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function getShelly(hostname: string): Promise<unknown | null> {
   try {
     // Replace the URL with your target URL
@@ -568,10 +564,11 @@ async function getShelly(hostname: string): Promise<unknown | null> {
       return null;
     }
     const data = await response.json();
-    // eslint-disable-next-line no-console
+
     // console.log(data);
     return data;
-  } catch (error) {
+  }
+  catch (error) {
     // eslint-disable-next-line no-console
     console.error('Error fetching shelly:', error);
     return null;
@@ -589,10 +586,11 @@ async function getSettings(hostname: string): Promise<unknown | null> {
       return null;
     }
     const data = await response.json();
-    // eslint-disable-next-line no-console
+
     // console.log(data);
     return data;
-  } catch (error) {
+  }
+  catch (error) {
     // eslint-disable-next-line no-console
     console.error('Error fetching settings:', error);
     return null;
@@ -610,10 +608,11 @@ async function getStatus(hostname: string): Promise<unknown | null> {
       return null;
     }
     const data = await response.json();
-    // eslint-disable-next-line no-console
+
     // console.log(data);
     return data;
-  } catch (error) {
+  }
+  catch (error) {
     // eslint-disable-next-line no-console
     console.error('Error fetching status:', error);
     return null;

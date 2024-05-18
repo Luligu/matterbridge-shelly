@@ -5,26 +5,26 @@ import { ShellyDevice, ShellyComponent, ShellyProperty, ShellyDataType, ShellyDa
 import { AnsiLogger, TimestampFormat, db, debugStringify, dn, hk, idn, nf, or, rs, wr, zb } from 'node-ansi-logger';
 import exp from 'constants';
 
-//jest.mock('node-fetch', () => jest.fn());
-//jest.unstable_mockModule('node-fetch', () => {
-//const fetch = jest.fn();
+// jest.mock('node-fetch', () => jest.fn());
+// jest.unstable_mockModule('node-fetch', () => {
+// const fetch = jest.fn();
 // );
 // const { fetch } = await import('node-fetch');
 
 describe('Shellies', () => {
   const log = new AnsiLogger({ logName: 'shellyDeviceTest', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: true });
 
-  beforeAll(() => {});
+  beforeAll(() => { });
 
   beforeEach(() => {
-    //(fetch as jest.Mock).mockClear();
+    // (fetch as jest.Mock).mockClear();
   });
 
   afterEach(() => {
-    //jest.clearAllMocks();
+    // jest.clearAllMocks();
   });
 
-  afterAll(() => {});
+  afterAll(() => { });
 
   /*
   describe('new not existing ShellyDevice()', () => {

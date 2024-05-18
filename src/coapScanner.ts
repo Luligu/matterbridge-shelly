@@ -14,15 +14,15 @@ const COAP_MULTICAST_ADDRESS = '224.0.1.187';
 
 export interface CoapMessage {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  msg: any;
-  host: string;
-  deviceType: string;
-  deviceId: string;
-  protocolRevision: string;
-  validFor: number;
-  serial: number;
+  msg: any,
+  host: string,
+  deviceType: string,
+  deviceId: string,
+  protocolRevision: string,
+  validFor: number,
+  serial: number,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  payload: any;
+  payload: any
 }
 
 export class CoapServer {
@@ -121,7 +121,7 @@ export class CoapServer {
         // Handle null or incompatible types explicitly
         throw new TypeError('Expected a string for GLOBAL_DEVID');
       },
-      (buf) => buf.toString(),
+      buf => buf.toString(),
     );
 
     coap.registerOption(
@@ -138,7 +138,7 @@ export class CoapServer {
         // Handle null or non-string types explicitly
         throw new TypeError('Expected a string for STATUS_VALIDITY');
       },
-      (buf) => buf.readUInt16BE(0),
+      buf => buf.readUInt16BE(0),
     );
 
     coap.registerOption(
@@ -155,7 +155,7 @@ export class CoapServer {
         // Handle null or non-string types explicitly
         throw new TypeError('Expected a string for STATUS_SERIAL');
       },
-      (buf) => buf.readUInt16BE(0),
+      buf => buf.readUInt16BE(0),
     );
   }
 
@@ -182,7 +182,8 @@ export class CoapServer {
       const validity = headers[COIOT_OPTION_STATUS_VALIDITY];
       if ((validity & 0x1) === 0) {
         validFor = Math.floor(validity / 10);
-      } else {
+      }
+      else {
         validFor = validity * 4;
       }
     }
@@ -193,7 +194,8 @@ export class CoapServer {
 
     try {
       payload = JSON.parse(msg.payload.toString());
-    } catch (e) {
+    }
+    catch (e) {
       payload = msg.payload.toString();
     }
     /*
@@ -235,7 +237,8 @@ export class CoapServer {
         this.log.warn('Parsing coap message...');
         const coapMessage = this.parseShellyMessage(msg);
         this.callback && this.callback(coapMessage);
-      } else {
+      }
+      else {
         console.log(msg);
       }
     });
@@ -243,7 +246,8 @@ export class CoapServer {
     this.coapServer.listen((err) => {
       if (err) {
         this.log.warn('Error while listening ...', err);
-      } else {
+      }
+      else {
         this.log.info('Server is listening ...');
       }
     });
@@ -320,7 +324,8 @@ export class CoapServer {
         client.send(message, 0, message.length, PORT, MULTICAST_ADDRESS, (err) => {
           if (err) {
             console.error(`Failed to send message: ${err.stack}`);
-          } else {
+          }
+          else {
             console.log(`Message sent to ${MULTICAST_ADDRESS}:${PORT}`);
           }
         });
@@ -337,9 +342,9 @@ export class CoapServer {
         this.stop();
       }, timeout * 1000);
     }
-    //this.getDeviceDescription('192.168.1.219');
-    //this.getDeviceStatus('192.168.1.219');
-    //this.getMulticastDeviceStatus();
+    // this.getDeviceDescription('192.168.1.219');
+    // this.getDeviceStatus('192.168.1.219');
+    // this.getMulticastDeviceStatus();
     this.listenForStatusUpdates();
     // if (process.argv.includes('receiver')) this.startDgramServer();
     // if (process.argv.includes('sender')) this.startDgramSender();
