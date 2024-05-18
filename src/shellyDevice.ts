@@ -3,6 +3,7 @@
 import { AnsiLogger, TimestampFormat, db, debugStringify, dn, hk, idn, nf, or, rs, wr, zb } from 'node-ansi-logger';
 import { EventEmitter } from 'events';
 import { promises as fs } from 'fs';
+//import { default as fetch } from 'node-fetch';
 import fetch from 'node-fetch';
 
 export type ShellyData = {
@@ -12,40 +13,50 @@ export type ShellyData = {
 export type ShellyDataType = string | number | boolean | null | undefined | object;
 
 export class ShellyProperty {
-  key: string;
-  _value: ShellyDataType;
-  constructor(readonly key: string, value: ShellyDataType) {
+  readonly key: string;
+  private readonly _value: ShellyDataType;
+
+  constructor(key: string, value: ShellyDataType) {
     this.key = key;
     this._value = value;
   }
-  
+
   get value(): ShellyDataType {
     return this._value;
   }
 }
 
 export class ShellyComponent {
-  key: string;
-  name: string;
-  properties = new Map<string, ShellyProperty>();
+  readonly id: string;
+  readonly name: string;
+  private readonly _properties = new Map<string, ShellyProperty>();
+
+  constructor(id: string, name: string) {
+    this.id = id;
+    this.name = name;
+  }
+
   hasProperty(key: string): boolean {
-    return this.properties.has(key);
+    return this._properties.has(key);
   }
+
   getProperty(key: string): ShellyProperty | undefined {
-    return this.properties.get(key);
+    return this._properties.get(key);
   }
+
   addProperty(property: ShellyProperty): ShellyComponent {
-    this.properties.set(property.key, property);
+    this._properties.set(property.key, property);
     return this;
   }
+
+  get properties(): ShellyProperty[] {
+    return Array.from(this._properties.values());
+  }
+
   *[Symbol.iterator](): IterableIterator<[string, ShellyProperty]> {
-    for (const [key, property] of this.properties.entries()) {
+    for (const [key, property] of this._properties.entries()) {
       yield [key, property];
     }
-  }
-  constructor(readonly key: string, name: string) {
-    this.key = key;
-    this.name = name;
   }
   //device: Device;
   //update(data: Record<string, unknown>);
@@ -60,30 +71,10 @@ export class ShellyDevice extends EventEmitter {
   mac = '';
   firmware = '';
   auth = false;
-
   name = '';
   online = false;
 
-  private components = new Map<string, ShellyComponent>();
-
-  hasComponent(key: string): boolean {
-    return this.components.has(key);
-  }
-
-  getComponent(key: string): ShellyComponent | undefined {
-    return this.components.get(key);
-  }
-
-  addComponent(component: ShellyComponent) {
-    this.components.set(component.key, component);
-    return component;
-  }
-
-  *[Symbol.iterator](): IterableIterator<[string, ShellyComponent]> {
-    for (const [key, component] of this.components.entries()) {
-      yield [key, component];
-    }
-  }
+  private readonly _components = new Map<string, ShellyComponent>();
 
   constructor(log: AnsiLogger, host: string) {
     super();
@@ -91,23 +82,51 @@ export class ShellyDevice extends EventEmitter {
     this.host = host;
   }
 
-  static async create(log: AnsiLogger, host: string): Promise<ShellyDevice | null> {
-    const shelly = await ShellyDevice.getShelly(host);
-    if (!shelly) return null;
-    console.log('Shelly:', shelly);
+  hasComponent(id: string): boolean {
+    return this._components.has(id);
+  }
 
-    const device = new ShellyDevice(log, host);
+  getComponent(id: string): ShellyComponent | undefined {
+    return this._components.get(id);
+  }
+
+  addComponent(component: ShellyComponent): ShellyComponent {
+    this._components.set(component.id, component);
+    return component;
+  }
+
+  get components(): ShellyComponent[] {
+    return Array.from(this._components.values());
+  }
+
+  *[Symbol.iterator](): IterableIterator<[string, ShellyComponent]> {
+    for (const [key, component] of this._components.entries()) {
+      yield [key, component];
+    }
+  }
+
+  static async create(log: AnsiLogger, host: string): Promise<ShellyDevice | undefined> {
+    const shelly = await ShellyDevice.getShelly(host);
+    if (!shelly) {
+      log.error(`Error creating device from host ${host}. No shelly data found.`);
+      return undefined;
+    }
+    //console.log('Shelly:', shelly);
+
+    const device = new ShellyDevice(log, host.replace('mock.', ''));
     device.mac = shelly.mac as string;
+    // Gen 1 Shelly device
     if (!shelly.gen) {
       const settings = await ShellyDevice.getShelly(host, 'settings');
-      if (!settings) return null;
+      if (!settings) {
+        log.error(`Error creating device gen 1 from host ${host}. No settings data found.`);
+        return undefined;
+      }
       device.model = shelly.type as string;
       device.id = (settings.device as ShellyData).hostname as string;
       device.firmware = (shelly.fw as string).split('/')[1];
       device.auth = shelly.auth as boolean;
       device.name = settings.name as string;
-
-      //device.addComponent(new ShellyComponent('wifi_ap', 'WiFi'));
       for (const key in settings) {
         if (key === 'wifi_ap') device.addComponent(new ShellyComponent(key, 'WiFi'));
         if (key === 'wifi_sta') device.addComponent(new ShellyComponent(key, 'WiFi'));
@@ -129,9 +148,13 @@ export class ShellyDevice extends EventEmitter {
         }
       }
     }
+    // Gen 2 Shelly device
     if (shelly.gen === 2) {
       const settings = await ShellyDevice.getShelly(host, 'rpc/Shelly.GetConfig');
-      if (!settings) return null;
+      if (!settings) {
+        log.error(`Error creating device gen 2 from host ${host}. No settings data found.`);
+        return undefined;
+      }
       device.model = shelly.model as string;
       device.id = shelly.id as string;
       device.firmware = (shelly.fw_id as string).split('/')[1];
@@ -167,25 +190,31 @@ export class ShellyDevice extends EventEmitter {
   }
 
   static async getShelly(host: string, service: string = 'shelly'): Promise<ShellyData | null> {
+    if (host.startsWith('mock.')) {
+      if (service === 'shelly') return shellyDimmerShelly;
+      if (service === 'status') return shellyDimmerStatus;
+      if (service === 'settings') return shellyDimmerSettings;
+    }
+    const url = `http://${host}/${service}`;
     try {
-      const response = await fetch(`http://${host}/${service}`);
+      const response = await fetch(url);
       if (!response.ok) {
-        console.error('Error fetching shelly:');
+        console.error(`Response not ok fetching shelly ${url}`, response);
         return null;
       }
       const data = await response.json();
       // console.log(data);
       return data as ShellyData;
     } catch (error) {
-      console.error('Error fetching shelly:', error);
+      console.error(`Error fetching shelly ${url}:`, error);
       return null;
     }
   }
 
-  static async sendCommand(hostname: string, service: string, index: number, command: string): Promise<unknown | null> {
+  async sendCommand(hostname: string, component: string, index: number, command: string): Promise<unknown | null> {
     try {
       // Replace the URL with your target URL
-      const response = await fetch(`http://${hostname}/${service}/${index}?${command}`);
+      const response = await fetch(`http://${hostname}/${component}/${index}?${command}`);
       if (!response.ok) {
         // eslint-disable-next-line no-console
         console.error('Error fetching shelly:');
@@ -214,14 +243,12 @@ export class ShellyDevice extends EventEmitter {
       });
   }
 }
-
+/*
 if (process.argv.includes('shelly')) {
   const log = new AnsiLogger({ logName: 'shellyDevice', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: true });
 
   let shelly = await ShellyDevice.create(log, '192.168.1.217');
   if (shelly) {
-    //const data = ShellyDevice.getShelly(shelly.host, 'settings');
-    //await shelly.writeFile(shelly.id, data);
     console.log('Shelly:', shelly);
     for (const [key, component] of shelly) {
       console.log(`  - ${component.name} (${key})`);
@@ -254,20 +281,21 @@ if (process.argv.includes('shelly')) {
   }
   //await ShellyDevice.sendCommand('192.168.1.219', 'light', 0, 'turn=on');
 }
+*/
 
-/* Sample output for host/shelly:
-Gen 1 Shelly Dimmer:
-{
-    "type": "SHDM-2",
-    "mac": "98CDAC0D01BB",
-    "auth": false,
-    "fw": "20230913-114008/v1.14.0-gcb84623",
-    "discoverable": false,
-    "longid": 1,
-    "num_inputs": 2,
-    "num_outputs": 1,
-    "num_meters": 1
-}
+// Sample output Gen 1 Shelly Dimmer for 192.168.1.219/shelly
+export const shellyDimmerShelly: ShellyData = {
+  type: 'SHDM-2',
+  mac: '98CDAC0D01BB',
+  auth: false,
+  fw: '20230913-114008/v1.14.0-gcb84623',
+  discoverable: false,
+  longid: 1,
+  num_inputs: 2,
+  num_outputs: 1,
+  num_meters: 1,
+};
+/*
 Gen 2 Shelly Plus 1PM:
 {
     "name": null,
@@ -298,253 +326,248 @@ Gen 2 Shelly Plus 2PM:
     "profile": "switch"
 }
 */
-/* Sample output for Gen 1 host/status:
-{
-  "wifi_sta": {
-      "connected": true,
-      "ssid": "FibreBox_X6-12A4C7",
-      "ip": "192.168.1.219",
-      "rssi": -49
+// Sample output Gen 1 Shelly Dimmer for 192.168.1.219/status
+export const shellyDimmerStatus: ShellyData = {
+  wifi_sta: {
+    connected: true,
+    ssid: 'FibreBox_X6-12A4C7',
+    ip: '192.168.1.219',
+    rssi: -49,
   },
-  "cloud": {
-      "enabled": true,
-      "connected": true
+  cloud: {
+    enabled: true,
+    connected: true,
   },
-  "mqtt": {
-      "connected": false
+  mqtt: {
+    connected: false,
   },
-  "time": "07:30",
-  "unixtime": 1715923841,
-  "serial": 2606,
-  "has_update": false,
-  "mac": "98CDAC0D01BB",
-  "cfg_changed_cnt": 2,
-  "actions_stats": {
-      "skipped": 0
+  time: '07:30',
+  unixtime: 1715923841,
+  serial: 2606,
+  has_update: false,
+  mac: '98CDAC0D01BB',
+  cfg_changed_cnt: 2,
+  actions_stats: {
+    skipped: 0,
   },
-  "lights": [
-      {
-          "ison": false,
-          "source": "http",
-          "has_timer": false,
-          "timer_started": 0,
-          "timer_duration": 0,
-          "timer_remaining": 0,
-          "mode": "white",
-          "brightness": 100,
-          "transition": 0
-      }
+  lights: [
+    {
+      ison: false,
+      source: 'http',
+      has_timer: false,
+      timer_started: 0,
+      timer_duration: 0,
+      timer_remaining: 0,
+      mode: 'white',
+      brightness: 100,
+      transition: 0,
+    },
   ],
-  "meters": [
-      {
-          "power": 0,
-          "overpower": 0,
-          "is_valid": true,
-          "timestamp": 1715931041,
-          "counters": [
-              0,
-              0,
-              0
-          ],
-          "total": 0
-      }
+  meters: [
+    {
+      power: 0,
+      overpower: 0,
+      is_valid: true,
+      timestamp: 1715931041,
+      counters: [0, 0, 0],
+      total: 0,
+    },
   ],
-  "inputs": [
-      {
-          "input": 0,
-          "event": "",
-          "event_cnt": 0
+  inputs: [
+    {
+      input: 0,
+      event: '',
+      event_cnt: 0,
+    },
+    {
+      input: 0,
+      event: '',
+      event_cnt: 0,
+    },
+  ],
+  tmp: {
+    tC: 48.68,
+    tF: 119.62,
+    is_valid: true,
+  },
+  calibrated: false,
+  calib_progress: 0,
+  calib_status: 0,
+  calib_running: 0,
+  wire_mode: 1,
+  forced_neutral: false,
+  overtemperature: false,
+  loaderror: 0,
+  overpower: false,
+  debug: 0,
+  update: {
+    status: 'idle',
+    has_update: false,
+    new_version: '20230913-114008/v1.14.0-gcb84623',
+    old_version: '20230913-114008/v1.14.0-gcb84623',
+    beta_version: '20231107-164738/v1.14.1-rc1-g0617c15',
+  },
+  ram_total: 49672,
+  ram_free: 36812,
+  fs_size: 233681,
+  fs_free: 119476,
+  uptime: 116135,
+};
+// Sample output for Gen 1 Shelly Dimmer for 192.168.1.219/settings:
+export const shellyDimmerSettings: ShellyData = {
+  device: {
+    type: 'SHDM-2',
+    mac: '98CDAC0D01BB',
+    hostname: 'shellydimmer2-98CDAC0D01BB',
+    num_inputs: 2,
+    num_outputs: 1,
+    num_meters: 1,
+  },
+  wifi_ap: {
+    enabled: false,
+    ssid: 'shellydimmer2-98CDAC0D01BB',
+    key: '',
+  },
+  wifi_sta: {
+    enabled: true,
+    ssid: 'FibreBox_X6-12A4C7',
+    ipv4_method: 'dhcp',
+    ip: null,
+    gw: null,
+    mask: null,
+    dns: null,
+  },
+  wifi_sta1: {
+    enabled: false,
+    ssid: null,
+    ipv4_method: 'dhcp',
+    ip: null,
+    gw: null,
+    mask: null,
+    dns: null,
+  },
+  ap_roaming: {
+    enabled: false,
+    threshold: -70,
+  },
+  mqtt: {
+    enable: false,
+    server: '192.168.33.3:1883',
+    user: '',
+    id: 'shellydimmer2-98CDAC0D01BB',
+    reconnect_timeout_max: 60,
+    reconnect_timeout_min: 2,
+    clean_session: true,
+    keep_alive: 60,
+    max_qos: 0,
+    retain: false,
+    update_period: 30,
+  },
+  coiot: {
+    enabled: true,
+    update_period: 15,
+    peer: '192.168.1.189:5683',
+  },
+  sntp: {
+    server: 'time.google.com',
+    enabled: true,
+  },
+  login: {
+    enabled: false,
+    unprotected: false,
+    username: 'admin',
+  },
+  pin_code: '',
+  name: null,
+  fw: '20230913-114008/v1.14.0-gcb84623',
+  factory_reset_from_switch: true,
+  pon_wifi_reset: false,
+  discoverable: false,
+  build_info: {
+    build_id: '20230913-114008/v1.14.0-gcb84623',
+    build_timestamp: '2023-09-13T11:40:08Z',
+    build_version: '1.0',
+  },
+  cloud: {
+    enabled: true,
+    connected: true,
+  },
+  timezone: 'Europe/Monaco',
+  lat: 43.731201,
+  lng: 7.4138,
+  tzautodetect: true,
+  tz_utc_offset: 7200,
+  tz_dst: false,
+  tz_dst_auto: true,
+  time: '14:22',
+  unixtime: 1715862160,
+  led_status_disable: false,
+  debug_enable: false,
+  allow_cross_origin: false,
+  actions: {
+    active: false,
+    names: [
+      'btn1_on_url',
+      'btn1_off_url',
+      'btn1_longpush_url',
+      'btn1_shortpush_url',
+      'btn2_on_url',
+      'btn2_off_url',
+      'btn2_longpush_url',
+      'btn2_shortpush_url',
+      'out_on_url',
+      'out_off_url',
+    ],
+  },
+  hwinfo: {
+    hw_revision: 'prod-2021-02',
+    batch_id: 0,
+  },
+  mode: 'white',
+  pulse_mode: 2,
+  pulse_mode_detected: 1,
+  pulse_mode_rebooted: 0,
+  load_autodetect: 1,
+  calibrated: false,
+  transition: 1000,
+  fade_rate: 3,
+  min_brightness: 0,
+  zcross_debounce: 100,
+  bypass: false,
+  lights: [
+    {
+      name: '',
+      ison: false,
+      default_state: 'last',
+      auto_on: 0,
+      auto_off: 0,
+      schedule: false,
+      night_mode: {
+        enabled: false,
+        start_time: '00:00',
+        end_time: '00:00',
+        brightness: 0,
       },
-      {
-          "input": 0,
-          "event": "",
-          "event_cnt": 0
-      }
+      schedule_rules: [],
+      btn_type: 'one_button',
+      btn_debounce: 80,
+      swap_inputs: 0,
+    },
   ],
-  "tmp": {
-      "tC": 48.68,
-      "tF": 119.62,
-      "is_valid": true
+  night_mode: {
+    enabled: false,
+    start_time: '00:00',
+    end_time: '00:00',
+    brightness: 0,
   },
-  "calibrated": false,
-  "calib_progress": 0,
-  "calib_status": 0,
-  "calib_running": 0,
-  "wire_mode": 1,
-  "forced_neutral": false,
-  "overtemperature": false,
-  "loaderror": 0,
-  "overpower": false,
-  "debug": 0,
-  "update": {
-      "status": "idle",
-      "has_update": false,
-      "new_version": "20230913-114008/v1.14.0-gcb84623",
-      "old_version": "20230913-114008/v1.14.0-gcb84623",
-      "beta_version": "20231107-164738/v1.14.1-rc1-g0617c15"
+  warm_up: {
+    enabled: 0,
+    brightness: 100,
+    time: 50,
   },
-  "ram_total": 49672,
-  "ram_free": 36812,
-  "fs_size": 233681,
-  "fs_free": 119476,
-  "uptime": 116135
-}
-*/
-/* Sample output for Gen 1 host/settings:
-{
-  "device": {
-      "type": "SHDM-2",
-      "mac": "98CDAC0D01BB",
-      "hostname": "shellydimmer2-98CDAC0D01BB",
-      "num_inputs": 2,
-      "num_outputs": 1,
-      "num_meters": 1
-  },
-  "wifi_ap": {
-      "enabled": false,
-      "ssid": "shellydimmer2-98CDAC0D01BB",
-      "key": ""
-  },
-  "wifi_sta": {
-      "enabled": true,
-      "ssid": "FibreBox_X6-12A4C7",
-      "ipv4_method": "dhcp",
-      "ip": null,
-      "gw": null,
-      "mask": null,
-      "dns": null
-  },
-  "wifi_sta1": {
-      "enabled": false,
-      "ssid": null,
-      "ipv4_method": "dhcp",
-      "ip": null,
-      "gw": null,
-      "mask": null,
-      "dns": null
-  },
-  "ap_roaming": {
-      "enabled": false,
-      "threshold": -70
-  },
-  "mqtt": {
-      "enable": false,
-      "server": "192.168.33.3:1883",
-      "user": "",
-      "id": "shellydimmer2-98CDAC0D01BB",
-      "reconnect_timeout_max": 60,
-      "reconnect_timeout_min": 2,
-      "clean_session": true,
-      "keep_alive": 60,
-      "max_qos": 0,
-      "retain": false,
-      "update_period": 30
-  },
-  "coiot": {
-      "enabled": true,
-      "update_period": 15,
-      "peer": "192.168.1.189:5683"
-  },
-  "sntp": {
-      "server": "time.google.com",
-      "enabled": true
-  },
-  "login": {
-      "enabled": false,
-      "unprotected": false,
-      "username": "admin"
-  },
-  "pin_code": "",
-  "name": null,
-  "fw": "20230913-114008/v1.14.0-gcb84623",
-  "factory_reset_from_switch": true,
-  "pon_wifi_reset": false,
-  "discoverable": false,
-  "build_info": {
-      "build_id": "20230913-114008/v1.14.0-gcb84623",
-      "build_timestamp": "2023-09-13T11:40:08Z",
-      "build_version": "1.0"
-  },
-  "cloud": {
-      "enabled": true,
-      "connected": true
-  },
-  "timezone": "Europe/Monaco",
-  "lat": 43.731201,
-  "lng": 7.4138,
-  "tzautodetect": true,
-  "tz_utc_offset": 7200,
-  "tz_dst": false,
-  "tz_dst_auto": true,
-  "time": "14:22",
-  "unixtime": 1715862160,
-  "led_status_disable": false,
-  "debug_enable": false,
-  "allow_cross_origin": false,
-  "actions": {
-      "active": false,
-      "names": [
-          "btn1_on_url",
-          "btn1_off_url",
-          "btn1_longpush_url",
-          "btn1_shortpush_url",
-          "btn2_on_url",
-          "btn2_off_url",
-          "btn2_longpush_url",
-          "btn2_shortpush_url",
-          "out_on_url",
-          "out_off_url"
-      ]
-  },
-  "hwinfo": {
-      "hw_revision": "prod-2021-02",
-      "batch_id": 0
-  },
-  "mode": "white",
-  "pulse_mode": 2,
-  "pulse_mode_detected": 1,
-  "pulse_mode_rebooted": 0,
-  "load_autodetect": 1,
-  "calibrated": false,
-  "transition": 1000,
-  "fade_rate": 3,
-  "min_brightness": 0,
-  "zcross_debounce": 100,
-  "bypass": false,
-  "lights": [
-      {
-          "name": "",
-          "ison": false,
-          "default_state": "last",
-          "auto_on": 0,
-          "auto_off": 0,
-          "schedule": false,
-          "night_mode": {
-              "enabled": false,
-              "start_time": "00:00",
-              "end_time": "00:00",
-              "brightness": 0
-          },
-          "schedule_rules": [],
-          "btn_type": "one_button",
-          "btn_debounce": 80,
-          "swap_inputs": 0
-      }
-  ],
-  "night_mode": {
-      "enabled": false,
-      "start_time": "00:00",
-      "end_time": "00:00",
-      "brightness": 0
-  },
-  "warm_up": {
-      "enabled": 0,
-      "brightness": 100,
-      "time": 50
-  },
-  "eco_mode_enabled": false
-}
-*/
+  eco_mode_enabled: false,
+};
+
 /* Sample output for Gen 2 host/rpc/Shelly.GetStatus:
 {
     "ble": {},
