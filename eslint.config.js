@@ -55,14 +55,6 @@ export default tseslint.config(
     rules: {
       'no-console': 'warn',
       'no-undef': 'off',
-      'max-len': ['warn', 180],
-      'quotes': ['error', 'single', { avoidEscape: true, allowTemplateLiterals: false }],
-      'spaced-comment': ['error', 'always', { block: { balanced: true } }],
-      'comma-spacing': ['error', { before: false, after: true }],
-      'space-before-function-paren': ['error', { anonymous: 'always', named: 'never', asyncArrow: 'always' }],
-      'keyword-spacing': ['error', { before: true, after: true }],
-      'no-multi-spaces': 'error',
-      'object-curly-spacing': ['error', 'always'],
     },
   },
   {
@@ -78,21 +70,6 @@ export default tseslint.config(
       parserOptions: {
         project: true,
       },
-    },
-    rules: {
-      '@typescript-eslint/type-annotation-spacing': [
-        'error',
-        {
-          before: false,
-          after: true,
-          overrides: {
-            arrow: {
-              before: true,
-              after: true,
-            },
-          },
-        },
-      ],
     },
   },
   {

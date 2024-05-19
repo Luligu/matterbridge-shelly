@@ -30,20 +30,20 @@ coverage
 
 export default {
   printWidth: 180, // default 80
-  tabWidth: 2, // default 2
-  useTabs: false, // default false
-  semi: true, // default true
+  tabWidth: 2,
+  useTabs: false,
+  semi: true,
   singleQuote: true, // default false
   quoteProps: 'preserve', // default 'as-needed'
-  jsxSingleQuote: false, // default false
-  trailingComma: 'all', // default 'all'
-  bracketSpacing: true, // default true
-  bracketSameLine: false, // default false
-  arrowParens: 'always', // default 'always'
-  requirePragma: false, // default false
-  insertPragma: false, // default false
-  proseWrap: 'preserve', // default 'preserve'
-  endOfLine: 'lf', // default 'lf'
+  jsxSingleQuote: false,
+  trailingComma: 'all',
+  bracketSpacing: true,
+  bracketSameLine: false,
+  arrowParens: 'always',
+  requirePragma: false,
+  insertPragma: false,
+  proseWrap: 'preserve',
+  endOfLine: 'lf',
   embeddedLanguageFormatting: 'off', // default 'auto'
-  singleAttributePerLine: false, // default false
+  singleAttributePerLine: false,
 };

@@ -30,15 +30,12 @@ describe('Shellies', () => {
     //
   });
 
-  // eslint-disable-next-line jest/no-commented-out-tests
-  /*
   describe('new not existing ShellyDevice()', () => {
     test('Create a non existing device', async () => {
-      const device = await ShellyDevice.create(log, '192.168.1.219');
-      expect(device).toBeUndefined;
+      const device = await ShellyDevice.create(log, '192.168.1.299');
+      expect(device).toBeUndefined();
     }, 30000);
   });
-  */
 
   describe('new gen 1 ShellyDevice()', () => {
     test('Create a gen 1 device', async () => {
