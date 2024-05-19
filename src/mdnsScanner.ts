@@ -4,7 +4,7 @@ import { AnsiLogger, BLUE, BRIGHT, CYAN, GREEN, TimestampFormat, db, debugString
 import mdns, { ResponsePacket, QueryPacket } from 'multicast-dns';
 
 export class MdnsScanner {
-  private discoveredPeripherals = new Map<string, { id: string, host: string, gen: number }>();
+  private discoveredPeripherals = new Map<string, { id: string; host: string; gen: number }>();
   private log;
   private scanner?: mdns.MulticastDNS;
   private _isScanning = false;

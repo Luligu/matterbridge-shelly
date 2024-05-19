@@ -15,7 +15,7 @@ export default [
     xxxplugins: {
       '@typescript-eslint': tsEslintRecommended,
       '@stylistic': stylistic,
-      'prettier': prettier
+      'prettier': prettier,
     },
     languageOptions: {
       ecmaVersion: 'latest',
@@ -23,35 +23,38 @@ export default [
     },
     parser: '@typescript-eslint/parser',
     parserOptions: {
-      'ecmaVersion': 'latest',
-      'sourceType': 'module'
+      ecmaVersion: 'latest',
+      sourceType: 'module',
     },
     environments: {
       browser: true,
       es2021: true,
-      node: true
+      node: true,
     },
     rules: {
       'prettier/prettier': ['error'],
-      'indent': ['error', 2, { 'SwitchCase': 1 }],
+      'indent': ['error', 2, { SwitchCase: 1 }],
       'max-len': ['warn', 180],
       'no-console': ['warn'],
-      'quotes': ['error', 'single', { 'avoidEscape': true, 'allowTemplateLiterals': false }],
-      'comma-spacing': ['error', { 'before': false, 'after': true }],
-      'space-before-function-paren': ['error', { 'anonymous': 'always', 'named': 'never', 'asyncArrow': 'always' }],
-      'keyword-spacing': ['error', { 'before': true, 'after': true }],
+      'quotes': ['error', 'single', { avoidEscape: true, allowTemplateLiterals: false }],
+      'comma-spacing': ['error', { before: false, after: true }],
+      'space-before-function-paren': ['error', { anonymous: 'always', named: 'never', asyncArrow: 'always' }],
+      'keyword-spacing': ['error', { before: true, after: true }],
       'no-multi-spaces': 'error',
       'object-curly-spacing': ['error', 'always'],
-      '@typescript-eslint/type-annotation-spacing': ['error', {
-        'before': false,
-        'after': true,
-        'overrides': {
-          'arrow': {
-            'before': true,
-            'after': true
-          }
-        }
-      }]
+      '@typescript-eslint/type-annotation-spacing': [
+        'error',
+        {
+          before: false,
+          after: true,
+          overrides: {
+            arrow: {
+              before: true,
+              after: true,
+            },
+          },
+        },
+      ],
     },
-  }
+  },
 ];

@@ -3,13 +3,13 @@
 declare module 'shellies' {
   interface Request extends superagent.SuperAgentRequest {
     // You can add additional properties or methods if needed
-    query(params: object): this
+    query(params: object): this;
   }
 
   interface SuperAgentStatic extends superagent.SuperAgentStatic {
-    timeout(ms: number): this,
-    set(field: string, val: string): this,
-    get(url: string): Request
+    timeout(ms: number): this;
+    set(field: string, val: string): this;
+    get(url: string): Request;
     // Include other methods from superagent if needed
   }
 

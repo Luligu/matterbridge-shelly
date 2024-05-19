@@ -203,8 +203,7 @@ export class ShellyDevice extends EventEmitter {
       const data = await response.json();
       // console.log(data);
       return data as ShellyData;
-    }
-    catch (error) {
+    } catch (error) {
       console.error(`Error fetching shelly ${url}:`, error);
       return null;
     }
@@ -222,8 +221,7 @@ export class ShellyDevice extends EventEmitter {
 
       // console.log(data);
       return data;
-    }
-    catch (error) {
+    } catch (error) {
       console.error('Error fetching shelly:', error);
       return null;
     }
