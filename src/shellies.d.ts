@@ -32,6 +32,7 @@ declare module 'shellies' {
     *[Symbol.iterator](): Iterator<[string, any]> {
       if (this._props.has('*')) {
         // adding the props to a new Set here to filter out duplicates
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         for (const prop of new Set(this._props.get('*')!.values())) {
           yield [prop, this[prop]];
         }
@@ -39,6 +40,7 @@ declare module 'shellies' {
 
       if (this.mode && this._props.has(this.mode)) {
         // adding the props to a new Set here to filter out duplicates
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         for (const prop of new Set(this._props.get(this.mode)!.values())) {
           yield [prop, this[prop]];
         }
@@ -67,9 +69,7 @@ declare module 'shellies' {
 
     async start(networkInterface: string = null): void;
     stop(): void;
-    on(event: 'discover', listener: (device: Device) => void): this;
-    on(event: 'add', listener: (device: Device) => void): this;
-    on(event: 'remove', listener: (device: Device) => void): this;
+    on(event: 'discover' | 'add' | 'remove', listener: (device: Device) => void): this;
 
     createDevice(type: string, id: string, host: string): Device;
     getDevice(type: string, id: string): Device | undefined;

@@ -6,9 +6,7 @@ import { EventEmitter } from 'events';
 import { promises as fs } from 'fs';
 import fetch from 'node-fetch';
 
-export type ShellyData = {
-  [key: string]: ShellyDataType
-};
+export type ShellyData = Record<string, ShellyDataType>;
 
 export type ShellyDataType = string | number | boolean | null | undefined | object;
 
@@ -189,7 +187,7 @@ export class ShellyDevice extends EventEmitter {
     return device;
   }
 
-  static async getShelly(host: string, service: string = 'shelly'): Promise<ShellyData | null> {
+  static async getShelly(host: string, service = 'shelly'): Promise<ShellyData | null> {
     if (host.startsWith('mock.')) {
       if (service === 'shelly') return shellyDimmerShelly;
       if (service === 'status') return shellyDimmerStatus;

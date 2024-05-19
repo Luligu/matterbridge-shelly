@@ -14,7 +14,9 @@ import exp from 'constants';
 describe('Shellies', () => {
   const log = new AnsiLogger({ logName: 'shellyDeviceTest', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: true });
 
-  beforeAll(() => { });
+  beforeAll(() => {
+    // 
+  });
 
   beforeEach(() => {
     // (fetch as jest.Mock).mockClear();
@@ -24,7 +26,9 @@ describe('Shellies', () => {
     // jest.clearAllMocks();
   });
 
-  afterAll(() => { });
+  afterAll(() => {
+    // 
+  });
 
   /*
   describe('new not existing ShellyDevice()', () => {

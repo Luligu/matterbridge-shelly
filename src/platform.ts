@@ -16,9 +16,7 @@ import fetch from 'node-fetch';
 
 import { MdnsScanner } from './mdnsScanner.js';
 
-type ConfigDeviceIp = {
-  [key: string]: string
-};
+type ConfigDeviceIp = Record<string, string>;
 
 // Shelly device map
 type ShellyDeviceId = string;
