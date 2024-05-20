@@ -31,12 +31,14 @@ export class ShellyProperty {
 export class ShellyComponent {
   readonly id: string;
   readonly name: string;
+  readonly device: ShellyDevice;
   private readonly _properties = new Map<string, ShellyProperty>();
   private readonly stateName = ['Light', 'Relay', 'Switch'];
 
-  constructor(id: string, name: string, data?: ShellyData) {
+  constructor(id: string, name: string, device: ShellyDevice, data?: ShellyData) {
     this.id = id;
     this.name = name;
+    this.device = device;
     for (const prop in data) {
       // Add a state property for Light, Relay, and Switch components
       if (this.stateName.includes(name)) this.addProperty(new ShellyProperty('state', false));
@@ -153,23 +155,23 @@ export class ShellyDevice extends EventEmitter {
       device.name = settings.name as string;
       device.gen = 1;
       for (const key in settings) {
-        if (key === 'wifi_ap') device.addComponent(new ShellyComponent(key, 'WiFi', settings[key] as ShellyData));
-        if (key === 'wifi_sta') device.addComponent(new ShellyComponent(key, 'WiFi', settings[key] as ShellyData));
-        if (key === 'wifi_sta1') device.addComponent(new ShellyComponent(key, 'WiFi', settings[key] as ShellyData));
-        if (key === 'mqtt') device.addComponent(new ShellyComponent(key, 'MQTT', settings[key] as ShellyData));
-        if (key === 'coiot') device.addComponent(new ShellyComponent(key, 'CoIoT', settings[key] as ShellyData));
-        if (key === 'sntp') device.addComponent(new ShellyComponent(key, 'Sntp', settings[key] as ShellyData));
-        if (key === 'cloud') device.addComponent(new ShellyComponent(key, 'Cloud', settings[key] as ShellyData));
+        if (key === 'wifi_ap') device.addComponent(new ShellyComponent(key, 'WiFi', device, settings[key] as ShellyData));
+        if (key === 'wifi_sta') device.addComponent(new ShellyComponent(key, 'WiFi', device, settings[key] as ShellyData));
+        if (key === 'wifi_sta1') device.addComponent(new ShellyComponent(key, 'WiFi', device, settings[key] as ShellyData));
+        if (key === 'mqtt') device.addComponent(new ShellyComponent(key, 'MQTT', device, settings[key] as ShellyData));
+        if (key === 'coiot') device.addComponent(new ShellyComponent(key, 'CoIoT', device, settings[key] as ShellyData));
+        if (key === 'sntp') device.addComponent(new ShellyComponent(key, 'Sntp', device, settings[key] as ShellyData));
+        if (key === 'cloud') device.addComponent(new ShellyComponent(key, 'Cloud', device, settings[key] as ShellyData));
         if (key === 'lights') {
           let index = 0;
           for (const light of settings[key] as ShellyData[]) {
-            device.addComponent(new ShellyComponent(`light:${index++}`, 'Light', light as ShellyData));
+            device.addComponent(new ShellyComponent(`light:${index++}`, 'Light', device, light as ShellyData));
           }
         }
         if (key === 'relays') {
           let index = 0;
           for (const relay of settings[key] as ShellyData[]) {
-            device.addComponent(new ShellyComponent(`relay:${index++}`, 'Relay', relay as ShellyData));
+            device.addComponent(new ShellyComponent(`relay:${index++}`, 'Relay', device, relay as ShellyData));
           }
         }
       }
@@ -177,13 +179,13 @@ export class ShellyDevice extends EventEmitter {
         if (key === 'lights') {
           let index = 0;
           for (const light of status[key] as ShellyData[]) {
-            device.addComponent(new ShellyComponent(`light:${index++}`, 'Light', light as ShellyData));
+            device.addComponent(new ShellyComponent(`light:${index++}`, 'Light', device, light as ShellyData));
           }
         }
         if (key === 'relays') {
           let index = 0;
           for (const relay of status[key] as ShellyData[]) {
-            device.addComponent(new ShellyComponent(`relay:${index++}`, 'Relay', relay as ShellyData));
+            device.addComponent(new ShellyComponent(`relay:${index++}`, 'Relay', device, relay as ShellyData));
           }
         }
       }
@@ -205,29 +207,28 @@ export class ShellyDevice extends EventEmitter {
       for (const key in settings) {
         if (key === 'wifi') {
           const wifi = settings[key] as ShellyData;
-          if (wifi.ap) device.addComponent(new ShellyComponent('wifi_ap', 'WiFi', wifi.ap as ShellyData)); // Ok
-          if (wifi.sta) device.addComponent(new ShellyComponent('wifi_sta', 'WiFi', wifi.sta as ShellyData)); // Ok
-          if (wifi.sta1) device.addComponent(new ShellyComponent('wifi_sta1', 'WiFi', wifi.sta1 as ShellyData)); // Ok
+          if (wifi.ap) device.addComponent(new ShellyComponent('wifi_ap', 'WiFi', device, wifi.ap as ShellyData)); // Ok
+          if (wifi.sta) device.addComponent(new ShellyComponent('wifi_sta', 'WiFi', device, wifi.sta as ShellyData)); // Ok
+          if (wifi.sta1) device.addComponent(new ShellyComponent('wifi_sta1', 'WiFi', device, wifi.sta1 as ShellyData)); // Ok
         }
         if (key === 'sys') {
           const sys = settings[key] as ShellyData;
           if (sys.sntp) {
-            device.addComponent(new ShellyComponent('sntp', 'Sntp', sys.sntp as ShellyData)); // Ok
+            device.addComponent(new ShellyComponent('sntp', 'Sntp', device, sys.sntp as ShellyData)); // Ok
             const dev = sys.device as ShellyData;
             device.name = dev.name as string;
           }
         }
-        if (key === 'mqtt') device.addComponent(new ShellyComponent(key, 'MQTT', settings[key] as ShellyData)); // Ok
-        if (key === 'ws') device.addComponent(new ShellyComponent(key, 'WebSocket', settings[key] as ShellyData)); // Ok
-        if (key === 'cloud') device.addComponent(new ShellyComponent(key, 'Cloud', settings[key] as ShellyData)); // Ok
-        if (key === 'ble') device.addComponent(new ShellyComponent(key, 'Ble', settings[key] as ShellyData)); // Ok
-        if (key.startsWith('switch:')) device.addComponent(new ShellyComponent(key, 'Switch', settings[key] as ShellyData));
-        if (key.startsWith('pm1:')) device.addComponent(new ShellyComponent(key, 'PowerMeter', settings[key] as ShellyData));
+        if (key === 'mqtt') device.addComponent(new ShellyComponent(key, 'MQTT', device, settings[key] as ShellyData)); // Ok
+        if (key === 'ws') device.addComponent(new ShellyComponent(key, 'WebSocket', device, settings[key] as ShellyData)); // Ok
+        if (key === 'cloud') device.addComponent(new ShellyComponent(key, 'Cloud', device, settings[key] as ShellyData)); // Ok
+        if (key === 'ble') device.addComponent(new ShellyComponent(key, 'Ble', device, settings[key] as ShellyData)); // Ok
+        if (key.startsWith('switch:')) device.addComponent(new ShellyComponent(key, 'Switch', device, settings[key] as ShellyData));
+        if (key.startsWith('pm1:')) device.addComponent(new ShellyComponent(key, 'PowerMeter', device, settings[key] as ShellyData));
       }
       for (const key in status) {
-        if (key.startsWith('switch:')) {
-          device.addComponent(new ShellyComponent(key, 'Switch', status[key] as ShellyData));
-        }
+        if (key.startsWith('switch:')) device.addComponent(new ShellyComponent(key, 'Switch', device, status[key] as ShellyData));
+        if (key.startsWith('pm1:')) device.addComponent(new ShellyComponent(key, 'PowerMeter', device, status[key] as ShellyData));
       }
     }
 

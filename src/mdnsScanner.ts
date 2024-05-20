@@ -21,7 +21,7 @@ export class MdnsScanner {
     return this._isScanning;
   }
 
-  start(callback?: (id: string, host: string, gen: number) => Promise<void>, timeout?: number, log = false) {
+  start(callback?: (id: string, host: string, gen: number) => Promise<void>, timeout?: number, debug = false) {
     this.log.info('Starting mDNS query service for shelly devices...');
     this._isScanning = true;
     this.callback = callback;
@@ -29,23 +29,24 @@ export class MdnsScanner {
     this.scanner = mdns();
     this.scanner.on('response', async (response: ResponsePacket) => {
       let port = 0;
+      let gen = 0;
       for (const a of response.answers) {
-        if (log && a.type === 'PTR') {
+        if (debug && a.type === 'PTR') {
           this.log.debug(`[${idn}${a.type}${rs}${db}] Name: ${CYAN}${a.name}${db} data: ${typeof a.data === 'string' ? a.data : debugStringify(a.data)}`);
         }
-        if (log && a.type === 'PTR' && a.name === '_http._tcp.local') {
+        if (debug && a.type === 'PTR' && a.name === '_http._tcp.local') {
           this.log.debug(`[${BLUE}${a.type}${db}] Name: ${CYAN}${a.name}${db} data: ${typeof a.data === 'string' ? a.data : debugStringify(a.data)}`);
         }
-        if (log && a.type === 'A' && a.name.startsWith('shelly')) {
+        if (debug && a.type === 'A' && a.name.startsWith('shelly')) {
           this.log.debug(`[${BLUE}${a.type}${db}] Name: ${CYAN}${a.name}${db} data: ${typeof a.data === 'string' ? a.data : debugStringify(a.data)}`);
         }
-        if (log && a.type === 'NSEC' && a.name.startsWith('shelly')) {
+        if (debug && a.type === 'NSEC' && a.name.startsWith('shelly')) {
           this.log.debug(`[${BLUE}${a.type}${db}] Name: ${CYAN}${a.name}${db} data: ${typeof a.data === 'string' ? a.data : debugStringify(a.data)}`);
         }
-        if (log && a.type === 'SRV' && a.name.startsWith('shelly')) {
+        if (debug && a.type === 'SRV' && a.name.startsWith('shelly')) {
           this.log.debug(`[${BLUE}${a.type}${db}] Name: ${CYAN}${a.name}${db} data: ${typeof a.data === 'string' ? a.data : debugStringify(a.data)}`);
         }
-        if (log && a.type === 'TXT' && a.name.startsWith('shelly')) {
+        if (debug && a.type === 'TXT' && a.name.startsWith('shelly')) {
           this.log.debug(`[${BLUE}${a.type}${db}] Name: ${CYAN}${a.name}${db} data: ${a.data}`);
         }
         if (a.type === 'SRV' && a.name.startsWith('shelly')) {
@@ -60,38 +61,41 @@ export class MdnsScanner {
         }
       }
       for (const a of response.additionals) {
-        if (log && a.type === 'PTR') {
+        if (debug && a.type === 'PTR') {
           this.log.debug(`[${idn}${a.type}${rs}${db}] Name: ${CYAN}${a.name}${db} data: ${typeof a.data === 'string' ? a.data : debugStringify(a.data)}`);
         }
-        if (log && a.type === 'PTR' && a.name === '_http._tcp.local') {
+        if (debug && a.type === 'PTR' && a.name === '_http._tcp.local') {
           this.log.debug(`[${BLUE}${a.type}${db}] Name: ${CYAN}${a.name}${db} data: ${typeof a.data === 'string' ? a.data : debugStringify(a.data)}`);
         }
-        if (log && a.type === 'A' && a.name.startsWith('shelly')) {
+        if (debug && a.type === 'A' && a.name.startsWith('shelly')) {
           this.log.debug(`[${BLUE}${a.type}${db}] Name: ${CYAN}${a.name}${db} data: ${typeof a.data === 'string' ? a.data : debugStringify(a.data)}`);
         }
-        if (log && a.type === 'NSEC' && a.name.startsWith('shelly')) {
+        if (debug && a.type === 'NSEC' && a.name.startsWith('shelly')) {
           this.log.debug(`[${BLUE}${a.type}${db}] Name: ${CYAN}${a.name}${db} data: ${typeof a.data === 'string' ? a.data : debugStringify(a.data)}`);
         }
-        if (log && a.type === 'SRV') {
+        if (debug && a.type === 'SRV') {
           this.log.debug(`[${BLUE}${a.type}${db}] Name: ${CYAN}${a.name}${db} data: ${typeof a.data === 'string' ? a.data : debugStringify(a.data)}`);
         }
-        if (log && a.type === 'TXT') {
+        if (debug && a.type === 'TXT') {
           this.log.debug(`[${BLUE}${a.type}${db}] Name: ${CYAN}${a.name}${db} data: ${a.data}`);
         }
         if (a.type === 'SRV' && a.name.startsWith('shelly')) {
           port = a.data.port;
         }
+        if (a.type === 'TXT' && a.name.startsWith('shelly')) {
+          gen = parseInt(a.data.toString().replace('gen=', ''));
+        }
         if (a.type === 'A' && a.name.startsWith('Shelly')) {
           if (!this.discoveredPeripherals.has(a.name.replace('.local', '').toLowerCase())) {
             this.log.info(
-              `Discovered shelly gen ${CYAN}2${nf} device id: ${hk}${a.name.replace('.local', '').toLowerCase()}${nf} host: ${zb}${a.data}${nf} port: ${zb}${port}${nf}`,
+              `Discovered shelly gen ${CYAN}${gen}${nf} device id: ${hk}${a.name.replace('.local', '').toLowerCase()}${nf} host: ${zb}${a.data}${nf} port: ${zb}${port}${nf}`,
             );
             this.discoveredPeripherals.set(a.name.replace('.local', '').toLowerCase(), {
               id: a.name.replace('.local', '').toLowerCase(),
               host: a.data,
-              gen: 2,
+              gen,
             });
-            if (this.callback) await this.callback(a.name.replace('.local', '').toLowerCase(), a.data, 2);
+            if (this.callback) await this.callback(a.name.replace('.local', '').toLowerCase(), a.data, gen);
           }
         }
       }

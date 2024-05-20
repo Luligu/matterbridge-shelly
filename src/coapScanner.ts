@@ -328,7 +328,7 @@ export class CoapServer {
     });
   }
 
-  start(callback?: (msg: CoapMessage) => void, timeout?: number) {
+  start(callback?: (msg: CoapMessage) => void, timeout?: number, debug = false) {
     this.log.info('Starting CoIoT server for shelly devices...');
     this._isScanning = true;
     this.callback = callback;

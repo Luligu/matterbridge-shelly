@@ -457,7 +457,7 @@ export class MdnsDeviceDiscoverer extends DeviceDiscoverer {
         }
       },
       this.timeout, // In seconds
-      false,
+      true,
     );
   }
 
