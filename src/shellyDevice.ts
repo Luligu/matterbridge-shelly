@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { AnsiLogger, TimestampFormat, db, debugStringify, dn, hk, idn, nf, or, rs, wr, zb } from 'node-ansi-logger';
+import { AnsiLogger, BLUE, GREEN, GREY, MAGENTA, TimestampFormat, db, debugStringify, dn, hk, idn, nf, or, rs, wr, zb } from 'node-ansi-logger';
 import { EventEmitter } from 'events';
 import { promises as fs } from 'fs';
 import fetch from 'node-fetch';
@@ -12,7 +12,7 @@ export type ShellyDataType = string | number | boolean | null | undefined | obje
 
 export class ShellyProperty {
   readonly key: string;
-  private readonly _value: ShellyDataType;
+  private _value: ShellyDataType;
 
   constructor(key: string, value: ShellyDataType) {
     this.key = key;
@@ -22,16 +22,26 @@ export class ShellyProperty {
   get value(): ShellyDataType {
     return this._value;
   }
+
+  set value(value: ShellyDataType) {
+    this._value = value;
+  }
 }
 
 export class ShellyComponent {
   readonly id: string;
   readonly name: string;
   private readonly _properties = new Map<string, ShellyProperty>();
+  private readonly stateName = ['Light', 'Relay', 'Switch'];
 
-  constructor(id: string, name: string) {
+  constructor(id: string, name: string, data?: ShellyData) {
     this.id = id;
     this.name = name;
+    for (const prop in data) {
+      // Add a state property for Light, Relay, and Switch components
+      if (this.stateName.includes(name)) this.addProperty(new ShellyProperty('state', false));
+      this.addProperty(new ShellyProperty(prop, data[prop] as ShellyData));
+    }
   }
 
   hasProperty(key: string): boolean {
@@ -45,6 +55,18 @@ export class ShellyComponent {
   addProperty(property: ShellyProperty): ShellyComponent {
     this._properties.set(property.key, property);
     return this;
+  }
+
+  setValue(key: string, value: ShellyDataType): ShellyComponent {
+    const property = this.getProperty(key);
+    if (property) property.value = value;
+    return this;
+  }
+
+  getValue(key: string): ShellyDataType {
+    const property = this.getProperty(key);
+    if (property) return property.value;
+    return undefined;
   }
 
   get properties(): ShellyProperty[] {
@@ -71,10 +93,12 @@ export class ShellyDevice extends EventEmitter {
   auth = false;
   name = '';
   online = false;
+  gen = 0;
+  lastseen = 0;
 
   private readonly _components = new Map<string, ShellyComponent>();
 
-  constructor(log: AnsiLogger, host: string) {
+  private constructor(log: AnsiLogger, host: string) {
     super();
     this.log = log;
     this.host = host;
@@ -104,20 +128,22 @@ export class ShellyDevice extends EventEmitter {
   }
 
   static async create(log: AnsiLogger, host: string): Promise<ShellyDevice | undefined> {
-    const shelly = await ShellyDevice.getShelly(host);
+    const shelly = await ShellyDevice.fetch(host);
     if (!shelly) {
       log.error(`Error creating device from host ${host}. No shelly data found.`);
       return undefined;
     }
     // console.log('Shelly:', shelly);
-
     const device = new ShellyDevice(log, host.replace('mock.', ''));
     device.mac = shelly.mac as string;
+    device.lastseen = Date.now();
+
     // Gen 1 Shelly device
     if (!shelly.gen) {
-      const settings = await ShellyDevice.getShelly(host, 'settings');
-      if (!settings) {
-        log.error(`Error creating device gen 1 from host ${host}. No settings data found.`);
+      const status = await ShellyDevice.fetch(host, 'status');
+      const settings = await ShellyDevice.fetch(host, 'settings');
+      if (!status || !settings) {
+        log.error(`Error creating device gen 1 from host ${host}. No data found.`);
         return undefined;
       }
       device.model = shelly.type as string;
@@ -125,69 +151,127 @@ export class ShellyDevice extends EventEmitter {
       device.firmware = (shelly.fw as string).split('/')[1];
       device.auth = shelly.auth as boolean;
       device.name = settings.name as string;
+      device.gen = 1;
       for (const key in settings) {
-        if (key === 'wifi_ap') device.addComponent(new ShellyComponent(key, 'WiFi'));
-        if (key === 'wifi_sta') device.addComponent(new ShellyComponent(key, 'WiFi'));
-        if (key === 'wifi_sta1') device.addComponent(new ShellyComponent(key, 'WiFi'));
-        if (key === 'mqtt') device.addComponent(new ShellyComponent(key, 'MQTT'));
-        if (key === 'coiot') device.addComponent(new ShellyComponent(key, 'CoIoT'));
-        if (key === 'sntp') device.addComponent(new ShellyComponent(key, 'Sntp'));
-        if (key === 'cloud') device.addComponent(new ShellyComponent(key, 'Cloud'));
+        if (key === 'wifi_ap') device.addComponent(new ShellyComponent(key, 'WiFi', settings[key] as ShellyData));
+        if (key === 'wifi_sta') device.addComponent(new ShellyComponent(key, 'WiFi', settings[key] as ShellyData));
+        if (key === 'wifi_sta1') device.addComponent(new ShellyComponent(key, 'WiFi', settings[key] as ShellyData));
+        if (key === 'mqtt') device.addComponent(new ShellyComponent(key, 'MQTT', settings[key] as ShellyData));
+        if (key === 'coiot') device.addComponent(new ShellyComponent(key, 'CoIoT', settings[key] as ShellyData));
+        if (key === 'sntp') device.addComponent(new ShellyComponent(key, 'Sntp', settings[key] as ShellyData));
+        if (key === 'cloud') device.addComponent(new ShellyComponent(key, 'Cloud', settings[key] as ShellyData));
         if (key === 'lights') {
-          const lights = settings[key] as ShellyData[];
           let index = 0;
-          for (const light of lights) {
-            const component = device.addComponent(new ShellyComponent(`light:${index++}`, 'Light'));
-            const properties = light as ShellyData;
-            for (const prop in properties) {
-              component.addProperty(new ShellyProperty(prop, properties[prop] as string));
-            }
+          for (const light of settings[key] as ShellyData[]) {
+            device.addComponent(new ShellyComponent(`light:${index++}`, 'Light', light as ShellyData));
+          }
+        }
+        if (key === 'relays') {
+          let index = 0;
+          for (const relay of settings[key] as ShellyData[]) {
+            device.addComponent(new ShellyComponent(`relay:${index++}`, 'Relay', relay as ShellyData));
+          }
+        }
+      }
+      for (const key in status) {
+        if (key === 'lights') {
+          let index = 0;
+          for (const light of status[key] as ShellyData[]) {
+            device.addComponent(new ShellyComponent(`light:${index++}`, 'Light', light as ShellyData));
+          }
+        }
+        if (key === 'relays') {
+          let index = 0;
+          for (const relay of status[key] as ShellyData[]) {
+            device.addComponent(new ShellyComponent(`relay:${index++}`, 'Relay', relay as ShellyData));
           }
         }
       }
     }
+
     // Gen 2 Shelly device
-    if (shelly.gen === 2) {
-      const settings = await ShellyDevice.getShelly(host, 'rpc/Shelly.GetConfig');
-      if (!settings) {
-        log.error(`Error creating device gen 2 from host ${host}. No settings data found.`);
+    if (shelly.gen === 2 || shelly.gen === 3) {
+      const status = await ShellyDevice.fetch(host, 'rpc/Shelly.GetStatus');
+      const settings = await ShellyDevice.fetch(host, 'rpc/Shelly.GetConfig');
+      if (!status || !settings) {
+        log.error(`Error creating device gen 2 from host ${host}. No data found.`);
         return undefined;
       }
       device.model = shelly.model as string;
       device.id = shelly.id as string;
       device.firmware = (shelly.fw_id as string).split('/')[1];
       device.auth = shelly.auth_en as boolean;
+      device.gen = shelly.gen;
       for (const key in settings) {
         if (key === 'wifi') {
           const wifi = settings[key] as ShellyData;
-          if (wifi.ap) device.addComponent(new ShellyComponent('wifi_ap', 'WiFi')); // Ok
-          if (wifi.sta) device.addComponent(new ShellyComponent('wifi_sta', 'WiFi')); // Ok
-          if (wifi.sta1) device.addComponent(new ShellyComponent('wifi_sta1', 'WiFi')); // Ok
+          if (wifi.ap) device.addComponent(new ShellyComponent('wifi_ap', 'WiFi', wifi.ap as ShellyData)); // Ok
+          if (wifi.sta) device.addComponent(new ShellyComponent('wifi_sta', 'WiFi', wifi.sta as ShellyData)); // Ok
+          if (wifi.sta1) device.addComponent(new ShellyComponent('wifi_sta1', 'WiFi', wifi.sta1 as ShellyData)); // Ok
         }
         if (key === 'sys') {
           const sys = settings[key] as ShellyData;
           if (sys.sntp) {
-            device.addComponent(new ShellyComponent('sntp', 'Sntp')); // Ok
+            device.addComponent(new ShellyComponent('sntp', 'Sntp', sys.sntp as ShellyData)); // Ok
             const dev = sys.device as ShellyData;
             device.name = dev.name as string;
           }
         }
-        if (key === 'mqtt') device.addComponent(new ShellyComponent(key, 'MQTT')); // Ok
-        if (key === 'ws') device.addComponent(new ShellyComponent(key, 'WebSocket')); // Ok
-        if (key === 'cloud') device.addComponent(new ShellyComponent(key, 'Cloud')); // Ok
+        if (key === 'mqtt') device.addComponent(new ShellyComponent(key, 'MQTT', settings[key] as ShellyData)); // Ok
+        if (key === 'ws') device.addComponent(new ShellyComponent(key, 'WebSocket', settings[key] as ShellyData)); // Ok
+        if (key === 'cloud') device.addComponent(new ShellyComponent(key, 'Cloud', settings[key] as ShellyData)); // Ok
+        if (key === 'ble') device.addComponent(new ShellyComponent(key, 'Ble', settings[key] as ShellyData)); // Ok
+        if (key.startsWith('switch:')) device.addComponent(new ShellyComponent(key, 'Switch', settings[key] as ShellyData));
+        if (key.startsWith('pm1:')) device.addComponent(new ShellyComponent(key, 'PowerMeter', settings[key] as ShellyData));
+      }
+      for (const key in status) {
         if (key.startsWith('switch:')) {
-          const component = device.addComponent(new ShellyComponent(key, 'Switch'));
-          const properties = settings[key] as ShellyData;
-          for (const prop in properties) {
-            component.addProperty(new ShellyProperty(prop, properties[prop] as string));
-          }
+          device.addComponent(new ShellyComponent(key, 'Switch', status[key] as ShellyData));
         }
       }
     }
+
+    await device.update();
+
     return device;
   }
 
-  static async getShelly(host: string, service = 'shelly'): Promise<ShellyData | null> {
+  async update(): Promise<void> {
+    if (this.gen === 1) {
+      const status = await ShellyDevice.fetch(this.host, 'status');
+      if (!status) {
+        this.log.error(`Error fetching device ${this.id} status. No data found.`);
+        return;
+      }
+      for (const key in status) {
+        if (key === 'lights' || key === 'relays') {
+          let index = 0;
+          for (const light of status[key] as ShellyData[]) {
+            const component = this.getComponent(`${key.slice(0, 5)}:${index++}`);
+            if (component) component.setValue('state', light.ison as boolean);
+            else this.log.error(`Error setting status for device ${this.id}. No component found for ${key.slice(0, 5)}:${index - 1}`);
+          }
+        }
+      }
+    } else if (this.gen === 2 || this.gen === 3) {
+      const status = await ShellyDevice.fetch(this.host, 'rpc/Shelly.GetStatus');
+      if (!status) {
+        this.log.error(`Error fetching device ${this.id} status. No data found.`);
+        return;
+      }
+      for (const key in status) {
+        if (key.startsWith('switch:')) {
+          const light = status[key] as ShellyData;
+          const component = this.getComponent(key);
+          if (component) component.setValue('state', light.output as boolean);
+          else this.log.error(`Error setting status for device ${this.id}. No component found for ${key}`);
+        }
+      }
+    }
+    this.lastseen = Date.now();
+  }
+
+  static async fetch(host: string, service = 'shelly'): Promise<ShellyData | null> {
     if (host.startsWith('mock.')) {
       if (service === 'shelly') return shellyDimmerShelly;
       if (service === 'status') return shellyDimmerStatus;
@@ -209,21 +293,19 @@ export class ShellyDevice extends EventEmitter {
     }
   }
 
-  async sendCommand(hostname: string, component: string, index: number, command: string): Promise<unknown | null> {
+  async sendCommand(hostname: string, component: string, index: number, command: string): Promise<unknown | undefined> {
     try {
-      // Replace the URL with your target URL
       const response = await fetch(`http://${hostname}/${component}/${index}?${command}`);
       if (!response.ok) {
         console.error('Error fetching shelly:');
-        return null;
+        return undefined;
       }
       const data = await response.json();
-
-      // console.log(data);
+      console.log(data);
       return data;
     } catch (error) {
       console.error('Error fetching shelly:', error);
-      return null;
+      return undefined;
     }
   }
 
@@ -238,46 +320,38 @@ export class ShellyDevice extends EventEmitter {
         this.log.error(`Error writing to ${filePath}:`, error);
       });
   }
+
+  logDevice() {
+    // Log the device
+    this.log.debug(
+      `Shelly device ${MAGENTA}${this.id}${db} (${this.model}) gen ${BLUE}${this.gen}${db} name ${BLUE}${this.name}${db} mac ${BLUE}${this.mac}${db} host ${BLUE}${this.host}${db}`,
+    );
+    for (const [key, component] of this) {
+      this.log.debug(`- ${GREEN}${component.name}${db} (${GREY}${key}${db})`);
+      for (const [key, property] of component) {
+        this.log.debug(`  - ${key}: ${property.value && typeof property.value === 'object' ? debugStringify(property.value) : property.value}`);
+      }
+    }
+  }
 }
-/*
+
 if (process.argv.includes('shelly')) {
   const log = new AnsiLogger({ logName: 'shellyDevice', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: true });
 
   let shelly = await ShellyDevice.create(log, '192.168.1.217');
-  if (shelly) {
-    console.log('Shelly:', shelly);
-    for (const [key, component] of shelly) {
-      console.log(`  - ${component.name} (${key})`);
-      for (const [key, property] of component) {
-        console.log(`    - ${key}: ${property.value}`);
-      }
-    }
-  }
+  if (shelly) shelly.logDevice();
 
   shelly = await ShellyDevice.create(log, '192.168.1.218');
-  if (shelly) {
-    console.log('Shelly:', shelly);
-    for (const [key, component] of shelly) {
-      console.log(`  - ${component.name} (${key})`);
-      for (const [key, property] of component) {
-        console.log(`    - ${key}: ${property.value}`);
-      }
-    }
-  }
+  if (shelly) shelly.logDevice();
 
   shelly = await ShellyDevice.create(log, '192.168.1.219');
-  if (shelly) {
-    console.log('Shelly:', shelly);
-    for (const [key, component] of shelly) {
-      console.log(`  - ${component.name} (${key})`);
-      for (const [key, property] of component) {
-        console.log(`    - ${key}: ${property.value}`);
-      }
-    }
-  }
-  //await ShellyDevice.sendCommand('192.168.1.219', 'light', 0, 'turn=on');
+  if (shelly) shelly.logDevice();
+
+  shelly = await ShellyDevice.create(log, '192.168.1.220');
+  if (shelly) shelly.logDevice();
+
+  // await ShellyDevice.sendCommand('192.168.1.219', 'light', 0, 'turn=on');
 }
-*/
 
 // Sample output Gen 1 Shelly Dimmer for 192.168.1.219/shelly
 export const shellyDimmerShelly: ShellyData = {
@@ -291,37 +365,37 @@ export const shellyDimmerShelly: ShellyData = {
   num_outputs: 1,
   num_meters: 1,
 };
-/*
-Gen 2 Shelly Plus 1PM:
-{
-    "name": null,
-    "id": "shellyplus1pm-441793d69718",
-    "mac": "441793D69718",
-    "slot": 0,
-    "model": "SNSW-001P16EU",
-    "gen": 2,
-    "fw_id": "20240430-105751/1.3.1-gd8534ee",
-    "ver": "1.3.1",
-    "app": "Plus1PM",
-    "auth_en": false,
-    "auth_domain": null
-}
-Gen 2 Shelly Plus 2PM:
-{
-    "name": null,
-    "id": "shellyplus2pm-5443b23d81f8",
-    "mac": "5443B23D81F8",
-    "slot": 0,
-    "model": "SNSW-102P16EU",
-    "gen": 2,
-    "fw_id": "20240430-105737/1.3.1-gd8534ee",
-    "ver": "1.3.1",
-    "app": "Plus2PM",
-    "auth_en": false,
-    "auth_domain": null,
-    "profile": "switch"
-}
-*/
+
+// Sample output Gen 2 Shelly Plus 1PM for 192.168.1.217/shelly
+export const shellyplus1pmShelly: ShellyData = {
+  'name': null,
+  'id': 'shellyplus1pm-441793d69718',
+  'mac': '441793D69718',
+  'slot': 0,
+  'model': 'SNSW-001P16EU',
+  'gen': 2,
+  'fw_id': '20240430-105751/1.3.1-gd8534ee',
+  'ver': '1.3.1',
+  'app': 'Plus1PM',
+  'auth_en': false,
+  'auth_domain': null,
+};
+
+// Sample output Gen 2 Shelly Plus 2PM for 192.168.1.218/shelly
+export const shellyplus2pmShelly: ShellyData = {
+  'name': null,
+  'id': 'shellyplus2pm-5443b23d81f8',
+  'mac': '5443B23D81F8',
+  'slot': 0,
+  'model': 'SNSW-102P16EU',
+  'gen': 2,
+  'fw_id': '20240430-105737/1.3.1-gd8534ee',
+  'ver': '1.3.1',
+  'app': 'Plus2PM',
+  'auth_en': false,
+  'auth_domain': null,
+  'profile': 'switch',
+};
 // Sample output Gen 1 Shelly Dimmer for 192.168.1.219/status
 export const shellyDimmerStatus: ShellyData = {
   wifi_sta: {

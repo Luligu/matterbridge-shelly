@@ -87,8 +87,9 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           child.getClusterServer(OnOffCluster)?.setOnOffAttribute(value);
 
           // Add event handler
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           device.on('change', (prop, newValue, oldValue) => {
-            this.log.info('', prop, 'changed from', oldValue, 'to', newValue);
+            // this.log.info('', prop, 'changed from', oldValue, 'to', newValue);
             this.shellySwitchUpdateHandler(switchDevice, device, property, prop, newValue);
           });
 
@@ -259,7 +260,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       await this.configDiscoverer?.start();
       const server = new CoapServer();
       server.start((msg: CoapMessage) => {
-        this.log.info(`CoIoT message received from: ${msg.host}`);
+        // this.log.info(`CoIoT message received from: ${msg.host}`);
         shellies1g._statusUpdateHandler(msg);
       });
     }, 10000);
@@ -434,7 +435,7 @@ export class MdnsDeviceDiscoverer extends DeviceDiscoverer {
         // We get id: shellyplus1pm-441793d69718 host: 192.168.1.217 gen:2
         const shellyData = (await getShelly(host)) as { type: string; model: string; mac: string };
         // eslint-disable-next-line no-console
-        if (shellyData) console.log(shellyData);
+        // if (shellyData) console.log(shellyData);
         if (gen === 1) {
           if (shellyData) {
             this.log.info(`mdnsScanner discovered shelly gen 1 ${id} model ${shellyData.type} mac ${shellyData.mac} host ${host}`);
@@ -455,7 +456,7 @@ export class MdnsDeviceDiscoverer extends DeviceDiscoverer {
           }
         }
       },
-      this.timeout,
+      this.timeout, // In seconds
       false,
     );
   }
@@ -481,7 +482,7 @@ export class StorageDeviceDiscoverer extends DeviceDiscoverer {
       this.log.info(`${nf}StorageDeviceDiscoverer deviceId: ${hk}${device.id}${nf} hostname: ${zb}${device.hostname}${nf}`);
       const shellyData = (await getShelly(device.hostname)) as { type: string; model: string; mac: string; gen: number };
       // eslint-disable-next-line no-console
-      if (shellyData) console.log(shellyData);
+      // if (shellyData) console.log(shellyData);
       if (!shellyData) {
         this.log.error(`Failed to retrieve shelly data for device ${device.id}`);
         return;
@@ -515,7 +516,7 @@ export class ConfigDeviceDiscoverer extends DeviceDiscoverer {
       this.log.info(`${nf}ConfigDeviceDiscoverer deviceId: ${hk}${key}${nf} hostname: ${zb}${value}${nf}`);
       const shellyData = (await getShelly(value as string)) as { type: string; model: string; mac: string; gen: number };
       // eslint-disable-next-line no-console
-      if (shellyData) console.log(shellyData);
+      // if (shellyData) console.log(shellyData);
       if (!shellyData) {
         this.log.error(`Failed to retrieve shelly data for device ${key}`);
         return;

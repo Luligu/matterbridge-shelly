@@ -3,6 +3,8 @@
 
 eslint.config.js
 
+typescript-eslint@8.0.0-alpha.14
+
 How to install:
   npm install --save-dev eslint @eslint/js typescript typescript-eslint eslint-plugin-jest
   eslint --max-warnings=0 --debug --ignore-pattern dist/ --ignore-pattern build/ .
@@ -21,7 +23,9 @@ Add to .vscode/settings.json:
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit"
   },
-  "eslint.experimental.useFlatConfig": true
+  "eslint.experimental.useFlatConfig": true,
+  "eslint.format.enable": true,
+
 
 Prettier:
 
@@ -33,14 +37,12 @@ How to install:
 import eslint from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import jesteslint from 'eslint-plugin-jest';
-import eslintConfigPrettier from 'eslint-config-prettier';
 import eslintPluginPrettier from 'eslint-plugin-prettier/recommended';
 
 export default tseslint.config(
   eslint.configs.recommended,
   ...tseslint.configs.strict,
   ...tseslint.configs.stylistic,
-  eslintConfigPrettier,
   eslintPluginPrettier,
   {
     name: 'global ignores',
@@ -48,6 +50,7 @@ export default tseslint.config(
   },
   {
     name: 'javascript',
+    files: ['**/*.js'],
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',
@@ -55,6 +58,7 @@ export default tseslint.config(
     rules: {
       'no-console': 'warn',
       'no-undef': 'off',
+      'spaced-comment': ['error', 'always'],
     },
   },
   {
@@ -71,9 +75,14 @@ export default tseslint.config(
         project: true,
       },
     },
+    rules: {
+      'no-console': 'warn',
+      'no-undef': 'off',
+      'spaced-comment': ['error', 'always'],
+    },
   },
   {
-    name: 'jest tests',
+    name: 'jest',
     files: ['**/__test__/*', '**/*.test.ts', '**/*.spec.ts'],
     plugins: {
       '@typescript-eslint': tseslint.plugin,

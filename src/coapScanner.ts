@@ -230,9 +230,9 @@ export class CoapServer {
     */
 
     this.coapServer.on('request', (msg: IncomingMessage, res: OutgoingMessage) => {
-      this.log.warn(`Coap server got a messagge code ${msg.code} url ${msg.url} rsinfo ${debugStringify(msg.rsinfo)}...`);
+      // this.log.warn(`Coap server got a messagge code ${msg.code} url ${msg.url} rsinfo ${debugStringify(msg.rsinfo)}...`);
       if (msg.code === '0.30' && msg.url === '/cit/s') {
-        this.log.warn('Parsing coap message...');
+        // this.log.warn('Parsing coap message...');
         const coapMessage = this.parseShellyMessage(msg);
         this.callback && this.callback(coapMessage);
       } else {

@@ -9,6 +9,7 @@ export class MdnsScanner {
   private scanner?: mdns.MulticastDNS;
   private _isScanning = false;
   private scannerTimeout?: NodeJS.Timeout;
+  private queryTimeout?: NodeJS.Timeout;
 
   private callback?: (id: string, host: string, gen: number) => Promise<void>;
 
@@ -51,8 +52,8 @@ export class MdnsScanner {
           port = a.data.port;
         }
         if (a.type === 'A' && a.name.startsWith('shelly')) {
-          this.log.info(`Discovered shelly gen ${CYAN}1${nf} device id: ${hk}${a.name.replace('.local', '')}${nf} host: ${zb}${a.data}${nf} port: ${zb}${port}${nf}`);
           if (!this.discoveredPeripherals.has(a.name.replace('.local', ''))) {
+            this.log.info(`Discovered shelly gen ${CYAN}1${nf} device id: ${hk}${a.name.replace('.local', '')}${nf} host: ${zb}${a.data}${nf} port: ${zb}${port}${nf}`);
             this.discoveredPeripherals.set(a.name.replace('.local', ''), { id: a.name.replace('.local', ''), host: a.data, gen: 1 });
             if (this.callback) await this.callback(a.name.replace('.local', ''), a.data, 1);
           }
@@ -81,8 +82,10 @@ export class MdnsScanner {
           port = a.data.port;
         }
         if (a.type === 'A' && a.name.startsWith('Shelly')) {
-          this.log.info(`Discovered shelly gen ${CYAN}2${nf} device id: ${hk}${a.name.replace('.local', '').toLowerCase()}${nf} host: ${zb}${a.data}${nf} port: ${zb}${port}${nf}`);
           if (!this.discoveredPeripherals.has(a.name.replace('.local', '').toLowerCase())) {
+            this.log.info(
+              `Discovered shelly gen ${CYAN}2${nf} device id: ${hk}${a.name.replace('.local', '').toLowerCase()}${nf} host: ${zb}${a.data}${nf} port: ${zb}${port}${nf}`,
+            );
             this.discoveredPeripherals.set(a.name.replace('.local', '').toLowerCase(), {
               id: a.name.replace('.local', '').toLowerCase(),
               host: a.data,
@@ -96,7 +99,7 @@ export class MdnsScanner {
     });
 
     this.scanner.query('_http._tcp.local', 'PTR');
-    setInterval(() => {
+    this.queryTimeout = setInterval(() => {
       this.scanner?.query('_http._tcp.local', 'PTR');
     }, 10000);
     /*
@@ -120,8 +123,10 @@ export class MdnsScanner {
   stop() {
     this.log.info('Stopping mDNS query service...');
     if (this.scannerTimeout) clearTimeout(this.scannerTimeout);
+    if (this.queryTimeout) clearTimeout(this.queryTimeout);
     this._isScanning = false;
     this.scannerTimeout = undefined;
+    this.queryTimeout = undefined;
     this.scanner?.destroy();
     this.scanner = undefined;
     this.logPeripheral();

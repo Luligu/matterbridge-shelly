@@ -32,7 +32,12 @@ describe('Shellies', () => {
 
   describe('new not existing ShellyDevice()', () => {
     test('Create a non existing device', async () => {
-      const device = await ShellyDevice.create(log, '192.168.1.299');
+      const device = await ShellyDevice.create(log, '192.168.250.219');
+      expect(device).toBeUndefined();
+    }, 30000);
+
+    test('Create a non existing device name', async () => {
+      const device = await ShellyDevice.create(log, 'somename');
       expect(device).toBeUndefined();
     }, 30000);
   });
