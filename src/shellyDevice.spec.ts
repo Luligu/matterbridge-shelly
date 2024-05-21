@@ -3,6 +3,8 @@
 import { ShellyDevice, ShellyComponent, ShellyProperty, ShellyDataType, ShellyData } from './shellyDevice.js';
 import { AnsiLogger, TimestampFormat, db, debugStringify, dn, hk, idn, nf, or, rs, wr, zb } from 'node-ansi-logger';
 import { shellydimmer2Settings } from './shellydimmer2.js';
+import { getInterfaceAddress } from './coapScanner.js';
+import { get } from 'http';
 
 describe('Shellies', () => {
   const log = new AnsiLogger({ logName: 'shellyDeviceTest', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: true });
@@ -176,6 +178,8 @@ describe('Shellies', () => {
   });
 
   describe('new real gen 1 ShellyDevice()', () => {
+    if (getInterfaceAddress() !== '192.168.1.189') return;
+
     test('create a gen 1 device and update', async () => {
       const device = await ShellyDevice.create(log, '192.168.1.219');
       if (!device) return;

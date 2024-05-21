@@ -249,33 +249,11 @@ export class CoapServer {
     });
   }
 
-  getInterfaceAddress() {
-    let INTERFACE = 'Not found';
-    const networkInterfaces = os.networkInterfaces();
-    // console.log('Available Network Interfaces:', networkInterfaces);
-    for (const interfaceDetails of Object.values(networkInterfaces)) {
-      if (!interfaceDetails) {
-        break;
-      }
-      for (const detail of interfaceDetails) {
-        if (detail.family === 'IPv4' && !detail.internal && INTERFACE === 'Not found') {
-          INTERFACE = detail.address;
-        }
-      }
-      // Break if both addresses are found to improve efficiency
-      if (INTERFACE !== 'Not found') {
-        break;
-      }
-    }
-    console.log('Selected Network Interfaces:', INTERFACE);
-    return INTERFACE;
-  }
-
   startDgramServer() {
     this.log.info('Starting CoIoT multicast receiver...');
     const MULTICAST_ADDRESS = '224.0.1.187';
     const PORT = 5683;
-    const INTERFACE = this.getInterfaceAddress();
+    const INTERFACE = getInterfaceAddress();
 
     const socket = dgram.createSocket({ type: 'udp4', reuseAddr: true });
 
@@ -306,7 +284,7 @@ export class CoapServer {
     this.log.info('Starting CoIoT multicast sender...');
     const MULTICAST_ADDRESS = '224.0.1.187';
     const PORT = 5683;
-    const INTERFACE = this.getInterfaceAddress();
+    const INTERFACE = getInterfaceAddress();
 
     const message = Buffer.from('Test multicast message');
 
@@ -350,6 +328,28 @@ export class CoapServer {
     if (this.coapServer) this.coapServer.close();
     this.log.info('Stopped CoIoT server for shelly devices.');
   }
+}
+
+export function getInterfaceAddress() {
+  let INTERFACE = 'Not found';
+  const networkInterfaces = os.networkInterfaces();
+  // console.log('Available Network Interfaces:', networkInterfaces);
+  for (const interfaceDetails of Object.values(networkInterfaces)) {
+    if (!interfaceDetails) {
+      break;
+    }
+    for (const detail of interfaceDetails) {
+      if (detail.family === 'IPv4' && !detail.internal && INTERFACE === 'Not found') {
+        INTERFACE = detail.address;
+      }
+    }
+    // Break if both addresses are found to improve efficiency
+    if (INTERFACE !== 'Not found') {
+      break;
+    }
+  }
+  console.log('Selected Network Interfaces:', INTERFACE);
+  return INTERFACE;
 }
 
 if (process.argv.includes('coapServer') || process.argv.includes('coapSender') || process.argv.includes('coapReceiver')) {
