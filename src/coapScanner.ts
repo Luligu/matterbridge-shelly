@@ -328,15 +328,10 @@ export class CoapServer {
     });
   }
 
-  start(callback?: (msg: CoapMessage) => void, timeout?: number, debug = false) {
+  start(callback?: (msg: CoapMessage) => void, debug = false) {
     this.log.info('Starting CoIoT server for shelly devices...');
     this._isScanning = true;
     this.callback = callback;
-    if (timeout && timeout > 0) {
-      this.scannerTimeout = setTimeout(() => {
-        this.stop();
-      }, timeout * 1000);
-    }
     // this.getDeviceDescription('192.168.1.219');
     // this.getDeviceStatus('192.168.1.219');
     // this.getMulticastDeviceStatus();

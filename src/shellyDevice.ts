@@ -1,10 +1,11 @@
 /* eslint-disable no-console */
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { AnsiLogger, BLUE, GREEN, GREY, MAGENTA, TimestampFormat, db, debugStringify, dn, hk, idn, nf, or, rs, wr, zb } from 'node-ansi-logger';
+import { AnsiLogger, BLUE, GREEN, MAGENTA, db, debugStringify } from 'node-ansi-logger';
 import { EventEmitter } from 'events';
-import { promises as fs } from 'fs';
 import fetch from 'node-fetch';
+import { shellydimmer2Settings, shellydimmer2Shelly, shellydimmer2Status } from './shellydimmer2.js';
+import { shellyplus2pmSettings, shellyplus2pmShelly, shellyplus2pmStatus } from './shellyplus2pm.js';
+import { shellyplus1pmSettings, shellyplus1pmShelly, shellyplus1pmStatus } from './shellyplus1pm.js';
+import { shellypmminig3Settings, shellypmminig3Shelly, shellypmminig3Status } from './shellypmminig3.js';
 
 export type ShellyData = Record<string, ShellyDataType>;
 
@@ -42,7 +43,7 @@ export class ShellyComponent {
     for (const prop in data) {
       // Add a state property for Light, Relay, and Switch components
       if (this.stateName.includes(name)) this.addProperty(new ShellyProperty('state', false));
-      this.addProperty(new ShellyProperty(prop, data[prop] as ShellyData));
+      this.addProperty(new ShellyProperty(prop, data[prop] as ShellyDataType));
     }
   }
 
@@ -80,8 +81,62 @@ export class ShellyComponent {
       yield [key, property];
     }
   }
-  // device: Device;
-  // update(data: Record<string, unknown>);
+
+  update(data: ShellyData) {
+    for (const key in data) {
+      const property = this.getProperty(key);
+      if (property) {
+        property.value = data[key];
+        if (property.key === 'ison') {
+          const state = this.getProperty('state');
+          if (state) state.value = data[key];
+        }
+        if (property.key === 'output') {
+          const state = this.getProperty('state');
+          if (state) state.value = data[key];
+        }
+      }
+    }
+  }
+
+  async fetchUpdate() {
+    if (this.name === 'Sntp') return;
+    if (this.name === 'CoIoT') return;
+    const id = this.id.includes(':') ? this.id.split(':')[1] : undefined;
+    const service = this.device.gen === 1 ? this.id.replace(':', '/') : `rpc/${this.name}.GetStatus${id ? '?id=' + id : ''}`;
+    let data: ShellyData | null = null;
+    if (this.device.gen === 1) {
+      if (this.id === 'cloud') {
+        data = await ShellyDevice.fetch(this.device.host, 'status');
+        data = data?.cloud as ShellyData;
+      } else if (this.id === 'mqtt') {
+        data = await ShellyDevice.fetch(this.device.host, 'status');
+        data = data?.mqtt as ShellyData;
+      } else if (this.id === 'wifi_sta') {
+        data = await ShellyDevice.fetch(this.device.host, 'status');
+        data = data?.wifi_sta as ShellyData;
+      } else if (this.id === 'wifi_sta1') {
+        data = await ShellyDevice.fetch(this.device.host, 'status');
+        data = data?.wifi_sta1 ? (data?.wifi_sta1 as ShellyData) : {};
+      } else if (this.id === 'wifi_ap') {
+        data = await ShellyDevice.fetch(this.device.host, 'status');
+        data = data?.wifi_ap ? (data?.wifi_ap as ShellyData) : {};
+      } else {
+        data = await ShellyDevice.fetch(this.device.host, service);
+      }
+    } else {
+      data = await ShellyDevice.fetch(this.device.host, service);
+    }
+    if (data) this.update(data);
+    else this.device.log.error(`Error fetching component ${this.id} (${this.name}) for device ${this.device.id}`);
+  }
+
+  logComponent() {
+    this.device.log.debug(`Component ${GREEN}${this.id}${db} (${BLUE}${this.name}${db})`);
+    for (const [key, property] of this) {
+      this.device.log.debug(`- ${key}: ${property.value && typeof property.value === 'object' ? debugStringify(property.value) : property.value}`);
+    }
+  }
   // handleEvent(event: RpcEvent);
 }
 
@@ -97,6 +152,7 @@ export class ShellyDevice extends EventEmitter {
   online = false;
   gen = 0;
   lastseen = 0;
+  private lastseenInterval?: NodeJS.Timeout;
 
   private readonly _components = new Map<string, ShellyComponent>();
 
@@ -104,6 +160,13 @@ export class ShellyDevice extends EventEmitter {
     super();
     this.log = log;
     this.host = host;
+  }
+
+  destroy() {
+    if (this.lastseenInterval) clearInterval(this.lastseenInterval);
+    this.lastseenInterval = undefined;
+    this.lastseen = 0;
+    this.removeAllListeners();
   }
 
   hasComponent(id: string): boolean {
@@ -119,6 +182,17 @@ export class ShellyDevice extends EventEmitter {
     return component;
   }
 
+  addComponentProperties(id: string, data?: ShellyData): ShellyComponent | undefined {
+    const component = this.getComponent(id);
+    if (component) {
+      for (const prop in data) {
+        component.addProperty(new ShellyProperty(prop, data[prop] as ShellyDataType));
+      }
+      return component;
+    }
+    return undefined;
+  }
+
   get components(): ShellyComponent[] {
     return Array.from(this._components.values());
   }
@@ -130,7 +204,7 @@ export class ShellyDevice extends EventEmitter {
   }
 
   static async create(log: AnsiLogger, host: string): Promise<ShellyDevice | undefined> {
-    const shelly = await ShellyDevice.fetch(host);
+    const shelly = await ShellyDevice.fetch(host, 'shelly');
     if (!shelly) {
       log.error(`Error creating device from host ${host}. No shelly data found.`);
       return undefined;
@@ -179,13 +253,13 @@ export class ShellyDevice extends EventEmitter {
         if (key === 'lights') {
           let index = 0;
           for (const light of status[key] as ShellyData[]) {
-            device.addComponent(new ShellyComponent(`light:${index++}`, 'Light', device, light as ShellyData));
+            device.addComponentProperties(`light:${index++}`, light as ShellyData);
           }
         }
         if (key === 'relays') {
           let index = 0;
           for (const relay of status[key] as ShellyData[]) {
-            device.addComponent(new ShellyComponent(`relay:${index++}`, 'Relay', device, relay as ShellyData));
+            device.addComponentProperties(`relay:${index++}`, relay as ShellyData);
           }
         }
       }
@@ -220,34 +294,46 @@ export class ShellyDevice extends EventEmitter {
           }
         }
         if (key === 'mqtt') device.addComponent(new ShellyComponent(key, 'MQTT', device, settings[key] as ShellyData)); // Ok
-        if (key === 'ws') device.addComponent(new ShellyComponent(key, 'WebSocket', device, settings[key] as ShellyData)); // Ok
+        if (key === 'ws') device.addComponent(new ShellyComponent(key, 'WS', device, settings[key] as ShellyData)); // Ok
         if (key === 'cloud') device.addComponent(new ShellyComponent(key, 'Cloud', device, settings[key] as ShellyData)); // Ok
         if (key === 'ble') device.addComponent(new ShellyComponent(key, 'Ble', device, settings[key] as ShellyData)); // Ok
         if (key.startsWith('switch:')) device.addComponent(new ShellyComponent(key, 'Switch', device, settings[key] as ShellyData));
         if (key.startsWith('pm1:')) device.addComponent(new ShellyComponent(key, 'PowerMeter', device, settings[key] as ShellyData));
       }
       for (const key in status) {
-        if (key.startsWith('switch:')) device.addComponent(new ShellyComponent(key, 'Switch', device, status[key] as ShellyData));
-        if (key.startsWith('pm1:')) device.addComponent(new ShellyComponent(key, 'PowerMeter', device, status[key] as ShellyData));
+        if (key.startsWith('switch:')) device.addComponentProperties(key, status[key] as ShellyData);
+        if (key.startsWith('pm1:')) device.addComponentProperties(key, status[key] as ShellyData);
       }
     }
 
-    await device.update();
+    await device.fetchUpdate();
+
+    if (device.gen === 1) {
+      const CoIoT = device.getComponent('coiot');
+      if (CoIoT) {
+        if (!CoIoT.getValue('enabled')) log.error(`CoIoT is not enabled for device ${device.id}. Enable it in the settings to receive updates from the device.`);
+        if (!CoIoT.getValue('peer') || CoIoT.getValue('peer') !== 'mcast') log.warn(`CoIoT peer for device ${device.id} is not mcast: ${CoIoT.getValue('peer')}`);
+      } else {
+        log.error(`CoIoT service not found for device ${device.id}`);
+      }
+    }
+
+    device.lastseenInterval = setInterval(
+      () => {
+        if (Date.now() - device.lastseen > 10 * 60 * 1000) log.warn(`Device ${device.id} has not been seen for 10 minutes. Check the device connection.`);
+      },
+      10 * 60 * 1000,
+    );
 
     return device;
   }
 
-  async update(): Promise<void> {
+  update(data: ShellyData) {
     if (this.gen === 1) {
-      const status = await ShellyDevice.fetch(this.host, 'status');
-      if (!status) {
-        this.log.error(`Error fetching device ${this.id} status. No data found.`);
-        return;
-      }
-      for (const key in status) {
+      for (const key in data) {
         if (key === 'lights' || key === 'relays') {
           let index = 0;
-          for (const light of status[key] as ShellyData[]) {
+          for (const light of data[key] as ShellyData[]) {
             const component = this.getComponent(`${key.slice(0, 5)}:${index++}`);
             if (component) component.setValue('state', light.ison as boolean);
             else this.log.error(`Error setting status for device ${this.id}. No component found for ${key.slice(0, 5)}:${index - 1}`);
@@ -255,28 +341,48 @@ export class ShellyDevice extends EventEmitter {
         }
       }
     } else if (this.gen === 2 || this.gen === 3) {
-      const status = await ShellyDevice.fetch(this.host, 'rpc/Shelly.GetStatus');
-      if (!status) {
-        this.log.error(`Error fetching device ${this.id} status. No data found.`);
-        return;
-      }
-      for (const key in status) {
+      for (const key in data) {
         if (key.startsWith('switch:')) {
-          const light = status[key] as ShellyData;
+          const light = data[key] as ShellyData;
           const component = this.getComponent(key);
           if (component) component.setValue('state', light.output as boolean);
           else this.log.error(`Error setting status for device ${this.id}. No component found for ${key}`);
         }
       }
     }
+  }
+
+  async fetchUpdate(): Promise<void> {
+    const service = this.gen === 1 ? 'status' : 'rpc/Shelly.GetStatus';
+    const status = await ShellyDevice.fetch(this.host, service);
+    if (!status) {
+      this.log.error(`Error fetching device ${this.id} status. No data found.`);
+      return;
+    }
+    this.update(status);
     this.lastseen = Date.now();
   }
 
   static async fetch(host: string, service = 'shelly'): Promise<ShellyData | null> {
-    if (host.startsWith('mock.')) {
-      if (service === 'shelly') return shellyDimmerShelly;
-      if (service === 'status') return shellyDimmerStatus;
-      if (service === 'settings') return shellyDimmerSettings;
+    if (host === 'mock.192.168.1.217') {
+      if (service === 'shelly') return shellyplus1pmShelly;
+      if (service === 'rpc/Shelly.GetStatus') return shellyplus1pmStatus;
+      if (service === 'rpc/Shelly.GetConfig') return shellyplus1pmSettings;
+    }
+    if (host === 'mock.192.168.1.218') {
+      if (service === 'shelly') return shellyplus2pmShelly;
+      if (service === 'rpc/Shelly.GetStatus') return shellyplus2pmStatus;
+      if (service === 'rpc/Shelly.GetConfig') return shellyplus2pmSettings;
+    }
+    if (host === 'mock.192.168.1.219') {
+      if (service === 'shelly') return shellydimmer2Shelly;
+      if (service === 'status') return shellydimmer2Status;
+      if (service === 'settings') return shellydimmer2Settings;
+    }
+    if (host === 'mock.192.168.1.220') {
+      if (service === 'shelly') return shellypmminig3Shelly;
+      if (service === 'status') return shellypmminig3Status;
+      if (service === 'settings') return shellypmminig3Settings;
     }
     const url = `http://${host}/${service}`;
     try {
@@ -294,22 +400,40 @@ export class ShellyDevice extends EventEmitter {
     }
   }
 
+  // Gen 1
+  // http://192.168.1.219/light/0
+  // http://192.168.1.219/light/0?turn=on
+  // http://192.168.1.219/light/0?turn=off
+  // http://192.168.1.219/light/0?turn=toggle
+
+  // Gen 2 and 3 legacy
+  // http://192.168.1.217/relay/0
+  // http://192.168.1.217/relay/0?turn=on
+  // http://192.168.1.217/relay/0?turn=off
+  // http://192.168.1.217/relay/0?turn=toggle
+
+  // Gen 2 and 3 rpc
+  // http://192.168.1.218/rpc/Switch.GetStatus?id=0
+  // http://192.168.1.218/rpc/Switch.Set?id=0&on=true
+  // http://192.168.1.218/rpc/Switch.Set?id=0&on=false
+  // http://192.168.1.218/rpc/Switch.Toggle?id=0
   async sendCommand(hostname: string, component: string, index: number, command: string): Promise<unknown | undefined> {
     try {
       const response = await fetch(`http://${hostname}/${component}/${index}?${command}`);
       if (!response.ok) {
-        console.error('Error fetching shelly:');
+        this.log.error(`Error fetching shelly at ${hostname} response:`, response.statusText);
         return undefined;
       }
       const data = await response.json();
       console.log(data);
       return data;
     } catch (error) {
-      console.error('Error fetching shelly:', error);
+      this.log.error(`Error fetching shelly at ${hostname} error:`, error);
       return undefined;
     }
   }
 
+  /*
   async writeFile(filePath: string, data: string) {
     // Write the data to a file
     await fs
@@ -321,6 +445,7 @@ export class ShellyDevice extends EventEmitter {
         this.log.error(`Error writing to ${filePath}:`, error);
       });
   }
+  */
 
   logDevice() {
     // Log the device
@@ -328,14 +453,14 @@ export class ShellyDevice extends EventEmitter {
       `Shelly device ${MAGENTA}${this.id}${db} (${this.model}) gen ${BLUE}${this.gen}${db} name ${BLUE}${this.name}${db} mac ${BLUE}${this.mac}${db} host ${BLUE}${this.host}${db}`,
     );
     for (const [key, component] of this) {
-      this.log.debug(`- ${GREEN}${component.name}${db} (${GREY}${key}${db})`);
+      this.log.debug(`- ${GREEN}${component.name}${db} (${BLUE}${key}${db})`);
       for (const [key, property] of component) {
         this.log.debug(`  - ${key}: ${property.value && typeof property.value === 'object' ? debugStringify(property.value) : property.value}`);
       }
     }
   }
 }
-
+/*
 if (process.argv.includes('shelly')) {
   const log = new AnsiLogger({ logName: 'shellyDevice', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: true });
 
@@ -344,560 +469,32 @@ if (process.argv.includes('shelly')) {
 
   shelly = await ShellyDevice.create(log, '192.168.1.218');
   if (shelly) shelly.logDevice();
+  if (shelly) {
+    const component = shelly.getComponent('switch:0');
+    await component?.fetchUpdate();
+    component?.logComponent();
+  }
+  if (shelly) {
+    const component = shelly.getComponent('switch:1');
+    await component?.fetchUpdate();
+    component?.logComponent();
+  }
 
   shelly = await ShellyDevice.create(log, '192.168.1.219');
   if (shelly) shelly.logDevice();
+  if (shelly) {
+    const component = shelly.getComponent('light:0');
+    await component?.fetchUpdate();
+    component?.logComponent();
+  }
 
   shelly = await ShellyDevice.create(log, '192.168.1.220');
   if (shelly) shelly.logDevice();
 
+  process.on('SIGINT', function () {
+    process.exit();
+  });
+
   // await ShellyDevice.sendCommand('192.168.1.219', 'light', 0, 'turn=on');
-}
-
-// Sample output Gen 1 Shelly Dimmer for 192.168.1.219/shelly
-export const shellyDimmerShelly: ShellyData = {
-  type: 'SHDM-2',
-  mac: '98CDAC0D01BB',
-  auth: false,
-  fw: '20230913-114008/v1.14.0-gcb84623',
-  discoverable: false,
-  longid: 1,
-  num_inputs: 2,
-  num_outputs: 1,
-  num_meters: 1,
-};
-
-// Sample output Gen 2 Shelly Plus 1PM for 192.168.1.217/shelly
-export const shellyplus1pmShelly: ShellyData = {
-  'name': null,
-  'id': 'shellyplus1pm-441793d69718',
-  'mac': '441793D69718',
-  'slot': 0,
-  'model': 'SNSW-001P16EU',
-  'gen': 2,
-  'fw_id': '20240430-105751/1.3.1-gd8534ee',
-  'ver': '1.3.1',
-  'app': 'Plus1PM',
-  'auth_en': false,
-  'auth_domain': null,
-};
-
-// Sample output Gen 2 Shelly Plus 2PM for 192.168.1.218/shelly
-export const shellyplus2pmShelly: ShellyData = {
-  'name': null,
-  'id': 'shellyplus2pm-5443b23d81f8',
-  'mac': '5443B23D81F8',
-  'slot': 0,
-  'model': 'SNSW-102P16EU',
-  'gen': 2,
-  'fw_id': '20240430-105737/1.3.1-gd8534ee',
-  'ver': '1.3.1',
-  'app': 'Plus2PM',
-  'auth_en': false,
-  'auth_domain': null,
-  'profile': 'switch',
-};
-// Sample output Gen 1 Shelly Dimmer for 192.168.1.219/status
-export const shellyDimmerStatus: ShellyData = {
-  wifi_sta: {
-    connected: true,
-    ssid: 'FibreBox_X6-12A4C7',
-    ip: '192.168.1.219',
-    rssi: -49,
-  },
-  cloud: {
-    enabled: true,
-    connected: true,
-  },
-  mqtt: {
-    connected: false,
-  },
-  time: '07:30',
-  unixtime: 1715923841,
-  serial: 2606,
-  has_update: false,
-  mac: '98CDAC0D01BB',
-  cfg_changed_cnt: 2,
-  actions_stats: {
-    skipped: 0,
-  },
-  lights: [
-    {
-      ison: false,
-      source: 'http',
-      has_timer: false,
-      timer_started: 0,
-      timer_duration: 0,
-      timer_remaining: 0,
-      mode: 'white',
-      brightness: 100,
-      transition: 0,
-    },
-  ],
-  meters: [
-    {
-      power: 0,
-      overpower: 0,
-      is_valid: true,
-      timestamp: 1715931041,
-      counters: [0, 0, 0],
-      total: 0,
-    },
-  ],
-  inputs: [
-    {
-      input: 0,
-      event: '',
-      event_cnt: 0,
-    },
-    {
-      input: 0,
-      event: '',
-      event_cnt: 0,
-    },
-  ],
-  tmp: {
-    tC: 48.68,
-    tF: 119.62,
-    is_valid: true,
-  },
-  calibrated: false,
-  calib_progress: 0,
-  calib_status: 0,
-  calib_running: 0,
-  wire_mode: 1,
-  forced_neutral: false,
-  overtemperature: false,
-  loaderror: 0,
-  overpower: false,
-  debug: 0,
-  update: {
-    status: 'idle',
-    has_update: false,
-    new_version: '20230913-114008/v1.14.0-gcb84623',
-    old_version: '20230913-114008/v1.14.0-gcb84623',
-    beta_version: '20231107-164738/v1.14.1-rc1-g0617c15',
-  },
-  ram_total: 49672,
-  ram_free: 36812,
-  fs_size: 233681,
-  fs_free: 119476,
-  uptime: 116135,
-};
-// Sample output for Gen 1 Shelly Dimmer for 192.168.1.219/settings:
-export const shellyDimmerSettings: ShellyData = {
-  device: {
-    type: 'SHDM-2',
-    mac: '98CDAC0D01BB',
-    hostname: 'shellydimmer2-98CDAC0D01BB',
-    num_inputs: 2,
-    num_outputs: 1,
-    num_meters: 1,
-  },
-  wifi_ap: {
-    enabled: false,
-    ssid: 'shellydimmer2-98CDAC0D01BB',
-    key: '',
-  },
-  wifi_sta: {
-    enabled: true,
-    ssid: 'FibreBox_X6-12A4C7',
-    ipv4_method: 'dhcp',
-    ip: null,
-    gw: null,
-    mask: null,
-    dns: null,
-  },
-  wifi_sta1: {
-    enabled: false,
-    ssid: null,
-    ipv4_method: 'dhcp',
-    ip: null,
-    gw: null,
-    mask: null,
-    dns: null,
-  },
-  ap_roaming: {
-    enabled: false,
-    threshold: -70,
-  },
-  mqtt: {
-    enable: false,
-    server: '192.168.33.3:1883',
-    user: '',
-    id: 'shellydimmer2-98CDAC0D01BB',
-    reconnect_timeout_max: 60,
-    reconnect_timeout_min: 2,
-    clean_session: true,
-    keep_alive: 60,
-    max_qos: 0,
-    retain: false,
-    update_period: 30,
-  },
-  coiot: {
-    enabled: true,
-    update_period: 15,
-    peer: '192.168.1.189:5683',
-  },
-  sntp: {
-    server: 'time.google.com',
-    enabled: true,
-  },
-  login: {
-    enabled: false,
-    unprotected: false,
-    username: 'admin',
-  },
-  pin_code: '',
-  name: null,
-  fw: '20230913-114008/v1.14.0-gcb84623',
-  factory_reset_from_switch: true,
-  pon_wifi_reset: false,
-  discoverable: false,
-  build_info: {
-    build_id: '20230913-114008/v1.14.0-gcb84623',
-    build_timestamp: '2023-09-13T11:40:08Z',
-    build_version: '1.0',
-  },
-  cloud: {
-    enabled: true,
-    connected: true,
-  },
-  timezone: 'Europe/Monaco',
-  lat: 43.731201,
-  lng: 7.4138,
-  tzautodetect: true,
-  tz_utc_offset: 7200,
-  tz_dst: false,
-  tz_dst_auto: true,
-  time: '14:22',
-  unixtime: 1715862160,
-  led_status_disable: false,
-  debug_enable: false,
-  allow_cross_origin: false,
-  actions: {
-    active: false,
-    names: [
-      'btn1_on_url',
-      'btn1_off_url',
-      'btn1_longpush_url',
-      'btn1_shortpush_url',
-      'btn2_on_url',
-      'btn2_off_url',
-      'btn2_longpush_url',
-      'btn2_shortpush_url',
-      'out_on_url',
-      'out_off_url',
-    ],
-  },
-  hwinfo: {
-    hw_revision: 'prod-2021-02',
-    batch_id: 0,
-  },
-  mode: 'white',
-  pulse_mode: 2,
-  pulse_mode_detected: 1,
-  pulse_mode_rebooted: 0,
-  load_autodetect: 1,
-  calibrated: false,
-  transition: 1000,
-  fade_rate: 3,
-  min_brightness: 0,
-  zcross_debounce: 100,
-  bypass: false,
-  lights: [
-    {
-      name: '',
-      ison: false,
-      default_state: 'last',
-      auto_on: 0,
-      auto_off: 0,
-      schedule: false,
-      night_mode: {
-        enabled: false,
-        start_time: '00:00',
-        end_time: '00:00',
-        brightness: 0,
-      },
-      schedule_rules: [],
-      btn_type: 'one_button',
-      btn_debounce: 80,
-      swap_inputs: 0,
-    },
-  ],
-  night_mode: {
-    enabled: false,
-    start_time: '00:00',
-    end_time: '00:00',
-    brightness: 0,
-  },
-  warm_up: {
-    enabled: 0,
-    brightness: 100,
-    time: 50,
-  },
-  eco_mode_enabled: false,
-};
-
-/* Sample output for Gen 2 host/rpc/Shelly.GetStatus:
-{
-    "ble": {},
-    "cloud": {
-        "connected": true
-    },
-    "input:0": {
-        "id": 0,
-        "state": null
-    },
-    "input:1": {
-        "id": 1,
-        "state": false
-    },
-    "mqtt": {
-        "connected": false
-    },
-    "switch:0": {
-        "id": 0,
-        "source": "WS_in",
-        "output": false,
-        "apower": 0,
-        "voltage": 237.1,
-        "freq": 50,
-        "current": 0,
-        "pf": 0,
-        "aenergy": {
-            "total": 0,
-            "by_minute": [
-                0,
-                0,
-                0
-            ],
-            "minute_ts": 1715923860
-        },
-        "ret_aenergy": {
-            "total": 0,
-            "by_minute": [
-                0,
-                0,
-                0
-            ],
-            "minute_ts": 1715923860
-        },
-        "temperature": {
-            "tC": 52.4,
-            "tF": 126.2
-        }
-    },
-    "switch:1": {
-        "id": 1,
-        "source": "WS_in",
-        "output": false,
-        "apower": 0,
-        "voltage": 237.1,
-        "freq": 50,
-        "current": 0,
-        "pf": 0,
-        "aenergy": {
-            "total": 0,
-            "by_minute": [
-                0,
-                0,
-                0
-            ],
-            "minute_ts": 1715923860
-        },
-        "ret_aenergy": {
-            "total": 0,
-            "by_minute": [
-                0,
-                0,
-                0
-            ],
-            "minute_ts": 1715923860
-        },
-        "temperature": {
-            "tC": 52.4,
-            "tF": 126.2
-        }
-    },
-    "sys": {
-        "mac": "5443B23D81F8",
-        "restart_required": false,
-        "time": "07:31",
-        "unixtime": 1715923918,
-        "uptime": 373141,
-        "ram_size": 260172,
-        "ram_free": 115580,
-        "fs_size": 458752,
-        "fs_free": 126976,
-        "cfg_rev": 13,
-        "kvs_rev": 0,
-        "schedule_rev": 0,
-        "webhook_rev": 0,
-        "available_updates": {},
-        "reset_reason": 1
-    },
-    "wifi": {
-        "sta_ip": "192.168.1.218",
-        "status": "got ip",
-        "ssid": "FibreBox_X6-12A4C7",
-        "rssi": -60
-    },
-    "ws": {
-        "connected": false
-    }
-}
-*/
-/* Sample output for Gen 2 host/rpc/Shelly.GetConfig:
-{
-    "ble": {
-        "enable": true,
-        "rpc": {
-            "enable": true
-        },
-        "observer": {
-            "enable": false
-        }
-    },
-    "cloud": {
-        "enable": true,
-        "server": "shelly-103-eu.shelly.cloud:6022/jrpc"
-    },
-    "input:0": {
-        "id": 0,
-        "name": null,
-        "type": "button",
-        "enable": true,
-        "invert": false,
-        "factory_reset": true
-    },
-    "input:1": {
-        "id": 1,
-        "name": null,
-        "type": "switch",
-        "enable": true,
-        "invert": false,
-        "factory_reset": true
-    },
-    "mqtt": {
-        "enable": false,
-        "server": null,
-        "client_id": "shellyplus2pm-5443b23d81f8",
-        "user": null,
-        "ssl_ca": null,
-        "topic_prefix": "shellyplus2pm-5443b23d81f8",
-        "rpc_ntf": true,
-        "status_ntf": false,
-        "use_client_cert": false,
-        "enable_rpc": true,
-        "enable_control": true
-    },
-    "switch:0": {
-        "id": 0,
-        "name": null,
-        "in_mode": "momentary",
-        "initial_state": "restore_last",
-        "auto_on": false,
-        "auto_on_delay": 60,
-        "auto_off": false,
-        "auto_off_delay": 60,
-        "power_limit": 2800,
-        "voltage_limit": 280,
-        "undervoltage_limit": 0,
-        "autorecover_voltage_errors": false,
-        "current_limit": 10
-    },
-    "switch:1": {
-        "id": 1,
-        "name": null,
-        "in_mode": "follow",
-        "initial_state": "match_input",
-        "auto_on": false,
-        "auto_on_delay": 60,
-        "auto_off": false,
-        "auto_off_delay": 60,
-        "power_limit": 2800,
-        "voltage_limit": 280,
-        "undervoltage_limit": 0,
-        "autorecover_voltage_errors": false,
-        "current_limit": 10
-    },
-    "sys": {
-        "device": {
-            "name": null,
-            "mac": "5443B23D81F8",
-            "fw_id": "20240430-105737/1.3.1-gd8534ee",
-            "discoverable": true,
-            "eco_mode": false,
-            "profile": "switch",
-            "addon_type": null
-        },
-        "location": {
-            "tz": "Europe/Monaco",
-            "lat": 43.7312,
-            "lon": 7.4138
-        },
-        "debug": {
-            "level": 2,
-            "file_level": null,
-            "mqtt": {
-                "enable": false
-            },
-            "websocket": {
-                "enable": false
-            },
-            "udp": {
-                "addr": null
-            }
-        },
-        "ui_data": {},
-        "rpc_udp": {
-            "dst_addr": null,
-            "listen_port": null
-        },
-        "sntp": {
-            "server": "time.google.com"
-        },
-        "cfg_rev": 12
-    },
-    "wifi": {
-        "ap": {
-            "ssid": "ShellyPlus2PM-5443B23D81F8",
-            "is_open": true,
-            "enable": false,
-            "range_extender": {
-                "enable": false
-            }
-        },
-        "sta": {
-            "ssid": "FibreBox_X6-12A4C7",
-            "is_open": false,
-            "enable": true,
-            "ipv4mode": "dhcp",
-            "ip": null,
-            "netmask": null,
-            "gw": null,
-            "nameserver": null
-        },
-        "sta1": {
-            "ssid": null,
-            "is_open": true,
-            "enable": false,
-            "ipv4mode": "dhcp",
-            "ip": null,
-            "netmask": null,
-            "gw": null,
-            "nameserver": null
-        },
-        "roam": {
-            "rssi_thr": -80,
-            "interval": 60
-        }
-    },
-    "ws": {
-        "enable": false,
-        "server": null,
-        "ssl_ca": "ca.pem"
-    }
 }
 */

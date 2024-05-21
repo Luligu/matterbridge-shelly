@@ -43,6 +43,8 @@ export default tseslint.config(
   eslint.configs.recommended,
   ...tseslint.configs.strict,
   ...tseslint.configs.stylistic,
+  // ...tseslint.configs.strictTypeChecked,
+  // ...tseslint.configs.stylisticTypeChecked,
   eslintPluginPrettier,
   {
     name: 'global ignores',
@@ -55,6 +57,9 @@ export default tseslint.config(
       ecmaVersion: 'latest',
       sourceType: 'module',
     },
+    linterOptions: {
+      reportUnusedDisableDirectives: 'warn',
+    },
     rules: {
       'no-console': 'warn',
       'no-undef': 'off',
@@ -64,9 +69,7 @@ export default tseslint.config(
   {
     name: 'typescript',
     files: ['**/*.ts'],
-    plugins: {
-      '@typescript-eslint': tseslint.plugin,
-    },
+    ignores: ['**/__test__/*', '**/*.test.ts', '**/*.spec.ts'],
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',
@@ -74,6 +77,12 @@ export default tseslint.config(
       parserOptions: {
         project: true,
       },
+    },
+    linterOptions: {
+      reportUnusedDisableDirectives: 'warn',
+    },
+    plugins: {
+      '@typescript-eslint': tseslint.plugin,
     },
     rules: {
       'no-console': 'warn',
@@ -84,11 +93,6 @@ export default tseslint.config(
   {
     name: 'jest',
     files: ['**/__test__/*', '**/*.test.ts', '**/*.spec.ts'],
-    plugins: {
-      '@typescript-eslint': tseslint.plugin,
-      jest: jesteslint,
-    },
-    ...jesteslint.configs['flat/recommended'],
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',
@@ -96,6 +100,20 @@ export default tseslint.config(
       parserOptions: {
         project: false,
       },
+    },
+    linterOptions: {
+      reportUnusedDisableDirectives: 'warn',
+    },
+    plugins: {
+      '@typescript-eslint': tseslint.plugin,
+      jest: jesteslint,
+    },
+    ...jesteslint.configs['flat/recommended'],
+    rules: {
+      'no-console': 'warn',
+      'no-undef': 'off',
+      'spaced-comment': ['error', 'always'],
+      ...jesteslint.configs['flat/recommended'].rules,
     },
   },
 );

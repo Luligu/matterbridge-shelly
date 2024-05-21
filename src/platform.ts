@@ -262,7 +262,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       server.start((msg: CoapMessage) => {
         // this.log.info(`CoIoT message received from: ${msg.host}`);
         shellies1g._statusUpdateHandler(msg);
-      });
+      }, false);
     }, 10000);
   }
 
@@ -434,7 +434,6 @@ export class MdnsDeviceDiscoverer extends DeviceDiscoverer {
         // We get id: shellydimmer2-98CDAC0D01BB host: 192.168.1.219 gen:1
         // We get id: shellyplus1pm-441793d69718 host: 192.168.1.217 gen:2
         const shellyData = (await getShelly(host)) as { type: string; model: string; mac: string };
-        // eslint-disable-next-line no-console
         // if (shellyData) console.log(shellyData);
         if (gen === 1) {
           if (shellyData) {
@@ -446,9 +445,9 @@ export class MdnsDeviceDiscoverer extends DeviceDiscoverer {
             if (!shellies1g.hasDevice(device)) shellies1g.addDevice(device);
           }
         }
-        if (gen === 2) {
+        if (gen === 2 || gen === 3) {
           if (shellyData) {
-            this.log.info(`mdnsScanner discovered shelly gen 2 ${id} model ${shellyData.model} mac ${shellyData.mac} host ${host}`);
+            this.log.info(`mdnsScanner discovered shelly gen ${gen} ${id} model ${shellyData.model} mac ${shellyData.mac} host ${host}`);
             this.platform.shellyDevices.set(id, { id, hostname: host });
             await this.platform.saveShellyDevices();
             // We need deviceId shellyplus1pm-441793d69718 hostname 192.168.1.217
@@ -457,7 +456,7 @@ export class MdnsDeviceDiscoverer extends DeviceDiscoverer {
         }
       },
       this.timeout, // In seconds
-      true,
+      false,
     );
   }
 
@@ -481,7 +480,6 @@ export class StorageDeviceDiscoverer extends DeviceDiscoverer {
     shellyDevices.forEach(async (device) => {
       this.log.info(`${nf}StorageDeviceDiscoverer deviceId: ${hk}${device.id}${nf} hostname: ${zb}${device.hostname}${nf}`);
       const shellyData = (await getShelly(device.hostname)) as { type: string; model: string; mac: string; gen: number };
-      // eslint-disable-next-line no-console
       // if (shellyData) console.log(shellyData);
       if (!shellyData) {
         this.log.error(`Failed to retrieve shelly data for device ${device.id}`);
@@ -492,7 +490,7 @@ export class StorageDeviceDiscoverer extends DeviceDiscoverer {
         const device1g = shellies1g.createDevice(shellyData.type, shellyData.mac, device.hostname);
         if (!shellies1g.hasDevice(device1g)) shellies1g.addDevice(device1g);
       }
-      if (shellyData.gen === 2) {
+      if (shellyData.gen === 2 || shellyData.gen === 3) {
         // We need deviceId shellyplus1pm-441793d69718 hostname 192.168.1.217
         this.handleDiscoveredDevice({ deviceId: device.id, hostname: device.hostname });
       }
@@ -515,7 +513,6 @@ export class ConfigDeviceDiscoverer extends DeviceDiscoverer {
     Object.entries(this.config.deviceIp as Record<string, PlatformConfigValue>).forEach(async ([key, value]) => {
       this.log.info(`${nf}ConfigDeviceDiscoverer deviceId: ${hk}${key}${nf} hostname: ${zb}${value}${nf}`);
       const shellyData = (await getShelly(value as string)) as { type: string; model: string; mac: string; gen: number };
-      // eslint-disable-next-line no-console
       // if (shellyData) console.log(shellyData);
       if (!shellyData) {
         this.log.error(`Failed to retrieve shelly data for device ${key}`);
@@ -526,7 +523,7 @@ export class ConfigDeviceDiscoverer extends DeviceDiscoverer {
         const device1g = shellies1g.createDevice(shellyData.type, shellyData.mac, value as string);
         if (!shellies1g.hasDevice(device1g)) shellies1g.addDevice(device1g);
       }
-      if (shellyData.gen === 2) {
+      if (shellyData.gen === 2 || shellyData.gen === 3) {
         // We need deviceId shellyplus1pm-441793d69718 hostname 192.168.1.217
         this.handleDiscoveredDevice({ deviceId: key, hostname: value as string });
       }
