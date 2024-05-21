@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import { AnsiLogger, BLUE, GREEN, MAGENTA, db, debugStringify } from 'node-ansi-logger';
+import { AnsiLogger, BLUE, GREEN, MAGENTA, TimestampFormat, db, debugStringify } from 'node-ansi-logger';
 import { EventEmitter } from 'events';
 import fetch from 'node-fetch';
 import { shellydimmer2Settings, shellydimmer2Shelly, shellydimmer2Status } from './shellydimmer2.js';
@@ -14,10 +14,12 @@ export type ShellyDataType = string | number | boolean | null | undefined | obje
 export class ShellyProperty {
   readonly key: string;
   private _value: ShellyDataType;
+  readonly component: ShellyComponent;
 
-  constructor(key: string, value: ShellyDataType) {
+  constructor(key: string, value: ShellyDataType, component: ShellyComponent) {
     this.key = key;
     this._value = value;
+    this.component = component;
   }
 
   get value(): ShellyDataType {
@@ -28,6 +30,20 @@ export class ShellyProperty {
     this._value = value;
   }
 }
+
+interface SwitchComponent {
+  On(): void;
+  Off(): void;
+  Toggle(): void;
+}
+
+interface CoverComponent {
+  Open(): void;
+  Close(): void;
+  Stop(): void;
+}
+
+type ShellyComponentType = ShellyComponent & Partial<SwitchComponent> & Partial<CoverComponent>;
 
 export class ShellyComponent {
   readonly id: string;
@@ -42,8 +58,39 @@ export class ShellyComponent {
     this.device = device;
     for (const prop in data) {
       // Add a state property for Light, Relay, and Switch components
-      if (this.stateName.includes(name)) this.addProperty(new ShellyProperty('state', false));
-      this.addProperty(new ShellyProperty(prop, data[prop] as ShellyDataType));
+      if (this.stateName.includes(name)) this.addProperty(new ShellyProperty('state', false, this));
+      this.addProperty(new ShellyProperty(prop, data[prop] as ShellyDataType, this));
+    }
+
+    // Extend the class prototype to include the Switch Relay Light methods dynamically
+    if (this.stateName.includes(name)) {
+      (this as ShellyComponentType).On = function () {
+        this.setValue('state', true);
+      };
+
+      (this as ShellyComponentType).Off = function () {
+        this.setValue('state', false);
+      };
+
+      (this as ShellyComponentType).Toggle = function () {
+        const currentState = this.getValue('state');
+        this.setValue('state', !currentState);
+      };
+    }
+
+    // Extend the class prototype to include the Cover methods dynamically
+    if (name === 'Cover') {
+      (this as ShellyComponentType).Open = function () {
+        this.setValue('state', 'open');
+      };
+
+      (this as ShellyComponentType).Close = function () {
+        this.setValue('state', 'close');
+      };
+
+      (this as ShellyComponentType).Stop = function () {
+        this.setValue('state', 'stop');
+      };
     }
   }
 
@@ -186,7 +233,7 @@ export class ShellyDevice extends EventEmitter {
     const component = this.getComponent(id);
     if (component) {
       for (const prop in data) {
-        component.addProperty(new ShellyProperty(prop, data[prop] as ShellyDataType));
+        component.addProperty(new ShellyProperty(prop, data[prop] as ShellyDataType, component));
       }
       return component;
     }
@@ -460,13 +507,15 @@ export class ShellyDevice extends EventEmitter {
     }
   }
 }
-/*
+
 if (process.argv.includes('shelly')) {
   const log = new AnsiLogger({ logName: 'shellyDevice', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: true });
 
-  let shelly = await ShellyDevice.create(log, '192.168.1.217');
+  const shelly = await ShellyDevice.create(log, '192.168.1.217');
   if (shelly) shelly.logDevice();
+  console.log(shelly);
 
+  /*
   shelly = await ShellyDevice.create(log, '192.168.1.218');
   if (shelly) shelly.logDevice();
   if (shelly) {
@@ -490,11 +539,10 @@ if (process.argv.includes('shelly')) {
 
   shelly = await ShellyDevice.create(log, '192.168.1.220');
   if (shelly) shelly.logDevice();
-
+  */
   process.on('SIGINT', function () {
     process.exit();
   });
 
   // await ShellyDevice.sendCommand('192.168.1.219', 'light', 0, 'turn=on');
 }
-*/

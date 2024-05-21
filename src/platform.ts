@@ -1,4 +1,16 @@
-import { DeviceTypes, EndpointNumber, FixedLabelCluster, OnOff, OnOffCluster, PlatformConfig, PlatformConfigValue, PowerSource, onOffSwitch } from 'matterbridge';
+import {
+  DeviceTypes,
+  EndpointNumber,
+  FixedLabelCluster,
+  OnOff,
+  OnOffCluster,
+  PlatformConfig,
+  PlatformConfigValue,
+  PowerSource,
+  WindowCovering,
+  WindowCoveringCluster,
+  onOffSwitch,
+} from 'matterbridge';
 import { Matterbridge, MatterbridgeDevice, MatterbridgeDynamicPlatform } from 'matterbridge';
 import { AnsiLogger, db, debugStringify, dn, hk, idn, nf, or, rs, wr, zb } from 'node-ansi-logger';
 import { NodeStorage, NodeStorageManager } from 'node-persist-manager';
@@ -9,7 +21,7 @@ import { CoapMessage, CoapServer } from './coapScanner.js';
 import shellies1g, { Device as Device1g } from 'shellies';
 
 // Shellyies gen 2
-import { Device, DeviceId, DeviceIdentifiers, DeviceDiscoverer, Shellies, Switch, CharacteristicValue } from 'shellies-ng';
+import { Device, DeviceId, DeviceIdentifiers, DeviceDiscoverer, Shellies, Switch, Cover, CharacteristicValue } from 'shellies-ng';
 
 import path from 'path';
 import fetch from 'node-fetch';
@@ -146,6 +158,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       // Scan the device components
       for (const [key, component] of device) {
         if (component.name === 'Switch') {
+          if (device.getComponent('cover:0')) continue;
           const switchComponent = device.getComponent(key) as Switch;
           if (switchComponent) {
             this.log.info(`${hk}${device.id}${nf} - Switch status: ${switchComponent.output}`);
@@ -174,6 +187,54 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             });
           } else {
             this.log.error('Failed to retrieve Switch component');
+          }
+          switchDevice.addFixedLabel('composed', component.name);
+        }
+        if (component.name === 'Cover') {
+          const coverComponent = device.getComponent(key) as Cover;
+          if (coverComponent) {
+            this.log.info(`${hk}${device.id}${nf} - Cover status: ${coverComponent.state}`);
+            if (coverComponent.voltage !== undefined) this.log.info(`${hk}${device.id}${nf} - Cover voltage: ${coverComponent.voltage}`);
+            if (coverComponent.current !== undefined) this.log.info(`${hk}${device.id}${nf} - Cover current: ${coverComponent.current}`);
+            if (coverComponent.apower !== undefined) this.log.info(`${hk}${device.id}${nf} - Cover power: ${coverComponent.apower}`);
+            if (coverComponent.aenergy && coverComponent.aenergy.total !== undefined) this.log.info(`${hk}${device.id}${nf} - Cover energy: ${coverComponent.aenergy.total}`);
+
+            // Add a child enpoint for cover
+            const child = switchDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.WINDOW_COVERING], [WindowCovering.Cluster.id]);
+            // Set the WindowCovering attributes
+            switchDevice.setWindowCoveringTargetAsCurrentAndStopped(child);
+            /*
+            const windowCoveringCluster = child.getClusterServer(
+              WindowCoveringCluster.with(WindowCovering.Feature.Lift, WindowCovering.Feature.PositionAwareLift, WindowCovering.Feature.AbsolutePosition),
+            );
+            if (windowCoveringCluster) {
+              const position = windowCoveringCluster.getCurrentPositionLiftPercent100thsAttribute();
+              if (position !== null) {
+                windowCoveringCluster.setTargetPositionLiftPercent100thsAttribute(position);
+                windowCoveringCluster.setOperationalStatusAttribute({
+                  global: WindowCovering.MovementStatus.Stopped,
+                  lift: WindowCovering.MovementStatus.Stopped,
+                  tilt: 0,
+                });
+              }
+            }
+            */
+            // Add event handler
+            coverComponent.on('change', (characteristic: string, value: CharacteristicValue) => {
+              console.log(characteristic, value); // state: stopped opening closing
+              this.shellyCoverUpdateHandler(switchDevice, device, key, characteristic, value);
+            });
+            /*
+            // Add command handlers
+            switchDevice.addCommandHandler('on', async (data) => {
+              this.shellySwitchCommandHandler(switchDevice, device, 'on', data.endpoint.number, true);
+            });
+            switchDevice.addCommandHandler('off', async (data) => {
+              this.shellySwitchCommandHandler(switchDevice, device, 'off', data.endpoint.number, false);
+            });
+            */
+          } else {
+            this.log.error('Failed to retrieve Cover component');
           }
           switchDevice.addFixedLabel('composed', component.name);
         }
@@ -399,6 +460,73 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           `for shelly device ${dn}${shellyDevice?.id}${nf} component ${endpointName}${nf}`,
       );
     return true;
+  }
+
+  private shellyCoverUpdateHandler(
+    matterbridgeDevice: MatterbridgeDevice,
+    shellyDevice: Device | Device1g,
+    switchId: string,
+    characteristic: string,
+    value: CharacteristicValue,
+  ): boolean {
+    this.log.info(
+      `${db}Shelly message for device ${idn}${shellyDevice.id}${rs}${db} ${hk}${switchId}${db} ` +
+        `${zb}${characteristic}${db}:${typeof value === 'object' ? debugStringify(value as object) : value}${rs}`,
+    );
+    if (!(shellyDevice instanceof Device) /* && !(characteristic.startsWith('switch') || characteristic.startsWith('relay'))*/) {
+      return false;
+    }
+    if (shellyDevice instanceof Device && characteristic !== 'state') {
+      return false;
+    }
+    const endpoints = matterbridgeDevice.getChildEndpoints();
+    for (const endpoint of endpoints) {
+      const labelList = endpoint.getClusterServer(FixedLabelCluster)?.getLabelListAttribute();
+      if (!labelList) {
+        this.log.error('shellySwitchUpdateHandler error: labelList undefined');
+        return false;
+      }
+      let endpointName = '';
+      for (const entry of labelList) {
+        if (entry.label === 'endpointName') endpointName = entry.value;
+      }
+      if (endpointName === switchId) {
+        const windowCoveringCluster = endpoint.getClusterServer(
+          WindowCoveringCluster.with(WindowCovering.Feature.Lift, WindowCovering.Feature.PositionAwareLift, WindowCovering.Feature.AbsolutePosition),
+        );
+        if (!windowCoveringCluster) {
+          this.log.error('shellySwitchUpdateHandler error: cluster not found');
+          return false;
+        }
+        if (value === 'stopped') {
+          matterbridgeDevice.setWindowCoveringTargetAsCurrentAndStopped(endpoint);
+        }
+        if (value === 'closed') {
+          matterbridgeDevice.setWindowCoveringTargetAndCurrentPosition(10000, endpoint);
+          matterbridgeDevice.setWindowCoveringStatus(WindowCovering.MovementStatus.Stopped, endpoint);
+        }
+        if (value === 'opened') {
+          matterbridgeDevice.setWindowCoveringTargetAndCurrentPosition(0, endpoint);
+          matterbridgeDevice.setWindowCoveringStatus(WindowCovering.MovementStatus.Stopped, endpoint);
+        }
+        if (value === 'opening') {
+          windowCoveringCluster.setTargetPositionLiftPercent100thsAttribute(0);
+          matterbridgeDevice.setWindowCoveringStatus(WindowCovering.MovementStatus.Opening, endpoint);
+        }
+        if (value === 'closing') {
+          windowCoveringCluster.setTargetPositionLiftPercent100thsAttribute(10000);
+          matterbridgeDevice.setWindowCoveringStatus(WindowCovering.MovementStatus.Closing, endpoint);
+        }
+        this.log.info(
+          `${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}WindowCovering${db} for device ${dn}${shellyDevice.id}${db}` +
+            ` ${hk}${switchId}${db} ${zb}${characteristic}${db}:${rs}`,
+          value,
+        );
+        return true;
+      }
+    }
+    this.log.error(`shellySwitchUpdateHandler error: endpointName ${switchId} not found`);
+    return false;
   }
 
   private validateWhiteBlackList(entityName: string) {
