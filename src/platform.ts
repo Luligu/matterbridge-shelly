@@ -221,7 +221,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             */
             // Add event handler
             coverComponent.on('change', (characteristic: string, value: CharacteristicValue) => {
-              console.log(characteristic, value); // state: stopped opening closing
+              this.log.info(`Change: ${characteristic}: ${value}`); // state: stopped opening closing
               this.shellyCoverUpdateHandler(switchDevice, device, key, characteristic, value);
             });
             /*
