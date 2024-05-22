@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
-import { AnsiLogger, CYAN, GREEN, TimestampFormat, db, debugStringify, dn, hk, nf, rs, wr, zb } from 'node-ansi-logger';
-
+import { AnsiLogger, BLUE, CYAN, GREEN, TimestampFormat, db, debugStringify, dn, hk, nf, rs, wr, zb } from 'node-ansi-logger';
 import coap, { Server, IncomingMessage, OutgoingMessage } from 'coap';
 import dgram from 'dgram';
 import os from 'os';
@@ -48,7 +47,7 @@ export class CoapServer {
   }
 
   getDeviceDescription(host: string) {
-    this.log.info(`Getting device description from ${host}...`);
+    this.log.debug(`Requesting device description from ${host}...`);
     const response = coap
       .request({
         host,
@@ -56,19 +55,18 @@ export class CoapServer {
         pathname: '/cit/d',
         agent: this.coapAgent,
       })
-      .on('response', (res) => {
-        console.log('getDeviceDescription:response', res);
-        this.log.warn(`Parsing device description response from ${host}...`);
-        this.parseShellyMessage(res);
+      .on('response', (msg: IncomingMessage) => {
+        this.log.debug(`Coap got device description ("/cit/d") code ${BLUE}${msg.code}${db} url ${BLUE}${msg.url}${db} rsinfo ${debugStringify(msg.rsinfo)}:`);
+        this.parseShellyMessage(msg);
       })
       .on('error', (err) => {
-        this.log.error('error', err);
+        this.log.error('Coap error getting device description ("/cit/d"):', err);
       })
       .end();
   }
 
   getDeviceStatus(host: string) {
-    this.log.info(`Getting device status from ${host}...`);
+    this.log.debug(`Requesting device status from ${host}...`);
     const response = coap
       .request({
         host,
@@ -76,19 +74,18 @@ export class CoapServer {
         pathname: '/cit/s',
         agent: this.coapAgent,
       })
-      .on('response', (res) => {
-        console.log('getDeviceStatus:response', res);
-        this.log.warn(`Parsing device status response from ${host}...`);
-        this.parseShellyMessage(res);
+      .on('response', (msg: IncomingMessage) => {
+        this.log.debug(`Coap got device status ("/cit/s") code ${BLUE}${msg.code}${db} url ${BLUE}${msg.url}${db} rsinfo ${debugStringify(msg.rsinfo)}:`);
+        this.parseShellyMessage(msg);
       })
       .on('error', (err) => {
-        this.log.error('error', err);
+        this.log.error('Coap error getting device status ("/cit/s"):', err);
       })
       .end();
   }
 
   getMulticastDeviceStatus() {
-    this.log.info('Getting multicast device status...');
+    this.log.debug('Requesting multicast device status...');
     const response = coap
       .request({
         host: COAP_MULTICAST_ADDRESS,
@@ -98,13 +95,12 @@ export class CoapServer {
         multicast: true,
         multicastTimeout: 60 * 1000,
       })
-      .on('response', (res) => {
-        console.log('Multicast device status response:', res);
-        this.log.warn(`Parsing multicast device status response from ${COAP_MULTICAST_ADDRESS}...`);
-        this.parseShellyMessage(res);
+      .on('response', (msg: IncomingMessage) => {
+        this.log.debug(`Multicast device status code ${BLUE}${msg.code}${db} url ${BLUE}${msg.url}${db} rsinfo ${debugStringify(msg.rsinfo)}:`);
+        this.parseShellyMessage(msg);
       })
       .on('error', (err) => {
-        this.log.error('error', err);
+        this.log.error('Coap error requesting multicast device status ("/cit/s"):', err);
       })
       .end();
   }
@@ -159,10 +155,12 @@ export class CoapServer {
     );
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  parseShellyMessage(msg: any) {
+  parseShellyMessage(msg: IncomingMessage) {
+    this.log.debug(`Parsing device Coap response...`);
+
     const host = msg.rsinfo.address;
-    const headers = msg.headers;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const headers = msg.headers as any;
 
     let deviceType = '';
     let deviceId = '';
@@ -196,15 +194,15 @@ export class CoapServer {
     } catch (e) {
       payload = msg.payload.toString();
     }
-    /*
-    this.log.info('host', host);
-    this.log.info('deviceType', deviceType);
-    this.log.info('deviceId', deviceId);
-    this.log.info('protocolRevision', protocolRevision);
-    this.log.info('validFor', validFor);
-    this.log.info('serial', serial);
-    this.log.info('payload', payload);
-    */
+
+    this.log.debug('host', host);
+    this.log.debug('deviceType', deviceType);
+    this.log.debug('deviceId', deviceId);
+    this.log.debug('protocolRevision', protocolRevision);
+    this.log.debug('validFor', validFor);
+    this.log.debug('serial', serial);
+    this.log.debug('payload', payload);
+
     return { msg, host, deviceType, deviceId, protocolRevision, validFor, serial, payload };
   }
 
@@ -222,7 +220,7 @@ export class CoapServer {
       // Unicast messages from Shelly devices will have the 2.05 code, which the
       // server will silently drop (since its a response code and not a request
       // code). To avoid this, we change it to 0.30 here.
-      if (req.packet.code === 'XX2.05') {
+      if (req.packet.code === '2.05') {
         req.packet.code = '0.30';
       }
       next();
@@ -230,9 +228,8 @@ export class CoapServer {
     */
 
     this.coapServer.on('request', (msg: IncomingMessage, res: OutgoingMessage) => {
-      // this.log.warn(`Coap server got a messagge code ${msg.code} url ${msg.url} rsinfo ${debugStringify(msg.rsinfo)}...`);
+      this.log.debug(`Coap server got a messagge code ${BLUE}${msg.code}${db} url ${BLUE}${msg.url}${db} rsinfo ${debugStringify(msg.rsinfo)}...`);
       if (msg.code === '0.30' && msg.url === '/cit/s') {
-        // this.log.warn('Parsing coap message...');
         const coapMessage = this.parseShellyMessage(msg);
         this.callback && this.callback(coapMessage);
       } else {
@@ -242,9 +239,9 @@ export class CoapServer {
 
     this.coapServer.listen((err) => {
       if (err) {
-        this.log.warn('Error while listening ...', err);
+        this.log.warn('Coap server error while listening:', err);
       } else {
-        this.log.info('Server is listening ...');
+        this.log.info('Coap server is listening ...');
       }
     });
   }
@@ -307,6 +304,7 @@ export class CoapServer {
   }
 
   start(callback?: (msg: CoapMessage) => void, debug = false) {
+    this.log.setLogDebug(debug);
     this.log.info('Starting CoIoT server for shelly devices...');
     this._isScanning = true;
     this.callback = callback;
@@ -352,14 +350,24 @@ export function getInterfaceAddress() {
   return INTERFACE;
 }
 
-if (process.argv.includes('coapServer') || process.argv.includes('coapSender') || process.argv.includes('coapReceiver')) {
+if (
+  process.argv.includes('coapServer') ||
+  process.argv.includes('coapSender') ||
+  process.argv.includes('coapReceiver') ||
+  process.argv.includes('coapDescription') ||
+  process.argv.includes('coapStatus')
+) {
   const coapServer = new CoapServer();
 
   if (process.argv.includes('coapReceiver')) coapServer.startDgramServer();
 
   if (process.argv.includes('coapSender')) coapServer.startDgramSender();
 
-  if (process.argv.includes('coapServer')) coapServer.start();
+  if (process.argv.includes('coapServer') || process.argv.includes('coapDescription') || process.argv.includes('coapStatus')) coapServer.start(undefined, true);
+
+  if (process.argv.includes('coapDescription')) coapServer.getDeviceDescription('192.168.1.219');
+
+  if (process.argv.includes('coapStatus')) coapServer.getDeviceStatus('192.168.1.219');
 
   process.on('SIGINT', async function () {
     coapServer.stop();

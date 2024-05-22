@@ -142,8 +142,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       // console.log('Device:', device);
 
       // Create a new Matterbridge device for the switch
-      const switchDevice = new MatterbridgeDevice(DeviceTypes.BRIDGED_DEVICE_WITH_POWERSOURCE_INFO);
-      switchDevice.createDefaultBridgedDeviceBasicInformationClusterServer(
+      const mbDevice = new MatterbridgeDevice(DeviceTypes.BRIDGED_DEVICE_WITH_POWERSOURCE_INFO);
+      mbDevice.createDefaultBridgedDeviceBasicInformationClusterServer(
         device.id,
         device.id,
         0xfff1,
@@ -152,8 +152,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         Number(device.firmware.version?.replace(/\D/g, '')),
         device.firmware.version,
       );
-      switchDevice.createDefaultPowerSourceConfigurationClusterServer();
-      switchDevice.createDefaultPowerSourceWiredClusterServer(PowerSource.WiredCurrentType.Ac);
+      mbDevice.createDefaultPowerSourceConfigurationClusterServer();
+      mbDevice.createDefaultPowerSourceWiredClusterServer(PowerSource.WiredCurrentType.Ac);
 
       // Scan the device components
       for (const [key, component] of device) {
@@ -168,27 +168,27 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             if (switchComponent.aenergy && switchComponent.aenergy.total !== undefined) this.log.info(`${hk}${device.id}${nf} - Switch energy: ${switchComponent.aenergy.total}`);
 
             // Add a child enpoint for each switch
-            const child = switchDevice.addChildDeviceTypeWithClusterServer(key, [onOffSwitch], [OnOff.Complete.id]);
+            const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [onOffSwitch], [OnOff.Complete.id]);
             // Set the OnOff attribute
             child.getClusterServer(OnOffCluster)?.setOnOffAttribute(switchComponent.output);
 
             // Add event handler
             switchComponent.on('change', (characteristic: string, value: CharacteristicValue) => {
               // console.log(characteristic, value);
-              this.shellySwitchUpdateHandler(switchDevice, device, key, characteristic, value);
+              this.shellySwitchUpdateHandler(mbDevice, device, key, characteristic, value);
             });
 
             // Add command handlers
-            switchDevice.addCommandHandler('on', async (data) => {
-              this.shellySwitchCommandHandler(switchDevice, device, 'on', data.endpoint.number, true);
+            mbDevice.addCommandHandler('on', async (data) => {
+              this.shellySwitchCommandHandler(mbDevice, device, 'on', data.endpoint.number, true);
             });
-            switchDevice.addCommandHandler('off', async (data) => {
-              this.shellySwitchCommandHandler(switchDevice, device, 'off', data.endpoint.number, false);
+            mbDevice.addCommandHandler('off', async (data) => {
+              this.shellySwitchCommandHandler(mbDevice, device, 'off', data.endpoint.number, false);
             });
           } else {
             this.log.error('Failed to retrieve Switch component');
           }
-          switchDevice.addFixedLabel('composed', component.name);
+          mbDevice.addFixedLabel('composed', component.name);
         }
         if (component.name === 'Cover') {
           const coverComponent = device.getComponent(key) as Cover;
@@ -200,51 +200,49 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             if (coverComponent.aenergy && coverComponent.aenergy.total !== undefined) this.log.info(`${hk}${device.id}${nf} - Cover energy: ${coverComponent.aenergy.total}`);
 
             // Add a child enpoint for cover
-            const child = switchDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.WINDOW_COVERING], [WindowCovering.Cluster.id]);
+            const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.WINDOW_COVERING], [WindowCovering.Cluster.id]);
             // Set the WindowCovering attributes
-            switchDevice.setWindowCoveringTargetAsCurrentAndStopped(child);
-            /*
-            const windowCoveringCluster = child.getClusterServer(
-              WindowCoveringCluster.with(WindowCovering.Feature.Lift, WindowCovering.Feature.PositionAwareLift, WindowCovering.Feature.AbsolutePosition),
-            );
-            if (windowCoveringCluster) {
-              const position = windowCoveringCluster.getCurrentPositionLiftPercent100thsAttribute();
-              if (position !== null) {
-                windowCoveringCluster.setTargetPositionLiftPercent100thsAttribute(position);
-                windowCoveringCluster.setOperationalStatusAttribute({
-                  global: WindowCovering.MovementStatus.Stopped,
-                  lift: WindowCovering.MovementStatus.Stopped,
-                  tilt: 0,
-                });
-              }
-            }
-            */
+            mbDevice.setWindowCoveringTargetAsCurrentAndStopped(child);
+            // Add mode selection
+            mbDevice.createDefaultModeSelectClusterServer(child);
+
             // Add event handler
             coverComponent.on('change', (characteristic: string, value: CharacteristicValue) => {
-              this.log.info(`Change: ${characteristic}: ${value}`); // state: stopped opening closing
-              this.shellyCoverUpdateHandler(switchDevice, device, key, characteristic, value);
+              this.shellyCoverUpdateHandler(mbDevice, device, key, characteristic, value);
             });
+
             /*
-            // Add command handlers
-            switchDevice.addCommandHandler('on', async (data) => {
-              this.shellySwitchCommandHandler(switchDevice, device, 'on', data.endpoint.number, true);
-            });
-            switchDevice.addCommandHandler('off', async (data) => {
-              this.shellySwitchCommandHandler(switchDevice, device, 'off', data.endpoint.number, false);
-            });
+            upOrOpen: MakeMandatory<ClusterServerHandlers<typeof WindowCovering.Complete>['upOrOpen']>;
+            downOrClose: MakeMandatory<ClusterServerHandlers<typeof WindowCovering.Complete>['downOrClose']>;
+            stopMotion: MakeMandatory<ClusterServerHandlers<typeof WindowCovering.Complete>['stopMotion']>;
+            goToLiftPercentage: MakeMandatory<ClusterServerHandlers<typeof WindowCovering.Complete>['goToLiftPercentage']>;
             */
+            // Add command handlers
+            mbDevice.addCommandHandler('upOrOpen', async (data) => {
+              this.shellyCoverCommandHandler(mbDevice, device, 'open', data.endpoint.number, 0);
+            });
+            mbDevice.addCommandHandler('downOrClose', async (data) => {
+              this.shellyCoverCommandHandler(mbDevice, device, 'close', data.endpoint.number, 10000);
+            });
+            mbDevice.addCommandHandler('stopMotion', async (data) => {
+              this.shellyCoverCommandHandler(mbDevice, device, 'stop', data.endpoint.number, null);
+            });
+            mbDevice.addCommandHandler('goToLiftPercentage', async (data) => {
+              if (data.request.liftPercent100thsValue === 0) this.shellyCoverCommandHandler(mbDevice, device, 'open', data.endpoint.number, 0);
+              if (data.request.liftPercent100thsValue === 10000) this.shellyCoverCommandHandler(mbDevice, device, 'close', data.endpoint.number, 10000);
+            });
           } else {
             this.log.error('Failed to retrieve Cover component');
           }
-          switchDevice.addFixedLabel('composed', component.name);
+          mbDevice.addFixedLabel('composed', component.name);
         }
       }
 
       // Register the device with Matterbridge
-      await this.registerDevice(switchDevice);
+      await this.registerDevice(mbDevice);
 
       // Save the MatterbridgeDevice in the bridgedDevices map
-      this.bridgedDevices.set(device.id, switchDevice);
+      this.bridgedDevices.set(device.id, mbDevice);
     });
 
     // Handle remove device
@@ -275,7 +273,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
 
     // create NodeStorageManager
     this.nodeStorageManager = new NodeStorageManager({
-      dir: path.join(this.matterbridge.matterbridgePluginDirectory, 'matterbridge-shelly'),
+      dir: path.join(this.matterbridge.matterbridgeDirectory, 'matterbridge-shelly'),
       logging: false,
     });
     this.nodeStorage = await this.nodeStorageManager.createStorage('devices');
@@ -441,7 +439,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       this.log.error('shellyCommandHandler error: cluster not found');
       return false;
     }
-    cluster?.setOnOffAttribute(true);
+    cluster?.setOnOffAttribute(state);
     if (!(shellyDevice instanceof Device)) {
       sendCommand(shellyDevice.host, endpointName.startsWith('switch') ? 'light' : 'relay', 0, state ? 'turn=on' : 'turn=off'); // Dimmer switch->light relay->relay
     }
@@ -527,6 +525,73 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     }
     this.log.error(`shellySwitchUpdateHandler error: endpointName ${switchId} not found`);
     return false;
+  }
+
+  private shellyCoverCommandHandler(
+    matterbridgeDevice: MatterbridgeDevice,
+    shellyDevice: Device | Device1g,
+    command: string,
+    endpointNumber: EndpointNumber | undefined,
+    value: CharacteristicValue,
+  ): boolean {
+    if (!endpointNumber) {
+      this.log.error('shellyCommandHandler error: endpointNumber undefined');
+      return false;
+    }
+    const endpoint = matterbridgeDevice.getChildEndpoint(endpointNumber);
+    if (!endpoint) {
+      this.log.error('shellyCommandHandler error: endpoint undefined');
+      return false;
+    }
+    const labelList = endpoint.getClusterServer(FixedLabelCluster)?.getLabelListAttribute();
+    // this.log.debug('getChildStatePayload labelList:', labelList);
+    if (!labelList) {
+      this.log.error('shellyCommandHandler error: labelList undefined');
+      return false;
+    }
+    let endpointName = '';
+    for (const entry of labelList) {
+      if (entry.label === 'endpointName') endpointName = entry.value;
+    }
+    if (endpointName === '') {
+      this.log.error('shellyCommandHandler error: endpointName not found');
+      return false;
+    }
+    if (command === 'stop') {
+      matterbridgeDevice.setWindowCoveringTargetAsCurrentAndStopped(endpoint);
+    } else if (command === 'open') {
+      matterbridgeDevice.setWindowCoveringCurrentTargetStatus(0, 0, WindowCovering.MovementStatus.Stopped, endpoint);
+    } else if (command === 'close') {
+      matterbridgeDevice.setWindowCoveringCurrentTargetStatus(10000, 10000, WindowCovering.MovementStatus.Stopped, endpoint);
+    }
+    /*
+    const cluster = endpoint.getClusterServer(
+      WindowCoveringCluster.with(WindowCovering.Feature.Lift, WindowCovering.Feature.PositionAwareLift, WindowCovering.Feature.AbsolutePosition),
+    );
+    if (!cluster) {
+      this.log.error('shellyCommandHandler error: cluster not found');
+      return false;
+    }
+    cluster?.setOnOffAttribute(true);
+    */
+    if (!(shellyDevice instanceof Device)) {
+      // sendCommand(shellyDevice.host, endpointName.startsWith('switch') ? 'light' : 'relay', 0, state ? 'turn=on' : 'turn=off'); // Dimmer switch->light relay->relay
+    }
+    if (shellyDevice instanceof Device) {
+      // const switchComponent = shellyDevice?.getComponent(endpointName) as Switch;
+      // switchComponent?.set(state);
+    }
+    if (this.shellies && shellyDevice)
+      this.log.info(
+        `Command ${command} for endpoint ${or}${endpointNumber}${nf} attribute ${hk}WindowCovering-TargetPositionLiftPercent100ths${nf}: ${value} ` +
+          `for shelly device ${dn}${shellyDevice.id}${nf} component ${endpointName}${nf}`,
+      );
+    else
+      this.log.error(
+        `Failed to send ${command} command for endpoint ${or}${endpointNumber}${nf} attribute ${hk}WindowCovering-TargetPositionLiftPercent100ths${nf}: ${value} ` +
+          `for shelly device ${dn}${shellyDevice?.id}${nf} component ${endpointName}${nf}`,
+      );
+    return true;
   }
 
   private validateWhiteBlackList(entityName: string) {
