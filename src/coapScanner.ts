@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
-import { AnsiLogger, BLUE, CYAN, GREEN, TimestampFormat, db, debugStringify, dn, hk, nf, rs, wr, zb } from 'node-ansi-logger';
+import { AnsiLogger, BLUE, CYAN, GREEN, TimestampFormat, db, debugStringify, dn, hk, idn, nf, rs, wr, zb } from 'node-ansi-logger';
 import coap, { Server, IncomingMessage, OutgoingMessage } from 'coap';
 import dgram from 'dgram';
 import os from 'os';
@@ -195,7 +195,7 @@ export class CoapServer {
       payload = msg.payload.toString();
     }
 
-    this.log.debug(`host: ${BLUE}${host}${db}`);
+    this.log.debug(`host: ${idn}${host}${rs}${db}`);
     this.log.debug(`deviceType: ${BLUE}${deviceType}${db}`);
     this.log.debug(`deviceId: ${BLUE}${deviceId}${db}`);
     this.log.debug(`protocolRevision: ${protocolRevision}${db}`);

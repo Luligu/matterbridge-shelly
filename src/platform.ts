@@ -213,12 +213,6 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               this.shellyCoverUpdateHandler(mbDevice, device, key, characteristic, value);
             });
 
-            /*
-            upOrOpen: MakeMandatory<ClusterServerHandlers<typeof WindowCovering.Complete>['upOrOpen']>;
-            downOrClose: MakeMandatory<ClusterServerHandlers<typeof WindowCovering.Complete>['downOrClose']>;
-            stopMotion: MakeMandatory<ClusterServerHandlers<typeof WindowCovering.Complete>['stopMotion']>;
-            goToLiftPercentage: MakeMandatory<ClusterServerHandlers<typeof WindowCovering.Complete>['goToLiftPercentage']>;
-            */
             // Add command handlers
             mbDevice.addCommandHandler('upOrOpen', async (data) => {
               this.shellyCoverCommandHandler(mbDevice, device, 'open', data.endpoint.number, 0);
@@ -231,7 +225,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             });
             mbDevice.addCommandHandler('goToLiftPercentage', async (data) => {
               if (data.request.liftPercent100thsValue === 0) this.shellyCoverCommandHandler(mbDevice, device, 'open', data.endpoint.number, 0);
-              if (data.request.liftPercent100thsValue === 10000) this.shellyCoverCommandHandler(mbDevice, device, 'close', data.endpoint.number, 10000);
+              else if (data.request.liftPercent100thsValue === 10000) this.shellyCoverCommandHandler(mbDevice, device, 'close', data.endpoint.number, 10000);
+              else this.shellyCoverCommandHandler(mbDevice, device, 'pos', data.endpoint.number, data.request.liftPercent100thsValue / 100);
             });
           } else {
             this.log.error('Failed to retrieve Cover component');
@@ -505,7 +500,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           matterbridgeDevice.setWindowCoveringTargetAndCurrentPosition(10000, endpoint);
           matterbridgeDevice.setWindowCoveringStatus(WindowCovering.MovementStatus.Stopped, endpoint);
         }
-        if (value === 'opened') {
+        if (value === 'open') {
           matterbridgeDevice.setWindowCoveringTargetAndCurrentPosition(0, endpoint);
           matterbridgeDevice.setWindowCoveringStatus(WindowCovering.MovementStatus.Stopped, endpoint);
         }
@@ -559,29 +554,24 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       this.log.error('shellyCommandHandler error: endpointName not found');
       return false;
     }
-    if (command === 'stop') {
-      matterbridgeDevice.setWindowCoveringTargetAsCurrentAndStopped(endpoint);
-    } else if (command === 'open') {
-      matterbridgeDevice.setWindowCoveringCurrentTargetStatus(0, 0, WindowCovering.MovementStatus.Stopped, endpoint);
-    } else if (command === 'close') {
-      matterbridgeDevice.setWindowCoveringCurrentTargetStatus(10000, 10000, WindowCovering.MovementStatus.Stopped, endpoint);
-    }
-    /*
-    const cluster = endpoint.getClusterServer(
-      WindowCoveringCluster.with(WindowCovering.Feature.Lift, WindowCovering.Feature.PositionAwareLift, WindowCovering.Feature.AbsolutePosition),
-    );
-    if (!cluster) {
-      this.log.error('shellyCommandHandler error: cluster not found');
-      return false;
-    }
-    cluster?.setOnOffAttribute(true);
-    */
     if (!(shellyDevice instanceof Device)) {
       // sendCommand(shellyDevice.host, endpointName.startsWith('switch') ? 'light' : 'relay', 0, state ? 'turn=on' : 'turn=off'); // Dimmer switch->light relay->relay
     }
     if (shellyDevice instanceof Device) {
-      // const switchComponent = shellyDevice?.getComponent(endpointName) as Switch;
-      // switchComponent?.set(state);
+      const hostname = this.shellyDevices.get(shellyDevice.id)?.hostname;
+      if (command === 'stop') {
+        hostname && sendRpcCommand(hostname, 'Cover', 'Stop', 0);
+        matterbridgeDevice.setWindowCoveringTargetAsCurrentAndStopped(endpoint);
+      } else if (command === 'open') {
+        hostname && sendRpcCommand(hostname, 'Cover', 'Open', 0);
+        // matterbridgeDevice.setWindowCoveringCurrentTargetStatus(0, 0, WindowCovering.MovementStatus.Stopped, endpoint);
+      } else if (command === 'close') {
+        hostname && sendRpcCommand(hostname, 'Cover', 'Close', 0);
+        // matterbridgeDevice.setWindowCoveringCurrentTargetStatus(10000, 10000, WindowCovering.MovementStatus.Stopped, endpoint);
+      } else if (command === 'pos') {
+        hostname && sendRpcCommand(hostname, 'Cover', 'Close', 0, `pos=${value}`);
+        // matterbridgeDevice.setWindowCoveringCurrentTargetStatus(10000, 10000, WindowCovering.MovementStatus.Stopped, endpoint);
+      }
     }
     if (this.shellies && shellyDevice)
       this.log.info(
@@ -728,20 +718,42 @@ export class ConfigDeviceDiscoverer extends DeviceDiscoverer {
 
 async function sendCommand(hostname: string, service: string, index: number, command: string): Promise<unknown | null> {
   try {
-    // Replace the URL with your target URL
-    const response = await fetch(`http://${hostname}/${service}/${index}?${command}`);
+    const url = `http://${hostname}/${service}/${index}?${command}`;
+    // eslint-disable-next-line no-console
+    console.log(url);
+    const response = await fetch(url);
     if (!response.ok) {
       // eslint-disable-next-line no-console
-      console.error('Error fetching shelly:');
+      console.error(`Error fetching shelly at ${hostname} response:`, response.statusText);
       return null;
     }
     const data = await response.json();
-
     // console.log(data);
     return data;
   } catch (error) {
     // eslint-disable-next-line no-console
-    console.error('Error fetching shelly:', error);
+    console.error(`Error fetching shelly at ${hostname} error:`, error);
+    return null;
+  }
+}
+
+async function sendRpcCommand(hostname: string, service: string, command: string, index: number, extra: string | undefined = undefined): Promise<unknown | null> {
+  try {
+    const url = `http://${hostname}/rpc/${service}.${command}?id=${index}${extra ? `&${extra}` : ``}`;
+    // eslint-disable-next-line no-console
+    console.log(url);
+    const response = await fetch(url);
+    if (!response.ok) {
+      // eslint-disable-next-line no-console
+      console.error(`Error fetching shelly at ${hostname} response:`, response.statusText);
+      return null;
+    }
+    const data = await response.json();
+    // console.log(data);
+    return data;
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(`Error fetching shelly at ${hostname} error:`, error);
     return null;
   }
 }

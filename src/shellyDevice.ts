@@ -466,7 +466,27 @@ export class ShellyDevice extends EventEmitter {
   // http://192.168.1.218/rpc/Switch.Toggle?id=0
   async sendCommand(hostname: string, component: string, index: number, command: string): Promise<unknown | undefined> {
     try {
-      const response = await fetch(`http://${hostname}/${component}/${index}?${command}`);
+      const url = `http://${hostname}/${component}/${index}?${command}`;
+      this.log.debug(`sendCommand url ${url}`);
+      const response = await fetch(url);
+      if (!response.ok) {
+        this.log.error(`Error fetching shelly at ${hostname} response:`, response.statusText);
+        return undefined;
+      }
+      const data = await response.json();
+      console.log(data);
+      return data;
+    } catch (error) {
+      this.log.error(`Error fetching shelly at ${hostname} error:`, error);
+      return undefined;
+    }
+  }
+
+  async sendRpcCommand(hostname: string, service: string, command: string, index: number, extra: string | undefined = undefined): Promise<unknown | undefined> {
+    try {
+      const url = `http://${hostname}/rpc/${service}.${command}?id=${index}${extra ? `&${extra}` : ``}`;
+      this.log.debug(`sendCommand url ${url}`);
+      const response = await fetch(url);
       if (!response.ok) {
         this.log.error(`Error fetching shelly at ${hostname} response:`, response.statusText);
         return undefined;
