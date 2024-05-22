@@ -195,13 +195,13 @@ export class CoapServer {
       payload = msg.payload.toString();
     }
 
-    this.log.debug('host', host);
-    this.log.debug('deviceType', deviceType);
-    this.log.debug('deviceId', deviceId);
-    this.log.debug('protocolRevision', protocolRevision);
-    this.log.debug('validFor', validFor);
-    this.log.debug('serial', serial);
-    this.log.debug('payload', payload);
+    this.log.debug(`host: ${BLUE}${host}${db}`);
+    this.log.debug(`deviceType: ${BLUE}${deviceType}${db}`);
+    this.log.debug(`deviceId: ${BLUE}${deviceId}${db}`);
+    this.log.debug(`protocolRevision: ${protocolRevision}${db}`);
+    this.log.debug(`validFor: ${validFor}`);
+    this.log.debug(`serial: ${serial}`);
+    this.log.debug(`payload: `, payload);
 
     return { msg, host, deviceType, deviceId, protocolRevision, validFor, serial, payload };
   }

@@ -60,6 +60,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
   private whiteList: string[] = [];
   private blackList: string[] = [];
   private deviceIp: ConfigDeviceIp = {};
+  localConfig: PlatformConfig = {};
 
   constructor(matterbridge: Matterbridge, log: AnsiLogger, config: PlatformConfig) {
     super(matterbridge, log, config);
@@ -69,6 +70,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     if (config.whiteList) this.whiteList = config.whiteList as string[];
     if (config.blackList) this.blackList = config.blackList as string[];
     if (config.deviceIp) this.deviceIp = config.deviceIp as ConfigDeviceIp;
+    this.localConfig = config;
 
     // Use Shelly gen 1 client
     this.shellies1g.on('add', async (device: Device1g) => {
@@ -321,7 +323,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       server.start((msg: CoapMessage) => {
         // this.log.info(`CoIoT message received from: ${msg.host}`);
         shellies1g._statusUpdateHandler(msg);
-      }, false);
+      }, this.config.debugDiscover as boolean);
     }, 10000);
   }
 
@@ -649,7 +651,7 @@ export class MdnsDeviceDiscoverer extends DeviceDiscoverer {
         }
       },
       this.timeout, // In seconds
-      false,
+      this.platform.localConfig.debugDiscover as boolean,
     );
   }
 

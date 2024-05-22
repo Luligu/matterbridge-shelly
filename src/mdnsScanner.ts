@@ -146,13 +146,12 @@ export class MdnsScanner {
   }
 }
 
-/*
-const mdnsScanner = new MdnsScanner();
-mdnsScanner.start(undefined, undefined, true);
-//mdnsScanner.start();
+if (process.argv.includes('mdnsScanner')) {
+  const mdnsScanner = new MdnsScanner();
+  mdnsScanner.start(undefined, undefined, true);
 
-process.on('SIGINT', async function () {
-  mdnsScanner.stop();
-  process.exit();
-});
-*/
+  process.on('SIGINT', async function () {
+    mdnsScanner.stop();
+    process.exit();
+  });
+}
