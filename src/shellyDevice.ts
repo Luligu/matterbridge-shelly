@@ -452,18 +452,6 @@ export class ShellyDevice extends EventEmitter {
   // http://192.168.1.219/light/0?turn=on
   // http://192.168.1.219/light/0?turn=off
   // http://192.168.1.219/light/0?turn=toggle
-
-  // Gen 2 and 3 legacy
-  // http://192.168.1.217/relay/0
-  // http://192.168.1.217/relay/0?turn=on
-  // http://192.168.1.217/relay/0?turn=off
-  // http://192.168.1.217/relay/0?turn=toggle
-
-  // Gen 2 and 3 rpc
-  // http://192.168.1.218/rpc/Switch.GetStatus?id=0
-  // http://192.168.1.218/rpc/Switch.Set?id=0&on=true
-  // http://192.168.1.218/rpc/Switch.Set?id=0&on=false
-  // http://192.168.1.218/rpc/Switch.Toggle?id=0
   async sendCommand(hostname: string, component: string, index: number, command: string): Promise<unknown | undefined> {
     try {
       const url = `http://${hostname}/${component}/${index}?${command}`;
@@ -482,6 +470,17 @@ export class ShellyDevice extends EventEmitter {
     }
   }
 
+  // Gen 2 and 3 legacy
+  // http://192.168.1.217/relay/0
+  // http://192.168.1.217/relay/0?turn=on
+  // http://192.168.1.217/relay/0?turn=off
+  // http://192.168.1.217/relay/0?turn=toggle
+
+  // Gen 2 and 3 rpc
+  // http://192.168.1.218/rpc/Switch.GetStatus?id=0
+  // http://192.168.1.218/rpc/Switch.Set?id=0&on=true
+  // http://192.168.1.218/rpc/Switch.Set?id=0&on=false
+  // http://192.168.1.218/rpc/Switch.Toggle?id=0
   async sendRpcCommand(hostname: string, service: string, command: string, index: number, extra: string | undefined = undefined): Promise<unknown | undefined> {
     try {
       const url = `http://${hostname}/rpc/${service}.${command}?id=${index}${extra ? `&${extra}` : ``}`;

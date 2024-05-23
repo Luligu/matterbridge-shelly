@@ -1,4 +1,7 @@
 import {
+  Matterbridge,
+  MatterbridgeDevice,
+  MatterbridgeDynamicPlatform,
   DeviceTypes,
   EndpointNumber,
   FixedLabelCluster,
@@ -11,7 +14,6 @@ import {
   WindowCoveringCluster,
   onOffSwitch,
 } from 'matterbridge';
-import { Matterbridge, MatterbridgeDevice, MatterbridgeDynamicPlatform } from 'matterbridge';
 import { AnsiLogger, db, debugStringify, dn, hk, idn, nf, or, rs, wr, zb } from 'node-ansi-logger';
 import { NodeStorage, NodeStorageManager } from 'node-persist-manager';
 
