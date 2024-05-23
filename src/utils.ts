@@ -4,7 +4,7 @@
  * @file utils.ts
  * @author Luca Liguori
  * @date 2024-02-17
- * @version 1.2.2
+ * @version 1.2.3
  *
  * Copyright 2024 Luca Liguori.
  *
@@ -78,9 +78,8 @@ export function deepEqual(a: any, b: any, excludeProperties: string[] = []): boo
   }
 
   // If one of them is null (and we know they are not equal from the first check), return false
-  // eslint-disable-next-line eqeqeq
   if (a == null || b == null) {
-    debugLog('deepEqual false for ==null');
+    debugLog('deepEqual false for == null');
     return false;
   }
 
