@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
-import { AnsiLogger, BLUE, GREEN, MAGENTA, TimestampFormat, db, debugStringify, id } from 'node-ansi-logger';
+import { AnsiLogger, BLUE, GREEN, MAGENTA, TimestampFormat, db, debugStringify } from 'node-ansi-logger';
 import { EventEmitter } from 'events';
-import fetch, { Response } from 'node-fetch';
+import fetch from 'node-fetch';
 import { shellydimmer2Settings, shellydimmer2Shelly, shellydimmer2Status } from './shellydimmer2.js';
 import { shellyplus2pmSettings, shellyplus2pmShelly, shellyplus2pmStatus } from './shellyplus2pm.js';
 import { shellyplus1pmSettings, shellyplus1pmShelly, shellyplus1pmStatus } from './shellyplus1pm.js';
