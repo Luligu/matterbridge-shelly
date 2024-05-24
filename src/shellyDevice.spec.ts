@@ -3,8 +3,7 @@
 import { ShellyDevice, ShellyComponent, ShellyProperty, ShellyDataType, ShellyData } from './shellyDevice.js';
 import { AnsiLogger, TimestampFormat, db, debugStringify, dn, hk, idn, nf, or, rs, wr, zb } from 'node-ansi-logger';
 import { shellydimmer2Settings } from './shellydimmer2.js';
-import { getInterfaceAddress } from './coapScanner.js';
-import { get } from 'http';
+import { getIpv4InterfaceAddress } from './utils';
 
 describe('Shellies', () => {
   const log = new AnsiLogger({ logName: 'shellyDeviceTest', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: true });
@@ -130,7 +129,8 @@ describe('Shellies', () => {
       const device = await ShellyDevice.create(log, 'mock.192.168.1.218');
       const components = device?.components;
       expect(components).toBeDefined();
-      expect(components?.length).toBe(10);
+      expect(components?.length).toBe(11);
+      expect(device?.hasComponent('cover:0')).toBeFalsy();
       expect(device?.hasComponent('switch:0')).toBeTruthy();
       expect(device?.hasComponent('switch:1')).toBeTruthy();
       expect(device?.hasComponent('switch:3')).toBeFalsy();
@@ -178,7 +178,7 @@ describe('Shellies', () => {
   });
 
   describe('new real gen 1 ShellyDevice()', () => {
-    if (getInterfaceAddress() !== '192.168.1.189') return;
+    if (getIpv4InterfaceAddress() !== '192.168.1.189') return;
 
     test('create a gen 1 device and update', async () => {
       const device = await ShellyDevice.create(log, '192.168.1.219');
@@ -208,6 +208,8 @@ describe('Shellies', () => {
   });
 
   describe('new real gen 2 ShellyDevice()', () => {
+    if (getIpv4InterfaceAddress() !== '192.168.1.189') return;
+
     test('create a gen 2 device and update', async () => {
       const device = await ShellyDevice.create(log, '192.168.1.217');
       if (!device) return;

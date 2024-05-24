@@ -17,7 +17,7 @@ import {
 import { AnsiLogger, db, debugStringify, dn, hk, idn, nf, or, rs, wr, zb } from 'node-ansi-logger';
 import { NodeStorage, NodeStorageManager } from 'node-persist-manager';
 
-import { CoapMessage, CoapServer } from './coapScanner.js';
+import { CoapMessage, CoapServer } from './coapServer.js';
 
 // Shellyies gen 1
 import shellies1g, { Device as Device1g } from 'shellies';

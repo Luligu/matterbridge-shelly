@@ -1,11 +1,15 @@
 /* eslint-disable no-console */
-import { AnsiLogger, BLUE, GREEN, MAGENTA, TimestampFormat, db, debugStringify } from 'node-ansi-logger';
+import { AnsiLogger, BLUE, GREEN, MAGENTA, TimestampFormat, db, debugStringify, id } from 'node-ansi-logger';
 import { EventEmitter } from 'events';
-import fetch from 'node-fetch';
+import fetch, { Response } from 'node-fetch';
 import { shellydimmer2Settings, shellydimmer2Shelly, shellydimmer2Status } from './shellydimmer2.js';
 import { shellyplus2pmSettings, shellyplus2pmShelly, shellyplus2pmStatus } from './shellyplus2pm.js';
 import { shellyplus1pmSettings, shellyplus1pmShelly, shellyplus1pmStatus } from './shellyplus1pm.js';
 import { shellypmminig3Settings, shellypmminig3Shelly, shellypmminig3Status } from './shellypmminig3.js';
+import { getIpv4InterfaceAddress } from './utils.js';
+import { PrimitiveTypes } from 'shellies-ng';
+import crypto from 'crypto';
+import { AuthParams, createShellyAuth, parseAuthenticateHeader } from './auth.js';
 
 export type ShellyData = Record<string, ShellyDataType>;
 
@@ -333,6 +337,7 @@ export class ShellyDevice extends EventEmitter {
           if (wifi.sta1) device.addComponent(new ShellyComponent('wifi_sta1', 'WiFi', device, wifi.sta1 as ShellyData)); // Ok
         }
         if (key === 'sys') {
+          device.addComponent(new ShellyComponent('sys', 'Sys', device, settings[key] as ShellyData)); // Ok
           const sys = settings[key] as ShellyData;
           if (sys.sntp) {
             device.addComponent(new ShellyComponent('sntp', 'Sntp', device, sys.sntp as ShellyData)); // Ok
@@ -345,10 +350,14 @@ export class ShellyDevice extends EventEmitter {
         if (key === 'cloud') device.addComponent(new ShellyComponent(key, 'Cloud', device, settings[key] as ShellyData)); // Ok
         if (key === 'ble') device.addComponent(new ShellyComponent(key, 'Ble', device, settings[key] as ShellyData)); // Ok
         if (key.startsWith('switch:')) device.addComponent(new ShellyComponent(key, 'Switch', device, settings[key] as ShellyData));
+        if (key.startsWith('cover:')) device.addComponent(new ShellyComponent(key, 'Cover', device, settings[key] as ShellyData));
+        if (key.startsWith('light:')) device.addComponent(new ShellyComponent(key, 'Light', device, settings[key] as ShellyData));
         if (key.startsWith('pm1:')) device.addComponent(new ShellyComponent(key, 'PowerMeter', device, settings[key] as ShellyData));
       }
       for (const key in status) {
         if (key.startsWith('switch:')) device.addComponentProperties(key, status[key] as ShellyData);
+        if (key.startsWith('cover:')) device.addComponentProperties(key, status[key] as ShellyData);
+        if (key.startsWith('light:')) device.addComponentProperties(key, status[key] as ShellyData);
         if (key.startsWith('pm1:')) device.addComponentProperties(key, status[key] as ShellyData);
       }
     }
@@ -359,9 +368,16 @@ export class ShellyDevice extends EventEmitter {
       const CoIoT = device.getComponent('coiot');
       if (CoIoT) {
         if (!CoIoT.getValue('enabled')) log.error(`CoIoT is not enabled for device ${device.id}. Enable it in the settings to receive updates from the device.`);
-        if (!CoIoT.getValue('peer') || CoIoT.getValue('peer') !== 'mcast') log.warn(`CoIoT peer for device ${device.id} is not mcast: ${CoIoT.getValue('peer')}`);
+        if (!CoIoT.getValue('peer')) {
+          log.error(`CoIoT peer for device ${device.id} is not set.`);
+        } else {
+          const peer = CoIoT.getValue('peer') as string;
+          const ipv4 = getIpv4InterfaceAddress() + ':5683';
+          if (peer !== 'mcast' && peer !== ipv4)
+            log.error(`CoIoT peer for device ${device.id} is not mcast or ${ipv4}. Set it in the settings to receive updates from the device.`);
+        }
       } else {
-        log.error(`CoIoT service not found for device ${device.id}`);
+        log.error(`CoIoT service not found for device ${device.id}.`);
       }
     }
 
@@ -395,6 +411,12 @@ export class ShellyDevice extends EventEmitter {
           if (component) component.setValue('state', light.output as boolean);
           else this.log.error(`Error setting status for device ${this.id}. No component found for ${key}`);
         }
+        if (key.startsWith('cover:')) {
+          const cover = data[key] as ShellyData;
+          const component = this.getComponent(key);
+          if (component) component.setValue('state', cover.state as boolean);
+          else this.log.error(`Error setting status for device ${this.id}. No component found for ${key}`);
+        }
       }
     }
   }
@@ -410,7 +432,8 @@ export class ShellyDevice extends EventEmitter {
     this.lastseen = Date.now();
   }
 
-  static async fetch(host: string, service = 'shelly'): Promise<ShellyData | null> {
+  // await ShellyDevice.fetch('192.168.1.217', 'rpc/Switch.Toggle', { id: 0 });
+  static async fetch(host: string, service = 'shelly', params?: Record<string, PrimitiveTypes>): Promise<ShellyData | null> {
     if (host === 'mock.192.168.1.217') {
       if (service === 'shelly') return shellyplus1pmShelly;
       if (service === 'rpc/Shelly.GetStatus') return shellyplus1pmStatus;
@@ -433,16 +456,40 @@ export class ShellyDevice extends EventEmitter {
     }
     const url = `http://${host}/${service}`;
     try {
-      const response = await fetch(url);
+      const options = {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(params),
+      };
+      let response = params ? await fetch(url, options) : await fetch(url);
       if (!response.ok) {
-        console.error(`Response not ok fetching shelly ${url}`, response);
+        console.error(`Response error fetching shelly ${url}${params ? ' with ' + JSON.stringify(params) : ''}: ${response.status} (${response.statusText})`);
+
+        if (response.status === 401) {
+          // Try with authentication
+          const authHeader = response.headers.get('www-authenticate');
+          if (authHeader === null) throw new Error('No www-authenticate header found');
+          const authParams = parseAuthenticateHeader(authHeader);
+          const auth = createShellyAuth('tango', parseInt(authParams.nonce), crypto.randomInt(0, 999999999), authParams.realm);
+          const body: Record<string, string | number | boolean | object | AuthParams> = {};
+          body.jsonrpc = '2.0';
+          body.id = 1;
+          body.src = 'Matterbridge';
+          body.method = service;
+          if (params) body.params = params;
+          body.auth = auth;
+          options.body = JSON.stringify(body);
+          response = await fetch(`http://${host}`, options);
+          if (response.ok) return (await response.json()) as ShellyData;
+        }
         return null;
       }
       const data = await response.json();
-      // console.log(data);
       return data as ShellyData;
     } catch (error) {
-      console.error(`Error fetching shelly ${url}:`, error);
+      console.error(`Error fetching shelly ${url}${params ? ' with ' + JSON.stringify(params) : ''}:`, error);
       return null;
     }
   }
@@ -527,14 +574,18 @@ export class ShellyDevice extends EventEmitter {
   }
 }
 
-if (process.argv.includes('shelly')) {
+if (process.argv.includes('startShelly')) {
   const log = new AnsiLogger({ logName: 'shellyDevice', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: true });
 
-  const shelly = await ShellyDevice.create(log, '192.168.1.217');
-  if (shelly) shelly.logDevice();
-  console.log(shelly);
+  // await ShellyDevice.fetch('192.168.1.217/rpc', 'Switch.Toggle', { id: 0 });
+  await ShellyDevice.fetch('192.168.1.221/rpc', 'Switch.Toggle', { id: 0 });
 
-  /*
+  let shelly;
+
+  shelly = await ShellyDevice.create(log, '192.168.1.217');
+  if (shelly) shelly.logDevice();
+  // console.log(shelly);
+
   shelly = await ShellyDevice.create(log, '192.168.1.218');
   if (shelly) shelly.logDevice();
   if (shelly) {
@@ -558,7 +609,10 @@ if (process.argv.includes('shelly')) {
 
   shelly = await ShellyDevice.create(log, '192.168.1.220');
   if (shelly) shelly.logDevice();
-  */
+
+  shelly = await ShellyDevice.create(log, '192.168.1.221');
+  if (shelly) shelly.logDevice();
+
   process.on('SIGINT', function () {
     process.exit();
   });
