@@ -1,9 +1,17 @@
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { AnsiLogger, BLUE, BRIGHT, CYAN, GREEN, TimestampFormat, db, debugStringify, dn, hk, idn, nf, rs, wr, zb } from 'node-ansi-logger';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import mdns, { ResponsePacket, QueryPacket } from 'multicast-dns';
+import { AnsiLogger, BLUE, CYAN, TimestampFormat, db, debugStringify, hk, idn, nf, rs, zb } from 'node-ansi-logger';
+import mdns, { ResponsePacket } from 'multicast-dns';
+import EventEmitter from 'events';
 
-export class MdnsScanner {
+export interface DiscoveredDevice {
+  id: string;
+  host: string;
+  port: number;
+  gen: number;
+}
+
+export type DiscoveredDeviceListener = (data: DiscoveredDevice) => void;
+
+export class MdnsScanner extends EventEmitter {
   private discoveredPeripherals = new Map<string, { id: string; host: string; gen: number }>();
   private log;
   private scanner?: mdns.MulticastDNS;
@@ -14,7 +22,18 @@ export class MdnsScanner {
   private callback?: (id: string, host: string, gen: number) => Promise<void>;
 
   constructor() {
+    super();
     this.log = new AnsiLogger({ logName: 'mdnsShellyDiscover', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: true });
+  }
+
+  override on(event: 'discovered', listener: DiscoveredDeviceListener): this {
+    super.on(event, listener);
+    return this;
+  }
+
+  override off(event: 'discovered', listener: DiscoveredDeviceListener): this {
+    super.off(event, listener);
+    return this;
   }
 
   get isScanning() {
@@ -56,6 +75,7 @@ export class MdnsScanner {
           if (!this.discoveredPeripherals.has(a.name.replace('.local', ''))) {
             this.log.info(`Discovered shelly gen ${CYAN}1${nf} device id: ${hk}${a.name.replace('.local', '')}${nf} host: ${zb}${a.data}${nf} port: ${zb}${port}${nf}`);
             this.discoveredPeripherals.set(a.name.replace('.local', ''), { id: a.name.replace('.local', ''), host: a.data, gen: 1 });
+            this.emit('discovered', { id: a.name.replace('.local', ''), host: a.data, port, gen: 1 });
             if (this.callback) await this.callback(a.name.replace('.local', ''), a.data, 1);
           }
         }
@@ -90,32 +110,25 @@ export class MdnsScanner {
             this.log.info(
               `Discovered shelly gen ${CYAN}${gen}${nf} device id: ${hk}${a.name.replace('.local', '').toLowerCase()}${nf} host: ${zb}${a.data}${nf} port: ${zb}${port}${nf}`,
             );
-            this.discoveredPeripherals.set(a.name.replace('.local', '').toLowerCase(), {
-              id: a.name.replace('.local', '').toLowerCase(),
-              host: a.data,
-              gen,
-            });
+            this.discoveredPeripherals.set(a.name.replace('.local', '').toLowerCase(), { id: a.name.replace('.local', '').toLowerCase(), host: a.data, gen });
+            this.emit('discovered', { id: a.name.replace('.local', '').toLowerCase(), host: a.data, port, gen });
             if (this.callback) await this.callback(a.name.replace('.local', '').toLowerCase(), a.data, gen);
           }
         }
       }
-      // console.log(response);
     });
 
-    this.scanner.query('_http._tcp.local', 'PTR');
+    // this.scanner.query('_http._tcp.local', 'PTR');
+    /*
     this.queryTimeout = setInterval(() => {
       this.scanner?.query('_http._tcp.local', 'PTR');
     }, 10000);
-    /*
-    this.scanner.query({
-      questions: [
-        {
-          name: '_http._tcp.local',
-          type: 'PTR',
-        },
-      ],
-    });
     */
+    this.scanner.query([
+      { name: '_http._tcp.local', type: 'PTR' },
+      { name: '_shelly._tcp.local', type: 'PTR' },
+    ]);
+
     if (timeout && timeout > 0) {
       this.scannerTimeout = setTimeout(() => {
         this.stop();
@@ -133,6 +146,7 @@ export class MdnsScanner {
     this.queryTimeout = undefined;
     this.scanner?.destroy();
     this.scanner = undefined;
+    this.removeAllListeners();
     this.logPeripheral();
     this.log.info('Stopped mDNS query service.');
   }
@@ -143,6 +157,7 @@ export class MdnsScanner {
     for (const [name, { id, host, gen }] of this.discoveredPeripherals) {
       this.log.info(`- id: ${hk}${name}${nf} host: ${zb}${host}${nf} gen: ${CYAN}${gen}${nf}`);
     }
+    return this.discoveredPeripherals.size;
   }
 }
 
