@@ -2,14 +2,17 @@
 import { AnsiLogger, BLUE, GREEN, MAGENTA, TimestampFormat, db, debugStringify } from 'node-ansi-logger';
 import { EventEmitter } from 'events';
 import fetch from 'node-fetch';
+import { getIpv4InterfaceAddress } from './utils.js';
+import crypto from 'crypto';
+import { AuthParams, createShellyAuth, parseAuthenticateHeader } from './auth.js';
+
 import { shellydimmer2Settings, shellydimmer2Shelly, shellydimmer2Status } from './shellydimmer2.js';
 import { shellyplus2pmSettings, shellyplus2pmShelly, shellyplus2pmStatus } from './shellyplus2pm.js';
 import { shellyplus1pmSettings, shellyplus1pmShelly, shellyplus1pmStatus } from './shellyplus1pm.js';
 import { shellypmminig3Settings, shellypmminig3Shelly, shellypmminig3Status } from './shellypmminig3.js';
-import { getIpv4InterfaceAddress } from './utils.js';
-import { PrimitiveTypes } from 'shellies-ng';
-import crypto from 'crypto';
-import { AuthParams, createShellyAuth, parseAuthenticateHeader } from './auth.js';
+import { shelly1minig3Settings, shelly1minig3Status, shelly1minig3Shelly } from './shelly1minig3.js';
+
+export declare type ParamsTypes = boolean | number | string;
 
 export type ShellyData = Record<string, ShellyDataType>;
 
@@ -47,10 +50,15 @@ interface CoverComponent {
   Stop(): void;
 }
 
+export type ShellySwitchComponent = ShellyComponent & SwitchComponent;
+
+export type ShellyCoverComponent = ShellyComponent & CoverComponent;
+
 type ShellyComponentType = ShellyComponent & Partial<SwitchComponent> & Partial<CoverComponent>;
 
 export class ShellyComponent {
   readonly id: string;
+  readonly index: number;
   readonly name: string;
   readonly device: ShellyDevice;
   private readonly _properties = new Map<string, ShellyProperty>();
@@ -58,6 +66,7 @@ export class ShellyComponent {
 
   constructor(id: string, name: string, device: ShellyDevice, data?: ShellyData) {
     this.id = id;
+    this.index = id.includes(':') ? parseInt(id.split(':')[1]) : -1;
     this.name = name;
     this.device = device;
     for (const prop in data) {
@@ -70,15 +79,18 @@ export class ShellyComponent {
     if (this.stateName.includes(name)) {
       (this as ShellyComponentType).On = function () {
         this.setValue('state', true);
+        device.sendCommand(device.host, 'relay', this.index, 'turn=on');
       };
 
       (this as ShellyComponentType).Off = function () {
         this.setValue('state', false);
+        device.sendCommand(device.host, 'relay', this.index, 'turn=on');
       };
 
       (this as ShellyComponentType).Toggle = function () {
         const currentState = this.getValue('state');
         this.setValue('state', !currentState);
+        device.sendCommand(device.host, 'relay', this.index, 'turn=toggle');
       };
     }
 
@@ -86,14 +98,17 @@ export class ShellyComponent {
     if (name === 'Cover') {
       (this as ShellyComponentType).Open = function () {
         this.setValue('state', 'open');
+        device.sendCommand(device.host, 'roller', this.index, 'go=open');
       };
 
       (this as ShellyComponentType).Close = function () {
         this.setValue('state', 'close');
+        device.sendCommand(device.host, 'roller', this.index, 'go=close');
       };
 
       (this as ShellyComponentType).Stop = function () {
         this.setValue('state', 'stop');
+        device.sendCommand(device.host, 'roller', this.index, 'go=stop');
       };
     }
   }
@@ -188,12 +203,13 @@ export class ShellyComponent {
       this.device.log.debug(`- ${key}: ${property.value && typeof property.value === 'object' ? debugStringify(property.value) : property.value}`);
     }
   }
-  // handleEvent(event: RpcEvent);
 }
 
 export class ShellyDevice extends EventEmitter {
   readonly log: AnsiLogger;
   readonly host: string;
+  readonly username: string;
+  readonly password: string | undefined;
   id = '';
   model = '';
   mac = '';
@@ -211,6 +227,8 @@ export class ShellyDevice extends EventEmitter {
     super();
     this.log = log;
     this.host = host;
+    this.username = 'admin';
+    this.password = undefined;
   }
 
   destroy() {
@@ -399,7 +417,7 @@ export class ShellyDevice extends EventEmitter {
           for (const light of data[key] as ShellyData[]) {
             const component = this.getComponent(`${key.slice(0, 5)}:${index++}`);
             if (component) component.setValue('state', light.ison as boolean);
-            else this.log.error(`Error setting status for device ${this.id}. No component found for ${key.slice(0, 5)}:${index - 1}`);
+            else this.log.error(`Error setting status for device ${this.id} host ${this.host}. No component found for ${key.slice(0, 5)}:${index - 1}`);
           }
         }
       }
@@ -409,13 +427,13 @@ export class ShellyDevice extends EventEmitter {
           const light = data[key] as ShellyData;
           const component = this.getComponent(key);
           if (component) component.setValue('state', light.output as boolean);
-          else this.log.error(`Error setting status for device ${this.id}. No component found for ${key}`);
+          else this.log.error(`Error setting status for device ${this.id} host ${this.host}. No component found for ${key}`);
         }
         if (key.startsWith('cover:')) {
           const cover = data[key] as ShellyData;
           const component = this.getComponent(key);
           if (component) component.setValue('state', cover.state as boolean);
-          else this.log.error(`Error setting status for device ${this.id}. No component found for ${key}`);
+          else this.log.error(`Error setting status for device ${this.id} host ${this.host}. No component found for ${key}`);
         }
       }
     }
@@ -433,7 +451,7 @@ export class ShellyDevice extends EventEmitter {
   }
 
   // await ShellyDevice.fetch('192.168.1.217', 'rpc/Switch.Toggle', { id: 0 });
-  static async fetch(host: string, service = 'shelly', params?: Record<string, PrimitiveTypes>): Promise<ShellyData | null> {
+  static async fetch(host: string, service: string, params?: Record<string, ParamsTypes>): Promise<ShellyData | null> {
     if (host === 'mock.192.168.1.217') {
       if (service === 'shelly') return shellyplus1pmShelly;
       if (service === 'rpc/Shelly.GetStatus') return shellyplus1pmStatus;
@@ -451,8 +469,13 @@ export class ShellyDevice extends EventEmitter {
     }
     if (host === 'mock.192.168.1.220') {
       if (service === 'shelly') return shellypmminig3Shelly;
-      if (service === 'status') return shellypmminig3Status;
-      if (service === 'settings') return shellypmminig3Settings;
+      if (service === 'rpc/Shelly.GetStatus') return shellypmminig3Status;
+      if (service === 'rpc/Shelly.GetConfig') return shellypmminig3Settings;
+    }
+    if (host === 'mock.192.168.1.221') {
+      if (service === 'shelly') return shelly1minig3Shelly;
+      if (service === 'rpc/Shelly.GetStatus') return shelly1minig3Status;
+      if (service === 'rpc/Shelly.GetConfig') return shelly1minig3Settings;
     }
     const url = `http://${host}/${service}`;
     try {
@@ -499,6 +522,18 @@ export class ShellyDevice extends EventEmitter {
   // http://192.168.1.219/light/0?turn=on
   // http://192.168.1.219/light/0?turn=off
   // http://192.168.1.219/light/0?turn=toggle
+
+  // Gen 2 and 3 legacy
+  // http://192.168.1.217/relay/0
+  // http://192.168.1.217/relay/0?turn=on
+  // http://192.168.1.217/relay/0?turn=off
+  // http://192.168.1.217/relay/0?turn=toggle
+
+  // http://192.168.1.218/roller/0
+  // http://192.168.1.218/roller/0?go=open
+  // http://192.168.1.218/roller/0?go=close
+  // http://192.168.1.218/roller/0?go=stop
+
   async sendCommand(hostname: string, component: string, index: number, command: string): Promise<unknown | undefined> {
     try {
       const url = `http://${hostname}/${component}/${index}?${command}`;
@@ -517,17 +552,12 @@ export class ShellyDevice extends EventEmitter {
     }
   }
 
-  // Gen 2 and 3 legacy
-  // http://192.168.1.217/relay/0
-  // http://192.168.1.217/relay/0?turn=on
-  // http://192.168.1.217/relay/0?turn=off
-  // http://192.168.1.217/relay/0?turn=toggle
-
   // Gen 2 and 3 rpc
   // http://192.168.1.218/rpc/Switch.GetStatus?id=0
   // http://192.168.1.218/rpc/Switch.Set?id=0&on=true
   // http://192.168.1.218/rpc/Switch.Set?id=0&on=false
   // http://192.168.1.218/rpc/Switch.Toggle?id=0
+
   async sendRpcCommand(hostname: string, service: string, command: string, index: number, extra: string | undefined = undefined): Promise<unknown | undefined> {
     try {
       const url = `http://${hostname}/rpc/${service}.${command}?id=${index}${extra ? `&${extra}` : ``}`;
