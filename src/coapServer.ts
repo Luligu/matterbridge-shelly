@@ -312,6 +312,6 @@ if (process.argv.includes('coapServer') || process.argv.includes('coapDescriptio
 
   process.on('SIGINT', async function () {
     coapServer.stop();
-    process.exit();
+    // process.exit();
   });
 }

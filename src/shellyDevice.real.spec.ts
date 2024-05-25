@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
-import { ShellyDevice, ShellyComponent, ShellyProperty, ShellyDataType, ShellyData, ShellySwitchComponent } from './shellyDevice.js';
+import { ShellyDevice, ShellyComponent, ShellyProperty, ShellyDataType, ShellyData, ShellySwitchComponent, ShellyCoverComponent } from './shellyDevice.js';
 import { AnsiLogger, TimestampFormat, db, debugStringify, dn, hk, idn, nf, or, rs, wr, zb } from 'node-ansi-logger';
 import { getIpv4InterfaceAddress } from './utils';
 import exp from 'constants';
@@ -159,7 +159,7 @@ describe('Shellies', () => {
       device.destroy();
     });
 
-    test('send legacy command to a gen 2 device', async () => {
+    test('send legacy command relay to a gen 2 device', async () => {
       const device = await ShellyDevice.create(log, '192.168.1.217');
       expect(device).not.toBeUndefined();
       if (!device) return;
@@ -182,6 +182,35 @@ describe('Shellies', () => {
       device.destroy();
     });
 
+    test('send legacy command roller to a gen 2 device', async () => {
+      const device = await ShellyDevice.create(log, '192.168.1.218');
+      expect(device).not.toBeUndefined();
+      if (!device) return;
+
+      let component = device.getComponent('cover:1');
+      expect(component).toBeUndefined();
+
+      component = device.getComponent('cover:0');
+      expect(component).not.toBeUndefined();
+      if (!component) {
+        device.destroy();
+        return;
+      }
+      let response = await device.sendCommand('192.168.1.218', 'roller', 0, 'go=open');
+      expect(response).not.toBeUndefined();
+      await component.fetchUpdate();
+      response = await device.sendCommand('192.168.1.218', 'roller', 0, 'go=stop');
+      expect(response).not.toBeUndefined();
+      await component.fetchUpdate();
+      response = await device.sendCommand('192.168.1.218', 'roller', 0, 'go=open');
+      expect(response).not.toBeUndefined();
+      await component.fetchUpdate();
+      response = await device.sendCommand('192.168.1.218', 'roller', 0, 'go=stop');
+      expect(response).not.toBeUndefined();
+      await component.fetchUpdate();
+      device.destroy();
+    });
+
     test('execute On() Off() Toggle() for a gen 2 device', async () => {
       const device = await ShellyDevice.create(log, '192.168.1.217');
       expect(device).not.toBeUndefined();
@@ -199,6 +228,26 @@ describe('Shellies', () => {
       expect(component.getProperty('state')?.value).toBe(false);
       component.Toggle();
       expect(component.getProperty('state')?.value).toBe(true);
+      device.destroy();
+    });
+
+    test('execute Open() CLose() Stop() for a gen 2 device', async () => {
+      const device = await ShellyDevice.create(log, '192.168.1.218');
+      expect(device).not.toBeUndefined();
+      if (!device) return;
+
+      const component = device.getComponent('cover:0') as ShellyCoverComponent;
+      expect(component).not.toBeUndefined();
+      if (!component) {
+        device.destroy();
+        return;
+      }
+      component.Open();
+      expect(component.getProperty('state')?.value).toBe('open');
+      component.Stop();
+      expect(component.getProperty('state')?.value).toBe('stop');
+      component.Close();
+      expect(component.getProperty('state')?.value).toBe('close');
       device.destroy();
     });
   });

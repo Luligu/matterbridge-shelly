@@ -605,11 +605,12 @@ export class ShellyDevice extends EventEmitter {
 }
 
 if (process.argv.includes('startShelly')) {
-  const log = new AnsiLogger({ logName: 'shellyDevice', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: true });
+  // const log = new AnsiLogger({ logName: 'shellyDevice', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: true });
 
   // await ShellyDevice.fetch('192.168.1.217/rpc', 'Switch.Toggle', { id: 0 });
   await ShellyDevice.fetch('192.168.1.221/rpc', 'Switch.Toggle', { id: 0 });
 
+  /*
   let shelly;
 
   shelly = await ShellyDevice.create(log, '192.168.1.217');
@@ -646,6 +647,6 @@ if (process.argv.includes('startShelly')) {
   process.on('SIGINT', function () {
     process.exit();
   });
-
+*/
   // await ShellyDevice.sendCommand('192.168.1.219', 'light', 0, 'turn=on');
 }
