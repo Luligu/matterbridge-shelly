@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-import { AnsiLogger, BLUE, CYAN, GREEN, TimestampFormat, db, debugStringify, dn, hk, idn, nf, rs, wr, zb } from 'node-ansi-logger';
+import { AnsiLogger, BLUE, CYAN, GREEN, TimestampFormat, db, debugStringify, dn, er, hk, idn, nf, rs, wr, zb } from 'node-ansi-logger';
 import WebSocket from 'ws';
 import crypto from 'crypto';
 import EventEmitter from 'events';
-import { createShellyAuth } from './auth.js';
+import { createDigestShellyAuth } from './auth.js';
 
 interface AuthParams {
   realm: string; // device_id
@@ -78,7 +78,7 @@ export class WsClient extends EventEmitter {
 
   // Define the request frame without auth
   private requestFrame: RequestFrame = {
-    id: 0, // Request ID
+    id: 0, // Request ID will get updated with a random number
     src: 'Matterbridge', // Source of request
     method: 'Shelly.GetStatus',
     params: {},
@@ -86,7 +86,7 @@ export class WsClient extends EventEmitter {
 
   // Define the request frame with auth
   private requestFrameWithAuth: RequestFrameWithAuth = {
-    id: 0, // Request ID
+    id: 0, // Request ID will get updated with a random number
     src: 'Matterbridge', // Source of request
     method: 'Shelly.GetStatus',
     params: {},
@@ -149,21 +149,21 @@ export class WsClient extends EventEmitter {
         this.requestFrameWithAuth.params = this.requestFrame.params;
         const auth: ResponseErrorMessage = JSON.parse(response.error.message);
         this.log.debug(`Auth requested: ${response.error.message}`);
-        this.requestFrameWithAuth.auth = createShellyAuth(this.password, auth.nonce, crypto.randomInt(0, 999999999), auth.realm, auth.nc);
+        this.requestFrameWithAuth.auth = createDigestShellyAuth('admin', this.password, auth.nonce, crypto.randomInt(0, 999999999), auth.realm, auth.nc);
         this.wsClient?.send(JSON.stringify(this.requestFrameWithAuth));
       } else if (response.result && response.id === this.requestId && response.dst === 'Matterbridge') {
-        this.log.debug(`Received Shelly.GetStatus from ${this.id}:${rs}\n`, response.result);
-        this.emit('update', response.result);
+        this.log.debug(`Received response from ${CYAN}${this.id}${db} on ${BLUE}${this.wsHost}${db}:${rs}\n`, response.result);
+        this.emit('response', response.result);
       } else if (response.method && (response.method === 'NotifyStatus' || response.method === 'NotifyFullStatus') && response.dst === 'Matterbridge') {
-        this.log.debug(`Received NotifyStatus from ${this.id}:${rs}\n`, response.params);
+        this.log.debug(`Received NotifyStatus from ${CYAN}${this.id}${db} on ${BLUE}${this.wsHost}${db}:${rs}\n`, response.params);
         this.emit('update', response.params);
-      } else if (response.method && response.method === 'NotifyEvent' && response.dst === 'Matterbridge') {
-        this.log.debug(`Received NotifyEvent from ${this.id}:${rs}\n`, response.events);
+      } else if (response.method && response.method === 'NotifyEvent' && response.id === this.requestId && response.dst === 'Matterbridge') {
+        this.log.debug(`Received NotifyEvent from ${CYAN}${this.id}${db} on ${BLUE}${this.wsHost}${db}:${rs}\n`, response.events);
         this.emit('event', response.events);
       } else if (response.error && response.id === this.requestId && response.dst === 'Matterbridge') {
-        this.log.error(`Received error response from ${this.id}:${rs}\n`, response);
+        this.log.error(`Received error response from ${CYAN}${this.id}${er} on ${BLUE}${this.wsHost}${er}:${rs}\n`, response);
       } else {
-        this.log.error(`Received unknown response from ${this.id}:${rs}\n`, response);
+        this.log.warn(`Received unknown response from ${CYAN}${this.id}${wr} on ${BLUE}${this.wsHost}${wr}:${rs}\n`, response);
       }
     });
 
@@ -198,13 +198,10 @@ export class WsClient extends EventEmitter {
 
 if (process.argv.includes('startWsClient')) {
   const wsClient = new WsClient('192.168.1.221', 'tango');
-
   wsClient.start(undefined, true);
 
-  /*
-  setTimeout(() => {
-    wsClient.sendRequest('Shelly.GetComonents', {});
-  }, 15000);
+  const wsClient2 = new WsClient('192.168.1.217', 'tango');
+  wsClient2.start(undefined, true);
 
   setTimeout(() => {
     wsClient.sendRequest('Switch.Set', { id: 0, on: true });
@@ -213,9 +210,17 @@ if (process.argv.includes('startWsClient')) {
   setTimeout(() => {
     wsClient.sendRequest('Switch.Set', { id: 0, on: false });
   }, 10000);
-  */
+
+  setTimeout(() => {
+    wsClient.sendRequest('Shelly.GetComponents', {});
+  }, 15000);
+
+  setTimeout(() => {
+    wsClient.sendRequest('Shelly.ListMethods', {});
+  }, 20000);
 
   process.on('SIGINT', async function () {
     wsClient.stop();
+    wsClient2.stop();
   });
 }

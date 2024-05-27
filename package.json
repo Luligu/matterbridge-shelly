@@ -40,7 +40,7 @@
     "start:bridge": "matterbridge -bridge",
     "start:childbridge": "matterbridge -childbridge",
     "start:mdns": "node dist/mdnsScanner.js mdnsScanner",
-    "start:coap": "node dist/coapScanner.js coapDescription coapStatus",
+    "start:coap": "node dist/coapServer.js coapDescription coapStatus coapServer",
     "start:ws": "node dist/wsClient.js startWsClient",
     "start:shellyDevice": "node dist/shellyDevice.js startShelly",
     "start:shelly": "node dist/shelly.js shelly",

@@ -10,7 +10,18 @@ export interface AuthParams {
   algorithm: string; // SHA-256
 }
 
-export function parseAuthenticateHeader(authHeader: string): Record<string, string> {
+export function parseBasicAuthenticateHeader(authHeader: string): Record<string, string> {
+  // 'Digest qop="auth", realm="shelly1minig3-543204547478", nonce="1716556501", algorithm=SHA-256'
+  authHeader = authHeader.replace('Basic ', '');
+  const authParams: Record<string, string> = {};
+  authHeader.split(', ').forEach((param) => {
+    const [key, value] = param.split('=');
+    authParams[key.trim()] = value.replace(/"/g, '');
+  });
+  return authParams;
+}
+
+export function parseDigestAuthenticateHeader(authHeader: string): Record<string, string> {
   // 'Digest qop="auth", realm="shelly1minig3-543204547478", nonce="1716556501", algorithm=SHA-256'
   authHeader = authHeader.replace('Digest ', '');
   const authParams: Record<string, string> = {};
@@ -21,12 +32,32 @@ export function parseAuthenticateHeader(authHeader: string): Record<string, stri
   return authParams;
 }
 
-export function createShellyAuth(password: string, nonce: number, cnonce: number, realm: string, nc = 1): AuthParams {
-  const auth: AuthParams = { realm, username: 'admin', nonce, cnonce, response: '', algorithm: 'SHA-256' };
+export function createBasicShellyAuth(username: string, password: string): string {
+  return Buffer.from(`${username}:${password}`).toString('base64');
+}
+
+export function createDigestShellyAuth(username: string, password: string, nonce: number, cnonce: number, realm: string, nc = 1): AuthParams {
+  const auth: AuthParams = { realm, username, nonce, cnonce, response: '', algorithm: 'SHA-256' };
   const ha1 = crypto.createHash('sha256').update(`admin:${auth.realm}:${password}`).digest('hex');
   const ha2 = crypto.createHash('sha256').update('dummy_method:dummy_uri').digest('hex');
   auth.response = crypto.createHash('sha256').update(`${ha1}:${auth.nonce}:${nc}:${cnonce}:auth:${ha2}`).digest('hex');
   return auth;
+}
+
+export function getGen1BodyOptions(params?: Record<string, string | number | boolean>): string {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return new URLSearchParams(params as any).toString();
+}
+
+export function getGen2BodyOptions(jsonrpc: string, id: number, src: string, method: string, params?: Record<string, string | number | boolean>, auth?: AuthParams): string {
+  const body: Record<string, string | number | boolean | object | AuthParams> = {};
+  body.jsonrpc = '2.0';
+  body.id = 10;
+  body.src = 'Matterbridge';
+  body.method = method;
+  if (params) body.params = params;
+  if (auth) body.auth = auth;
+  return JSON.stringify(body);
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

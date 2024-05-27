@@ -1,10 +1,6 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-
-import { AnsiLogger, BLUE, CYAN, GREEN, TimestampFormat, db, debugStringify, dn, hk, idn, nf, rs, wr, zb } from 'node-ansi-logger';
-import { getIpv4InterfaceAddress } from './utils.js';
+import { AnsiLogger, BLUE, CYAN, MAGENTA, RESET, TimestampFormat, db, debugStringify, idn, rs, wr } from 'node-ansi-logger';
 import coap, { Server, IncomingMessage, OutgoingMessage } from 'coap';
-import dgram from 'dgram';
-import os from 'os';
+import EventEmitter from 'events';
 
 const COIOT_OPTION_GLOBAL_DEVID = '3332';
 const COIOT_OPTION_STATUS_VALIDITY = '3412';
@@ -25,15 +21,43 @@ export interface CoapMessage {
   payload: any;
 }
 
-export class CoapServer {
+interface CoIoTBlkComponent {
+  I: number;
+  D: string;
+}
+
+interface CoIoTSenProperty {
+  I: number;
+  T: string;
+  D: string;
+  U: string;
+  R: string | string[];
+  L: number;
+}
+
+interface CoIoTGValue {
+  channel: number;
+  id: number;
+  value: number | string;
+}
+
+interface CoIoTDescription {
+  id: number;
+  component: string;
+  property: string;
+}
+
+export class CoapServer extends EventEmitter {
   private log;
   private coapAgent;
   private coapServer: Server | undefined;
   private _isListening = false;
+  private readonly devices = new Map<string, CoIoTDescription[]>();
 
   private callback?: (msg: CoapMessage) => void;
 
   constructor() {
+    super();
     this.log = new AnsiLogger({ logName: 'coapServer', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: true });
 
     this.registerShellyOptions();
@@ -49,6 +73,7 @@ export class CoapServer {
   getDeviceDescription(host: string): Promise<IncomingMessage> {
     this.log.debug(`Requesting device description from ${host}...`);
     return new Promise((resolve, reject) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const response = coap
         .request({
           host,
@@ -58,8 +83,8 @@ export class CoapServer {
         })
         .on('response', (msg: IncomingMessage) => {
           this.log.debug(`Coap got device description ("/cit/d") code ${BLUE}${msg.code}${db} url ${BLUE}${msg.url}${db} rsinfo ${debugStringify(msg.rsinfo)}:`);
+          msg.url = '/cit/d';
           this.parseShellyMessage(msg);
-          // msg.pipe(process.stdout); // Ensure the message stream is consumed.
           resolve(msg);
         })
         .on('error', (err) => {
@@ -73,6 +98,7 @@ export class CoapServer {
   getDeviceStatus(host: string): Promise<IncomingMessage> {
     this.log.debug(`Requesting device status from ${host}...`);
     return new Promise((resolve, reject) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const response = coap
         .request({
           host,
@@ -121,10 +147,8 @@ export class CoapServer {
       const timer = setTimeout(
         () => {
           this.log.debug('Multicast request timeout reached');
-          // console.log(request);
           request.sender.removeAllListeners();
           request.sender.reset();
-          // reject(new Error('Multicast request timeout reached'));
           resolve(null);
         },
         (timeout + 5) * 1000,
@@ -182,13 +206,15 @@ export class CoapServer {
     );
   }
 
-  parseShellyMessage(msg: IncomingMessage) {
+  private parseShellyMessage(msg: IncomingMessage) {
     this.log.debug(`Parsing device Coap response...`);
 
     const host = msg.rsinfo.address;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const headers = msg.headers as any;
 
+    const code = msg.code;
+    const url = msg.url;
     let deviceType = '';
     let deviceId = '';
     let protocolRevision = '';
@@ -222,17 +248,63 @@ export class CoapServer {
       payload = msg.payload.toString();
     }
 
+    this.log.debug(`url:  ${BLUE}${url}${db}`);
+    this.log.debug(`code: ${BLUE}${code}${db}`);
     this.log.debug(`host: ${idn}${host}${rs}${db}`);
     this.log.debug(`deviceType: ${BLUE}${deviceType}${db}`);
     this.log.debug(`deviceId: ${BLUE}${deviceId}${db}`);
     this.log.debug(`protocolRevision: ${protocolRevision}${db}`);
     this.log.debug(`validFor: ${validFor}`);
     this.log.debug(`serial: ${serial}`);
-    this.log.debug(`payload: `, payload);
+    this.log.debug(`payload:${RESET}`, payload);
+
+    if (msg.url === '/cit/d') {
+      const desc: CoIoTDescription[] = [];
+      this.log.debug(`parsing ${MAGENTA}blocks${db}:`);
+      const blk: CoIoTBlkComponent[] = payload.blk;
+      blk.forEach((b) => {
+        this.log.debug(`- block: ${CYAN}${b.I}${db} description ${CYAN}${b.D}${db}`);
+        const sen: CoIoTSenProperty[] = payload.sen;
+        sen
+          .filter((s) => s.L === b.I)
+          .forEach((s) => {
+            this.log.debug(
+              `  - id: ${CYAN}${s.I}${db} type ${CYAN}${s.T}${db} description ${CYAN}${s.D}${db} unit ${CYAN}${s.U}${db} range ${CYAN}${s.R}${db} block ${CYAN}${s.L}${db}`,
+            );
+            if (s.D === 'output') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'ison' });
+            if (s.D === 'brightness') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'brightness' });
+          });
+      });
+      this.log.debug(`parsing ${MAGENTA}decoding${db}:`);
+      desc.forEach((d) => {
+        this.log.debug(`- id ${CYAN}${d.id}${db} component ${CYAN}${d.component}${db} property ${CYAN}${d.property}${db}`);
+      });
+      this.devices.set(host, desc);
+    }
+
+    if (msg.url === '/cit/s') {
+      const descriptions: CoIoTDescription[] = this.devices.get(host) || [];
+      if (!descriptions || descriptions.length === 0) this.log.warn(`No description found for host ${host}`);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const values: CoIoTGValue[] = payload.G.map((v: any[]) => ({
+        channel: v[0],
+        id: v[1],
+        value: v[2],
+      }));
+      this.log.debug(`parsing ${MAGENTA}values${db} (${values.length}):`);
+      values.forEach((v) => {
+        const desc = descriptions.find((d) => d.id === v.id);
+        if (desc) {
+          this.log.debug(`- channel ${CYAN}${v.channel}${db} id ${CYAN}${v.id}${db} value ${CYAN}${v.value}${db} => ${CYAN}${desc.component}${db} ${CYAN}${desc.property}${db}`);
+        }
+        // else this.log.warn(`No description found for id ${v.id}`);
+      });
+    }
 
     return { msg, host, deviceType, deviceId, protocolRevision, validFor, serial, payload };
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   listenForStatusUpdates(networkInterface?: string) {
     this.coapServer = coap.createServer({
       multicastAddress: COAP_MULTICAST_ADDRESS,
@@ -254,6 +326,7 @@ export class CoapServer {
     });
     */
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     this.coapServer.on('request', (msg: IncomingMessage, res: OutgoingMessage) => {
       this.log.debug(`Coap server got a messagge code ${BLUE}${msg.code}${db} url ${BLUE}${msg.url}${db} rsinfo ${debugStringify(msg.rsinfo)}...`);
       if (msg.code === '0.30' && msg.url === '/cit/s') {
@@ -279,11 +352,7 @@ export class CoapServer {
     this.log.info('Starting CoIoT server for shelly devices...');
     this._isListening = true;
     this.callback = callback;
-    // this.getDeviceDescription('192.168.1.219');
-    // this.getDeviceStatus('192.168.1.219');
-    // this.getMulticastDeviceStatus();
     this.listenForStatusUpdates();
-
     this.log.info('Started CoIoT server for shelly devices.');
   }
 
@@ -299,16 +368,20 @@ export class CoapServer {
 if (process.argv.includes('coapServer') || process.argv.includes('coapDescription') || process.argv.includes('coapStatus') || process.argv.includes('coapMcast')) {
   const coapServer = new CoapServer();
 
-  if (process.argv.includes('coapServer')) coapServer.start(undefined, true);
-
   if (process.argv.includes('coapDescription')) await coapServer.getDeviceDescription('192.168.1.219');
 
   if (process.argv.includes('coapStatus')) await coapServer.getDeviceStatus('192.168.1.219');
+
+  if (process.argv.includes('coapDescription')) await coapServer.getDeviceDescription('192.168.1.222');
+
+  if (process.argv.includes('coapStatus')) await coapServer.getDeviceStatus('192.168.1.222');
 
   if (process.argv.includes('coapMcast')) {
     await coapServer.getMulticastDeviceStatus(30);
     coapServer.stop();
   }
+
+  if (process.argv.includes('coapServer')) coapServer.start(undefined, true);
 
   process.on('SIGINT', async function () {
     coapServer.stop();
