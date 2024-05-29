@@ -1,6 +1,6 @@
 import EventEmitter from 'events';
 import { ShellyDevice } from './shellyDevice.js';
-import { AnsiLogger, CYAN, MAGENTA, BRIGHT, hk, db, BLUE, TimestampFormat, nf, wr } from 'node-ansi-logger';
+import { AnsiLogger, CYAN, MAGENTA, BRIGHT, hk, db, TimestampFormat, nf, wr, zb } from 'node-ansi-logger';
 import { DiscoveredDevice, MdnsScanner } from './mdnsScanner.js';
 import { CoapMessage, CoapServer } from './coapServer.js';
 
@@ -18,7 +18,7 @@ export class Shelly extends EventEmitter {
     this.coapServer = new CoapServer();
 
     this.mdnsScanner.on('discovered', async (device: DiscoveredDevice) => {
-      this.log.info(`Discovered shelly gen ${BLUE}${device.gen}${nf} device id ${hk}${device.id}${nf} host ${MAGENTA}${device.host}${nf} port ${MAGENTA}${device.port}${nf} `);
+      this.log.info(`Discovered shelly gen ${CYAN}${device.gen}${nf} device id ${hk}${device.id}${nf} host ${zb}${device.host}${nf} port ${zb}${device.port}${nf} `);
       this.emit('discovered', device);
     });
 

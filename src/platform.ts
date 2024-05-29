@@ -56,6 +56,7 @@ interface ShellyDevice {
 
 export class ShellyPlatform extends MatterbridgeDynamicPlatform {
   public discoveredDevices = new Map<ShellyDeviceId, DiscoveredDevice>();
+  public storedDevices = new Map<ShellyDeviceId, DiscoveredDevice>();
   public shellyDevices = new Map<ShellyDeviceId, ShellyDevice>();
   public bridgedDevices = new Map<ShellyDeviceId, MatterbridgeDevice>();
 
@@ -253,28 +254,6 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       }
     });
 
-    /*
-    // Handle remove device
-    this.shellies.on('remove', (device: Device) => {
-      this.log.warn(`Shellies removed device with ID: ${device.id}, model: ${device.modelName} (${device.model})`);
-    });
-
-    // Handle error
-    this.shellies.on('error', (deviceId: DeviceId, error: Error) => {
-      this.log.error('Shellies error occured:', error.message);
-    });
-
-    // Handle exclude
-    this.shellies.on('exclude', (deviceId: DeviceId) => {
-      this.log.warn(`Shellies exclude device with ID: ${deviceId}`);
-    });
-
-    // Handle unknown
-    this.shellies.on('unknown', (deviceId: DeviceId, model: string, identifiers: DeviceIdentifiers) => {
-      this.log.warn(`Shellies unknown device with ID: ${deviceId}, model: ${model} hostname: ${identifiers.hostname}`);
-    });
-    */
-
     this.log.info('Finished initializing platform:', this.config.name);
   }
 
@@ -287,18 +266,20 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       logging: false,
     });
     this.nodeStorage = await this.nodeStorageManager.createStorage('devices');
-    await this.loadShellyDevices();
+    await this.loadStoredDevices();
 
     // handle Shelly discovered event
     this.shelly.on('discovered', async (discoveredDevice: DiscoveredDevice) => {
+      if (this.discoveredDevices.has(discoveredDevice.id)) {
+        this.log.info(`**Shelly device ${hk}${discoveredDevice.id}${nf} host ${zb}${discoveredDevice.host}${nf} already discovered`);
+        return;
+      }
+      this.discoveredDevices.set(discoveredDevice.id, discoveredDevice);
+      this.storedDevices.set(discoveredDevice.id, discoveredDevice);
+      await this.saveStoredDevices();
       if (this.validateWhiteBlackList(discoveredDevice.id)) {
         await this.addDevice(discoveredDevice.id, discoveredDevice.host);
-      } else {
-        this.log.warn(`Shelly device ${discoveredDevice.id} not validated in white list or in black list`);
       }
-
-      this.discoveredDevices.set(discoveredDevice.id, discoveredDevice);
-      await this.saveShellyDevices();
     });
 
     // start Shelly mDNS device discoverer
@@ -308,18 +289,16 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
 
     // add all stored devices
     if (this.config.enableStorageDiscover === true) {
-      this.discoveredDevices.forEach(async (discoveredDevice) => {
-        this.shelly.emit('discovered', discoveredDevice);
-        // await this.addDevice(discoveredDevice.id, discoveredDevice.host);
+      this.storedDevices.forEach(async (storedDevice) => {
+        this.shelly.emit('discovered', storedDevice);
       });
     }
 
     // add all configured devices
     if (this.config.enableConfigDiscover === true) {
       Object.entries(this.config.deviceIp as Record<string, string>).forEach(async ([id, host]) => {
-        const discoveredDevice: DiscoveredDevice = { id, host, port: 0, gen: 0 };
-        this.shelly.emit('discovered', discoveredDevice);
-        // await this.addDevice(id, host);
+        const configDevice: DiscoveredDevice = { id, host, port: 0, gen: 0 };
+        this.shelly.emit('discovered', configDevice);
       });
     }
   }
@@ -336,30 +315,30 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     if (this.config.unregisterOnShutdown === true) await this.unregisterAllDevices();
   }
 
-  public async saveShellyDevices() {
-    this.log.debug(`Saving ${this.discoveredDevices.size} discovered Shelly devices to the storage`);
-    await this.nodeStorage?.set<DiscoveredDevice[]>('DeviceIdentifiers', Array.from(this.discoveredDevices.values()));
+  public async saveStoredDevices() {
+    this.log.debug(`Saving ${this.storedDevices.size} discovered Shelly devices to the storage`);
+    await this.nodeStorage?.set<DiscoveredDevice[]>('DeviceIdentifiers', Array.from(this.storedDevices.values()));
   }
 
-  private async loadShellyDevices(): Promise<boolean> {
+  private async loadStoredDevices(): Promise<boolean> {
     if (!this.nodeStorage) {
       this.log.error('NodeStorage is not initialized');
       return false;
     }
-    const discoveredDevices = await this.nodeStorage.get<DiscoveredDevice[]>('DeviceIdentifiers', []);
-    for (const device of discoveredDevices) {
-      this.discoveredDevices.set(device.id, device);
+    const storedDevices = await this.nodeStorage.get<DiscoveredDevice[]>('DeviceIdentifiers', []);
+    for (const device of storedDevices) {
+      this.storedDevices.set(device.id, device);
     }
-    this.log.debug(`Loaded ${this.discoveredDevices.size} discovered Shelly devices from the storage`);
+    this.log.debug(`Loaded ${this.storedDevices.size} discovered Shelly devices from the storage`);
     return true;
   }
 
   private async addDevice(deviceId: string, host: string) {
-    this.log.info(`**Adding shelly device ${deviceId} host ${host}`);
     if (this.shelly.hasDevice(deviceId) || this.shelly.hasDeviceHost(host)) {
-      this.log.warn(`Shelly device ${deviceId} host ${host} already added`);
+      this.log.info(`Shelly device ${hk}${deviceId}${nf} host ${zb}${host}${nf} already added`);
       return;
     }
+    this.log.info(`**Adding shelly device ${deviceId} host ${host}`);
     const log = new AnsiLogger({ logName: deviceId, logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: true });
     const device = await ShellyDevice.create(this.shelly, log, host);
     if (!device) {

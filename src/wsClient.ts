@@ -151,14 +151,14 @@ export class WsClient extends EventEmitter {
         this.requestFrameWithAuth.auth = createDigestShellyAuth('admin', this.password, auth.nonce, crypto.randomInt(0, 999999999), auth.realm, auth.nc);
         this.wsClient?.send(JSON.stringify(this.requestFrameWithAuth));
       } else if (response.result && response.id === this.requestId && response.dst === 'Matterbridge') {
-        this.log.debug(`Received response from ${CYAN}${this.id}${db} on ${BLUE}${this.wsHost}${db}:${rs}\n`, response.result);
+        this.log.debug(`Received Shelly.GetStatus response from ${CYAN}${this.id}${db} on ${BLUE}${this.wsHost}${db}:${rs}\n`, response.result);
         this.emit('response', response.result);
       } else if (response.method && (response.method === 'NotifyStatus' || response.method === 'NotifyFullStatus') && response.dst === 'Matterbridge') {
         this.log.debug(`Received NotifyStatus from ${CYAN}${this.id}${db} on ${BLUE}${this.wsHost}${db}:${rs}\n`, response.params);
         this.emit('update', response.params);
-      } else if (response.method && response.method === 'NotifyEvent' && response.id === this.requestId && response.dst === 'Matterbridge') {
-        this.log.debug(`Received NotifyEvent from ${CYAN}${this.id}${db} on ${BLUE}${this.wsHost}${db}:${rs}\n`, response.events);
-        this.emit('event', response.events);
+      } else if (response.method && response.method === 'NotifyEvent' && response.dst === 'Matterbridge') {
+        this.log.debug(`Received NotifyEvent from ${CYAN}${this.id}${db} on ${BLUE}${this.wsHost}${db}:${rs}\n`, response.params.events);
+        this.emit('event', response.params.events);
       } else if (response.error && response.id === this.requestId && response.dst === 'Matterbridge') {
         this.log.error(`Received error response from ${CYAN}${this.id}${er} on ${BLUE}${this.wsHost}${er}:${rs}\n`, response);
       } else {
