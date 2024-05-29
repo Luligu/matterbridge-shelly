@@ -40,7 +40,7 @@ describe('Shellies test', () => {
   });
 
   test('Start discover', (done) => {
-    mdns.start(undefined, 60, true);
+    mdns.start(60, true);
     expect(mdns.isScanning).toBeTruthy();
     setTimeout(() => {
       mdns.stop();

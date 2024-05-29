@@ -1,6 +1,8 @@
 import { AnsiLogger, BLUE, CYAN, MAGENTA, RESET, TimestampFormat, db, debugStringify, idn, rs, wr } from 'node-ansi-logger';
-import coap, { Server, IncomingMessage, OutgoingMessage } from 'coap';
+import coap, { Server, IncomingMessage, OutgoingMessage, globalAgent } from 'coap';
 import EventEmitter from 'events';
+
+// 192.168.1.189:5683
 
 const COIOT_OPTION_GLOBAL_DEVID = '3332';
 const COIOT_OPTION_STATUS_VALIDITY = '3412';
@@ -48,21 +50,19 @@ interface CoIoTDescription {
 }
 
 export class CoapServer extends EventEmitter {
-  private log;
-  private coapAgent;
+  private readonly log;
+  // private readonly coapAgent;
   private coapServer: Server | undefined;
   private _isListening = false;
   private readonly devices = new Map<string, CoIoTDescription[]>();
 
-  private callback?: (msg: CoapMessage) => void;
-
-  constructor() {
+  constructor(debug = false) {
     super();
-    this.log = new AnsiLogger({ logName: 'coapServer', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: true });
+    this.log = new AnsiLogger({ logName: 'coapServer', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: debug });
 
     this.registerShellyOptions();
 
-    this.coapAgent = new coap.Agent();
+    // this.coapAgent = new coap.Agent();
     // this.coapAgent._nextToken = () => Buffer.alloc(0);
   }
 
@@ -79,7 +79,7 @@ export class CoapServer extends EventEmitter {
           host,
           method: 'GET',
           pathname: '/cit/d',
-          agent: this.coapAgent,
+          // agent: this.coapAgent,
         })
         .on('response', (msg: IncomingMessage) => {
           this.log.debug(`Coap got device description ("/cit/d") code ${BLUE}${msg.code}${db} url ${BLUE}${msg.url}${db} rsinfo ${debugStringify(msg.rsinfo)}:`);
@@ -104,7 +104,7 @@ export class CoapServer extends EventEmitter {
           host,
           method: 'GET',
           pathname: '/cit/s',
-          agent: this.coapAgent,
+          // agent: this.coapAgent,
         })
         .on('response', (msg: IncomingMessage) => {
           this.log.debug(`Coap got device status ("/cit/s") code ${BLUE}${msg.code}${db} url ${BLUE}${msg.url}${db} rsinfo ${debugStringify(msg.rsinfo)}:`);
@@ -127,7 +127,7 @@ export class CoapServer extends EventEmitter {
           host: COAP_MULTICAST_ADDRESS,
           method: 'GET',
           pathname: '/cit/s',
-          agent: this.coapAgent,
+          // agent: this.coapAgent,
           multicast: true,
           multicastTimeout: timeout * 1000,
         })
@@ -301,11 +301,11 @@ export class CoapServer extends EventEmitter {
       });
     }
 
-    return { msg, host, deviceType, deviceId, protocolRevision, validFor, serial, payload };
+    return { msg, host, deviceType, deviceId, protocolRevision, validFor, serial, payload } as CoapMessage;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  listenForStatusUpdates(networkInterface?: string) {
+  private listenForStatusUpdates(networkInterface?: string) {
     this.coapServer = coap.createServer({
       multicastAddress: COAP_MULTICAST_ADDRESS,
     });
@@ -331,7 +331,7 @@ export class CoapServer extends EventEmitter {
       this.log.debug(`Coap server got a messagge code ${BLUE}${msg.code}${db} url ${BLUE}${msg.url}${db} rsinfo ${debugStringify(msg.rsinfo)}...`);
       if (msg.code === '0.30' && msg.url === '/cit/s') {
         const coapMessage = this.parseShellyMessage(msg);
-        this.callback && this.callback(coapMessage);
+        this.emit('update', coapMessage);
       } else {
         this.log.warn(`Coap server got a wrong messagge code ${BLUE}${msg.code}${wr} url ${BLUE}${msg.url}${wr} rsinfo ${db}${debugStringify(msg.rsinfo)}...`);
         // console.log(msg);
@@ -347,20 +347,29 @@ export class CoapServer extends EventEmitter {
     });
   }
 
-  start(callback?: (msg: CoapMessage) => void, debug = false) {
+  async registerDevice(host: string) {
+    this.log.debug(`Registering device ${host}...`);
+    await this.getDeviceDescription(host);
+    this.log.debug(`Registered device ${host}.`);
+  }
+
+  start(debug = false) {
     this.log.setLogDebug(debug);
+    if (this._isListening) return;
     this.log.info('Starting CoIoT server for shelly devices...');
     this._isListening = true;
-    this.callback = callback;
     this.listenForStatusUpdates();
     this.log.info('Started CoIoT server for shelly devices.');
   }
 
   stop() {
     this.log.info('Stopping CoIoT server for shelly devices...');
+    this.removeAllListeners();
     this._isListening = false;
-    this.coapAgent.close();
+    globalAgent.close();
+    // this.coapAgent.close();
     if (this.coapServer) this.coapServer.close();
+    this.devices.clear();
     this.log.info('Stopped CoIoT server for shelly devices.');
   }
 }
@@ -381,7 +390,7 @@ if (process.argv.includes('coapServer') || process.argv.includes('coapDescriptio
     coapServer.stop();
   }
 
-  if (process.argv.includes('coapServer')) coapServer.start(undefined, true);
+  if (process.argv.includes('coapServer')) coapServer.start(true);
 
   process.on('SIGINT', async function () {
     coapServer.stop();

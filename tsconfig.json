@@ -1,10 +1,11 @@
 {
-  "extends": "@tsconfig/node-lts/tsconfig.json",
   "compilerOptions": {
     "incremental": true,
     "composite": true,
     "target": "esnext",
-    "lib": ["ESNext"],
+    "lib": [
+      "ESNext"
+    ],
     "module": "nodenext",
     "rootDir": "./src",
     "moduleResolution": "nodenext",
@@ -25,6 +26,12 @@
     "noImplicitOverride": true,
     "skipLibCheck": true
   },
-  "include": ["src/**/*.ts"],
-  "exclude": ["**/*.spec.ts", "**/*.test.ts", "**/__test__/*"]
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "**/*.spec.ts",
+    "**/*.test.ts",
+    "**/__test__/*"
+  ]
 }

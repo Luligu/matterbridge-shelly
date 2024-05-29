@@ -19,14 +19,14 @@ interface RequestFrame {
   id: number; // Request ID
   src: string; // Source of request
   method: string; // Shelly.GetStatus';
-  params: object; // ? stuff
+  params: object; // other stuff
 }
 
 interface RequestFrameWithAuth {
   id: number; // Request ID
   src: string; // Source of request
   method: string; // Shelly.GetStatus';
-  params: object; // ? stuff
+  params: object; // other stuff
   auth: AuthParams;
 }
 
@@ -74,7 +74,6 @@ export class WsClient extends EventEmitter {
   private auth = false;
   private password;
   private requestId;
-  private callback?: () => void;
 
   // Define the request frame without auth
   private requestFrame: RequestFrame = {
@@ -128,7 +127,7 @@ export class WsClient extends EventEmitter {
 
     // Handle the open event
     this.wsClient.on('open', () => {
-      this.log.info(`WebSocket connection opened with Shelly device on address ${this.wsHost}`);
+      this.log.info(`WebSocket connection opened with Shelly device host ${zb}${this.wsHost}${nf}`);
       this._isConnected = true;
       this.wsClient?.send(JSON.stringify(this.requestFrame));
     });
@@ -179,10 +178,9 @@ export class WsClient extends EventEmitter {
     });
   }
 
-  start(callback?: () => void, debug = false) {
+  start(debug = false) {
     this.log.setLogDebug(debug);
     this.log.debug(`Starting ws client for Shelly device on address ${this.wsHost}`);
-    this.callback = callback;
     this.listenForStatusUpdates();
     this.log.debug(`Started ws client for Shelly device on address ${this.wsHost}`);
   }
@@ -198,10 +196,10 @@ export class WsClient extends EventEmitter {
 
 if (process.argv.includes('startWsClient')) {
   const wsClient = new WsClient('192.168.1.221', 'tango');
-  wsClient.start(undefined, true);
+  wsClient.start(true);
 
   const wsClient2 = new WsClient('192.168.1.217', 'tango');
-  wsClient2.start(undefined, true);
+  wsClient2.start(true);
 
   setTimeout(() => {
     wsClient.sendRequest('Switch.Set', { id: 0, on: true });

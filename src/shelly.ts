@@ -1,40 +1,78 @@
 import EventEmitter from 'events';
 import { ShellyDevice } from './shellyDevice.js';
-import { AnsiLogger, CYAN, MAGENTA, BRIGHT, hk, db, BLUE, TimestampFormat } from 'node-ansi-logger';
+import { AnsiLogger, CYAN, MAGENTA, BRIGHT, hk, db, BLUE, TimestampFormat, nf, wr } from 'node-ansi-logger';
 import { DiscoveredDevice, MdnsScanner } from './mdnsScanner.js';
+import { CoapMessage, CoapServer } from './coapServer.js';
 
 export class Shelly extends EventEmitter {
   private readonly _devices = new Map<string, ShellyDevice>();
   private readonly log: AnsiLogger;
-  private readonly mdnsScanner: MdnsScanner;
+  private mdnsScanner: MdnsScanner | undefined;
+  private coapServer: CoapServer | undefined;
+  private coapServerTimeout?: NodeJS.Timeout;
 
   constructor(log: AnsiLogger) {
     super();
     this.log = log;
     this.mdnsScanner = new MdnsScanner();
+    this.coapServer = new CoapServer();
 
     this.mdnsScanner.on('discovered', async (device: DiscoveredDevice) => {
-      this.log.debug(`Discovered shelly device: ${hk}${device.id}${db} at ${MAGENTA}${device.host}${db} port ${MAGENTA}${device.port}${db} gen ${BLUE}${device.gen}${db}`);
+      this.log.info(`Discovered shelly gen ${BLUE}${device.gen}${nf} device id ${hk}${device.id}${nf} host ${MAGENTA}${device.host}${nf} port ${MAGENTA}${device.port}${nf} `);
       this.emit('discovered', device);
+    });
+
+    this.coapServer.on('update', async (msg: CoapMessage) => {
+      this.log.info(`CoIoT update from device ${hk}${msg.deviceId}${nf} host ${MAGENTA}${msg.host}${nf}:` /* , msg.payload*/);
+      /*
+      const shellyDevice = this.getDevice(device.id);
+      if (shellyDevice) {
+        shellyDevice.update(device);
+      }
+      */
     });
   }
 
   destroy() {
-    this.mdnsScanner.removeAllListeners();
-    this.mdnsScanner.stop();
+    if (this.coapServerTimeout) clearTimeout(this.coapServerTimeout);
+    this.coapServerTimeout = undefined;
+    this.devices.forEach((device) => {
+      device.destroy();
+      this.removeDevice(device);
+    });
     this.removeAllListeners();
+    this.mdnsScanner?.removeAllListeners();
+    this.mdnsScanner?.stop();
+    this.mdnsScanner = undefined;
+    this.coapServer?.removeAllListeners();
+    this.coapServer?.stop();
+    this.coapServer = undefined;
   }
 
   hasDevice(id: string): boolean {
     return this._devices.has(id);
   }
 
+  hasDeviceHost(host: string): boolean {
+    const devices = this.devices.filter((device) => device.host === host);
+    return devices.length > 0;
+  }
+
   getDevice(id: string): ShellyDevice | undefined {
     return this._devices.get(id);
   }
 
-  addDevice(device: ShellyDevice): Shelly {
+  async addDevice(device: ShellyDevice): Promise<Shelly> {
+    if (this.hasDevice(device.id)) {
+      this.log.warn(`Shelly device ${hk}${device.id}${wr}: name ${CYAN}${device.name}${wr} ip ${MAGENTA}${device.host}${wr} model ${CYAN}${device.model}${wr} already exists`);
+      return this;
+    }
     this._devices.set(device.id, device);
+    if (device.gen === 1) {
+      await this.coapServer?.registerDevice(device.host);
+      this.startCoap(60, false);
+    }
+    this.emit('add', device);
     return this;
   }
 
@@ -57,8 +95,18 @@ export class Shelly extends EventEmitter {
     }
   }
 
-  discover(mdnsTimeout?: number, mdnsDebug = false) {
-    this.mdnsScanner.start(undefined, mdnsTimeout, mdnsDebug);
+  startMdns(mdnsTimeout?: number, debug = false) {
+    this.mdnsScanner?.start(mdnsTimeout, debug);
+  }
+
+  startCoap(coapTimeout?: number, debug = false) {
+    if (coapTimeout) {
+      this.coapServerTimeout = setTimeout(() => {
+        this.coapServer?.start(debug);
+      }, coapTimeout * 1000);
+    } else {
+      this.coapServer?.start(debug);
+    }
   }
 
   logDevices() {
@@ -70,19 +118,21 @@ export class Shelly extends EventEmitter {
 }
 
 if (process.argv.includes('shelly')) {
-  const log = new AnsiLogger({ logName: 'Shellies', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: true });
+  const debug = false;
+  const log = new AnsiLogger({ logName: 'Shellies', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: debug });
   const shelly = new Shelly(log);
-  shelly.discover(60, true);
+  shelly.startMdns(undefined, false);
 
   shelly.on('discovered', async (discoveredDevice: DiscoveredDevice) => {
-    const log = new AnsiLogger({ logName: discoveredDevice.id, logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: true });
-    const device = await ShellyDevice.create(log, discoveredDevice.host);
+    const log = new AnsiLogger({ logName: discoveredDevice.id, logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: debug });
+    const device = await ShellyDevice.create(shelly, log, discoveredDevice.host);
     if (!device) return;
-    shelly.addDevice(device);
-    shelly.logDevices();
+    await shelly.addDevice(device);
   });
 
   process.on('SIGINT', async function () {
+    shelly.logDevices();
     shelly.destroy();
+    // process.exit();
   });
 }
