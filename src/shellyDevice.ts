@@ -1,7 +1,7 @@
 import { AnsiLogger, BLUE, CYAN, GREEN, GREY, MAGENTA, RED, RESET, TimestampFormat, db, debugStringify, hk, nf, wr, zb } from 'node-ansi-logger';
 import { EventEmitter } from 'events';
 import fetch, { RequestInit } from 'node-fetch';
-import { getIpv4InterfaceAddress } from './utils.js';
+import { getIpv4InterfaceAddress } from 'matterbridge';
 import crypto from 'crypto';
 import { parseDigestAuthenticateHeader, createDigestShellyAuth, createBasicShellyAuth, parseBasicAuthenticateHeader, getGen2BodyOptions, getGen1BodyOptions } from './auth.js';
 

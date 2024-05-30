@@ -23,7 +23,7 @@ export class Shelly extends EventEmitter {
     });
 
     this.coapServer.on('update', async (msg: CoapMessage) => {
-      this.log.info(`CoIoT update from device ${hk}${msg.deviceId}${nf} host ${MAGENTA}${msg.host}${nf}:` /* , msg.payload*/);
+      this.log.info(`CoIoT update from device ${hk}${msg.deviceId}${nf} host ${zb}${msg.host}${nf}` /* , msg.payload*/);
       /*
       const shellyDevice = this.getDevice(device.id);
       if (shellyDevice) {

@@ -53,6 +53,7 @@ export default tseslint.config(
   {
     name: 'javascript',
     files: ['**/*.js'],
+    ...tseslint.configs.disableTypeChecked,
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',

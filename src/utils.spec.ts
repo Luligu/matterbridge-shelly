@@ -1,4 +1,4 @@
-import { deepEqual, deepCopy, getIpv4InterfaceAddress, getIpv6InterfaceAddress } from './utils';
+import { deepEqual, deepCopy, getIpv4InterfaceAddress, getIpv6InterfaceAddress } from 'matterbridge';
 import { shellyplus2pmShelly, shellyplus2pmStatus, shellyplus2pmSettings } from './shellyplus2pm';
 import { ShellyData } from './shellyDevice';
 

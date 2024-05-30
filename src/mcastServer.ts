@@ -1,5 +1,5 @@
 import { AnsiLogger, TimestampFormat } from 'node-ansi-logger';
-import { getIpv4InterfaceAddress } from './utils.js';
+import { getIpv4InterfaceAddress } from 'matterbridge';
 import dgram from 'dgram';
 
 export class Multicast {
