@@ -1,4 +1,4 @@
-import { AnsiLogger, BLUE, CYAN, GREEN, GREY, MAGENTA, RED, RESET, TimestampFormat, db, debugStringify, hk, nf, wr, zb } from 'node-ansi-logger';
+import { AnsiLogger, BLUE, CYAN, GREEN, GREY, MAGENTA, RED, RESET, TimestampFormat, db, debugStringify, hk, idn, nf, rs, wr, zb } from 'node-ansi-logger';
 import { EventEmitter } from 'events';
 import fetch, { RequestInit } from 'node-fetch';
 import { getIpv4InterfaceAddress } from 'matterbridge';
@@ -243,6 +243,7 @@ export class ShellyDevice extends EventEmitter {
   online = false;
   gen = 0;
   lastseen = 0;
+  hasUpdate = false;
   private lastseenInterval?: NodeJS.Timeout;
 
   private wsClient: WsClient | undefined;
@@ -315,7 +316,7 @@ export class ShellyDevice extends EventEmitter {
     device.lastseen = Date.now();
 
     if (shellyPayload.mode) device.profile = shellyPayload.mode as 'relay' | 'cover';
-    if (shellyPayload.profile) device.profile = shellyPayload.mode as 'relay' | 'cover';
+    if (shellyPayload.profile) device.profile = shellyPayload.profile as 'relay' | 'cover';
 
     // Gen 1 Shelly device
     if (!shellyPayload.gen) {
@@ -331,6 +332,7 @@ export class ShellyDevice extends EventEmitter {
       device.auth = shellyPayload.auth as boolean;
       device.name = settingsPayload.name ? (settingsPayload.name as string) : device.id;
       device.gen = 1;
+      device.hasUpdate = statusPayload.has_update as boolean;
       for (const key in settingsPayload) {
         if (key === 'wifi_ap') device.addComponent(new ShellyComponent(device, key, 'WiFi', settingsPayload[key] as ShellyData));
         if (key === 'wifi_sta') device.addComponent(new ShellyComponent(device, key, 'WiFi', settingsPayload[key] as ShellyData));
@@ -358,20 +360,6 @@ export class ShellyDevice extends EventEmitter {
           }
         }
       }
-      for (const key in statusPayload) {
-        if (key === 'lights') {
-          let index = 0;
-          for (const light of statusPayload[key] as ShellyData[]) {
-            device.setComponentProperties(`light:${index++}`, light as ShellyData);
-          }
-        }
-        if (key === 'relays') {
-          let index = 0;
-          for (const relay of statusPayload[key] as ShellyData[]) {
-            device.setComponentProperties(`relay:${index++}`, relay as ShellyData);
-          }
-        }
-      }
     }
 
     // Gen 2 Shelly device
@@ -387,6 +375,7 @@ export class ShellyDevice extends EventEmitter {
       device.firmware = (shellyPayload.fw_id as string).split('/')[1];
       device.auth = shellyPayload.auth_en as boolean;
       device.gen = shellyPayload.gen;
+      // TODO device.hasUpdate = statusPayload.has_update as boolean;
       for (const key in settingsPayload) {
         if (key === 'wifi') {
           const wifi = settingsPayload[key] as ShellyData;
@@ -411,12 +400,6 @@ export class ShellyDevice extends EventEmitter {
         if (key.startsWith('cover:')) device.addComponent(new ShellyComponent(device, key, 'Cover', settingsPayload[key] as ShellyData));
         if (key.startsWith('light:')) device.addComponent(new ShellyComponent(device, key, 'Light', settingsPayload[key] as ShellyData));
         if (key.startsWith('pm1:')) device.addComponent(new ShellyComponent(device, key, 'PowerMeter', settingsPayload[key] as ShellyData));
-      }
-      for (const key in statusPayload) {
-        if (key.startsWith('switch:')) device.setComponentProperties(key, statusPayload[key] as ShellyData);
-        if (key.startsWith('cover:')) device.setComponentProperties(key, statusPayload[key] as ShellyData);
-        if (key.startsWith('light:')) device.setComponentProperties(key, statusPayload[key] as ShellyData);
-        if (key.startsWith('pm1:')) device.setComponentProperties(key, statusPayload[key] as ShellyData);
       }
     }
 
@@ -453,10 +436,11 @@ export class ShellyDevice extends EventEmitter {
     // Start WebSocket client for gen 2 and 3 devices
     if (device.gen === 2 || device.gen === 3) {
       device.wsClient = new WsClient(host, 'tango');
-      device.wsClient.start(false);
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      device.wsClient.start(true);
+
       device.wsClient.on('update', (message) => {
         log.info(`WebSocket update from device ${hk}${device.id}${nf} host ${zb}${device.host}${nf}` /* , message*/);
+        device.update(message);
       });
     }
 
@@ -498,6 +482,10 @@ export class ShellyDevice extends EventEmitter {
         }
       }
     } else if (this.gen === 2 || this.gen === 3) {
+      // Update passive components
+      for (const key in data) {
+        if (key === 'sys') this.setComponentProperties(key, data[key] as ShellyData);
+      }
       // Update active components
       for (const key in data) {
         if (key.startsWith('switch:')) this.setComponentProperties(key, data[key] as ShellyData);
@@ -647,7 +635,7 @@ export class ShellyDevice extends EventEmitter {
   logDevice() {
     // Log the device
     this.log.debug(
-      `Shelly device ${MAGENTA}${this.id}${db} (${this.model}) gen ${BLUE}${this.gen}${db} name ${BLUE}${this.name}${db} mac ${BLUE}${this.mac}${db} host ${BLUE}${this.host}${db}`,
+      `Shelly device ${MAGENTA}${this.id}${db} (${this.model}) gen ${BLUE}${this.gen}${db} name ${BLUE}${this.name}${db} mac ${BLUE}${this.mac}${db} host ${BLUE}${this.host}${db} profile ${BLUE}${this.profile}${db} firmware ${BLUE}${this.firmware}${db} auth ${BLUE}${this.auth}${db} online ${BLUE}${this.online}${db} lastseen ${BLUE}${this.lastseen}${db}`,
     );
     for (const [key, component] of this) {
       this.log.debug(`- ${GREEN}${component.name}${db} (${BLUE}${key}${db})`);
@@ -660,7 +648,25 @@ export class ShellyDevice extends EventEmitter {
 
 if (process.argv.includes('startShelly')) {
   const log = new AnsiLogger({ logName: 'shellyDevice', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: true });
+  const shelly = new Shelly(log, 'admin', 'tango');
 
+  const myRealDevices: { host: string; desc: string }[] = [
+    { host: '192.168.1.219', desc: 'Gen 1 Shelly Dimmer 2' },
+    { host: '192.168.1.222', desc: 'Gen 1 Shelly Switch 2.5' },
+    { host: '192.168.1.217', desc: 'Gen 2 Shelly Plus 1 PM' },
+    { host: '192.168.1.218', desc: 'Gen 2 Shelly Plus 2 PM' },
+    { host: '192.168.1.220', desc: 'Gen 3 Shelly PM mini' },
+    { host: '192.168.1.221', desc: 'Gen 3 Shelly 1 mini' },
+  ];
+
+  for (const device of myRealDevices) {
+    log.info(`Creating Shelly device ${idn}${device.desc}${rs}${db} host ${zb}${device.host}${db}`);
+    const shellyDevice = await ShellyDevice.create(shelly, log, device.host);
+    if (shellyDevice) {
+      shellyDevice.logDevice();
+      shellyDevice.destroy();
+    }
+  }
   /*
   // Gen 1 devices
   await ShellyDevice.fetch(log, '192.168.1.219', 'shelly'); // Password protected
@@ -683,8 +689,7 @@ if (process.argv.includes('startShelly')) {
   await ShellyDevice.fetch(log, '192.168.1.217', 'Shelly.GetStatus'); // No auth required
   */
 
-  const shelly = new Shelly(log);
-
+  /*
   const device = await ShellyDevice.create(shelly, log, '192.168.1.217');
   if (device) device.logDevice();
 
@@ -694,6 +699,8 @@ if (process.argv.includes('startShelly')) {
   switchComponent?.logComponent();
   await device?.fetchUpdate();
   // console.log(shelly);
+  */
+
   /*
   shelly = await ShellyDevice.create(log, '192.168.1.218');
   if (shelly) shelly.logDevice();
@@ -724,9 +731,9 @@ if (process.argv.includes('startShelly')) {
 */
 
   process.on('SIGINT', function () {
-    device?.destroy();
+    // device?.destroy();
     shelly.destroy();
-    // process.exit();
+    process.exit();
   });
   // await ShellyDevice.sendCommand('192.168.1.219', 'light', 0, 'turn=on');
 }

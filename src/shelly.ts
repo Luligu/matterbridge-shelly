@@ -10,10 +10,14 @@ export class Shelly extends EventEmitter {
   private mdnsScanner: MdnsScanner | undefined;
   private coapServer: CoapServer | undefined;
   private coapServerTimeout?: NodeJS.Timeout;
+  private username?: string;
+  private password?: string;
 
-  constructor(log: AnsiLogger) {
+  constructor(log: AnsiLogger, username?: string, password?: string) {
     super();
     this.log = log;
+    this.username = username;
+    this.password = password;
     this.mdnsScanner = new MdnsScanner();
     this.coapServer = new CoapServer();
 

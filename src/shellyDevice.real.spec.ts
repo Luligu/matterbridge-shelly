@@ -2,7 +2,7 @@
 /* eslint-disable no-console */
 import { ShellyDevice, ShellyComponent, ShellyProperty, ShellyDataType, ShellyData, ShellySwitchComponent, ShellyCoverComponent } from './shellyDevice.js';
 import { AnsiLogger, TimestampFormat, db, debugStringify, dn, hk, idn, nf, or, rs, wr, zb } from 'node-ansi-logger';
-import { getIpv4InterfaceAddress } from './utils';
+import { getIpv4InterfaceAddress } from 'matterbridge';
 import exp from 'constants';
 
 describe('Shellies', () => {

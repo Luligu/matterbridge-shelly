@@ -68,6 +68,7 @@ export class WsClient extends EventEmitter {
   private log;
   private wsClient: WebSocket | undefined;
   private _isConnected = false;
+  private _isConnecting = false;
   private id?: string;
   private wsHost;
   private wsUrl;
@@ -119,6 +120,7 @@ export class WsClient extends EventEmitter {
 
   async listenForStatusUpdates() {
     try {
+      this._isConnecting = true;
       this.wsClient = new WebSocket(this.wsUrl);
     } catch (error) {
       this.log.error(`Failed to create WebSocket connection to ${this.wsUrl}: ${error}`);
@@ -128,6 +130,7 @@ export class WsClient extends EventEmitter {
     // Handle the open event
     this.wsClient.on('open', () => {
       this.log.info(`WebSocket connection opened with Shelly device host ${zb}${this.wsHost}${nf}`);
+      this._isConnecting = false;
       this._isConnected = true;
       this.wsClient?.send(JSON.stringify(this.requestFrame));
     });
@@ -186,10 +189,11 @@ export class WsClient extends EventEmitter {
   }
 
   stop() {
-    this.log.debug(`Stopping ws client for Shelly device on address ${this.wsHost}`);
-    this.wsClient?.close();
-    this.wsClient?.removeAllListeners();
+    this.log.debug(`Stopping ws client for Shelly device on address ${this.wsHost} state ${this.wsClient?.readyState}`);
+    this.log.warn(`Closing ws client for Shelly device on address ${this.wsHost} ${this.wsClient?.readyState}`);
+    if (this._isConnected) this.wsClient?.close();
     this._isConnected = false;
+    this.wsClient?.removeAllListeners();
     this.log.debug(`Stopped ws client for Shelly device on address ${this.wsHost}`);
   }
 }
