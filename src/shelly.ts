@@ -3,6 +3,7 @@ import { ShellyDevice } from './shellyDevice.js';
 import { AnsiLogger, CYAN, MAGENTA, BRIGHT, hk, db, TimestampFormat, nf, wr, zb } from 'node-ansi-logger';
 import { DiscoveredDevice, MdnsScanner } from './mdnsScanner.js';
 import { CoapMessage, CoapServer } from './coapServer.js';
+import os from 'os';
 
 export class Shelly extends EventEmitter {
   private readonly _devices = new Map<string, ShellyDevice>();
@@ -121,7 +122,23 @@ export class Shelly extends EventEmitter {
   }
 }
 
+function logInterfaces(): string | undefined {
+  let ipv6Address: string | undefined;
+  const networkInterfaces = os.networkInterfaces();
+  console.log('Available Network Interfaces:', networkInterfaces);
+  for (const interfaceDetails of Object.values(networkInterfaces)) {
+    if (!interfaceDetails) {
+      break;
+    }
+    for (const detail of interfaceDetails) {
+      console.log('Details:', detail);
+    }
+  }
+  return ipv6Address;
+}
+
 if (process.argv.includes('shelly')) {
+  logInterfaces();
   const debug = false;
   const log = new AnsiLogger({ logName: 'Shellies', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: debug });
   const shelly = new Shelly(log);
@@ -132,6 +149,12 @@ if (process.argv.includes('shelly')) {
     const device = await ShellyDevice.create(shelly, log, discoveredDevice.host);
     if (!device) return;
     await shelly.addDevice(device);
+  });
+
+  shelly.on('add', async (device: ShellyDevice) => {
+    log.info(
+      `Added shelly device ${hk}${device.id}${nf}: name ${CYAN}${device.name}${nf} ip ${MAGENTA}${device.host}${nf} model ${CYAN}${device.model}${nf} auth ${CYAN}${device.auth}${nf}`,
+    );
   });
 
   process.on('SIGINT', async function () {

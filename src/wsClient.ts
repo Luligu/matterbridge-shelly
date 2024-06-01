@@ -189,8 +189,18 @@ export class WsClient extends EventEmitter {
   }
 
   stop() {
-    this.log.debug(`Stopping ws client for Shelly device on address ${this.wsHost} state ${this.wsClient?.readyState}`);
-    this.log.warn(`Closing ws client for Shelly device on address ${this.wsHost} ${this.wsClient?.readyState}`);
+    this.log.debug(
+      `Stopping ws client for Shelly device on address ${this.wsHost} state ${this.wsClient?.readyState} conencting ${this._isConnecting} connected ${this._isConnected} `,
+    );
+    if (this._isConnecting) {
+      setTimeout(() => {
+        if (this._isConnected) this.wsClient?.close();
+        this._isConnected = false;
+        this.wsClient?.removeAllListeners();
+        this.log.debug(`Stopped ws client for Shelly device on address ${this.wsHost}`);
+      }, 5000);
+      return;
+    }
     if (this._isConnected) this.wsClient?.close();
     this._isConnected = false;
     this.wsClient?.removeAllListeners();
