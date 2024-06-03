@@ -47,6 +47,7 @@ interface CoIoTDescription {
   id: number;
   component: string;
   property: string;
+  range: string | string[];
 }
 
 export class CoapServer extends EventEmitter {
@@ -271,13 +272,13 @@ export class CoapServer extends EventEmitter {
             this.log.debug(
               `  - id: ${CYAN}${s.I}${db} type ${CYAN}${s.T}${db} description ${CYAN}${s.D}${db} unit ${CYAN}${s.U}${db} range ${CYAN}${s.R}${db} block ${CYAN}${s.L}${db}`,
             );
-            if (s.D === 'output') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'ison' });
-            if (s.D === 'brightness') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'brightness' });
+            if (s.D === 'output') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'ison', range: s.R });
+            if (s.D === 'brightness') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'brightness', range: s.R });
           });
       });
       this.log.debug(`parsing ${MAGENTA}decoding${db}:`);
       desc.forEach((d) => {
-        this.log.debug(`- id ${CYAN}${d.id}${db} component ${CYAN}${d.component}${db} property ${CYAN}${d.property}${db}`);
+        this.log.debug(`- id ${CYAN}${d.id}${db} component ${CYAN}${d.component}${db} property ${CYAN}${d.property}${db} range ${CYAN}${d.range}${db}`);
       });
       this.devices.set(host, desc);
     }
@@ -295,7 +296,10 @@ export class CoapServer extends EventEmitter {
       values.forEach((v) => {
         const desc = descriptions.find((d) => d.id === v.id);
         if (desc) {
-          this.log.debug(`- channel ${CYAN}${v.channel}${db} id ${CYAN}${v.id}${db} value ${CYAN}${v.value}${db} => ${CYAN}${desc.component}${db} ${CYAN}${desc.property}${db}`);
+          this.log.debug(
+            `- channel ${CYAN}${v.channel}${db} id ${CYAN}${v.id}${db} value ${CYAN}${v.value}${db} => ${CYAN}${desc.component}${db} ${CYAN}${desc.property}${db} ${CYAN}${desc.range === '0/1' ? v.value === 1 : v.value}${db}`,
+          );
+          this.emit('update', host, desc.component, desc.property, desc.range === '0/1' ? v.value === 1 : v.value);
         }
         // else this.log.warn(`No description found for id ${v.id}`);
       });
@@ -330,8 +334,9 @@ export class CoapServer extends EventEmitter {
     this.coapServer.on('request', (msg: IncomingMessage, res: OutgoingMessage) => {
       this.log.debug(`Coap server got a messagge code ${BLUE}${msg.code}${db} url ${BLUE}${msg.url}${db} rsinfo ${debugStringify(msg.rsinfo)}...`);
       if (msg.code === '0.30' && msg.url === '/cit/s') {
-        const coapMessage = this.parseShellyMessage(msg);
-        this.emit('update', coapMessage);
+        // const coapMessage = this.parseShellyMessage(msg);
+        // this.emit('update', coapMessage);
+        this.parseShellyMessage(msg);
       } else {
         this.log.warn(`Coap server got a wrong messagge code ${BLUE}${msg.code}${wr} url ${BLUE}${msg.url}${wr} rsinfo ${db}${debugStringify(msg.rsinfo)}...`);
         // console.log(msg);
@@ -375,7 +380,7 @@ export class CoapServer extends EventEmitter {
 }
 
 if (process.argv.includes('coapServer') || process.argv.includes('coapDescription') || process.argv.includes('coapStatus') || process.argv.includes('coapMcast')) {
-  const coapServer = new CoapServer();
+  const coapServer = new CoapServer(true);
 
   if (process.argv.includes('coapDescription')) await coapServer.getDeviceDescription('192.168.1.219');
 

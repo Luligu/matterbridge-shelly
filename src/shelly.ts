@@ -2,7 +2,7 @@ import EventEmitter from 'events';
 import { ShellyDevice } from './shellyDevice.js';
 import { AnsiLogger, CYAN, MAGENTA, BRIGHT, hk, db, TimestampFormat, nf, wr, zb } from 'node-ansi-logger';
 import { DiscoveredDevice, MdnsScanner } from './mdnsScanner.js';
-import { CoapMessage, CoapServer } from './coapServer.js';
+import { CoapServer } from './coapServer.js';
 import os from 'os';
 
 export class Shelly extends EventEmitter {
@@ -27,14 +27,15 @@ export class Shelly extends EventEmitter {
       this.emit('discovered', device);
     });
 
-    this.coapServer.on('update', async (msg: CoapMessage) => {
-      this.log.info(`CoIoT update from device ${hk}${msg.deviceId}${nf} host ${zb}${msg.host}${nf}` /* , msg.payload*/);
-      /*
-      const shellyDevice = this.getDevice(device.id);
+    this.coapServer.on('update', async (host: string, component: string, property: string, value: string | number | boolean) => {
+      const shellyDevice = this.getDeviceByHost(host);
       if (shellyDevice) {
-        shellyDevice.update(device);
+        this.log.info(
+          `CoIoT update from device id ${hk}${shellyDevice.id}${nf} host ${zb}${host}${nf} component ${CYAN}${component}${nf} property ${CYAN}${property}${nf} value ${CYAN}${value}${nf}`,
+        );
+        shellyDevice.getComponent(component)?.setValue(property, value);
+        // shellyDevice.update(device);
       }
-      */
     });
   }
 
@@ -67,6 +68,12 @@ export class Shelly extends EventEmitter {
     return this._devices.get(id);
   }
 
+  getDeviceByHost(host: string): ShellyDevice | undefined {
+    const devices = this.devices.filter((device) => device.host === host);
+    if (devices.length === 0) return undefined;
+    return this._devices.get(devices[0].id);
+  }
+
   async addDevice(device: ShellyDevice): Promise<Shelly> {
     if (this.hasDevice(device.id)) {
       this.log.warn(`Shelly device ${hk}${device.id}${wr}: name ${CYAN}${device.name}${wr} ip ${MAGENTA}${device.host}${wr} model ${CYAN}${device.model}${wr} already exists`);
@@ -75,7 +82,7 @@ export class Shelly extends EventEmitter {
     this._devices.set(device.id, device);
     if (device.gen === 1) {
       await this.coapServer?.registerDevice(device.host);
-      this.startCoap(60, false);
+      this.startCoap(10, false);
     }
     this.emit('add', device);
     return this;
@@ -142,7 +149,7 @@ if (process.argv.includes('shelly')) {
   const debug = false;
   const log = new AnsiLogger({ logName: 'Shellies', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: debug });
   const shelly = new Shelly(log);
-  shelly.startMdns(undefined, false);
+  shelly.startMdns(300, false);
 
   shelly.on('discovered', async (discoveredDevice: DiscoveredDevice) => {
     const log = new AnsiLogger({ logName: discoveredDevice.id, logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: debug });

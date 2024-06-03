@@ -22,6 +22,8 @@ import {
   ColorControl,
   ClusterId,
   LevelControlCluster,
+  getClusterNameById,
+  ClusterRegistry,
 } from 'matterbridge';
 import { AnsiLogger, BLUE, TimestampFormat, db, debugStringify, dn, er, hk, idn, nf, or, rs, wr, zb } from 'node-ansi-logger';
 import { NodeStorage, NodeStorageManager } from 'node-persist-manager';
@@ -31,7 +33,6 @@ import fetch from 'node-fetch';
 import { Shelly } from './shelly.js';
 import { DiscoveredDevice } from './mdnsScanner.js';
 import { ShellyCoverComponent, ShellyData, ShellyDevice, ShellySwitchComponent } from './shellyDevice.js';
-import { on } from 'events';
 
 // import { CoapMessage, CoapServer } from './coapServer.js';
 
@@ -228,6 +229,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         } else if (component.name === 'PowerMeter') {
           const pmComponent = device.getComponent(key);
           if (pmComponent) {
+            ClusterRegistry.register(EveHistory.Complete);
+            this.log.info('Added custom cluster:', getClusterNameById(EveHistoryCluster.id));
             const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.ON_OFF_PLUGIN_UNIT], [OnOff.Complete.id, EveHistory.Cluster.id]);
             mbDevice.addFixedLabel('composed', component.name);
             // Set the electrical attributes
@@ -251,6 +254,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           }
         }
       }
+      // Check if we have a device to register with Matterbridge
       const endpoints = mbDevice.getChildEndpoints();
       if (endpoints.length > 0) {
         // Register the device with Matterbridge

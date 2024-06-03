@@ -426,7 +426,7 @@ export class ShellyDevice extends EventEmitter {
       device.wsClient.start(false);
 
       device.wsClient.on('update', (message) => {
-        log.info(`WebSocket update from device ${hk}${device.id}${nf} host ${zb}${device.host}${nf}`, message);
+        log.info(`WebSocket update from device ${hk}${device.id}${nf} host ${zb}${device.host}${nf}` /* , message*/);
         device.update(message);
       });
     }
