@@ -32,7 +32,9 @@ import fetch from 'node-fetch';
 
 import { Shelly } from './shelly.js';
 import { DiscoveredDevice } from './mdnsScanner.js';
-import { ShellyCoverComponent, ShellyData, ShellyDevice, ShellySwitchComponent } from './shellyDevice.js';
+import { ShellyDevice } from './shellyDevice.js';
+import { ShellyCoverComponent, ShellySwitchComponent } from './shellyComponent.js';
+import { ShellyData } from './shellyTypes.js';
 
 // import { CoapMessage, CoapServer } from './coapServer.js';
 

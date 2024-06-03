@@ -1,4 +1,4 @@
-import { ShellyData } from './shellyDevice.js';
+import { ShellyData } from './shellyTypes.js';
 
 // Sample output Gen 1 Shelly Dimmer for 192.168.1.219/shelly
 export const shellydimmer2Shelly: ShellyData = {

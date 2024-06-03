@@ -109,7 +109,7 @@ export default tseslint.config(
       '@typescript-eslint': tseslint.plugin,
       jest: jesteslint,
     },
-    // ...jesteslint.configs['flat/recommended'],
+    ...jesteslint.configs['flat/recommended'],
     rules: {
       'no-console': 'warn',
       'no-undef': 'off',

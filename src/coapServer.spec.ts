@@ -1,4 +1,4 @@
-import { CoapMessage, CoapServer } from './coapServer';
+import { CoapServer } from './coapServer';
 
 describe('Coap scanner', () => {
   let coapServer: CoapServer | undefined = undefined;
@@ -54,17 +54,8 @@ describe('Coap scanner', () => {
     30 * 1000,
   );
 
-  // eslint-disable-next-line jest/no-done-callback
-  test('Start scanner', (done) => {
-    function callback(message: CoapMessage) {
-      try {
-        expect(message.validFor).toBeGreaterThan(0);
-        done();
-      } catch (error) {
-        done(error);
-      }
-    }
-    coapServer?.start(callback, true);
+  test('Start scanner', () => {
+    coapServer?.start(true);
     expect(coapServer?.isListening).toBeTruthy();
   }, 60000);
 });

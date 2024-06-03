@@ -36,7 +36,7 @@ export class MdnsScanner extends EventEmitter {
     this.log.info('Sent mDNS query for shelly devices.');
   }
 
-  start(timeout?: number, debug = false) {
+  start(shutdownTimeout?: number, debug = false) {
     this.log.info('Starting mDNS query service for shelly devices...');
     this._isScanning = true;
 
@@ -117,10 +117,10 @@ export class MdnsScanner extends EventEmitter {
       this.sendQuery();
     }, 60 * 1000);
 
-    if (timeout && timeout > 0) {
+    if (shutdownTimeout && shutdownTimeout > 0) {
       this.scannerTimeout = setTimeout(() => {
         this.stop();
-      }, timeout * 1000);
+      }, shutdownTimeout * 1000);
     }
     this.log.info('Started mDNS query service for shelly devices.');
   }

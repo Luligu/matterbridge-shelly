@@ -3,7 +3,7 @@ import { ShellyDevice } from './shellyDevice.js';
 import { AnsiLogger, CYAN, MAGENTA, BRIGHT, hk, db, TimestampFormat, nf, wr, zb } from 'node-ansi-logger';
 import { DiscoveredDevice, MdnsScanner } from './mdnsScanner.js';
 import { CoapServer } from './coapServer.js';
-import os from 'os';
+import { logInterfaces } from 'matterbridge';
 
 export class Shelly extends EventEmitter {
   private readonly _devices = new Map<string, ShellyDevice>();
@@ -30,11 +30,10 @@ export class Shelly extends EventEmitter {
     this.coapServer.on('update', async (host: string, component: string, property: string, value: string | number | boolean) => {
       const shellyDevice = this.getDeviceByHost(host);
       if (shellyDevice) {
-        this.log.info(
+        shellyDevice.log.info(
           `CoIoT update from device id ${hk}${shellyDevice.id}${nf} host ${zb}${host}${nf} component ${CYAN}${component}${nf} property ${CYAN}${property}${nf} value ${CYAN}${value}${nf}`,
         );
         shellyDevice.getComponent(component)?.setValue(property, value);
-        // shellyDevice.update(device);
       }
     });
   }
@@ -107,15 +106,15 @@ export class Shelly extends EventEmitter {
     }
   }
 
-  startMdns(mdnsTimeout?: number, debug = false) {
-    this.mdnsScanner?.start(mdnsTimeout, debug);
+  startMdns(mdnsShutdownTimeout?: number, debug = false) {
+    this.mdnsScanner?.start(mdnsShutdownTimeout, debug);
   }
 
-  startCoap(coapTimeout?: number, debug = false) {
-    if (coapTimeout) {
+  startCoap(coapStartTimeout?: number, debug = false) {
+    if (coapStartTimeout) {
       this.coapServerTimeout = setTimeout(() => {
         this.coapServer?.start(debug);
-      }, coapTimeout * 1000);
+      }, coapStartTimeout * 1000);
     } else {
       this.coapServer?.start(debug);
     }
@@ -127,21 +126,6 @@ export class Shelly extends EventEmitter {
       this.log.debug(`- ${hk}${id}${db}: name ${CYAN}${device.name}${db} ip ${MAGENTA}${device.host}${db} model ${CYAN}${device.model}${db} auth ${CYAN}${device.auth}${db}`);
     }
   }
-}
-
-function logInterfaces(): string | undefined {
-  let ipv6Address: string | undefined;
-  const networkInterfaces = os.networkInterfaces();
-  console.log('Available Network Interfaces:', networkInterfaces);
-  for (const interfaceDetails of Object.values(networkInterfaces)) {
-    if (!interfaceDetails) {
-      break;
-    }
-    for (const detail of interfaceDetails) {
-      console.log('Details:', detail);
-    }
-  }
-  return ipv6Address;
 }
 
 if (process.argv.includes('shelly')) {

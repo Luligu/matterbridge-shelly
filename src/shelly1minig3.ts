@@ -1,4 +1,4 @@
-import { ShellyData } from './shellyDevice.js';
+import { ShellyData } from './shellyTypes.js';
 
 // Sample output Gen 3 Shelly PM Mini for 192.168.1.221/shelly
 export const shelly1minig3Shelly: ShellyData = {

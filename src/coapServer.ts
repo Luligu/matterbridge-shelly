@@ -245,7 +245,7 @@ export class CoapServer extends EventEmitter {
 
     try {
       payload = JSON.parse(msg.payload.toString());
-    } catch (e) {
+    } catch {
       payload = msg.payload.toString();
     }
 

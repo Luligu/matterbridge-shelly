@@ -39,7 +39,7 @@ A working shelly device gen. 1 or 2 or 3.
 
 For Gen. 1 devices:
 
-- CoIoT: the CoIoT (coap) service must be enabled and the CoIoT peer must be mcast. If mcast is not working on your network put in the peer the Matterbridge ipv4Address an d port 5683 (e.g. 192.168.1.100:5683). Multicast may not work for all networks due to router or access poit configuration or network topology. If CoIoT is not configured correctly you will not receive any update from the device.
+- CoIoT: the CoIoT (coap) service must be enabled in the settings of the device and the CoIoT peer must be mcast. If mcast is not working on your network put in the peer field the Matterbridge ipv4Address and port 5683 (e.g. 192.168.1.100:5683). Multicast may not work for all networks due to router or access poit configuration or network topology (I cannot help you on this, just check your router or access point configuration). If CoIoT is not configured correctly you will not receive any update from the device.
 
 ## How to install
 
@@ -90,7 +90,7 @@ These are the config values:
 }
 ```
 
-You can edit the config file from the frontend or
+You can edit the config file from the frontend (best option) or
 
 On windows:
 
