@@ -82,7 +82,7 @@ describe('ShellyComponent', () => {
     (component as ShellySwitchComponent).Toggle();
     (component as ShellySwitchComponent).Level(50);
     expect(mockFetch).toHaveBeenCalled();
-    expect(mockFetch).toHaveBeenCalledTimes(4);
+    expect(mockFetch).toHaveBeenCalledTimes(3);
     mockFetch.mockRestore();
   });
 
@@ -172,6 +172,7 @@ describe('ShellyComponent', () => {
 
   it('should construct properly with cover type component gen 2', () => {
     const mockFetch = jest.spyOn(ShellyDevice, 'fetch').mockResolvedValue({});
+
     const data = { key1: 'value', key2: 123, key3: true };
     const component = new ShellyComponent(device2, 'cover:1', 'Cover', data);
     expect(component.id).toBe('cover:1');

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1717430569680" clover="3.2.0">
-  <project timestamp="1717430569680" name="All files">
+<coverage generated="1717431356853" clover="3.2.0">
+  <project timestamp="1717431356853" name="All files">
     <metrics statements="800" coveredstatements="332" conditionals="377" coveredconditionals="114" methods="131" coveredmethods="42" elements="1308" coveredelements="488" complexity="0" loc="800" ncloc="800" packages="1" files="13" classes="13"/>
     <file name="auth.ts" path="C:\Users\lligu\GitHub\matterbridge-shelly\src\auth.ts">
       <metrics statements="37" coveredstatements="0" conditionals="4" coveredconditionals="0" methods="9" coveredmethods="0"/>

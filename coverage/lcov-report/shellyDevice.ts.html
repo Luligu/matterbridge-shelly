@@ -1453,8 +1453,8 @@ export class ShellyDevice extends EventEmitter {
     }
     <span class="missing-if-branch" title="if path not taken" >I</span>if (host === 'mock.192.168.1.218') {
 <span class="cstat-no" title="statement not covered" >      <span class="missing-if-branch" title="if path not taken" >I</span>if (service === 'shelly') <span class="cstat-no" title="statement not covered" >return shellyplus2pmShelly;</span></span>
-<span class="cstat-no" title="statement not covered" >      <span class="missing-if-branch" title="if path not taken" >I</span>if (service === 'rpc/Shelly.GetStatus') <span class="cstat-no" title="statement not covered" >return shellyplus2pmStatus;</span></span>
-<span class="cstat-no" title="statement not covered" >      <span class="missing-if-branch" title="if path not taken" >I</span>if (service === 'rpc/Shelly.GetConfig') <span class="cstat-no" title="statement not covered" >return shellyplus2pmSettings;</span></span>
+<span class="cstat-no" title="statement not covered" >      <span class="missing-if-branch" title="if path not taken" >I</span>if (service === 'Shelly.GetStatus') <span class="cstat-no" title="statement not covered" >return shellyplus2pmStatus;</span></span>
+<span class="cstat-no" title="statement not covered" >      <span class="missing-if-branch" title="if path not taken" >I</span>if (service === 'Shelly.GetConfig') <span class="cstat-no" title="statement not covered" >return shellyplus2pmSettings;</span></span>
     }
     if (host === 'mock.192.168.1.219') {
       if (service === 'shelly') return shellydimmer2Shelly;
@@ -1463,13 +1463,13 @@ export class ShellyDevice extends EventEmitter {
     }
 <span class="cstat-no" title="statement not covered" >    <span class="missing-if-branch" title="if path not taken" >I</span>if (host === 'mock.192.168.1.220') {</span>
 <span class="cstat-no" title="statement not covered" >      <span class="missing-if-branch" title="if path not taken" >I</span>if (service === 'shelly') <span class="cstat-no" title="statement not covered" >return shellypmminig3Shelly;</span></span>
-<span class="cstat-no" title="statement not covered" >      <span class="missing-if-branch" title="if path not taken" >I</span>if (service === 'rpc/Shelly.GetStatus') <span class="cstat-no" title="statement not covered" >return shellypmminig3Status;</span></span>
-<span class="cstat-no" title="statement not covered" >      <span class="missing-if-branch" title="if path not taken" >I</span>if (service === 'rpc/Shelly.GetConfig') <span class="cstat-no" title="statement not covered" >return shellypmminig3Settings;</span></span>
+<span class="cstat-no" title="statement not covered" >      <span class="missing-if-branch" title="if path not taken" >I</span>if (service === 'Shelly.GetStatus') <span class="cstat-no" title="statement not covered" >return shellypmminig3Status;</span></span>
+<span class="cstat-no" title="statement not covered" >      <span class="missing-if-branch" title="if path not taken" >I</span>if (service === 'Shelly.GetConfig') <span class="cstat-no" title="statement not covered" >return shellypmminig3Settings;</span></span>
     }
 <span class="cstat-no" title="statement not covered" >    <span class="missing-if-branch" title="if path not taken" >I</span>if (host === 'mock.192.168.1.221') {</span>
 <span class="cstat-no" title="statement not covered" >      <span class="missing-if-branch" title="if path not taken" >I</span>if (service === 'shelly') <span class="cstat-no" title="statement not covered" >return shelly1minig3Shelly;</span></span>
-<span class="cstat-no" title="statement not covered" >      <span class="missing-if-branch" title="if path not taken" >I</span>if (service === 'rpc/Shelly.GetStatus') <span class="cstat-no" title="statement not covered" >return shelly1minig3Status;</span></span>
-<span class="cstat-no" title="statement not covered" >      <span class="missing-if-branch" title="if path not taken" >I</span>if (service === 'rpc/Shelly.GetConfig') <span class="cstat-no" title="statement not covered" >return shelly1minig3Settings;</span></span>
+<span class="cstat-no" title="statement not covered" >      <span class="missing-if-branch" title="if path not taken" >I</span>if (service === 'Shelly.GetStatus') <span class="cstat-no" title="statement not covered" >return shelly1minig3Status;</span></span>
+<span class="cstat-no" title="statement not covered" >      <span class="missing-if-branch" title="if path not taken" >I</span>if (service === 'Shelly.GetConfig') <span class="cstat-no" title="statement not covered" >return shelly1minig3Settings;</span></span>
     }
     const gen = <span class="cstat-no" title="statement not covered" >/^[^A-Z]*$/.test(service) ? 1 : 2;</span>
     const url = <span class="cstat-no" title="statement not covered" >gen === 1 ? `http://${host}/${service}` : `http://${host}/rpc`;</span>
@@ -1648,7 +1648,7 @@ export class ShellyDevice extends EventEmitter {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2024-06-03T16:02:49.650Z
+                at 2024-06-03T16:15:56.820Z
             </div>
         <script src="prettify.js"></script>
         <script>
