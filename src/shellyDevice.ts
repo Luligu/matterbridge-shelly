@@ -225,7 +225,9 @@ export class ShellyDevice extends EventEmitter {
     // Start WebSocket client for gen 2 and 3 devices
     if (device.gen === 2 || device.gen === 3) {
       device.wsClient = new WsClient(host, 'tango');
-      device.wsClient.start(false);
+      setTimeout(() => {
+        device.wsClient?.start(false);
+      }, 10 * 1000);
 
       device.wsClient.on('update', (message) => {
         log.info(`WebSocket update from device ${hk}${device.id}${nf} host ${zb}${device.host}${nf}` /* , message*/);
