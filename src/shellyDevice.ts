@@ -286,7 +286,7 @@ export class ShellyDevice extends EventEmitter {
         if (key.startsWith('light:') || key.startsWith('switch:')) {
           const componentData = data[key] as ShellyData;
           const component = this.getComponent(key);
-          if (component && componentData.output) component.setValue('state', componentData.output as boolean);
+          if (component && componentData.output !== undefined) component.setValue('state', componentData.output as boolean);
         }
       }
     }
@@ -438,11 +438,13 @@ if (process.argv.includes('startShelly')) {
   const shelly = new Shelly(log, 'admin', 'tango');
 
   const myRealDevices: { host: string; desc: string }[] = [
+    /*
     { host: '192.168.1.219', desc: 'Gen 1 Shelly Dimmer 2' },
     { host: '192.168.1.222', desc: 'Gen 1 Shelly Switch 2.5' },
     { host: '192.168.1.217', desc: 'Gen 2 Shelly Plus 1 PM' },
     { host: '192.168.1.218', desc: 'Gen 2 Shelly Plus 2 PM' },
     { host: '192.168.1.220', desc: 'Gen 3 Shelly PM mini' },
+    */
     { host: '192.168.1.221', desc: 'Gen 3 Shelly 1 mini' },
   ];
 

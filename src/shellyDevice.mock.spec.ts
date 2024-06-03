@@ -1,12 +1,15 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-import { ShellyDevice, ShellyComponent, ShellyProperty, ShellyDataType, ShellyData } from './shellyDevice.js';
+import { ShellyDevice } from './shellyDevice.js';
 import { AnsiLogger, TimestampFormat, db, debugStringify, dn, hk, idn, nf, or, rs, wr, zb } from 'node-ansi-logger';
 import { shellydimmer2Settings } from './shellydimmer2.js';
-import { getIpv4InterfaceAddress } from './utils';
+import { getIpv4InterfaceAddress } from 'matterbridge';
+import { Shelly } from './shelly.js';
+import { ShellyComponent } from './shellyComponent.js';
 
 describe('Shellies', () => {
   const log = new AnsiLogger({ logName: 'shellyDeviceTest', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: true });
+  const shelly = new Shelly(log);
 
   beforeAll(() => {
     //
@@ -26,7 +29,7 @@ describe('Shellies', () => {
 
   describe('new gen 1 shellydimmer2', () => {
     test('Create a gen 1 device', async () => {
-      const device = await ShellyDevice.create(log, 'mock.192.168.1.219');
+      const device = await ShellyDevice.create(shelly, log, 'mock.192.168.1.219');
       expect(device).not.toBeUndefined();
       expect(device?.host).toBe('192.168.1.219');
       expect(device?.model).toBe('SHDM-2');
@@ -40,15 +43,15 @@ describe('Shellies', () => {
     });
 
     test('Create a gen 1 device with name = null', async () => {
-      const device = await ShellyDevice.create(log, 'mock.192.168.1.219');
+      const device = await ShellyDevice.create(shelly, log, 'mock.192.168.1.219');
       expect(device).not.toBeUndefined();
-      expect(device?.name).toBeNull();
+      expect(device?.name).not.toBeNull();
       if (device) device.destroy();
       expect(device?.lastseen).toBe(0);
     });
 
     test('Create a gen 1 device with all components', async () => {
-      const device = await ShellyDevice.create(log, 'mock.192.168.1.219');
+      const device = await ShellyDevice.create(shelly, log, 'mock.192.168.1.219');
       expect(device).not.toBeUndefined();
       const components = device?.components;
       expect(components).toBeDefined();
@@ -58,14 +61,14 @@ describe('Shellies', () => {
 
     test('Create a gen 1 device with a name', async () => {
       shellydimmer2Settings.name = 'my dimmer';
-      const device = await ShellyDevice.create(log, 'mock.192.168.1.219');
+      const device = await ShellyDevice.create(shelly, log, 'mock.192.168.1.219');
       expect(device).not.toBeUndefined();
       expect(device?.name).toBe('my dimmer');
       if (device) device.destroy();
     });
 
     test('Create a gen 1 device with components WiFi', async () => {
-      const device = await ShellyDevice.create(log, 'mock.192.168.1.219');
+      const device = await ShellyDevice.create(shelly, log, 'mock.192.168.1.219');
       expect(device).not.toBeUndefined();
       expect(device?.hasComponent('wifi_ap')).toBeTruthy();
       expect(device?.hasComponent('wifi_sta')).toBeTruthy();
@@ -74,9 +77,9 @@ describe('Shellies', () => {
     });
 
     test('Create a gen 1 device with dummy component', async () => {
-      const device = await ShellyDevice.create(log, 'mock.192.168.1.219');
+      const device = await ShellyDevice.create(shelly, log, 'mock.192.168.1.219');
       expect(device).not.toBeUndefined();
-      device?.addComponent(new ShellyComponent('dummy1', 'dummy', device));
+      device?.addComponent(new ShellyComponent(device, 'dummy1', 'dummy'));
       expect(device?.hasComponent('dummy1')).toBeTruthy();
       expect(device?.hasComponent('dummy')).toBeFalsy();
       let component = device?.getComponent('dummy');
@@ -87,9 +90,9 @@ describe('Shellies', () => {
     });
 
     test('Create a gen 1 device with relay component', async () => {
-      const device = await ShellyDevice.create(log, 'mock.192.168.1.219');
+      const device = await ShellyDevice.create(shelly, log, 'mock.192.168.1.219');
       expect(device).not.toBeUndefined();
-      device?.addComponent(new ShellyComponent('relay:0', 'Relay', device));
+      device?.addComponent(new ShellyComponent(device, 'relay:0', 'Relay'));
       const component = device?.getComponent('relay:0');
       expect(component).not.toBeUndefined();
       expect(component?.id).toBe('relay:0');
@@ -98,7 +101,7 @@ describe('Shellies', () => {
     });
 
     test('Create a gen 1 device and test index', async () => {
-      const device = await ShellyDevice.create(log, 'mock.192.168.1.219');
+      const device = await ShellyDevice.create(shelly, log, 'mock.192.168.1.219');
       expect(device).not.toBeUndefined();
       let component = device?.getComponent('light:0');
       expect(component).not.toBeUndefined();
@@ -106,21 +109,21 @@ describe('Shellies', () => {
       expect(component?.index).toBe(0);
       expect(component?.name).toBe('Light');
 
-      device?.addComponent(new ShellyComponent('relay:0', 'Relay', device));
+      device?.addComponent(new ShellyComponent(device, 'relay:0', 'Relay'));
       component = device?.getComponent('relay:0');
       expect(component).not.toBeUndefined();
       expect(component?.id).toBe('relay:0');
       expect(component?.index).toBe(0);
       expect(component?.name).toBe('Relay');
 
-      device?.addComponent(new ShellyComponent('relay:9', 'Relay', device));
+      device?.addComponent(new ShellyComponent(device, 'relay:9', 'Relay'));
       component = device?.getComponent('relay:9');
       expect(component).not.toBeUndefined();
       expect(component?.id).toBe('relay:9');
       expect(component?.index).toBe(9);
       expect(component?.name).toBe('Relay');
 
-      device?.addComponent(new ShellyComponent('sys', 'Sys', device));
+      device?.addComponent(new ShellyComponent(device, 'sys', 'Sys'));
       component = device?.getComponent('sys');
       expect(component).not.toBeUndefined();
       expect(component?.id).toBe('sys');
@@ -132,7 +135,7 @@ describe('Shellies', () => {
 
   describe('new gen 2 shellyplus2pm', () => {
     test('Create a gen 2 device', async () => {
-      const device = await ShellyDevice.create(log, 'mock.192.168.1.218');
+      const device = await ShellyDevice.create(shelly, log, 'mock.192.168.1.218');
       expect(device).not.toBeUndefined();
       expect(device?.host).toBe('192.168.1.218');
       expect(device?.model).toBe('SNSW-102P16EU');
@@ -145,7 +148,7 @@ describe('Shellies', () => {
     });
 
     test('Create a gen 2 device with name not null', async () => {
-      const device = await ShellyDevice.create(log, 'mock.192.168.1.218');
+      const device = await ShellyDevice.create(shelly, log, 'mock.192.168.1.218');
       expect(device).not.toBeUndefined();
       expect(device?.name).not.toBeNull();
       expect(device?.name).toBe('Device shellyplus2pm');
@@ -154,7 +157,7 @@ describe('Shellies', () => {
     });
 
     test('Create a gen 2 device with all components', async () => {
-      const device = await ShellyDevice.create(log, 'mock.192.168.1.218');
+      const device = await ShellyDevice.create(shelly, log, 'mock.192.168.1.218');
       expect(device).not.toBeUndefined();
       const components = device?.components;
       expect(components).toBeDefined();
@@ -167,7 +170,7 @@ describe('Shellies', () => {
     });
 
     test('Create a gen 2 device with components name null', async () => {
-      const device = await ShellyDevice.create(log, 'mock.192.168.1.218');
+      const device = await ShellyDevice.create(shelly, log, 'mock.192.168.1.218');
       expect(device).not.toBeUndefined();
       const switch0 = device?.getComponent('switch:0');
       expect(switch0).not.toBeUndefined();
@@ -186,7 +189,7 @@ describe('Shellies', () => {
     });
 
     test('Create a gen 2 device with cloud property', async () => {
-      const device = await ShellyDevice.create(log, 'mock.192.168.1.218');
+      const device = await ShellyDevice.create(shelly, log, 'mock.192.168.1.218');
       expect(device).not.toBeUndefined();
       const cloud = device?.getComponent('cloud');
       expect(cloud).not.toBeUndefined();
@@ -202,7 +205,7 @@ describe('Shellies', () => {
           expect(property.key).not.toBeUndefined();
         }
       }
-      expect(device?.addComponentProperties('nocomponent', {})).toBeUndefined();
+      expect(device?.updateComponent('nocomponent', {})).toBeUndefined();
       if (device) device.destroy();
       expect(device?.lastseen).toBe(0);
     });
@@ -210,7 +213,7 @@ describe('Shellies', () => {
 
   describe('new gen 2 shellyplus1pm', () => {
     test('Create a gen 2 device', async () => {
-      const device = await ShellyDevice.create(log, 'mock.192.168.1.217');
+      const device = await ShellyDevice.create(shelly, log, 'mock.192.168.1.217');
       expect(device).not.toBeUndefined();
       expect(device?.host).toBe('192.168.1.217');
       expect(device?.model).toBe('SNSW-001P16EU');
@@ -225,7 +228,7 @@ describe('Shellies', () => {
 
   describe('new gen 3 shellypmminig3', () => {
     test('Create a gen 2 device', async () => {
-      const device = await ShellyDevice.create(log, 'mock.192.168.1.220');
+      const device = await ShellyDevice.create(shelly, log, 'mock.192.168.1.220');
       expect(device).not.toBeUndefined();
       expect(device?.host).toBe('192.168.1.220');
       expect(device?.model).toBe('S3PM-001PCEU16');
@@ -240,7 +243,7 @@ describe('Shellies', () => {
 
   describe('new gen 3 shelly1minig3', () => {
     test('Create a gen 2 device', async () => {
-      const device = await ShellyDevice.create(log, 'mock.192.168.1.221');
+      const device = await ShellyDevice.create(shelly, log, 'mock.192.168.1.221');
       expect(device).not.toBeUndefined();
       expect(device?.host).toBe('192.168.1.221');
       expect(device?.model).toBe('S3SW-001X8EU');

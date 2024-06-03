@@ -39,9 +39,9 @@ export class ShellyComponent {
     this.name = name;
     this.device = device;
     for (const prop in data) {
+      this.addProperty(new ShellyProperty(this, prop, data[prop] as ShellyDataType));
       // Add a state property for Light, Relay, and Switch components
       if (this.stateName.includes(name) && (prop === 'ison' || prop === 'output')) this.addProperty(new ShellyProperty(this, 'state', data[prop]));
-      this.addProperty(new ShellyProperty(this, prop, data[prop] as ShellyDataType));
     }
 
     // Extend the class prototype to include the Switch Relay Light methods dynamically
@@ -119,18 +119,20 @@ export class ShellyComponent {
     if (property) {
       if (!deepEqual(property.value, value)) {
         this.device.log.info(
-          `***${CYAN}${this.id}:${key}${GREY} updated from ${property.value} to ${YELLOW}${value}${GREY} in component ${GREEN}${this.id}${GREY} (${BLUE}${this.name}${GREY})`,
+          `***${CYAN}${this.id}:${key}${GREY} updated from ${property.value !== null && typeof property.value === 'object' ? debugStringify(property.value) : property.value}${GREY} to ${YELLOW}${value !== null && typeof value === 'object' ? debugStringify(value) : value}${GREY} in component ${GREEN}${this.id}${GREY} (${BLUE}${this.name}${GREY})`,
         );
         this.device.emit('update', this.id, key, value);
         property.value = value;
       } else {
         this.device.log.info(
-          `*${CYAN}${this.id}:${key}${GREY} not changed from ${YELLOW}${property.value}${GREY} in component ${GREEN}${this.id}${GREY} (${BLUE}${this.name}${GREY})`,
+          `*${CYAN}${this.id}:${key}${GREY} not changed from ${YELLOW}${property.value !== null && typeof property.value === 'object' ? debugStringify(property.value) : property.value}${GREY} in component ${GREEN}${this.id}${GREY} (${BLUE}${this.name}${GREY})`,
         );
       }
     } else {
       this.addProperty(new ShellyProperty(this, key, value));
-      this.device.log.info(`**${CYAN}${this.id}:${key}${GREY} added with value ${YELLOW}${value}${GREY} to component ${GREEN}${this.id}${GREY} (${BLUE}${this.name}${GREY})`);
+      this.device.log.info(
+        `**${CYAN}${this.id}:${key}${GREY} added with value ${YELLOW}${value !== null && typeof value === 'object' ? debugStringify(value) : value}${GREY} to component ${GREEN}${this.id}${GREY} (${BLUE}${this.name}${GREY})`,
+      );
     }
     return this;
   }
@@ -139,7 +141,7 @@ export class ShellyComponent {
     const property = this.getProperty(key);
     if (property) return property.value;
     else {
-      this.device.log.error(`****Property ${CYAN}${key}${db} not found in component ${GREEN}${this.id}${er} (${BLUE}${this.name}${er})`);
+      this.device.log.error(`****Property ${CYAN}${key}${er} not found in component ${GREEN}${this.id}${er} (${BLUE}${this.name}${er})`);
       return undefined;
     }
   }

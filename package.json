@@ -51,7 +51,7 @@
     "test:utils": "node --experimental-vm-modules node_modules/jest/bin/jest.js src/utils.spec.ts --coverage",
     "test:shellyProperty": "node --experimental-vm-modules node_modules/jest/bin/jest.js src/shellyProperty.test.ts --coverage",
     "test:shellyComponent": "node --experimental-vm-modules node_modules/jest/bin/jest.js src/shellyComponent.test.ts --coverage",
-    "test:mock": "node --experimental-vm-modules node_modules/jest/bin/jest.js src/shellyDevice.mock.spec.ts",
+    "test:mock": "node --experimental-vm-modules node_modules/jest/bin/jest.js src/shellyDevice.mock.spec.ts --coverage",
     "test:real": "node --experimental-vm-modules node_modules/jest/bin/jest.js src/shellyDevice.real.spec.ts",
     "test:shelly": "node --experimental-vm-modules node_modules/jest/bin/jest.js src/shelly.test.ts --coverage",
     "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage",
