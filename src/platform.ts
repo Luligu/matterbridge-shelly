@@ -535,7 +535,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
   }
 
   private shellyCoverUpdateHandler(matterbridgeDevice: MatterbridgeDevice, shellyDevice: ShellyDevice, component: string, property: string, value: ShellyDataType): boolean {
-    this.log.info(
+    shellyDevice.log.info(
       `${db}Shelly message for device ${idn}${shellyDevice.id}${rs}${db} ${hk}${component}${db}:` +
         `${zb}${property}${db}:${YELLOW}${value !== null && typeof value === 'object' ? debugStringify(value as object) : value}${rs}`,
     );
@@ -568,7 +568,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         windowCoveringCluster.setTargetPositionLiftPercent100thsAttribute(10000);
         matterbridgeDevice.setWindowCoveringStatus(WindowCovering.MovementStatus.Closing, endpoint);
       }
-      this.log.info(
+      shellyDevice.log.info(
         `${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}WindowCovering${db} for device ${dn}${shellyDevice.id}${db}` +
           ` ${hk}${component}${db}:${zb}${property}${db}::${YELLOW}${value !== null && typeof value === 'object' ? debugStringify(value as object) : value}${rs}`,
       );
