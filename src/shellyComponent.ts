@@ -4,6 +4,7 @@ import { ShellyData, ShellyDataType } from './shellyTypes.js';
 import { ShellyProperty } from './shellyProperty.js';
 import { ShellyDevice } from './shellyDevice.js';
 import { deepEqual } from 'matterbridge';
+import EventEmitter from 'events';
 
 interface SwitchComponent {
   On(): void;
@@ -25,7 +26,7 @@ export type ShellyCoverComponent = ShellyComponent & CoverComponent;
 
 type ShellyComponentType = ShellyComponent & Partial<SwitchComponent> & Partial<CoverComponent>;
 
-export class ShellyComponent {
+export class ShellyComponent extends EventEmitter {
   readonly device: ShellyDevice;
   readonly id: string;
   readonly index: number;
@@ -34,6 +35,7 @@ export class ShellyComponent {
   private readonly stateName = ['Light', 'Relay', 'Switch'];
 
   constructor(device: ShellyDevice, id: string, name: string, data?: ShellyData) {
+    super();
     this.id = id;
     this.index = id.includes(':') ? parseInt(id.split(':')[1]) : -1;
     this.name = name;
@@ -122,6 +124,7 @@ export class ShellyComponent {
           `***${CYAN}${this.id}:${key}${GREY} updated from ${property.value !== null && typeof property.value === 'object' ? debugStringify(property.value) : property.value}${GREY} to ${YELLOW}${value !== null && typeof value === 'object' ? debugStringify(value) : value}${GREY} in component ${GREEN}${this.id}${GREY} (${BLUE}${this.name}${GREY})`,
         );
         this.device.emit('update', this.id, key, value);
+        this.emit('update', this.id, key, value);
         property.value = value;
       } else {
         this.device.log.info(

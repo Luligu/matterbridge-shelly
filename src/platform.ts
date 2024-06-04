@@ -24,8 +24,9 @@ import {
   LevelControlCluster,
   getClusterNameById,
   ClusterRegistry,
+  Endpoint,
 } from 'matterbridge';
-import { AnsiLogger, BLUE, TimestampFormat, db, debugStringify, dn, er, hk, idn, nf, or, rs, wr, zb } from 'node-ansi-logger';
+import { AnsiLogger, BLUE, CYAN, TimestampFormat, YELLOW, db, debugStringify, dn, er, hk, idn, nf, or, rs, wr, zb } from 'node-ansi-logger';
 import { NodeStorage, NodeStorageManager } from 'node-persist-manager';
 import path from 'path';
 import fetch from 'node-fetch';
@@ -34,7 +35,7 @@ import { Shelly } from './shelly.js';
 import { DiscoveredDevice } from './mdnsScanner.js';
 import { ShellyDevice } from './shellyDevice.js';
 import { ShellyCoverComponent, ShellySwitchComponent } from './shellyComponent.js';
-import { ShellyData } from './shellyTypes.js';
+import { ShellyData, ShellyDataType } from './shellyTypes.js';
 
 // import { CoapMessage, CoapServer } from './coapServer.js';
 
@@ -70,15 +71,6 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
 
   // Shelly
   private shelly: Shelly;
-  /*
-  // Shelly 1
-  private shellies1g = shellies1g;
-  // Shelly 2+
-  private shellies?: Shellies;
-  private mdnsDiscoverer?: MdnsDeviceDiscoverer;
-  private storageDiscoverer?: StorageDeviceDiscoverer;
-  private configDiscoverer?: ConfigDeviceDiscoverer;
-  */
 
   // Config
   private username = '';
@@ -86,7 +78,6 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
   private whiteList: string[] = [];
   private blackList: string[] = [];
   private deviceIp: ConfigDeviceIp = {};
-  // localConfig: PlatformConfig = {};
 
   constructor(matterbridge: Matterbridge, log: AnsiLogger, config: PlatformConfig) {
     super(matterbridge, log, config);
@@ -96,9 +87,22 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     if (config.whiteList) this.whiteList = config.whiteList as string[];
     if (config.blackList) this.blackList = config.blackList as string[];
     if (config.deviceIp) this.deviceIp = config.deviceIp as ConfigDeviceIp;
-    // this.localConfig = config;
 
     this.shelly = new Shelly(log);
+
+    // handle Shelly discovered event
+    this.shelly.on('discovered', async (discoveredDevice: DiscoveredDevice) => {
+      if (this.discoveredDevices.has(discoveredDevice.id)) {
+        this.log.info(`**Shelly device ${hk}${discoveredDevice.id}${nf} host ${zb}${discoveredDevice.host}${nf} already discovered`);
+        return;
+      }
+      this.discoveredDevices.set(discoveredDevice.id, discoveredDevice);
+      this.storedDevices.set(discoveredDevice.id, discoveredDevice);
+      await this.saveStoredDevices();
+      if (this.validateWhiteBlackList(discoveredDevice.id)) {
+        await this.addDevice(discoveredDevice.id, discoveredDevice.host);
+      }
+    });
 
     // handle Shelly add event
     this.shelly.on('add', async (device: ShellyDevice) => {
@@ -113,6 +117,16 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       }
 
       // console.log('Device:', device);
+      // Add event handler
+      device.on('update', (component: string, property: string, value: ShellyDataType) => {
+        /*
+        device.log.info(
+          `Shelly update from ${hk}${device.id}${nf} on ${CYAN}${component}:${CYAN}${property}${nf} value ${CYAN}${value !== null && typeof value === 'object' ? debugStringify(value) : value}${nf}`,
+        );
+        */
+        // console.log(characteristic, value);
+        // this.shellySwitchUpdateHandler(mbDevice, device, key, characteristic, value);
+      });
 
       // Create a new Matterbridge device for the switch
       const mbDevice = new MatterbridgeDevice(bridgedNode);
@@ -128,10 +142,6 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       // DEPRECATED mbDevice.createDefaultPowerSourceConfigurationClusterServer();
       const child = mbDevice.addChildDeviceTypeWithClusterServer('PowerSource', [powerSource], [PowerSource.Cluster.id]);
       child.addClusterServer(mbDevice.getDefaultPowerSourceWiredClusterServer());
-      /*
-      mbDevice.addDeviceType(powerSource);
-      mbDevice.createDefaultPowerSourceWiredClusterServer(PowerSource.WiredCurrentType.Ac);
-      */
 
       // Scan the device components
       for (const [key, component] of device) {
@@ -141,36 +151,38 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             let deviceType = DeviceTypes.ON_OFF_LIGHT;
             if (lightComponent.hasProperty('brightness')) deviceType = DeviceTypes.DIMMABLE_LIGHT;
             if (lightComponent.hasProperty('color')) deviceType = DeviceTypes.COLOR_TEMPERATURE_LIGHT;
-            const clusterId: ClusterId[] = [OnOff.Cluster.id];
-            if (lightComponent.hasProperty('brightness')) clusterId.push(LevelControl.Cluster.id);
-            if (lightComponent.hasProperty('color')) clusterId.push(ColorControl.Cluster.id);
-            const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [deviceType], clusterId);
+            const clusterIds: ClusterId[] = [OnOff.Cluster.id];
+            if (lightComponent.hasProperty('brightness')) clusterIds.push(LevelControl.Cluster.id);
+            if (lightComponent.hasProperty('color')) clusterIds.push(ColorControl.Cluster.id);
+            const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [deviceType], clusterIds);
             mbDevice.addFixedLabel('composed', component.name);
             // Set the OnOff attribute
             const state = lightComponent.getValue('state');
             if (state !== undefined) child.getClusterServer(OnOffCluster)?.setOnOffAttribute(state as boolean);
             // Add command handlers
             mbDevice.addCommandHandler('on', async (data) => {
-              this.shellySwitchCommandHandler(mbDevice, data.endpoint.number, device, component.id, 'On', true);
+              this.shellySwitchCommandHandler(mbDevice, data.endpoint.number, device, 'On', true);
             });
             mbDevice.addCommandHandler('off', async (data) => {
-              this.shellySwitchCommandHandler(mbDevice, data.endpoint.number, device, component.id, 'Off', false);
+              this.shellySwitchCommandHandler(mbDevice, data.endpoint.number, device, 'Off', false);
             });
             mbDevice.addCommandHandler('moveToLevel', async ({ request, attributes, endpoint }) => {
               const state = child.getClusterServer(OnOffCluster)?.getOnOffAttribute();
-              if (state !== undefined) this.shellySwitchCommandHandler(mbDevice, endpoint.number, device, component.id, 'On', state, request.level);
+              if (state !== undefined) this.shellySwitchCommandHandler(mbDevice, endpoint.number, device, 'On', state, request.level);
             });
             mbDevice.addCommandHandler('moveToLevelWithOnOff', async ({ request, attributes, endpoint }) => {
               const state = child.getClusterServer(OnOffCluster)?.getOnOffAttribute();
-              if (state !== undefined) this.shellySwitchCommandHandler(mbDevice, endpoint.number, device, component.id, 'On', state, request.level);
+              if (state !== undefined) this.shellySwitchCommandHandler(mbDevice, endpoint.number, device, 'On', state, request.level);
             });
-            /*
             // Add event handler
-            switchComponent.on('change', (characteristic: string, value: CharacteristicValue) => {
-              // console.log(characteristic, value);
-              this.shellySwitchUpdateHandler(mbDevice, device, key, characteristic, value);
+            lightComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
+              /*
+              device.log.info(
+                `Shelly update from ${hk}${device.id}${nf} on ${CYAN}${component}:${property}${nf} value ${CYAN}${value !== null && typeof value === 'object' ? debugStringify(value) : value}${nf}`,
+              );
+              */
+              this.shellySwitchUpdateHandler(mbDevice, device, component, property, value);
             });
-            */
           }
         } else if (component.name === 'Switch' || component.name === 'Relay') {
           const switchComponent = device.getComponent(key) as ShellySwitchComponent;
@@ -184,20 +196,17 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             mbDevice.addCommandHandler('on', async (data) => {
               // switchComponent.On();
               // switchComponent.logComponent();
-              this.shellySwitchCommandHandler(mbDevice, data.endpoint.number, device, switchComponent.id, 'On', true);
+              this.shellySwitchCommandHandler(mbDevice, data.endpoint.number, device, 'On', true);
             });
             mbDevice.addCommandHandler('off', async (data) => {
               // switchComponent.Off();
               // switchComponent.logComponent();
-              this.shellySwitchCommandHandler(mbDevice, data.endpoint.number, device, switchComponent.id, 'Off', false);
+              this.shellySwitchCommandHandler(mbDevice, data.endpoint.number, device, 'Off', false);
             });
-            /*
             // Add event handler
-            switchComponent.on('change', (characteristic: string, value: CharacteristicValue) => {
-              // console.log(characteristic, value);
-              this.shellySwitchUpdateHandler(mbDevice, device, key, characteristic, value);
+            switchComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
+              this.shellySwitchUpdateHandler(mbDevice, device, component, property, value);
             });
-            */
           }
         } else if (component.name === 'Cover' || component.name === 'Roller') {
           const coverComponent = device.getComponent(key);
@@ -208,25 +217,23 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             mbDevice.setWindowCoveringTargetAsCurrentAndStopped(child);
             // Add command handlers
             mbDevice.addCommandHandler('upOrOpen', async (data) => {
-              this.shellyCoverCommandHandler(mbDevice, data.endpoint.number, device, component.id, 'Open', 0);
+              this.shellyCoverCommandHandler(mbDevice, data.endpoint.number, device, 'Open', 0);
             });
             mbDevice.addCommandHandler('downOrClose', async (data) => {
-              this.shellyCoverCommandHandler(mbDevice, data.endpoint.number, device, component.id, 'Close', 10000);
+              this.shellyCoverCommandHandler(mbDevice, data.endpoint.number, device, 'Close', 10000);
             });
             mbDevice.addCommandHandler('stopMotion', async (data) => {
-              this.shellyCoverCommandHandler(mbDevice, data.endpoint.number, device, component.id, 'Stop');
+              this.shellyCoverCommandHandler(mbDevice, data.endpoint.number, device, 'Stop');
             });
             mbDevice.addCommandHandler('goToLiftPercentage', async (data) => {
-              if (data.request.liftPercent100thsValue === 0) this.shellyCoverCommandHandler(mbDevice, data.endpoint.number, device, component.id, 'Open', 0);
-              else if (data.request.liftPercent100thsValue === 10000) this.shellyCoverCommandHandler(mbDevice, data.endpoint.number, device, component.id, 'Close', 10000);
-              else this.shellyCoverCommandHandler(mbDevice, data.endpoint.number, device, component.id, 'GoToPosition', data.request.liftPercent100thsValue);
+              if (data.request.liftPercent100thsValue === 0) this.shellyCoverCommandHandler(mbDevice, data.endpoint.number, device, 'Open', 0);
+              else if (data.request.liftPercent100thsValue === 10000) this.shellyCoverCommandHandler(mbDevice, data.endpoint.number, device, 'Close', 10000);
+              else this.shellyCoverCommandHandler(mbDevice, data.endpoint.number, device, 'GoToPosition', data.request.liftPercent100thsValue);
             });
-            /*
             // Add event handler
-            coverComponent.on('change', (characteristic: string, value: CharacteristicValue) => {
-              this.shellyCoverUpdateHandler(mbDevice, device, key, characteristic, value);
+            coverComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
+              this.shellyCoverUpdateHandler(mbDevice, device, component, property, value);
             });
-            */
           }
         } else if (component.name === 'PowerMeter') {
           const pmComponent = device.getComponent(key);
@@ -281,20 +288,6 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     });
     this.nodeStorage = await this.nodeStorageManager.createStorage('devices');
     await this.loadStoredDevices();
-
-    // handle Shelly discovered event
-    this.shelly.on('discovered', async (discoveredDevice: DiscoveredDevice) => {
-      if (this.discoveredDevices.has(discoveredDevice.id)) {
-        this.log.info(`**Shelly device ${hk}${discoveredDevice.id}${nf} host ${zb}${discoveredDevice.host}${nf} already discovered`);
-        return;
-      }
-      this.discoveredDevices.set(discoveredDevice.id, discoveredDevice);
-      this.storedDevices.set(discoveredDevice.id, discoveredDevice);
-      await this.saveStoredDevices();
-      if (this.validateWhiteBlackList(discoveredDevice.id)) {
-        await this.addDevice(discoveredDevice.id, discoveredDevice.host);
-      }
-    });
 
     // start Shelly mDNS device discoverer
     if (this.config.enableMdnsDiscover === true) {
@@ -373,11 +366,24 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     return undefined;
   }
 
+  getChildEndpointWithLabel(matterbridgeDevice: MatterbridgeDevice, label: string): Endpoint | undefined {
+    const endpoints = matterbridgeDevice.getChildEndpoints();
+    for (const endpoint of endpoints) {
+      const labelList = endpoint.getClusterServer(FixedLabelCluster)?.getLabelListAttribute();
+      if (!labelList) return undefined;
+      let endpointName = '';
+      for (const entry of labelList) {
+        if (entry.label === 'endpointName') endpointName = entry.value;
+      }
+      if (endpointName === label) return endpoint;
+    }
+    return undefined;
+  }
+
   private shellySwitchCommandHandler(
     matterbridgeDevice: MatterbridgeDevice,
     endpointNumber: EndpointNumber | undefined,
     shellyDevice: ShellyDevice,
-    componentName: string | undefined,
     command: string,
     state: boolean,
     level?: number,
@@ -393,7 +399,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       return false;
     }
     // Get the Shelly switch component
-    componentName = this.getEndpointLabel(matterbridgeDevice, endpointNumber);
+    const componentName = this.getEndpointLabel(matterbridgeDevice, endpointNumber);
     if (!componentName) {
       this.log.error(`shellyCommandHandler error: endpointName undefined for shelly device ${dn}${shellyDevice?.id}${er}`);
       return false;
@@ -432,7 +438,6 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     matterbridgeDevice: MatterbridgeDevice,
     endpointNumber: EndpointNumber | undefined,
     shellyDevice: ShellyDevice,
-    componentName: string | undefined,
     command: string,
     pos?: number,
   ): boolean {
@@ -447,7 +452,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       return false;
     }
     // Get the Shelly switch component
-    componentName = this.getEndpointLabel(matterbridgeDevice, endpointNumber);
+    const componentName = this.getEndpointLabel(matterbridgeDevice, endpointNumber);
     if (!componentName) {
       this.log.error(`shellyCommandHandler error: endpointName undefined for shelly device ${dn}${shellyDevice?.id}${er}`);
       return false;
@@ -504,121 +509,74 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     }
     return true;
   }
-  /*
-  private shellySwitchUpdateHandler(
-    matterbridgeDevice: MatterbridgeDevice,
-    shellyDevice: Device | Device1g,
-    switchId: string,
-    characteristic: string,
-    value: CharacteristicValue,
-  ): boolean {
-    this.log.info(
-      `${db}Shelly message for device ${idn}${shellyDevice.id}${rs}${db} ${hk}${switchId}${db} ` +
-        `${zb}${characteristic}${db}:${typeof value === 'object' ? debugStringify(value as object) : value}${rs}`,
+
+  private shellySwitchUpdateHandler(matterbridgeDevice: MatterbridgeDevice, shellyDevice: ShellyDevice, component: string, property: string, value: ShellyDataType): boolean {
+    shellyDevice.log.info(
+      `${db}Shelly message for device ${idn}${shellyDevice.id}${rs}${db} ${hk}${component}${db}:` +
+        `${zb}${property}:${YELLOW}${value !== null && typeof value === 'object' ? debugStringify(value as object) : value}${rs}`,
     );
-    if (!(shellyDevice instanceof Device) && !(characteristic.startsWith('switch') || characteristic.startsWith('relay'))) {
-      return false;
-    }
-    if (shellyDevice instanceof Device && characteristic !== 'output') {
-      return false;
-    }
-    const endpoints = matterbridgeDevice.getChildEndpoints();
-    for (const endpoint of endpoints) {
-      const labelList = endpoint.getClusterServer(FixedLabelCluster)?.getLabelListAttribute();
-      if (!labelList) {
-        this.log.error('shellySwitchUpdateHandler error: labelList undefined');
+    if (property !== 'state') return false;
+    const endpoint = this.getChildEndpointWithLabel(matterbridgeDevice, component);
+    if (endpoint) {
+      const cluster = endpoint.getClusterServer(OnOffCluster);
+      if (!cluster) {
+        this.log.error('shellySwitchUpdateHandler error: OnOffCluster not found');
         return false;
       }
-      let endpointName = '';
-      for (const entry of labelList) {
-        if (entry.label === 'endpointName') endpointName = entry.value;
-      }
-      if (endpointName === switchId) {
-        const cluster = endpoint.getClusterServer(OnOffCluster);
-        if (!cluster) {
-          this.log.error('shellySwitchUpdateHandler error: cluster not found');
-          return false;
-        }
-        cluster.setOnOffAttribute(value as boolean);
-        this.log.info(
-          `${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}OnOff-onOff${db} for device ${dn}${shellyDevice.id}${db}` +
-            ` ${hk}${switchId}${db} ${zb}${characteristic}${db}:${rs}`,
-          value,
-        );
-        return true;
-      }
+      cluster.setOnOffAttribute(value as boolean);
+      shellyDevice.log.info(
+        `${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}OnOff-onOff${db} for device ${dn}${shellyDevice.id}` +
+          `:${hk}${component}${db}:${zb}${property}${db}:${YELLOW}${value !== null && typeof value === 'object' ? debugStringify(value as object) : value}${rs}`,
+      );
+      return true;
     }
-    this.log.error(`shellySwitchUpdateHandler error: endpointName ${switchId} not found`);
+    this.log.error(`shellySwitchUpdateHandler error: endpointName ${component} not found`);
     return false;
   }
 
-  private shellyCoverUpdateHandler(
-    matterbridgeDevice: MatterbridgeDevice,
-    shellyDevice: Device | Device1g,
-    switchId: string,
-    characteristic: string,
-    value: CharacteristicValue,
-  ): boolean {
+  private shellyCoverUpdateHandler(matterbridgeDevice: MatterbridgeDevice, shellyDevice: ShellyDevice, component: string, property: string, value: ShellyDataType): boolean {
     this.log.info(
-      `${db}Shelly message for device ${idn}${shellyDevice.id}${rs}${db} ${hk}${switchId}${db} ` +
-        `${zb}${characteristic}${db}:${typeof value === 'object' ? debugStringify(value as object) : value}${rs}`,
+      `${db}Shelly message for device ${idn}${shellyDevice.id}${rs}${db} ${hk}${component}${db}:` +
+        `${zb}${property}${db}:${YELLOW}${value !== null && typeof value === 'object' ? debugStringify(value as object) : value}${rs}`,
     );
-    if (!(shellyDevice instanceof Device) ) {
-      return false;
-    }
-    if (shellyDevice instanceof Device && characteristic !== 'state') {
-      return false;
-    }
-    const endpoints = matterbridgeDevice.getChildEndpoints();
-    for (const endpoint of endpoints) {
-      const labelList = endpoint.getClusterServer(FixedLabelCluster)?.getLabelListAttribute();
-      if (!labelList) {
-        this.log.error('shellySwitchUpdateHandler error: labelList undefined');
+    if (property !== 'state') return false;
+    const endpoint = this.getChildEndpointWithLabel(matterbridgeDevice, component);
+    if (endpoint) {
+      const windowCoveringCluster = endpoint.getClusterServer(
+        WindowCoveringCluster.with(WindowCovering.Feature.Lift, WindowCovering.Feature.PositionAwareLift, WindowCovering.Feature.AbsolutePosition),
+      );
+      if (!windowCoveringCluster) {
+        this.log.error('shellyCoverUpdateHandler error: WindowCoveringCluster not found');
         return false;
       }
-      let endpointName = '';
-      for (const entry of labelList) {
-        if (entry.label === 'endpointName') endpointName = entry.value;
+      if (value === 'stopped') {
+        matterbridgeDevice.setWindowCoveringTargetAsCurrentAndStopped(endpoint);
       }
-      if (endpointName === switchId) {
-        const windowCoveringCluster = endpoint.getClusterServer(
-          WindowCoveringCluster.with(WindowCovering.Feature.Lift, WindowCovering.Feature.PositionAwareLift, WindowCovering.Feature.AbsolutePosition),
-        );
-        if (!windowCoveringCluster) {
-          this.log.error('shellySwitchUpdateHandler error: cluster not found');
-          return false;
-        }
-        if (value === 'stopped') {
-          matterbridgeDevice.setWindowCoveringTargetAsCurrentAndStopped(endpoint);
-        }
-        if (value === 'closed') {
-          matterbridgeDevice.setWindowCoveringTargetAndCurrentPosition(10000, endpoint);
-          matterbridgeDevice.setWindowCoveringStatus(WindowCovering.MovementStatus.Stopped, endpoint);
-        }
-        if (value === 'open') {
-          matterbridgeDevice.setWindowCoveringTargetAndCurrentPosition(0, endpoint);
-          matterbridgeDevice.setWindowCoveringStatus(WindowCovering.MovementStatus.Stopped, endpoint);
-        }
-        if (value === 'opening') {
-          windowCoveringCluster.setTargetPositionLiftPercent100thsAttribute(0);
-          matterbridgeDevice.setWindowCoveringStatus(WindowCovering.MovementStatus.Opening, endpoint);
-        }
-        if (value === 'closing') {
-          windowCoveringCluster.setTargetPositionLiftPercent100thsAttribute(10000);
-          matterbridgeDevice.setWindowCoveringStatus(WindowCovering.MovementStatus.Closing, endpoint);
-        }
-        this.log.info(
-          `${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}WindowCovering${db} for device ${dn}${shellyDevice.id}${db}` +
-            ` ${hk}${switchId}${db} ${zb}${characteristic}${db}:${rs}`,
-          value,
-        );
-        return true;
+      if (value === 'closed') {
+        matterbridgeDevice.setWindowCoveringTargetAndCurrentPosition(10000, endpoint);
+        matterbridgeDevice.setWindowCoveringStatus(WindowCovering.MovementStatus.Stopped, endpoint);
       }
+      if (value === 'open') {
+        matterbridgeDevice.setWindowCoveringTargetAndCurrentPosition(0, endpoint);
+        matterbridgeDevice.setWindowCoveringStatus(WindowCovering.MovementStatus.Stopped, endpoint);
+      }
+      if (value === 'opening') {
+        windowCoveringCluster.setTargetPositionLiftPercent100thsAttribute(0);
+        matterbridgeDevice.setWindowCoveringStatus(WindowCovering.MovementStatus.Opening, endpoint);
+      }
+      if (value === 'closing') {
+        windowCoveringCluster.setTargetPositionLiftPercent100thsAttribute(10000);
+        matterbridgeDevice.setWindowCoveringStatus(WindowCovering.MovementStatus.Closing, endpoint);
+      }
+      this.log.info(
+        `${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}WindowCovering${db} for device ${dn}${shellyDevice.id}${db}` +
+          ` ${hk}${component}${db}:${zb}${property}${db}::${YELLOW}${value !== null && typeof value === 'object' ? debugStringify(value as object) : value}${rs}`,
+      );
+      return true;
     }
-    this.log.error(`shellySwitchUpdateHandler error: endpointName ${switchId} not found`);
+    this.log.error(`shellyCoverUpdateHandler error: endpointName ${component} not found`);
     return false;
   }
-  */
 
   private validateWhiteBlackList(entityName: string) {
     if (this.whiteList.length > 0 && !this.whiteList.find((name) => name === entityName)) {

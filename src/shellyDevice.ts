@@ -232,6 +232,7 @@ export class ShellyDevice extends EventEmitter {
       device.wsClient.on('update', (message) => {
         log.info(`WebSocket update from device ${hk}${device.id}${nf} host ${zb}${device.host}${nf}` /* , message*/);
         device.update(message);
+        device.lastseen = Date.now();
       });
     }
 
@@ -267,7 +268,7 @@ export class ShellyDevice extends EventEmitter {
           let index = 0;
           for (const light of data[key] as ShellyData[]) {
             const component = this.getComponent(`${key.slice(0, 5)}:${index++}`);
-            if (component && light.ison) component.setValue('state', light.ison as boolean);
+            if (component && light.ison !== undefined) component.setValue('state', light.ison as boolean);
           }
         }
       }

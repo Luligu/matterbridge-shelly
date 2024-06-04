@@ -11,7 +11,18 @@
 
 ---
 
-This plugin allows to expose the shelly gen 1 and gen 2+ devices .
+This plugin allows you to expose Shelly Gen 1, Gen 2, and Gen 3 devices to Matter.
+
+Features:
+
+- Shellies are automatically discovered using mDNS.
+- Discovered shellies are stored in local storage for quick loading on startup.
+- In this first release, the components exposed are lights (with brightness), switches, and rollers.
+- Shellies are controlled locally, eliminating the need for cloud or MQTT (which can be disabled).
+- Shelly Gen 1 devices are controlled using the CoIoT protocol (see the note below).
+- Shelly Gen 2 and Gen 3 devices are controlled using WebSocket.
+- The Matter device takes the name configured in the Shelly device's web page.
+- A 10-minute timer checks if the device has reported in that time.
 
 ## Prerequisites
 
@@ -67,9 +78,37 @@ matterbridge -bridge
 
 ## How to use it
 
-If the whiteList is defined only the devices included are exposed to Matter.
+You may need to set some config values:
 
-If the blackList is defined the devices included will not be exposed to Matter.
+### username
+If your devices are password protected put there the username. It must be unique for all the devices.
+Is only used for gen 1 devices. Gen 2 and 3 devices have always admin.
+
+### password
+If your devices are password protected put there the password. It must be unique for all the devices.
+
+### whiteList
+If the whiteList is defined only the devices included in the list are exposed to Matter.
+
+### blackList
+If the blackList is defined the devices included in the list will not be exposed to Matter.
+
+### deviceIp
+You can put there one of more of your devices if they have problem with mdns (don't use it unless is needed).
+E.g. "shelly1minig3-543204547478": "192.168.1.221"
+
+### enableMdnsDiscover
+Should always be enabled to discover new devices. It turn off automatically after 10 minutes to reduce network traffic.
+Once a device is discovered, it is added to the shelly storage.
+
+### enableStorageDiscover
+Should always be enabled to automatically add all the devices already discovered.
+
+### enableConfigDiscover
+Should be enabled only if the mdns is not working. It adds the devices defined in deviceIp.
+
+### debug
+Should be enabled only if you want to debug some issue in the log.
 
 If any device creates issues put it in the blackList.
 
@@ -83,10 +122,15 @@ These are the config values:
   "password": "<PASSWORD>",
   "blackList": [],
   "whiteList": [],
-  "ip": {
+  "deviceIp": {
     "<DEVICENAME1>": x.x.x.x,
     "<DEVICENAME2>": x.x.x.x
   }
+  "enableMdnsDiscover": false,
+  "enableStorageDiscover": true,
+  "enableConfigDiscover": false,
+  "debug": false
+  "unregisterOnShutdown": false,
 }
 ```
 

@@ -34,6 +34,7 @@ export class Shelly extends EventEmitter {
           `CoIoT update from device id ${hk}${shellyDevice.id}${nf} host ${zb}${host}${nf} component ${CYAN}${component}${nf} property ${CYAN}${property}${nf} value ${CYAN}${value}${nf}`,
         );
         shellyDevice.getComponent(component)?.setValue(property, value);
+        shellyDevice.lastseen = Date.now();
       }
     });
   }
