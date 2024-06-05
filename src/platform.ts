@@ -256,6 +256,11 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     // add all stored devices
     if (this.config.enableStorageDiscover === true) {
       this.storedDevices.forEach(async (storedDevice) => {
+        if (storedDevice.id === undefined || storedDevice.host === undefined || !this.isValidIpv4Address(storedDevice.host)) {
+          this.log.error(`Stored Shelly device id ${hk}${storedDevice.id}${er} host ${zb}${storedDevice.host}${er} is not valid`);
+          return;
+        }
+        this.log.debug(`Loading from storage Shelly device ${hk}${storedDevice.id}${db} host ${zb}${storedDevice.host}${db}`);
         this.shelly.emit('discovered', storedDevice);
       });
     }
@@ -264,6 +269,11 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     if (this.config.enableConfigDiscover === true) {
       Object.entries(this.config.deviceIp as ConfigDeviceIp).forEach(async ([id, host]) => {
         const configDevice: DiscoveredDevice = { id, host, port: 0, gen: 0 };
+        if (configDevice.id === undefined || configDevice.host === undefined || !this.isValidIpv4Address(configDevice.host)) {
+          this.log.error(`Config Shelly device id ${hk}${configDevice.id}${er} host ${zb}${configDevice.host}${er} is not valid`);
+          return;
+        }
+        this.log.debug(`Loading from config Shelly device ${hk}${configDevice.id}${db} host ${zb}${configDevice.host}${db}`);
         this.shelly.emit('discovered', configDevice);
       });
     }
@@ -314,6 +324,12 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     log.setLogName(device.name ?? device.id);
     await this.shelly.addDevice(device);
     this.shellyDevices.set(device.id, device);
+  }
+
+  isValidIpv4Address(ipv4Address: string): boolean {
+    const ipv4Regex =
+      /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+    return ipv4Regex.test(ipv4Address);
   }
 
   getEndpointLabel(matterbridgeDevice: MatterbridgeDevice, endpointNumber: EndpointNumber): string | undefined {
