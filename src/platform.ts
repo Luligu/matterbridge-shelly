@@ -24,7 +24,7 @@ import {
   ClusterRegistry,
   Endpoint,
 } from 'matterbridge';
-import { AnsiLogger, BLUE, GREEN, TimestampFormat, YELLOW, db, debugStringify, dn, er, hk, idn, nf, or, rs, wr, zb } from 'node-ansi-logger';
+import { AnsiLogger, BLUE, CYAN, GREEN, TimestampFormat, YELLOW, db, debugStringify, dn, er, hk, idn, nf, or, rs, wr, zb } from 'node-ansi-logger';
 import { NodeStorage, NodeStorageManager } from 'node-persist-manager';
 import path from 'path';
 
@@ -84,14 +84,14 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
 
     // handle Shelly add event
     this.shelly.on('add', async (device: ShellyDevice) => {
-      device.log.info(`Shelly added gen ${BLUE}${device.gen}${nf} device ${hk}${device.id}${rs}${nf} host ${zb}${device.host}${nf}`);
-      device.log.info(`- mac: ${BLUE}${device.mac}${nf}`);
-      device.log.info(`- model: ${BLUE}${device.model}${nf}`);
-      device.log.info(`- firmware: ${BLUE}${device.firmware}${nf}`);
-      if (device.profile) device.log.info(`- profile: ${BLUE}${device.profile}${nf}`);
+      device.log.info(`Shelly added gen ${CYAN}${device.gen}${nf} device ${hk}${device.id}${rs}${nf} host ${zb}${device.host}${nf}`);
+      device.log.info(`- mac: ${CYAN}${device.mac}${nf}`);
+      device.log.info(`- model: ${CYAN}${device.model}${nf}`);
+      device.log.info(`- firmware: ${CYAN}${device.firmware}${nf}`);
+      if (device.profile) device.log.info(`- profile: ${CYAN}${device.profile}${nf}`);
       device.log.info('- components:');
       for (const [key, component] of device) {
-        device.log.info(`  - ${GREEN}${component.name}${nf} (${BLUE}${key}${nf})`);
+        device.log.info(`  - ${CYAN}${key}${nf} (${GREEN}${component.name}${nf})`);
       }
       if (config.debug) device.logDevice();
 
@@ -322,11 +322,11 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       this.log.info(`Shelly device ${hk}${deviceId}${nf} host ${zb}${host}${nf} already added`);
       return;
     }
-    this.log.info(`**Adding shelly device ${deviceId} host ${host}`);
+    this.log.info(`Adding shelly device ${hk}${deviceId}${nf} host ${zb}${host}${nf}`);
     const log = new AnsiLogger({ logName: deviceId, logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: this.config.debug === true });
     const device = await ShellyDevice.create(this.shelly, log, host);
     if (!device) {
-      this.log.error(`Failed to create Shelly device ${deviceId} host ${host}`);
+      this.log.error(`Failed to create Shelly device ${hk}${deviceId}${er} host ${zb}${host}${er}`);
       return;
     }
     log.setLogName(device.name ?? device.id);
