@@ -218,9 +218,17 @@ export class ShellyDevice extends EventEmitter {
       const lastSeenDateString = lastSeenDate.toLocaleString();
       if (Date.now() - device.lastseen > 9 * 60 * 1000) device.fetchUpdate();
 
-      if (Date.now() - device.lastseen > 10 * 60 * 1000)
-        log.warn(`Device ${hk}${device.id}${wr} host ${zb}${device.host}${wr} has not been seen for 10 minutes (last time: ${lastSeenDateString}). Check the device connection.`);
-      else log.info(`Device ${hk}${device.id}${nf} host ${zb}${device.host}${nf} has been seen the last time: ${lastSeenDateString}.`);
+      if (Date.now() - device.lastseen > 10 * 60 * 1000) {
+        log.warn(
+          `Device ${hk}${device.id}${wr} host ${zb}${device.host}${wr} has not been seen for 10 minutes (last time: ${CYAN}${lastSeenDateString}${nf}). Check the device connection.`,
+        );
+        device.online = false;
+        device.emit('offline');
+      } else {
+        log.info(`Device ${hk}${device.id}${nf} host ${zb}${device.host}${nf} has been seen the last time: ${CYAN}${lastSeenDateString}${nf}.`);
+        device.online = true;
+        device.emit('online');
+      }
     }, 60 * 1000);
 
     // Start WebSocket client for gen 2 and 3 devices

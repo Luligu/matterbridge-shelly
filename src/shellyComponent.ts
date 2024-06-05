@@ -70,9 +70,10 @@ export class ShellyComponent extends EventEmitter {
 
       (this as ShellyComponentType).Level = function (level: number) {
         if (!this.hasProperty('brightness')) return;
-        this.setValue('brightness', level);
-        if (device.gen === 1) ShellyDevice.fetch(device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { brightness: level });
-        if (device.gen !== 1) ShellyDevice.fetch(device.log, device.host, `${this.name}.Set`, { id: this.index, brightness: level });
+        const adjustedLevel = Math.min(Math.max(Math.round(level), 0), 100);
+        this.setValue('brightness', adjustedLevel);
+        if (device.gen === 1) ShellyDevice.fetch(device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { brightness: adjustedLevel });
+        if (device.gen !== 1) ShellyDevice.fetch(device.log, device.host, `${this.name}.Set`, { id: this.index, brightness: adjustedLevel });
       };
     }
 

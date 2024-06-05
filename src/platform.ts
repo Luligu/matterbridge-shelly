@@ -24,7 +24,7 @@ import {
   ClusterRegistry,
   Endpoint,
 } from 'matterbridge';
-import { AnsiLogger, BLUE, TimestampFormat, YELLOW, db, debugStringify, dn, er, hk, idn, nf, or, rs, wr, zb } from 'node-ansi-logger';
+import { AnsiLogger, BLUE, GREEN, TimestampFormat, YELLOW, db, debugStringify, dn, er, hk, idn, nf, or, rs, wr, zb } from 'node-ansi-logger';
 import { NodeStorage, NodeStorageManager } from 'node-persist-manager';
 import path from 'path';
 
@@ -85,13 +85,13 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     // handle Shelly add event
     this.shelly.on('add', async (device: ShellyDevice) => {
       device.log.info(`Shelly added gen ${BLUE}${device.gen}${nf} device ${hk}${device.id}${rs}${nf} host ${zb}${device.host}${nf}`);
-      device.log.info(`- mac: ${device.mac}`);
-      device.log.info(`- model: ${device.model}`);
-      device.log.info(`- firmware: ${device.firmware}`);
-      if (device.profile) device.log.info(`- profile: ${device.profile}`);
+      device.log.info(`- mac: ${BLUE}${device.mac}${nf}`);
+      device.log.info(`- model: ${BLUE}${device.model}${nf}`);
+      device.log.info(`- firmware: ${BLUE}${device.firmware}${nf}`);
+      if (device.profile) device.log.info(`- profile: ${BLUE}${device.profile}${nf}`);
       device.log.info('- components:');
       for (const [key, component] of device) {
-        device.log.info(`  - ${component.name} (${key})`);
+        device.log.info(`  - ${GREEN}${component.name}${nf} (${BLUE}${key}${nf})`);
       }
       if (config.debug) device.logDevice();
 
@@ -246,7 +246,13 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       logging: false,
     });
     this.nodeStorage = await this.nodeStorageManager.createStorage('devices');
-    await this.loadStoredDevices();
+    if (this.config.resetStorageDiscover === true) {
+      this.config.resetStorageDiscover = false;
+      await this.nodeStorage.clear();
+      this.log.info('Resetting the Shellies storage');
+    } else {
+      await this.loadStoredDevices();
+    }
 
     // start Shelly mDNS device discoverer
     if (this.config.enableMdnsDiscover === true) {
@@ -257,7 +263,9 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     if (this.config.enableStorageDiscover === true) {
       this.storedDevices.forEach(async (storedDevice) => {
         if (storedDevice.id === undefined || storedDevice.host === undefined || !this.isValidIpv4Address(storedDevice.host)) {
-          this.log.error(`Stored Shelly device id ${hk}${storedDevice.id}${er} host ${zb}${storedDevice.host}${er} is not valid`);
+          this.log.error(
+            `Stored Shelly device id ${hk}${storedDevice.id}${er} host ${zb}${storedDevice.host}${er} is not valid. Please enable resetStorageDiscover in plugin config and restart.`,
+          );
           return;
         }
         this.log.debug(`Loading from storage Shelly device ${hk}${storedDevice.id}${db} host ${zb}${storedDevice.host}${db}`);
@@ -270,7 +278,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       Object.entries(this.config.deviceIp as ConfigDeviceIp).forEach(async ([id, host]) => {
         const configDevice: DiscoveredDevice = { id, host, port: 0, gen: 0 };
         if (configDevice.id === undefined || configDevice.host === undefined || !this.isValidIpv4Address(configDevice.host)) {
-          this.log.error(`Config Shelly device id ${hk}${configDevice.id}${er} host ${zb}${configDevice.host}${er} is not valid`);
+          this.log.error(`Config Shelly device id ${hk}${configDevice.id}${er} host ${zb}${configDevice.host}${er} is not valid. Please check the plugin config and restart.`);
           return;
         }
         this.log.debug(`Loading from config Shelly device ${hk}${configDevice.id}${db} host ${zb}${configDevice.host}${db}`);
