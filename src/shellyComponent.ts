@@ -78,7 +78,7 @@ export class ShellyComponent extends EventEmitter {
     }
 
     // Extend the class prototype to include the Cover methods dynamically
-    if (name === 'Cover') {
+    if (name === 'Cover' || name === 'Roller') {
       (this as ShellyComponentType).Open = function () {
         this.setValue('state', 'open');
         if (device.gen === 1) ShellyDevice.fetch(device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { go: 'open' });

@@ -91,7 +91,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
 
     // handle Shelly add event
     this.shelly.on('add', async (device: ShellyDevice) => {
-      device.log.info(`Shelly added gen ${CYAN}${device.gen}${nf} device ${hk}${device.id}${rs}${nf} host ${zb}${device.host}${nf}`);
+      device.log.info(`Shelly added gen ${CYAN}${device.gen}${nf} device ${hk}${device.id}${rs}${nf} host ${zb}${device.host}${nf} name ${idn}${zb}${device.name}${rs}${nf}`);
       device.log.info(`- mac: ${CYAN}${device.mac}${nf}`);
       device.log.info(`- model: ${CYAN}${device.model}${nf}`);
       device.log.info(`- firmware: ${CYAN}${device.firmware}${nf}`);

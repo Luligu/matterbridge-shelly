@@ -189,6 +189,7 @@ export class ShellyDevice extends EventEmitter {
         if (key.startsWith('switch:')) device.addComponent(new ShellyComponent(device, key, 'Switch', settingsPayload[key] as ShellyData));
         if (key.startsWith('cover:')) device.addComponent(new ShellyComponent(device, key, 'Cover', settingsPayload[key] as ShellyData));
         if (key.startsWith('light:')) device.addComponent(new ShellyComponent(device, key, 'Light', settingsPayload[key] as ShellyData));
+        if (key.startsWith('input:')) device.addComponent(new ShellyComponent(device, key, 'Input', settingsPayload[key] as ShellyData));
         if (key.startsWith('pm1:')) device.addComponent(new ShellyComponent(device, key, 'PowerMeter', settingsPayload[key] as ShellyData));
       }
     }
@@ -459,6 +460,7 @@ if (process.argv.includes('startShelly')) {
     { host: '192.168.1.220', desc: 'Gen 3 Shelly PM mini' },
     */
     { host: '192.168.1.221', desc: 'Gen 3 Shelly 1 mini' },
+    { host: '192.168.1.224', desc: 'Gen 2 Shelly i4' },
   ];
 
   for (const device of myRealDevices) {

@@ -91,11 +91,11 @@ If your devices are password protected put there the password. It must be unique
 
 ### whiteList
 
-If the whiteList is defined only the devices included in the list are exposed to Matter.
+If the whiteList is defined only the devices included in the list are exposed to Matter. Use the device id (e.g. shellyplus2pm-5443b23d81f8).
 
 ### blackList
 
-If the blackList is defined the devices included in the list will not be exposed to Matter.
+If the blackList is defined the devices included in the list will not be exposed to Matter. Use the device id (e.g. shellyplus2pm-5443b23d81f8)
 
 ### deviceIp
 
