@@ -146,7 +146,6 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             // Add event handler
             lightComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
               this.shellyUpdateHandler(mbDevice, device, component, property, value);
-              this.shellySwitchUpdateHandler(mbDevice, device, component, property, value);
             });
           }
         } else if (component.name === 'Switch' || component.name === 'Relay') {
@@ -167,7 +166,6 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             // Add event handler
             switchComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
               this.shellyUpdateHandler(mbDevice, device, component, property, value);
-              this.shellySwitchUpdateHandler(mbDevice, device, component, property, value);
             });
           }
         } else if (component.name === 'Cover' || component.name === 'Roller') {
@@ -500,30 +498,21 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       `${db}Shelly message for device ${idn}${shellyDevice.id}${rs}${db} ` +
         `${hk}${component}${db}:${zb}${property}${db}:${YELLOW}${value !== null && typeof value === 'object' ? debugStringify(value as object) : value}${rs}`,
     );
-  }
-
-  private shellySwitchUpdateHandler(matterbridgeDevice: MatterbridgeDevice, shellyDevice: ShellyDevice, component: string, property: string, value: ShellyDataType): boolean {
-    shellyDevice.log.info(
-      `${db}Shelly message for device ${idn}${shellyDevice.id}${rs}${db} ${hk}${component}${db}:` +
-        `${zb}${property}:${YELLOW}${value !== null && typeof value === 'object' ? debugStringify(value as object) : value}${rs}`,
-    );
-    if (property !== 'state') return false;
-    const endpoint = this.getChildEndpointWithLabel(matterbridgeDevice, component);
-    if (endpoint) {
+    const shellyComponent = shellyDevice.getComponent(component);
+    if (!shellyComponent) return;
+    // Update state
+    if ((shellyComponent.name === 'Light' || shellyComponent.name === 'Relay' || shellyComponent.name === 'Switch') && property === 'state') {
       const cluster = endpoint.getClusterServer(OnOffCluster);
-      if (!cluster) {
-        this.log.error('shellySwitchUpdateHandler error: OnOffCluster not found');
-        return false;
-      }
-      cluster.setOnOffAttribute(value as boolean);
-      shellyDevice.log.info(
-        `${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}OnOff-onOff${db} for device ${dn}${shellyDevice.id}` +
-          `:${hk}${component}${db}:${zb}${property}${db}:${YELLOW}${value !== null && typeof value === 'object' ? debugStringify(value as object) : value}${rs}`,
-      );
-      return true;
+      cluster?.setOnOffAttribute(value as boolean);
+      shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}OnOff-onOff${db} ${YELLOW}${value}${db}`);
     }
-    this.log.error(`shellySwitchUpdateHandler error: endpointName ${component} not found`);
-    return false;
+    // Update brightness
+    if (shellyComponent.name === 'Light' && property === 'brightness') {
+      const cluster = endpoint.getClusterServer(LevelControlCluster);
+      const matterLevel = Math.max(Math.min(((value as number) / 100) * 255, 255), 0);
+      cluster?.setCurrentLevelAttribute(matterLevel);
+      shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}LevelControl-currentLevel${db} ${YELLOW}${matterLevel}${db}`);
+    }
   }
 
   private shellyCoverUpdateHandler(matterbridgeDevice: MatterbridgeDevice, shellyDevice: ShellyDevice, component: string, property: string, value: ShellyDataType): boolean {

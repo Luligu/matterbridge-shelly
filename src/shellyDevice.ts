@@ -104,7 +104,7 @@ export class ShellyDevice extends EventEmitter {
     device.mac = shellyPayload.mac as string;
     device.lastseen = Date.now();
 
-    if (shellyPayload.mode) device.profile = shellyPayload.mode as 'relay' | 'cover';
+    if (shellyPayload.mode) device.profile = (shellyPayload.mode === 'roller' ? 'cover' : 'relay') as 'relay' | 'cover';
     if (shellyPayload.profile) device.profile = shellyPayload.profile as 'relay' | 'cover';
 
     // Gen 1 Shelly device
