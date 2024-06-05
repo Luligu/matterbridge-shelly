@@ -81,33 +81,42 @@ matterbridge -bridge
 You may need to set some config values:
 
 ### username
+
 If your devices are password protected put there the username. It must be unique for all the devices.
 Is only used for gen 1 devices. Gen 2 and 3 devices have always admin.
 
 ### password
+
 If your devices are password protected put there the password. It must be unique for all the devices.
 
 ### whiteList
+
 If the whiteList is defined only the devices included in the list are exposed to Matter.
 
 ### blackList
+
 If the blackList is defined the devices included in the list will not be exposed to Matter.
 
 ### deviceIp
+
 You can put there one of more of your devices if they have problem with mdns (don't use it unless is needed).
 E.g. "shelly1minig3-543204547478": "192.168.1.221"
 
 ### enableMdnsDiscover
+
 Should always be enabled to discover new devices. It turn off automatically after 10 minutes to reduce network traffic.
 Once a device is discovered, it is added to the shelly storage.
 
 ### enableStorageDiscover
+
 Should always be enabled to automatically add all the devices already discovered.
 
 ### enableConfigDiscover
+
 Should be enabled only if the mdns is not working. It adds the devices defined in deviceIp.
 
 ### debug
+
 Should be enabled only if you want to debug some issue in the log.
 
 If any device creates issues put it in the blackList.

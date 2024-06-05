@@ -11,16 +11,18 @@ export class Shelly extends EventEmitter {
   private mdnsScanner: MdnsScanner | undefined;
   private coapServer: CoapServer | undefined;
   private coapServerTimeout?: NodeJS.Timeout;
-  private username?: string;
-  private password?: string;
+  public username: string | undefined;
+  public password: string | undefined;
+  public debug: boolean;
 
-  constructor(log: AnsiLogger, username?: string, password?: string) {
+  constructor(log: AnsiLogger, username?: string, password?: string, debug = false) {
     super();
     this.log = log;
     this.username = username;
     this.password = password;
-    this.mdnsScanner = new MdnsScanner();
-    this.coapServer = new CoapServer();
+    this.debug = debug;
+    this.mdnsScanner = new MdnsScanner(debug);
+    this.coapServer = new CoapServer(debug);
 
     this.mdnsScanner.on('discovered', async (device: DiscoveredDevice) => {
       this.log.info(`Discovered shelly gen ${CYAN}${device.gen}${nf} device id ${hk}${device.id}${nf} host ${zb}${device.host}${nf} port ${zb}${device.port}${nf} `);
@@ -30,9 +32,10 @@ export class Shelly extends EventEmitter {
     this.coapServer.on('update', async (host: string, component: string, property: string, value: string | number | boolean) => {
       const shellyDevice = this.getDeviceByHost(host);
       if (shellyDevice) {
-        shellyDevice.log.info(
-          `CoIoT update from device id ${hk}${shellyDevice.id}${nf} host ${zb}${host}${nf} component ${CYAN}${component}${nf} property ${CYAN}${property}${nf} value ${CYAN}${value}${nf}`,
-        );
+        if (debug)
+          shellyDevice.log.info(
+            `CoIoT update from device id ${hk}${shellyDevice.id}${nf} host ${zb}${host}${nf} component ${CYAN}${component}${nf} property ${CYAN}${property}${nf} value ${CYAN}${value}${nf}`,
+          );
         shellyDevice.getComponent(component)?.setValue(property, value);
         shellyDevice.lastseen = Date.now();
       }

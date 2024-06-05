@@ -120,20 +120,20 @@ export class ShellyComponent extends EventEmitter {
     const property = this.getProperty(key);
     if (property) {
       if (!deepEqual(property.value, value)) {
-        this.device.log.info(
+        this.device.log.debug(
           `***${CYAN}${this.id}:${key}${GREY} updated from ${property.value !== null && typeof property.value === 'object' ? debugStringify(property.value) : property.value}${GREY} to ${YELLOW}${value !== null && typeof value === 'object' ? debugStringify(value) : value}${GREY} in component ${GREEN}${this.id}${GREY} (${BLUE}${this.name}${GREY})`,
         );
         this.device.emit('update', this.id, key, value);
         this.emit('update', this.id, key, value);
         property.value = value;
       } else {
-        this.device.log.info(
+        this.device.log.debug(
           `*${CYAN}${this.id}:${key}${GREY} not changed from ${YELLOW}${property.value !== null && typeof property.value === 'object' ? debugStringify(property.value) : property.value}${GREY} in component ${GREEN}${this.id}${GREY} (${BLUE}${this.name}${GREY})`,
         );
       }
     } else {
       this.addProperty(new ShellyProperty(this, key, value));
-      this.device.log.info(
+      this.device.log.debug(
         `**${CYAN}${this.id}:${key}${GREY} added with value ${YELLOW}${value !== null && typeof value === 'object' ? debugStringify(value) : value}${GREY} to component ${GREEN}${this.id}${GREY} (${BLUE}${this.name}${GREY})`,
       );
     }

@@ -19,7 +19,7 @@ export class ShellyDevice extends EventEmitter {
   readonly shelly: Shelly;
   readonly log: AnsiLogger;
   readonly host: string;
-  readonly username: string;
+  readonly username: string | undefined;
   readonly password: string | undefined;
   profile: 'relay' | 'cover' | undefined;
   id = '';
@@ -43,8 +43,8 @@ export class ShellyDevice extends EventEmitter {
     this.shelly = shelly;
     this.log = log;
     this.host = host;
-    this.username = 'admin';
-    this.password = undefined;
+    this.username = shelly.username;
+    this.password = shelly.password;
   }
 
   destroy() {
@@ -213,14 +213,15 @@ export class ShellyDevice extends EventEmitter {
     }
 
     // Start lastseen interval
-    device.lastseenInterval = setInterval(
-      () => {
-        if (Date.now() - device.lastseen > 10 * 60 * 1000)
-          log.warn(`Device ${hk}${device.id}${wr} host ${zb}${device.host}${wr} has not been seen for 10 minutes. Check the device connection.`);
-        else log.info(`Device ${hk}${device.id}${nf} host ${zb}${device.host}${nf} has been seen in the last 10 minutes.`);
-      },
-      10 * 60 * 1000,
-    );
+    device.lastseenInterval = setInterval(() => {
+      const lastSeenDate = new Date(device.lastseen);
+      const lastSeenDateString = lastSeenDate.toLocaleString();
+      if (Date.now() - device.lastseen > 9 * 60 * 1000) device.fetchUpdate();
+
+      if (Date.now() - device.lastseen > 10 * 60 * 1000)
+        log.warn(`Device ${hk}${device.id}${wr} host ${zb}${device.host}${wr} has not been seen for 10 minutes (last time: ${lastSeenDateString}). Check the device connection.`);
+      else log.info(`Device ${hk}${device.id}${nf} host ${zb}${device.host}${nf} has been seen the last time: ${lastSeenDateString}.`);
+    }, 60 * 1000);
 
     // Start WebSocket client for gen 2 and 3 devices
     if (device.gen === 2 || device.gen === 3) {
@@ -230,7 +231,7 @@ export class ShellyDevice extends EventEmitter {
       }, 10 * 1000);
 
       device.wsClient.on('update', (message) => {
-        log.info(`WebSocket update from device ${hk}${device.id}${nf} host ${zb}${device.host}${nf}` /* , message*/);
+        if (shelly.debug) log.info(`WebSocket update from device ${hk}${device.id}${nf} host ${zb}${device.host}${nf}`);
         device.update(message);
         device.lastseen = Date.now();
       });

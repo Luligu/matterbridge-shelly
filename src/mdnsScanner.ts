@@ -19,9 +19,9 @@ export class MdnsScanner extends EventEmitter {
   private scannerTimeout?: NodeJS.Timeout;
   private queryTimeout?: NodeJS.Timeout;
 
-  constructor() {
+  constructor(debug = false) {
     super();
-    this.log = new AnsiLogger({ logName: 'mdnsShellyDiscover', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: true });
+    this.log = new AnsiLogger({ logName: 'mdnsShellyDiscover', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: debug });
   }
 
   get isScanning() {
