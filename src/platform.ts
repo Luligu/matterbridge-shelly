@@ -66,7 +66,14 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     if (config.whiteList) this.whiteList = config.whiteList as string[];
     if (config.blackList) this.blackList = config.blackList as string[];
 
-    this.shelly = new Shelly(log, this.username, this.password);
+    log.info(
+      `Initializing platform: ${this.config.name} ` +
+        `with username: ${config.username} password: ${config.password} ` +
+        `mdnsDiscover: ${config.enableMdnsDiscover} storageDiscover: ${config.enableStorageDiscover} configDiscover: ${config.enableConfigDiscover} ` +
+        `resetStorageDiscover: ${config.resetStorageDiscover} debug: ${config.debug} unregisterOnShutdown: ${config.unregisterOnShutdown}`,
+    );
+
+    this.shelly = new Shelly(log, this.username, this.password, config.debug as boolean);
 
     // handle Shelly discovered event
     this.shelly.on('discovered', async (discoveredDevice: DiscoveredDevice) => {
@@ -512,6 +519,14 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       const matterLevel = Math.max(Math.min(((value as number) / 100) * 255, 255), 0);
       cluster?.setCurrentLevelAttribute(matterLevel);
       shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}LevelControl-currentLevel${db} ${YELLOW}${matterLevel}${db}`);
+    }
+    // Update energy
+    if (shellyComponent.name === 'PowerMeter' && property === 'aenergy') {
+      const cluster = endpoint.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy));
+      cluster?.setTotalConsumptionAttribute((value as ShellyData).total as number);
+      shellyDevice.log.info(
+        `${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}EveHistory-totalConsumption${db} ${YELLOW}${(value as ShellyData).total as number}${db}`,
+      );
     }
   }
 

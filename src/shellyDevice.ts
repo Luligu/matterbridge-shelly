@@ -104,6 +104,7 @@ export class ShellyDevice extends EventEmitter {
     device.mac = shellyPayload.mac as string;
     device.lastseen = Date.now();
 
+    // Gen 1 Shelly device can be mode relay or roller!
     if (shellyPayload.mode) device.profile = (shellyPayload.mode === 'roller' ? 'cover' : 'relay') as 'relay' | 'cover';
     if (shellyPayload.profile) device.profile = shellyPayload.profile as 'relay' | 'cover';
 
@@ -216,14 +217,14 @@ export class ShellyDevice extends EventEmitter {
     device.lastseenInterval = setInterval(() => {
       const lastSeenDate = new Date(device.lastseen);
       const lastSeenDateString = lastSeenDate.toLocaleString();
-      if (Date.now() - device.lastseen > 9 * 60 * 1000) device.fetchUpdate();
-
       if (Date.now() - device.lastseen > 10 * 60 * 1000) {
         log.warn(
           `Device ${hk}${device.id}${wr} host ${zb}${device.host}${wr} has not been seen for 10 minutes (last time: ${CYAN}${lastSeenDateString}${nf}). Check the device connection.`,
         );
         device.online = false;
         device.emit('offline');
+        log.info(`Fetching update for device ${hk}${device.id}${nf} host ${zb}${device.host}${nf}.`);
+        device.fetchUpdate(); // We don't await for the update to complete
       } else {
         log.info(`Device ${hk}${device.id}${nf} host ${zb}${device.host}${nf} has been seen the last time: ${CYAN}${lastSeenDateString}${nf}.`);
         device.online = true;
@@ -235,7 +236,7 @@ export class ShellyDevice extends EventEmitter {
     if (device.gen === 2 || device.gen === 3) {
       device.wsClient = new WsClient(host, 'tango');
       setTimeout(() => {
-        device.wsClient?.start(false);
+        device.wsClient?.start(shelly.debug);
       }, 10 * 1000);
 
       device.wsClient.on('update', (message) => {
