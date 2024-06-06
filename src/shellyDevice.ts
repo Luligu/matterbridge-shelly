@@ -220,7 +220,7 @@ export class ShellyDevice extends EventEmitter {
       const lastSeenDateString = lastSeenDate.toLocaleString();
       if (Date.now() - device.lastseen > 10 * 60 * 1000) {
         log.warn(
-          `Device ${hk}${device.id}${wr} host ${zb}${device.host}${wr} has not been seen for 10 minutes (last time: ${CYAN}${lastSeenDateString}${nf}). Check the device connection.`,
+          `Device ${hk}${device.id}${wr} host ${zb}${device.host}${wr} has not been seen for 10 minutes (last time: ${CYAN}${lastSeenDateString}${wr}). Check the device connection.`,
         );
         device.online = false;
         device.emit('offline');
@@ -293,6 +293,7 @@ export class ShellyDevice extends EventEmitter {
         if (key.startsWith('switch:')) this.updateComponent(key, data[key] as ShellyData);
         if (key.startsWith('cover:')) this.updateComponent(key, data[key] as ShellyData);
         if (key.startsWith('light:')) this.updateComponent(key, data[key] as ShellyData);
+        if (key.startsWith('input:')) this.updateComponent(key, data[key] as ShellyData);
         if (key.startsWith('pm1:')) this.updateComponent(key, data[key] as ShellyData);
       }
       // Update state for active components with output

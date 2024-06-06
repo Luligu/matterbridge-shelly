@@ -23,6 +23,7 @@ import {
   getClusterNameById,
   ClusterRegistry,
   Endpoint,
+  BooleanStateCluster,
 } from 'matterbridge';
 import { AnsiLogger, BLUE, CYAN, GREEN, TimestampFormat, YELLOW, db, debugStringify, dn, er, hk, idn, nf, or, rs, wr, zb } from 'node-ansi-logger';
 import { NodeStorage, NodeStorageManager } from 'node-persist-manager';
@@ -91,7 +92,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
 
     // handle Shelly add event
     this.shelly.on('add', async (device: ShellyDevice) => {
-      device.log.info(`Shelly added gen ${CYAN}${device.gen}${nf} device ${hk}${device.id}${rs}${nf} host ${zb}${device.host}${nf} name ${idn}${zb}${device.name}${rs}${nf}`);
+      device.log.info(`Shelly added gen ${CYAN}${device.gen}${nf} device ${hk}${device.id}${rs}${nf} host ${zb}${device.host}${nf} name ${idn}${device.name}${rs}${nf}`);
       device.log.info(`- mac: ${CYAN}${device.mac}${nf}`);
       device.log.info(`- model: ${CYAN}${device.model}${nf}`);
       device.log.info(`- firmware: ${CYAN}${device.firmware}${nf}`);
@@ -225,11 +226,29 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               this.shellyUpdateHandler(mbDevice, device, component, property, value);
             });
           }
+        } else if (component.name === 'Input') {
+          const inputComponent = device.getComponent(key);
+          if (inputComponent) {
+            /*
+            device.log.setLogDebug(true);
+            inputComponent.logComponent();
+            device.log.setLogDebug(false);
+            */
+            const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.CONTACT_SENSOR], []);
+            mbDevice.addFixedLabel('composed', component.name);
+            // Set the state attribute
+            const state = inputComponent.getValue('state');
+            if (state !== undefined && typeof state === 'boolean') child.getClusterServer(BooleanStateCluster)?.setStateValueAttribute(state as boolean);
+            // Add event handler
+            inputComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
+              this.shellyUpdateHandler(mbDevice, device, component, property, value);
+            });
+          }
         }
       }
       // Check if we have a device to register with Matterbridge
       const endpoints = mbDevice.getChildEndpoints();
-      if (endpoints.length > 0) {
+      if (endpoints.length > 1) {
         // Register the device with Matterbridge
         await this.registerDevice(mbDevice);
         // Save the MatterbridgeDevice in the bridgedDevices map
@@ -452,7 +471,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       this.log.error(`shellyCommandHandler error: coverComponent ${componentName} not found for shelly device ${dn}${shellyDevice?.id}${er}`);
       return false;
     }
-    // Set WindowCoveringCluster attributes 10000 = closed, 0 = opened
+    // Matter uses 10000 = fully closed - 0 = fully opened
+    // Shelly uses 0 = fully closed - 100 = fully opened
     const coverCluster = endpoint.getClusterServer(
       WindowCoveringCluster.with(WindowCovering.Feature.Lift, WindowCovering.Feature.PositionAwareLift, WindowCovering.Feature.AbsolutePosition),
     );
@@ -516,6 +536,12 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       cluster?.setOnOffAttribute(value as boolean);
       shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}OnOff-onOff${db} ${YELLOW}${value}${db}`);
     }
+    // Update state for Input
+    if (shellyComponent.name === 'Input' && property === 'state') {
+      const cluster = endpoint.getClusterServer(BooleanStateCluster);
+      cluster?.setStateValueAttribute(value as boolean);
+      shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}BooleanState-stateValue${db} ${YELLOW}${value}${db}`);
+    }
     // Update brightness
     if (shellyComponent.name === 'Light' && property === 'brightness') {
       const cluster = endpoint.getClusterServer(LevelControlCluster);
@@ -528,6 +554,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       const windowCoveringCluster = endpoint.getClusterServer(
         WindowCoveringCluster.with(WindowCovering.Feature.Lift, WindowCovering.Feature.PositionAwareLift, WindowCovering.Feature.AbsolutePosition),
       );
+      // Matter uses 10000 = fully closed - 0 = fully opened
+      // Shelly uses 0 = fully closed - 100 = fully opened
       if (property === 'state') {
         // Gen 1 devices send stop
         if (value === 'stopped' || value === 'stop') {
