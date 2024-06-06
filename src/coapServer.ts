@@ -274,6 +274,9 @@ export class CoapServer extends EventEmitter {
             );
             if (s.D === 'output') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'ison', range: s.R });
             if (s.D === 'brightness') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'brightness', range: s.R });
+            if (s.D === 'mode') desc.push({ id: s.I, component: 'sys', property: 'profile', range: s.R });
+            if (s.D === 'roller') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'state', range: s.R });
+            if (s.D === 'rollerPos') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'current_pos', range: s.R });
           });
       });
       this.log.debug(`parsing ${MAGENTA}decoding${db}:`);
@@ -285,7 +288,9 @@ export class CoapServer extends EventEmitter {
 
     if (msg.url === '/cit/s') {
       const descriptions: CoIoTDescription[] = this.devices.get(host) || [];
-      if (!descriptions || descriptions.length === 0) this.log.warn(`No description found for host ${host}`);
+      if (!descriptions || descriptions.length === 0) {
+        // this.log.warn(`No description found for host ${host}`);
+      }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const values: CoIoTGValue[] = payload.G.map((v: any[]) => ({
         channel: v[0],

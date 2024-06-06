@@ -200,7 +200,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             // Add event handler
             coverComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
               this.shellyUpdateHandler(mbDevice, device, component, property, value);
-              this.shellyCoverUpdateHandler(mbDevice, device, component, property, value);
+              // this.shellyCoverUpdateHandler(mbDevice, device, component, property, value);
             });
           }
         } else if (component.name === 'PowerMeter') {
@@ -406,7 +406,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     onOffCluster.setOnOffAttribute(state); // TODO remove
     if (state) switchComponent.On();
     else switchComponent.Off();
-    shellyDevice.log.info(`Command ${componentName}:${command}() for endpoint ${or}${endpointNumber}${nf} attribute ${hk}${onOffCluster.name}-onOff${nf}: ${state} `);
+    shellyDevice.log.info(`Command ${hk}${componentName}${nf}:${command}() for endpoint ${or}${endpointNumber}${nf} attribute ${hk}${onOffCluster.name}-onOff${nf}: ${state} `);
     // Set LevelControlCluster currentLevel attribute
     if (level !== undefined) {
       const levelControlCluster = endpoint.getClusterServer(LevelControlCluster);
@@ -417,7 +417,9 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       levelControlCluster.setCurrentLevelAttribute(level); // TODO remove
       const shellyLevel = Math.max(Math.min((level / 254) * 100, 100), 1);
       switchComponent?.Level(shellyLevel);
-      shellyDevice.log.info(`Command ${componentName}:Level(${shellyLevel}) for endpoint ${or}${endpointNumber}${nf} attribute ${hk}${onOffCluster.name}-onOff${nf}: ${state} `);
+      shellyDevice.log.info(
+        `Command ${hk}${componentName}${nf}:Level(${shellyLevel}) for endpoint ${or}${endpointNumber}${nf} attribute ${hk}${onOffCluster.name}-onOff${nf}: ${state} `,
+      );
     }
     return true;
   }
@@ -450,7 +452,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       this.log.error(`shellyCommandHandler error: coverComponent ${componentName} not found for shelly device ${dn}${shellyDevice?.id}${er}`);
       return false;
     }
-    // Set WindowCoveringCluster attributes
+    // Set WindowCoveringCluster attributes 10000 = closed, 0 = opened
     const coverCluster = endpoint.getClusterServer(
       WindowCoveringCluster.with(WindowCovering.Feature.Lift, WindowCovering.Feature.PositionAwareLift, WindowCovering.Feature.AbsolutePosition),
     );
@@ -460,39 +462,40 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     }
     if (command === 'Stop') {
       matterbridgeDevice.setWindowCoveringTargetAsCurrentAndStopped(endpoint);
+      coverComponent.Stop();
       const current = coverCluster.getCurrentPositionLiftPercent100thsAttribute();
       const target = coverCluster.getTargetPositionLiftPercent100thsAttribute();
       const status = coverCluster.getOperationalStatusAttribute();
-      coverComponent.Stop();
       shellyDevice.log.info(
-        `Command ${componentName}:${command}() for endpoint ${or}${endpointNumber}${nf} attribute ${hk}${coverCluster.name}${nf} current:${current} target:${target} status:${status.global}`,
+        `Command ${hk}${componentName}${nf}:${command}() for endpoint ${or}${endpointNumber}${nf} attribute ${hk}${coverCluster.name}${nf} current:${current} target:${target} status:${status.global}`,
       );
     } else if (command === 'Open') {
       matterbridgeDevice.setWindowCoveringCurrentTargetStatus(0, 0, WindowCovering.MovementStatus.Stopped, endpoint);
+      coverComponent.Open();
       const current = coverCluster.getCurrentPositionLiftPercent100thsAttribute();
       const target = coverCluster.getTargetPositionLiftPercent100thsAttribute();
       const status = coverCluster.getOperationalStatusAttribute();
-      coverComponent.Open();
       shellyDevice.log.info(
-        `Command ${componentName}:${command}() for endpoint ${or}${endpointNumber}${nf} attribute ${hk}${coverCluster.name}${nf} current:${current} target:${target} status:${status.global}`,
+        `Command ${hk}${componentName}${nf}:${command}() for endpoint ${or}${endpointNumber}${nf} attribute ${hk}${coverCluster.name}${nf} current:${current} target:${target} status:${status.global}`,
       );
     } else if (command === 'Close') {
       matterbridgeDevice.setWindowCoveringCurrentTargetStatus(10000, 10000, WindowCovering.MovementStatus.Stopped, endpoint);
+      coverComponent.Close();
       const current = coverCluster.getCurrentPositionLiftPercent100thsAttribute();
       const target = coverCluster.getTargetPositionLiftPercent100thsAttribute();
       const status = coverCluster.getOperationalStatusAttribute();
-      coverComponent.Close();
       shellyDevice.log.info(
-        `Command ${componentName}:${command}() for endpoint ${or}${endpointNumber}${nf} attribute ${hk}${coverCluster.name}${nf} current:${current} target:${target} status:${status.global}`,
+        `Command ${hk}${componentName}${nf}:${command}() for endpoint ${or}${endpointNumber}${nf} attribute ${hk}${coverCluster.name}${nf} current:${current} target:${target} status:${status.global}`,
       );
     } else if (command === 'GoToPosition' && pos !== undefined) {
       matterbridgeDevice.setWindowCoveringCurrentTargetStatus(pos, pos, WindowCovering.MovementStatus.Stopped, endpoint);
+      const shellyPos = 100 - Math.max(Math.min(Math.round(pos / 100), 10000), 0);
+      coverComponent.GoToPosition(shellyPos);
       const current = coverCluster.getCurrentPositionLiftPercent100thsAttribute();
       const target = coverCluster.getTargetPositionLiftPercent100thsAttribute();
       const status = coverCluster.getOperationalStatusAttribute();
-      coverComponent.GoToPosition(pos / 100);
       shellyDevice.log.info(
-        `Command ${componentName}:${command}() for endpoint ${or}${endpointNumber}${nf} attribute ${hk}${coverCluster.name}${nf} current:${current} target:${target} status:${status.global}`,
+        `Command ${hk}${componentName}${nf}:${command}(${shellyPos}) for endpoint ${or}${endpointNumber}${nf} attribute ${hk}${coverCluster.name}${nf} current:${current} target:${target} status:${status.global}`,
       );
     }
     return true;
@@ -520,6 +523,43 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       cluster?.setCurrentLevelAttribute(matterLevel);
       shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}LevelControl-currentLevel${db} ${YELLOW}${matterLevel}${db}`);
     }
+    // Update cover
+    if (shellyComponent.name === 'Cover' || shellyComponent.name === 'Roller') {
+      const windowCoveringCluster = endpoint.getClusterServer(
+        WindowCoveringCluster.with(WindowCovering.Feature.Lift, WindowCovering.Feature.PositionAwareLift, WindowCovering.Feature.AbsolutePosition),
+      );
+      if (property === 'state') {
+        // Gen 1 devices send stop
+        if (value === 'stopped' || value === 'stop') {
+          matterbridgeDevice.setWindowCoveringTargetAsCurrentAndStopped(endpoint);
+        }
+        // Gen 1 devices send close
+        if (value === 'closed' || value === 'close') {
+          matterbridgeDevice.setWindowCoveringCurrentTargetStatus(10000, 10000, WindowCovering.MovementStatus.Stopped, endpoint);
+        }
+        // Gen 1 devices send open
+        if (value === 'open') {
+          matterbridgeDevice.setWindowCoveringCurrentTargetStatus(0, 0, WindowCovering.MovementStatus.Stopped, endpoint);
+        }
+        if (value === 'opening') {
+          windowCoveringCluster?.setTargetPositionLiftPercent100thsAttribute(0);
+          matterbridgeDevice.setWindowCoveringStatus(WindowCovering.MovementStatus.Opening, endpoint);
+        }
+        if (value === 'closing') {
+          windowCoveringCluster?.setTargetPositionLiftPercent100thsAttribute(10000);
+          matterbridgeDevice.setWindowCoveringStatus(WindowCovering.MovementStatus.Closing, endpoint);
+        }
+      } else if (property === 'current_pos' && value !== -1) {
+        const matterPos = 10000 - Math.min(Math.max(Math.round((value as number) * 100), 0), 10000);
+        matterbridgeDevice.setWindowCoveringCurrentTargetStatus(matterPos, matterPos, WindowCovering.MovementStatus.Stopped, endpoint);
+      }
+      const current = windowCoveringCluster?.getCurrentPositionLiftPercent100thsAttribute();
+      const target = windowCoveringCluster?.getTargetPositionLiftPercent100thsAttribute();
+      const status = windowCoveringCluster?.getOperationalStatusAttribute();
+      shellyDevice.log.info(
+        `${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}WindowCovering${db} current:${YELLOW}${current}${db} target:${YELLOW}${target}${db} status:${YELLOW}${status?.global}${rs}`,
+      );
+    }
     // Update energy
     if (shellyComponent.name === 'PowerMeter' && property === 'aenergy') {
       const cluster = endpoint.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy));
@@ -535,7 +575,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       `${db}Shelly message for device ${idn}${shellyDevice.id}${rs}${db} ${hk}${component}${db}:` +
         `${zb}${property}${db}:${YELLOW}${value !== null && typeof value === 'object' ? debugStringify(value as object) : value}${rs}`,
     );
-    if (property !== 'state') return false;
+    if (property !== 'state' && property !== 'current_pos') return false;
     const endpoint = this.getChildEndpointWithLabel(matterbridgeDevice, component);
     if (endpoint) {
       const windowCoveringCluster = endpoint.getClusterServer(
@@ -545,29 +585,39 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         this.log.error('shellyCoverUpdateHandler error: WindowCoveringCluster not found');
         return false;
       }
-      if (value === 'stopped') {
-        matterbridgeDevice.setWindowCoveringTargetAsCurrentAndStopped(endpoint);
+      if (property === 'state') {
+        // Gen 1 devices send stop
+        if (value === 'stopped' || value === 'stop') {
+          matterbridgeDevice.setWindowCoveringTargetAsCurrentAndStopped(endpoint);
+        }
+        // Gen 1 devices send close
+        if (value === 'closed' || value === 'close') {
+          matterbridgeDevice.setWindowCoveringCurrentTargetStatus(10000, 10000, WindowCovering.MovementStatus.Stopped, endpoint);
+        }
+        // Gen 1 devices send open
+        if (value === 'open') {
+          matterbridgeDevice.setWindowCoveringCurrentTargetStatus(0, 0, WindowCovering.MovementStatus.Stopped, endpoint);
+        }
+        if (value === 'opening') {
+          windowCoveringCluster.setTargetPositionLiftPercent100thsAttribute(0);
+          matterbridgeDevice.setWindowCoveringStatus(WindowCovering.MovementStatus.Opening, endpoint);
+        }
+        if (value === 'closing') {
+          windowCoveringCluster.setTargetPositionLiftPercent100thsAttribute(10000);
+          matterbridgeDevice.setWindowCoveringStatus(WindowCovering.MovementStatus.Closing, endpoint);
+        }
+      } else if (property === 'current_pos') {
+        const matterPos = 10000 - Math.min(Math.max(Math.round((value as number) * 100), 0), 10000);
+        matterbridgeDevice.setWindowCoveringCurrentTargetStatus(matterPos, matterPos, WindowCovering.MovementStatus.Stopped, endpoint);
       }
-      if (value === 'closed') {
-        matterbridgeDevice.setWindowCoveringTargetAndCurrentPosition(10000, endpoint);
-        matterbridgeDevice.setWindowCoveringStatus(WindowCovering.MovementStatus.Stopped, endpoint);
-      }
-      if (value === 'open') {
-        matterbridgeDevice.setWindowCoveringTargetAndCurrentPosition(0, endpoint);
-        matterbridgeDevice.setWindowCoveringStatus(WindowCovering.MovementStatus.Stopped, endpoint);
-      }
-      if (value === 'opening') {
-        windowCoveringCluster.setTargetPositionLiftPercent100thsAttribute(0);
-        matterbridgeDevice.setWindowCoveringStatus(WindowCovering.MovementStatus.Opening, endpoint);
-      }
-      if (value === 'closing') {
-        windowCoveringCluster.setTargetPositionLiftPercent100thsAttribute(10000);
-        matterbridgeDevice.setWindowCoveringStatus(WindowCovering.MovementStatus.Closing, endpoint);
-      }
+
+      const current = windowCoveringCluster.getCurrentPositionLiftPercent100thsAttribute();
+      const target = windowCoveringCluster.getTargetPositionLiftPercent100thsAttribute();
+      const status = windowCoveringCluster.getOperationalStatusAttribute();
       shellyDevice.log.info(
-        `${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}WindowCovering${db} for device ${dn}${shellyDevice.id}${db}` +
-          ` ${hk}${component}${db}:${zb}${property}${db}::${YELLOW}${value !== null && typeof value === 'object' ? debugStringify(value as object) : value}${rs}`,
+        `${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}WindowCovering${db} current:${current} target:${target} status:${status.global} for device ${dn}${shellyDevice.id}${db}`,
       );
+
       return true;
     }
     this.log.error(`shellyCoverUpdateHandler error: endpointName ${component} not found`);

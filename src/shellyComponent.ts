@@ -98,6 +98,7 @@ export class ShellyComponent extends EventEmitter {
       };
 
       (this as ShellyComponentType).GoToPosition = function (pos: number) {
+        pos = Math.min(Math.max(Math.round(pos), 0), 100);
         if (device.gen === 1) ShellyDevice.fetch(device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { go: 'to_pos', roller_pos: pos });
         if (device.gen !== 1) ShellyDevice.fetch(device.log, device.host, `${this.name}.GoToPosition `, { id: this.index, pos: pos });
       };

@@ -87,7 +87,7 @@ export class Shelly extends EventEmitter {
     this._devices.set(device.id, device);
     if (device.gen === 1) {
       await this.coapServer?.registerDevice(device.host);
-      this.startCoap(10, false);
+      this.startCoap(10, this.debug);
     }
     this.emit('add', device);
     return this;
