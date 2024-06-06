@@ -4,7 +4,6 @@ import {
   MatterbridgeDynamicPlatform,
   DeviceTypes,
   EndpointNumber,
-  FixedLabelCluster,
   OnOff,
   OnOffCluster,
   PlatformConfig,
@@ -22,7 +21,6 @@ import {
   LevelControlCluster,
   getClusterNameById,
   ClusterRegistry,
-  Endpoint,
   BooleanStateCluster,
 } from 'matterbridge';
 import { AnsiLogger, BLUE, CYAN, GREEN, TimestampFormat, YELLOW, db, debugStringify, dn, er, hk, idn, nf, or, rs, wr, zb } from 'node-ansi-logger';
@@ -364,29 +362,6 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     return ipv4Regex.test(ipv4Address);
   }
 
-  getEndpointLabel(matterbridgeDevice: MatterbridgeDevice, endpointNumber: EndpointNumber): string | undefined {
-    const labelList = matterbridgeDevice.getChildEndpoint(endpointNumber)?.getClusterServer(FixedLabelCluster)?.getLabelListAttribute();
-    if (!labelList) return undefined;
-    for (const entry of labelList) {
-      if (entry.label === 'endpointName') return entry.value;
-    }
-    return undefined;
-  }
-
-  getChildEndpointWithLabel(matterbridgeDevice: MatterbridgeDevice, label: string): Endpoint | undefined {
-    const endpoints = matterbridgeDevice.getChildEndpoints();
-    for (const endpoint of endpoints) {
-      const labelList = endpoint.getClusterServer(FixedLabelCluster)?.getLabelListAttribute();
-      if (!labelList) return undefined;
-      let endpointName = '';
-      for (const entry of labelList) {
-        if (entry.label === 'endpointName') endpointName = entry.value;
-      }
-      if (endpointName === label) return endpoint;
-    }
-    return undefined;
-  }
-
   private shellySwitchCommandHandler(
     matterbridgeDevice: MatterbridgeDevice,
     endpointNumber: EndpointNumber | undefined,
@@ -406,7 +381,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       return false;
     }
     // Get the Shelly switch component
-    const componentName = this.getEndpointLabel(matterbridgeDevice, endpointNumber);
+    const componentName = matterbridgeDevice.getEndpointLabel(endpointNumber);
     if (!componentName) {
       this.log.error(`shellyCommandHandler error: endpointName undefined for shelly device ${dn}${shellyDevice?.id}${er}`);
       return false;
@@ -461,7 +436,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       return false;
     }
     // Get the Shelly switch component
-    const componentName = this.getEndpointLabel(matterbridgeDevice, endpointNumber);
+    const componentName = matterbridgeDevice.getEndpointLabel(endpointNumber);
     if (!componentName) {
       this.log.error(`shellyCommandHandler error: endpointName undefined for shelly device ${dn}${shellyDevice?.id}${er}`);
       return false;
@@ -522,7 +497,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
   }
 
   private shellyUpdateHandler(matterbridgeDevice: MatterbridgeDevice, shellyDevice: ShellyDevice, component: string, property: string, value: ShellyDataType) {
-    const endpoint = this.getChildEndpointWithLabel(matterbridgeDevice, component);
+    const endpoint = matterbridgeDevice.getChildEndpointWithLabel(component);
     if (!endpoint) return;
     shellyDevice.log.info(
       `${db}Shelly message for device ${idn}${shellyDevice.id}${rs}${db} ` +
@@ -596,60 +571,6 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         `${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}EveHistory-totalConsumption${db} ${YELLOW}${(value as ShellyData).total as number}${db}`,
       );
     }
-  }
-
-  private shellyCoverUpdateHandler(matterbridgeDevice: MatterbridgeDevice, shellyDevice: ShellyDevice, component: string, property: string, value: ShellyDataType): boolean {
-    shellyDevice.log.info(
-      `${db}Shelly message for device ${idn}${shellyDevice.id}${rs}${db} ${hk}${component}${db}:` +
-        `${zb}${property}${db}:${YELLOW}${value !== null && typeof value === 'object' ? debugStringify(value as object) : value}${rs}`,
-    );
-    if (property !== 'state' && property !== 'current_pos') return false;
-    const endpoint = this.getChildEndpointWithLabel(matterbridgeDevice, component);
-    if (endpoint) {
-      const windowCoveringCluster = endpoint.getClusterServer(
-        WindowCoveringCluster.with(WindowCovering.Feature.Lift, WindowCovering.Feature.PositionAwareLift, WindowCovering.Feature.AbsolutePosition),
-      );
-      if (!windowCoveringCluster) {
-        this.log.error('shellyCoverUpdateHandler error: WindowCoveringCluster not found');
-        return false;
-      }
-      if (property === 'state') {
-        // Gen 1 devices send stop
-        if (value === 'stopped' || value === 'stop') {
-          matterbridgeDevice.setWindowCoveringTargetAsCurrentAndStopped(endpoint);
-        }
-        // Gen 1 devices send close
-        if (value === 'closed' || value === 'close') {
-          matterbridgeDevice.setWindowCoveringCurrentTargetStatus(10000, 10000, WindowCovering.MovementStatus.Stopped, endpoint);
-        }
-        // Gen 1 devices send open
-        if (value === 'open') {
-          matterbridgeDevice.setWindowCoveringCurrentTargetStatus(0, 0, WindowCovering.MovementStatus.Stopped, endpoint);
-        }
-        if (value === 'opening') {
-          windowCoveringCluster.setTargetPositionLiftPercent100thsAttribute(0);
-          matterbridgeDevice.setWindowCoveringStatus(WindowCovering.MovementStatus.Opening, endpoint);
-        }
-        if (value === 'closing') {
-          windowCoveringCluster.setTargetPositionLiftPercent100thsAttribute(10000);
-          matterbridgeDevice.setWindowCoveringStatus(WindowCovering.MovementStatus.Closing, endpoint);
-        }
-      } else if (property === 'current_pos') {
-        const matterPos = 10000 - Math.min(Math.max(Math.round((value as number) * 100), 0), 10000);
-        matterbridgeDevice.setWindowCoveringCurrentTargetStatus(matterPos, matterPos, WindowCovering.MovementStatus.Stopped, endpoint);
-      }
-
-      const current = windowCoveringCluster.getCurrentPositionLiftPercent100thsAttribute();
-      const target = windowCoveringCluster.getTargetPositionLiftPercent100thsAttribute();
-      const status = windowCoveringCluster.getOperationalStatusAttribute();
-      shellyDevice.log.info(
-        `${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}WindowCovering${db} current:${current} target:${target} status:${status.global} for device ${dn}${shellyDevice.id}${db}`,
-      );
-
-      return true;
-    }
-    this.log.error(`shellyCoverUpdateHandler error: endpointName ${component} not found`);
-    return false;
   }
 
   private validateWhiteBlackList(entityName: string) {
