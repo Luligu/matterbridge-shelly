@@ -48,7 +48,7 @@ export default tseslint.config(
   eslintPluginPrettier,
   {
     name: 'global ignores',
-    ignores: ['dist/', 'build/', 'node_modules/'],
+    ignores: ['dist/', 'build/', 'node_modules/', 'coverage/'],
   },
   {
     name: 'javascript',
