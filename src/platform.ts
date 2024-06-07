@@ -19,9 +19,11 @@ import {
   ColorControl,
   ClusterId,
   LevelControlCluster,
-  getClusterNameById,
-  ClusterRegistry,
   BooleanStateCluster,
+  ClusterRegistry,
+  electricalSensor,
+  ElectricalPowerMeasurement,
+  ElectricalEnergyMeasurement,
 } from 'matterbridge';
 import { AnsiLogger, BLUE, CYAN, GREEN, TimestampFormat, YELLOW, db, debugStringify, dn, er, hk, idn, nf, or, rs, wr, zb } from 'node-ansi-logger';
 import { NodeStorage, NodeStorageManager } from 'node-persist-manager';
@@ -159,6 +161,23 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           if (switchComponent) {
             const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [onOffSwitch], [OnOff.Cluster.id]);
             mbDevice.addFixedLabel('composed', component.name);
+            switchComponent.logComponent();
+            if (
+              switchComponent.hasProperty('voltage') &&
+              switchComponent.hasProperty('current') &&
+              switchComponent.hasProperty('apower') &&
+              switchComponent.hasProperty('aenergy')
+            ) {
+              child.addClusterServer(
+                mbDevice.getDefaultStaticEveHistoryClusterServer(
+                  switchComponent.getValue('voltage') as number,
+                  switchComponent.getValue('current') as number,
+                  switchComponent.getValue('apower') as number,
+                  (switchComponent.getValue('aenergy') as ShellyData).total as number,
+                ),
+              );
+              this.log.warn(`Added EveHistory cluster to ${device.id}`);
+            }
             // Set the OnOff attribute
             const state = switchComponent.getValue('state');
             if (state !== undefined) child.getClusterServer(OnOffCluster)?.setOnOffAttribute(state as boolean);
@@ -205,10 +224,14 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         } else if (component.name === 'PowerMeter') {
           const pmComponent = device.getComponent(key);
           if (pmComponent) {
-            ClusterRegistry.register(EveHistory.Complete);
-            this.log.info('Added custom cluster:', getClusterNameById(EveHistoryCluster.id));
-            const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.ON_OFF_PLUGIN_UNIT], [OnOff.Complete.id, EveHistory.Cluster.id]);
+            mbDevice.log.setLogDebug(true);
             mbDevice.addFixedLabel('composed', component.name);
+            // Add the Matter 1.3 device type with the ElectricalPowerMeasurement and ElectricalEnergyMeasurement clusters
+            mbDevice.addChildDeviceTypeWithClusterServer('electricalSensor', [electricalSensor], [ElectricalPowerMeasurement.Cluster.id, ElectricalEnergyMeasurement.Cluster.id]);
+            // Add the custom EveHistory cluster for HA
+            ClusterRegistry.register(EveHistory.Complete);
+            // const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.ON_OFF_PLUGIN_UNIT], [OnOff.Complete.id, EveHistory.Cluster.id]);
+            const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [powerSource], [EveHistory.Cluster.id]);
             // Set the electrical attributes
             const voltage = pmComponent.getValue('voltage');
             if (voltage !== undefined) child.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy))?.setVoltageAttribute(voltage as number);
