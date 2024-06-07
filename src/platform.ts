@@ -67,12 +67,15 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     if (config.whiteList) this.whiteList = config.whiteList as string[];
     if (config.blackList) this.blackList = config.blackList as string[];
 
-    log.info(
-      `Initializing platform: ${this.config.name} ` +
-        `with username: ${config.username} password: ${config.password} ` +
-        `mdnsDiscover: ${config.enableMdnsDiscover} storageDiscover: ${config.enableStorageDiscover} configDiscover: ${config.enableConfigDiscover} ` +
-        `resetStorageDiscover: ${config.resetStorageDiscover} debug: ${config.debug} unregisterOnShutdown: ${config.unregisterOnShutdown}`,
-    );
+    log.info(`Initializing platform: ${idn}${this.config.name}${rs}`);
+    log.info(`- username: ${CYAN}${config.username}`);
+    log.info(`- password: ${CYAN}${config.password}`);
+    log.info(`- mdnsDiscover: ${CYAN}${config.enableMdnsDiscover}`);
+    log.info(`- storageDiscover: ${CYAN}${config.enableStorageDiscover}`);
+    log.info(`- configDiscover: ${CYAN}${config.enableConfigDiscover}`);
+    log.info(`- resetStorageDiscover: ${CYAN}${config.resetStorageDiscover}`);
+    log.info(`- debug: ${CYAN}${config.debug}`);
+    log.info(`- unregisterOnShutdown: ${CYAN}${config.unregisterOnShutdown}`);
 
     this.shelly = new Shelly(log, this.username, this.password, config.debug as boolean);
 
@@ -92,7 +95,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
 
     // handle Shelly add event
     this.shelly.on('add', async (device: ShellyDevice) => {
-      device.log.info(`Shelly added gen ${CYAN}${device.gen}${nf} device ${hk}${device.id}${rs}${nf} host ${zb}${device.host}${nf} name ${idn}${device.name}${rs}${nf}`);
+      device.log.info(`Shelly added ${idn}${device.name}${rs} gen ${CYAN}${device.gen}${nf} device id ${hk}${device.id}${rs}${nf} host ${zb}${device.host}${nf}`);
       device.log.info(`- mac: ${CYAN}${device.mac}${nf}`);
       device.log.info(`- model: ${CYAN}${device.model}${nf}`);
       device.log.info(`- firmware: ${CYAN}${device.firmware}${nf}`);
@@ -131,9 +134,15 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             if (lightComponent.hasProperty('color')) clusterIds.push(ColorControl.Cluster.id);
             const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [deviceType], clusterIds);
             mbDevice.addFixedLabel('composed', component.name);
-            // Set the OnOff attribute
+            // Set the onOff attribute
             const state = lightComponent.getValue('state');
             if (state !== undefined) child.getClusterServer(OnOffCluster)?.setOnOffAttribute(state as boolean);
+            // Set the currentLevel attribute
+            const level = lightComponent.getValue('brightness');
+            if (level !== undefined) {
+              const matterLevel = Math.max(Math.min(Math.round((level as number) / 100) * 255, 255), 0);
+              child.getClusterServer(LevelControlCluster)?.setCurrentLevelAttribute(matterLevel as number);
+            }
             // Add command handlers
             mbDevice.addCommandHandler('on', async (data) => {
               this.shellySwitchCommandHandler(mbDevice, data.endpoint.number, device, 'On', true);
@@ -176,7 +185,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
                   (switchComponent.getValue('aenergy') as ShellyData).total as number,
                 ),
               );
-              this.log.warn(`Added EveHistory cluster to ${device.id}`);
+              // this.log.warn(`Added EveHistory cluster to ${device.id}`);
             }
             // Set the OnOff attribute
             const state = switchComponent.getValue('state');
@@ -218,7 +227,6 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             // Add event handler
             coverComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
               this.shellyUpdateHandler(mbDevice, device, component, property, value);
-              // this.shellyCoverUpdateHandler(mbDevice, device, component, property, value);
             });
           }
         } else if (component.name === 'PowerMeter') {
@@ -279,11 +287,11 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       }
     });
 
-    this.log.info('Finished initializing platform:', this.config.name);
+    this.log.info(`Initialized platform: ${idn}${this.config.name}${rs}`);
   }
 
   override async onStart(reason?: string) {
-    this.log.info('onStart called with reason:', reason ?? 'none');
+    this.log.info(`Starting platform ${idn}${this.config.name}${rs}${nf}: ${reason ?? ''}`);
 
     // create NodeStorageManager
     this.nodeStorageManager = new NodeStorageManager({
@@ -333,11 +341,11 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
   }
 
   override async onConfigure() {
-    this.log.info('onConfigure called');
+    this.log.info(`Configuring platform ${idn}${this.config.name}${rs}${nf}`);
   }
 
   override async onShutdown(reason?: string) {
-    this.log.info('onShutdown called with reason:', reason ?? 'none');
+    this.log.info(`Shutting down platform ${idn}${this.config.name}${rs}${nf}: ${reason ?? ''}`);
 
     this.shelly.destroy();
 
