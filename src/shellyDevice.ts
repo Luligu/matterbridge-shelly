@@ -227,7 +227,7 @@ export class ShellyDevice extends EventEmitter {
         log.info(`Fetching update for device ${hk}${device.id}${nf} host ${zb}${device.host}${nf}.`);
         device.fetchUpdate(); // We don't await for the update to complete
       } else {
-        log.info(`Device ${hk}${device.id}${nf} host ${zb}${device.host}${nf} has been seen the last time: ${CYAN}${lastSeenDateString}${nf}.`);
+        log.debug(`Device ${hk}${device.id}${db} host ${zb}${device.host}${db} has been seen the last time: ${CYAN}${lastSeenDateString}${db}.`);
         device.online = true;
         device.emit('online');
       }
@@ -462,6 +462,7 @@ if (process.argv.includes('startShelly')) {
     */
     { host: '192.168.1.221', desc: 'Gen 3 Shelly 1 mini' },
     { host: '192.168.1.224', desc: 'Gen 2 Shelly i4' },
+    { host: '192.168.1.225', desc: 'Gen 3 Shelly 1PM mini' },
   ];
 
   for (const device of myRealDevices) {

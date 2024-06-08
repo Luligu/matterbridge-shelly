@@ -107,7 +107,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       if (config.debug) device.logDevice();
 
       // Create a new Matterbridge device for the switch
-      const mbDevice = new MatterbridgeDevice(bridgedNode);
+      const mbDevice = new MatterbridgeDevice(bridgedNode, undefined, config.debug as boolean);
       mbDevice.createDefaultBridgedDeviceBasicInformationClusterServer(
         device.name,
         device.id,
@@ -232,7 +232,6 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         } else if (component.name === 'PowerMeter') {
           const pmComponent = device.getComponent(key);
           if (pmComponent) {
-            mbDevice.log.setLogDebug(true);
             mbDevice.addFixedLabel('composed', component.name);
             // Add the Matter 1.3 device type with the ElectricalPowerMeasurement and ElectricalEnergyMeasurement clusters
             mbDevice.addChildDeviceTypeWithClusterServer('electricalSensor', [electricalSensor], [ElectricalPowerMeasurement.Cluster.id, ElectricalEnergyMeasurement.Cluster.id]);
@@ -258,11 +257,6 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         } else if (component.name === 'Input') {
           const inputComponent = device.getComponent(key);
           if (inputComponent) {
-            /*
-            device.log.setLogDebug(true);
-            inputComponent.logComponent();
-            device.log.setLogDebug(false);
-            */
             const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.CONTACT_SENSOR], []);
             mbDevice.addFixedLabel('composed', component.name);
             // Set the state attribute
@@ -286,8 +280,6 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         this.log.warn(`Device gen ${BLUE}${device.gen}${wr} device ${hk}${device.id}${rs}${wr} host ${zb}${device.host}${wr} has no components to add.`);
       }
     });
-
-    this.log.info(`Initialized platform: ${idn}${this.config.name}${rs}`);
   }
 
   override async onStart(reason?: string) {
@@ -440,7 +432,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         return false;
       }
       levelControlCluster.setCurrentLevelAttribute(level); // TODO remove
-      const shellyLevel = Math.max(Math.min((level / 254) * 100, 100), 1);
+      const shellyLevel = Math.max(Math.min(Math.round((level / 254) * 100), 100), 1);
       switchComponent?.Level(shellyLevel);
       shellyDevice.log.info(
         `Command ${hk}${componentName}${nf}:Level(${shellyLevel}) for endpoint ${or}${endpointNumber}${nf} attribute ${hk}${onOffCluster.name}-onOff${nf}: ${state} `,

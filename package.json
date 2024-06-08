@@ -104,7 +104,6 @@
     "@types/multicast-dns": "^7.2.4",
     "@types/node": "^20.14.2",
     "@types/ws": "^8.5.10",
-    "eslint": "^9.4.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-jest": "^28.6.0",
     "eslint-plugin-prettier": "^5.1.3",
