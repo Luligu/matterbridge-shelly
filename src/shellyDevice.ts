@@ -5,11 +5,11 @@ import { getIpv4InterfaceAddress } from 'matterbridge';
 import crypto from 'crypto';
 import { parseDigestAuthenticateHeader, createDigestShellyAuth, createBasicShellyAuth, parseBasicAuthenticateHeader, getGen2BodyOptions, getGen1BodyOptions } from './auth.js';
 
-import { shellydimmer2Settings, shellydimmer2Shelly, shellydimmer2Status } from './shellydimmer2.js';
-import { shellyplus2pmSettings, shellyplus2pmShelly, shellyplus2pmStatus } from './shellyplus2pm.js';
-import { shellyplus1pmSettings, shellyplus1pmShelly, shellyplus1pmStatus } from './shellyplus1pm.js';
-import { shellypmminig3Settings, shellypmminig3Shelly, shellypmminig3Status } from './shellypmminig3.js';
-import { shelly1minig3Settings, shelly1minig3Status, shelly1minig3Shelly } from './shelly1minig3.js';
+import { shellydimmer2Settings, shellydimmer2Shelly, shellydimmer2Status } from './mock/shellydimmer2.js';
+import { shellyplus2pmSettings, shellyplus2pmShelly, shellyplus2pmStatus } from './mock/shellyplus2pm.js';
+import { shellyplus1pmSettings, shellyplus1pmShelly, shellyplus1pmStatus } from './mock/shellyplus1pm.js';
+import { shellypmminig3Settings, shellypmminig3Shelly, shellypmminig3Status } from './mock/shellypmminig3.js';
+import { shelly1minig3Settings, shelly1minig3Status, shelly1minig3Shelly } from './mock/shelly1minig3.js';
 import { WsClient } from './wsClient.js';
 import { Shelly } from './shelly.js';
 import { ShellyData } from './shellyTypes.js';

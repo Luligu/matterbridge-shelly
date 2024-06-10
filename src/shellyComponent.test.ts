@@ -219,6 +219,12 @@ describe('ShellyComponent', () => {
     const component = new ShellyComponent(device, id, name);
     component.setValue('key', 'value');
     expect(component.getValue('key')).toBe('value');
+    component.setValue('key1', 'value3');
+    component.setValue('key2', false);
+    component.setValue('key3', 345);
+    component.setValue('key1', 'valuedd');
+    component.setValue('key2', true);
+    component.setValue('key3', 456);
     component.setValue('key', 'value1');
     expect(component.getValue('key')).toBe('value1');
   });

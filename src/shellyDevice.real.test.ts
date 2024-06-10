@@ -1,12 +1,12 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable no-console */
-import { ShellyDevice, ShellyComponent, ShellyProperty, ShellyDataType, ShellyData, ShellySwitchComponent, ShellyCoverComponent } from './shellyDevice.js';
-import { AnsiLogger, TimestampFormat, db, debugStringify, dn, hk, idn, nf, or, rs, wr, zb } from 'node-ansi-logger';
+import { Shelly } from './shelly.js';
+import { ShellyDevice } from './shellyDevice.js';
+import { ShellyCoverComponent, ShellySwitchComponent } from './shellyComponent';
+import { AnsiLogger, TimestampFormat } from 'node-ansi-logger';
 import { getIpv4InterfaceAddress } from 'matterbridge';
-import exp from 'constants';
 
 describe('Shellies', () => {
   const log = new AnsiLogger({ logName: 'shellyDeviceTest', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: true });
+  const shelly = new Shelly(log);
 
   beforeAll(() => {
     //
@@ -43,7 +43,7 @@ describe('Shellies', () => {
     if (getIpv4InterfaceAddress() !== '192.168.1.189') return;
 
     test('create a gen 1 device and update', async () => {
-      const device = await ShellyDevice.create(log, '192.168.1.219');
+      const device = await ShellyDevice.create(shelly, log, '192.168.1.219');
       if (!device) return;
       expect(device).not.toBeUndefined();
       expect(device?.gen).toBe(1);
@@ -73,7 +73,7 @@ describe('Shellies', () => {
     if (getIpv4InterfaceAddress() !== '192.168.1.189') return;
 
     test('create a gen 2 device and update', async () => {
-      const device = await ShellyDevice.create(log, '192.168.1.217');
+      const device = await ShellyDevice.create(shelly, log, '192.168.1.217');
       if (!device) return;
       expect(device).not.toBeUndefined();
       expect(device?.gen).toBe(2);
@@ -100,7 +100,7 @@ describe('Shellies', () => {
     });
 
     test('send command to a gen 2 device and update', async () => {
-      const device = await ShellyDevice.create(log, '192.168.1.217');
+      const device = await ShellyDevice.create(shelly, log, '192.168.1.217');
       expect(device).not.toBeUndefined();
       if (!device) return;
 
@@ -137,7 +137,7 @@ describe('Shellies', () => {
     });
 
     test('send rpc command to a gen 2 device', async () => {
-      const device = await ShellyDevice.create(log, '192.168.1.217');
+      const device = await ShellyDevice.create(shelly, log, '192.168.1.217');
       expect(device).not.toBeUndefined();
       if (!device) return;
 
@@ -160,7 +160,7 @@ describe('Shellies', () => {
     });
 
     test('send legacy command relay to a gen 2 device', async () => {
-      const device = await ShellyDevice.create(log, '192.168.1.217');
+      const device = await ShellyDevice.create(shelly, log, '192.168.1.217');
       expect(device).not.toBeUndefined();
       if (!device) return;
 
@@ -183,7 +183,7 @@ describe('Shellies', () => {
     });
 
     test('send legacy command roller to a gen 2 device', async () => {
-      const device = await ShellyDevice.create(log, '192.168.1.218');
+      const device = await ShellyDevice.create(shelly, log, '192.168.1.218');
       expect(device).not.toBeUndefined();
       if (!device) return;
 
@@ -212,7 +212,7 @@ describe('Shellies', () => {
     });
 
     test('execute On() Off() Toggle() for a gen 2 device', async () => {
-      const device = await ShellyDevice.create(log, '192.168.1.217');
+      const device = await ShellyDevice.create(shelly, log, '192.168.1.217');
       expect(device).not.toBeUndefined();
       if (!device) return;
 
@@ -232,7 +232,7 @@ describe('Shellies', () => {
     });
 
     test('execute Open() CLose() Stop() for a gen 2 device', async () => {
-      const device = await ShellyDevice.create(log, '192.168.1.218');
+      const device = await ShellyDevice.create(shelly, log, '192.168.1.218');
       expect(device).not.toBeUndefined();
       if (!device) return;
 
@@ -254,7 +254,7 @@ describe('Shellies', () => {
 
   describe('create real gen 2 shellyplus2pm 218', () => {
     test('send command to a gen 2 device and update', async () => {
-      const device = await ShellyDevice.create(log, '192.168.1.218');
+      const device = await ShellyDevice.create(shelly, log, '192.168.1.218');
       expect(device).not.toBeUndefined();
       if (!device) return;
       expect(device).not.toBeUndefined();
@@ -293,7 +293,7 @@ describe('Shellies', () => {
     });
 
     test('send wrong command to a gen 2 device and update', async () => {
-      const device = await ShellyDevice.create(log, '192.168.1.218');
+      const device = await ShellyDevice.create(shelly, log, '192.168.1.218');
       expect(device).not.toBeUndefined();
       if (!device) return;
       console.log('send wrong command to a gen 2 device and update');

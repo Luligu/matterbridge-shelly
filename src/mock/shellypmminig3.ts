@@ -1,82 +1,81 @@
-import { ShellyData } from './shellyTypes.js';
+import { ShellyData } from '../shellyTypes.js';
 
-// Sample output Gen 2 Shelly Plus 1PM for 192.168.1.217/shelly
-export const shellyplus1pmShelly: ShellyData = {
+// Sample output Gen 3 Shelly PM Mini for 192.168.1.220/shelly
+export const shellypmminig3Shelly: ShellyData = {
   'name': null,
-  'id': 'shellyplus1pm-441793d69718',
-  'mac': '441793D69718',
+  'id': 'shellypmminig3-84fce63957f4',
+  'mac': '84FCE63957F4',
   'slot': 0,
-  'model': 'SNSW-001P16EU',
-  'gen': 2,
-  'fw_id': '20240430-105751/1.3.1-gd8534ee',
+  'model': 'S3PM-001PCEU16',
+  'gen': 3,
+  'fw_id': '20240430-105737/1.3.1-gd8534ee',
   'ver': '1.3.1',
-  'app': 'Plus1PM',
+  'app': 'MiniPMG3',
   'auth_en': false,
   'auth_domain': null,
 };
 
-// Sample output Gen 2 Shelly Plus 2PM for 192.168.1.217/rpc/Shelly.GetStatus
-export const shellyplus1pmStatus: ShellyData = {
+// Sample output Gen 2 Shelly Plus 2PM for 192.168.1.220/rpc/Shelly.GetStatus
+export const shellypmminig3Status: ShellyData = {
   'ble': {},
+  'bthome': {
+    'errors': ['bluetooth_disabled'],
+  },
   'cloud': {
     'connected': true,
-  },
-  'input:0': {
-    'id': 0,
-    'state': null,
   },
   'mqtt': {
     'connected': false,
   },
-  'switch:0': {
+  'pm1:0': {
     'id': 0,
-    'source': 'HTTP_in',
-    'output': false,
-    'apower': 0,
-    'voltage': 239,
+    'voltage': 237.4,
     'current': 0,
+    'apower': 0,
+    'freq': 49.9,
     'aenergy': {
       'total': 0,
       'by_minute': [0, 0, 0],
-      'minute_ts': 1716299460,
+      'minute_ts': 1716240240,
     },
-    'temperature': {
-      'tC': 58.9,
-      'tF': 138,
+    'ret_aenergy': {
+      'total': 0,
+      'by_minute': [0, 0, 0],
+      'minute_ts': 1716240240,
     },
   },
   'sys': {
-    'mac': '441793D69718',
+    'mac': '84FCE63957F4',
     'restart_required': false,
-    'time': '15:51',
-    'unixtime': 1716299487,
-    'uptime': 98032,
-    'ram_size': 261512,
-    'ram_free': 118004,
-    'fs_size': 458752,
-    'fs_free': 139264,
-    'cfg_rev': 23,
+    'time': '23:24',
+    'unixtime': 1716240292,
+    'uptime': 37815,
+    'ram_size': 261624,
+    'ram_free': 152356,
+    'fs_size': 1048576,
+    'fs_free': 712704,
+    'cfg_rev': 12,
     'kvs_rev': 0,
-    'schedule_rev': 0,
+    'schedule_rev': 1,
     'webhook_rev': 0,
     'available_updates': {},
-    'reset_reason': 1,
+    'reset_reason': 3,
   },
   'wifi': {
-    'sta_ip': '192.168.1.217',
+    'sta_ip': '192.168.1.220',
     'status': 'got ip',
     'ssid': 'FibreBox_X6-12A4C7',
-    'rssi': -62,
+    'rssi': -52,
   },
   'ws': {
     'connected': false,
   },
 };
 
-// Sample output Gen 2 Shelly Plus 2PM for 192.168.1.217/rpc/Shelly.GetConfig
-export const shellyplus1pmSettings: ShellyData = {
+// Sample output Gen 2 Shelly Plus 2PM for 192.168.1.220/rpc/Shelly.GetConfig
+export const shellypmminig3Settings: ShellyData = {
   'ble': {
-    'enable': true,
+    'enable': false,
     'rpc': {
       'enable': true,
     },
@@ -84,53 +83,35 @@ export const shellyplus1pmSettings: ShellyData = {
       'enable': false,
     },
   },
+  'bthome': {},
   'cloud': {
     'enable': true,
     'server': 'shelly-103-eu.shelly.cloud:6022/jrpc',
   },
-  'input:0': {
-    'id': 0,
-    'name': null,
-    'type': 'button',
-    'enable': true,
-    'invert': false,
-    'factory_reset': true,
-  },
   'mqtt': {
     'enable': false,
     'server': null,
-    'client_id': 'shellyplus1pm-441793d69718',
+    'client_id': 'shellypmminig3-84fce63957f4',
     'user': null,
     'ssl_ca': null,
-    'topic_prefix': 'shellyplus1pm-441793d69718',
+    'topic_prefix': 'shellypmminig3-84fce63957f4',
     'rpc_ntf': true,
     'status_ntf': false,
     'use_client_cert': false,
     'enable_rpc': true,
     'enable_control': true,
   },
-  'switch:0': {
+  'pm1:0': {
     'id': 0,
-    'name': 'Power switch',
-    'in_mode': 'detached',
-    'initial_state': 'restore_last',
-    'auto_on': false,
-    'auto_on_delay': 60,
-    'auto_off': false,
-    'auto_off_delay': 60,
-    'power_limit': 4480,
-    'voltage_limit': 280,
-    'autorecover_voltage_errors': false,
-    'current_limit': 16,
+    'name': null,
   },
   'sys': {
     'device': {
-      'name': 'Plus1PM name',
-      'mac': '441793D69718',
-      'fw_id': '20240430-105751/1.3.1-gd8534ee',
+      'name': 'MiniPMG3',
+      'mac': '84FCE63957F4',
+      'fw_id': '20240430-105737/1.3.1-gd8534ee',
       'discoverable': true,
       'eco_mode': false,
-      'addon_type': null,
     },
     'location': {
       'tz': 'Europe/Monaco',
@@ -158,13 +139,13 @@ export const shellyplus1pmSettings: ShellyData = {
     'sntp': {
       'server': 'time.google.com',
     },
-    'cfg_rev': 23,
+    'cfg_rev': 12,
   },
   'wifi': {
     'ap': {
-      'ssid': 'ShellyPlus1PM-441793D69718',
+      'ssid': 'ShellyPMMiniG3-84FCE63957F4',
       'is_open': true,
-      'enable': true,
+      'enable': false,
       'range_extender': {
         'enable': false,
       },

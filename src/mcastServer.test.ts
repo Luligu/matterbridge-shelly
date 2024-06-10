@@ -8,11 +8,11 @@ describe('Muticast server and client test', () => {
   });
 
   beforeEach(() => {
-    // (fetch as jest.Mock).mockClear();
+    //
   });
 
   afterEach(() => {
-    // jest.clearAllMocks();
+    //
   });
 
   afterAll(() => {
@@ -48,23 +48,4 @@ describe('Muticast server and client test', () => {
     }
     mcast?.startDgramClient(callback);
   }, 60000);
-
-  // eslint-disable-next-line jest/no-commented-out-tests
-  /*
-  describe('Testing scanner', () => {
-    // eslint-disable-next-line jest/no-done-callback
-    test('Start scanner', (done) => {
-      function callback(message: CoapMessage) {
-        try {
-          expect(message.validFor).toBeGreaterThan(0);
-          done();
-        } catch (error) {
-          done(error);
-        }
-      }
-      coapServer?.start(callback, true);
-      // expect(coapServer?.isScanning).toBeTruthy();
-    }, 60000);
-  });
-  */
 });

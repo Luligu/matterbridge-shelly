@@ -1,9 +1,6 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-
 import { ShellyDevice } from './shellyDevice.js';
-import { AnsiLogger, TimestampFormat, db, debugStringify, dn, hk, idn, nf, or, rs, wr, zb } from 'node-ansi-logger';
-import { shellydimmer2Settings } from './shellydimmer2.js';
-import { getIpv4InterfaceAddress } from 'matterbridge';
+import { AnsiLogger, TimestampFormat } from 'node-ansi-logger';
+import { shellydimmer2Settings } from './mock/shellydimmer2.js';
 import { Shelly } from './shelly.js';
 import { ShellyComponent } from './shellyComponent.js';
 
@@ -16,11 +13,11 @@ describe('Shellies', () => {
   });
 
   beforeEach(() => {
-    // (fetch as jest.Mock).mockClear();
+    //
   });
 
   afterEach(() => {
-    // jest.clearAllMocks();
+    //
   });
 
   afterAll(() => {
@@ -201,6 +198,8 @@ describe('Shellies', () => {
       expect(cloud?.properties.length).toBeLessThan(3);
       if (cloud) {
         for (const [key, property] of cloud) {
+          // eslint-disable-next-line jest/no-conditional-expect
+          expect(key).toBe(property.key);
           // eslint-disable-next-line jest/no-conditional-expect
           expect(property.key).not.toBeUndefined();
         }

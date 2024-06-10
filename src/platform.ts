@@ -168,7 +168,10 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         } else if (component.name === 'Switch' || component.name === 'Relay') {
           const switchComponent = device.getComponent(key) as ShellySwitchComponent;
           if (switchComponent) {
-            const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [onOffSwitch], [OnOff.Cluster.id]);
+            let deviceType = onOffSwitch;
+            if (config.exposeSwitch === 'light') deviceType = DeviceTypes.ON_OFF_LIGHT;
+            if (config.exposeSwitch === 'outlet') deviceType = DeviceTypes.ON_OFF_PLUGIN_UNIT;
+            const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [deviceType], [OnOff.Cluster.id]);
             mbDevice.addFixedLabel('composed', component.name);
             switchComponent.logComponent();
             if (
@@ -254,10 +257,11 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               this.shellyUpdateHandler(mbDevice, device, component, property, value);
             });
           }
-        } else if (component.name === 'Input') {
+        } else if (component.name === 'Input' && config.exposeInput !== 'disabled') {
           const inputComponent = device.getComponent(key);
-          if (inputComponent) {
-            const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.CONTACT_SENSOR], []);
+          if (inputComponent && config.exposeInput === 'contact') {
+            const deviceType = config.exposeInput === 'contact' ? DeviceTypes.CONTACT_SENSOR : DeviceTypes.GENERIC_SWITCH;
+            const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [deviceType], []);
             mbDevice.addFixedLabel('composed', component.name);
             // Set the state attribute
             const state = inputComponent.getValue('state');

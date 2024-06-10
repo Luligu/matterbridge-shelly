@@ -1,4 +1,4 @@
-import { ShellyData } from './shellyTypes.js';
+import { ShellyData } from '../shellyTypes.js';
 
 // Sample output Gen 2 Shelly Plus 2PM for 192.168.1.218/shelly
 export const shellyplus2pmShelly: ShellyData = {

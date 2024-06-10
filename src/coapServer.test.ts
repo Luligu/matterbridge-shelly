@@ -4,15 +4,15 @@ describe('Coap scanner', () => {
   let coapServer: CoapServer | undefined = undefined;
 
   beforeAll(() => {
-    coapServer = new CoapServer();
+    coapServer = new CoapServer(true);
   });
 
   beforeEach(() => {
-    // (fetch as jest.Mock).mockClear();
+    //
   });
 
   afterEach(() => {
-    // jest.clearAllMocks();
+    //
   });
 
   afterAll(() => {
