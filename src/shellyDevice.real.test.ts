@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { Shelly } from './shelly.js';
 import { ShellyDevice } from './shellyDevice.js';
 import { ShellyCoverComponent, ShellySwitchComponent } from './shellyComponent';
