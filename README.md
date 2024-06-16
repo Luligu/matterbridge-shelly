@@ -121,7 +121,7 @@ Should be enabled only if the mdns is not working. It adds the devices defined i
 
 Should be enabled only if you want to debug some issue in the log.
 
-If any device creates issues put it in the blackList.
+### Config file
 
 These are the config values:
 
@@ -137,7 +137,7 @@ These are the config values:
     "<DEVICENAME1>": x.x.x.x,
     "<DEVICENAME2>": x.x.x.x
   }
-  "enableMdnsDiscover": false,
+  "enableMdnsDiscover": true,
   "enableStorageDiscover": true,
   "enableConfigDiscover": false,
   "debug": false

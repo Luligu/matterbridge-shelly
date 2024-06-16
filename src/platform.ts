@@ -240,7 +240,6 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             mbDevice.addChildDeviceTypeWithClusterServer('electricalSensor', [electricalSensor], [ElectricalPowerMeasurement.Cluster.id, ElectricalEnergyMeasurement.Cluster.id]);
             // Add the custom EveHistory cluster for HA
             ClusterRegistry.register(EveHistory.Complete);
-            // const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.ON_OFF_PLUGIN_UNIT], [OnOff.Complete.id, EveHistory.Cluster.id]);
             const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [powerSource], [EveHistory.Cluster.id]);
             // Set the electrical attributes
             const voltage = pmComponent.getValue('voltage');
