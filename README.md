@@ -91,13 +91,21 @@ Is only used for gen 1 devices. Gen 2 and 3 devices have always admin.
 
 If your devices are password protected put there the password. It must be unique for all the devices.
 
-### whiteList
+### exposeSwitch
 
-If the whiteList is defined only the devices included in the list are exposed to Matter. Use the device id (e.g. shellyplus2pm-5443b23d81f8).
+Choose how to expose the shelly switches: as a switch, light or outlet.
+
+### exposeInput
+
+Choose how to expose the shelly inputs: disabled, contact or momentary switch
 
 ### blackList
 
 If the blackList is defined the devices included in the list will not be exposed to Matter. Use the device id (e.g. shellyplus2pm-5443b23d81f8)
+
+### whiteList
+
+If the whiteList is defined only the devices included in the list are exposed to Matter. Use the device id (e.g. shellyplus2pm-5443b23d81f8).
 
 ### deviceIp
 
@@ -131,16 +139,18 @@ These are the config values:
   "type": "DynamicPlatform",
   "username": "<USERNAME>",
   "password": "<PASSWORD>",
+  "exposeSwitch": "switch" | "light" | "outlet"
+  "exposeInput": "disabled" | "contact" | "momentary"
   "blackList": [],
   "whiteList": [],
   "deviceIp": {
-    "<DEVICENAME1>": x.x.x.x,
-    "<DEVICENAME2>": x.x.x.x
-  }
+    "<DEVICEID1>": "x.x.x.x",
+    "<DEVICEID2>": "x.x.x.x"
+  },
   "enableMdnsDiscover": true,
   "enableStorageDiscover": true,
   "enableConfigDiscover": false,
-  "debug": false
+  "debug": false,
   "unregisterOnShutdown": false,
 }
 ```
