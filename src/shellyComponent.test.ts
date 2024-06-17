@@ -5,6 +5,7 @@ import { ShellyProperty } from './shellyProperty';
 import { ShellyData } from './shellyTypes';
 import { Shelly } from './shelly';
 import { jest } from '@jest/globals';
+import path from 'path';
 
 describe('ShellyComponent', () => {
   const log = new AnsiLogger({ logName: 'shellyComponentTest', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: true });
@@ -17,8 +18,8 @@ describe('ShellyComponent', () => {
   let data: ShellyData;
 
   beforeAll(async () => {
-    const mockDevice = await ShellyDevice.create(shelly, log, 'mock.192.168.1.219');
-    const mockDevice2 = await ShellyDevice.create(shelly, log, 'mock.192.168.1.217');
+    const mockDevice = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shellydimmer2-98CDAC0D01BB.json'));
+    const mockDevice2 = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shellyplus1pm-441793d69718.json'));
     if (mockDevice) device = mockDevice;
     if (mockDevice2) device2 = mockDevice2;
   });

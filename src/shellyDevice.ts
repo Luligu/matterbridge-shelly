@@ -1,4 +1,4 @@
-import { AnsiLogger, BLUE, CYAN, GREEN, GREY, MAGENTA, RED, RESET, TimestampFormat, db, debugStringify, er, hk, idn, nf, rs, wr, zb } from 'node-ansi-logger';
+import { AnsiLogger, BLUE, CYAN, GREEN, GREY, MAGENTA, RED, RESET, db, debugStringify, er, hk, nf, wr, zb } from 'node-ansi-logger';
 import { EventEmitter } from 'events';
 import fetch, { RequestInit } from 'node-fetch';
 import { getIpv4InterfaceAddress } from 'matterbridge';
@@ -471,6 +471,7 @@ export class ShellyDevice extends EventEmitter {
   }
 }
 
+/*
 // node dist/shellyDevice.js startShelly debug
 if (process.argv.includes('startShelly')) {
   const log = new AnsiLogger({ logName: 'shellyDevice', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: process.argv.includes('debug') ? true : false });
@@ -512,7 +513,8 @@ if (process.argv.includes('startShellyMock')) {
     { host: 'shelly1pmminig3-543204519264.json', desc: 'shelly1pmminig3' },
     { host: 'shellydimmer2-98CDAC0D01BB.json', desc: 'shellydimmer2' },
     { host: 'shellyplus1pm-441793d69718.json', desc: 'shellyplus1pm' },
-    { host: 'shellyplus2pm-5443b23d81f8.json', desc: 'shellyplus2pm' },
+    { host: 'shellyplus2pm-5443b23d81f8.roller.json', desc: 'shellyplus2pm' },
+    { host: 'shellyplus2pm-5443b23d81f8.switch.json', desc: 'shellyplus2pm' },
     { host: 'shellyplusi4-cc7b5c8aea2c.json', desc: 'shellyplusi4' },
     { host: 'shellypmminig3-84fce63957f4.json', desc: 'shellypmminig3' },
     { host: 'shellyswitch25-3494546BBF7E.json', desc: 'shellyswitch25' },
@@ -535,3 +537,4 @@ if (process.argv.includes('startShellyMock')) {
     // process.exit();
   });
 }
+*/

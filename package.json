@@ -1,6 +1,6 @@
 {
   "name": "matterbridge-shelly",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Matterbridge shelly plugin",
   "author": "https://github.com/Luligu",
   "license": "Apache-2.0",
@@ -46,6 +46,7 @@
     "start:shellyDevice": "node dist/shellyDevice.js startShelly",
     "start:shelly": "node dist/shelly.js shelly",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "test:auth": "node --experimental-vm-modules node_modules/jest/bin/jest.js src/auth.test.ts --coverage",
     "test:mdns": "node --experimental-vm-modules node_modules/jest/bin/jest.js src/mdnsScanner.test.ts --coverage",
     "test:coap": "node --experimental-vm-modules node_modules/jest/bin/jest.js src/coapServer.test.ts --coverage",
     "test:mcast": "node --experimental-vm-modules node_modules/jest/bin/jest.js src/mcastServer.test.ts --coverage",

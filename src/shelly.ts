@@ -1,9 +1,8 @@
 import EventEmitter from 'events';
 import { ShellyDevice } from './shellyDevice.js';
-import { AnsiLogger, CYAN, MAGENTA, BRIGHT, hk, db, TimestampFormat, nf, wr, zb } from 'node-ansi-logger';
+import { AnsiLogger, CYAN, MAGENTA, BRIGHT, hk, db, nf, wr, zb } from 'node-ansi-logger';
 import { DiscoveredDevice, MdnsScanner } from './mdnsScanner.js';
 import { CoapServer } from './coapServer.js';
-import { logInterfaces } from 'matterbridge';
 
 export class Shelly extends EventEmitter {
   private readonly _devices = new Map<string, ShellyDevice>();
@@ -85,7 +84,7 @@ export class Shelly extends EventEmitter {
       return this;
     }
     this._devices.set(device.id, device);
-    if (device.gen === 1) {
+    if (device.gen === 1 && !device.host.endsWith('.json')) {
       await this.coapServer?.registerDevice(device.host);
       this.startCoap(10, this.debug);
     }
@@ -134,6 +133,7 @@ export class Shelly extends EventEmitter {
   }
 }
 
+/*
 if (process.argv.includes('shelly')) {
   logInterfaces();
   const debug = false;
@@ -160,3 +160,4 @@ if (process.argv.includes('shelly')) {
     // process.exit();
   });
 }
+*/

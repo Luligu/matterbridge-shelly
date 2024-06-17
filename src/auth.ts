@@ -1,5 +1,9 @@
 import crypto from 'crypto';
-import fetch from 'node-fetch';
+/*
+import { AnsiLogger, TimestampFormat, db, idn, rs, zb } from 'node-ansi-logger';
+import { Shelly } from './shelly.js';
+import { ShellyDevice } from './shellyDevice.js';
+*/
 
 export interface AuthParams {
   realm: string; // device_id
@@ -60,38 +64,35 @@ export function getGen2BodyOptions(jsonrpc: string, id: number, src: string, met
   return JSON.stringify(body);
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-async function makeRpcCall(url: string, method: string, params: object) {
-  const options = {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: '',
-  };
+/*
+// node dist/auth.js startAuth debug
+if (process.argv.includes('startAuth')) {
+  const log = new AnsiLogger({ logName: 'shellyDevice', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: process.argv.includes('debug') ? true : false });
+  const shelly = new Shelly(log, 'admin', 'tango', process.argv.includes('debug') ? true : false);
 
-  const payload = {
-    id: 0,
-    method, // 'Switch.Toggle',
-    params, // { id: 0 },
-  };
+  const myRealDevices: { host: string; desc: string }[] = [
+    { host: '192.168.1.219', desc: 'Gen 1 Shelly Dimmer 2' },
+    { host: '192.168.1.222', desc: 'Gen 1 Shelly Switch 2.5' },
+    { host: '192.168.1.217', desc: 'Gen 2 Shelly Plus 1 PM' },
+    { host: '192.168.1.218', desc: 'Gen 2 Shelly Plus 2 PM' },
+    { host: '192.168.1.220', desc: 'Gen 3 Shelly PM mini' },
+    { host: '192.168.1.221', desc: 'Gen 3 Shelly 1 mini' },
+    { host: '192.168.1.224', desc: 'Gen 2 Shelly i4' },
+    { host: '192.168.1.225', desc: 'Gen 3 Shelly 1PM mini' },
+  ];
 
-  options.body = JSON.stringify(payload);
-
-  try {
-    const response = await fetch(url, options);
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+  for (const device of myRealDevices) {
+    log.info(`Creating Shelly device ${idn}${device.desc}${rs}${db} host ${zb}${device.host}${db}`);
+    const shellyDevice = await ShellyDevice.create(shelly, log, device.host);
+    if (shellyDevice) {
+      shellyDevice.logDevice();
+      shellyDevice.destroy();
     }
-
-    const data = await response.json();
-    // eslint-disable-next-line no-console
-    console.log('Response:', data);
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('Error:', error);
   }
-}
 
-// makeRpcCall('http://192.168.1.217/rpc', 'Switch.Toggle', { id: 0 });
+  process.on('SIGINT', function () {
+    shelly.destroy();
+    // process.exit();
+  });
+}
+*/

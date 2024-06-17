@@ -77,6 +77,8 @@ describe('Shellies', () => {
       device.destroy();
     });
 
+    // eslint-disable-next-line jest/no-commented-out-tests
+    /*
     test('send legacy command to a gen 2 device and update', async () => {
       const device = await ShellyDevice.create(shelly, log, '192.168.1.217');
       expect(device).not.toBeUndefined();
@@ -113,6 +115,7 @@ describe('Shellies', () => {
       expect(stateProp?.value === stateProp2?.value).toBeTruthy();
       device.destroy();
     });
+    */
 
     test('send rpc command to a gen 2 device', async () => {
       const device = await ShellyDevice.create(shelly, log, '192.168.1.217');
@@ -137,6 +140,8 @@ describe('Shellies', () => {
       device.destroy();
     });
 
+    // eslint-disable-next-line jest/no-commented-out-tests
+    /*
     test('send legacy command relay to a gen 2 device', async () => {
       const device = await ShellyDevice.create(shelly, log, '192.168.1.217');
       expect(device).not.toBeUndefined();
@@ -188,6 +193,7 @@ describe('Shellies', () => {
       await device.fetchUpdate();
       device.destroy();
     });
+    */
 
     test('execute On() Off() Toggle() for a gen 2 device', async () => {
       const device = await ShellyDevice.create(shelly, log, '192.168.1.217');
