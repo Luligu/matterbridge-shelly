@@ -67,7 +67,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     if (config.whiteList) this.whiteList = config.whiteList as string[];
     if (config.blackList) this.blackList = config.blackList as string[];
 
-    log.info(`Initializing platform: ${idn}${this.config.name}${rs}`);
+    log.info(`Initializing platform: ${idn}${this.config.name}${rs}${nf} v ${CYAN}${this.version}`);
     log.info(`- username: ${CYAN}${config.username}`);
     log.info(`- password: ${CYAN}${config.password}`);
     log.info(`- mdnsDiscover: ${CYAN}${config.enableMdnsDiscover}`);
@@ -378,6 +378,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       return;
     }
     log.setLogName(device.name ?? device.id);
+    await device.saveDevicePayloads(path.join(this.matterbridge.matterbridgePluginDirectory, 'matterbridge-shelly'));
     await this.shelly.addDevice(device);
     this.shellyDevices.set(device.id, device);
   }

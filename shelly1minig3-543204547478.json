@@ -1,0 +1,190 @@
+{
+  "shelly": {
+    "name": "My mini switch 1 ch gen 3",
+    "id": "shelly1minig3-543204547478",
+    "mac": "543204547478",
+    "slot": 0,
+    "model": "S3SW-001X8EU",
+    "gen": 3,
+    "fw_id": "20240522-112834/1.3.2-g34c651b",
+    "ver": "1.3.2",
+    "app": "Mini1G3",
+    "auth_en": true,
+    "auth_domain": "shelly1minig3-543204547478"
+  },
+  "status": {
+    "ble": {},
+    "bthome": {
+      "errors": [
+        "bluetooth_disabled"
+      ]
+    },
+    "cloud": {
+      "connected": true
+    },
+    "input:0": {
+      "id": 0,
+      "state": null
+    },
+    "mqtt": {
+      "connected": false
+    },
+    "switch:0": {
+      "id": 0,
+      "source": "init",
+      "output": false,
+      "temperature": {
+        "tC": 56.9,
+        "tF": 134.5
+      }
+    },
+    "sys": {
+      "mac": "543204547478",
+      "restart_required": false,
+      "time": "09:21",
+      "unixtime": 1718608889,
+      "uptime": 121821,
+      "ram_size": 260808,
+      "ram_free": 151320,
+      "fs_size": 1048576,
+      "fs_free": 708608,
+      "cfg_rev": 21,
+      "kvs_rev": 8,
+      "schedule_rev": 0,
+      "webhook_rev": 0,
+      "available_updates": {},
+      "reset_reason": 1
+    },
+    "wifi": {
+      "sta_ip": "192.168.1.221",
+      "status": "got ip",
+      "ssid": "FibreBox_X6-12A4C7",
+      "rssi": -61
+    },
+    "ws": {
+      "connected": false
+    }
+  },
+  "settings": {
+    "ble": {
+      "enable": false,
+      "rpc": {
+        "enable": true
+      },
+      "observer": {
+        "enable": false
+      }
+    },
+    "bthome": {},
+    "cloud": {
+      "enable": true,
+      "server": "shelly-103-eu.shelly.cloud:6022/jrpc"
+    },
+    "input:0": {
+      "id": 0,
+      "name": null,
+      "type": "button",
+      "enable": true,
+      "invert": false,
+      "factory_reset": true
+    },
+    "mqtt": {
+      "enable": false,
+      "server": null,
+      "client_id": "shelly1minig3-543204547478",
+      "user": null,
+      "ssl_ca": null,
+      "topic_prefix": "shelly1minig3-543204547478",
+      "rpc_ntf": true,
+      "status_ntf": false,
+      "use_client_cert": false,
+      "enable_rpc": true,
+      "enable_control": true
+    },
+    "switch:0": {
+      "id": 0,
+      "name": null,
+      "in_mode": "momentary",
+      "initial_state": "restore_last",
+      "auto_on": false,
+      "auto_on_delay": 60,
+      "auto_off": false,
+      "auto_off_delay": 60
+    },
+    "sys": {
+      "device": {
+        "name": "My mini switch 1 ch gen 3",
+        "mac": "543204547478",
+        "fw_id": "20240522-112834/1.3.2-g34c651b",
+        "discoverable": true,
+        "eco_mode": false
+      },
+      "location": {
+        "tz": "Europe/Monaco",
+        "lat": 43.7314,
+        "lon": 7.419
+      },
+      "debug": {
+        "level": 2,
+        "file_level": null,
+        "mqtt": {
+          "enable": false
+        },
+        "websocket": {
+          "enable": false
+        },
+        "udp": {
+          "addr": null
+        }
+      },
+      "ui_data": {},
+      "rpc_udp": {
+        "dst_addr": null,
+        "listen_port": null
+      },
+      "sntp": {
+        "server": "time.google.com"
+      },
+      "cfg_rev": 21
+    },
+    "wifi": {
+      "ap": {
+        "ssid": "Shelly1MiniG3-543204547478",
+        "is_open": true,
+        "enable": false,
+        "range_extender": {
+          "enable": false
+        }
+      },
+      "sta": {
+        "ssid": "FibreBox_X6-12A4C7",
+        "is_open": false,
+        "enable": true,
+        "ipv4mode": "dhcp",
+        "ip": null,
+        "netmask": null,
+        "gw": null,
+        "nameserver": null
+      },
+      "sta1": {
+        "ssid": null,
+        "is_open": true,
+        "enable": false,
+        "ipv4mode": "dhcp",
+        "ip": null,
+        "netmask": null,
+        "gw": null,
+        "nameserver": null
+      },
+      "roam": {
+        "rssi_thr": -80,
+        "interval": 60
+      }
+    },
+    "ws": {
+      "enable": false,
+      "server": null,
+      "ssl_ca": "ca.pem"
+    }
+  }
+}

@@ -3,6 +3,9 @@ import { EventEmitter } from 'events';
 import fetch, { RequestInit } from 'node-fetch';
 import { getIpv4InterfaceAddress } from 'matterbridge';
 import crypto from 'crypto';
+import { promises as fs } from 'fs';
+import path from 'path';
+
 import { parseDigestAuthenticateHeader, createDigestShellyAuth, createBasicShellyAuth, parseBasicAuthenticateHeader, getGen2BodyOptions, getGen1BodyOptions } from './auth.js';
 
 import { shellydimmer2Settings, shellydimmer2Shelly, shellydimmer2Status } from './mock/shellydimmer2.js';
@@ -37,6 +40,10 @@ export class ShellyDevice extends EventEmitter {
   private wsClient: WsClient | undefined;
 
   private readonly _components = new Map<string, ShellyComponent>();
+
+  private shellyPayload: ShellyData | null = null;
+  private statusPayload: ShellyData | null = null;
+  private settingsPayload: ShellyData | null = null;
 
   private constructor(shelly: Shelly, log: AnsiLogger, host: string) {
     super();
@@ -247,7 +254,33 @@ export class ShellyDevice extends EventEmitter {
       });
     }
 
+    device.shellyPayload = shellyPayload;
+    device.statusPayload = statusPayload;
+    device.settingsPayload = settingsPayload;
     return device;
+  }
+
+  async saveDevicePayloads(dataPath: string) {
+    // Save the device in the Matterbridge
+    this.log.debug(`Saving device payloads for ${hk}${this.id}${db} host ${zb}${this.host}${db}`);
+    if (this.shellyPayload && this.statusPayload && this.settingsPayload) {
+      try {
+        await fs.mkdir(dataPath, { recursive: true });
+        this.log.debug(`Successfully created directory ${dataPath}`);
+
+        const deviceData = {
+          shelly: this.shellyPayload,
+          settings: this.settingsPayload,
+          status: this.statusPayload,
+        };
+        const data = JSON.stringify(deviceData, null, 2);
+        await fs.writeFile(path.join(dataPath, `${this.id}.json`), data, 'utf8');
+        this.log.debug(`Successfully wrote to ${path.join(dataPath, `${this.id}.json`)}`);
+      } catch (error) {
+        this.log.error(`Error saving device payloads in the directory ${dataPath} file ${path.join(dataPath, `${this.id}.json`)}:`, error);
+        return;
+      }
+    }
   }
 
   update(data: ShellyData) {
