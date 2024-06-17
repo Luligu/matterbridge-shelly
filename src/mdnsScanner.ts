@@ -149,6 +149,7 @@ export class MdnsScanner extends EventEmitter {
   }
 }
 
+/*
 if (process.argv.includes('mdnsScanner')) {
   const mdnsScanner = new MdnsScanner();
   mdnsScanner.start(undefined, true);
@@ -158,3 +159,4 @@ if (process.argv.includes('mdnsScanner')) {
     // process.exit();
   });
 }
+*/

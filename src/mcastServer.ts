@@ -104,6 +104,7 @@ export class Multicast {
   }
 }
 
+/*
 if (process.argv.includes('mcastServer') || process.argv.includes('mcastClient')) {
   const mcast = new Multicast();
 
@@ -116,3 +117,4 @@ if (process.argv.includes('mcastServer') || process.argv.includes('mcastClient')
     process.exit();
   });
 }
+*/

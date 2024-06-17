@@ -263,6 +263,7 @@ export class CoapServer extends EventEmitter {
       const desc: CoIoTDescription[] = [];
       this.log.debug(`parsing ${MAGENTA}blocks${db}:`);
       const blk: CoIoTBlkComponent[] = payload.blk;
+      // TODO here once crashed...
       blk.forEach((b) => {
         this.log.debug(`- block: ${CYAN}${b.I}${db} description ${CYAN}${b.D}${db}`);
         const sen: CoIoTSenProperty[] = payload.sen;
@@ -384,6 +385,7 @@ export class CoapServer extends EventEmitter {
   }
 }
 
+/*
 if (process.argv.includes('coapServer') || process.argv.includes('coapDescription') || process.argv.includes('coapStatus') || process.argv.includes('coapMcast')) {
   const coapServer = new CoapServer(true);
 
@@ -407,3 +409,4 @@ if (process.argv.includes('coapServer') || process.argv.includes('coapDescriptio
     // process.exit();
   });
 }
+*/

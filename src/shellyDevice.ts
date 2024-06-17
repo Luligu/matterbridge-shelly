@@ -8,11 +8,6 @@ import path from 'path';
 
 import { parseDigestAuthenticateHeader, createDigestShellyAuth, createBasicShellyAuth, parseBasicAuthenticateHeader, getGen2BodyOptions, getGen1BodyOptions } from './auth.js';
 
-import { shellydimmer2Settings, shellydimmer2Shelly, shellydimmer2Status } from './mock/shellydimmer2.js';
-import { shellyplus2pmSettings, shellyplus2pmShelly, shellyplus2pmStatus } from './mock/shellyplus2pm.js';
-import { shellyplus1pmSettings, shellyplus1pmShelly, shellyplus1pmStatus } from './mock/shellyplus1pm.js';
-import { shellypmminig3Settings, shellypmminig3Shelly, shellypmminig3Status } from './mock/shellypmminig3.js';
-import { shelly1minig3Settings, shelly1minig3Status, shelly1minig3Shelly } from './mock/shelly1minig3.js';
 import { WsClient } from './wsClient.js';
 import { Shelly } from './shelly.js';
 import { ShellyData } from './shellyTypes.js';
@@ -36,6 +31,7 @@ export class ShellyDevice extends EventEmitter {
   lastseen = 0;
   hasUpdate = false;
   private lastseenInterval?: NodeJS.Timeout;
+  private startWsClientTimeout?: NodeJS.Timeout;
 
   private wsClient: WsClient | undefined;
 
@@ -58,6 +54,8 @@ export class ShellyDevice extends EventEmitter {
     if (this.lastseenInterval) clearInterval(this.lastseenInterval);
     this.lastseenInterval = undefined;
     this.lastseen = 0;
+    if (this.startWsClientTimeout) clearTimeout(this.startWsClientTimeout);
+    this.startWsClientTimeout = undefined;
     this.wsClient?.stop();
     this.removeAllListeners();
   }
@@ -243,7 +241,7 @@ export class ShellyDevice extends EventEmitter {
     // Start WebSocket client for gen 2 and 3 devices
     if (device.gen === 2 || device.gen === 3) {
       device.wsClient = new WsClient(host, 'tango');
-      setTimeout(() => {
+      device.startWsClientTimeout = setTimeout(() => {
         device.wsClient?.start(shelly.debug);
       }, 10 * 1000);
 
@@ -258,29 +256,6 @@ export class ShellyDevice extends EventEmitter {
     device.statusPayload = statusPayload;
     device.settingsPayload = settingsPayload;
     return device;
-  }
-
-  async saveDevicePayloads(dataPath: string) {
-    // Save the device in the Matterbridge
-    this.log.debug(`Saving device payloads for ${hk}${this.id}${db} host ${zb}${this.host}${db}`);
-    if (this.shellyPayload && this.statusPayload && this.settingsPayload) {
-      try {
-        await fs.mkdir(dataPath, { recursive: true });
-        this.log.debug(`Successfully created directory ${dataPath}`);
-
-        const deviceData = {
-          shelly: this.shellyPayload,
-          settings: this.settingsPayload,
-          status: this.statusPayload,
-        };
-        const data = JSON.stringify(deviceData, null, 2);
-        await fs.writeFile(path.join(dataPath, `${this.id}.json`), data, 'utf8');
-        this.log.debug(`Successfully wrote to ${path.join(dataPath, `${this.id}.json`)}`);
-      } catch (error) {
-        this.log.error(`Error saving device payloads in the directory ${dataPath} file ${path.join(dataPath, `${this.id}.json`)}:`, error);
-        return;
-      }
-    }
   }
 
   update(data: ShellyData) {
@@ -377,31 +352,24 @@ export class ShellyDevice extends EventEmitter {
 
   // await ShellyDevice.fetch('192.168.1.217', 'rpc/Switch.Toggle', { id: 0 });
   static async fetch(log: AnsiLogger, host: string, service: string, params: Record<string, string | number | boolean> = {}): Promise<ShellyData | null> {
-    if (host === 'mock.192.168.1.217') {
-      if (service === 'shelly') return shellyplus1pmShelly;
-      if (service === 'Shelly.GetStatus') return shellyplus1pmStatus;
-      if (service === 'Shelly.GetConfig') return shellyplus1pmSettings;
+    // MOCK: Fetch device data from file if host is a json file
+    if (host.endsWith('.json')) {
+      log.warn(`Fetching device payloads from file ${host}: service ${service} params ${JSON.stringify(params)}`);
+      try {
+        const data = await fs.readFile(host, 'utf8');
+        const deviceData = JSON.parse(data);
+        if (service === 'shelly') return deviceData.shelly;
+        if (service === 'status') return deviceData.status;
+        if (service === 'settings') return deviceData.settings;
+        if (service === 'Shelly.GetStatus') return deviceData.status;
+        if (service === 'Shelly.GetConfig') return deviceData.settings;
+        log.error(`Error fetching device payloads from file ${host}: no service found`);
+      } catch (error) {
+        log.error(`Error reading device payloads from file ${host}:`, error);
+        return null;
+      }
     }
-    if (host === 'mock.192.168.1.218') {
-      if (service === 'shelly') return shellyplus2pmShelly;
-      if (service === 'Shelly.GetStatus') return shellyplus2pmStatus;
-      if (service === 'Shelly.GetConfig') return shellyplus2pmSettings;
-    }
-    if (host === 'mock.192.168.1.219') {
-      if (service === 'shelly') return shellydimmer2Shelly;
-      if (service === 'status') return shellydimmer2Status;
-      if (service === 'settings') return shellydimmer2Settings;
-    }
-    if (host === 'mock.192.168.1.220') {
-      if (service === 'shelly') return shellypmminig3Shelly;
-      if (service === 'Shelly.GetStatus') return shellypmminig3Status;
-      if (service === 'Shelly.GetConfig') return shellypmminig3Settings;
-    }
-    if (host === 'mock.192.168.1.221') {
-      if (service === 'shelly') return shelly1minig3Shelly;
-      if (service === 'Shelly.GetStatus') return shelly1minig3Status;
-      if (service === 'Shelly.GetConfig') return shelly1minig3Settings;
-    }
+
     const gen = /^[^A-Z]*$/.test(service) ? 1 : 2;
     const url = gen === 1 ? `http://${host}/${service}` : `http://${host}/rpc`;
     try {
@@ -479,20 +447,41 @@ export class ShellyDevice extends EventEmitter {
       }
     }
   }
+
+  async saveDevicePayloads(dataPath: string) {
+    this.log.debug(`Saving device payloads for ${hk}${this.id}${db} host ${zb}${this.host}${db}`);
+    if (this.shellyPayload && this.statusPayload && this.settingsPayload) {
+      try {
+        await fs.mkdir(dataPath, { recursive: true });
+        this.log.debug(`Successfully created directory ${dataPath}`);
+
+        const deviceData = {
+          shelly: this.shellyPayload,
+          settings: this.settingsPayload,
+          status: this.statusPayload,
+        };
+        const data = JSON.stringify(deviceData, null, 2);
+        await fs.writeFile(path.join(dataPath, `${this.id}.json`), data, 'utf8');
+        this.log.debug(`Successfully wrote to ${path.join(dataPath, `${this.id}.json`)}`);
+      } catch (error) {
+        this.log.error(`Error saving device payloads in the directory ${dataPath} file ${path.join(dataPath, `${this.id}.json`)}:`, error);
+        return;
+      }
+    }
+  }
 }
 
+// node dist/shellyDevice.js startShelly debug
 if (process.argv.includes('startShelly')) {
-  const log = new AnsiLogger({ logName: 'shellyDevice', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: true });
+  const log = new AnsiLogger({ logName: 'shellyDevice', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: process.argv.includes('debug') ? true : false });
   const shelly = new Shelly(log, 'admin', 'tango');
 
   const myRealDevices: { host: string; desc: string }[] = [
-    /*
     { host: '192.168.1.219', desc: 'Gen 1 Shelly Dimmer 2' },
     { host: '192.168.1.222', desc: 'Gen 1 Shelly Switch 2.5' },
     { host: '192.168.1.217', desc: 'Gen 2 Shelly Plus 1 PM' },
     { host: '192.168.1.218', desc: 'Gen 2 Shelly Plus 2 PM' },
     { host: '192.168.1.220', desc: 'Gen 3 Shelly PM mini' },
-    */
     { host: '192.168.1.221', desc: 'Gen 3 Shelly 1 mini' },
     { host: '192.168.1.224', desc: 'Gen 2 Shelly i4' },
     { host: '192.168.1.225', desc: 'Gen 3 Shelly 1PM mini' },
@@ -506,73 +495,43 @@ if (process.argv.includes('startShelly')) {
       shellyDevice.destroy();
     }
   }
-  /*
-  // Gen 1 devices
-  await ShellyDevice.fetch(log, '192.168.1.219', 'shelly'); // Password protected
-  await ShellyDevice.fetch(log, '192.168.1.219', 'light/0', { turn: 'toggle' }); // Password protected
-
-  await ShellyDevice.fetch(log, '192.168.1.222', 'shelly'); // No auth required
-  await ShellyDevice.fetch(log, '192.168.1.222', 'relay/0', { turn: 'toggle' }); // No auth required
-
-  // Gen 2 devices
-  await ShellyDevice.fetch(log, '192.168.1.221', 'shelly'); // // Password protected but no auth required for shelly
-  await ShellyDevice.fetch(log, '192.168.1.221', 'Switch.Toggle', { id: 0 }); // Password protected
-  await ShellyDevice.fetch(log, '192.168.1.221', 'Switch.Set', { id: 0, on: true }); // Password protected
-  await ShellyDevice.fetch(log, '192.168.1.221', 'Switch.Set', { id: 0, on: false }); // Password protected
-  await ShellyDevice.fetch(log, '192.168.1.221', 'Shelly.GetStatus'); // Password protected
-
-  await ShellyDevice.fetch(log, '192.168.1.217', 'shelly'); // No auth required for shelly
-  await ShellyDevice.fetch(log, '192.168.1.217', 'Switch.Toggle', { id: 0 }); // No auth required
-  await ShellyDevice.fetch(log, '192.168.1.217', 'Switch.Set', { id: 0, on: true }); // Password protected
-  await ShellyDevice.fetch(log, '192.168.1.217', 'Switch.Set', { id: 0, on: false }); // Password protected
-  await ShellyDevice.fetch(log, '192.168.1.217', 'Shelly.GetStatus'); // No auth required
-  */
-
-  /*
-  const device = await ShellyDevice.create(shelly, log, '192.168.1.217');
-  if (device) device.logDevice();
-
-  const switchComponent = device?.getComponent('switch:0');
-  switchComponent?.logComponent();
-  device?.update({ 'switch:0': { output: true }, 'switch:1': { output: false } });
-  switchComponent?.logComponent();
-  await device?.fetchUpdate();
-  // console.log(shelly);
-  */
-
-  /*
-  shelly = await ShellyDevice.create(log, '192.168.1.218');
-  if (shelly) shelly.logDevice();
-  if (shelly) {
-    const component = shelly.getComponent('switch:0');
-    await component?.fetchUpdate();
-    component?.logComponent();
-  }
-  if (shelly) {
-    const component = shelly.getComponent('switch:1');
-    await component?.fetchUpdate();
-    component?.logComponent();
-  }
-
-  shelly = await ShellyDevice.create(log, '192.168.1.219');
-  if (shelly) shelly.logDevice();
-  if (shelly) {
-    const component = shelly.getComponent('light:0');
-    await component?.fetchUpdate();
-    component?.logComponent();
-  }
-
-  shelly = await ShellyDevice.create(log, '192.168.1.220');
-  if (shelly) shelly.logDevice();
-
-  shelly = await ShellyDevice.create(log, '192.168.1.221');
-  if (shelly) shelly.logDevice();
-*/
 
   process.on('SIGINT', function () {
-    // device?.destroy();
     shelly.destroy();
-    process.exit();
+    // process.exit();
   });
-  // await ShellyDevice.sendCommand('192.168.1.219', 'light', 0, 'turn=on');
+}
+
+// node dist/shellyDevice.js startShellyMock debug
+if (process.argv.includes('startShellyMock')) {
+  const log = new AnsiLogger({ logName: 'shellyDevice', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: process.argv.includes('debug') ? true : false });
+  const shelly = new Shelly(log, 'admin', 'tango');
+
+  const myMockedDevices: { host: string; desc: string }[] = [
+    { host: 'shelly1minig3-543204547478.json', desc: 'shelly1minig3' },
+    { host: 'shelly1pmminig3-543204519264.json', desc: 'shelly1pmminig3' },
+    { host: 'shellydimmer2-98CDAC0D01BB.json', desc: 'shellydimmer2' },
+    { host: 'shellyplus1pm-441793d69718.json', desc: 'shellyplus1pm' },
+    { host: 'shellyplus2pm-5443b23d81f8.json', desc: 'shellyplus2pm' },
+    { host: 'shellyplusi4-cc7b5c8aea2c.json', desc: 'shellyplusi4' },
+    { host: 'shellypmminig3-84fce63957f4.json', desc: 'shellypmminig3' },
+    { host: 'shellyswitch25-3494546BBF7E.json', desc: 'shellyswitch25' },
+  ];
+
+  for (const device of myMockedDevices) {
+    log.info(`Creating Shelly device ${idn}${device.desc}${rs}${nf} from file ${zb}${device.host}${nf}`);
+    const file = path.join('src/mock/', device.host);
+    const shellyDevice = await ShellyDevice.create(shelly, log, file);
+    if (shellyDevice) {
+      shellyDevice.logDevice();
+      shellyDevice.destroy();
+    } else {
+      log.error(`Error creating device ${idn}${device.desc}${rs}${er} from file ${zb}${file}${er}`);
+    }
+  }
+
+  process.on('SIGINT', function () {
+    shelly.destroy();
+    // process.exit();
+  });
 }

@@ -1,0 +1,310 @@
+{
+  "shelly": {
+    "type": "SHSW-25",
+    "mac": "3494546BBF7E",
+    "auth": false,
+    "fw": "20230913-112234/v1.14.0-gcb84623",
+    "discoverable": false,
+    "longid": 1,
+    "num_outputs": 2,
+    "num_meters": 2,
+    "num_rollers": 1,
+    "mode": "roller"
+  },
+  "settings": {
+    "device": {
+      "type": "SHSW-25",
+      "mac": "3494546BBF7E",
+      "hostname": "shellyswitch25-3494546BBF7E",
+      "num_outputs": 2,
+      "num_meters": 2,
+      "num_rollers": 1,
+      "mode": "roller"
+    },
+    "wifi_ap": {
+      "enabled": false,
+      "ssid": "shellyswitch25-3494546BBF7E",
+      "key": ""
+    },
+    "wifi_sta": {
+      "enabled": true,
+      "ssid": "FibreBox_X6-12A4C7",
+      "ipv4_method": "dhcp",
+      "ip": null,
+      "gw": null,
+      "mask": null,
+      "dns": null
+    },
+    "wifi_sta1": {
+      "enabled": false,
+      "ssid": null,
+      "ipv4_method": "dhcp",
+      "ip": null,
+      "gw": null,
+      "mask": null,
+      "dns": null
+    },
+    "ap_roaming": {
+      "enabled": true,
+      "threshold": -70
+    },
+    "mqtt": {
+      "enable": false,
+      "server": "192.168.33.3:1883",
+      "user": "",
+      "id": "shellyswitch25-3494546BBF7E",
+      "reconnect_timeout_max": 60,
+      "reconnect_timeout_min": 2,
+      "clean_session": true,
+      "keep_alive": 60,
+      "max_qos": 0,
+      "retain": false,
+      "update_period": 30
+    },
+    "coiot": {
+      "enabled": true,
+      "update_period": 15,
+      "peer": "192.168.1.189:5683"
+    },
+    "sntp": {
+      "server": "time.google.com",
+      "enabled": true
+    },
+    "login": {
+      "enabled": false,
+      "unprotected": false,
+      "username": "admin"
+    },
+    "pin_code": "",
+    "name": "My shelly 2.5 gen 1",
+    "fw": "20230913-112234/v1.14.0-gcb84623",
+    "factory_reset_from_switch": true,
+    "pon_wifi_reset": false,
+    "discoverable": false,
+    "build_info": {
+      "build_id": "20230913-112234/v1.14.0-gcb84623",
+      "build_timestamp": "2023-09-13T11:22:34Z",
+      "build_version": "1.0"
+    },
+    "cloud": {
+      "enabled": true,
+      "connected": true
+    },
+    "timezone": "Europe/Monaco",
+    "lat": 43.731201,
+    "lng": 7.4138,
+    "tzautodetect": true,
+    "tz_utc_offset": 7200,
+    "tz_dst": false,
+    "tz_dst_auto": true,
+    "time": "09:26",
+    "unixtime": 1718609179,
+    "led_status_disable": false,
+    "debug_enable": false,
+    "allow_cross_origin": false,
+    "actions": {
+      "active": false,
+      "names": [
+        "btn_on_url",
+        "btn_off_url",
+        "longpush_url",
+        "shortpush_url",
+        "out_on_url",
+        "out_off_url",
+        "btn_on_url",
+        "btn_off_url",
+        "longpush_url",
+        "shortpush_url",
+        "out_on_url",
+        "out_off_url",
+        "roller_open_url",
+        "roller_close_url",
+        "roller_stop_url"
+      ]
+    },
+    "hwinfo": {
+      "hw_revision": "prod-191217",
+      "batch_id": 1
+    },
+    "mode": "roller",
+    "max_power": 1840,
+    "longpush_time": 800,
+    "relays": [
+      {
+        "name": null,
+        "appliance_type": "General",
+        "ison": false,
+        "has_timer": false,
+        "default_state": "last",
+        "btn_type": "momentary",
+        "btn_reverse": 0,
+        "auto_on": 0,
+        "auto_off": 0,
+        "max_power": 0,
+        "schedule": false,
+        "schedule_rules": []
+      },
+      {
+        "name": null,
+        "appliance_type": "General",
+        "ison": false,
+        "has_timer": false,
+        "default_state": "last",
+        "btn_type": "momentary",
+        "btn_reverse": 0,
+        "auto_on": 0,
+        "auto_off": 0,
+        "max_power": 0,
+        "schedule": false,
+        "schedule_rules": []
+      }
+    ],
+    "rollers": [
+      {
+        "maxtime": 20,
+        "maxtime_open": 20,
+        "maxtime_close": 20,
+        "default_state": "stop",
+        "swap": false,
+        "swap_inputs": false,
+        "input_mode": "openclose",
+        "button_type": "toggle",
+        "btn_reverse": 0,
+        "state": "stop",
+        "power": 0,
+        "is_valid": true,
+        "safety_switch": false,
+        "schedule": false,
+        "schedule_rules": [],
+        "obstacle_mode": "disabled",
+        "obstacle_action": "stop",
+        "obstacle_power": 200,
+        "obstacle_delay": 1,
+        "ends_delay": 2500,
+        "safety_mode": "while_opening",
+        "safety_action": "stop",
+        "safety_allowed_on_trigger": "none",
+        "off_power": 2,
+        "positioning": true
+      }
+    ],
+    "favorites_enabled": false,
+    "favorites": [
+      {
+        "name": "Position 1",
+        "pos": 0
+      },
+      {
+        "name": "Position 2",
+        "pos": 0
+      },
+      {
+        "name": "Position 3",
+        "pos": 0
+      },
+      {
+        "name": "Position 4",
+        "pos": 0
+      }
+    ],
+    "eco_mode_enabled": true
+  },
+  "status": {
+    "wifi_sta": {
+      "connected": true,
+      "ssid": "FibreBox_X6-12A4C7",
+      "ip": "192.168.1.222",
+      "rssi": -55
+    },
+    "cloud": {
+      "enabled": true,
+      "connected": true
+    },
+    "mqtt": {
+      "connected": false
+    },
+    "time": "09:26",
+    "unixtime": 1718609179,
+    "serial": 2689,
+    "has_update": false,
+    "mac": "3494546BBF7E",
+    "cfg_changed_cnt": 0,
+    "actions_stats": {
+      "skipped": 0
+    },
+    "rollers": [
+      {
+        "state": "stop",
+        "source": "input",
+        "power": 0,
+        "is_valid": true,
+        "safety_switch": false,
+        "overtemperature": false,
+        "stop_reason": "normal",
+        "last_direction": "close",
+        "current_pos": 112,
+        "calibrating": false,
+        "positioning": true
+      }
+    ],
+    "meters": [
+      {
+        "power": 0,
+        "overpower": 0,
+        "is_valid": true,
+        "timestamp": 1718616379,
+        "counters": [
+          0,
+          0,
+          0
+        ],
+        "total": 0
+      },
+      {
+        "power": 0,
+        "overpower": 0,
+        "is_valid": true,
+        "timestamp": 1718616379,
+        "counters": [
+          0,
+          0,
+          0
+        ],
+        "total": 0
+      }
+    ],
+    "inputs": [
+      {
+        "input": 0,
+        "event": "",
+        "event_cnt": 0
+      },
+      {
+        "input": 0,
+        "event": "",
+        "event_cnt": 0
+      }
+    ],
+    "temperature": 56.29,
+    "overtemperature": false,
+    "tmp": {
+      "tC": 56.29,
+      "tF": 133.32,
+      "is_valid": true
+    },
+    "temperature_status": "Normal",
+    "update": {
+      "status": "idle",
+      "has_update": false,
+      "new_version": "20230913-112234/v1.14.0-gcb84623",
+      "old_version": "20230913-112234/v1.14.0-gcb84623",
+      "beta_version": "20231107-163214/v1.14.1-rc1-g0617c15"
+    },
+    "ram_total": 50720,
+    "ram_free": 37668,
+    "fs_size": 233681,
+    "fs_free": 146082,
+    "voltage": 240.36,
+    "uptime": 122102
+  }
+}

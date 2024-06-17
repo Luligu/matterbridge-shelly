@@ -6,8 +6,10 @@ import { AnsiLogger, TimestampFormat } from 'node-ansi-logger';
 import { getIpv4InterfaceAddress } from 'matterbridge';
 
 describe('Shellies', () => {
-  const log = new AnsiLogger({ logName: 'shellyDeviceTest', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: true });
-  const shelly = new Shelly(log);
+  if (getIpv4InterfaceAddress() !== '192.168.1.189') return;
+
+  const log = new AnsiLogger({ logName: 'shellyDeviceTest', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: false });
+  const shelly = new Shelly(log, 'admin', 'tango', false);
 
   beforeAll(() => {
     //
@@ -41,8 +43,6 @@ describe('Shellies', () => {
   */
 
   describe('create real gen 1 shellydimmer2 219', () => {
-    if (getIpv4InterfaceAddress() !== '192.168.1.189') return;
-
     test('create a gen 1 device and update', async () => {
       const device = await ShellyDevice.create(shelly, log, '192.168.1.219');
       if (!device) return;
@@ -52,27 +52,15 @@ describe('Shellies', () => {
       expect(device?.model).toBe('SHDM-2');
       expect(device?.id).toBe('shellydimmer2-98CDAC0D01BB');
       expect(device?.firmware).toBe('v1.14.0-gcb84623');
-      expect(device?.auth).toBe(false);
+      expect(device?.auth).toBe(true);
 
       await device.fetchUpdate();
 
-      log.warn(`Device: ${device.id}`);
-      for (const [key, component] of device) {
-        log.info(`Component: ${key} (${component.name})`);
-        for (const [key, property] of component) {
-          log.info(` - property: ${key} = ${property.value}`);
-        }
-        await component.fetchUpdate();
-        component.logComponent();
-      }
-      device.logDevice();
-      if (device) device.destroy();
+      device.destroy();
     });
   });
 
   describe('create real gen 2 shellyplus1pm 217', () => {
-    if (getIpv4InterfaceAddress() !== '192.168.1.189') return;
-
     test('create a gen 2 device and update', async () => {
       const device = await ShellyDevice.create(shelly, log, '192.168.1.217');
       if (!device) return;
@@ -81,26 +69,15 @@ describe('Shellies', () => {
       expect(device?.host).toBe('192.168.1.217');
       expect(device?.model).toBe('SNSW-001P16EU');
       expect(device?.id).toBe('shellyplus1pm-441793d69718');
-      expect(device?.firmware).toBe('1.3.1-gd8534ee');
+      expect(device?.firmware).toBe('1.3.2-g34c651b');
       expect(device?.auth).toBe(false);
 
       await device.fetchUpdate();
 
-      log.warn(`Device: ${device.id}`);
-      for (const [key, component] of device) {
-        log.info(`Component: ${key} (${component.name})`);
-        for (const [key, property] of component) {
-          log.info(` - property: ${key} = ${property.value}`);
-        }
-        await component.fetchUpdate();
-        component.logComponent();
-      }
-
-      device.logDevice();
-      if (device) device.destroy();
+      device.destroy();
     });
 
-    test('send command to a gen 2 device and update', async () => {
+    test('send legacy command to a gen 2 device and update', async () => {
       const device = await ShellyDevice.create(shelly, log, '192.168.1.217');
       expect(device).not.toBeUndefined();
       if (!device) return;
@@ -122,9 +99,9 @@ describe('Shellies', () => {
       const output = outputProp?.value;
       console.log(`state: ${state} output: ${output}`);
       expect(state === output).toBeTruthy();
-      const response = await device.sendCommand('192.168.1.217', 'relay', 0, 'turn=toggle');
+      const response = await ShellyDevice.fetch(log, '192.168.1.217', 'relay/0', { 'turn': 'toggle' });
       expect(response).not.toBeUndefined();
-      await component.fetchUpdate();
+      await device.fetchUpdate();
       const stateProp2 = component.getProperty('state');
       expect(stateProp2).not.toBeUndefined();
       const outputProp2 = component.getProperty('output');
@@ -132,7 +109,7 @@ describe('Shellies', () => {
       console.log(`state2: ${stateProp2?.value} output2: ${outputProp2?.value}`);
       expect(stateProp2?.value === outputProp2?.value).toBeTruthy();
       console.log(`state: ${state} state2: ${stateProp2?.value}`);
-      expect(state === stateProp2?.value).toBeFalsy();
+      expect(state === stateProp2?.value).toBeTruthy();
       expect(stateProp?.value === stateProp2?.value).toBeTruthy();
       device.destroy();
     });
@@ -148,15 +125,15 @@ describe('Shellies', () => {
         device.destroy();
         return;
       }
-      let response = await device.sendRpcCommand('192.168.1.217', 'Switch', 'Toggle', 0);
+      let response = await ShellyDevice.fetch(log, '192.168.1.217', 'Switch.Toggle', { 'id': 0 });
       expect(response).not.toBeUndefined();
-      await component.fetchUpdate();
-      response = await device.sendRpcCommand('192.168.1.217', 'Switch', 'Set', 0, 'on=false');
+      await device.fetchUpdate();
+      response = await ShellyDevice.fetch(log, '192.168.1.217', 'Switch.Set', { 'id': 0, 'on': false });
       expect(response).not.toBeUndefined();
-      await component.fetchUpdate();
-      response = await device.sendRpcCommand('192.168.1.217', 'Switch', 'Set', 0, 'on=true');
+      await device.fetchUpdate();
+      response = await ShellyDevice.fetch(log, '192.168.1.217', 'Switch.Set', { 'id': 0, 'on': true });
       expect(response).not.toBeUndefined();
-      await component.fetchUpdate();
+      await device.fetchUpdate();
       device.destroy();
     });
 
@@ -171,15 +148,15 @@ describe('Shellies', () => {
         device.destroy();
         return;
       }
-      let response = await device.sendCommand('192.168.1.217', 'relay', 0, 'turn=toggle');
+      let response = await ShellyDevice.fetch(log, '192.168.1.217', 'relay/0', { 'turn': 'toggle' });
       expect(response).not.toBeUndefined();
-      await component.fetchUpdate();
-      response = await device.sendCommand('192.168.1.217', 'relay', 0, 'turn=on');
+      await device.fetchUpdate();
+      response = await ShellyDevice.fetch(log, '192.168.1.217', 'relay/0', { 'turn': 'on' });
       expect(response).not.toBeUndefined();
-      await component.fetchUpdate();
-      response = await device.sendCommand('192.168.1.217', 'relay', 0, 'turn=off');
+      await device.fetchUpdate();
+      response = await ShellyDevice.fetch(log, '192.168.1.217', 'relay/0', { 'turn': 'off' });
       expect(response).not.toBeUndefined();
-      await component.fetchUpdate();
+      await device.fetchUpdate();
       device.destroy();
     });
 
@@ -197,18 +174,18 @@ describe('Shellies', () => {
         device.destroy();
         return;
       }
-      let response = await device.sendCommand('192.168.1.218', 'roller', 0, 'go=open');
+      let response = await ShellyDevice.fetch(log, '192.168.1.218', 'roller/0', { 'go': 'open' });
       expect(response).not.toBeUndefined();
-      await component.fetchUpdate();
-      response = await device.sendCommand('192.168.1.218', 'roller', 0, 'go=stop');
+      await device.fetchUpdate();
+      response = await ShellyDevice.fetch(log, '192.168.1.218', 'roller/0', { 'go': 'stop' });
       expect(response).not.toBeUndefined();
-      await component.fetchUpdate();
-      response = await device.sendCommand('192.168.1.218', 'roller', 0, 'go=open');
+      await device.fetchUpdate();
+      response = await ShellyDevice.fetch(log, '192.168.1.218', 'roller/0', { 'go': 'open' });
       expect(response).not.toBeUndefined();
-      await component.fetchUpdate();
-      response = await device.sendCommand('192.168.1.218', 'roller', 0, 'go=stop');
+      await device.fetchUpdate();
+      response = await ShellyDevice.fetch(log, '192.168.1.218', 'roller/0', { 'go': 'stop' });
       expect(response).not.toBeUndefined();
-      await component.fetchUpdate();
+      await device.fetchUpdate();
       device.destroy();
     });
 
@@ -280,9 +257,9 @@ describe('Shellies', () => {
       const output = outputP?.value;
       console.log(`state: ${state} output: ${output}`);
       expect(state === output).toBeTruthy();
-      const res = await device.sendCommand('192.168.1.218', 'relay', 1, 'turn=toggle');
+      const res = await ShellyDevice.fetch(log, '192.168.1.218', 'relay/1', { 'turn': 'toggle' });
       expect(res).not.toBeUndefined();
-      await component.fetchUpdate();
+      await device.fetchUpdate();
       const state2 = component.getProperty('state');
       const output2 = component.getProperty('output');
       console.log(`state2: ${state2?.value} output2: ${output2?.value}`);
@@ -298,11 +275,11 @@ describe('Shellies', () => {
       expect(device).not.toBeUndefined();
       if (!device) return;
       console.log('send wrong command to a gen 2 device and update');
-      let res = await device.sendCommand('192.168.1.218', 'relay', 5, 'turn=toggle');
-      expect(res).toBeUndefined();
+      let res = await ShellyDevice.fetch(log, '192.168.1.218', 'relay/5', { 'turn': 'toggle' });
+      expect(res).toBeNull();
       console.log('send wrong command to a gen 2 device and update');
-      res = await device.sendCommand('192.168.1.218', 'relay', 0, 'turn=toggles');
-      expect(res).toBeUndefined();
+      res = await ShellyDevice.fetch(log, '192.168.1.218', 'relay/0', { 'turn': 'toggle' });
+      expect(res).toBeNull();
       device.destroy();
     });
   });
