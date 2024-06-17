@@ -1,0 +1,102 @@
+{
+  "title": "Matterbridge shelly plugin",
+  "description": "matterbridge-shelly v. 0.0.1 by https://github.com/Luligu",
+  "type": "object",
+  "properties": {
+    "name": {
+      "description": "Plugin name",
+      "type": "string",
+      "readOnly": true
+    },
+    "type": {
+      "description": "Plugin type",
+      "type": "string",
+      "readOnly": true
+    },
+    "username": {
+      "description": "Username (since is always admin for gen 2 and 3 devices, use admin also for gen 1)",
+      "type": "string"
+    },
+    "password": {
+      "description": "Password (must be unique for all the devices)",
+      "type": "string"
+    },
+    "exposeSwitch": {
+      "description": "Choose how to expose the shelly switches: as a switch, light or outlet",
+      "type": "string",
+      "enum": [
+        "switch",
+        "light",
+        "outlet"
+      ],
+      "default": "switch"
+    },
+    "exposeInput": {
+      "description": "Choose how to expose the shelly inputs: disabled, contact or momentary switch",
+      "type": "string",
+      "enum": [
+        "disabled",
+        "contact",
+        "momentary"
+      ],
+      "default": "disabled"
+    },
+    "blackList": {
+      "description": "The devices in the list will not be exposed. Use the device id (e.g. shellyplus2pm-5443b23d81f8)",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "whiteList": {
+      "description": "Only the devices in the list will be exposed. Use the device id (e.g. shellyplus2pm-5443b23d81f8)",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "deviceIp": {
+      "description": "Set the IP address for each device. Enter in the first field the shelly ID of the device and in the second field the IP address. (e.g. shelly1minig3-543204547478: 192.168.1.221)",
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "enableMdnsDiscover": {
+      "description": "Enable the mdns discovery for shelly devices (it will stop after 10 minutes)",
+      "type": "boolean",
+      "default": true
+    },
+    "enableStorageDiscover": {
+      "description": "Enable storage discovery for shelly devices (it will load from the storage the devices already discovered)",
+      "type": "boolean",
+      "default": true
+    },
+    "resetStorageDiscover": {
+      "description": "Reset the storage discovery on the next restart (it will clear the storage of already discovers devices)",
+      "type": "boolean",
+      "default": false
+    },
+    "enableConfigDiscover": {
+      "description": "Enable config discovery for shelly devices (it will load the devices from deviceIp config setting)",
+      "type": "boolean",
+      "default": false
+    },
+    "enableBleDiscover": {
+      "description": "Enable ble discovery for shelly devices (under development)",
+      "type": "boolean",
+      "readOnly": true,
+      "default": false
+    },
+    "debug": {
+      "description": "Enable the debug for the plugin (development only)",
+      "type": "boolean",
+      "default": false
+    },
+    "unregisterOnShutdown": {
+      "description": "Unregister all devices on shutdown (development only)",
+      "type": "boolean",
+      "default": false
+    }
+  }
+}
