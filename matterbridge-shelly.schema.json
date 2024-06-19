@@ -24,13 +24,21 @@
     "exposeSwitch": {
       "description": "Choose how to expose the shelly switches: as a switch, light or outlet",
       "type": "string",
-      "enum": ["switch", "light", "outlet"],
+      "enum": [
+        "switch",
+        "light",
+        "outlet"
+      ],
       "default": "switch"
     },
     "exposeInput": {
       "description": "Choose how to expose the shelly inputs: disabled, contact or momentary switch",
       "type": "string",
-      "enum": ["disabled", "contact", "momentary"],
+      "enum": [
+        "disabled",
+        "contact",
+        "momentary"
+      ],
       "default": "disabled"
     },
     "blackList": {
@@ -65,7 +73,7 @@
       "default": true
     },
     "resetStorageDiscover": {
-      "description": "Reset the storage discovery on the next restart (it will clear the storage of already discovers devices)",
+      "description": "Reset the storage discovery on the next restart (it will clear the storage of already discovered devices)",
       "type": "boolean",
       "default": false
     },

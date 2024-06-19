@@ -121,6 +121,10 @@ Once a device is discovered, it is added to the shelly storage.
 
 Should always be enabled to automatically add all the devices already discovered.
 
+### resetStorageDiscover
+
+Reset the storage discovery on the next restart (it will clear the storage of already discovered devices).
+
 ### enableConfigDiscover
 
 Should be enabled only if the mdns is not working. It adds the devices defined in deviceIp.

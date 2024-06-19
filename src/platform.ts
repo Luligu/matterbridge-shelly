@@ -117,7 +117,6 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         1, // Number(device.firmware.split('.')[0]),
         device.firmware,
       );
-      // DEPRECATED mbDevice.createDefaultPowerSourceConfigurationClusterServer();
       const child = mbDevice.addChildDeviceTypeWithClusterServer('PowerSource', [powerSource], [PowerSource.Cluster.id]);
       child.addClusterServer(mbDevice.getDefaultPowerSourceWiredClusterServer());
 
