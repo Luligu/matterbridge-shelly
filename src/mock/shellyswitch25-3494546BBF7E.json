@@ -76,7 +76,7 @@
       "username": "admin"
     },
     "pin_code": "",
-    "name": "My shelly 2.5 gen 1",
+    "name": "My Shelly 2.5",
     "fw": "20230913-112234/v1.14.0-gcb84623",
     "factory_reset_from_switch": true,
     "pon_wifi_reset": false,

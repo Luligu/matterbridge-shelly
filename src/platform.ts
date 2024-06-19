@@ -184,7 +184,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
                   switchComponent.getValue('voltage') as number,
                   switchComponent.getValue('current') as number,
                   switchComponent.getValue('apower') as number,
-                  (switchComponent.getValue('aenergy') as ShellyData).total as number,
+                  ((switchComponent.getValue('aenergy') as ShellyData).total as number) / 1000,
                 ),
               );
               this.log.warn(`Added EveHistory cluster to ${device.id} component ${key}`);
@@ -215,7 +215,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
                   coverComponent.getValue('voltage') as number,
                   coverComponent.getValue('current') as number,
                   coverComponent.getValue('apower') as number,
-                  (coverComponent.getValue('aenergy') as ShellyData).total as number,
+                  ((coverComponent.getValue('aenergy') as ShellyData).total as number) / 1000,
                 ),
               );
               this.log.warn(`Added EveHistory cluster to ${device.id} component ${key}`);
@@ -269,7 +269,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               child.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy))?.setTotalConsumptionAttribute(energy1 as number);
             const energy2 = pmComponent.hasProperty('aenergy') ? pmComponent.getValue('aenergy') : undefined; // Gen 2 devices
             if (energy2 !== undefined && energy2 !== null)
-              child.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy))?.setTotalConsumptionAttribute((energy2 as ShellyData).total as number);
+              child.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy))?.setTotalConsumptionAttribute(((energy2 as ShellyData).total as number) / 1000);
 
             // Add event handler
             pmComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
@@ -662,9 +662,9 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       }
       if (property === 'aenergy') {
         const cluster = endpoint.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy));
-        cluster?.setTotalConsumptionAttribute((value as ShellyData).total as number);
+        cluster?.setTotalConsumptionAttribute(((value as ShellyData).total as number) / 1000);
         shellyDevice.log.info(
-          `${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}EveHistory-totalConsumption${db} ${YELLOW}${(value as ShellyData).total as number}${db}`,
+          `${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}EveHistory-totalConsumption${db} ${YELLOW}${((value as ShellyData).total as number) / 1000}${db}`,
         );
       }
     }
