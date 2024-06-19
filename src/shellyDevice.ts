@@ -154,6 +154,8 @@ export class ShellyDevice extends EventEmitter {
             device.addComponent(new ShellyComponent(device, `roller:${index++}`, 'Roller', roller as ShellyData));
           }
         }
+      }
+      for (const key in statusPayload) {
         if (key === 'meters') {
           let index = 0;
           for (const meter of statusPayload[key] as ShellyData[]) {

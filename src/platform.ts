@@ -238,18 +238,24 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             ClusterRegistry.register(EveHistory.Complete);
             const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [powerSource], [EveHistory.Cluster.id]);
             // Set the electrical attributes
-            const voltage = pmComponent.getValue('voltage');
+            const voltage = pmComponent.hasProperty('voltage') ? pmComponent.getValue('voltage') : undefined;
             if (voltage !== undefined) child.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy))?.setVoltageAttribute(voltage as number);
-            const current = pmComponent.getValue('current');
+
+            const current = pmComponent.hasProperty('current') ? pmComponent.getValue('current') : undefined;
             if (current !== undefined) child.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy))?.setCurrentAttribute(current as number);
-            const power = pmComponent.getValue('apower') ?? pmComponent.getValue('power');
-            if (power !== undefined) child.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy))?.setConsumptionAttribute(power as number);
-            const energy1 = pmComponent.getValue('total'); // Gen 1 devices
+
+            const power1 = pmComponent.hasProperty('power') ? pmComponent.getValue('power') : undefined; // Gen 1 devices
+            if (power1 !== undefined) child.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy))?.setConsumptionAttribute(power1 as number);
+            const power2 = pmComponent.hasProperty('apower') ? pmComponent.getValue('apower') : undefined; // Gen 2 devices
+            if (power2 !== undefined) child.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy))?.setConsumptionAttribute(power2 as number);
+
+            const energy1 = pmComponent.hasProperty('total') ? pmComponent.getValue('total') : undefined; // Gen 1 devices
             if (energy1 !== undefined && energy1 !== null)
               child.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy))?.setTotalConsumptionAttribute(energy1 as number);
-            const energy2 = pmComponent.getValue('aenergy'); // Gen 2 devices
+            const energy2 = pmComponent.hasProperty('aenergy') ? pmComponent.getValue('aenergy') : undefined; // Gen 2 devices
             if (energy2 !== undefined && energy2 !== null)
               child.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy))?.setTotalConsumptionAttribute((energy2 as ShellyData).total as number);
+
             // Add event handler
             pmComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
               this.shellyUpdateHandler(mbDevice, device, component, property, value);
