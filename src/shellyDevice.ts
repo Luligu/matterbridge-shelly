@@ -154,6 +154,18 @@ export class ShellyDevice extends EventEmitter {
             device.addComponent(new ShellyComponent(device, `roller:${index++}`, 'Roller', roller as ShellyData));
           }
         }
+        if (key === 'meters') {
+          let index = 0;
+          for (const meter of statusPayload[key] as ShellyData[]) {
+            device.addComponent(new ShellyComponent(device, `meter:${index++}`, 'PowerMeter', meter as ShellyData));
+          }
+        }
+        if (key === 'emeters') {
+          let index = 0;
+          for (const emeter of statusPayload[key] as ShellyData[]) {
+            device.addComponent(new ShellyComponent(device, `emeter:${index++}`, 'PowerMeter', emeter as ShellyData));
+          }
+        }
       }
     }
 
@@ -278,6 +290,18 @@ export class ShellyDevice extends EventEmitter {
           let index = 0;
           for (const roller of data[key] as ShellyData[]) {
             this.updateComponent(`roller:${index++}`, roller as ShellyData);
+          }
+        }
+        if (key === 'meters') {
+          let index = 0;
+          for (const meter of data[key] as ShellyData[]) {
+            this.updateComponent(`meter:${index++}`, meter as ShellyData);
+          }
+        }
+        if (key === 'emeters') {
+          let index = 0;
+          for (const emeter of data[key] as ShellyData[]) {
+            this.updateComponent(`emeter:${index++}`, emeter as ShellyData);
           }
         }
       }

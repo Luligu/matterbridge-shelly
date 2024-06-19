@@ -1,4 +1,4 @@
-import { AnsiLogger, BLUE, CYAN, MAGENTA, RESET, TimestampFormat, db, debugStringify, idn, rs, wr } from 'node-ansi-logger';
+import { AnsiLogger, BLUE, CYAN, MAGENTA, RESET, TimestampFormat, db, debugStringify, idn, rs } from 'node-ansi-logger';
 import coap, { Server, IncomingMessage, OutgoingMessage, globalAgent } from 'coap';
 import EventEmitter from 'events';
 

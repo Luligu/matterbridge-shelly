@@ -21,9 +21,6 @@ import {
   LevelControlCluster,
   BooleanStateCluster,
   ClusterRegistry,
-  electricalSensor,
-  ElectricalPowerMeasurement,
-  ElectricalEnergyMeasurement,
 } from 'matterbridge';
 import { AnsiLogger, BLUE, CYAN, GREEN, TimestampFormat, YELLOW, db, debugStringify, dn, er, hk, idn, nf, or, rs, wr, zb } from 'node-ansi-logger';
 import { NodeStorage, NodeStorageManager } from 'node-persist-manager';
@@ -236,7 +233,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           if (pmComponent) {
             mbDevice.addFixedLabel('composed', component.name);
             // Add the Matter 1.3 device type with the ElectricalPowerMeasurement and ElectricalEnergyMeasurement clusters
-            mbDevice.addChildDeviceTypeWithClusterServer('electricalSensor', [electricalSensor], [ElectricalPowerMeasurement.Cluster.id, ElectricalEnergyMeasurement.Cluster.id]);
+            // mbDevice.addChildDeviceTypeWithClusterServer('electricalSensor', [electricalSensor], [ElectricalPowerMeasurement.Cluster.id, ElectricalEnergyMeasurement.Cluster.id]);
             // Add the custom EveHistory cluster for HA
             ClusterRegistry.register(EveHistory.Complete);
             const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [powerSource], [EveHistory.Cluster.id]);
@@ -245,11 +242,14 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             if (voltage !== undefined) child.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy))?.setVoltageAttribute(voltage as number);
             const current = pmComponent.getValue('current');
             if (current !== undefined) child.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy))?.setCurrentAttribute(current as number);
-            const power = pmComponent.getValue('apower');
+            const power = pmComponent.getValue('apower') ?? pmComponent.getValue('power');
             if (power !== undefined) child.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy))?.setConsumptionAttribute(power as number);
-            const energy = pmComponent.getValue('aenergy');
-            if (energy !== undefined && energy !== null)
-              child.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy))?.setTotalConsumptionAttribute((energy as ShellyData).total as number);
+            const energy1 = pmComponent.getValue('total'); // Gen 1 devices
+            if (energy1 !== undefined && energy1 !== null)
+              child.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy))?.setTotalConsumptionAttribute(energy1 as number);
+            const energy2 = pmComponent.getValue('aenergy'); // Gen 2 devices
+            if (energy2 !== undefined && energy2 !== null)
+              child.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy))?.setTotalConsumptionAttribute((energy2 as ShellyData).total as number);
             // Add event handler
             pmComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
               this.shellyUpdateHandler(mbDevice, device, component, property, value);
@@ -590,12 +590,24 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       );
     }
     // Update energy
-    if (shellyComponent.name === 'PowerMeter' && property === 'aenergy') {
-      const cluster = endpoint.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy));
-      cluster?.setTotalConsumptionAttribute((value as ShellyData).total as number);
-      shellyDevice.log.info(
-        `${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}EveHistory-totalConsumption${db} ${YELLOW}${(value as ShellyData).total as number}${db}`,
-      );
+    if (shellyComponent.name === 'PowerMeter') {
+      if (property === 'power' || property === 'apower') {
+        const cluster = endpoint.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy));
+        cluster?.setConsumptionAttribute(value as number);
+        shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}EveHistory-consumption${db} ${YELLOW}${value as number}${db}`);
+      }
+      if (property === 'total') {
+        const cluster = endpoint.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy));
+        cluster?.setTotalConsumptionAttribute(value as number);
+        shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}EveHistory-totalConsumption${db} ${YELLOW}${value as number}${db}`);
+      }
+      if (property === 'aenergy') {
+        const cluster = endpoint.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy));
+        cluster?.setTotalConsumptionAttribute((value as ShellyData).total as number);
+        shellyDevice.log.info(
+          `${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}EveHistory-totalConsumption${db} ${YELLOW}${(value as ShellyData).total as number}${db}`,
+        );
+      }
     }
   }
 
