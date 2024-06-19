@@ -228,7 +228,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               this.shellyUpdateHandler(mbDevice, device, component, property, value);
             });
           }
-        } else if (component.name === 'PowerMeter') {
+        } else if (component.name === 'PowerMeter' && config.exposePowerMeter !== 'disabled') {
           const pmComponent = device.getComponent(key);
           if (pmComponent) {
             mbDevice.addFixedLabel('composed', component.name);

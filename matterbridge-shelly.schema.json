@@ -41,6 +41,16 @@
       ],
       "default": "disabled"
     },
+    "exposePowerMeter": {
+      "description": "Choose how to expose the shelly power meters: disabled, matter13 (use Matter 1.3 electricalSensor) or evehistory (use Matter EveHistoryCluster)",
+      "type": "string",
+      "enum": [
+        "disabled",
+        "matter13",
+        "evehistory"
+      ],
+      "default": "disabled"
+    },
     "blackList": {
       "description": "The devices in the list will not be exposed. Use the device id (e.g. shellyplus2pm-5443b23d81f8)",
       "type": "array",
