@@ -62,7 +62,7 @@
     },
     "sys": {
       "device": {
-        "name": "My shelly 1PM mini",
+        "name": "My Shelly 1PM mini",
         "mac": "543204519264",
         "fw_id": "20231121-110955/1.1.99-minig3prod1-ga898543",
         "discoverable": true,
@@ -158,12 +158,20 @@
       "current": 0,
       "aenergy": {
         "total": 0,
-        "by_minute": [0, 0, 0],
+        "by_minute": [
+          0,
+          0,
+          0
+        ],
         "minute_ts": 1718609331
       },
       "ret_aenergy": {
         "total": 0,
-        "by_minute": [0, 0, 0],
+        "by_minute": [
+          0,
+          0,
+          0
+        ],
         "minute_ts": 1718609331
       },
       "temperature": {

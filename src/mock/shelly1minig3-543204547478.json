@@ -60,7 +60,7 @@
     },
     "sys": {
       "device": {
-        "name": "My mini switch 1 ch gen 3",
+        "name": "My Shelly 1 mini",
         "mac": "543204547478",
         "fw_id": "20240522-112834/1.3.2-g34c651b",
         "discoverable": true,

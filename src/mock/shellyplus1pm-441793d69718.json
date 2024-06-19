@@ -63,7 +63,7 @@
     },
     "sys": {
       "device": {
-        "name": "My shelly plus 1PM",
+        "name": "My Shelly 1PM plus",
         "mac": "441793D69718",
         "fw_id": "20240522-112836/1.3.2-g34c651b",
         "discoverable": true,

@@ -46,7 +46,7 @@
     },
     "sys": {
       "device": {
-        "name": "My mini power meter gen 3",
+        "name": "My Shelly PM mini",
         "mac": "84FCE63957F4",
         "fw_id": "20240522-112836/1.3.2-g34c651b",
         "discoverable": true,

@@ -21,6 +21,9 @@ import {
   LevelControlCluster,
   BooleanStateCluster,
   ClusterRegistry,
+  Endpoint,
+  SwitchCluster,
+  Switch,
 } from 'matterbridge';
 import { AnsiLogger, BLUE, CYAN, GREEN, TimestampFormat, YELLOW, db, debugStringify, dn, er, hk, idn, nf, or, rs, wr, zb } from 'node-ansi-logger';
 import { NodeStorage, NodeStorageManager } from 'node-persist-manager';
@@ -169,7 +172,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             if (config.exposeSwitch === 'outlet') deviceType = DeviceTypes.ON_OFF_PLUGIN_UNIT;
             const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [deviceType], [OnOff.Cluster.id]);
             mbDevice.addFixedLabel('composed', component.name);
-            switchComponent.logComponent();
+            // switchComponent.logComponent();
             if (
               switchComponent.hasProperty('voltage') &&
               switchComponent.hasProperty('current') &&
@@ -184,7 +187,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
                   (switchComponent.getValue('aenergy') as ShellyData).total as number,
                 ),
               );
-              // this.log.warn(`Added EveHistory cluster to ${device.id}`);
+              this.log.warn(`Added EveHistory cluster to ${device.id} component ${key}`);
             }
             // Set the OnOff attribute
             const state = switchComponent.getValue('state');
@@ -206,6 +209,18 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           if (coverComponent) {
             const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.WINDOW_COVERING], [WindowCovering.Cluster.id]);
             mbDevice.addFixedLabel('composed', component.name);
+            if (coverComponent.hasProperty('voltage') && coverComponent.hasProperty('current') && coverComponent.hasProperty('apower') && coverComponent.hasProperty('aenergy')) {
+              child.addClusterServer(
+                mbDevice.getDefaultStaticEveHistoryClusterServer(
+                  coverComponent.getValue('voltage') as number,
+                  coverComponent.getValue('current') as number,
+                  coverComponent.getValue('apower') as number,
+                  (coverComponent.getValue('aenergy') as ShellyData).total as number,
+                ),
+              );
+              this.log.warn(`Added EveHistory cluster to ${device.id} component ${key}`);
+            }
+
             // Set the WindowCovering attributes
             mbDevice.setWindowCoveringTargetAsCurrentAndStopped(child);
             // Add command handlers
@@ -270,6 +285,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             // Set the state attribute
             const state = inputComponent.getValue('state');
             if (state !== undefined && typeof state === 'boolean') child.getClusterServer(BooleanStateCluster)?.setStateValueAttribute(state as boolean);
+
             // Add event handler
             inputComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
               this.shellyUpdateHandler(mbDevice, device, component, property, value);
@@ -392,6 +408,43 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     const ipv4Regex =
       /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
     return ipv4Regex.test(ipv4Address);
+  }
+
+  protected triggerSwitchEvent(endpoint: Endpoint, event: string) {
+    let position = undefined;
+    const cluster = endpoint.getClusterServer(
+      SwitchCluster.with(Switch.Feature.MomentarySwitch, Switch.Feature.MomentarySwitchRelease, Switch.Feature.MomentarySwitchLongPress, Switch.Feature.MomentarySwitchMultiPress),
+    );
+    if (!cluster) {
+      this.log.error('triggerSwitchEvent error: cluster SwitchCluster not found');
+      return;
+    }
+    if (event === 'Single') {
+      position = 1;
+      cluster.setCurrentPositionAttribute(1);
+      cluster.triggerInitialPressEvent({ newPosition: 1 });
+      cluster.setCurrentPositionAttribute(0);
+      cluster.triggerShortReleaseEvent({ previousPosition: 1 });
+      cluster.setCurrentPositionAttribute(0);
+      cluster.triggerMultiPressCompleteEvent({ previousPosition: 1, totalNumberOfPressesCounted: 1 });
+      this.log.debug(`Trigger 'Single press' event for ${endpoint.name}:${endpoint.number}`);
+    }
+    if (event === 'Double') {
+      position = 2;
+      cluster.setCurrentPositionAttribute(position);
+      cluster.triggerMultiPressCompleteEvent({ previousPosition: 1, totalNumberOfPressesCounted: 2 });
+      cluster.setCurrentPositionAttribute(0);
+      this.log.debug(`Trigger 'Double press' event for ${endpoint.name}:${endpoint.number}`);
+    }
+    if (event === 'Long') {
+      position = 1;
+      cluster.setCurrentPositionAttribute(position);
+      cluster.triggerInitialPressEvent({ newPosition: 1 });
+      cluster.triggerLongPressEvent({ newPosition: 1 });
+      cluster.triggerLongReleaseEvent({ previousPosition: 1 });
+      cluster.setCurrentPositionAttribute(0);
+      this.log.debug(`Trigger 'Long press' event for ${endpoint.name}:${endpoint.number}`);
+    }
   }
 
   private shellySwitchCommandHandler(
