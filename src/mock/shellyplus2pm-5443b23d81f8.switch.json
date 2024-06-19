@@ -97,9 +97,9 @@
         "addon_type": null
       },
       "location": {
-        "tz": "Europe/Monaco",
-        "lat": 43.7312,
-        "lon": 7.4138
+        "tz": null,
+        "lat": null,
+        "lon": null
       },
       "debug": {
         "level": 2,
@@ -191,12 +191,20 @@
       "pf": 0,
       "aenergy": {
         "total": 0,
-        "by_minute": [0, 0, 0],
+        "by_minute": [
+          0,
+          0,
+          0
+        ],
         "minute_ts": 1718643780
       },
       "ret_aenergy": {
         "total": 0,
-        "by_minute": [0, 0, 0],
+        "by_minute": [
+          0,
+          0,
+          0
+        ],
         "minute_ts": 1718643780
       },
       "temperature": {
@@ -215,12 +223,20 @@
       "pf": 0,
       "aenergy": {
         "total": 0,
-        "by_minute": [0, 0, 0],
+        "by_minute": [
+          0,
+          0,
+          0
+        ],
         "minute_ts": 1718643780
       },
       "ret_aenergy": {
         "total": 0,
-        "by_minute": [0, 0, 0],
+        "by_minute": [
+          0,
+          0,
+          0
+        ],
         "minute_ts": 1718643780
       },
       "temperature": {

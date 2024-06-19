@@ -90,9 +90,9 @@
       "enabled": true,
       "connected": true
     },
-    "timezone": "Europe/Monaco",
-    "lat": 43.731201,
-    "lng": 7.4138,
+    "timezone": null,
+    "lat": null,
+    "lng": null,
     "tzautodetect": true,
     "tz_utc_offset": 7200,
     "tz_dst": false,
@@ -253,7 +253,11 @@
         "overpower": 0,
         "is_valid": true,
         "timestamp": 1718616379,
-        "counters": [0, 0, 0],
+        "counters": [
+          0,
+          0,
+          0
+        ],
         "total": 0
       },
       {
@@ -261,7 +265,11 @@
         "overpower": 0,
         "is_valid": true,
         "timestamp": 1718616379,
-        "counters": [0, 0, 0],
+        "counters": [
+          0,
+          0,
+          0
+        ],
         "total": 0
       }
     ],
