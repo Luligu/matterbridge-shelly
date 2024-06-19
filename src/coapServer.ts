@@ -344,7 +344,7 @@ export class CoapServer extends EventEmitter {
         // this.emit('update', coapMessage);
         this.parseShellyMessage(msg);
       } else {
-        this.log.warn(`Coap server got a wrong messagge code ${BLUE}${msg.code}${wr} url ${BLUE}${msg.url}${wr} rsinfo ${db}${debugStringify(msg.rsinfo)}...`);
+        // this.log.warn(`Coap server got a wrong messagge code ${BLUE}${msg.code}${wr} url ${BLUE}${msg.url}${wr} rsinfo ${db}${debugStringify(msg.rsinfo)}...`);
         // console.log(msg);
       }
     });
