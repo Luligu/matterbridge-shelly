@@ -1,5 +1,4 @@
 import { deepEqual, deepCopy, getIpv4InterfaceAddress, getIpv6InterfaceAddress } from 'matterbridge';
-import { ShellyData } from './shellyTypes';
 import { promises as fs } from 'fs';
 import path from 'path';
 
