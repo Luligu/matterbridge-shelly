@@ -101,7 +101,7 @@ Choose how to expose the shelly inputs: disabled, contact or momentary switch
 
 ### exposePowerMeter
 
-Choose how to expose the shelly power meters: disabled, matter13 (use Matter 1.3 electricalSensor) or evehistory (use Matter EveHistoryCluster)
+Choose how to expose the shelly power meters: disabled, matter13 (use Matter 1.3 electricalSensor under development) or evehistory (use Matter EveHistoryCluster)
 
 ### blackList
 
