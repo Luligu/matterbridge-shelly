@@ -26,6 +26,10 @@ Features:
 - The Matter device takes the name configured in the Shelly device's web page.
 - A 10-minute timer checks if the device has reported in that time.
 
+## Acknowledgements
+
+I would like to express my appreciation to [Tamer Salah](https://github.com/tammeryousef1006) for his invaluable contribution to this project. His expertise and assistance have been instrumental in its success.
+
 ## Prerequisites
 
 ### Matterbridge
