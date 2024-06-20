@@ -215,18 +215,16 @@ export class ShellyDevice extends EventEmitter {
 
     if (statusPayload) device.update(statusPayload);
 
-    // For gen 1 devices check if CoIoT is enabled and peer is set correctly
+    // For gen 1 devices check if CoIoT is enabled and peer is set correctly: 192.168.1.189:5683
     if (device.gen === 1) {
       const CoIoT = device.getComponent('coiot');
       if (CoIoT) {
-        if (!CoIoT.getValue('enabled')) log.error(`CoIoT is not enabled for device ${device.name} id ${device.id}. Enable it in the settings to receive updates from the device.`);
-        if (!CoIoT.getValue('peer')) {
-          log.error(`CoIoT peer for device ${device.name} id ${device.id} is not set.`);
-        } else {
+        if ((CoIoT.getValue('enabled') as boolean) === false)
+          log.error(`CoIoT is not enabled for device ${device.name} id ${device.id}. Enable it in the settings to receive updates from the device.`);
+        if ((CoIoT.getValue('peer') as string) !== '') {
           const peer = CoIoT.getValue('peer') as string;
           const ipv4 = getIpv4InterfaceAddress() + ':5683';
-          if (peer !== 'mcast' && peer !== ipv4)
-            log.error(`CoIoT peer for device ${device.name} id ${device.id} is not mcast or ${ipv4}. Set it in the settings to receive updates from the device.`);
+          if (peer !== ipv4) log.error(`CoIoT peer for device ${device.name} id ${device.id} is not mcast or ${ipv4}. Set it in the settings to receive updates from the device.`);
         }
       } else {
         log.error(`CoIoT service not found for device ${device.name} id ${device.id}.`);
