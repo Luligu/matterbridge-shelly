@@ -411,16 +411,14 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
   }
 
   protected triggerSwitchEvent(endpoint: Endpoint, event: string) {
-    let position = undefined;
     const cluster = endpoint.getClusterServer(
       SwitchCluster.with(Switch.Feature.MomentarySwitch, Switch.Feature.MomentarySwitchRelease, Switch.Feature.MomentarySwitchLongPress, Switch.Feature.MomentarySwitchMultiPress),
     );
     if (!cluster) {
-      this.log.error('triggerSwitchEvent error: cluster SwitchCluster not found');
+      this.log.error(`triggerSwitchEvent error: Switch cluster not found on endpoint ${endpoint.name}:${endpoint.number}`);
       return;
     }
     if (event === 'Single') {
-      position = 1;
       cluster.setCurrentPositionAttribute(1);
       cluster.triggerInitialPressEvent({ newPosition: 1 });
       cluster.setCurrentPositionAttribute(0);
@@ -430,19 +428,24 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       this.log.debug(`Trigger 'Single press' event for ${endpoint.name}:${endpoint.number}`);
     }
     if (event === 'Double') {
-      position = 2;
-      cluster.setCurrentPositionAttribute(position);
-      cluster.triggerMultiPressCompleteEvent({ previousPosition: 1, totalNumberOfPressesCounted: 2 });
+      cluster.setCurrentPositionAttribute(1);
+      cluster.triggerInitialPressEvent({ newPosition: 1 });
       cluster.setCurrentPositionAttribute(0);
+      cluster.triggerShortReleaseEvent({ previousPosition: 1 });
+      cluster.setCurrentPositionAttribute(1);
+      cluster.triggerInitialPressEvent({ newPosition: 1 });
+      cluster.triggerMultiPressOngoingEvent({ newPosition: 1, currentNumberOfPressesCounted: 2 });
+      cluster.setCurrentPositionAttribute(0);
+      cluster.triggerShortReleaseEvent({ previousPosition: 1 });
+      cluster.triggerMultiPressCompleteEvent({ previousPosition: 1, totalNumberOfPressesCounted: 2 });
       this.log.debug(`Trigger 'Double press' event for ${endpoint.name}:${endpoint.number}`);
     }
     if (event === 'Long') {
-      position = 1;
-      cluster.setCurrentPositionAttribute(position);
+      cluster.setCurrentPositionAttribute(1);
       cluster.triggerInitialPressEvent({ newPosition: 1 });
       cluster.triggerLongPressEvent({ newPosition: 1 });
-      cluster.triggerLongReleaseEvent({ previousPosition: 1 });
       cluster.setCurrentPositionAttribute(0);
+      cluster.triggerLongReleaseEvent({ previousPosition: 1 });
       this.log.debug(`Trigger 'Long press' event for ${endpoint.name}:${endpoint.number}`);
     }
   }
