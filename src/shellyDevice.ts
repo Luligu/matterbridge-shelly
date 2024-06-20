@@ -156,6 +156,8 @@ export class ShellyDevice extends EventEmitter {
         }
       }
       for (const key in statusPayload) {
+        if (key === 'temperature') device.addComponent(new ShellyComponent(device, 'sys', 'Sys', statusPayload[key] as ShellyData));
+        if (key === 'voltage') device.addComponent(new ShellyComponent(device, 'sys', 'Sys', statusPayload[key] as ShellyData));
         if (key === 'meters') {
           let index = 0;
           for (const meter of statusPayload[key] as ShellyData[]) {
@@ -221,6 +223,7 @@ export class ShellyDevice extends EventEmitter {
       if (CoIoT) {
         if ((CoIoT.getValue('enabled') as boolean) === false)
           log.error(`CoIoT is not enabled for device ${device.name} id ${device.id}. Enable it in the settings to receive updates from the device.`);
+        // When peer is mcast we get "" as value
         if ((CoIoT.getValue('peer') as string) !== '') {
           const peer = CoIoT.getValue('peer') as string;
           const ipv4 = getIpv4InterfaceAddress() + ':5683';
