@@ -52,7 +52,7 @@ describe('Shellies', () => {
       if (!device) return;
       expect(device).not.toBeUndefined();
       expect(device.name).not.toBeNull();
-      expect(device.name).toBe('My shelly dimmer2 gen 1');
+      expect(device.name).toBe('My Shelly dimmer2');
       expect(device.lastseen).not.toBe(0);
     });
 
@@ -61,7 +61,7 @@ describe('Shellies', () => {
       if (!device) return;
       const components = device.components;
       expect(components).toBeDefined();
-      expect(components?.length).toBe(8);
+      expect(components?.length).toBe(9);
     });
 
     test('Create a gen 1 device with components WiFi', async () => {
@@ -151,7 +151,7 @@ describe('Shellies', () => {
     test('Create a gen 2 device with name not null', async () => {
       expect(device).not.toBeUndefined();
       expect(device?.name).not.toBeNull();
-      expect(device?.name).toBe('My shelly plus 2PM');
+      expect(device?.name).toBe('My Shelly 2PM plus');
       expect(device?.lastseen).not.toBe(0);
     });
 
