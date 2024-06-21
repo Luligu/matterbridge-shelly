@@ -67,14 +67,16 @@ export class ShellyComponent extends EventEmitter {
         const currentState = this.getValue('state');
         this.setValue('state', !currentState);
         if (device.gen === 1) ShellyDevice.fetch(device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { turn: 'toggle' });
-        if (device.gen !== 1) ShellyDevice.fetch(device.log, device.host, `${this.name}.Set`, { id: this.index });
+        if (device.gen !== 1) ShellyDevice.fetch(device.log, device.host, `${this.name}.Toggle`, { id: this.index });
       };
 
       (this as ShellyComponentType).Level = function (level: number) {
         if (!this.hasProperty('brightness')) return;
         const adjustedLevel = Math.min(Math.max(Math.round(level), 0), 100);
         this.setValue('brightness', adjustedLevel);
-        if (device.gen === 1) ShellyDevice.fetch(device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { brightness: adjustedLevel });
+        if (device.gen === 1 && !this.hasProperty('gain'))
+          ShellyDevice.fetch(device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { brightness: adjustedLevel });
+        if (device.gen === 1 && this.hasProperty('gain')) ShellyDevice.fetch(device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { gain: adjustedLevel });
         if (device.gen !== 1) ShellyDevice.fetch(device.log, device.host, `${this.name}.Set`, { id: this.index, brightness: adjustedLevel });
       };
     }

@@ -157,6 +157,7 @@ export class ShellyDevice extends EventEmitter {
       }
       for (const key in statusPayload) {
         if (key === 'temperature') device.addComponent(new ShellyComponent(device, 'sys', 'Sys'));
+        if (key === 'tmp') device.addComponent(new ShellyComponent(device, 'sys', 'Sys'));
         if (key === 'voltage') device.addComponent(new ShellyComponent(device, 'sys', 'Sys'));
         if (key === 'mode') device.addComponent(new ShellyComponent(device, 'sys', 'Sys'));
         if (key === 'meters') {
@@ -441,6 +442,7 @@ export class ShellyDevice extends EventEmitter {
           }
           log.debug(`${GREY}options: ${JSON.stringify(options)}${RESET}`);
           response = await fetch(url, options);
+          log.debug(`${GREY}response ok: ${response.ok}${RESET}`);
           if (response.ok) {
             const data = await response.json();
             const reponse = gen === 1 ? data : (data as ShellyData).result;

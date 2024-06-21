@@ -276,11 +276,11 @@ export class CoapServer extends EventEmitter {
 
             // sys component
             if (s.D === 'mode') desc.push({ id: s.I, component: 'sys', property: 'profile', range: s.R });
-            if (s.D === 'deviceTemp' && b.D === 'device') desc.push({ id: s.I, component: 'sys', property: 'temperature', range: s.R }); // SHSW-25
+            if (s.D === 'deviceTemp' && s.U !== 'F' && b.D === 'device') desc.push({ id: s.I, component: 'sys', property: 'temperature', range: s.R }); // SHSW-25
             if (s.D === 'voltage' && b.D === 'device') desc.push({ id: s.I, component: 'sys', property: 'voltage', range: s.R }); // SHSW-25
 
             // light component
-            if (s.D === 'output') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'ison', range: s.R });
+            if (s.D === 'output') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'state', range: s.R });
             if (s.D === 'brightness') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'brightness', range: s.R });
             if (s.D === 'gain') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'brightness', range: s.R });
             if (s.D === 'red') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'red', range: s.R });
