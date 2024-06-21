@@ -127,10 +127,10 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           if (lightComponent) {
             let deviceType = DeviceTypes.ON_OFF_LIGHT;
             if (lightComponent.hasProperty('brightness')) deviceType = DeviceTypes.DIMMABLE_LIGHT;
-            if (lightComponent.hasProperty('color')) deviceType = DeviceTypes.COLOR_TEMPERATURE_LIGHT;
+            if (lightComponent.hasProperty('red')) deviceType = DeviceTypes.COLOR_TEMPERATURE_LIGHT;
             const clusterIds: ClusterId[] = [OnOff.Cluster.id];
             if (lightComponent.hasProperty('brightness')) clusterIds.push(LevelControl.Cluster.id);
-            if (lightComponent.hasProperty('color')) clusterIds.push(ColorControl.Cluster.id);
+            if (lightComponent.hasProperty('red')) clusterIds.push(ColorControl.Cluster.id);
             const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [deviceType], clusterIds);
             mbDevice.addFixedLabel('composed', component.name);
             // Set the onOff attribute
@@ -144,20 +144,20 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             }
             // Add command handlers
             mbDevice.addCommandHandler('on', async (data) => {
-              this.shellySwitchCommandHandler(mbDevice, data.endpoint.number, device, 'On', true);
+              this.shellyLightCommandHandler(mbDevice, data.endpoint.number, device, 'On', true);
             });
             mbDevice.addCommandHandler('off', async (data) => {
-              this.shellySwitchCommandHandler(mbDevice, data.endpoint.number, device, 'Off', false);
+              this.shellyLightCommandHandler(mbDevice, data.endpoint.number, device, 'Off', false);
             });
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             mbDevice.addCommandHandler('moveToLevel', async ({ request, attributes, endpoint }) => {
               const state = child.getClusterServer(OnOffCluster)?.getOnOffAttribute();
-              if (state !== undefined) this.shellySwitchCommandHandler(mbDevice, endpoint.number, device, 'On', state, request.level);
+              if (state !== undefined) this.shellyLightCommandHandler(mbDevice, endpoint.number, device, 'On', state, request.level);
             });
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             mbDevice.addCommandHandler('moveToLevelWithOnOff', async ({ request, attributes, endpoint }) => {
               const state = child.getClusterServer(OnOffCluster)?.getOnOffAttribute();
-              if (state !== undefined) this.shellySwitchCommandHandler(mbDevice, endpoint.number, device, 'On', state, request.level);
+              if (state !== undefined) this.shellyLightCommandHandler(mbDevice, endpoint.number, device, 'On', state, request.level);
             });
             // Add event handler
             lightComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
@@ -194,10 +194,10 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             if (state !== undefined) child.getClusterServer(OnOffCluster)?.setOnOffAttribute(state as boolean);
             // Add command handlers
             mbDevice.addCommandHandler('on', async (data) => {
-              this.shellySwitchCommandHandler(mbDevice, data.endpoint.number, device, 'On', true);
+              this.shellyLightCommandHandler(mbDevice, data.endpoint.number, device, 'On', true);
             });
             mbDevice.addCommandHandler('off', async (data) => {
-              this.shellySwitchCommandHandler(mbDevice, data.endpoint.number, device, 'Off', false);
+              this.shellyLightCommandHandler(mbDevice, data.endpoint.number, device, 'Off', false);
             });
             // Add event handler
             switchComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
@@ -450,7 +450,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     }
   }
 
-  private shellySwitchCommandHandler(
+  private shellyLightCommandHandler(
     matterbridgeDevice: MatterbridgeDevice,
     endpointNumber: EndpointNumber | undefined,
     shellyDevice: ShellyDevice,
@@ -465,7 +465,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     }
     const endpoint = matterbridgeDevice.getChildEndpoint(endpointNumber);
     if (!endpoint) {
-      this.log.error(`shellyCommandHandler error: endpoint undefined for shelly device ${dn}${shellyDevice?.id}${er}`);
+      this.log.error(`shellyCommandHandler error: endpoint not found for shelly device ${dn}${shellyDevice?.id}${er}`);
       return false;
     }
     // Get the Shelly switch component
@@ -651,34 +651,37 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         `${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}WindowCovering${db} current:${YELLOW}${current}${db} target:${YELLOW}${target}${db} status:${YELLOW}${status?.global}${rs}`,
       );
     }
-    // Update energy from main components (gen 1 devices send power total inside the component not with meter)
-    /*
+    // Update energy from main components (gen 2 devices send power total inside the component not with meter)
     if (
-      (shellyComponent.name === 'Light' ||
-        shellyComponent.name === 'Relay' ||
-        shellyComponent.name === 'Switch' ||
-        shellyComponent.name === 'Cover' ||
-        shellyComponent.name === 'Roller') &&
-      property === 'power'
+      shellyComponent.name === 'Light' ||
+      shellyComponent.name === 'Relay' ||
+      shellyComponent.name === 'Switch' ||
+      shellyComponent.name === 'Cover' ||
+      shellyComponent.name === 'Roller'
     ) {
-      const cluster = endpoint.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy));
-      cluster?.setConsumptionAttribute(value as number);
-      if (cluster) shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}EveHistory-consumption${db} ${YELLOW}${value as number}${db}`);
+      if (property === 'power') {
+        const cluster = endpoint.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy));
+        cluster?.setConsumptionAttribute(value as number);
+        if (cluster) shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}EveHistory-consumption${db} ${YELLOW}${value as number}${db}`);
+      }
+      if (property === 'total') {
+        const cluster = endpoint.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy));
+        cluster?.setTotalConsumptionAttribute((value as number) / 1000); // convert to kWh
+        if (cluster)
+          shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}EveHistory-totalConsumption${db} ${YELLOW}${(value as number) / 1000}${db}`);
+      }
+      if (property === 'voltage') {
+        const cluster = endpoint.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy));
+        cluster?.setVoltageAttribute(value as number);
+        if (cluster) shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}EveHistory-voltage${db} ${YELLOW}${value as number}${db}`);
+      }
+      if (property === 'current') {
+        const cluster = endpoint.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy));
+        cluster?.setCurrentAttribute(value as number);
+        if (cluster) shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}EveHistory-current${db} ${YELLOW}${value as number}${db}`);
+      }
     }
-    if (
-      (shellyComponent.name === 'Light' ||
-        shellyComponent.name === 'Relay' ||
-        shellyComponent.name === 'Switch' ||
-        shellyComponent.name === 'Cover' ||
-        shellyComponent.name === 'Roller') &&
-      property === 'total'
-    ) {
-      const cluster = endpoint.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy));
-      cluster?.setTotalConsumptionAttribute((value as number) / 1000); // convert to kWh
-      if (cluster)
-        shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}EveHistory-totalConsumption${db} ${YELLOW}${(value as number) / 1000}${db}`);
-    }
-    */
+
     // Update energy from PowerMeter
     if (shellyComponent.name === 'PowerMeter') {
       if (property === 'power' || property === 'apower') {

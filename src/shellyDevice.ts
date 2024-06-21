@@ -163,6 +163,7 @@ export class ShellyDevice extends EventEmitter {
         if (key === 'meters') {
           let index = 0;
           for (const meter of statusPayload[key] as ShellyData[]) {
+            if (device.profile === 'cover' && index > 0) break;
             device.addComponent(new ShellyComponent(device, `meter:${index++}`, 'PowerMeter', meter as ShellyData));
           }
         }
@@ -300,6 +301,7 @@ export class ShellyDevice extends EventEmitter {
         if (key === 'meters') {
           let index = 0;
           for (const meter of data[key] as ShellyData[]) {
+            if (this.profile === 'cover' && index > 0) break;
             this.updateComponent(`meter:${index++}`, meter as ShellyData);
           }
         }
