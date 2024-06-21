@@ -651,7 +651,32 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         `${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}WindowCovering${db} current:${YELLOW}${current}${db} target:${YELLOW}${target}${db} status:${YELLOW}${status?.global}${rs}`,
       );
     }
-    // Update energy
+    // Update energy from main components (gen 1 devices send power total inside the component not with meter)
+    if (
+      (shellyComponent.name === 'Light' ||
+        shellyComponent.name === 'Relay' ||
+        shellyComponent.name === 'Switch' ||
+        shellyComponent.name === 'Cover' ||
+        shellyComponent.name === 'Roller') &&
+      property === 'power'
+    ) {
+      const cluster = endpoint.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy));
+      cluster?.setConsumptionAttribute(value as number);
+      shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}EveHistory-consumption${db} ${YELLOW}${value as number}${db}`);
+    }
+    if (
+      (shellyComponent.name === 'Light' ||
+        shellyComponent.name === 'Relay' ||
+        shellyComponent.name === 'Switch' ||
+        shellyComponent.name === 'Cover' ||
+        shellyComponent.name === 'Roller') &&
+      property === 'total'
+    ) {
+      const cluster = endpoint.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy));
+      cluster?.setTotalConsumptionAttribute((value as number) / 1000); // convert to kWh
+      shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}EveHistory-totalConsumption${db} ${YELLOW}${(value as number) / 1000}${db}`);
+    }
+    // Update energy from PowerMeter
     if (shellyComponent.name === 'PowerMeter') {
       if (property === 'power' || property === 'apower') {
         const cluster = endpoint.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy));

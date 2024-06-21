@@ -273,21 +273,24 @@ export class CoapServer extends EventEmitter {
             this.log.debug(
               `  - id: ${CYAN}${s.I}${db} type ${CYAN}${s.T}${db} description ${CYAN}${s.D}${db} unit ${CYAN}${s.U}${db} range ${CYAN}${s.R}${db} block ${CYAN}${s.L}${db}`,
             );
+
+            // sys component
+            if (s.D === 'mode') desc.push({ id: s.I, component: 'sys', property: 'profile', range: s.R });
+            if (s.D === 'deviceTemp' && b.D === 'device') desc.push({ id: s.I, component: 'sys', property: 'temperature', range: s.R }); // SHSW-25
+            if (s.D === 'voltage' && b.D === 'device') desc.push({ id: s.I, component: 'sys', property: 'voltage', range: s.R }); // SHSW-25
+
+            // light component
             if (s.D === 'output') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'ison', range: s.R });
             if (s.D === 'brightness') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'brightness', range: s.R });
 
-            if (s.D === 'mode') desc.push({ id: s.I, component: 'sys', property: 'profile', range: s.R });
-
+            // relay component
             if (s.D === 'roller') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'state', range: s.R });
             if (s.D === 'rollerPos') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'current_pos', range: s.R });
             if (s.D === 'rollerStopReason') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'stop_reason', range: s.R });
             if (s.D === 'rollerPower') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'power', range: s.R });
             if (s.D === 'rollerEnergy') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'total', range: s.R });
 
-            if (s.D === 'deviceTemp' && b.D === 'device') desc.push({ id: s.I, component: 'sys', property: 'temperature', range: s.R }); // SHSW-25
-
-            if (s.D === 'voltage' && b.D === 'device') desc.push({ id: s.I, component: 'sys', property: 'voltage', range: s.R }); // SHSW-25
-
+            // meter component
             if (s.D === 'voltage' && b.D !== 'device') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'voltage', range: s.R }); // SHEM
             if (s.D === 'power') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'power', range: s.R });
             if (s.D === 'energy') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'total', range: s.R });
