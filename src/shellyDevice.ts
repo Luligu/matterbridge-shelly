@@ -156,8 +156,8 @@ export class ShellyDevice extends EventEmitter {
         }
       }
       for (const key in statusPayload) {
-        if (key === 'temperature') device.addComponent(new ShellyComponent(device, 'sys', 'Sys', statusPayload[key] as ShellyData));
-        if (key === 'voltage') device.addComponent(new ShellyComponent(device, 'sys', 'Sys', statusPayload[key] as ShellyData));
+        if (key === 'temperature') device.addComponent(new ShellyComponent(device, 'sys', 'Sys'));
+        if (key === 'voltage') device.addComponent(new ShellyComponent(device, 'sys', 'Sys'));
         if (key === 'meters') {
           let index = 0;
           for (const meter of statusPayload[key] as ShellyData[]) {
