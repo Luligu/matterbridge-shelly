@@ -44,6 +44,8 @@ export class ShellyComponent extends EventEmitter {
       this.addProperty(new ShellyProperty(this, prop, data[prop] as ShellyDataType));
       // Add a state property for Light, Relay, and Switch components
       if (this.stateName.includes(name) && (prop === 'ison' || prop === 'output')) this.addProperty(new ShellyProperty(this, 'state', data[prop]));
+      // Add a brightness property for Light, Relay, and Switch components
+      if (name === 'Light' && prop === 'gain') this.addProperty(new ShellyProperty(this, 'brightness', data[prop]));
     }
 
     // Extend the class prototype to include the Switch Relay Light methods dynamically
@@ -65,14 +67,16 @@ export class ShellyComponent extends EventEmitter {
         const currentState = this.getValue('state');
         this.setValue('state', !currentState);
         if (device.gen === 1) ShellyDevice.fetch(device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { turn: 'toggle' });
-        if (device.gen !== 1) ShellyDevice.fetch(device.log, device.host, `${this.name}.Set`, { id: this.index });
+        if (device.gen !== 1) ShellyDevice.fetch(device.log, device.host, `${this.name}.Toggle`, { id: this.index });
       };
 
       (this as ShellyComponentType).Level = function (level: number) {
         if (!this.hasProperty('brightness')) return;
         const adjustedLevel = Math.min(Math.max(Math.round(level), 0), 100);
         this.setValue('brightness', adjustedLevel);
-        if (device.gen === 1) ShellyDevice.fetch(device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { brightness: adjustedLevel });
+        if (device.gen === 1 && !this.hasProperty('gain'))
+          ShellyDevice.fetch(device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { brightness: adjustedLevel });
+        if (device.gen === 1 && this.hasProperty('gain')) ShellyDevice.fetch(device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { gain: adjustedLevel });
         if (device.gen !== 1) ShellyDevice.fetch(device.log, device.host, `${this.name}.Set`, { id: this.index, brightness: adjustedLevel });
       };
     }

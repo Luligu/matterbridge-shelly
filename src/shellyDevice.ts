@@ -156,6 +156,10 @@ export class ShellyDevice extends EventEmitter {
         }
       }
       for (const key in statusPayload) {
+        if (key === 'temperature') device.addComponent(new ShellyComponent(device, 'sys', 'Sys'));
+        if (key === 'tmp') device.addComponent(new ShellyComponent(device, 'sys', 'Sys'));
+        if (key === 'voltage') device.addComponent(new ShellyComponent(device, 'sys', 'Sys'));
+        if (key === 'mode') device.addComponent(new ShellyComponent(device, 'sys', 'Sys'));
         if (key === 'meters') {
           let index = 0;
           for (const meter of statusPayload[key] as ShellyData[]) {
@@ -215,18 +219,17 @@ export class ShellyDevice extends EventEmitter {
 
     if (statusPayload) device.update(statusPayload);
 
-    // For gen 1 devices check if CoIoT is enabled and peer is set correctly
+    // For gen 1 devices check if CoIoT is enabled and peer is set correctly: 192.168.1.189:5683
     if (device.gen === 1) {
       const CoIoT = device.getComponent('coiot');
       if (CoIoT) {
-        if (!CoIoT.getValue('enabled')) log.error(`CoIoT is not enabled for device ${device.name} id ${device.id}. Enable it in the settings to receive updates from the device.`);
-        if (!CoIoT.getValue('peer')) {
-          log.error(`CoIoT peer for device ${device.name} id ${device.id} is not set.`);
-        } else {
+        if ((CoIoT.getValue('enabled') as boolean) === false)
+          log.error(`CoIoT is not enabled for device ${device.name} id ${device.id}. Enable it in the settings to receive updates from the device.`);
+        // When peer is mcast we get "" as value
+        if ((CoIoT.getValue('peer') as string) !== '') {
           const peer = CoIoT.getValue('peer') as string;
           const ipv4 = getIpv4InterfaceAddress() + ':5683';
-          if (peer !== 'mcast' && peer !== ipv4)
-            log.error(`CoIoT peer for device ${device.name} id ${device.id} is not mcast or ${ipv4}. Set it in the settings to receive updates from the device.`);
+          if (peer !== ipv4) log.error(`CoIoT peer for device ${device.name} id ${device.id} is not mcast or ${ipv4}. Set it in the settings to receive updates from the device.`);
         }
       } else {
         log.error(`CoIoT service not found for device ${device.name} id ${device.id}.`);
@@ -314,6 +317,7 @@ export class ShellyDevice extends EventEmitter {
           for (const light of data[key] as ShellyData[]) {
             const component = this.getComponent(`${key.slice(0, 5)}:${index++}`);
             if (component && light.ison !== undefined) component.setValue('state', light.ison as boolean);
+            if (component && light.gain !== undefined) component.setValue('brightness', light.gain as number);
           }
         }
       }
@@ -438,6 +442,7 @@ export class ShellyDevice extends EventEmitter {
           }
           log.debug(`${GREY}options: ${JSON.stringify(options)}${RESET}`);
           response = await fetch(url, options);
+          log.debug(`${GREY}response ok: ${response.ok}${RESET}`);
           if (response.ok) {
             const data = await response.json();
             const reponse = gen === 1 ? data : (data as ShellyData).result;
