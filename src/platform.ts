@@ -1,3 +1,26 @@
+/**
+ * This file contains the class ShellyPlatform.
+ *
+ * @file src\platform.ts
+ * @author Luca Liguori
+ * @date 2024-05-01
+ * @version 1.0.0
+ *
+ * Copyright 2024, 2025 Luca Liguori.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License. *
+ */
+
 import {
   Matterbridge,
   MatterbridgeDevice,
@@ -34,6 +57,7 @@ import { DiscoveredDevice } from './mdnsScanner.js';
 import { ShellyDevice } from './shellyDevice.js';
 import { ShellyCoverComponent, ShellySwitchComponent } from './shellyComponent.js';
 import { ShellyData, ShellyDataType } from './shellyTypes.js';
+import { rgbColorToHslColor } from './colorUtils.js';
 
 type ConfigDeviceIp = Record<string, string>;
 
@@ -611,6 +635,24 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       const matterLevel = Math.max(Math.min(Math.round(((value as number) / 100) * 255), 255), 0);
       cluster?.setCurrentLevelAttribute(matterLevel);
       shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}LevelControl-currentLevel${db} ${YELLOW}${matterLevel}${db}`);
+    }
+    // Update color
+    const colors = ['red', 'green', 'blue', 'white'];
+    if (shellyComponent.name === 'Light' && colors.includes(property)) {
+      // shellyDevice.getComponent(component)?.setValue(property, value);
+      const red = property === 'red' ? (value as number) : (shellyComponent.getValue('red') as number);
+      const green = property === 'green' ? (value as number) : (shellyComponent.getValue('green') as number);
+      const blue = property === 'blue' ? (value as number) : (shellyComponent.getValue('blue') as number);
+      const white = property === 'white' ? (value as number) : (shellyComponent.getValue('white') as number);
+      this.log.warn(`Color: R: ${red} G: ${green} B: ${blue} W: ${white}`);
+      const cluster = endpoint.getClusterServer(ColorControl.Complete);
+      const hsl = rgbColorToHslColor({ r: red, g: green, b: blue });
+      cluster?.setCurrentHueAttribute(hsl.h);
+      cluster?.setCurrentSaturationAttribute(hsl.s);
+      cluster?.setColorModeAttribute(ColorControl.ColorMode.CurrentHueAndCurrentSaturation);
+      shellyDevice.log.info(
+        `${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}ColorControl.currentHue:${YELLOW}${hsl.h}${db} ${hk}ColorControl.currentSaturation:${YELLOW}${hsl.s}${db}`,
+      );
     }
     // Update cover
     if (shellyComponent.name === 'Cover' || shellyComponent.name === 'Roller') {

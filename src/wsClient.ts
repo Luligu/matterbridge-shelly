@@ -1,6 +1,27 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+/**
+ * This file contains the class WsClient.
+ *
+ * @file src\wsClient.ts
+ * @author Luca Liguori
+ * @date 2024-05-01
+ * @version 1.0.0
+ *
+ * Copyright 2024, 2025 Luca Liguori.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License. *
+ */
 
-import { AnsiLogger, BLUE, CYAN, GREEN, TimestampFormat, db, debugStringify, dn, er, hk, idn, nf, rs, wr, zb } from 'node-ansi-logger';
+import { AnsiLogger, BLUE, CYAN, TimestampFormat, db, er, nf, rs, wr, zb } from 'node-ansi-logger';
 import WebSocket from 'ws';
 import crypto from 'crypto';
 import EventEmitter from 'events';
@@ -30,6 +51,7 @@ interface RequestFrameWithAuth {
   auth: AuthParams;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface ResponseError {
   id: number;
   src: string;
@@ -50,6 +72,7 @@ interface ResponseErrorMessage {
 
 type Params = Record<string, string | number | boolean | object>;
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface ResponseNotifyStatus {
   src: string;
   dst: string;
@@ -57,6 +80,7 @@ interface ResponseNotifyStatus {
   params: Params;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface Response {
   id: number;
   src: string;
@@ -136,6 +160,7 @@ export class WsClient extends EventEmitter {
     });
 
     // Handle messages from the WebSocket
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     this.wsClient.on('message', (data: WebSocket.RawData, isBinary: boolean) => {
       const response = JSON.parse(data.toString());
       this.id = response.src;
