@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.0] - 2024-06-23
+
+### Added
+
+- [update]: If the device has a firmware update available, a message is displayed.
+- [update]: If the device's CoIoT is not correctly set, a message is displayed.
+
+### Fixed
+
+- [deviceGen2]: Fix mdnsDiscovery for gen 2 pro devices. When you upgrade select resetStorageDiscover on the first start please.
+
+<a href="https://www.buymeacoffee.com/luligugithub">
+  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+</a>
+
+## [0.3.3] - 2024-06-21
+
+### Added
+
+- [deviceGen2]: Fix power meter update from gen. 2/3 devices.
+
+<a href="https://www.buymeacoffee.com/luligugithub">
+  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+</a>
+
 ## [0.3.2] - 2024-06-21
 
 ### Added

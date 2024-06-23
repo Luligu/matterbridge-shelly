@@ -122,7 +122,8 @@ export class ShellyDevice extends EventEmitter {
         return undefined;
       }
       device.model = shellyPayload.type as string;
-      device.id = (settingsPayload.device as ShellyData).hostname as string;
+      const [name, mac] = ((settingsPayload.device as ShellyData).hostname as string).split('-');
+      device.id = name.toLowerCase() + '-' + mac.toUpperCase();
       device.firmware = (shellyPayload.fw as string).split('/')[1];
       device.auth = shellyPayload.auth as boolean;
       device.name = settingsPayload.name ? (settingsPayload.name as string) : device.id;
@@ -185,11 +186,12 @@ export class ShellyDevice extends EventEmitter {
         return undefined;
       }
       device.model = shellyPayload.model as string;
-      device.id = shellyPayload.id as string;
+      const [name, mac] = (shellyPayload.id as string).split('-');
+      device.id = name.toLowerCase() + '-' + mac.toUpperCase();
       device.firmware = (shellyPayload.fw_id as string).split('/')[1];
       device.auth = shellyPayload.auth_en as boolean;
       device.gen = shellyPayload.gen;
-      // TODO device.hasUpdate = statusPayload.has_update as boolean;
+      device.hasUpdate = Object.keys((statusPayload.sys as ShellyData).available_updates as object).length > 0;
       for (const key in settingsPayload) {
         if (key === 'wifi') {
           const wifi = settingsPayload[key] as ShellyData;
@@ -210,6 +212,7 @@ export class ShellyDevice extends EventEmitter {
         if (key === 'ws') device.addComponent(new ShellyComponent(device, key, 'WS', settingsPayload[key] as ShellyData)); // Ok
         if (key === 'cloud') device.addComponent(new ShellyComponent(device, key, 'Cloud', settingsPayload[key] as ShellyData)); // Ok
         if (key === 'ble') device.addComponent(new ShellyComponent(device, key, 'Ble', settingsPayload[key] as ShellyData)); // Ok
+        if (key === 'eth') device.addComponent(new ShellyComponent(device, key, 'Eth', settingsPayload[key] as ShellyData)); // Ok
         if (key.startsWith('switch:')) device.addComponent(new ShellyComponent(device, key, 'Switch', settingsPayload[key] as ShellyData));
         if (key.startsWith('cover:')) device.addComponent(new ShellyComponent(device, key, 'Cover', settingsPayload[key] as ShellyData));
         if (key.startsWith('light:')) device.addComponent(new ShellyComponent(device, key, 'Light', settingsPayload[key] as ShellyData));
@@ -236,6 +239,9 @@ export class ShellyDevice extends EventEmitter {
         log.error(`CoIoT service not found for device ${device.name} id ${device.id}.`);
       }
     }
+
+    // Check if device has an available firmware update
+    if (device.hasUpdate) log.warn(`Device ${hk}${device.id}${wr} host ${zb}${device.host}${wr} has an available firmware update.`);
 
     // Start lastseen interval
     device.lastseenInterval = setInterval(() => {
@@ -327,6 +333,11 @@ export class ShellyDevice extends EventEmitter {
       // Update passive components
       for (const key in data) {
         if (key === 'sys') this.updateComponent(key, data[key] as ShellyData);
+        if (key === 'eth') this.updateComponent(key, data[key] as ShellyData);
+        if (key === 'cloud') this.updateComponent(key, data[key] as ShellyData);
+        if (key === 'mqtt') this.updateComponent(key, data[key] as ShellyData);
+        if (key === 'ws') this.updateComponent(key, data[key] as ShellyData);
+        if (key === 'ble') this.updateComponent(key, data[key] as ShellyData);
       }
       // Update active components
       for (const key in data) {
@@ -354,8 +365,12 @@ export class ShellyDevice extends EventEmitter {
     const status = await ShellyDevice.fetch(this.log, this.host, service);
     if (!status) {
       this.log.error(`Error fetching device ${this.id} status. No data found.`);
+      this.online = false;
+      this.emit('offline');
       return;
     }
+    this.online = true;
+    this.emit('online');
     this.update(status);
   }
 
