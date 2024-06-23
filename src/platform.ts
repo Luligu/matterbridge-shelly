@@ -187,7 +187,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
                   ((switchComponent.getValue('aenergy') as ShellyData).total as number) / 1000,
                 ),
               );
-              this.log.warn(`Added EveHistory cluster to ${device.id} component ${key}`);
+              // this.log.warn(`Added EveHistory cluster to ${device.id} component ${key}`);
             }
             // Set the OnOff attribute
             const state = switchComponent.getValue('state');
@@ -218,7 +218,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
                   ((coverComponent.getValue('aenergy') as ShellyData).total as number) / 1000,
                 ),
               );
-              this.log.warn(`Added EveHistory cluster to ${device.id} component ${key}`);
+              // this.log.warn(`Added EveHistory cluster to ${device.id} component ${key}`);
             }
 
             // Set the WindowCovering attributes
@@ -325,7 +325,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
 
     // start Shelly mDNS device discoverer
     if (this.config.enableMdnsDiscover === true) {
-      this.shelly.startMdns(60 * 10);
+      this.shelly.startMdns(60 * 10 /* , this.config.debug as boolean*/);
     }
 
     // add all stored devices

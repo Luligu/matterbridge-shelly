@@ -24,7 +24,9 @@ Features:
 - Shelly Gen 1 devices are controlled using the CoIoT protocol (see the note below).
 - Shelly Gen 2 and Gen 3 devices are controlled using WebSocket.
 - The Matter device takes the name configured in the Shelly device's web page.
-- A 10-minute timer checks if the device has reported in that time.
+- If the device has a firmware update available, a message is displayed.
+- If the device's CoIoT is not correctly set, a message is displayed.
+- A 10-minute timer checks if the device has reported within that time frame, and fetch un update.
 
 ## Acknowledgements
 
