@@ -53,7 +53,8 @@ export class ShellyDevice extends EventEmitter {
   gen = 0;
   lastseen = 0;
   hasUpdate = false;
-  colorTimeout?: NodeJS.Timeout;
+  colorUpdateTimeout?: NodeJS.Timeout;
+  colorCommandTimeout?: NodeJS.Timeout;
   private lastseenInterval?: NodeJS.Timeout;
   private startWsClientTimeout?: NodeJS.Timeout;
 
@@ -75,8 +76,10 @@ export class ShellyDevice extends EventEmitter {
   }
 
   destroy() {
-    if (this.colorTimeout) clearInterval(this.colorTimeout);
-    this.colorTimeout = undefined;
+    if (this.colorUpdateTimeout) clearInterval(this.colorUpdateTimeout);
+    this.colorUpdateTimeout = undefined;
+    if (this.colorCommandTimeout) clearInterval(this.colorCommandTimeout);
+    this.colorCommandTimeout = undefined;
     this.lastseen = 0;
     if (this.lastseenInterval) clearInterval(this.lastseenInterval);
     this.lastseenInterval = undefined;

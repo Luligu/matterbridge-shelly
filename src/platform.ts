@@ -47,6 +47,7 @@ import {
   Endpoint,
   SwitchCluster,
   Switch,
+  ColorControlCluster,
 } from 'matterbridge';
 import { AnsiLogger, BLUE, CYAN, GREEN, TimestampFormat, YELLOW, db, debugStringify, dn, er, hk, idn, nf, or, rs, wr, zb } from 'node-ansi-logger';
 import { NodeStorage, NodeStorageManager } from 'node-persist-manager';
@@ -184,6 +185,28 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             mbDevice.addCommandHandler('moveToLevelWithOnOff', async ({ request, endpoint }) => {
               const state = child.getClusterServer(OnOffCluster)?.getOnOffAttribute();
               this.shellyLightCommandHandler(mbDevice, endpoint.number, device, 'Level', state, request.level);
+            });
+            mbDevice.addCommandHandler('moveToHue', async ({ request, attributes, endpoint }) => {
+              attributes.colorMode.setLocal(ColorControl.ColorMode.CurrentHueAndCurrentSaturation);
+              const state = child.getClusterServer(OnOffCluster)?.getOnOffAttribute();
+              const level = child.getClusterServer(LevelControlCluster)?.getCurrentLevelAttribute();
+              const saturation = child.getClusterServer(ColorControlCluster.with(ColorControl.Feature.HueSaturation))?.getCurrentSaturationAttribute() ?? 0;
+              const rgb = hslColorToRgbColor((request.hue / 254) * 360, (saturation / 254) * 100, 50);
+              if (device.colorCommandTimeout) clearTimeout(device.colorCommandTimeout);
+              device.colorCommandTimeout = setTimeout(() => {
+                this.shellyLightCommandHandler(mbDevice, endpoint.number, device, 'ColorRGB', state, level, { r: rgb.r, g: rgb.g, b: rgb.b });
+              }, 200);
+            });
+            mbDevice.addCommandHandler('moveToSaturation', async ({ request, attributes, endpoint }) => {
+              attributes.colorMode.setLocal(ColorControl.ColorMode.CurrentHueAndCurrentSaturation);
+              const state = child.getClusterServer(OnOffCluster)?.getOnOffAttribute();
+              const level = child.getClusterServer(LevelControlCluster)?.getCurrentLevelAttribute();
+              const hue = child.getClusterServer(ColorControlCluster.with(ColorControl.Feature.HueSaturation))?.getCurrentHueAttribute() ?? 0;
+              const rgb = hslColorToRgbColor((hue / 254) * 360, (request.saturation / 254) * 100, 50);
+              if (device.colorCommandTimeout) clearTimeout(device.colorCommandTimeout);
+              device.colorCommandTimeout = setTimeout(() => {
+                this.shellyLightCommandHandler(mbDevice, endpoint.number, device, 'ColorRGB', state, level, { r: rgb.r, g: rgb.g, b: rgb.b });
+              }, 200);
             });
             mbDevice.addCommandHandler('moveToHueAndSaturation', async ({ request, attributes, endpoint }) => {
               attributes.colorMode.setLocal(ColorControl.ColorMode.CurrentHueAndCurrentSaturation);
@@ -655,8 +678,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       const cluster = endpoint.getClusterServer(ColorControl.Complete);
       const hsl = rgbColorToHslColor({ r: red, g: green, b: blue });
       this.log.warn(`Color: R:${red} G:${green} B:${blue} => H:${hsl.h} S:${hsl.s} L:${hsl.l}`);
-      if (shellyDevice.colorTimeout) clearTimeout(shellyDevice.colorTimeout);
-      shellyDevice.colorTimeout = setTimeout(() => {
+      if (shellyDevice.colorUpdateTimeout) clearTimeout(shellyDevice.colorUpdateTimeout);
+      shellyDevice.colorUpdateTimeout = setTimeout(() => {
         const hue = Math.max(Math.min(Math.round((hsl.h / 360) * 254), 254), 0);
         const saturation = Math.max(Math.min(Math.round((hsl.s / 100) * 254), 254), 0);
         cluster?.setCurrentHueAttribute(hue);
