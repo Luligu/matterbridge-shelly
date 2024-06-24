@@ -157,6 +157,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             if (lightComponent.hasProperty('brightness')) clusterIds.push(LevelControl.Cluster.id);
             if (lightComponent.hasProperty('red')) clusterIds.push(ColorControl.Cluster.id);
             const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [deviceType], clusterIds);
+            child.addClusterServer(mbDevice.getDefaultXYColorControlClusterServer());
             mbDevice.addFixedLabel('composed', component.name);
             // Set the onOff attribute
             const state = lightComponent.getValue('state');
@@ -167,6 +168,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               const matterLevel = Math.max(Math.min(Math.round((level as number) / 100) * 255, 255), 0);
               child.getClusterServer(LevelControlCluster)?.setCurrentLevelAttribute(matterLevel as number);
             }
+            // Set the currentX and currentY attribute
+            // TODO
 
             // Add command handlers from Matter
             mbDevice.addCommandHandler('on', async (data) => {
@@ -192,10 +195,11 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               const level = child.getClusterServer(LevelControlCluster)?.getCurrentLevelAttribute();
               const saturation = child.getClusterServer(ColorControlCluster.with(ColorControl.Feature.HueSaturation))?.getCurrentSaturationAttribute() ?? 0;
               const rgb = hslColorToRgbColor((request.hue / 254) * 360, (saturation / 254) * 100, 50);
+              this.log.warn(`***Sending command moveToHue => ColorRGB(${rgb.r},  ${rgb.g}, ${rgb.b})`);
               if (device.colorCommandTimeout) clearTimeout(device.colorCommandTimeout);
               device.colorCommandTimeout = setTimeout(() => {
                 this.shellyLightCommandHandler(mbDevice, endpoint.number, device, 'ColorRGB', state, level, { r: rgb.r, g: rgb.g, b: rgb.b });
-              }, 200);
+              }, 500);
             });
             mbDevice.addCommandHandler('moveToSaturation', async ({ request, attributes, endpoint }) => {
               attributes.colorMode.setLocal(ColorControl.ColorMode.CurrentHueAndCurrentSaturation);
@@ -203,10 +207,11 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               const level = child.getClusterServer(LevelControlCluster)?.getCurrentLevelAttribute();
               const hue = child.getClusterServer(ColorControlCluster.with(ColorControl.Feature.HueSaturation))?.getCurrentHueAttribute() ?? 0;
               const rgb = hslColorToRgbColor((hue / 254) * 360, (request.saturation / 254) * 100, 50);
+              this.log.warn(`***Sending command moveToSaturation => ColorRGB(${rgb.r},  ${rgb.g}, ${rgb.b})`);
               if (device.colorCommandTimeout) clearTimeout(device.colorCommandTimeout);
               device.colorCommandTimeout = setTimeout(() => {
                 this.shellyLightCommandHandler(mbDevice, endpoint.number, device, 'ColorRGB', state, level, { r: rgb.r, g: rgb.g, b: rgb.b });
-              }, 200);
+              }, 500);
             });
             mbDevice.addCommandHandler('moveToHueAndSaturation', async ({ request, attributes, endpoint }) => {
               attributes.colorMode.setLocal(ColorControl.ColorMode.CurrentHueAndCurrentSaturation);
@@ -602,42 +607,18 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       return false;
     }
     if (command === 'Stop') {
-      matterbridgeDevice.setWindowCoveringTargetAsCurrentAndStopped(endpoint);
       coverComponent.Stop();
-      const current = coverCluster.getCurrentPositionLiftPercent100thsAttribute();
-      const target = coverCluster.getTargetPositionLiftPercent100thsAttribute();
-      const status = coverCluster.getOperationalStatusAttribute();
-      shellyDevice.log.info(
-        `Command ${hk}${componentName}${nf}:${command}() for endpoint ${or}${endpointNumber}${nf} attribute ${hk}${coverCluster.name}${nf} current:${current} target:${target} status:${status.global}`,
-      );
+      shellyDevice.log.info(`Command ${hk}${componentName}${nf}:${command}() for shelly device ${idn}${shellyDevice?.id}${rs}${nf}`);
     } else if (command === 'Open') {
-      matterbridgeDevice.setWindowCoveringCurrentTargetStatus(0, 0, WindowCovering.MovementStatus.Stopped, endpoint);
       coverComponent.Open();
-      const current = coverCluster.getCurrentPositionLiftPercent100thsAttribute();
-      const target = coverCluster.getTargetPositionLiftPercent100thsAttribute();
-      const status = coverCluster.getOperationalStatusAttribute();
-      shellyDevice.log.info(
-        `Command ${hk}${componentName}${nf}:${command}() for endpoint ${or}${endpointNumber}${nf} attribute ${hk}${coverCluster.name}${nf} current:${current} target:${target} status:${status.global}`,
-      );
+      shellyDevice.log.info(`Command ${hk}${componentName}${nf}:${command}() for shelly device ${idn}${shellyDevice?.id}${rs}${nf}`);
     } else if (command === 'Close') {
-      matterbridgeDevice.setWindowCoveringCurrentTargetStatus(10000, 10000, WindowCovering.MovementStatus.Stopped, endpoint);
       coverComponent.Close();
-      const current = coverCluster.getCurrentPositionLiftPercent100thsAttribute();
-      const target = coverCluster.getTargetPositionLiftPercent100thsAttribute();
-      const status = coverCluster.getOperationalStatusAttribute();
-      shellyDevice.log.info(
-        `Command ${hk}${componentName}${nf}:${command}() for endpoint ${or}${endpointNumber}${nf} attribute ${hk}${coverCluster.name}${nf} current:${current} target:${target} status:${status.global}`,
-      );
+      shellyDevice.log.info(`Command ${hk}${componentName}${nf}:${command}() for shelly device ${idn}${shellyDevice?.id}${rs}${nf}`);
     } else if (command === 'GoToPosition' && pos !== undefined) {
-      matterbridgeDevice.setWindowCoveringCurrentTargetStatus(pos, pos, WindowCovering.MovementStatus.Stopped, endpoint);
       const shellyPos = 100 - Math.max(Math.min(Math.round(pos / 100), 10000), 0);
       coverComponent.GoToPosition(shellyPos);
-      const current = coverCluster.getCurrentPositionLiftPercent100thsAttribute();
-      const target = coverCluster.getTargetPositionLiftPercent100thsAttribute();
-      const status = coverCluster.getOperationalStatusAttribute();
-      shellyDevice.log.info(
-        `Command ${hk}${componentName}${nf}:${command}(${shellyPos}) for endpoint ${or}${endpointNumber}${nf} attribute ${hk}${coverCluster.name}${nf} current:${current} target:${target} status:${status.global}`,
-      );
+      shellyDevice.log.info(`Command ${hk}${componentName}${nf}:${command}(${shellyPos}) for shelly device ${idn}${shellyDevice?.id}${rs}${nf}`);
     }
     return true;
   }
@@ -695,8 +676,15 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       const windowCoveringCluster = endpoint.getClusterServer(
         WindowCoveringCluster.with(WindowCovering.Feature.Lift, WindowCovering.Feature.PositionAwareLift, WindowCovering.Feature.AbsolutePosition),
       );
+      if (!windowCoveringCluster) {
+        shellyDevice.log.error('shellyUpdateHandler error: cluster WindowCoveringCluster not found');
+        return;
+      }
       // Matter uses 10000 = fully closed   0 = fully opened
       // Shelly uses 0 = fully closed   100 = fully opened
+      // Gen 2 open sequence: state:open state:opening current_pos:100 state:open
+      // Gen 2 close sequence: state:close state:closing current_pos:0 state:close
+      // Gen 2 stop sequence: state:stop current_pos:80 state:stopped
       if (property === 'state') {
         // Gen 1 devices send stop
         if (value === 'stopped' || value === 'stop') {
@@ -720,13 +708,17 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         }
       } else if (property === 'current_pos' && value !== -1) {
         const matterPos = 10000 - Math.min(Math.max(Math.round((value as number) * 100), 0), 10000);
-        matterbridgeDevice.setWindowCoveringCurrentTargetStatus(matterPos, matterPos, WindowCovering.MovementStatus.Stopped, endpoint);
+        windowCoveringCluster?.setCurrentPositionLiftPercent100thsAttribute(matterPos);
+      } else if (property === 'target_pos' && value !== -1 && value !== null) {
+        const matterPos = 10000 - Math.min(Math.max(Math.round((value as number) * 100), 0), 10000);
+        windowCoveringCluster?.setTargetPositionLiftPercent100thsAttribute(matterPos);
       }
-      const current = windowCoveringCluster?.getCurrentPositionLiftPercent100thsAttribute();
-      const target = windowCoveringCluster?.getTargetPositionLiftPercent100thsAttribute();
-      const status = windowCoveringCluster?.getOperationalStatusAttribute();
+      const current = windowCoveringCluster.getCurrentPositionLiftPercent100thsAttribute();
+      const target = windowCoveringCluster.getTargetPositionLiftPercent100thsAttribute();
+      const status = windowCoveringCluster.getOperationalStatusAttribute();
+      const statusLookup = ['stopped', 'opening', 'closing', 'unknown'];
       shellyDevice.log.info(
-        `${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}WindowCovering${db} current:${YELLOW}${current}${db} target:${YELLOW}${target}${db} status:${YELLOW}${status?.global}${rs}`,
+        `${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}WindowCovering${db} current:${YELLOW}${current}${db} target:${YELLOW}${target}${db} status:${YELLOW}${statusLookup[status.global ?? 3]}${rs}`,
       );
     }
     // Update energy from main components (gen 2 devices send power total inside the component not with meter)
@@ -737,7 +729,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       shellyComponent.name === 'Cover' ||
       shellyComponent.name === 'Roller'
     ) {
-      if (property === 'power') {
+      if (property === 'power' || property === 'apower') {
         const cluster = endpoint.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy));
         cluster?.setConsumptionAttribute(value as number);
         if (cluster) shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}EveHistory-consumption${db} ${YELLOW}${value as number}${db}`);

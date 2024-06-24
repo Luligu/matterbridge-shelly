@@ -71,6 +71,22 @@ export function getGen1BodyOptions(params?: Record<string, string | number | boo
   return new URLSearchParams(params as any).toString();
 }
 
+/*
+options: {
+  "method":"POST",
+  "headers": {
+    "Content-Type":"application/json"
+  },
+  "body": "{ 
+    \"jsonrpc\":\"2.0\",
+    \"id\":10,
+    \"src\":\"Matterbridge\",
+    \"method\":\"Cover.GoToPosition \",
+    \"params\":{\"id\":0,\"pos\":90}
+  }"
+}
+*/
+
 export function getGen2BodyOptions(jsonrpc: string, id: number, src: string, method: string, params?: Record<string, string | number | boolean>, auth?: AuthParams): string {
   const body: Record<string, string | number | boolean | object | AuthParams> = {};
   body.jsonrpc = '2.0';
@@ -79,6 +95,7 @@ export function getGen2BodyOptions(jsonrpc: string, id: number, src: string, met
   body.method = method;
   if (params) body.params = params;
   if (auth) body.auth = auth;
+  // console.log(JSON.stringify(body));
   return JSON.stringify(body);
 }
 
