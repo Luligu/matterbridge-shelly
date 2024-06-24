@@ -484,48 +484,50 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
   ): boolean {
     // Get the matter endpoint
     if (!endpointNumber) {
-      this.log.error(`shellyCommandHandler error: endpointNumber undefined for shelly device ${dn}${shellyDevice?.id}${er}`);
+      shellyDevice.log.error(`shellyCommandHandler error: endpointNumber undefined for shelly device ${dn}${shellyDevice?.id}${er}`);
       return false;
     }
     const endpoint = matterbridgeDevice.getChildEndpoint(endpointNumber);
     if (!endpoint) {
-      this.log.error(`shellyCommandHandler error: endpoint not found for shelly device ${dn}${shellyDevice?.id}${er}`);
+      shellyDevice.log.error(`shellyCommandHandler error: endpoint not found for shelly device ${dn}${shellyDevice?.id}${er}`);
       return false;
     }
     // Get the Shelly switch component
     const componentName = matterbridgeDevice.getEndpointLabel(endpointNumber);
     if (!componentName) {
-      this.log.error(`shellyCommandHandler error: endpointName undefined for shelly device ${dn}${shellyDevice?.id}${er}`);
+      shellyDevice.log.error(`shellyCommandHandler error: componentName not found for shelly device ${dn}${shellyDevice?.id}${er}`);
       return false;
     }
     const switchComponent = shellyDevice?.getComponent(componentName) as ShellySwitchComponent;
     if (!switchComponent) {
-      this.log.error(`shellyCommandHandler error: switchComponent ${componentName} not found for shelly device ${dn}${shellyDevice?.id}${er}`);
+      shellyDevice.log.error(`shellyCommandHandler error: component ${componentName} not found for shelly device ${dn}${shellyDevice?.id}${er}`);
       return false;
     }
     // Set OnOffCluster onOff attribute
+    /*
     const onOffCluster = endpoint.getClusterServer(OnOffCluster);
     if (!onOffCluster) {
       this.log.error('shellyCommandHandler error: cluster OnOffCluster not found');
       return false;
     }
     onOffCluster.setOnOffAttribute(state); // TODO remove
+    */
     if (state) switchComponent.On();
     else switchComponent.Off();
-    shellyDevice.log.info(`Command ${hk}${componentName}${nf}:${command}() for endpoint ${or}${endpointNumber}${nf} attribute ${hk}${onOffCluster.name}-onOff${nf}: ${state} `);
+    shellyDevice.log.info(`Command ${hk}${componentName}${nf}:${command}() for shelly device ${dn}${shellyDevice?.id}${nf}`);
     // Set LevelControlCluster currentLevel attribute
     if (level !== undefined) {
+      /*
       const levelControlCluster = endpoint.getClusterServer(LevelControlCluster);
       if (!levelControlCluster) {
         this.log.error('shellyCommandHandler error: cluster LevelControlCluster not found');
         return false;
       }
       levelControlCluster.setCurrentLevelAttribute(level); // TODO remove
+      */
       const shellyLevel = Math.max(Math.min(Math.round((level / 254) * 100), 100), 1);
       switchComponent?.Level(shellyLevel);
-      shellyDevice.log.info(
-        `Command ${hk}${componentName}${nf}:Level(${shellyLevel}) for endpoint ${or}${endpointNumber}${nf} attribute ${hk}${onOffCluster.name}-onOff${nf}: ${state} `,
-      );
+      shellyDevice.log.info(`Command ${hk}${componentName}${nf}:Level(${YELLOW}${shellyLevel}${nf}) for shelly device ${dn}${shellyDevice?.id}${nf}`);
     }
     return true;
   }
@@ -539,32 +541,32 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
   ): boolean {
     // Get the matter endpoint
     if (!endpointNumber) {
-      this.log.error(`shellyCommandHandler error: endpointNumber undefined for shelly device ${dn}${shellyDevice?.id}${er}`);
+      shellyDevice.log.error(`shellyCoverCommandHandler error: endpointNumber undefined for shelly device ${dn}${shellyDevice?.id}${er}`);
       return false;
     }
     const endpoint = matterbridgeDevice.getChildEndpoint(endpointNumber);
     if (!endpoint) {
-      this.log.error(`shellyCommandHandler error: endpoint undefined for shelly device ${dn}${shellyDevice?.id}${er}`);
+      shellyDevice.log.error(`shellyCoverCommandHandler error: endpoint not found for shelly device ${dn}${shellyDevice?.id}${er}`);
       return false;
     }
-    // Get the Shelly switch component
+    // Get the Shelly cover component
     const componentName = matterbridgeDevice.getEndpointLabel(endpointNumber);
     if (!componentName) {
-      this.log.error(`shellyCommandHandler error: endpointName undefined for shelly device ${dn}${shellyDevice?.id}${er}`);
+      shellyDevice.log.error(`shellyCoverCommandHandler error: endpointName not found for shelly device ${dn}${shellyDevice?.id}${er}`);
       return false;
     }
     const coverComponent = shellyDevice?.getComponent(componentName) as ShellyCoverComponent;
     if (!coverComponent) {
-      this.log.error(`shellyCommandHandler error: coverComponent ${componentName} not found for shelly device ${dn}${shellyDevice?.id}${er}`);
+      shellyDevice.log.error(`shellyCoverCommandHandler error: component ${componentName} not found for shelly device ${dn}${shellyDevice?.id}${er}`);
       return false;
     }
-    // Matter uses 10000 = fully closed - 0 = fully opened
-    // Shelly uses 0 = fully closed - 100 = fully opened
+    // Matter uses 10000 = fully closed   0 = fully opened
+    // Shelly uses 0 = fully closed   100 = fully opened
     const coverCluster = endpoint.getClusterServer(
       WindowCoveringCluster.with(WindowCovering.Feature.Lift, WindowCovering.Feature.PositionAwareLift, WindowCovering.Feature.AbsolutePosition),
     );
     if (!coverCluster) {
-      this.log.error('shellyCommandHandler error: cluster WindowCoveringCluster not found');
+      shellyDevice.log.error('shellyCoverCommandHandler error: cluster WindowCoveringCluster not found');
       return false;
     }
     if (command === 'Stop') {
@@ -643,16 +645,20 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       const red = property === 'red' ? (value as number) : (shellyComponent.getValue('red') as number);
       const green = property === 'green' ? (value as number) : (shellyComponent.getValue('green') as number);
       const blue = property === 'blue' ? (value as number) : (shellyComponent.getValue('blue') as number);
-      const white = property === 'white' ? (value as number) : (shellyComponent.getValue('white') as number);
-      this.log.warn(`Color: R: ${red} G: ${green} B: ${blue} W: ${white}`);
       const cluster = endpoint.getClusterServer(ColorControl.Complete);
       const hsl = rgbColorToHslColor({ r: red, g: green, b: blue });
-      cluster?.setCurrentHueAttribute(hsl.h);
-      cluster?.setCurrentSaturationAttribute(hsl.s);
-      cluster?.setColorModeAttribute(ColorControl.ColorMode.CurrentHueAndCurrentSaturation);
-      shellyDevice.log.info(
-        `${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}ColorControl.currentHue:${YELLOW}${hsl.h}${db} ${hk}ColorControl.currentSaturation:${YELLOW}${hsl.s}${db}`,
-      );
+      this.log.warn(`Color: R:${red} G:${green} B:${blue} => H:${hsl.h} S:${hsl.s} L:${hsl.l}`);
+      if (shellyDevice.colorTimeout) clearTimeout(shellyDevice.colorTimeout);
+      shellyDevice.colorTimeout = setTimeout(() => {
+        const hue = Math.max(Math.min(Math.round((hsl.h / 360) * 254), 254), 0);
+        const saturation = Math.max(Math.min(Math.round((hsl.s / 100) * 254), 254), 0);
+        cluster?.setCurrentHueAttribute(hue);
+        cluster?.setCurrentSaturationAttribute(saturation);
+        cluster?.setColorModeAttribute(ColorControl.ColorMode.CurrentHueAndCurrentSaturation);
+        shellyDevice.log.info(
+          `${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}ColorControl.currentHue:${YELLOW}${hue}${db} ${hk}ColorControl.currentSaturation:${YELLOW}${saturation}${db}`,
+        );
+      }, 200);
     }
     // Update cover
     if (shellyComponent.name === 'Cover' || shellyComponent.name === 'Roller') {
