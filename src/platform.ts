@@ -57,7 +57,7 @@ import { DiscoveredDevice } from './mdnsScanner.js';
 import { ShellyDevice } from './shellyDevice.js';
 import { ShellyCoverComponent, ShellySwitchComponent } from './shellyComponent.js';
 import { ShellyData, ShellyDataType } from './shellyTypes.js';
-import { rgbColorToHslColor } from './colorUtils.js';
+import { hslColorToRgbColor, rgbColorToHslColor } from './colorUtils.js';
 
 type ConfigDeviceIp = Record<string, string>;
 
@@ -166,24 +166,34 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               const matterLevel = Math.max(Math.min(Math.round((level as number) / 100) * 255, 255), 0);
               child.getClusterServer(LevelControlCluster)?.setCurrentLevelAttribute(matterLevel as number);
             }
-            // Add command handlers
+
+            // Add command handlers from Matter
             mbDevice.addCommandHandler('on', async (data) => {
               this.shellyLightCommandHandler(mbDevice, data.endpoint.number, device, 'On', true);
             });
             mbDevice.addCommandHandler('off', async (data) => {
               this.shellyLightCommandHandler(mbDevice, data.endpoint.number, device, 'Off', false);
             });
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            mbDevice.addCommandHandler('moveToLevel', async ({ request, attributes, endpoint }) => {
-              const state = child.getClusterServer(OnOffCluster)?.getOnOffAttribute();
-              if (state !== undefined) this.shellyLightCommandHandler(mbDevice, endpoint.number, device, 'On', state, request.level);
+            mbDevice.addCommandHandler('toggle', async (data) => {
+              this.shellyLightCommandHandler(mbDevice, data.endpoint.number, device, 'Toggle', false);
             });
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            mbDevice.addCommandHandler('moveToLevelWithOnOff', async ({ request, attributes, endpoint }) => {
+            mbDevice.addCommandHandler('moveToLevel', async ({ request, endpoint }) => {
               const state = child.getClusterServer(OnOffCluster)?.getOnOffAttribute();
-              if (state !== undefined) this.shellyLightCommandHandler(mbDevice, endpoint.number, device, 'On', state, request.level);
+              this.shellyLightCommandHandler(mbDevice, endpoint.number, device, 'Level', state, request.level);
             });
-            // Add event handler
+            mbDevice.addCommandHandler('moveToLevelWithOnOff', async ({ request, endpoint }) => {
+              const state = child.getClusterServer(OnOffCluster)?.getOnOffAttribute();
+              this.shellyLightCommandHandler(mbDevice, endpoint.number, device, 'Level', state, request.level);
+            });
+            mbDevice.addCommandHandler('moveToHueAndSaturation', async ({ request, attributes, endpoint }) => {
+              attributes.colorMode.setLocal(ColorControl.ColorMode.CurrentHueAndCurrentSaturation);
+              const state = child.getClusterServer(OnOffCluster)?.getOnOffAttribute();
+              const level = child.getClusterServer(LevelControlCluster)?.getCurrentLevelAttribute();
+              const rgb = hslColorToRgbColor((request.hue / 254) * 360, (request.saturation / 254) * 100, 50);
+              this.shellyLightCommandHandler(mbDevice, endpoint.number, device, 'ColorRGB', state, level, { r: rgb.r, g: rgb.g, b: rgb.b });
+            });
+
+            // Add event handler from Shelly
             lightComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
               this.shellyUpdateHandler(mbDevice, device, component, property, value);
             });
@@ -479,8 +489,9 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     endpointNumber: EndpointNumber | undefined,
     shellyDevice: ShellyDevice,
     command: string,
-    state: boolean,
-    level?: number,
+    state?: boolean,
+    level?: number | null,
+    color?: { r: number; g: number; b: number },
   ): boolean {
     // Get the matter endpoint
     if (!endpointNumber) {
@@ -503,31 +514,29 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       shellyDevice.log.error(`shellyCommandHandler error: component ${componentName} not found for shelly device ${dn}${shellyDevice?.id}${er}`);
       return false;
     }
-    // Set OnOffCluster onOff attribute
-    /*
-    const onOffCluster = endpoint.getClusterServer(OnOffCluster);
-    if (!onOffCluster) {
-      this.log.error('shellyCommandHandler error: cluster OnOffCluster not found');
-      return false;
-    }
-    onOffCluster.setOnOffAttribute(state); // TODO remove
-    */
-    if (state) switchComponent.On();
-    else switchComponent.Off();
-    shellyDevice.log.info(`Command ${hk}${componentName}${nf}:${command}() for shelly device ${dn}${shellyDevice?.id}${nf}`);
-    // Set LevelControlCluster currentLevel attribute
-    if (level !== undefined) {
-      /*
-      const levelControlCluster = endpoint.getClusterServer(LevelControlCluster);
-      if (!levelControlCluster) {
-        this.log.error('shellyCommandHandler error: cluster LevelControlCluster not found');
-        return false;
-      }
-      levelControlCluster.setCurrentLevelAttribute(level); // TODO remove
-      */
+    // Send On() Off() Toggle() command
+    if (command === 'On') switchComponent.On();
+    else if (command === 'Off') switchComponent.Off();
+    else if (command === 'Toggle') switchComponent.Toggle();
+    if (command === 'On' || command === 'Off' || command === 'Toggle')
+      shellyDevice.log.info(`Command ${hk}${componentName}${nf}:${command}() for shelly device ${idn}${shellyDevice?.id}${rs}${nf}`);
+
+    // Send Level() command
+    if (command === 'Level' && level !== null && level !== undefined) {
       const shellyLevel = Math.max(Math.min(Math.round((level / 254) * 100), 100), 1);
       switchComponent?.Level(shellyLevel);
-      shellyDevice.log.info(`Command ${hk}${componentName}${nf}:Level(${YELLOW}${shellyLevel}${nf}) for shelly device ${dn}${shellyDevice?.id}${nf}`);
+      shellyDevice.log.info(`Command ${hk}${componentName}${nf}:Level(${YELLOW}${shellyLevel}${nf}) for shelly device ${idn}${shellyDevice?.id}${rs}${nf}`);
+    }
+
+    // Send ColorRGB() command
+    if (command === 'ColorRGB' && color !== undefined) {
+      color.r = Math.max(Math.min(color.r, 255), 0);
+      color.g = Math.max(Math.min(color.g, 255), 0);
+      color.b = Math.max(Math.min(color.b, 255), 0);
+      switchComponent?.ColorRGB(color.r, color.g, color.b);
+      shellyDevice.log.info(
+        `Command ${hk}${componentName}${nf}:ColorRGB(${YELLOW}${color.r}${nf}, ${YELLOW}${color.g}${nf}, ${YELLOW}${color.b}${nf}) for shelly device ${idn}${shellyDevice?.id}${rs}${nf}`,
+      );
     }
     return true;
   }
@@ -639,9 +648,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}LevelControl-currentLevel${db} ${YELLOW}${matterLevel}${db}`);
     }
     // Update color
-    const colors = ['red', 'green', 'blue', 'white'];
-    if (shellyComponent.name === 'Light' && colors.includes(property)) {
-      // shellyDevice.getComponent(component)?.setValue(property, value);
+    if (shellyComponent.name === 'Light' && ['red', 'green', 'blue', 'white'].includes(property)) {
       const red = property === 'red' ? (value as number) : (shellyComponent.getValue('red') as number);
       const green = property === 'green' ? (value as number) : (shellyComponent.getValue('green') as number);
       const blue = property === 'blue' ? (value as number) : (shellyComponent.getValue('blue') as number);
@@ -665,8 +672,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       const windowCoveringCluster = endpoint.getClusterServer(
         WindowCoveringCluster.with(WindowCovering.Feature.Lift, WindowCovering.Feature.PositionAwareLift, WindowCovering.Feature.AbsolutePosition),
       );
-      // Matter uses 10000 = fully closed - 0 = fully opened
-      // Shelly uses 0 = fully closed - 100 = fully opened
+      // Matter uses 10000 = fully closed   0 = fully opened
+      // Shelly uses 0 = fully closed   100 = fully opened
       if (property === 'state') {
         // Gen 1 devices send stop
         if (value === 'stopped' || value === 'stop') {
