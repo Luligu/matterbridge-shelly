@@ -157,7 +157,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             if (lightComponent.hasProperty('brightness')) clusterIds.push(LevelControl.Cluster.id);
             if (lightComponent.hasProperty('red')) clusterIds.push(ColorControl.Cluster.id);
             const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [deviceType], clusterIds);
-            child.addClusterServer(mbDevice.getDefaultXYColorControlClusterServer());
+            // child.addClusterServer(mbDevice.getDefaultXYColorControlClusterServer());
             mbDevice.addFixedLabel('composed', component.name);
             // Set the onOff attribute
             const state = lightComponent.getValue('state');
