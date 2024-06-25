@@ -276,6 +276,7 @@ export class ShellyDevice extends EventEmitter {
 
     // Start lastseen interval
     device.lastseenInterval = setInterval(() => {
+      // Check lastseen interval
       const lastSeenDate = new Date(device.lastseen);
       const lastSeenDateString = lastSeenDate.toLocaleString();
       if (Date.now() - device.lastseen > 10 * 60 * 1000) {
@@ -288,6 +289,13 @@ export class ShellyDevice extends EventEmitter {
         // log.debug(`Device ${hk}${device.id}${db} host ${zb}${device.host}${db} has been seen the last time: ${CYAN}${lastSeenDateString}${db}.`);
         device.online = true;
         device.emit('online');
+      }
+      // Check WebSocket client for gen 2 and 3 devices
+      if (device.gen === 2 || device.gen === 3) {
+        if (device.wsClient?.isConnected === false) {
+          log.warn(`WebSocket client for device ${hk}${device.id}${wr} host ${zb}${device.host}${wr} is not connected.`);
+          // device.wsClient?.start(shelly.debug);
+        }
       }
     }, 60 * 1000);
 
