@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 
 - [color]: Added ColorControl cluster to shelly device with rgb.
+- [current]: Added the current value to EveHistory electrical cluster.
 
 ### Fixed
 

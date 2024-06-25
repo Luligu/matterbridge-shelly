@@ -283,6 +283,11 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               // this.log.warn(`Added EveHistory cluster to ${device.id} component ${key}`);
             }
 
+            // TODO: Add the WindowCovering attributes
+            /*
+            "pos_control": true,
+            "current_pos": 0
+            */
             // Set the WindowCovering attributes
             mbDevice.setWindowCoveringTargetAsCurrentAndStopped(child);
             // Add command handlers
@@ -733,12 +738,26 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         const cluster = endpoint.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy));
         cluster?.setConsumptionAttribute(value as number);
         if (cluster) shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}EveHistory-consumption${db} ${YELLOW}${value as number}${db}`);
+        const voltage = shellyComponent.getValue('voltage') as number;
+        if (voltage) {
+          const current = (value as number) / voltage;
+          cluster?.setCurrentAttribute(current as number);
+          shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}EveHistory-current${db} ${YELLOW}${current as number}${db}`);
+        }
       }
       if (property === 'total') {
         const cluster = endpoint.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy));
         cluster?.setTotalConsumptionAttribute((value as number) / 1000); // convert to kWh
         if (cluster)
           shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}EveHistory-totalConsumption${db} ${YELLOW}${(value as number) / 1000}${db}`);
+      }
+      if (property === 'aenergy') {
+        const cluster = endpoint.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy));
+        cluster?.setTotalConsumptionAttribute(((value as ShellyData).total as number) / 1000); // convert to kWh
+        if (cluster)
+          shellyDevice.log.info(
+            `${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}EveHistory-totalConsumption${db} ${YELLOW}${((value as ShellyData).total as number) / 1000}${db}`,
+          );
       }
       if (property === 'voltage') {
         const cluster = endpoint.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy));
