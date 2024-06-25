@@ -1,3 +1,26 @@
+/**
+ * This file contains the class SwitchComponent.
+ *
+ * @file src\shellyComponent.ts
+ * @author Luca Liguori
+ * @date 2024-05-01
+ * @version 1.0.0
+ *
+ * Copyright 2024, 2025 Luca Liguori.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License. *
+ */
+
 import { BLUE, CYAN, GREEN, GREY, YELLOW, db, debugStringify, er } from 'node-ansi-logger';
 
 import { ShellyData, ShellyDataType } from './shellyTypes.js';
@@ -11,6 +34,7 @@ interface SwitchComponent {
   Off(): void;
   Toggle(): void;
   Level(level: number): void;
+  ColorRGB(red: number, green: number, blue: number): void;
 }
 
 interface CoverComponent {
@@ -42,8 +66,10 @@ export class ShellyComponent extends EventEmitter {
     this.device = device;
     for (const prop in data) {
       this.addProperty(new ShellyProperty(this, prop, data[prop] as ShellyDataType));
+
       // Add a state property for Light, Relay, and Switch components
       if (this.stateName.includes(name) && (prop === 'ison' || prop === 'output')) this.addProperty(new ShellyProperty(this, 'state', data[prop]));
+
       // Add a brightness property for Light, Relay, and Switch components
       if (name === 'Light' && prop === 'gain') this.addProperty(new ShellyProperty(this, 'brightness', data[prop]));
     }
@@ -79,6 +105,18 @@ export class ShellyComponent extends EventEmitter {
         if (device.gen === 1 && this.hasProperty('gain')) ShellyDevice.fetch(device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { gain: adjustedLevel });
         if (device.gen !== 1) ShellyDevice.fetch(device.log, device.host, `${this.name}.Set`, { id: this.index, brightness: adjustedLevel });
       };
+
+      (this as ShellyComponentType).ColorRGB = function (red: number, green: number, blue: number) {
+        if (!this.hasProperty('red') || !this.hasProperty('green') || !this.hasProperty('blue')) return;
+        red = Math.min(Math.max(Math.round(red), 0), 255);
+        green = Math.min(Math.max(Math.round(green), 0), 255);
+        blue = Math.min(Math.max(Math.round(blue), 0), 255);
+        this.setValue('red', red);
+        this.setValue('green', green);
+        this.setValue('blue', blue);
+        if (device.gen === 1) ShellyDevice.fetch(device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { red, green, blue });
+        if (device.gen !== 1) ShellyDevice.fetch(device.log, device.host, `${this.name}.Set`, { id: this.index, red, green, blue });
+      };
     }
 
     // Extend the class prototype to include the Cover methods dynamically
@@ -104,7 +142,7 @@ export class ShellyComponent extends EventEmitter {
       (this as ShellyComponentType).GoToPosition = function (pos: number) {
         pos = Math.min(Math.max(Math.round(pos), 0), 100);
         if (device.gen === 1) ShellyDevice.fetch(device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { go: 'to_pos', roller_pos: pos });
-        if (device.gen !== 1) ShellyDevice.fetch(device.log, device.host, `${this.name}.GoToPosition `, { id: this.index, pos: pos });
+        if (device.gen !== 1) ShellyDevice.fetch(device.log, device.host, `${this.name}.GoToPosition`, { id: this.index, pos: pos });
       };
     }
   }

@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.1] - 2024-06-25
+
+### Added
+
+- [color]: Added ColorControl cluster to shelly device with rgb.
+- [current]: Added the current value to EveHistory electrical cluster.
+
+### Fixed
+
+- [cover]: Fix cover move to position for gen 2.
+- [power]: Fix power value update.
+
+<a href="https://www.buymeacoffee.com/luligugithub">
+  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+</a>
+
 ## [0.4.0] - 2024-06-23
 
 ### Added

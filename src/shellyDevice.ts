@@ -1,3 +1,26 @@
+/**
+ * This file contains the class ShellyDevice.
+ *
+ * @file src\shellyDevice.ts
+ * @author Luca Liguori
+ * @date 2024-05-01
+ * @version 1.0.0
+ *
+ * Copyright 2024, 2025 Luca Liguori.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License. *
+ */
+
 import { AnsiLogger, BLUE, CYAN, GREEN, GREY, MAGENTA, RED, RESET, db, debugStringify, er, hk, nf, wr, zb } from 'node-ansi-logger';
 import { EventEmitter } from 'events';
 import fetch, { RequestInit } from 'node-fetch';
@@ -30,6 +53,8 @@ export class ShellyDevice extends EventEmitter {
   gen = 0;
   lastseen = 0;
   hasUpdate = false;
+  colorUpdateTimeout?: NodeJS.Timeout;
+  colorCommandTimeout?: NodeJS.Timeout;
   private lastseenInterval?: NodeJS.Timeout;
   private startWsClientTimeout?: NodeJS.Timeout;
 
@@ -51,12 +76,18 @@ export class ShellyDevice extends EventEmitter {
   }
 
   destroy() {
+    if (this.colorUpdateTimeout) clearInterval(this.colorUpdateTimeout);
+    this.colorUpdateTimeout = undefined;
+    if (this.colorCommandTimeout) clearInterval(this.colorCommandTimeout);
+    this.colorCommandTimeout = undefined;
+    this.lastseen = 0;
     if (this.lastseenInterval) clearInterval(this.lastseenInterval);
     this.lastseenInterval = undefined;
     this.lastseen = 0;
     if (this.startWsClientTimeout) clearTimeout(this.startWsClientTimeout);
     this.startWsClientTimeout = undefined;
     this.wsClient?.stop();
+
     this.removeAllListeners();
   }
 
@@ -248,15 +279,13 @@ export class ShellyDevice extends EventEmitter {
       const lastSeenDate = new Date(device.lastseen);
       const lastSeenDateString = lastSeenDate.toLocaleString();
       if (Date.now() - device.lastseen > 10 * 60 * 1000) {
-        log.warn(
-          `Device ${hk}${device.id}${wr} host ${zb}${device.host}${wr} has not been seen for 10 minutes (last time: ${CYAN}${lastSeenDateString}${wr}). Check the device connection.`,
-        );
+        log.warn(`Device ${hk}${device.id}${wr} host ${zb}${device.host}${wr} has not been seen for 10 minutes (last time: ${CYAN}${lastSeenDateString}${wr}).`);
         device.online = false;
         device.emit('offline');
         log.info(`Fetching update for device ${hk}${device.id}${nf} host ${zb}${device.host}${nf}.`);
         device.fetchUpdate(); // We don't await for the update to complete
       } else {
-        log.debug(`Device ${hk}${device.id}${db} host ${zb}${device.host}${db} has been seen the last time: ${CYAN}${lastSeenDateString}${db}.`);
+        // log.debug(`Device ${hk}${device.id}${db} host ${zb}${device.host}${db} has been seen the last time: ${CYAN}${lastSeenDateString}${db}.`);
         device.online = true;
         device.emit('online');
       }
@@ -364,7 +393,7 @@ export class ShellyDevice extends EventEmitter {
     const service = this.gen === 1 ? 'status' : 'Shelly.GetStatus';
     const status = await ShellyDevice.fetch(this.log, this.host, service);
     if (!status) {
-      this.log.error(`Error fetching device ${this.id} status. No data found.`);
+      this.log.error(`Error fetching device ${this.id} status. No data found. The device may be offline.`);
       this.online = false;
       this.emit('offline');
       return;
