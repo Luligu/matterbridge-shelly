@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.0] - 2024-06-26
+
+### Added
+
+- [configure]: Added onConfigure() for the persited attributes of OnOff cluster and WindowCovering cluster. The attributes are updated from shelly.
+- [websocket]: Added interval for gen 2 and gen 3 devices to check if WebSocket is still connected. Try to reconnect and log message if fails.
+
+<a href="https://www.buymeacoffee.com/luligugithub">
+  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+</a>
+
 ## [0.5.1] - 2024-06-25
 
 ### Added

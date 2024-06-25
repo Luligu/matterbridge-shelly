@@ -294,7 +294,7 @@ export class ShellyDevice extends EventEmitter {
       if (device.gen === 2 || device.gen === 3) {
         if (device.wsClient?.isConnected === false) {
           log.warn(`WebSocket client for device ${hk}${device.id}${wr} host ${zb}${device.host}${wr} is not connected.`);
-          // device.wsClient?.start(shelly.debug);
+          device.wsClient?.start(shelly.debug);
         }
       }
     }, 60 * 1000);
