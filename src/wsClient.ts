@@ -100,6 +100,10 @@ export class WsClient extends EventEmitter {
   private password;
   private requestId;
 
+  // PingPong
+  private pingInterval?: NodeJS.Timeout;
+  private pongTimeout?: NodeJS.Timeout;
+
   // Define the request frame without auth
   private requestFrame: RequestFrame = {
     id: 0, // Request ID will get updated with a random number
@@ -132,9 +136,9 @@ export class WsClient extends EventEmitter {
     return this._isConnected;
   }
 
-  async sendRequest(method: string, params: Params = {}) {
+  async sendRequest(method = 'Shelly.GetStatus', params: Params = {}) {
     if (!this.wsClient || !this._isConnected) {
-      this.log.error(`SendRequest error: WebSocket client is not connected to ${this.wsHost}`);
+      this.log.error(`SendRequest error: WebSocket client is not connected to ${zb}${this.wsHost}${er}`);
       return;
     }
     this.requestFrame.method = method;
@@ -142,12 +146,44 @@ export class WsClient extends EventEmitter {
     this.wsClient?.send(JSON.stringify(this.requestFrame));
   }
 
+  private startPingPong(pingTimeout = 30000) {
+    this.log.debug(`Start PingPong with host ${zb}${this.wsHost}${db}.`);
+    this.pingInterval = setInterval(() => {
+      if (this.wsClient?.readyState === WebSocket.OPEN) {
+        this.wsClient.ping(); // Send a ping message
+
+        // Set a timeout to wait for a pong response
+        this.pongTimeout = setTimeout(() => {
+          this.log.error(`Pong not received from ${zb}${this.wsHost}${er}, closing connection.`);
+          this.wsClient?.terminate(); // Close the connection if pong is not received
+        }, pingTimeout);
+      }
+    }, pingTimeout);
+
+    // Listen for pong messages to clear the pong timeout
+    this.wsClient?.on('pong', () => {
+      clearTimeout(this.pongTimeout);
+      this.log.debug(`Pong received from ${zb}${this.wsHost}${db}, connection is alive.`);
+    });
+  }
+
+  private stopPingPong() {
+    if (this.pingInterval) {
+      clearInterval(this.pingInterval);
+      this.pingInterval = undefined;
+    }
+    if (this.pongTimeout) {
+      clearTimeout(this.pongTimeout);
+      this.pongTimeout = undefined;
+    }
+  }
+
   async listenForStatusUpdates() {
     try {
       this._isConnecting = true;
       this.wsClient = new WebSocket(this.wsUrl);
     } catch (error) {
-      this.log.error(`Failed to create WebSocket connection to ${this.wsUrl}: ${error}`);
+      this.log.error(`Failed to create WebSocket connection to ${zb}${this.wsUrl}${er}: ${error}`);
       return;
     }
 
@@ -157,6 +193,21 @@ export class WsClient extends EventEmitter {
       this._isConnecting = false;
       this._isConnected = true;
       this.wsClient?.send(JSON.stringify(this.requestFrame));
+
+      // Start the ping/pong mechanism
+      this.startPingPong();
+    });
+
+    // Handle errors
+    this.wsClient.on('error', (error: Error) => {
+      this.log.error(`WebSocket error with Shelly device on address ${zb}${this.wsHost}${rs}\n`, error);
+    });
+
+    // Handle the close event
+    this.wsClient.on('close', () => {
+      this.log.info(`WebSocket connection closed with Shelly device on address ${zb}${this.wsHost}${nf}`);
+      this._isConnected = false;
+      this.stopPingPong();
     });
 
     // Handle messages from the WebSocket
@@ -193,17 +244,6 @@ export class WsClient extends EventEmitter {
         this.log.warn(`Received unknown response from ${CYAN}${this.id}${wr} on ${BLUE}${this.wsHost}${wr}:${rs}\n`, response);
       }
     });
-
-    // Handle errors
-    this.wsClient.on('error', (error: Error) => {
-      this.log.error(`WebSocket error with Shelly device on address ${this.wsHost}${rs}\n`, error);
-    });
-
-    // Handle the close event
-    this.wsClient.on('close', () => {
-      this.log.info(`WebSocket connection closed with Shelly device on address ${this.wsHost}`);
-      this._isConnected = false;
-    });
   }
 
   start(debug = false) {
@@ -218,6 +258,7 @@ export class WsClient extends EventEmitter {
     this.log.debug(
       `Stopping ws client for Shelly device on address ${this.wsHost} state ${this.wsClient?.readyState} conencting ${this._isConnecting} connected ${this._isConnected} `,
     );
+    this.stopPingPong();
     if (this._isConnecting) {
       setTimeout(() => {
         if (this._isConnected) this.wsClient?.close();

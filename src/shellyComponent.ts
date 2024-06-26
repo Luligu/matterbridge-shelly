@@ -29,6 +29,14 @@ import { ShellyDevice } from './shellyDevice.js';
 import { deepEqual } from 'matterbridge';
 import EventEmitter from 'events';
 
+interface LightComponent {
+  On(): void;
+  Off(): void;
+  Toggle(): void;
+  Level(level: number): void;
+  ColorRGB(red: number, green: number, blue: number): void;
+}
+
 interface SwitchComponent {
   On(): void;
   Off(): void;
@@ -44,11 +52,25 @@ interface CoverComponent {
   GoToPosition(pos: number): void;
 }
 
+export type ShellyLightComponent = ShellyComponent & LightComponent;
+
 export type ShellySwitchComponent = ShellyComponent & SwitchComponent;
 
 export type ShellyCoverComponent = ShellyComponent & CoverComponent;
 
-type ShellyComponentType = ShellyComponent & Partial<SwitchComponent> & Partial<CoverComponent>;
+type ShellyComponentType = ShellyComponent & Partial<LightComponent> & Partial<SwitchComponent> & Partial<CoverComponent>;
+
+function isLightComponent(name: string): name is 'Light' {
+  return ['Light'].includes(name);
+}
+
+function isSwitchComponent(name: string): name is 'Light' | 'Relay' | 'Switch' {
+  return ['Light', 'Relay', 'Switch'].includes(name);
+}
+
+function isCoverComponent(name: string): name is 'Cover' | 'Roller' {
+  return ['Cover', 'Roller'].includes(name);
+}
 
 export class ShellyComponent extends EventEmitter {
   readonly device: ShellyDevice;
@@ -56,7 +78,7 @@ export class ShellyComponent extends EventEmitter {
   readonly index: number;
   readonly name: string;
   private readonly _properties = new Map<string, ShellyProperty>();
-  private readonly stateName = ['Light', 'Relay', 'Switch'];
+  // private readonly stateName = ['Light', 'Relay', 'Switch'];
 
   constructor(device: ShellyDevice, id: string, name: string, data?: ShellyData) {
     super();
@@ -68,14 +90,14 @@ export class ShellyComponent extends EventEmitter {
       this.addProperty(new ShellyProperty(this, prop, data[prop] as ShellyDataType));
 
       // Add a state property for Light, Relay, and Switch components
-      if (this.stateName.includes(name) && (prop === 'ison' || prop === 'output')) this.addProperty(new ShellyProperty(this, 'state', data[prop]));
+      if (isSwitchComponent(name) && (prop === 'ison' || prop === 'output')) this.addProperty(new ShellyProperty(this, 'state', data[prop]));
 
       // Add a brightness property for Light, Relay, and Switch components
-      if (name === 'Light' && prop === 'gain') this.addProperty(new ShellyProperty(this, 'brightness', data[prop]));
+      if (isLightComponent(name) && prop === 'gain') this.addProperty(new ShellyProperty(this, 'brightness', data[prop]));
     }
 
     // Extend the class prototype to include the Switch Relay Light methods dynamically
-    if (this.stateName.includes(name)) {
+    if (isSwitchComponent(name)) {
       // console.log('Component:', this);
       (this as ShellyComponentType).On = function () {
         this.setValue('state', true);
@@ -120,26 +142,26 @@ export class ShellyComponent extends EventEmitter {
     }
 
     // Extend the class prototype to include the Cover methods dynamically
-    if (name === 'Cover' || name === 'Roller') {
-      (this as ShellyComponentType).Open = function () {
+    if (isCoverComponent(name)) {
+      (this as unknown as ShellyCoverComponent).Open = function () {
         this.setValue('state', 'open');
         if (device.gen === 1) ShellyDevice.fetch(device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { go: 'open' });
         if (device.gen !== 1) ShellyDevice.fetch(device.log, device.host, `${this.name}.Open`, { id: this.index });
       };
 
-      (this as ShellyComponentType).Close = function () {
+      (this as unknown as ShellyCoverComponent).Close = function () {
         this.setValue('state', 'close');
         if (device.gen === 1) ShellyDevice.fetch(device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { go: 'close' });
         if (device.gen !== 1) ShellyDevice.fetch(device.log, device.host, `${this.name}.Close`, { id: this.index });
       };
 
-      (this as ShellyComponentType).Stop = function () {
+      (this as unknown as ShellyCoverComponent).Stop = function () {
         this.setValue('state', 'stop');
         if (device.gen === 1) ShellyDevice.fetch(device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { go: 'stop' });
         if (device.gen !== 1) ShellyDevice.fetch(device.log, device.host, `${this.name}.Stop`, { id: this.index });
       };
 
-      (this as ShellyComponentType).GoToPosition = function (pos: number) {
+      (this as unknown as ShellyCoverComponent).GoToPosition = function (pos: number) {
         pos = Math.min(Math.max(Math.round(pos), 0), 100);
         if (device.gen === 1) ShellyDevice.fetch(device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { go: 'to_pos', roller_pos: pos });
         if (device.gen !== 1) ShellyDevice.fetch(device.log, device.host, `${this.name}.GoToPosition`, { id: this.index, pos: pos });

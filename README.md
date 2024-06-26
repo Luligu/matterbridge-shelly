@@ -19,14 +19,17 @@ Features:
 
 - Shellies are automatically discovered using mDNS.
 - Discovered shellies are stored in local storage for quick loading on startup.
-- In this first release, the components exposed are lights (with brightness), switches, rollers and meters (with EveHistory electrical measurements).
-- Shellies are controlled locally, eliminating the need for cloud or MQTT (which can be disabled).
+- The components exposed are lights (with brightness and color selection), switches, rollers and meters.
+- All components expose the electrical measurements with the EveHistory cluster (displayed on HA), waiting for the controllers to upgrade to the Matter 1.3 specs.
+- Shellies are controlled locally, eliminating the need for cloud or MQTT (which can both be disabled).
 - Shelly Gen 1 devices are controlled using the CoIoT protocol (see the note below).
 - Shelly Gen 2 and Gen 3 devices are controlled using WebSocket.
 - The Matter device takes the name configured in the Shelly device's web page.
 - If the device has a firmware update available, a message is displayed.
-- If the device's CoIoT is not correctly set, a message is displayed.
+- If the device's CoIoT protocol is not correctly configured, a message is displayed.
 - A 10-minute timer checks if the device has reported within that time frame, and fetch un update.
+
+If you like this project and find it useful, please consider giving it a star on GitHub at https://github.com/Luligu/matterbridge-shelly and sponsoring it.
 
 ## Acknowledgements
 
