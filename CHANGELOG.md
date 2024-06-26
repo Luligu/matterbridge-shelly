@@ -2,15 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+If you like this project and find it useful, please consider giving it a star on GitHub at https://github.com/Luligu/matterbridge-shelly and sponsoring it.
+
 ## [0.6.0] - 2024-06-26
 
 ### Added
 
-- [configure]: Added onConfigure() for the persited attributes of OnOff cluster and WindowCovering cluster. The attributes are updated from shelly.
-- [websocket]: Added interval for gen 2 and gen 3 devices to check if WebSocket is still connected. Try to reconnect and log message if fails.
+- [configure]: Introduced `onConfigure()` for the persisted attributes of the OnOff cluster and WindowCovering cluster. The attributes are now updated from Shelly devices.
+- [websocket]: Implemented an interval check for Gen 2 and Gen 3 devices to verify if the WebSocket client is still connected. The system will attempt to reconnect and log a message if it fails.
+
+### Changed
+
+- [package]: Updated dependencies
 
 <a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+  <img src="https://github.com/Luligu/matterbridge/yellow-button.png" alt="Buy me a coffee" width="120">
 </a>
 
 ## [0.5.1] - 2024-06-25
