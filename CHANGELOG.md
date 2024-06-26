@@ -1,4 +1,4 @@
-# Changelog
+# <img src="https://github.com/Luligu/matterbridge/blob/main/frontend/public/matterbridge%2064x64.png" alt="Matterbridge Logo" width="64px" height="64px">&nbsp;&nbsp;&nbsp;Matterbridge shelly plugin changelog
 
 All notable changes to this project will be documented in this file.
 
@@ -16,7 +16,7 @@ If you like this project and find it useful, please consider giving it a star on
 - [package]: Updated dependencies
 
 <a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="https://github.com/Luligu/matterbridge/yellow-button.png" alt="Buy me a coffee" width="120">
+  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
 </a>
 
 ## [0.5.1] - 2024-06-25
