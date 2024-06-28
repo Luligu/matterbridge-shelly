@@ -9,6 +9,7 @@ If you like this project and find it useful, please consider giving it a star on
 ### Changed
 
 - [firmware]: The recent firmware update for Gen 2 and Gen. 3 devices changed the way data is sent. This fix the electrical readings.
+- [package]: Updated eslint to 9.6.0
 
 <a href="https://www.buymeacoffee.com/luligugithub">
   <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
