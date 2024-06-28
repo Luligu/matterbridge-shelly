@@ -80,7 +80,6 @@ export class ShellyDevice extends EventEmitter {
     this.colorUpdateTimeout = undefined;
     if (this.colorCommandTimeout) clearInterval(this.colorCommandTimeout);
     this.colorCommandTimeout = undefined;
-    this.lastseen = 0;
     if (this.lastseenInterval) clearInterval(this.lastseenInterval);
     this.lastseenInterval = undefined;
     this.lastseen = 0;
@@ -286,7 +285,7 @@ export class ShellyDevice extends EventEmitter {
         log.info(`Fetching update for device ${hk}${device.id}${nf} host ${zb}${device.host}${nf}.`);
         device.fetchUpdate(); // We don't await for the update to complete
       } else {
-        // log.debug(`Device ${hk}${device.id}${db} host ${zb}${device.host}${db} has been seen the last time: ${CYAN}${lastSeenDateString}${db}.`);
+        log.debug(`Device ${hk}${device.id}${db} host ${zb}${device.host}${db} has been seen the last time: ${CYAN}${lastSeenDateString}${db}.`);
         device.online = true;
         device.emit('online');
       }
@@ -309,7 +308,6 @@ export class ShellyDevice extends EventEmitter {
       device.wsClient.on('update', (message) => {
         if (shelly.debug) log.info(`WebSocket update from device ${hk}${device.id}${nf} host ${zb}${device.host}${nf}`);
         device.update(message);
-        device.lastseen = Date.now();
       });
     }
 
@@ -434,11 +432,10 @@ export class ShellyDevice extends EventEmitter {
   // http://192.168.1.218/rpc/Switch.Set?id=0&on=false
   // http://192.168.1.218/rpc/Switch.Toggle?id=0
 
-  // await ShellyDevice.fetch('192.168.1.217', 'rpc/Switch.Toggle', { id: 0 });
   static async fetch(log: AnsiLogger, host: string, service: string, params: Record<string, string | number | boolean> = {}): Promise<ShellyData | null> {
     // MOCK: Fetch device data from file if host is a json file
     if (host.endsWith('.json')) {
-      log.warn(`Fetching device payloads from file ${host}: service ${service} params ${JSON.stringify(params)}`);
+      log.warn(`Fetching mock device payloads from file ${host}: service ${service} params ${JSON.stringify(params)}`);
       try {
         const data = await fs.readFile(host, 'utf8');
         const deviceData = JSON.parse(data);

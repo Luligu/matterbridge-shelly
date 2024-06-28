@@ -48,17 +48,20 @@ import {
   SwitchCluster,
   Switch,
   ColorControlCluster,
+  electricalSensor,
+  ElectricalPowerMeasurement,
+  ElectricalEnergyMeasurement,
 } from 'matterbridge';
-import { AnsiLogger, BLUE, CYAN, GREEN, TimestampFormat, YELLOW, db, debugStringify, dn, er, hk, idn, nf, or, rs, wr, zb } from 'node-ansi-logger';
-import { NodeStorage, NodeStorageManager } from 'node-persist-manager';
+import { AnsiLogger, BLUE, CYAN, GREEN, TimestampFormat, YELLOW, db, debugStringify, dn, er, hk, idn, nf, or, rs, wr, zb } from 'matterbridge/logger';
+import { NodeStorage, NodeStorageManager } from 'matterbridge/storage';
 import path from 'path';
 
 import { Shelly } from './shelly.js';
 import { DiscoveredDevice } from './mdnsScanner.js';
 import { ShellyDevice } from './shellyDevice.js';
-import { ShellyCoverComponent, ShellySwitchComponent } from './shellyComponent.js';
+import { ShellyCoverComponent, ShellyLightComponent, ShellySwitchComponent } from './shellyComponent.js';
 import { ShellyData, ShellyDataType } from './shellyTypes.js';
-import { hslColorToRgbColor, rgbColorToHslColor } from './colorUtils.js';
+import { hslColorToRgbColor, rgbColorToHslColor } from './colorUtils.js'; // 'matterbridge/utils/colorUtils';
 
 type ConfigDeviceIp = Record<string, string>;
 
@@ -240,6 +243,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
 
             // Add the electrical EveHistory cluster
             if (
+              config.exposePowerMeter === 'evehistory' &&
               switchComponent.hasProperty('voltage') &&
               switchComponent.hasProperty('current') &&
               switchComponent.hasProperty('apower') &&
@@ -279,7 +283,13 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             mbDevice.addFixedLabel('composed', component.name);
 
             // Add the electrical EveHistory cluster
-            if (coverComponent.hasProperty('voltage') && coverComponent.hasProperty('current') && coverComponent.hasProperty('apower') && coverComponent.hasProperty('aenergy')) {
+            if (
+              config.exposePowerMeter === 'evehistory' &&
+              coverComponent.hasProperty('voltage') &&
+              coverComponent.hasProperty('current') &&
+              coverComponent.hasProperty('apower') &&
+              coverComponent.hasProperty('aenergy')
+            ) {
               child.addClusterServer(
                 mbDevice.getDefaultStaticEveHistoryClusterServer(
                   coverComponent.getValue('voltage') as number,
@@ -327,30 +337,50 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           const pmComponent = device.getComponent(key);
           if (pmComponent) {
             mbDevice.addFixedLabel('composed', component.name);
-            // Add the Matter 1.3 device type with the ElectricalPowerMeasurement and ElectricalEnergyMeasurement clusters
-            // mbDevice.addChildDeviceTypeWithClusterServer('electricalSensor', [electricalSensor], [ElectricalPowerMeasurement.Cluster.id, ElectricalEnergyMeasurement.Cluster.id]);
-            // Add the custom EveHistory cluster for HA
-            ClusterRegistry.register(EveHistory.Complete);
-            const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [powerSource], [EveHistory.Cluster.id]);
-            // Set the electrical attributes
-            const voltage = pmComponent.hasProperty('voltage') ? pmComponent.getValue('voltage') : undefined;
-            if (voltage !== undefined) child.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy))?.setVoltageAttribute(voltage as number);
+            if (config.exposePowerMeter === 'matter13') {
+              // Add the Matter 1.3 electricalSensor device type with the ElectricalPowerMeasurement and ElectricalEnergyMeasurement clusters
+              const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [electricalSensor], [ElectricalPowerMeasurement.Cluster.id, ElectricalEnergyMeasurement.Cluster.id]);
+              // Set the electrical attributes
+              const epm = child.getClusterServer(ElectricalPowerMeasurement.Complete);
+              const voltage = pmComponent.hasProperty('voltage') ? pmComponent.getValue('voltage') : undefined;
+              if (voltage !== undefined) epm?.setVoltageAttribute(50);
 
-            const current = pmComponent.hasProperty('current') ? pmComponent.getValue('current') : undefined;
-            if (current !== undefined) child.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy))?.setCurrentAttribute(current as number);
+              const current = pmComponent.hasProperty('current') ? pmComponent.getValue('current') : undefined;
+              if (current !== undefined) epm?.setActiveCurrentAttribute(current as number);
 
-            const power1 = pmComponent.hasProperty('power') ? pmComponent.getValue('power') : undefined; // Gen 1 devices
-            if (power1 !== undefined) child.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy))?.setConsumptionAttribute(power1 as number);
-            const power2 = pmComponent.hasProperty('apower') ? pmComponent.getValue('apower') : undefined; // Gen 2 devices
-            if (power2 !== undefined) child.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy))?.setConsumptionAttribute(power2 as number);
+              const power1 = pmComponent.hasProperty('power') ? pmComponent.getValue('power') : undefined; // Gen 1 devices
+              if (power1 !== undefined) epm?.setActivePowerAttribute(power1 as number);
+              const power2 = pmComponent.hasProperty('apower') ? pmComponent.getValue('apower') : undefined; // Gen 2 devices
+              if (power2 !== undefined) epm?.setActivePowerAttribute(power2 as number);
 
-            const energy1 = pmComponent.hasProperty('total') ? pmComponent.getValue('total') : undefined; // Gen 1 devices in watts
-            if (energy1 !== undefined && energy1 !== null)
-              child.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy))?.setTotalConsumptionAttribute((energy1 as number) / 1000);
-            const energy2 = pmComponent.hasProperty('aenergy') ? pmComponent.getValue('aenergy') : undefined; // Gen 2 devices in watts
-            if (energy2 !== undefined && energy2 !== null)
-              child.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy))?.setTotalConsumptionAttribute(((energy2 as ShellyData).total as number) / 1000);
+              const eem = child.getClusterServer(ElectricalEnergyMeasurement.Complete);
+              const energy1 = pmComponent.hasProperty('total') ? pmComponent.getValue('total') : undefined; // Gen 1 devices in watts
+              if (energy1 !== undefined && energy1 !== null) eem?.setCumulativeEnergyImportedAttribute({ energy: (energy1 as number) / 1000 });
+              const energy2 = pmComponent.hasProperty('aenergy') ? pmComponent.getValue('aenergy') : undefined; // Gen 2 devices in watts
+              if (energy2 !== undefined && energy2 !== null) eem?.setCumulativeEnergyImportedAttribute({ energy: ((energy2 as ShellyData).total as number) / 1000 });
+            } else if (config.exposePowerMeter === 'evehistory') {
+              // Add the powerSource device type with the EveHistory cluster for HA
+              ClusterRegistry.register(EveHistory.Complete);
+              const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [powerSource], [EveHistory.Cluster.id]);
+              // Set the electrical attributes
+              const voltage = pmComponent.hasProperty('voltage') ? pmComponent.getValue('voltage') : undefined;
+              if (voltage !== undefined) child.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy))?.setVoltageAttribute(voltage as number);
 
+              const current = pmComponent.hasProperty('current') ? pmComponent.getValue('current') : undefined;
+              if (current !== undefined) child.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy))?.setCurrentAttribute(current as number);
+
+              const power1 = pmComponent.hasProperty('power') ? pmComponent.getValue('power') : undefined; // Gen 1 devices
+              if (power1 !== undefined) child.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy))?.setConsumptionAttribute(power1 as number);
+              const power2 = pmComponent.hasProperty('apower') ? pmComponent.getValue('apower') : undefined; // Gen 2 devices
+              if (power2 !== undefined) child.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy))?.setConsumptionAttribute(power2 as number);
+
+              const energy1 = pmComponent.hasProperty('total') ? pmComponent.getValue('total') : undefined; // Gen 1 devices in watts
+              if (energy1 !== undefined && energy1 !== null)
+                child.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy))?.setTotalConsumptionAttribute((energy1 as number) / 1000);
+              const energy2 = pmComponent.hasProperty('aenergy') ? pmComponent.getValue('aenergy') : undefined; // Gen 2 devices in watts
+              if (energy2 !== undefined && energy2 !== null)
+                child.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy))?.setTotalConsumptionAttribute(((energy2 as ShellyData).total as number) / 1000);
+            }
             // Add event handler
             pmComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
               this.shellyUpdateHandler(mbDevice, device, component, property, value);
@@ -474,8 +504,12 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
   }
 
   public async saveStoredDevices() {
+    if (!this.nodeStorage) {
+      this.log.error('NodeStorage is not initialized');
+      return;
+    }
     this.log.debug(`Saving ${this.storedDevices.size} discovered Shelly devices to the storage`);
-    await this.nodeStorage?.set<DiscoveredDevice[]>('DeviceIdentifiers', Array.from(this.storedDevices.values()));
+    await this.nodeStorage.set<DiscoveredDevice[]>('DeviceIdentifiers', Array.from(this.storedDevices.values()));
   }
 
   private async loadStoredDevices(): Promise<boolean> {
@@ -484,9 +518,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       return false;
     }
     const storedDevices = await this.nodeStorage.get<DiscoveredDevice[]>('DeviceIdentifiers', []);
-    for (const device of storedDevices) {
-      this.storedDevices.set(device.id, device);
-    }
+    for (const device of storedDevices) this.storedDevices.set(device.id, device);
     this.log.debug(`Loaded ${this.storedDevices.size} discovered Shelly devices from the storage`);
     return true;
   }
@@ -580,22 +612,22 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       shellyDevice.log.error(`shellyCommandHandler error: componentName not found for shelly device ${dn}${shellyDevice?.id}${er}`);
       return false;
     }
-    const switchComponent = shellyDevice?.getComponent(componentName) as ShellySwitchComponent;
-    if (!switchComponent) {
+    const lightComponent = shellyDevice?.getComponent(componentName) as ShellyLightComponent;
+    if (!lightComponent) {
       shellyDevice.log.error(`shellyCommandHandler error: component ${componentName} not found for shelly device ${dn}${shellyDevice?.id}${er}`);
       return false;
     }
     // Send On() Off() Toggle() command
-    if (command === 'On') switchComponent.On();
-    else if (command === 'Off') switchComponent.Off();
-    else if (command === 'Toggle') switchComponent.Toggle();
+    if (command === 'On') lightComponent.On();
+    else if (command === 'Off') lightComponent.Off();
+    else if (command === 'Toggle') lightComponent.Toggle();
     if (command === 'On' || command === 'Off' || command === 'Toggle')
       shellyDevice.log.info(`Command ${hk}${componentName}${nf}:${command}() for shelly device ${idn}${shellyDevice?.id}${rs}${nf}`);
 
     // Send Level() command
     if (command === 'Level' && level !== null && level !== undefined) {
       const shellyLevel = Math.max(Math.min(Math.round((level / 254) * 100), 100), 1);
-      switchComponent?.Level(shellyLevel);
+      lightComponent?.Level(shellyLevel);
       shellyDevice.log.info(`Command ${hk}${componentName}${nf}:Level(${YELLOW}${shellyLevel}${nf}) for shelly device ${idn}${shellyDevice?.id}${rs}${nf}`);
     }
 
@@ -604,7 +636,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       color.r = Math.max(Math.min(color.r, 255), 0);
       color.g = Math.max(Math.min(color.g, 255), 0);
       color.b = Math.max(Math.min(color.b, 255), 0);
-      switchComponent?.ColorRGB(color.r, color.g, color.b);
+      lightComponent?.ColorRGB(color.r, color.g, color.b);
       shellyDevice.log.info(
         `Command ${hk}${componentName}${nf}:ColorRGB(${YELLOW}${color.r}${nf}, ${YELLOW}${color.g}${nf}, ${YELLOW}${color.b}${nf}) for shelly device ${idn}${shellyDevice?.id}${rs}${nf}`,
       );
@@ -766,21 +798,24 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     }
     // Update energy from main components (gen 2 devices send power total inside the component not with meter)
     if (
-      shellyComponent.name === 'Light' ||
-      shellyComponent.name === 'Relay' ||
-      shellyComponent.name === 'Switch' ||
-      shellyComponent.name === 'Cover' ||
-      shellyComponent.name === 'Roller'
+      this.config.exposePowerMeter === 'evehistory' &&
+      (shellyComponent.name === 'Light' ||
+        shellyComponent.name === 'Relay' ||
+        shellyComponent.name === 'Switch' ||
+        shellyComponent.name === 'Cover' ||
+        shellyComponent.name === 'Roller' ||
+        shellyComponent.name === 'PowerMeter')
     ) {
       if (property === 'power' || property === 'apower') {
         const cluster = endpoint.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy));
         cluster?.setConsumptionAttribute(value as number);
         if (cluster) shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}EveHistory-consumption${db} ${YELLOW}${value as number}${db}`);
+        // Calculate current from power and voltage
         const voltage = shellyComponent.getValue('voltage') as number;
         if (voltage) {
           const current = (value as number) / voltage;
           cluster?.setCurrentAttribute(current as number);
-          shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}EveHistory-current${db} ${YELLOW}${current as number}${db}`);
+          if (cluster) shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}EveHistory-current${db} ${YELLOW}${current as number}${db}`);
         }
       }
       if (property === 'total') {
@@ -806,11 +841,19 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         const cluster = endpoint.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy));
         cluster?.setCurrentAttribute(value as number);
         if (cluster) shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}EveHistory-current${db} ${YELLOW}${value as number}${db}`);
+        // Calculate power from current and voltage
+        const voltage = shellyComponent.getValue('voltage') as number;
+        if (voltage) {
+          const power = (value as number) * voltage;
+          cluster?.setConsumptionAttribute(power as number);
+          if (cluster) shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}EveHistory-consumption${db} ${YELLOW}${power as number}${db}`);
+        }
       }
     }
 
+    /*
     // Update energy from PowerMeter
-    if (shellyComponent.name === 'PowerMeter') {
+    if (this.config.exposePowerMeter === 'evehistory' && shellyComponent.name === 'PowerMeter') {
       if (property === 'power' || property === 'apower') {
         const cluster = endpoint.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy));
         cluster?.setConsumptionAttribute(value as number);
@@ -841,6 +884,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           );
       }
     }
+    */
   }
 
   private validateWhiteBlackList(entityName: string) {
