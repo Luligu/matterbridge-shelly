@@ -106,13 +106,13 @@ export class CoapServer extends EventEmitter {
           // agent: this.coapAgent,
         })
         .on('response', (msg: IncomingMessage) => {
-          this.log.debug(`Coap got device description ("/cit/d") code ${BLUE}${msg.code}${db} url ${BLUE}${msg.url}${db} rsinfo ${debugStringify(msg.rsinfo)}:`);
+          this.log.debug(`CoIoT (coap) received device description ("/cit/d") code ${BLUE}${msg.code}${db} url ${BLUE}${msg.url}${db} rsinfo ${debugStringify(msg.rsinfo)}:`);
           msg.url = '/cit/d';
           this.parseShellyMessage(msg);
           resolve(msg);
         })
         .on('error', (err) => {
-          this.log.error('Coap error getting device description ("/cit/d"):', err);
+          this.log.error('CoIoT (coap) error getting device description ("/cit/d"):', err);
           reject(err);
         })
         .end();
@@ -131,12 +131,12 @@ export class CoapServer extends EventEmitter {
           // agent: this.coapAgent,
         })
         .on('response', (msg: IncomingMessage) => {
-          this.log.debug(`Coap got device status ("/cit/s") code ${BLUE}${msg.code}${db} url ${BLUE}${msg.url}${db} rsinfo ${debugStringify(msg.rsinfo)}:`);
+          this.log.debug(`CoIoT (coap) received device status ("/cit/s") code ${BLUE}${msg.code}${db} url ${BLUE}${msg.url}${db} rsinfo ${debugStringify(msg.rsinfo)}:`);
           this.parseShellyMessage(msg);
           resolve(msg);
         })
         .on('error', (err) => {
-          this.log.error('Coap error getting device status ("/cit/s"):', err);
+          this.log.error('CoIoT (coap) error getting device status ("/cit/s"):', err);
           reject(err);
         })
         .end();
@@ -144,7 +144,7 @@ export class CoapServer extends EventEmitter {
   }
 
   getMulticastDeviceStatus(timeout = 60): Promise<IncomingMessage | null> {
-    this.log.debug('Requesting multicast device status...');
+    this.log.debug('Requesting CoIoT (coap) multicast device status...');
     return new Promise((resolve, reject) => {
       const request = coap
         .request({
@@ -163,7 +163,7 @@ export class CoapServer extends EventEmitter {
         })
         .on('error', (err) => {
           clearTimeout(timer);
-          this.log.error('Coap error requesting multicast device status ("/cit/s"):', err);
+          this.log.error('CoIoT (coap) error requesting multicast device status ("/cit/s"):', err);
           reject(err);
         })
         .end();
@@ -231,7 +231,7 @@ export class CoapServer extends EventEmitter {
   }
 
   private parseShellyMessage(msg: IncomingMessage) {
-    this.log.debug(`Parsing device Coap response...`);
+    this.log.debug(`Parsing device CoIoT (coap) response...`);
 
     const host = msg.rsinfo.address;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -370,25 +370,9 @@ export class CoapServer extends EventEmitter {
       multicastAddress: COAP_MULTICAST_ADDRESS,
     });
 
-    /*
-    // 192.168.1.189:5683
-    // insert our own middleware right before requests are handled (the last step)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    this.coapServer._middlewares.splice(Math.max(this.coapServer._middlewares.length - 1, 0), 0, (req: any, next: any) => {
-      this.log.warn(`Server middleware got a messagge code ${req.packet.code} rsinfo ${debugStringify(req.rsinfo)}...`);
-      // Unicast messages from Shelly devices will have the 2.05 code, which the
-      // server will silently drop (since its a response code and not a request
-      // code). To avoid this, we change it to 0.30 here.
-      if (req.packet.code === '2.05') {
-        req.packet.code = '0.30';
-      }
-      next();
-    });
-    */
-
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     this.coapServer.on('request', (msg: IncomingMessage, res: OutgoingMessage) => {
-      this.log.debug(`Coap server got a messagge code ${BLUE}${msg.code}${db} url ${BLUE}${msg.url}${db} rsinfo ${debugStringify(msg.rsinfo)}...`);
+      this.log.debug(`CoIoT (coap) server got a messagge code ${BLUE}${msg.code}${db} url ${BLUE}${msg.url}${db} rsinfo ${debugStringify(msg.rsinfo)}...`);
       if (msg.code === '0.30' && msg.url === '/cit/s') {
         // const coapMessage = this.parseShellyMessage(msg);
         // this.emit('update', coapMessage);
@@ -401,9 +385,9 @@ export class CoapServer extends EventEmitter {
 
     this.coapServer.listen((err) => {
       if (err) {
-        this.log.warn('Coap server error while listening:', err);
+        this.log.warn('CoIoT (coap) server error while listening:', err);
       } else {
-        this.log.info('Coap server is listening ...');
+        this.log.info('CoIoT (coap) server is listening ...');
       }
     });
   }
@@ -417,21 +401,21 @@ export class CoapServer extends EventEmitter {
   start(debug = false) {
     this.log.setLogDebug(debug);
     if (this._isListening) return;
-    this.log.info('Starting CoIoT server for shelly devices...');
+    this.log.info('Starting CoIoT (coap) server for shelly devices...');
     this._isListening = true;
     this.listenForStatusUpdates();
-    this.log.info('Started CoIoT server for shelly devices.');
+    this.log.info('Started CoIoT (coap) server for shelly devices.');
   }
 
   stop() {
-    this.log.info('Stopping CoIoT server for shelly devices...');
+    this.log.info('Stopping CoIoT (coap) server for shelly devices...');
     this.removeAllListeners();
     this._isListening = false;
     globalAgent.close();
     // this.coapAgent.close();
     if (this.coapServer) this.coapServer.close();
     this.devices.clear();
-    this.log.info('Stopped CoIoT server for shelly devices.');
+    this.log.info('Stopped CoIoT (coap) server for shelly devices.');
   }
 }
 

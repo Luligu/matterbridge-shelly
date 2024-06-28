@@ -114,11 +114,11 @@ Choose how to expose the shelly power meters: disabled, matter13 (use Matter 1.3
 
 ### blackList
 
-If the blackList is defined the devices included in the list will not be exposed to Matter. Use the device id (e.g. shellyplus2pm-5443b23d81f8)
+If the blackList is defined the devices included in the list will not be exposed to Matter. Use the device id (e.g. shellyplus2pm-5443B23D81F8)
 
 ### whiteList
 
-If the whiteList is defined only the devices included in the list are exposed to Matter. Use the device id (e.g. shellyplus2pm-5443b23d81f8).
+If the whiteList is defined only the devices included in the list are exposed to Matter. Use the device id (e.g. shellyplus2pm-5443B23D81F8).
 
 ### deviceIp
 
@@ -140,11 +140,15 @@ Reset the storage discovery on the next restart (it will clear the storage of al
 
 ### enableConfigDiscover
 
-Should be enabled only if the mdns is not working. It adds the devices defined in deviceIp.
+Should be enabled only if the mdns is not working in your network. It adds the devices defined in deviceIp.
 
 ### debug
 
 Should be enabled only if you want to debug some issue in the log.
+
+### unregisterOnShutdown
+
+Should be enabled only if you want to remove the devices from the controllers on shutdown.
 
 ### Config file
 
@@ -166,6 +170,7 @@ These are the config values:
   },
   "enableMdnsDiscover": true,
   "enableStorageDiscover": true,
+  "resetStorageDiscover": false
   "enableConfigDiscover": false,
   "debug": false,
   "unregisterOnShutdown": false,

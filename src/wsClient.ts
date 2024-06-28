@@ -274,32 +274,34 @@ export class WsClient extends EventEmitter {
     this.log.debug(`Stopped ws client for Shelly device on address ${this.wsHost}`);
   }
 }
-/*
-if (process.argv.includes('startWsClient')) {
-  const wsClient = new WsClient('192.168.1.221', 'tango');
-  wsClient.start(true);
 
-  const wsClient2 = new WsClient('192.168.1.217', 'tango');
+/*
+// Start the WebSocket client with the following command: node dist/wsClient.js startWsClient
+if (process.argv.includes('startWsClient')) {
+  const wsClient1 = new WsClient('192.168.1.217', 'tango');
+  wsClient1.start(true);
+
+  const wsClient2 = new WsClient('192.168.1.218', 'tango');
   wsClient2.start(true);
 
   setTimeout(() => {
-    wsClient.sendRequest('Switch.Set', { id: 0, on: true });
+    wsClient1.sendRequest('Switch.Set', { id: 0, on: true });
   }, 5000);
 
   setTimeout(() => {
-    wsClient.sendRequest('Switch.Set', { id: 0, on: false });
+    wsClient1.sendRequest('Switch.Set', { id: 0, on: false });
   }, 10000);
 
   setTimeout(() => {
-    wsClient.sendRequest('Shelly.GetComponents', {});
+    wsClient1.sendRequest('Shelly.GetComponents', {});
   }, 15000);
 
   setTimeout(() => {
-    wsClient.sendRequest('Shelly.ListMethods', {});
+    wsClient1.sendRequest('Shelly.ListMethods', {});
   }, 20000);
 
   process.on('SIGINT', async function () {
-    wsClient.stop();
+    wsClient1.stop();
     wsClient2.stop();
   });
 }

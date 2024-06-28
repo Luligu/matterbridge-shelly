@@ -41,8 +41,6 @@ interface SwitchComponent {
   On(): void;
   Off(): void;
   Toggle(): void;
-  Level(level: number): void;
-  ColorRGB(red: number, green: number, blue: number): void;
 }
 
 interface CoverComponent {
@@ -58,14 +56,12 @@ export type ShellySwitchComponent = ShellyComponent & SwitchComponent;
 
 export type ShellyCoverComponent = ShellyComponent & CoverComponent;
 
-type ShellyComponentType = ShellyComponent & Partial<LightComponent> & Partial<SwitchComponent> & Partial<CoverComponent>;
-
 function isLightComponent(name: string): name is 'Light' {
   return ['Light'].includes(name);
 }
 
-function isSwitchComponent(name: string): name is 'Light' | 'Relay' | 'Switch' {
-  return ['Light', 'Relay', 'Switch'].includes(name);
+function isSwitchComponent(name: string): name is 'Relay' | 'Switch' {
+  return ['Relay', 'Switch'].includes(name);
 }
 
 function isCoverComponent(name: string): name is 'Cover' | 'Roller' {
@@ -90,35 +86,38 @@ export class ShellyComponent extends EventEmitter {
       this.addProperty(new ShellyProperty(this, prop, data[prop] as ShellyDataType));
 
       // Add a state property for Light, Relay, and Switch components
-      if (isSwitchComponent(name) && (prop === 'ison' || prop === 'output')) this.addProperty(new ShellyProperty(this, 'state', data[prop]));
+      if (isSwitchComponent(name) || (isLightComponent(name) && (prop === 'ison' || prop === 'output'))) this.addProperty(new ShellyProperty(this, 'state', data[prop]));
 
       // Add a brightness property for Light, Relay, and Switch components
       if (isLightComponent(name) && prop === 'gain') this.addProperty(new ShellyProperty(this, 'brightness', data[prop]));
     }
 
     // Extend the class prototype to include the Switch Relay Light methods dynamically
-    if (isSwitchComponent(name)) {
+    if (isSwitchComponent(name) || isLightComponent(name)) {
       // console.log('Component:', this);
-      (this as ShellyComponentType).On = function () {
+      (this as unknown as ShellySwitchComponent).On = function () {
         this.setValue('state', true);
         if (device.gen === 1) ShellyDevice.fetch(device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { turn: 'on' });
         if (device.gen !== 1) ShellyDevice.fetch(device.log, device.host, `${this.name}.Set`, { id: this.index, on: true });
       };
 
-      (this as ShellyComponentType).Off = function () {
+      (this as unknown as ShellySwitchComponent).Off = function () {
         this.setValue('state', false);
         if (device.gen === 1) ShellyDevice.fetch(device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { turn: 'off' });
         if (device.gen !== 1) ShellyDevice.fetch(device.log, device.host, `${this.name}.Set`, { id: this.index, on: false });
       };
 
-      (this as ShellyComponentType).Toggle = function () {
+      (this as unknown as ShellySwitchComponent).Toggle = function () {
         const currentState = this.getValue('state');
         this.setValue('state', !currentState);
         if (device.gen === 1) ShellyDevice.fetch(device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { turn: 'toggle' });
         if (device.gen !== 1) ShellyDevice.fetch(device.log, device.host, `${this.name}.Toggle`, { id: this.index });
       };
+    }
 
-      (this as ShellyComponentType).Level = function (level: number) {
+    // Extend the class prototype to include the Light methods dynamically
+    if (isLightComponent(name)) {
+      (this as unknown as ShellyLightComponent).Level = function (level: number) {
         if (!this.hasProperty('brightness')) return;
         const adjustedLevel = Math.min(Math.max(Math.round(level), 0), 100);
         this.setValue('brightness', adjustedLevel);
@@ -128,7 +127,7 @@ export class ShellyComponent extends EventEmitter {
         if (device.gen !== 1) ShellyDevice.fetch(device.log, device.host, `${this.name}.Set`, { id: this.index, brightness: adjustedLevel });
       };
 
-      (this as ShellyComponentType).ColorRGB = function (red: number, green: number, blue: number) {
+      (this as unknown as ShellyLightComponent).ColorRGB = function (red: number, green: number, blue: number) {
         if (!this.hasProperty('red') || !this.hasProperty('green') || !this.hasProperty('blue')) return;
         red = Math.min(Math.max(Math.round(red), 0), 255);
         green = Math.min(Math.max(Math.round(green), 0), 255);
