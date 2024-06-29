@@ -54,10 +54,23 @@ export function parseDigestAuthenticateHeader(authHeader: string): Record<string
   return authParams;
 }
 
+/* Should return 
+'YWRtaW46'
+*/
 export function createBasicShellyAuth(username: string, password: string): string {
   return Buffer.from(`${username}:${password}`).toString('base64');
 }
 
+/* Should return 
+{
+  realm: 'shelly1minig3-543204547478',
+  username: 'admin',
+  nonce: 1719662215,
+  cnonce: 253120865,
+  response: '73120c3efd8a023be249e3ba5703e871c9b99fec12d0188a9e13fd895d64f6be',
+  algorithm: 'SHA-256'
+}
+*/
 export function createDigestShellyAuth(username: string, password: string, nonce: number, cnonce: number, realm: string, nc = 1): AuthParams {
   const auth: AuthParams = { realm, username, nonce, cnonce, response: '', algorithm: 'SHA-256' };
   const ha1 = crypto.createHash('sha256').update(`admin:${auth.realm}:${password}`).digest('hex');
