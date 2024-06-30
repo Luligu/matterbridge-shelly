@@ -126,7 +126,7 @@ export class ShellyDevice extends EventEmitter {
   }
 
   static async create(shelly: Shelly, log: AnsiLogger, host: string): Promise<ShellyDevice | undefined> {
-    const shellyPayload = await ShellyDevice.fetch(log, host, 'shelly');
+    const shellyPayload = await ShellyDevice.fetch(shelly, log, host, 'shelly');
     let statusPayload: ShellyData | null = null;
     let settingsPayload: ShellyData | null = null;
 
@@ -145,8 +145,8 @@ export class ShellyDevice extends EventEmitter {
 
     // Gen 1 Shelly device
     if (!shellyPayload.gen) {
-      statusPayload = await ShellyDevice.fetch(log, host, 'status');
-      settingsPayload = await ShellyDevice.fetch(log, host, 'settings');
+      statusPayload = await ShellyDevice.fetch(shelly, log, host, 'status');
+      settingsPayload = await ShellyDevice.fetch(shelly, log, host, 'settings');
       if (!statusPayload || !settingsPayload) {
         log.error(`Error creating device gen 1 from host ${host}. No data found.`);
         return undefined;
@@ -209,8 +209,8 @@ export class ShellyDevice extends EventEmitter {
 
     // Gen 2 Shelly device
     if (shellyPayload.gen === 2 || shellyPayload.gen === 3) {
-      statusPayload = await ShellyDevice.fetch(log, host, 'Shelly.GetStatus');
-      settingsPayload = await ShellyDevice.fetch(log, host, 'Shelly.GetConfig');
+      statusPayload = await ShellyDevice.fetch(shelly, log, host, 'Shelly.GetStatus');
+      settingsPayload = await ShellyDevice.fetch(shelly, log, host, 'Shelly.GetConfig');
       if (!statusPayload || !settingsPayload) {
         log.error(`Error creating device gen 2 from host ${host}. No data found.`);
         return undefined;
@@ -397,7 +397,7 @@ export class ShellyDevice extends EventEmitter {
 
   async fetchUpdate(): Promise<void> {
     const service = this.gen === 1 ? 'status' : 'Shelly.GetStatus';
-    const status = await ShellyDevice.fetch(this.log, this.host, service);
+    const status = await ShellyDevice.fetch(this.shelly, this.log, this.host, service);
     if (!status) {
       this.log.error(`Error fetching device ${this.id} status. No data found. The device may be offline.`);
       this.online = false;
@@ -432,7 +432,7 @@ export class ShellyDevice extends EventEmitter {
   // http://192.168.1.218/rpc/Switch.Set?id=0&on=false
   // http://192.168.1.218/rpc/Switch.Toggle?id=0
 
-  static async fetch(log: AnsiLogger, host: string, service: string, params: Record<string, string | number | boolean> = {}): Promise<ShellyData | null> {
+  static async fetch(shelly: Shelly, log: AnsiLogger, host: string, service: string, params: Record<string, string | number | boolean> = {}): Promise<ShellyData | null> {
     // MOCK: Fetch device data from file if host is a json file
     if (host.endsWith('.json')) {
       log.warn(`Fetching mock device payloads from file ${host}: service ${service} params ${JSON.stringify(params)}`);
@@ -475,12 +475,14 @@ export class ShellyDevice extends EventEmitter {
           const authHeader = response.headers.get('www-authenticate');
           log.debug(`${GREY}authHeader: ${authHeader}${RESET}`);
           if (authHeader === null) throw new Error('No www-authenticate header found');
+          if (shelly.username === undefined || shelly.username === '') log.error(`Device at host ${host} requires authentication but no username has been provided in the config`);
+          if (shelly.password === undefined || shelly.password === '') log.error(`Device at host ${host} requires authentication but no password has been provided in the config`);
           if (authHeader.startsWith('Basic')) {
             // Gen 1 devices require basic authentication
             const authParams = parseBasicAuthenticateHeader(authHeader); // Get nonce and realm
             log.debug(`${GREY}authparams: ${JSON.stringify(authParams)}${RESET}`);
             if (!authParams.realm) throw new Error('No authenticate realm parameter found in header');
-            const auth = createBasicShellyAuth('admin', 'tango');
+            const auth = createBasicShellyAuth(shelly.username ?? '', shelly.password ?? '');
             headers.Authorization = `Basic ${auth}`;
           } else if (authHeader.startsWith('Digest')) {
             // Gen 2 and 3 devices require digest authentication
@@ -488,7 +490,7 @@ export class ShellyDevice extends EventEmitter {
             log.debug(`${GREY}authparams: ${JSON.stringify(authParams)}${RESET}`);
             if (!authParams.nonce) throw new Error('No authenticate nonce parameter found in header');
             if (!authParams.realm) throw new Error('No authenticate realm parameter found in header');
-            const auth = createDigestShellyAuth('admin', 'tango', parseInt(authParams.nonce), crypto.randomInt(0, 999999999), authParams.realm);
+            const auth = createDigestShellyAuth('admin', shelly.password ?? '', parseInt(authParams.nonce), crypto.randomInt(0, 999999999), authParams.realm);
             options.body = getGen2BodyOptions('2.0', 10, 'Matterbridge', service, params, auth);
           }
           log.debug(`${GREY}options: ${JSON.stringify(options)}${RESET}`);
@@ -501,9 +503,10 @@ export class ShellyDevice extends EventEmitter {
             return reponse as ShellyData;
           }
         }
+        // console.log(shelly.username, shelly.password, shelly.username === undefined, shelly.password === undefined);
         log.error(
-          `${RED}Response error fetching shelly gen ${gen} host ${host} service ${service}${params ? ' with ' + JSON.stringify(params) : ''} url ${url}:` +
-            ` ${response.status} (${response.statusText})${RESET}`,
+          `Response error fetching shelly gen ${gen} host ${host} service ${service}${params ? ' with ' + JSON.stringify(params) : ''} url ${url}:` +
+            ` ${response.status} (${response.statusText})`,
         );
         return null;
       }

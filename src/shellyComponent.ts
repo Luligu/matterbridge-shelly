@@ -97,21 +97,21 @@ export class ShellyComponent extends EventEmitter {
       // console.log('Component:', this);
       (this as unknown as ShellySwitchComponent).On = function () {
         this.setValue('state', true);
-        if (device.gen === 1) ShellyDevice.fetch(device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { turn: 'on' });
-        if (device.gen !== 1) ShellyDevice.fetch(device.log, device.host, `${this.name}.Set`, { id: this.index, on: true });
+        if (device.gen === 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { turn: 'on' });
+        if (device.gen !== 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${this.name}.Set`, { id: this.index, on: true });
       };
 
       (this as unknown as ShellySwitchComponent).Off = function () {
         this.setValue('state', false);
-        if (device.gen === 1) ShellyDevice.fetch(device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { turn: 'off' });
-        if (device.gen !== 1) ShellyDevice.fetch(device.log, device.host, `${this.name}.Set`, { id: this.index, on: false });
+        if (device.gen === 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { turn: 'off' });
+        if (device.gen !== 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${this.name}.Set`, { id: this.index, on: false });
       };
 
       (this as unknown as ShellySwitchComponent).Toggle = function () {
         const currentState = this.getValue('state');
         this.setValue('state', !currentState);
-        if (device.gen === 1) ShellyDevice.fetch(device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { turn: 'toggle' });
-        if (device.gen !== 1) ShellyDevice.fetch(device.log, device.host, `${this.name}.Toggle`, { id: this.index });
+        if (device.gen === 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { turn: 'toggle' });
+        if (device.gen !== 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${this.name}.Toggle`, { id: this.index });
       };
     }
 
@@ -122,9 +122,10 @@ export class ShellyComponent extends EventEmitter {
         const adjustedLevel = Math.min(Math.max(Math.round(level), 0), 100);
         this.setValue('brightness', adjustedLevel);
         if (device.gen === 1 && !this.hasProperty('gain'))
-          ShellyDevice.fetch(device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { brightness: adjustedLevel });
-        if (device.gen === 1 && this.hasProperty('gain')) ShellyDevice.fetch(device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { gain: adjustedLevel });
-        if (device.gen !== 1) ShellyDevice.fetch(device.log, device.host, `${this.name}.Set`, { id: this.index, brightness: adjustedLevel });
+          ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { brightness: adjustedLevel });
+        if (device.gen === 1 && this.hasProperty('gain'))
+          ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { gain: adjustedLevel });
+        if (device.gen !== 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${this.name}.Set`, { id: this.index, brightness: adjustedLevel });
       };
 
       (this as unknown as ShellyLightComponent).ColorRGB = function (red: number, green: number, blue: number) {
@@ -135,8 +136,8 @@ export class ShellyComponent extends EventEmitter {
         this.setValue('red', red);
         this.setValue('green', green);
         this.setValue('blue', blue);
-        if (device.gen === 1) ShellyDevice.fetch(device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { red, green, blue });
-        if (device.gen !== 1) ShellyDevice.fetch(device.log, device.host, `${this.name}.Set`, { id: this.index, red, green, blue });
+        if (device.gen === 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { red, green, blue });
+        if (device.gen !== 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${this.name}.Set`, { id: this.index, red, green, blue });
       };
     }
 
@@ -144,26 +145,26 @@ export class ShellyComponent extends EventEmitter {
     if (isCoverComponent(name)) {
       (this as unknown as ShellyCoverComponent).Open = function () {
         this.setValue('state', 'open');
-        if (device.gen === 1) ShellyDevice.fetch(device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { go: 'open' });
-        if (device.gen !== 1) ShellyDevice.fetch(device.log, device.host, `${this.name}.Open`, { id: this.index });
+        if (device.gen === 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { go: 'open' });
+        if (device.gen !== 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${this.name}.Open`, { id: this.index });
       };
 
       (this as unknown as ShellyCoverComponent).Close = function () {
         this.setValue('state', 'close');
-        if (device.gen === 1) ShellyDevice.fetch(device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { go: 'close' });
-        if (device.gen !== 1) ShellyDevice.fetch(device.log, device.host, `${this.name}.Close`, { id: this.index });
+        if (device.gen === 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { go: 'close' });
+        if (device.gen !== 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${this.name}.Close`, { id: this.index });
       };
 
       (this as unknown as ShellyCoverComponent).Stop = function () {
         this.setValue('state', 'stop');
-        if (device.gen === 1) ShellyDevice.fetch(device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { go: 'stop' });
-        if (device.gen !== 1) ShellyDevice.fetch(device.log, device.host, `${this.name}.Stop`, { id: this.index });
+        if (device.gen === 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { go: 'stop' });
+        if (device.gen !== 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${this.name}.Stop`, { id: this.index });
       };
 
       (this as unknown as ShellyCoverComponent).GoToPosition = function (pos: number) {
         pos = Math.min(Math.max(Math.round(pos), 0), 100);
-        if (device.gen === 1) ShellyDevice.fetch(device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { go: 'to_pos', roller_pos: pos });
-        if (device.gen !== 1) ShellyDevice.fetch(device.log, device.host, `${this.name}.GoToPosition`, { id: this.index, pos: pos });
+        if (device.gen === 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { go: 'to_pos', roller_pos: pos });
+        if (device.gen !== 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${this.name}.GoToPosition`, { id: this.index, pos: pos });
       };
     }
   }

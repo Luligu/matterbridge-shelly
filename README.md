@@ -19,7 +19,7 @@ Features:
 
 - Shellies are automatically discovered using mDNS.
 - Discovered shellies are stored in local storage for quick loading on startup.
-- The components exposed are lights (with brightness and color selection), switches, rollers and meters.
+- The components exposed are Light (with brightness and RGB color), Switch, Relay, Roller, Cover, PowerMeter and Input.
 - All components expose the electrical measurements with the EveHistory cluster (displayed on HA), waiting for the controllers to upgrade to the Matter 1.3 specs.
 - Shellies are controlled locally, eliminating the need for cloud or MQTT (which can both be disabled).
 - Shelly Gen 1 devices are controlled using the CoIoT protocol (see the note below).

@@ -14,7 +14,7 @@
       "readOnly": true
     },
     "username": {
-      "description": "Username (since is always admin for gen 2 and 3 devices, use admin also for gen 1)",
+      "description": "Username (used only for gen 1 devices)",
       "type": "string"
     },
     "password": {
@@ -24,19 +24,32 @@
     "exposeSwitch": {
       "description": "Choose how to expose the shelly switches: as a switch (don't use it for Alexa), light or outlet",
       "type": "string",
-      "enum": ["switch", "light", "outlet"],
+      "enum": [
+        "switch",
+        "light",
+        "outlet"
+      ],
       "default": "switch"
     },
     "exposeInput": {
-      "description": "Choose how to expose the shelly inputs: disabled, contact or momentary switch (under development)",
+      "description": "Choose how to expose the shelly inputs: disabled, contact, momentary or latching switch",
       "type": "string",
-      "enum": ["disabled", "contact", "momentary"],
+      "enum": [
+        "disabled",
+        "contact",
+        "momentary",
+        "latching"
+      ],
       "default": "disabled"
     },
     "exposePowerMeter": {
-      "description": "Choose how to expose the shelly power meters: disabled, matter13 (will use Matter 1.3 electricalSensor, don't use it now) or evehistory (use Matter EveHistoryCluster)",
+      "description": "Choose how to expose the shelly power meters: disabled, matter13 (will use Matter 1.3 electricalSensor) or evehistory (use Matter EveHistoryCluster)",
       "type": "string",
-      "enum": ["disabled", "matter13", "evehistory"],
+      "enum": [
+        "disabled",
+        "matter13",
+        "evehistory"
+      ],
       "default": "evehistory"
     },
     "blackList": {

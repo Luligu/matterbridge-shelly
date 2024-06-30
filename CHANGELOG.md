@@ -4,11 +4,27 @@ All notable changes to this project will be documented in this file.
 
 If you like this project and find it useful, please consider giving it a star on GitHub at https://github.com/Luligu/matterbridge-shelly and sponsoring it.
 
+## [0.7.0] - 2024-06-30
+
+### Changed
+
+- [Input]: The Input component is now fully supported. The Input can be set in the config like disabled, contact, momentary or latching.
+
+### Fixed
+
+- [PowerMeter]: Fixed voltage error message in PowerMeter.
+- [shelly]: Fixed authentication.
+
+<a href="https://www.buymeacoffee.com/luligugithub">
+  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+</a>
+
 ## [0.6.1] - 2024-06-28
 
 ### Changed
 
 - [firmware]: The recent firmware update for Gen 2 and Gen. 3 devices changed the way data is sent. This fix the electrical readings.
+- [package]: Updated eslint to 9.6.0
 
 <a href="https://www.buymeacoffee.com/luligugithub">
   <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
