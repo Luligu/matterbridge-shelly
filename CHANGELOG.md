@@ -6,6 +6,10 @@ If you like this project and find it useful, please consider giving it a star on
 
 ## [0.7.1] - 2024-07-02
 
+### Changed
+
+- [package]: Updated dependencies (ws and coap)
+
 ### Fixed
 
 - [shelly]: Fixed issue caused by a shelly gen 1 when it sends a CoIoT message /cit/d without blk.
