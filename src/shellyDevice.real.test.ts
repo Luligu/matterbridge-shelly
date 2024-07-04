@@ -1,12 +1,11 @@
-/* eslint-disable no-console */
 import { Shelly } from './shelly.js';
 import { ShellyDevice } from './shellyDevice.js';
-import { ShellyCoverComponent, ShellySwitchComponent } from './shellyComponent';
+// import { ShellyCoverComponent, ShellySwitchComponent } from './shellyComponent';
 import { AnsiLogger, TimestampFormat } from 'node-ansi-logger';
-import { getIpv4InterfaceAddress } from 'matterbridge';
+// import { getIpv4InterfaceAddress } from 'matterbridge';
 
 describe('Shellies', () => {
-  if (getIpv4InterfaceAddress() !== '192.168.1.189') return;
+  // if (getIpv4InterfaceAddress() !== '192.168.1.189') return;
 
   const log = new AnsiLogger({ logName: 'shellyDeviceTest', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: false });
   const shelly = new Shelly(log, 'admin', 'tango', false);
@@ -27,21 +26,20 @@ describe('Shellies', () => {
     //
   });
 
-  // eslint-disable-next-line jest/no-commented-out-tests
-  /*
   describe('new not existing ShellyDevice()', () => {
     test('Create a non existing device', async () => {
-      const device = await ShellyDevice.create(log, '192.168.250.219');
+      const device = await ShellyDevice.create(shelly, log, '192.168.250.219');
       expect(device).toBeUndefined();
     }, 30000);
 
     test('Create a non existing device name', async () => {
-      const device = await ShellyDevice.create(log, 'somename');
+      const device = await ShellyDevice.create(shelly, log, 'somename');
       expect(device).toBeUndefined();
     }, 30000);
   });
-  */
 
+  // eslint-disable-next-line jest/no-commented-out-tests
+  /*
   describe('create real gen 1 shellydimmer2 219', () => {
     test('create a gen 1 device and update', async () => {
       const device = await ShellyDevice.create(shelly, log, '192.168.1.219');
@@ -115,7 +113,6 @@ describe('Shellies', () => {
       expect(stateProp?.value === stateProp2?.value).toBeTruthy();
       device.destroy();
     });
-    */
 
     test('send rpc command to a gen 2 device', async () => {
       const device = await ShellyDevice.create(shelly, log, '192.168.1.217');
@@ -193,7 +190,6 @@ describe('Shellies', () => {
       await device.fetchUpdate();
       device.destroy();
     });
-    */
 
     test('execute On() Off() Toggle() for a gen 2 device', async () => {
       const device = await ShellyDevice.create(shelly, log, '192.168.1.217');
@@ -289,4 +285,5 @@ describe('Shellies', () => {
       device.destroy();
     });
   });
+  */
 });
