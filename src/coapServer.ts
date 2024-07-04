@@ -286,7 +286,10 @@ export class CoapServer extends EventEmitter {
       const desc: CoIoTDescription[] = [];
       this.log.debug(`parsing ${MAGENTA}blocks${db}:`);
       const blk: CoIoTBlkComponent[] = payload.blk;
-      // TODO here once crashed...
+      if (!blk) {
+        this.log.error(`No blk found for host ${host} in ${msg.url}`);
+        return;
+      }
       blk.forEach((b) => {
         this.log.debug(`- block: ${CYAN}${b.I}${db} description ${CYAN}${b.D}${db}`);
         const sen: CoIoTSenProperty[] = payload.sen;
