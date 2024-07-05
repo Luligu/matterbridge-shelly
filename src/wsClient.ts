@@ -103,6 +103,7 @@ export class WsClient extends EventEmitter {
   // PingPong
   private pingInterval?: NodeJS.Timeout;
   private pongTimeout?: NodeJS.Timeout;
+  private stopTimeout?: NodeJS.Timeout;
 
   // Define the request frame without auth
   private requestFrame: RequestFrame = {
@@ -167,11 +168,13 @@ export class WsClient extends EventEmitter {
     // Listen for pong messages to clear the pong timeout
     this.wsClient?.on('pong', () => {
       clearTimeout(this.pongTimeout);
+      this.pongTimeout = undefined;
       this.log.debug(`Pong received from ${zb}${this.wsHost}${db}, connection is alive.`);
     });
   }
 
   private stopPingPong() {
+    this.log.debug(`Stop PingPong with host ${zb}${this.wsHost}${db}.`);
     if (this.pingInterval) {
       clearInterval(this.pingInterval);
       this.pingInterval = undefined;
@@ -205,7 +208,8 @@ export class WsClient extends EventEmitter {
 
     // Handle errors
     this.wsClient.on('error', (error: Error) => {
-      this.log.error(`WebSocket error with Shelly device on address ${zb}${this.wsHost}${rs}\n`, error);
+      this.log.error(`WebSocket error with Shelly device on address ${zb}${this.wsHost}${rs} readyState: ${this.wsClient?.readyState}\n`, error);
+      this._isConnecting = false;
     });
 
     // Handle the close event
@@ -261,12 +265,14 @@ export class WsClient extends EventEmitter {
   stop(debug = false) {
     this.log.setLogDebug(debug);
     this.log.debug(
-      `Stopping ws client for Shelly device on address ${this.wsHost} state ${this.wsClient?.readyState} conencting ${this._isConnecting} connected ${this._isConnected} `,
+      `Stopping ws client for Shelly device on address ${this.wsHost} state ${this.wsClient?.readyState} connencting ${this._isConnecting} connected ${this._isConnected} `,
     );
     this.stopPingPong();
     if (this._isConnecting) {
-      setTimeout(() => {
+      this.stopTimeout = setTimeout(() => {
+        this.stopTimeout = undefined;
         if (this._isConnected) this.wsClient?.close();
+        if (this._isConnecting) this.wsClient?.terminate();
         this._isConnecting = false;
         this._isConnected = false;
         this.wsClient?.removeAllListeners();
