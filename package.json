@@ -50,6 +50,7 @@
     "test:mdns": "node --experimental-vm-modules node_modules/jest/bin/jest.js src/mdnsScanner.test.ts --coverage",
     "test:coap": "node --experimental-vm-modules node_modules/jest/bin/jest.js src/coapServer.test.ts --coverage",
     "test:mcast": "node --experimental-vm-modules node_modules/jest/bin/jest.js src/mcastServer.test.ts --coverage",
+    "test:ws": "node --experimental-vm-modules node_modules/jest/bin/jest.js src/wsClient.test.ts --coverage",
     "test:utils": "node --experimental-vm-modules node_modules/jest/bin/jest.js src/utils.spec.ts --coverage",
     "test:shellyProperty": "node --experimental-vm-modules node_modules/jest/bin/jest.js src/shellyProperty.test.ts --coverage",
     "test:shellyComponent": "node --experimental-vm-modules node_modules/jest/bin/jest.js src/shellyComponent.test.ts --coverage",

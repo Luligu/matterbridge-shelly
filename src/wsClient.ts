@@ -136,6 +136,10 @@ export class WsClient extends EventEmitter {
     return this._isConnected;
   }
 
+  get isConnecting() {
+    return this._isConnecting;
+  }
+
   async sendRequest(method = 'Shelly.GetStatus', params: Params = {}) {
     if (!this.wsClient || !this._isConnected) {
       this.log.error(`SendRequest error: WebSocket client is not connected to ${zb}${this.wsHost}${er}`);
@@ -192,7 +196,8 @@ export class WsClient extends EventEmitter {
       this.log.info(`WebSocket connection opened with Shelly device host ${zb}${this.wsHost}${nf}`);
       this._isConnecting = false;
       this._isConnected = true;
-      this.wsClient?.send(JSON.stringify(this.requestFrame));
+      if (this.wsClient?.readyState === WebSocket.OPEN) this.wsClient?.send(JSON.stringify(this.requestFrame));
+      else this.log.error(`WebSocket connection not open with Shelly device on address ${zb}${this.wsHost}${er}`);
 
       // Start the ping/pong mechanism
       this.startPingPong();
@@ -262,6 +267,7 @@ export class WsClient extends EventEmitter {
     if (this._isConnecting) {
       setTimeout(() => {
         if (this._isConnected) this.wsClient?.close();
+        this._isConnecting = false;
         this._isConnected = false;
         this.wsClient?.removeAllListeners();
         this.log.debug(`Stopped ws client for Shelly device on address ${this.wsHost}`);
