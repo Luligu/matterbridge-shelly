@@ -145,6 +145,11 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         1, // Number(device.firmware.split('.')[0]),
         device.firmware,
       );
+
+      mbDevice.addCommandHandler('identify', async ({ request, endpoint }) => {
+        this.log.info(`Identify command received for endpoint ${endpoint.number} request ${debugStringify(request)}`);
+      });
+
       const child = mbDevice.addChildDeviceTypeWithClusterServer('PowerSource', [powerSource], [PowerSource.Cluster.id]);
       child.addClusterServer(mbDevice.getDefaultPowerSourceWiredClusterServer());
 
