@@ -433,6 +433,11 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       if (endpoints.length > 1) {
         // Register the device with Matterbridge
         await this.registerDevice(mbDevice);
+        /*
+        mbDevice.getAllClusterServers().forEach((clusterServer) => {
+          this.log.warn(`***clusters: ${clusterServer.id}-${clusterServer.name}`);
+        });
+        */
         // Save the MatterbridgeDevice in the bridgedDevices map
         this.bridgedDevices.set(device.id, mbDevice);
       } else {
