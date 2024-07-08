@@ -8,7 +8,7 @@ describe('Shellies', () => {
   // if (getIpv4InterfaceAddress() !== '192.168.1.189') return;
 
   const log = new AnsiLogger({ logName: 'shellyDeviceTest', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: false });
-  const shelly = new Shelly(log, 'admin', 'tango', false);
+  const shelly = new Shelly(log, 'admin', 'tango', true);
 
   beforeAll(() => {
     //
@@ -35,7 +35,7 @@ describe('Shellies', () => {
     test('Create a non existing device name', async () => {
       const device = await ShellyDevice.create(shelly, log, 'somename');
       expect(device).toBeUndefined();
-    }, 900000);
+    }, 90000);
   });
 
   // eslint-disable-next-line jest/no-commented-out-tests
