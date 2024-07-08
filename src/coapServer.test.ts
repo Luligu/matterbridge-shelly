@@ -28,6 +28,9 @@ describe('Coap scanner', () => {
 
   afterAll(() => {
     coapServer?.stop();
+
+    // Restore the mocked AnsiLogger.log method
+    (AnsiLogger.prototype.log as jest.Mock).mockRestore();
   });
 
   test('Create the coapServer', () => {

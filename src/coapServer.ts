@@ -412,8 +412,6 @@ export class CoapServer extends EventEmitter {
     this.coapServer.on('request', (msg: IncomingMessage, res: OutgoingMessage) => {
       this.log.debug(`CoIoT (coap) server got a messagge code ${BLUE}${msg.code}${db} url ${BLUE}${msg.url}${db} rsinfo ${debugStringify(msg.rsinfo)}...`);
       if (msg.code === '0.30' && msg.url === '/cit/s') {
-        // const coapMessage = this.parseShellyMessage(msg);
-        // this.emit('update', coapMessage);
         this.parseShellyMessage(msg);
       } else {
         // this.log.warn(`Coap server got a wrong messagge code ${BLUE}${msg.code}${wr} url ${BLUE}${msg.url}${wr} rsinfo ${db}${debugStringify(msg.rsinfo)}...`);
