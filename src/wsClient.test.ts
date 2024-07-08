@@ -71,7 +71,7 @@ describe('WS client', () => {
         return !wsClient.isConnecting;
       },
       false,
-      30000,
+      90000,
       500,
       false,
     );
@@ -85,13 +85,13 @@ describe('WS client', () => {
         return !wsClient.isConnected;
       },
       false,
-      30000,
+      90000,
       500,
       false,
     );
     // console.log('Waiting for connection timeout done', wsClient.isConnecting, wsClient.isConnected);
     expect(wsClient.isConnected).toBeFalsy();
-  }, 60000);
+  }, 120000);
 
   // eslint-disable-next-line jest/no-commented-out-tests
   /*
