@@ -1,4 +1,4 @@
-name: Build and Lint
+name: Build, Lint and Test
 
 on: [push, pull_request]
 
