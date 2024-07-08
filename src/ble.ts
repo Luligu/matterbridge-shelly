@@ -23,7 +23,7 @@
 
 /*
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { AnsiLogger, TimestampFormat, db, debugStringify, dn, hk, nf, rs, wr, zb } from 'node-ansi-logger';
+import { AnsiLogger, TimestampFormat, db, debugStringify, dn, hk, nf, rs, wr, zb } from 'matterbridge/logger';
 
 import { createRequire } from 'module';
 import type { Peripheral, Service } from '@stoprocent/noble';

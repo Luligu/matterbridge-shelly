@@ -1,5 +1,5 @@
 import { ShellyDevice } from './shellyDevice.js';
-import { AnsiLogger, TimestampFormat } from 'node-ansi-logger';
+import { AnsiLogger, TimestampFormat } from 'matterbridge/logger';
 import { Shelly } from './shelly.js';
 import { ShellyComponent } from './shellyComponent.js';
 import path from 'path';

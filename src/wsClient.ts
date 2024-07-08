@@ -21,7 +21,7 @@
  * limitations under the License. *
  */
 
-import { AnsiLogger, BLUE, CYAN, TimestampFormat, db, er, nf, rs, wr, zb } from 'node-ansi-logger';
+import { AnsiLogger, BLUE, CYAN, TimestampFormat, db, er, nf, rs, wr, zb } from 'matterbridge/logger';
 import WebSocket from 'ws';
 import crypto from 'crypto';
 import EventEmitter from 'events';

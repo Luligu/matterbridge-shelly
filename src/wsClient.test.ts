@@ -5,7 +5,7 @@ import { jest } from '@jest/globals';
 import { waiter } from 'matterbridge/utils/utils';
 import { WsClient } from './wsClient';
 import WebSocket from 'ws';
-import { AnsiLogger, LogLevel } from 'node-ansi-logger';
+import { AnsiLogger, LogLevel } from 'matterbridge/logger';
 
 jest.useFakeTimers();
 

@@ -1,4 +1,4 @@
-import { AnsiLogger, TimestampFormat } from 'node-ansi-logger';
+import { AnsiLogger, TimestampFormat } from 'matterbridge/logger';
 import { ShellyComponent, ShellyCoverComponent, ShellyLightComponent, ShellySwitchComponent } from './shellyComponent';
 import { ShellyDevice } from './shellyDevice';
 import { ShellyProperty } from './shellyProperty';

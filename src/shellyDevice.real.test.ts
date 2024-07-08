@@ -1,7 +1,7 @@
 import { Shelly } from './shelly.js';
 import { ShellyDevice } from './shellyDevice.js';
 // import { ShellyCoverComponent, ShellySwitchComponent } from './shellyComponent';
-import { AnsiLogger, TimestampFormat } from 'node-ansi-logger';
+import { AnsiLogger, TimestampFormat } from 'matterbridge/logger';
 // import { getIpv4InterfaceAddress } from 'matterbridge';
 
 describe('Shellies', () => {

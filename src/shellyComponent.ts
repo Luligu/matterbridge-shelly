@@ -21,7 +21,7 @@
  * limitations under the License. *
  */
 
-import { BLUE, CYAN, GREEN, GREY, YELLOW, db, debugStringify, er } from 'node-ansi-logger';
+import { BLUE, CYAN, GREEN, GREY, YELLOW, db, debugStringify, er } from 'matterbridge/logger';
 
 import { ShellyData, ShellyDataType } from './shellyTypes.js';
 import { ShellyProperty } from './shellyProperty.js';

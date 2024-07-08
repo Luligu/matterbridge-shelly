@@ -3,7 +3,7 @@
 
 import { jest } from '@jest/globals';
 import { CoapServer } from './coapServer';
-import { AnsiLogger, LogLevel } from 'node-ansi-logger';
+import { AnsiLogger, LogLevel } from 'matterbridge/logger';
 
 // jest.useFakeTimers();
 
