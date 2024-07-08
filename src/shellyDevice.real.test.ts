@@ -30,12 +30,12 @@ describe('Shellies', () => {
     test('Create a non existing device', async () => {
       const device = await ShellyDevice.create(shelly, log, '192.168.250.219');
       expect(device).toBeUndefined();
-    }, 90000);
+    }, 300000);
 
     test('Create a non existing device name', async () => {
       const device = await ShellyDevice.create(shelly, log, 'somename');
       expect(device).toBeUndefined();
-    }, 90000);
+    }, 300000);
   });
 
   // eslint-disable-next-line jest/no-commented-out-tests
