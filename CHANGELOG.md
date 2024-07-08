@@ -11,10 +11,6 @@ If you like this project and find it useful, please consider giving it a star on
 - [package]: Updated dependencies.
 - [imports]: Updated matterbridge imports.
 
-### Fixed
-
-- [shelly]: Fixed issue caused by a shelly gen 1 when it sends a CoIoT message /cit/d without blk.
-
 <a href="https://www.buymeacoffee.com/luligugithub">
   <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
 </a>
