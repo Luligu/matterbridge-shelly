@@ -94,10 +94,11 @@ export class CoapServer extends EventEmitter {
     return this._isListening;
   }
 
-  getDeviceDescription(host: string): Promise<IncomingMessage> {
+  getDeviceDescription(host: string, timeout = 60): Promise<IncomingMessage | null> {
     this.log.debug(`Requesting device description from ${host}...`);
+    timeout = Math.min(Math.max(Math.round(timeout), 2), 300);
+
     return new Promise((resolve, reject) => {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const response = coap
         .request({
           host,
@@ -106,23 +107,37 @@ export class CoapServer extends EventEmitter {
           // agent: this.coapAgent,
         })
         .on('response', (msg: IncomingMessage) => {
+          clearTimeout(timer);
           this.log.debug(`CoIoT (coap) received device description ("/cit/d") code ${BLUE}${msg.code}${db} url ${BLUE}${msg.url}${db} rsinfo ${debugStringify(msg.rsinfo)}:`);
           msg.url = '/cit/d';
           this.parseShellyMessage(msg);
           resolve(msg);
         })
         .on('error', (err) => {
+          clearTimeout(timer);
           this.log.error('CoIoT (coap) error getting device description ("/cit/d"):', err);
           reject(err);
         })
         .end();
+
+      const timer = setTimeout(
+        () => {
+          this.log.debug('CoIoT (coap) request timeout reached');
+          response.sender.removeAllListeners();
+          response.sender.reset();
+          response.end();
+          resolve(null);
+        },
+        (timeout - 1) * 1000,
+      );
     });
   }
 
-  getDeviceStatus(host: string): Promise<IncomingMessage> {
+  getDeviceStatus(host: string, timeout = 60): Promise<IncomingMessage | null> {
     this.log.debug(`Requesting device status from ${host}...`);
+    timeout = Math.min(Math.max(Math.round(timeout), 2), 300);
+
     return new Promise((resolve, reject) => {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const response = coap
         .request({
           host,
@@ -131,22 +146,39 @@ export class CoapServer extends EventEmitter {
           // agent: this.coapAgent,
         })
         .on('response', (msg: IncomingMessage) => {
+          clearTimeout(timer);
           this.log.debug(`CoIoT (coap) received device status ("/cit/s") code ${BLUE}${msg.code}${db} url ${BLUE}${msg.url}${db} rsinfo ${debugStringify(msg.rsinfo)}:`);
           this.parseShellyMessage(msg);
           resolve(msg);
         })
         .on('error', (err) => {
+          clearTimeout(timer);
           this.log.error('CoIoT (coap) error getting device status ("/cit/s"):', err);
           reject(err);
         })
         .end();
+
+      const timer = setTimeout(
+        () => {
+          this.log.debug('CoIoT (coap) request timeout reached');
+          response.sender.removeAllListeners();
+          response.sender.reset();
+          response.end();
+          resolve(null);
+        },
+        (timeout - 1) * 1000,
+      );
     });
   }
 
   getMulticastDeviceStatus(timeout = 60): Promise<IncomingMessage | null> {
     this.log.debug('Requesting CoIoT (coap) multicast device status...');
+    timeout = Math.min(Math.max(Math.round(timeout), 2), 300);
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     return new Promise((resolve, reject) => {
-      const request = coap
+      this.log.debug('Sending CoAP multicast request...');
+      const response = coap
         .request({
           host: COAP_MULTICAST_ADDRESS,
           method: 'GET',
@@ -164,18 +196,21 @@ export class CoapServer extends EventEmitter {
         .on('error', (err) => {
           clearTimeout(timer);
           this.log.error('CoIoT (coap) error requesting multicast device status ("/cit/s"):', err);
-          reject(err);
+          resolve(null);
         })
         .end();
+      this.log.debug('Sent CoAP multicast request.');
 
+      this.log.debug('Adding CoAP multicast request timeout');
       const timer = setTimeout(
         () => {
           this.log.debug('Multicast request timeout reached');
-          request.sender.removeAllListeners();
-          request.sender.reset();
+          response.sender.removeAllListeners();
+          response.sender.reset();
+          response.end();
           resolve(null);
         },
-        (timeout + 5) * 1000,
+        (timeout - 1) * 1000,
       );
     });
   }

@@ -2,11 +2,10 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 import { jest } from '@jest/globals';
-import { waiter } from 'matterbridge';
+import { waiter } from 'matterbridge/utils/utils';
 import { WsClient } from './wsClient';
 import WebSocket from 'ws';
 import { AnsiLogger, LogLevel } from 'node-ansi-logger';
-import { error } from 'console';
 
 jest.useFakeTimers();
 
