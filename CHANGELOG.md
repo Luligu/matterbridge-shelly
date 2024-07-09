@@ -4,12 +4,16 @@ All notable changes to this project will be documented in this file.
 
 If you like this project and find it useful, please consider giving it a star on GitHub at https://github.com/Luligu/matterbridge-shelly and sponsoring it.
 
-## [0.7.2] - Not planned
+## [0.7.2] - 2024-07-09
 
 ### Changed
 
 - [package]: Updated dependencies.
 - [imports]: Updated matterbridge imports.
+
+### Fixed
+
+- [shelly]: Fixed issue caused by a shelly with undefined data.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
   <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
