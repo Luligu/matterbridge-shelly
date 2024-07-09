@@ -134,6 +134,10 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       }
       if (config.debug) device.logDevice();
 
+      if (device.name === undefined || device.id === undefined || device.model === undefined || device.firmware === undefined) {
+        this.log.error(`Shelly device ${hk}${device.id}${er} host ${zb}${device.host}${er} is not valid. Please put it in the blackList and open an issue.`);
+        return;
+      }
       // Create a new Matterbridge device for the switch
       const mbDevice = new MatterbridgeDevice(bridgedNode, undefined, config.debug as boolean);
       mbDevice.createDefaultBridgedDeviceBasicInformationClusterServer(
