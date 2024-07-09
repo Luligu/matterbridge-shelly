@@ -97,7 +97,7 @@
     "node-ansi-logger": "^1.9.5",
     "node-fetch": "^3.3.2",
     "node-persist-manager": "^1.0.7",
-    "rimraf": "^5.0.8",
+    "rimraf": "^6.0.0",
     "ws": "^8.18.0"
   },
   "devDependencies": {
