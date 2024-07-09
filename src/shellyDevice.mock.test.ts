@@ -1,5 +1,5 @@
 import { ShellyDevice } from './shellyDevice.js';
-import { AnsiLogger, TimestampFormat } from 'node-ansi-logger';
+import { AnsiLogger, TimestampFormat } from 'matterbridge/logger';
 import { Shelly } from './shelly.js';
 import { ShellyComponent } from './shellyComponent.js';
 import path from 'path';
@@ -61,7 +61,7 @@ describe('Shellies', () => {
       if (!device) return;
       const components = device.components;
       expect(components).toBeDefined();
-      expect(components?.length).toBe(9);
+      expect(components?.length).toBe(10);
     });
 
     test('Create a gen 1 device with components WiFi', async () => {
@@ -141,7 +141,7 @@ describe('Shellies', () => {
       expect(device).not.toBeUndefined();
       expect(device?.host).toBe(path.join('src', 'mock', 'shellyplus2pm-5443b23d81f8.roller.json'));
       expect(device?.model).toBe('SNSW-102P16EU');
-      expect(device?.id).toBe('shellyplus2pm-5443b23d81f8');
+      expect(device?.id).toBe('shellyplus2pm-5443B23D81F8');
       expect(device?.firmware).toBe('1.3.1-gd8534ee');
       expect(device?.auth).toBe(false);
       expect(device?.gen).toBe(2);
@@ -164,7 +164,7 @@ describe('Shellies', () => {
       expect(cloud?.getValue('name')).toBeUndefined();
       expect(cloud?.getValue('server')).not.toBeUndefined();
       expect(cloud?.properties.length).toBeGreaterThan(0);
-      expect(cloud?.properties.length).toBeLessThan(3);
+      expect(cloud?.properties.length).toBeLessThan(4);
       if (cloud) {
         for (const [key, property] of cloud) {
           // eslint-disable-next-line jest/no-conditional-expect
@@ -224,7 +224,7 @@ describe('Shellies', () => {
       expect(device).not.toBeUndefined();
       expect(device?.host).toBe(path.join('src', 'mock', 'shellyplus1pm-441793d69718.json'));
       expect(device?.model).toBe('SNSW-001P16EU');
-      expect(device?.id).toBe('shellyplus1pm-441793d69718');
+      expect(device?.id).toBe('shellyplus1pm-441793D69718');
       expect(device?.firmware).toBe('1.3.2-g34c651b');
       expect(device?.auth).toBe(false);
       expect(device?.gen).toBe(2);
@@ -239,7 +239,7 @@ describe('Shellies', () => {
       expect(device).not.toBeUndefined();
       expect(device?.host).toBe(path.join('src', 'mock', 'shellypmminig3-84fce63957f4.json'));
       expect(device?.model).toBe('S3PM-001PCEU16');
-      expect(device?.id).toBe('shellypmminig3-84fce63957f4');
+      expect(device?.id).toBe('shellypmminig3-84FCE63957F4');
       expect(device?.firmware).toBe('1.3.2-g34c651b');
       expect(device?.auth).toBe(false);
       expect(device?.gen).toBe(3);

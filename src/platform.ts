@@ -134,6 +134,10 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       }
       if (config.debug) device.logDevice();
 
+      if (device.name === undefined || device.id === undefined || device.model === undefined || device.firmware === undefined) {
+        this.log.error(`Shelly device ${hk}${device.id}${er} host ${zb}${device.host}${er} is not valid. Please put it in the blackList and open an issue.`);
+        return;
+      }
       // Create a new Matterbridge device for the switch
       const mbDevice = new MatterbridgeDevice(bridgedNode, undefined, config.debug as boolean);
       mbDevice.createDefaultBridgedDeviceBasicInformationClusterServer(
@@ -145,6 +149,11 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         1, // Number(device.firmware.split('.')[0]),
         device.firmware,
       );
+
+      mbDevice.addCommandHandler('identify', async ({ request, endpoint }) => {
+        this.log.info(`Identify command received for endpoint ${endpoint.number} request ${debugStringify(request)}`);
+      });
+
       const child = mbDevice.addChildDeviceTypeWithClusterServer('PowerSource', [powerSource], [PowerSource.Cluster.id]);
       child.addClusterServer(mbDevice.getDefaultPowerSourceWiredClusterServer());
 
@@ -428,6 +437,11 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       if (endpoints.length > 1) {
         // Register the device with Matterbridge
         await this.registerDevice(mbDevice);
+        /*
+        mbDevice.getAllClusterServers().forEach((clusterServer) => {
+          this.log.warn(`***clusters: ${clusterServer.id}-${clusterServer.name}`);
+        });
+        */
         // Save the MatterbridgeDevice in the bridgedDevices map
         this.bridgedDevices.set(device.id, mbDevice);
       } else {

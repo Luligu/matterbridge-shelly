@@ -21,7 +21,7 @@
  * limitations under the License. *
  */
 
-import { AnsiLogger, BLUE, CYAN, TimestampFormat, db, debugStringify, hk, idn, nf, rs, zb } from 'node-ansi-logger';
+import { AnsiLogger, BLUE, CYAN, TimestampFormat, db, debugStringify, hk, idn, nf, rs, zb } from 'matterbridge/logger';
 import mdns, { ResponsePacket } from 'multicast-dns';
 import EventEmitter from 'events';
 

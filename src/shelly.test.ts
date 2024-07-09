@@ -1,5 +1,5 @@
 /* eslint-disable jest/no-done-callback */
-import { AnsiLogger, TimestampFormat } from 'node-ansi-logger';
+import { AnsiLogger, TimestampFormat } from 'matterbridge/logger';
 import { Shelly } from './shelly.js';
 import { ShellyDevice } from './shellyDevice.js';
 import path from 'path';

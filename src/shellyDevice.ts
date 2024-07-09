@@ -21,7 +21,7 @@
  * limitations under the License. *
  */
 
-import { AnsiLogger, BLUE, CYAN, GREEN, GREY, MAGENTA, RED, RESET, db, debugStringify, er, hk, nf, wr, zb } from 'node-ansi-logger';
+import { AnsiLogger, BLUE, CYAN, GREEN, GREY, MAGENTA, RED, RESET, db, debugStringify, er, hk, nf, wr, zb } from 'matterbridge/logger';
 import { EventEmitter } from 'events';
 import fetch, { RequestInit } from 'node-fetch';
 import { getIpv4InterfaceAddress } from 'matterbridge';

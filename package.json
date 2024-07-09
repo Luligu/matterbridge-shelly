@@ -1,6 +1,6 @@
 {
   "name": "matterbridge-shelly",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "description": "Matterbridge shelly plugin",
   "author": "https://github.com/Luligu",
   "license": "Apache-2.0",
@@ -50,6 +50,7 @@
     "test:mdns": "node --experimental-vm-modules node_modules/jest/bin/jest.js src/mdnsScanner.test.ts --coverage",
     "test:coap": "node --experimental-vm-modules node_modules/jest/bin/jest.js src/coapServer.test.ts --coverage",
     "test:mcast": "node --experimental-vm-modules node_modules/jest/bin/jest.js src/mcastServer.test.ts --coverage",
+    "test:ws": "node --experimental-vm-modules node_modules/jest/bin/jest.js src/wsClient.test.ts --coverage",
     "test:utils": "node --experimental-vm-modules node_modules/jest/bin/jest.js src/utils.spec.ts --coverage",
     "test:shellyProperty": "node --experimental-vm-modules node_modules/jest/bin/jest.js src/shellyProperty.test.ts --coverage",
     "test:shellyComponent": "node --experimental-vm-modules node_modules/jest/bin/jest.js src/shellyComponent.test.ts --coverage",
@@ -96,7 +97,7 @@
     "node-ansi-logger": "^1.9.5",
     "node-fetch": "^3.3.2",
     "node-persist-manager": "^1.0.7",
-    "rimraf": "^5.0.7",
+    "rimraf": "^6.0.0",
     "ws": "^8.18.0"
   },
   "devDependencies": {
@@ -104,7 +105,7 @@
     "@types/eslint__js": "^8.42.3",
     "@types/jest": "^29.5.12",
     "@types/multicast-dns": "^7.2.4",
-    "@types/node": "^20.14.9",
+    "@types/node": "^20.14.10",
     "@types/ws": "^8.5.10",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-jest": "^28.6.0",
@@ -112,9 +113,9 @@
     "jest": "^29.7.0",
     "matterbridge": "file:../matterbridge",
     "prettier": "^3.3.2",
-    "ts-jest": "^29.1.5",
+    "ts-jest": "^29.2.0",
     "typescript": "^5.5.3",
-    "typescript-eslint": "^7.15.0"
+    "typescript-eslint": "^7.16.0"
   },
   "overrides": {
     "eslint": "latest"
