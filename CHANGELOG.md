@@ -9,6 +9,7 @@ If you like this project and find it useful, please consider giving it a star on
 ### Changed
 
 - [imports]: Updated matterbridge imports.
+- [package]: Updated dependencies.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
   <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
