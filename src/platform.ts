@@ -34,8 +34,6 @@ import {
   WindowCovering,
   WindowCoveringCluster,
   onOffSwitch,
-  EveHistory,
-  EveHistoryCluster,
   powerSource,
   bridgedNode,
   LevelControl,
@@ -52,6 +50,7 @@ import {
   ElectricalPowerMeasurement,
   ElectricalEnergyMeasurement,
 } from 'matterbridge';
+import { EveHistory, EveHistoryCluster } from 'matterbridge/history';
 import { AnsiLogger, BLUE, CYAN, GREEN, TimestampFormat, YELLOW, db, debugStringify, dn, er, hk, idn, nf, or, rs, wr, zb } from 'matterbridge/logger';
 import { NodeStorage, NodeStorageManager } from 'matterbridge/storage';
 import path from 'path';

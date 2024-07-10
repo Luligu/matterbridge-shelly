@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 If you like this project and find it useful, please consider giving it a star on GitHub at https://github.com/Luligu/matterbridge-shelly and sponsoring it.
 
+## [0.7.3] - 2024-07-10
+
+### Changed
+
+- [imports]: Updated matterbridge imports.
+
+<a href="https://www.buymeacoffee.com/luligugithub">
+  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+</a>
+
 ## [0.7.2] - 2024-07-09
 
 ### Changed
