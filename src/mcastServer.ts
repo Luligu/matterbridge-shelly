@@ -22,7 +22,7 @@
  */
 
 import { AnsiLogger, TimestampFormat } from 'node-ansi-logger';
-import { getIpv4InterfaceAddress } from 'matterbridge';
+import { getIpv4InterfaceAddress } from 'matterbridge/utils';
 import dgram from 'dgram';
 
 export class Multicast {

@@ -22,9 +22,9 @@
  */
 
 import { AnsiLogger, BLUE, CYAN, GREEN, GREY, MAGENTA, RED, RESET, db, debugStringify, er, hk, nf, wr, zb } from 'matterbridge/logger';
+import { getIpv4InterfaceAddress } from 'matterbridge/utils';
 import { EventEmitter } from 'events';
 import fetch, { RequestInit } from 'node-fetch';
-import { getIpv4InterfaceAddress } from 'matterbridge';
 import crypto from 'crypto';
 import { promises as fs } from 'fs';
 import path from 'path';
@@ -432,6 +432,19 @@ export class ShellyDevice extends EventEmitter {
   // http://192.168.1.218/rpc/Switch.Set?id=0&on=false
   // http://192.168.1.218/rpc/Switch.Toggle?id=0
 
+  /**
+   * Fetches device data from the specified host and service.
+   * If the host ends with '.json', it fetches the device data from a file.
+   * Otherwise, it makes an HTTP request to the specified host and service.
+   * Supports both Gen 1 and Gen 2 devices.
+   *
+   * @param shelly - The Shelly instance.
+   * @param log - The logger instance.
+   * @param host - The host to fetch the data from.
+   * @param service - The service to fetch the data from.
+   * @param params - Additional parameters for the request (default: {}).
+   * @returns A promise that resolves to the fetched device data or null if an error occurs.
+   */
   static async fetch(shelly: Shelly, log: AnsiLogger, host: string, service: string, params: Record<string, string | number | boolean> = {}): Promise<ShellyData | null> {
     // MOCK: Fetch device data from file if host is a json file
     if (host.endsWith('.json')) {
@@ -520,6 +533,9 @@ export class ShellyDevice extends EventEmitter {
     }
   }
 
+  /**
+   * Logs all components and properties of the Shelly device.
+   */
   logDevice() {
     // Log the device
     this.log.debug(
@@ -533,6 +549,11 @@ export class ShellyDevice extends EventEmitter {
     }
   }
 
+  /**
+   * Saves the device payloads (shelly, settings, status) to the specified data path.
+   * @param {string} dataPath - The path where the device payloads will be saved.
+   * @returns {Promise<void>} - A promise that resolves when the device payloads are successfully saved, or rejects with an error if there was an issue.
+   */
   async saveDevicePayloads(dataPath: string) {
     this.log.debug(`Saving device payloads for ${hk}${this.id}${db} host ${zb}${this.host}${db}`);
     if (this.shellyPayload && this.statusPayload && this.settingsPayload) {

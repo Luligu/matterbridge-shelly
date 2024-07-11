@@ -49,6 +49,7 @@
     "test:verbose": "node --experimental-vm-modules node_modules/jest/bin/jest.js --passWithNoTests --verbose",
     "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --passWithNoTests --watch",
     "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --passWithNoTests --coverage",
+    "test:platform": "node --experimental-vm-modules node_modules/jest/bin/jest.js index.test.ts platform.test.ts --coverage",
     "test:auth": "node --experimental-vm-modules node_modules/jest/bin/jest.js src/auth.test.ts --coverage",
     "test:mdns": "node --experimental-vm-modules node_modules/jest/bin/jest.js src/mdnsScanner.test.ts --coverage",
     "test:coap": "node --experimental-vm-modules node_modules/jest/bin/jest.js src/coapServer.test.ts --coverage",
