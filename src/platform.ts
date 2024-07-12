@@ -53,6 +53,8 @@ import {
 import { EveHistory, EveHistoryCluster } from 'matterbridge/history';
 import { AnsiLogger, BLUE, CYAN, GREEN, TimestampFormat, YELLOW, db, debugStringify, dn, er, hk, idn, nf, or, rs, wr, zb } from 'matterbridge/logger';
 import { NodeStorage, NodeStorageManager } from 'matterbridge/storage';
+import { hslColorToRgbColor, rgbColorToHslColor } from 'matterbridge/utils';
+
 import path from 'path';
 
 import { Shelly } from './shelly.js';
@@ -60,7 +62,6 @@ import { DiscoveredDevice } from './mdnsScanner.js';
 import { ShellyDevice } from './shellyDevice.js';
 import { ShellyComponent, ShellyCoverComponent, ShellyLightComponent, ShellySwitchComponent } from './shellyComponent.js';
 import { ShellyData, ShellyDataType } from './shellyTypes.js';
-import { hslColorToRgbColor, rgbColorToHslColor } from 'matterbridge/utils';
 
 type ConfigDeviceIp = Record<string, string>;
 
