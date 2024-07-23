@@ -53,6 +53,8 @@ import {
 import { EveHistory, EveHistoryCluster } from 'matterbridge/history';
 import { AnsiLogger, BLUE, CYAN, GREEN, TimestampFormat, YELLOW, db, debugStringify, dn, er, hk, idn, nf, or, rs, wr, zb } from 'matterbridge/logger';
 import { NodeStorage, NodeStorageManager } from 'matterbridge/storage';
+import { hslColorToRgbColor, rgbColorToHslColor } from 'matterbridge/utils';
+
 import path from 'path';
 
 import { Shelly } from './shelly.js';
@@ -60,7 +62,6 @@ import { DiscoveredDevice } from './mdnsScanner.js';
 import { ShellyDevice } from './shellyDevice.js';
 import { ShellyComponent, ShellyCoverComponent, ShellyLightComponent, ShellySwitchComponent } from './shellyComponent.js';
 import { ShellyData, ShellyDataType } from './shellyTypes.js';
-import { hslColorToRgbColor, rgbColorToHslColor } from 'matterbridge/utils/colorUtils';
 
 type ConfigDeviceIp = Record<string, string>;
 
@@ -94,7 +95,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     if (config.whiteList) this.whiteList = config.whiteList as string[];
     if (config.blackList) this.blackList = config.blackList as string[];
 
-    log.info(`Initializing platform: ${idn}${this.config.name}${rs}${nf} v ${CYAN}${this.version}`);
+    log.info(`Initializing platform: ${idn}${this.config.name}${rs}${nf}`);
     log.info(`- username: ${CYAN}${config.username}`);
     log.info(`- password: ${CYAN}${config.password}`);
     log.info(`- mdnsDiscover: ${CYAN}${config.enableMdnsDiscover}`);
@@ -543,13 +544,14 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     if (this.config.unregisterOnShutdown === true) await this.unregisterAllDevices();
   }
 
-  public async saveStoredDevices() {
+  private async saveStoredDevices(): Promise<boolean> {
     if (!this.nodeStorage) {
       this.log.error('NodeStorage is not initialized');
-      return;
+      return false;
     }
     this.log.debug(`Saving ${this.storedDevices.size} discovered Shelly devices to the storage`);
     await this.nodeStorage.set<DiscoveredDevice[]>('DeviceIdentifiers', Array.from(this.storedDevices.values()));
+    return true;
   }
 
   private async loadStoredDevices(): Promise<boolean> {

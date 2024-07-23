@@ -26,7 +26,7 @@ import { BLUE, CYAN, GREEN, GREY, YELLOW, db, debugStringify, er } from 'matterb
 import { ShellyData, ShellyDataType } from './shellyTypes.js';
 import { ShellyProperty } from './shellyProperty.js';
 import { ShellyDevice } from './shellyDevice.js';
-import { deepEqual } from 'matterbridge';
+import { deepEqual } from 'matterbridge/utils';
 import EventEmitter from 'events';
 
 interface LightComponent {

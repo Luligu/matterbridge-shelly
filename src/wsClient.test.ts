@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 import { jest } from '@jest/globals';
-import { waiter } from 'matterbridge/utils/utils';
+import { waiter } from 'matterbridge/utils';
 import { WsClient } from './wsClient';
 import WebSocket from 'ws';
 import { AnsiLogger, LogLevel } from 'matterbridge/logger';
