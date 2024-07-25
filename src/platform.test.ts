@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Matterbridge, MatterbridgeDevice, PlatformConfig } from 'matterbridge';
-import { AnsiLogger, idn, nf, rs } from 'node-ansi-logger';
+import { AnsiLogger, idn, nf, rs } from 'matterbridge/logger';
 import { ShellyPlatform } from './platform';
 import { jest } from '@jest/globals';
 

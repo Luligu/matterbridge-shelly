@@ -1,4 +1,6 @@
-import { AnsiLogger, TimestampFormat } from 'matterbridge/logger';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { AnsiLogger, LogLevel, TimestampFormat } from 'matterbridge/logger';
 import { ShellyComponent, ShellyCoverComponent, ShellyLightComponent, ShellySwitchComponent } from './shellyComponent';
 import { ShellyDevice } from './shellyDevice';
 import { ShellyProperty } from './shellyProperty';
@@ -8,7 +10,10 @@ import { jest } from '@jest/globals';
 import path from 'path';
 
 describe('ShellyComponent', () => {
-  const log = new AnsiLogger({ logName: 'shellyComponentTest', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: true });
+  let consoleLogSpy: jest.SpiedFunction<typeof console.log>;
+  let loggerLogSpy: jest.SpiedFunction<(level: LogLevel, message: string, ...parameters: any[]) => void>;
+
+  const log = new AnsiLogger({ logName: 'shellyComponentTest', logTimestampFormat: TimestampFormat.TIME_MILLIS });
   const shelly = new Shelly(log);
   let device: ShellyDevice;
   let device2: ShellyDevice;
@@ -18,6 +23,13 @@ describe('ShellyComponent', () => {
   let data: ShellyData;
 
   beforeAll(async () => {
+    consoleLogSpy = jest.spyOn(console, 'log').mockImplementation((...args: any[]) => {
+      // console.error(`Mocked console.log: ${args.join(' ')}`);
+    });
+    loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log').mockImplementation((level: string, message: string, ...parameters: any[]) => {
+      // console.error(`Mocked log: ${level} - ${message}`, ...parameters);
+    });
+
     const mockDevice = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shellydimmer2-98CDAC0D01BB.json'));
     const mockDevice2 = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shellyplus1pm-441793d69718.json'));
     if (mockDevice) device = mockDevice;
@@ -39,6 +51,9 @@ describe('ShellyComponent', () => {
     shelly.destroy();
     device.destroy();
     device2.destroy();
+
+    consoleLogSpy.mockRestore();
+    loggerLogSpy.mockRestore();
   });
 
   it('should have mock gen 1 and gen 2', () => {
@@ -277,6 +292,28 @@ describe('ShellyComponent', () => {
     component.update({ output: true });
     expect(component.getValue('output')).toBe(true);
     expect(component.getValue('state')).toBe(true);
+  });
+
+  it('should update brightness and color', () => {
+    const mockFetch = jest.spyOn(ShellyDevice, 'fetch').mockResolvedValue({});
+    const component = new ShellyComponent(device, 'light:0', 'Light', { output: true, gain: 50, red: 20, green: 30, blue: 40 });
+    expect(component.getProperty('state')).not.toBeUndefined();
+    expect(component.getValue('state')).toBe(true);
+    expect(component.getProperty('brightness')).not.toBeUndefined();
+    expect(component.getValue('brightness')).toBe(50);
+    expect(component.getProperty('red')).not.toBeUndefined();
+    expect(component.getValue('red')).toBe(20);
+    expect(component.getProperty('green')).not.toBeUndefined();
+    expect(component.getValue('green')).toBe(30);
+    expect(component.getProperty('blue')).not.toBeUndefined();
+    expect(component.getValue('blue')).toBe(40);
+    (component as ShellyLightComponent).Level(34);
+    (component as ShellyLightComponent).ColorRGB(10, 20, 30);
+    expect(component.getValue('brightness')).toBe(34);
+    expect(component.getValue('red')).toBe(10);
+    expect(component.getValue('green')).toBe(20);
+    expect(component.getValue('blue')).toBe(30);
+    mockFetch.mockRestore();
   });
 
   it('should iterate over properties', () => {

@@ -21,7 +21,7 @@
  * limitations under the License. *
  */
 
-import { AnsiLogger, TimestampFormat } from 'node-ansi-logger';
+import { AnsiLogger, TimestampFormat } from 'matterbridge/logger';
 import { getIpv4InterfaceAddress } from 'matterbridge/utils';
 import dgram from 'dgram';
 

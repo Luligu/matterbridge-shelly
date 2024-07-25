@@ -21,7 +21,7 @@
  * limitations under the License. *
  */
 
-import { AnsiLogger, CYAN, MAGENTA, BRIGHT, hk, db, nf, wr, zb, er } from 'node-ansi-logger';
+import { AnsiLogger, CYAN, MAGENTA, BRIGHT, hk, db, nf, wr, zb, er } from 'matterbridge/logger';
 
 import EventEmitter from 'events';
 

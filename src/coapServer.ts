@@ -21,7 +21,7 @@
  * limitations under the License. *
  */
 
-import { AnsiLogger, BLUE, CYAN, MAGENTA, RESET, TimestampFormat, db, debugStringify, idn, rs } from 'node-ansi-logger';
+import { AnsiLogger, BLUE, CYAN, MAGENTA, RESET, TimestampFormat, db, debugStringify, idn, rs } from 'matterbridge/logger';
 import coap, { Server, IncomingMessage, OutgoingMessage, globalAgent } from 'coap';
 import EventEmitter from 'events';
 
