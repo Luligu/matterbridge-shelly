@@ -95,9 +95,9 @@
   "dependencies": {
     "coap": "^1.4.0",
     "multicast-dns": "^7.2.5",
-    "node-ansi-logger": "^2.0.3",
+    "node-ansi-logger": "^2.0.6",
     "node-fetch": "^3.3.2",
-    "node-persist-manager": "^1.0.7",
+    "node-persist-manager": "^1.0.8",
     "ws": "^8.18.0"
   },
   "devDependencies": {
