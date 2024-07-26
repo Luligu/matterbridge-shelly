@@ -124,7 +124,7 @@ export class WsClient extends EventEmitter {
 
   constructor(wsHost: string, password?: string) {
     super();
-    this.log = new AnsiLogger({ logName: 'wsClient', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: false });
+    this.log = new AnsiLogger({ logName: 'ShellyWsClient', logTimestampFormat: TimestampFormat.TIME_MILLIS });
     this.wsHost = wsHost;
     this.wsUrl = `ws://${this.wsHost}/rpc`;
     this.password = password;
@@ -255,15 +255,13 @@ export class WsClient extends EventEmitter {
     });
   }
 
-  start(debug = false) {
-    this.log.setLogDebug(debug);
+  start() {
     this.log.debug(`Starting ws client for Shelly device on address ${this.wsHost}`);
     this.listenForStatusUpdates();
     this.log.debug(`Started ws client for Shelly device on address ${this.wsHost}`);
   }
 
-  stop(debug = false) {
-    this.log.setLogDebug(debug);
+  stop() {
     this.log.debug(
       `Stopping ws client for Shelly device on address ${this.wsHost} state ${this.wsClient?.readyState} connencting ${this._isConnecting} connected ${this._isConnected} `,
     );

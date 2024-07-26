@@ -21,7 +21,7 @@
  * limitations under the License. *
  */
 
-import { AnsiLogger, BLUE, CYAN, MAGENTA, RESET, TimestampFormat, db, debugStringify, idn, rs } from 'matterbridge/logger';
+import { AnsiLogger, BLUE, CYAN, LogLevel, MAGENTA, RESET, TimestampFormat, db, debugStringify, idn, rs } from 'matterbridge/logger';
 import coap, { Server, IncomingMessage, OutgoingMessage, globalAgent } from 'coap';
 import EventEmitter from 'events';
 
@@ -74,15 +74,15 @@ interface CoIoTDescription {
 }
 
 export class CoapServer extends EventEmitter {
-  private readonly log;
+  public readonly log;
   // private readonly coapAgent;
   private coapServer: Server | undefined;
   private _isListening = false;
   private readonly devices = new Map<string, CoIoTDescription[]>();
 
-  constructor(debug = false) {
+  constructor(logLevel: LogLevel = LogLevel.INFO) {
     super();
-    this.log = new AnsiLogger({ logName: 'coapServer', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: debug });
+    this.log = new AnsiLogger({ logName: 'ShellyCoapServer', logTimestampFormat: TimestampFormat.TIME_MILLIS, logLevel });
 
     this.registerShellyOptions();
 
@@ -434,8 +434,7 @@ export class CoapServer extends EventEmitter {
     this.log.debug(`Registered device ${host}.`);
   }
 
-  start(debug = false) {
-    this.log.setLogDebug(debug);
+  start() {
     if (this._isListening) return;
     this.log.info('Starting CoIoT (coap) server for shelly devices...');
     this._isListening = true;

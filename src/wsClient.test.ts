@@ -50,7 +50,7 @@ describe('WS client', () => {
   });
 
   test('Simulate connection timeout', async () => {
-    wsClient?.start(true);
+    wsClient?.start();
     expect(wsClient.isConnecting).toBeTruthy();
     expect(wsClient.isConnected).toBeFalsy();
 
@@ -252,7 +252,7 @@ describe('WS client', () => {
   });
 
   test('Stop listening', async () => {
-    wsClient.stop(true);
+    wsClient.stop();
     expect((wsClient as any).wsClient).toBeDefined();
     expect((wsClient as any).pingInterval).toBeUndefined();
     expect((wsClient as any).pongTimeout).toBeUndefined();
@@ -261,7 +261,7 @@ describe('WS client', () => {
 
     (wsClient as any)._isConnecting = true;
     jest.useFakeTimers();
-    wsClient.stop(true);
+    wsClient.stop();
     jest.runAllTimers();
     jest.useRealTimers();
   }, 60000);

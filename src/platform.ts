@@ -51,7 +51,7 @@ import {
   ElectricalEnergyMeasurement,
 } from 'matterbridge';
 import { EveHistory, EveHistoryCluster } from 'matterbridge/history';
-import { AnsiLogger, BLUE, CYAN, GREEN, TimestampFormat, YELLOW, db, debugStringify, dn, er, hk, idn, nf, or, rs, wr, zb } from 'matterbridge/logger';
+import { AnsiLogger, BLUE, CYAN, GREEN, LogLevel, TimestampFormat, YELLOW, db, debugStringify, dn, er, hk, idn, nf, or, rs, wr, zb } from 'matterbridge/logger';
 import { NodeStorage, NodeStorageManager } from 'matterbridge/storage';
 import { hslColorToRgbColor, rgbColorToHslColor } from 'matterbridge/utils';
 
@@ -105,7 +105,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     log.info(`- debug: ${CYAN}${config.debug}`);
     log.info(`- unregisterOnShutdown: ${CYAN}${config.unregisterOnShutdown}`);
 
-    this.shelly = new Shelly(log, this.username, this.password, config.debug as boolean);
+    this.shelly = new Shelly(log, this.username, this.password);
 
     // handle Shelly discovered event
     this.shelly.on('discovered', async (discoveredDevice: DiscoveredDevice) => {
@@ -542,6 +542,11 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     this.shelly.destroy();
 
     if (this.config.unregisterOnShutdown === true) await this.unregisterAllDevices();
+  }
+
+  override async onChangeLoggerLevel(logLevel: LogLevel) {
+    this.log.debug(`Changing logger level for platform ${idn}${this.config.name}${rs}${db}`);
+    this.shelly.setLogLevel(logLevel);
   }
 
   private async saveStoredDevices(): Promise<boolean> {

@@ -21,7 +21,7 @@
  * limitations under the License. *
  */
 
-import { AnsiLogger, BLUE, CYAN, TimestampFormat, db, debugStringify, hk, idn, nf, rs, zb } from 'matterbridge/logger';
+import { AnsiLogger, BLUE, CYAN, LogLevel, TimestampFormat, db, debugStringify, hk, idn, nf, rs, zb } from 'matterbridge/logger';
 import mdns, { ResponsePacket } from 'multicast-dns';
 import EventEmitter from 'events';
 
@@ -36,15 +36,15 @@ export type DiscoveredDeviceListener = (data: DiscoveredDevice) => void;
 
 export class MdnsScanner extends EventEmitter {
   private discoveredDevices = new Map<string, DiscoveredDevice>();
-  private log;
+  public readonly log;
   private scanner?: mdns.MulticastDNS;
   private _isScanning = false;
   private scannerTimeout?: NodeJS.Timeout;
   private queryTimeout?: NodeJS.Timeout;
 
-  constructor(debug = false) {
+  constructor(logLevel: LogLevel = LogLevel.INFO) {
     super();
-    this.log = new AnsiLogger({ logName: 'mdnsShellyDiscover', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: debug });
+    this.log = new AnsiLogger({ logName: 'ShellyMdnsDiscover', logTimestampFormat: TimestampFormat.TIME_MILLIS, logLevel });
   }
 
   get isScanning() {

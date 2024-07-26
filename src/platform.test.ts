@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Matterbridge, MatterbridgeDevice, PlatformConfig } from 'matterbridge';
-import { AnsiLogger, idn, nf, rs } from 'matterbridge/logger';
+import { AnsiLogger, db, idn, LogLevel, nf, rs } from 'matterbridge/logger';
 import { ShellyPlatform } from './platform';
 import { jest } from '@jest/globals';
 
@@ -44,7 +44,7 @@ describe('TestPlatform', () => {
   beforeEach(() => {
     // Creates the mocks for Matterbridge, AnsiLogger, and PlatformConfig
     mockMatterbridge = { addBridgedDevice: jest.fn(), matterbridgeDirectory: '', removeAllBridgedDevices: jest.fn() } as unknown as Matterbridge;
-    mockLog = { error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() } as unknown as AnsiLogger;
+    mockLog = { fatal: jest.fn(), error: jest.fn(), warn: jest.fn(), notice: jest.fn(), info: jest.fn(), debug: jest.fn() } as unknown as AnsiLogger;
     mockConfig = {
       'name': 'matterbridge-test',
       'type': 'DynamicPlatform',
@@ -91,6 +91,11 @@ describe('TestPlatform', () => {
   it('should call onConfigure', async () => {
     await shellyPlatform.onConfigure();
     expect((mockLog.info as jest.Mock).mock.calls[0]).toEqual([`Configuring platform ${idn}${mockConfig.name}${rs}${nf}`]);
+  });
+
+  it('should call onChangeLoggerLevel', async () => {
+    await shellyPlatform.onChangeLoggerLevel(LogLevel.DEBUG);
+    expect((mockLog.debug as jest.Mock).mock.calls[0]).toEqual([`Changing logger level for platform ${idn}${mockConfig.name}${rs}${db}`]);
   });
 
   it('should call onShutdown with reason', async () => {

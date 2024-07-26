@@ -15,7 +15,7 @@ describe('Coap scanner', () => {
     jest.spyOn(AnsiLogger.prototype, 'log').mockImplementation((level: LogLevel, message: string, ...parameters: any[]) => {
       // console.log(`Mocked log: ${level} - ${message}`, ...parameters);
     });
-    coapServer = new CoapServer(true);
+    coapServer = new CoapServer();
   });
 
   beforeEach(() => {
@@ -57,7 +57,7 @@ describe('Coap scanner', () => {
   }, 5000);
 
   test('Start scanner', () => {
-    coapServer?.start(true);
+    coapServer?.start();
     expect(coapServer?.isListening).toBeTruthy();
   }, 5000);
 });

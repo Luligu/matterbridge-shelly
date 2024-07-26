@@ -293,7 +293,7 @@ export class ShellyDevice extends EventEmitter {
       if (device.gen === 2 || device.gen === 3) {
         if (device.wsClient?.isConnected === false) {
           log.warn(`WebSocket client for device ${hk}${device.id}${wr} host ${zb}${device.host}${wr} is not connected.`);
-          device.wsClient?.start(shelly.debug);
+          device.wsClient?.start();
         }
       }
     }, 60 * 1000);
@@ -302,11 +302,11 @@ export class ShellyDevice extends EventEmitter {
     if (device.gen === 2 || device.gen === 3) {
       device.wsClient = new WsClient(host, 'tango');
       device.startWsClientTimeout = setTimeout(() => {
-        device.wsClient?.start(shelly.debug);
+        device.wsClient?.start();
       }, 10 * 1000);
 
       device.wsClient.on('update', (message) => {
-        if (shelly.debug) log.info(`WebSocket update from device ${hk}${device.id}${nf} host ${zb}${device.host}${nf}`);
+        log.debug(`WebSocket update from device ${hk}${device.id}${db} host ${zb}${device.host}${db}`);
         device.update(message);
       });
     }

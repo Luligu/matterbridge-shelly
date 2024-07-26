@@ -6,7 +6,7 @@ import path from 'path';
 
 describe('Shellies', () => {
   const log = new AnsiLogger({ logName: 'shellyDeviceTest', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: false });
-  const shelly = new Shelly(log, 'admin', 'tango', false);
+  const shelly = new Shelly(log, 'admin', 'tango');
 
   beforeAll(() => {
     //
