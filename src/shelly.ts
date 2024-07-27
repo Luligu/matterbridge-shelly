@@ -150,7 +150,9 @@ export class Shelly extends EventEmitter {
     this.log.logLevel = level;
     if (this.mdnsScanner) this.mdnsScanner.log.logLevel = level;
     if (this.coapServer) this.coapServer.log.logLevel = level;
-    this.devices.forEach((device) => (device.log.logLevel = level));
+    this.devices.forEach((device) => {
+      device.setLogLevel(level);
+    });
   }
 
   logDevices() {

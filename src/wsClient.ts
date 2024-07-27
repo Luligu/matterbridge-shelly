@@ -89,7 +89,7 @@ interface Response {
 }
 
 export class WsClient extends EventEmitter {
-  private log;
+  public readonly log;
   private wsClient: WebSocket | undefined;
   private _isConnected = false;
   private _isConnecting = false;

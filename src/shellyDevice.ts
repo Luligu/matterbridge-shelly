@@ -35,6 +35,7 @@ import { WsClient } from './wsClient.js';
 import { Shelly } from './shelly.js';
 import { ShellyData } from './shellyTypes.js';
 import { ShellyComponent } from './shellyComponent.js';
+import { LogLevel } from 'node-ansi-logger';
 
 export class ShellyDevice extends EventEmitter {
   readonly shelly: Shelly;
@@ -123,6 +124,11 @@ export class ShellyDevice extends EventEmitter {
     for (const [key, component] of this._components.entries()) {
       yield [key, component];
     }
+  }
+
+  setLogLevel(logLevel: LogLevel) {
+    this.log.logLevel = logLevel;
+    if (this.wsClient) this.wsClient.log.logLevel = logLevel;
   }
 
   static async create(shelly: Shelly, log: AnsiLogger, host: string): Promise<ShellyDevice | undefined> {
