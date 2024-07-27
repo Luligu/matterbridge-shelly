@@ -8,7 +8,7 @@ If you like this project and find it useful, please consider giving it a star on
 
 ### Changed
 
-- [imports]: Updated matterbridge imports.
+- [imports]: Updated matterbridge imports (the plugin needs Matterbridge 1.4.1!).
 - [package]: Updated dependencies.
 - [logger]: Update node-ansi-logger to 2.0.6.
 - [storage]: Update node-persist-manager to 1.0.8.
