@@ -12,6 +12,11 @@ If you like this project and find it useful, please consider giving it a star on
 - [package]: Updated dependencies.
 - [logger]: Update node-ansi-logger to 2.0.6.
 - [storage]: Update node-persist-manager to 1.0.8.
+- [shelly]: Changed update available message only for stable updates (ignore beta updates).
+
+### Fixed
+
+- [shelly]: Fixed issue when Input.state is null.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
   <img src="./yellow-button.png" alt="Buy me a coffee" width="120">

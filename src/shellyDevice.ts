@@ -227,6 +227,7 @@ export class ShellyDevice extends EventEmitter {
       device.firmware = (shellyPayload.fw_id as string).split('/')[1];
       device.auth = shellyPayload.auth_en as boolean;
       device.gen = shellyPayload.gen;
+      // "available_updates": { }
       // "available_updates": { "stable": { "version": "1.3.2" } }
       // "available_updates": { "beta": { "version": "1.4.0-beta3" } }
       // device.hasUpdate = Object.keys((statusPayload.sys as ShellyData).available_updates as object).length > 0;
