@@ -402,8 +402,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             mbDevice.addFixedLabel('composed', component.name);
             // Set the state attribute
             const state = inputComponent.getValue('state') as boolean;
-            console.error(`***state: type ${typeof state} value ${state}`);
-            if (state !== undefined && state !== null) child.getClusterServer(BooleanStateCluster)?.setStateValueAttribute(state);
+            // TODO why? console.error(`***state: type ${typeof state} value ${state}`);
+            if (state !== undefined && state !== null && typeof state === 'boolean') child.getClusterServer(BooleanStateCluster)?.setStateValueAttribute(state);
             // Add event handler
             inputComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
               this.shellyUpdateHandler(mbDevice, device, component, property, value);
@@ -414,7 +414,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             mbDevice.addFixedLabel('composed', component.name);
             // Set the state attribute
             const state = inputComponent.getValue('state') as boolean;
-            if (state !== undefined && state !== null) child.getClusterServer(SwitchCluster.with(Switch.Feature.MomentarySwitch))?.setCurrentPositionAttribute(state ? 1 : 0);
+            if (state !== undefined && state !== null && typeof state === 'boolean')
+              child.getClusterServer(SwitchCluster.with(Switch.Feature.MomentarySwitch))?.setCurrentPositionAttribute(state ? 1 : 0);
             // Add event handler
             inputComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
               this.shellyUpdateHandler(mbDevice, device, component, property, value);
@@ -425,7 +426,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             mbDevice.addFixedLabel('composed', component.name);
             // Set the state attribute
             const state = inputComponent.getValue('state') as boolean;
-            if (state !== undefined && state !== null) child.getClusterServer(SwitchCluster.with(Switch.Feature.LatchingSwitch))?.setCurrentPositionAttribute(state ? 1 : 0);
+            if (state !== undefined && state !== null && typeof state === 'boolean')
+              child.getClusterServer(SwitchCluster.with(Switch.Feature.LatchingSwitch))?.setCurrentPositionAttribute(state ? 1 : 0);
             // Add event handler
             inputComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
               this.shellyUpdateHandler(mbDevice, device, component, property, value);
