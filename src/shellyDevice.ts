@@ -227,7 +227,11 @@ export class ShellyDevice extends EventEmitter {
       device.firmware = (shellyPayload.fw_id as string).split('/')[1];
       device.auth = shellyPayload.auth_en as boolean;
       device.gen = shellyPayload.gen;
-      device.hasUpdate = Object.keys((statusPayload.sys as ShellyData).available_updates as object).length > 0;
+      // "available_updates": { "stable": { "version": "1.3.2" } }
+      // "available_updates": { "beta": { "version": "1.4.0-beta3" } }
+      // device.hasUpdate = Object.keys((statusPayload.sys as ShellyData).available_updates as object).length > 0;
+      const available_updates = (statusPayload.sys as ShellyData).available_updates as ShellyData;
+      device.hasUpdate = available_updates.stable !== undefined;
       for (const key in settingsPayload) {
         if (key === 'wifi') {
           const wifi = settingsPayload[key] as ShellyData;
