@@ -196,7 +196,7 @@ export class WsClient extends EventEmitter {
 
     // Handle the open event
     this.wsClient.on('open', () => {
-      this.log.info(`WebSocket connection opened with Shelly device host ${zb}${this.wsHost}${nf}`);
+      this.log.debug(`WebSocket connection opened with Shelly device host ${zb}${this.wsHost}${db}`);
       this._isConnecting = false;
       this._isConnected = true;
       if (this.wsClient?.readyState === WebSocket.OPEN) this.wsClient?.send(JSON.stringify(this.requestFrame));

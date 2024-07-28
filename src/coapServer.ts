@@ -315,7 +315,7 @@ export class CoapServer extends EventEmitter {
     this.log.debug(`protocolRevision: ${protocolRevision}${db}`);
     this.log.debug(`validFor: ${validFor}`);
     this.log.debug(`serial: ${serial}`);
-    this.log.debug(`payload:${RESET}`, payload);
+    this.log.debug(`payload:${RESET}\n`, payload);
 
     if (msg.url === '/cit/d') {
       const desc: CoIoTDescription[] = [];
@@ -423,7 +423,7 @@ export class CoapServer extends EventEmitter {
       if (err) {
         this.log.warn('CoIoT (coap) server error while listening:', err);
       } else {
-        this.log.info('CoIoT (coap) server is listening ...');
+        this.log.debug('CoIoT (coap) server is listening ...');
       }
     });
   }
@@ -436,21 +436,21 @@ export class CoapServer extends EventEmitter {
 
   start() {
     if (this._isListening) return;
-    this.log.info('Starting CoIoT (coap) server for shelly devices...');
+    this.log.debug('Starting CoIoT (coap) server for shelly devices...');
     this._isListening = true;
     this.listenForStatusUpdates();
-    this.log.info('Started CoIoT (coap) server for shelly devices.');
+    this.log.debug('Started CoIoT (coap) server for shelly devices.');
   }
 
   stop() {
-    this.log.info('Stopping CoIoT (coap) server for shelly devices...');
+    this.log.debug('Stopping CoIoT (coap) server for shelly devices...');
     this.removeAllListeners();
     this._isListening = false;
     globalAgent.close();
     // this.coapAgent.close();
     if (this.coapServer) this.coapServer.close();
     this.devices.clear();
-    this.log.info('Stopped CoIoT (coap) server for shelly devices.');
+    this.log.debug('Stopped CoIoT (coap) server for shelly devices.');
   }
 }
 
