@@ -8,7 +8,7 @@ describe('Shellies', () => {
   // if (getIpv4InterfaceAddress() !== '192.168.1.189') return;
 
   const log = new AnsiLogger({ logName: 'shellyDeviceTest', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: false });
-  const shelly = new Shelly(log, 'admin', 'tango', true);
+  const shelly = new Shelly(log, 'admin', 'tango');
 
   beforeAll(() => {
     //

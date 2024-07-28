@@ -35,6 +35,7 @@ import { WsClient } from './wsClient.js';
 import { Shelly } from './shelly.js';
 import { ShellyData } from './shellyTypes.js';
 import { ShellyComponent } from './shellyComponent.js';
+import { LogLevel } from 'node-ansi-logger';
 
 export class ShellyDevice extends EventEmitter {
   readonly shelly: Shelly;
@@ -123,6 +124,11 @@ export class ShellyDevice extends EventEmitter {
     for (const [key, component] of this._components.entries()) {
       yield [key, component];
     }
+  }
+
+  setLogLevel(logLevel: LogLevel) {
+    this.log.logLevel = logLevel;
+    if (this.wsClient) this.wsClient.log.logLevel = logLevel;
   }
 
   static async create(shelly: Shelly, log: AnsiLogger, host: string): Promise<ShellyDevice | undefined> {
@@ -221,7 +227,12 @@ export class ShellyDevice extends EventEmitter {
       device.firmware = (shellyPayload.fw_id as string).split('/')[1];
       device.auth = shellyPayload.auth_en as boolean;
       device.gen = shellyPayload.gen;
-      device.hasUpdate = Object.keys((statusPayload.sys as ShellyData).available_updates as object).length > 0;
+      // "available_updates": { }
+      // "available_updates": { "stable": { "version": "1.3.2" } }
+      // "available_updates": { "beta": { "version": "1.4.0-beta3" } }
+      // device.hasUpdate = Object.keys((statusPayload.sys as ShellyData).available_updates as object).length > 0;
+      const available_updates = (statusPayload.sys as ShellyData).available_updates as ShellyData;
+      device.hasUpdate = available_updates.stable !== undefined;
       for (const key in settingsPayload) {
         if (key === 'wifi') {
           const wifi = settingsPayload[key] as ShellyData;
@@ -293,7 +304,7 @@ export class ShellyDevice extends EventEmitter {
       if (device.gen === 2 || device.gen === 3) {
         if (device.wsClient?.isConnected === false) {
           log.warn(`WebSocket client for device ${hk}${device.id}${wr} host ${zb}${device.host}${wr} is not connected.`);
-          device.wsClient?.start(shelly.debug);
+          device.wsClient?.start();
         }
       }
     }, 60 * 1000);
@@ -302,11 +313,11 @@ export class ShellyDevice extends EventEmitter {
     if (device.gen === 2 || device.gen === 3) {
       device.wsClient = new WsClient(host, 'tango');
       device.startWsClientTimeout = setTimeout(() => {
-        device.wsClient?.start(shelly.debug);
+        device.wsClient?.start();
       }, 10 * 1000);
 
       device.wsClient.on('update', (message) => {
-        if (shelly.debug) log.info(`WebSocket update from device ${hk}${device.id}${nf} host ${zb}${device.host}${nf}`);
+        log.debug(`WebSocket update from device ${hk}${device.id}${db} host ${zb}${device.host}${db}`);
         device.update(message);
       });
     }

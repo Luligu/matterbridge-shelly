@@ -51,7 +51,7 @@ import {
   ElectricalEnergyMeasurement,
 } from 'matterbridge';
 import { EveHistory, EveHistoryCluster } from 'matterbridge/history';
-import { AnsiLogger, BLUE, CYAN, GREEN, TimestampFormat, YELLOW, db, debugStringify, dn, er, hk, idn, nf, or, rs, wr, zb } from 'matterbridge/logger';
+import { AnsiLogger, BLUE, CYAN, GREEN, LogLevel, TimestampFormat, YELLOW, db, debugStringify, dn, er, hk, idn, nf, or, rs, wr, zb } from 'matterbridge/logger';
 import { NodeStorage, NodeStorageManager } from 'matterbridge/storage';
 import { hslColorToRgbColor, rgbColorToHslColor } from 'matterbridge/utils';
 
@@ -95,17 +95,17 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     if (config.whiteList) this.whiteList = config.whiteList as string[];
     if (config.blackList) this.blackList = config.blackList as string[];
 
-    log.info(`Initializing platform: ${idn}${this.config.name}${rs}${nf}`);
-    log.info(`- username: ${CYAN}${config.username}`);
-    log.info(`- password: ${CYAN}${config.password}`);
-    log.info(`- mdnsDiscover: ${CYAN}${config.enableMdnsDiscover}`);
-    log.info(`- storageDiscover: ${CYAN}${config.enableStorageDiscover}`);
-    log.info(`- configDiscover: ${CYAN}${config.enableConfigDiscover}`);
-    log.info(`- resetStorageDiscover: ${CYAN}${config.resetStorageDiscover}`);
-    log.info(`- debug: ${CYAN}${config.debug}`);
-    log.info(`- unregisterOnShutdown: ${CYAN}${config.unregisterOnShutdown}`);
+    log.debug(`Initializing platform: ${idn}${this.config.name}${rs}${db}`);
+    log.debug(`- username: ${CYAN}${config.username}`);
+    log.debug(`- password: ${CYAN}${config.password}`);
+    log.debug(`- mdnsDiscover: ${CYAN}${config.enableMdnsDiscover}`);
+    log.debug(`- storageDiscover: ${CYAN}${config.enableStorageDiscover}`);
+    log.debug(`- configDiscover: ${CYAN}${config.enableConfigDiscover}`);
+    log.debug(`- resetStorageDiscover: ${CYAN}${config.resetStorageDiscover}`);
+    log.debug(`- debug: ${CYAN}${config.debug}`);
+    log.debug(`- unregisterOnShutdown: ${CYAN}${config.unregisterOnShutdown}`);
 
-    this.shelly = new Shelly(log, this.username, this.password, config.debug as boolean);
+    this.shelly = new Shelly(log, this.username, this.password);
 
     // handle Shelly discovered event
     this.shelly.on('discovered', async (discoveredDevice: DiscoveredDevice) => {
@@ -402,7 +402,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             mbDevice.addFixedLabel('composed', component.name);
             // Set the state attribute
             const state = inputComponent.getValue('state') as boolean;
-            if (state !== undefined) child.getClusterServer(BooleanStateCluster)?.setStateValueAttribute(state);
+            // TODO why? console.error(`***state: type ${typeof state} value ${state}`);
+            if (state !== undefined && state !== null && typeof state === 'boolean') child.getClusterServer(BooleanStateCluster)?.setStateValueAttribute(state);
             // Add event handler
             inputComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
               this.shellyUpdateHandler(mbDevice, device, component, property, value);
@@ -413,7 +414,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             mbDevice.addFixedLabel('composed', component.name);
             // Set the state attribute
             const state = inputComponent.getValue('state') as boolean;
-            if (state !== undefined) child.getClusterServer(SwitchCluster.with(Switch.Feature.MomentarySwitch))?.setCurrentPositionAttribute(state ? 1 : 0);
+            if (state !== undefined && state !== null && typeof state === 'boolean')
+              child.getClusterServer(SwitchCluster.with(Switch.Feature.MomentarySwitch))?.setCurrentPositionAttribute(state ? 1 : 0);
             // Add event handler
             inputComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
               this.shellyUpdateHandler(mbDevice, device, component, property, value);
@@ -424,7 +426,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             mbDevice.addFixedLabel('composed', component.name);
             // Set the state attribute
             const state = inputComponent.getValue('state') as boolean;
-            if (state !== undefined) child.getClusterServer(SwitchCluster.with(Switch.Feature.LatchingSwitch))?.setCurrentPositionAttribute(state ? 1 : 0);
+            if (state !== undefined && state !== null && typeof state === 'boolean')
+              child.getClusterServer(SwitchCluster.with(Switch.Feature.LatchingSwitch))?.setCurrentPositionAttribute(state ? 1 : 0);
             // Add event handler
             inputComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
               this.shellyUpdateHandler(mbDevice, device, component, property, value);
@@ -461,15 +464,16 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     this.nodeStorage = await this.nodeStorageManager.createStorage('devices');
     if (this.config.resetStorageDiscover === true) {
       this.config.resetStorageDiscover = false;
-      await this.nodeStorage.clear();
       this.log.info('Resetting the Shellies storage');
+      await this.nodeStorage.clear();
+      this.log.info('Reset the Shellies storage');
     } else {
       await this.loadStoredDevices();
     }
 
     // start Shelly mDNS device discoverer
     if (this.config.enableMdnsDiscover === true) {
-      this.shelly.startMdns(60 * 10 /* , this.config.debug as boolean*/);
+      this.shelly.startMdns(60 * 10);
     }
 
     // add all stored devices
@@ -544,6 +548,11 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     if (this.config.unregisterOnShutdown === true) await this.unregisterAllDevices();
   }
 
+  override async onChangeLoggerLevel(logLevel: LogLevel) {
+    this.log.debug(`Changing logger level for platform ${idn}${this.config.name}${rs}${db}`);
+    this.shelly.setLogLevel(logLevel);
+  }
+
   private async saveStoredDevices(): Promise<boolean> {
     if (!this.nodeStorage) {
       this.log.error('NodeStorage is not initialized');
@@ -571,13 +580,13 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       return;
     }
     this.log.info(`Adding shelly device ${hk}${deviceId}${nf} host ${zb}${host}${nf}`);
-    const log = new AnsiLogger({ logName: deviceId, logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: this.config.debug === true });
+    const log = new AnsiLogger({ logName: deviceId, logTimestampFormat: TimestampFormat.TIME_MILLIS, logLevel: this.log.logLevel });
     const device = await ShellyDevice.create(this.shelly, log, host);
     if (!device) {
       this.log.error(`Failed to create Shelly device ${hk}${deviceId}${er} host ${zb}${host}${er}`);
       return;
     }
-    log.setLogName(device.name ?? device.id);
+    log.logName = device.name ?? device.id;
     await device.saveDevicePayloads(path.join(this.matterbridge.matterbridgePluginDirectory, 'matterbridge-shelly'));
     await this.shelly.addDevice(device);
     this.shellyDevices.set(device.id, device);
@@ -780,7 +789,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}OnOff-onOff${db} ${YELLOW}${value}${db}`);
     }
     // Update state for Input
-    if (shellyComponent.name === 'Input' && property === 'state') {
+    if (shellyComponent.name === 'Input' && property === 'state' && typeof value === 'boolean') {
       if (this.config.exposeInput === 'contact') {
         endpoint.getClusterServer(BooleanStateCluster)?.setStateValueAttribute(value as boolean);
         shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}BooleanState-stateValue${db} ${YELLOW}${value}${db}`);

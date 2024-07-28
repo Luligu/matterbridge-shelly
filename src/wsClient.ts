@@ -89,7 +89,7 @@ interface Response {
 }
 
 export class WsClient extends EventEmitter {
-  private log;
+  public readonly log;
   private wsClient: WebSocket | undefined;
   private _isConnected = false;
   private _isConnecting = false;
@@ -124,7 +124,7 @@ export class WsClient extends EventEmitter {
 
   constructor(wsHost: string, password?: string) {
     super();
-    this.log = new AnsiLogger({ logName: 'wsClient', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: false });
+    this.log = new AnsiLogger({ logName: 'ShellyWsClient', logTimestampFormat: TimestampFormat.TIME_MILLIS });
     this.wsHost = wsHost;
     this.wsUrl = `ws://${this.wsHost}/rpc`;
     this.password = password;
@@ -196,7 +196,7 @@ export class WsClient extends EventEmitter {
 
     // Handle the open event
     this.wsClient.on('open', () => {
-      this.log.info(`WebSocket connection opened with Shelly device host ${zb}${this.wsHost}${nf}`);
+      this.log.debug(`WebSocket connection opened with Shelly device host ${zb}${this.wsHost}${db}`);
       this._isConnecting = false;
       this._isConnected = true;
       if (this.wsClient?.readyState === WebSocket.OPEN) this.wsClient?.send(JSON.stringify(this.requestFrame));
@@ -255,15 +255,13 @@ export class WsClient extends EventEmitter {
     });
   }
 
-  start(debug = false) {
-    this.log.setLogDebug(debug);
+  start() {
     this.log.debug(`Starting ws client for Shelly device on address ${this.wsHost}`);
     this.listenForStatusUpdates();
     this.log.debug(`Started ws client for Shelly device on address ${this.wsHost}`);
   }
 
-  stop(debug = false) {
-    this.log.setLogDebug(debug);
+  stop() {
     this.log.debug(
       `Stopping ws client for Shelly device on address ${this.wsHost} state ${this.wsClient?.readyState} connencting ${this._isConnecting} connected ${this._isConnected} `,
     );

@@ -5,8 +5,8 @@ import { ShellyDevice } from './shellyDevice.js';
 import path from 'path';
 
 describe('Shellies test', () => {
-  const log = new AnsiLogger({ logName: 'shellyDeviceTest', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: false });
-  const shellies = new Shelly(log, 'admin', 'tango', false);
+  const log = new AnsiLogger({ logName: 'shellyDeviceTest', logTimestampFormat: TimestampFormat.TIME_MILLIS });
+  const shellies = new Shelly(log, 'admin', 'tango');
 
   beforeAll(() => {
     //
@@ -100,7 +100,7 @@ describe('Shellies test', () => {
   }, 7000);
 
   test('Start coap', (done) => {
-    shellies.startCoap(undefined, false);
+    shellies.startCoap(undefined);
     setTimeout(() => {
       shellies.destroy();
       done();
@@ -109,7 +109,7 @@ describe('Shellies test', () => {
   }, 7000);
 
   test('Start coap timeout', (done) => {
-    shellies.startCoap(1, false);
+    shellies.startCoap(100);
     setTimeout(() => {
       shellies.destroy();
       done();

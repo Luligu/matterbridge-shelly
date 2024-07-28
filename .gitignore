@@ -46,3 +46,6 @@ replay_pid*
 bridge-info.json
 bridge-devices.json
 bridge-groups.json
+
+# other stuff
+TODO.md

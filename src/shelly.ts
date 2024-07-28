@@ -21,7 +21,7 @@
  * limitations under the License. *
  */
 
-import { AnsiLogger, CYAN, MAGENTA, BRIGHT, hk, db, nf, wr, zb, er } from 'node-ansi-logger';
+import { AnsiLogger, CYAN, MAGENTA, BRIGHT, hk, db, nf, wr, zb, er, LogLevel } from 'matterbridge/logger';
 
 import EventEmitter from 'events';
 
@@ -37,16 +37,14 @@ export class Shelly extends EventEmitter {
   private coapServerTimeout?: NodeJS.Timeout;
   public username: string | undefined;
   public password: string | undefined;
-  public debug: boolean;
 
-  constructor(log: AnsiLogger, username?: string, password?: string, debug = false) {
+  constructor(log: AnsiLogger, username?: string, password?: string) {
     super();
     this.log = log;
     this.username = username;
     this.password = password;
-    this.debug = debug;
-    this.mdnsScanner = new MdnsScanner(debug);
-    this.coapServer = new CoapServer(debug);
+    this.mdnsScanner = new MdnsScanner(this.log.logLevel);
+    this.coapServer = new CoapServer(this.log.logLevel);
 
     this.mdnsScanner.on('discovered', async (device: DiscoveredDevice) => {
       this.log.info(`Discovered shelly gen ${CYAN}${device.gen}${nf} device id ${hk}${device.id}${nf} host ${zb}${device.host}${nf} port ${zb}${device.port}${nf} `);
@@ -56,10 +54,9 @@ export class Shelly extends EventEmitter {
     this.coapServer.on('update', async (host: string, component: string, property: string, value: string | number | boolean) => {
       const shellyDevice = this.getDeviceByHost(host);
       if (shellyDevice) {
-        if (debug)
-          shellyDevice.log.info(
-            `CoIoT update from device id ${hk}${shellyDevice.id}${nf} host ${zb}${host}${nf} component ${CYAN}${component}${nf} property ${CYAN}${property}${nf} value ${CYAN}${value}${nf}`,
-          );
+        shellyDevice.log.debug(
+          `CoIoT update from device id ${hk}${shellyDevice.id}${db} host ${zb}${host}${db} component ${CYAN}${component}${db} property ${CYAN}${property}${db} value ${CYAN}${value}${db}`,
+        );
         if (!shellyDevice.hasComponent(component)) this.log.error(`Device ${hk}${shellyDevice.id}${er} host ${zb}${host}${er} does not have component ${CYAN}${component}${nf}`);
         shellyDevice.getComponent(component)?.setValue(property, value);
         shellyDevice.lastseen = Date.now();
@@ -110,7 +107,7 @@ export class Shelly extends EventEmitter {
     this._devices.set(device.id, device);
     if (device.gen === 1 && !device.host.endsWith('.json')) {
       await this.coapServer?.registerDevice(device.host);
-      this.startCoap(10, this.debug);
+      this.startCoap(10000);
     }
     this.emit('add', device);
     return this;
@@ -139,14 +136,23 @@ export class Shelly extends EventEmitter {
     this.mdnsScanner?.start(mdnsShutdownTimeout, debug);
   }
 
-  startCoap(coapStartTimeout?: number, debug = false) {
+  startCoap(coapStartTimeout?: number) {
     if (coapStartTimeout) {
       this.coapServerTimeout = setTimeout(() => {
-        this.coapServer?.start(debug);
-      }, coapStartTimeout * 1000);
+        this.coapServer?.start();
+      }, coapStartTimeout);
     } else {
-      this.coapServer?.start(debug);
+      this.coapServer?.start();
     }
+  }
+
+  setLogLevel(level: LogLevel) {
+    this.log.logLevel = level;
+    if (this.mdnsScanner) this.mdnsScanner.log.logLevel = level;
+    if (this.coapServer) this.coapServer.log.logLevel = level;
+    this.devices.forEach((device) => {
+      device.setLogLevel(level);
+    });
   }
 
   logDevices() {
