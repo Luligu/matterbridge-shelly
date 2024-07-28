@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 If you like this project and find it useful, please consider giving it a star on GitHub at https://github.com/Luligu/matterbridge-shelly and sponsoring it.
 
-## [0.7.5] - 2024-07-24
+## [0.7.5] - 2024-07-25
 
 ### Changed
 
