@@ -34,6 +34,10 @@ export interface DiscoveredDevice {
 
 export type DiscoveredDeviceListener = (data: DiscoveredDevice) => void;
 
+/**
+ * Creates an instance of MdnsScanner.
+ * @param {LogLevel} logLevel - The log level for the scanner. Defaults to LogLevel.INFO.
+ */
 export class MdnsScanner extends EventEmitter {
   private discoveredDevices = new Map<string, DiscoveredDevice>();
   public readonly log;
@@ -47,20 +51,34 @@ export class MdnsScanner extends EventEmitter {
     this.log = new AnsiLogger({ logName: 'ShellyMdnsDiscover', logTimestampFormat: TimestampFormat.TIME_MILLIS, logLevel });
   }
 
+  /**
+   * Gets a value indicating whether the MdnsScanner is currently scanning.
+   *
+   * @returns {boolean} A boolean value indicating whether the MdnsScanner is scanning.
+   */
   get isScanning() {
     return this._isScanning;
   }
 
+  /**
+   * Sends an mDNS query for shelly devices.
+   */
   private sendQuery() {
     this.scanner?.query([
       { name: '_http._tcp.local', type: 'PTR' },
       { name: '_shelly._tcp.local', type: 'PTR' },
     ]);
-    this.log.info('Sent mDNS query for shelly devices.');
+    this.log.debug('Sent mDNS query for shelly devices.');
   }
 
+  /**
+   * Starts the mDNS query service for shelly devices.
+   *
+   * @param {number} shutdownTimeout - The timeout value in milliseconds to stop the MdnsScanner (optional, if not provided the MdnsScanner will not stop).
+   * @param {boolean} debug - Indicates whether to enable debug mode (default: false).
+   */
   start(shutdownTimeout?: number, debug = false) {
-    this.log.info('Starting mDNS query service for shelly devices...');
+    this.log.debug('Starting mDNS query service for shelly devices...');
     this._isScanning = true;
 
     this.scanner = mdns();
@@ -150,34 +168,43 @@ export class MdnsScanner extends EventEmitter {
       if (debug) this.log.debug(`--- end ---`);
     });
 
+    // Send the query and set the timeout to send it again every 60 seconds
     this.sendQuery();
-
     this.queryTimeout = setInterval(() => {
       this.sendQuery();
     }, 60 * 1000);
 
+    // Set the timeout to stop the scanner if it is defined
     if (shutdownTimeout && shutdownTimeout > 0) {
       this.scannerTimeout = setTimeout(() => {
         this.stop();
-      }, shutdownTimeout * 1000);
+      }, shutdownTimeout);
     }
-    this.log.info('Started mDNS query service for shelly devices.');
+    this.log.debug('Started mDNS query service for shelly devices.');
   }
 
+  /**
+   * Stops the MdnsScanner query service.
+   */
   stop() {
-    this.log.info('Stopping mDNS query service...');
+    this.log.debug('Stopping mDNS query service...');
     if (this.scannerTimeout) clearTimeout(this.scannerTimeout);
-    if (this.queryTimeout) clearTimeout(this.queryTimeout);
-    this._isScanning = false;
     this.scannerTimeout = undefined;
+    if (this.queryTimeout) clearTimeout(this.queryTimeout);
     this.queryTimeout = undefined;
+    this._isScanning = false;
+    this.scanner?.removeAllListeners();
     this.scanner?.destroy();
     this.scanner = undefined;
     this.removeAllListeners();
     this.logPeripheral();
-    this.log.info('Stopped mDNS query service.');
+    this.log.debug('Stopped mDNS query service.');
   }
 
+  /**
+   * Logs information about discovered shelly devices.
+   * @returns The number of discovered devices.
+   */
   logPeripheral() {
     this.log.info(`Discovered ${this.discoveredDevices.size} shelly devices:`);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

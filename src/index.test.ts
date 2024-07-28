@@ -11,23 +11,17 @@ describe('initializePlugin', () => {
 
   beforeEach(() => {
     mockMatterbridge = { addBridgedDevice: jest.fn() } as unknown as Matterbridge;
-    mockLog = { error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() } as unknown as AnsiLogger;
+    mockLog = { fatal: jest.fn(), error: jest.fn(), warn: jest.fn(), notice: jest.fn(), info: jest.fn(), debug: jest.fn() } as unknown as AnsiLogger;
     mockConfig = {
-      'name': 'matterbridge-test',
+      'name': 'matterbridge-shelly',
       'type': 'DynamicPlatform',
-      'noDevices': false,
-      'throwLoad': false,
-      'throwStart': false,
-      'throwConfigure': false,
-      'throwShutdown': false,
+      'debug': false,
       'unregisterOnShutdown': false,
-      'delayStart': false,
     } as PlatformConfig;
   });
 
-  it('should return an instance of TestPlatform', () => {
-    const result = initializePlugin(mockMatterbridge, mockLog, mockConfig);
-
-    expect(result).toBeInstanceOf(ShellyPlatform);
+  it('should return an instance of ShellyPlatform', () => {
+    const platform = initializePlugin(mockMatterbridge, mockLog, mockConfig);
+    expect(platform).toBeInstanceOf(ShellyPlatform);
   });
 });
