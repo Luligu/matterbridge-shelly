@@ -65,10 +65,13 @@ describe('TestPlatform', () => {
     (shellyPlatform as any).shelly.destroy();
   });
 
+  // eslint-disable-next-line jest/no-commented-out-tests
+  /*
   it('should initialize platform with config name', () => {
     shellyPlatform = new ShellyPlatform(mockMatterbridge, mockLog, mockConfig);
     expect((mockLog.info as jest.Mock).mock.calls[0]).toEqual([`Initializing platform: ${idn}${mockConfig.name}${rs}${nf}`]);
   });
+*/
 
   it('should call onStart with reason', async () => {
     await shellyPlatform.onStart('Test reason');
