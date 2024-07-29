@@ -72,7 +72,7 @@ describe('WS client', () => {
       false,
       300000,
       500,
-      true,
+      false,
     );
     // console.log('Waiting for connection timeout done', wsClient.isConnecting, wsClient.isConnected);
     expect(wsClient.isConnecting).toBeFalsy();
@@ -86,7 +86,7 @@ describe('WS client', () => {
       false,
       300000,
       500,
-      true,
+      false,
     );
     // console.log('Waiting for connection timeout done', wsClient.isConnecting, wsClient.isConnected);
     expect(wsClient.isConnected).toBeFalsy();

@@ -133,7 +133,7 @@ export class Shelly extends EventEmitter {
   }
 
   startMdns(mdnsShutdownTimeout?: number, debug = false) {
-    this.mdnsScanner?.start(mdnsShutdownTimeout, debug);
+    this.mdnsScanner?.start(mdnsShutdownTimeout, undefined, debug);
   }
 
   startCoap(coapStartTimeout?: number) {

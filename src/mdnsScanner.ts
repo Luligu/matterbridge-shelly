@@ -77,11 +77,11 @@ export class MdnsScanner extends EventEmitter {
    * @param {number} shutdownTimeout - The timeout value in milliseconds to stop the MdnsScanner (optional, if not provided the MdnsScanner will not stop).
    * @param {boolean} debug - Indicates whether to enable debug mode (default: false).
    */
-  start(shutdownTimeout?: number, debug = false) {
+  start(shutdownTimeout?: number, interfaceName?: string, debug = false) {
     this.log.debug('Starting mDNS query service for shelly devices...');
     this._isScanning = true;
 
-    this.scanner = mdns();
+    this.scanner = mdns({ interface: interfaceName });
     this.scanner.on('response', async (response: ResponsePacket) => {
       let port = 0;
       let gen = 1;
