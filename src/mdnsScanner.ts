@@ -143,7 +143,7 @@ export class MdnsScanner extends EventEmitter {
             this.log.info(`MdnsScanner discovered shelly gen: ${CYAN}${gen}${nf} device id: ${hk}${deviceId}${nf} host: ${zb}${a.data}${nf} port: ${zb}${port}${nf}`);
             this.discoveredDevices.set(deviceId, { id: deviceId, host: a.data, port, gen });
             this.emit('discovered', { id: deviceId, host: a.data, port, gen });
-            console.log('Response:', response, 'Rinfo:', rinfo);
+            // console.log('Response:', response, 'Rinfo:', rinfo);
           }
         }
       }
@@ -187,7 +187,7 @@ export class MdnsScanner extends EventEmitter {
             this.log.info(`MdnsScanner discovered shelly gen: ${CYAN}${gen}${nf} device id: ${hk}${deviceId}${nf} host: ${zb}${a.data}${nf} port: ${zb}${port}${nf}`);
             this.discoveredDevices.set(deviceId, { id: deviceId, host: a.data, port, gen });
             this.emit('discovered', { id: deviceId, host: a.data, port, gen });
-            console.log('Response:', response, 'Rinfo:', rinfo);
+            // console.log('Response:', response, 'Rinfo:', rinfo);
           }
         }
       }
