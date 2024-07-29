@@ -130,7 +130,12 @@ const gen1_ResponsePacket = {
       ttl: 120,
       class: 'IN',
       flush: true,
-      data: {},
+      data: {
+        priority: 0,
+        weight: 0,
+        port: 80,
+        target: 'shellyswitch25-3494546BBF7E.local',
+      },
     },
     {
       name: 'shellyswitch25-3494546BBF7E._http._tcp.local',
@@ -203,7 +208,12 @@ const gen2_ResponsePacket = {
       ttl: 120,
       class: 'IN',
       flush: false,
-      data: {},
+      data: {
+        priority: 0,
+        weight: 0,
+        port: 80,
+        target: 'ShellyPlus2PM-30C92286CB68.local',
+      },
     },
     {
       name: 'shellyplus2pm-30c92286cb68._http._tcp.local',
@@ -227,7 +237,12 @@ const gen2_ResponsePacket = {
       ttl: 120,
       class: 'IN',
       flush: false,
-      data: {},
+      data: {
+        priority: 0,
+        weight: 0,
+        port: 80,
+        target: 'ShellyPlus2PM-30C92286CB68.local',
+      },
     },
     {
       name: 'shellyplus2pm-30c92286cb68._shelly._tcp.local',
@@ -291,7 +306,12 @@ const gen3_ResponsePacket = {
       ttl: 120,
       class: 'IN',
       flush: false,
-      data: {},
+      data: {
+        priority: 0,
+        weight: 0,
+        port: 80,
+        target: 'Shelly1MiniG3-543204547478.local',
+      },
     },
     {
       name: 'shellypmminig3-84fce63957f4._http._tcp.local',
@@ -315,7 +335,12 @@ const gen3_ResponsePacket = {
       ttl: 120,
       class: 'IN',
       flush: false,
-      data: {},
+      data: {
+        priority: 0,
+        weight: 0,
+        port: 80,
+        target: 'Shelly1MiniG3-543204547478.local',
+      },
     },
     {
       name: 'shellypmminig3-84fce63957f4._shelly._tcp.local',

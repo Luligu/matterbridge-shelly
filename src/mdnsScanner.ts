@@ -144,6 +144,7 @@ export class MdnsScanner extends EventEmitter {
             this.discoveredDevices.set(deviceId, { id: deviceId, host: a.data, port, gen });
             this.emit('discovered', { id: deviceId, host: a.data, port, gen });
             // console.log('Response:', response, 'Rinfo:', rinfo);
+            // console.log(response.answers);
           }
         }
       }
@@ -188,6 +189,7 @@ export class MdnsScanner extends EventEmitter {
             this.discoveredDevices.set(deviceId, { id: deviceId, host: a.data, port, gen });
             this.emit('discovered', { id: deviceId, host: a.data, port, gen });
             // console.log('Response:', response, 'Rinfo:', rinfo);
+            // console.log(response.additionals);
           }
         }
       }
