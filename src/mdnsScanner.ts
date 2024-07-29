@@ -86,7 +86,7 @@ export class MdnsScanner extends EventEmitter {
 
     // Create and initialize the mDNS scanner
     const mdnsOptions: mdns.Options = {};
-    if (interfaceAddress && type) {
+    if (interfaceAddress && interfaceAddress !== '' && type && (type === 'udp4' || type === 'udp6')) {
       mdnsOptions.interface = interfaceAddress;
       mdnsOptions.type = type;
       mdnsOptions.ip = type === 'udp4' ? '224.0.0.251' : 'ff02::fb';
@@ -143,6 +143,7 @@ export class MdnsScanner extends EventEmitter {
             this.log.info(`MdnsScanner discovered shelly gen: ${CYAN}${gen}${nf} device id: ${hk}${deviceId}${nf} host: ${zb}${a.data}${nf} port: ${zb}${port}${nf}`);
             this.discoveredDevices.set(deviceId, { id: deviceId, host: a.data, port, gen });
             this.emit('discovered', { id: deviceId, host: a.data, port, gen });
+            console.log('Response:', response, 'Rinfo:', rinfo);
           }
         }
       }
@@ -186,6 +187,7 @@ export class MdnsScanner extends EventEmitter {
             this.log.info(`MdnsScanner discovered shelly gen: ${CYAN}${gen}${nf} device id: ${hk}${deviceId}${nf} host: ${zb}${a.data}${nf} port: ${zb}${port}${nf}`);
             this.discoveredDevices.set(deviceId, { id: deviceId, host: a.data, port, gen });
             this.emit('discovered', { id: deviceId, host: a.data, port, gen });
+            console.log('Response:', response, 'Rinfo:', rinfo);
           }
         }
       }
