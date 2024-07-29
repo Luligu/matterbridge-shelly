@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 If you like this project and find it useful, please consider giving it a star on GitHub at https://github.com/Luligu/matterbridge-shelly and sponsoring it.
 
+## [0.7.6] - 2024-07-29
+
+- [shelly]: Refactor mdnsScanner and mdnsScanner jest test.
+
 ## [0.7.5] - 2024-07-28
 
 ### Changed

@@ -141,7 +141,7 @@ export class ShellyDevice extends EventEmitter {
       return undefined;
     }
     // console.log('Shelly:', shelly);
-    const device = new ShellyDevice(shelly, log, host.replace('mock.', ''));
+    const device = new ShellyDevice(shelly, log, host);
     device.mac = shellyPayload.mac as string;
     device.lastseen = Date.now();
 
@@ -230,7 +230,6 @@ export class ShellyDevice extends EventEmitter {
       // "available_updates": { }
       // "available_updates": { "stable": { "version": "1.3.2" } }
       // "available_updates": { "beta": { "version": "1.4.0-beta3" } }
-      // device.hasUpdate = Object.keys((statusPayload.sys as ShellyData).available_updates as object).length > 0;
       const available_updates = (statusPayload.sys as ShellyData).available_updates as ShellyData;
       device.hasUpdate = available_updates.stable !== undefined;
       for (const key in settingsPayload) {
@@ -260,6 +259,15 @@ export class ShellyDevice extends EventEmitter {
         if (key.startsWith('input:')) device.addComponent(new ShellyComponent(device, key, 'Input', settingsPayload[key] as ShellyData));
         if (key.startsWith('pm1:')) device.addComponent(new ShellyComponent(device, key, 'PowerMeter', settingsPayload[key] as ShellyData));
       }
+      /*
+      for (const key in statusPayload) {
+        if (key.startsWith('switch:')) device.addComponent(new ShellyComponent(device, key, 'Switch', statusPayload[key] as ShellyData));
+        if (key.startsWith('cover:')) device.addComponent(new ShellyComponent(device, key, 'Cover', statusPayload[key] as ShellyData));
+        if (key.startsWith('light:')) device.addComponent(new ShellyComponent(device, key, 'Light', statusPayload[key] as ShellyData));
+        if (key.startsWith('input:')) device.addComponent(new ShellyComponent(device, key, 'Input', statusPayload[key] as ShellyData));
+        if (key.startsWith('pm1:')) device.addComponent(new ShellyComponent(device, key, 'PowerMeter', statusPayload[key] as ShellyData));
+      }
+      */
     }
 
     if (statusPayload) device.update(statusPayload);

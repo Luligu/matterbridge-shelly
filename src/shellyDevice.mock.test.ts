@@ -1,15 +1,22 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { ShellyDevice } from './shellyDevice.js';
 import { AnsiLogger, TimestampFormat } from 'matterbridge/logger';
 import { Shelly } from './shelly.js';
 import { ShellyComponent } from './shellyComponent.js';
 import path from 'path';
+import { jest } from '@jest/globals';
 
 describe('Shellies', () => {
+  let consoleLogSpy: jest.SpiedFunction<typeof console.log>;
+
   const log = new AnsiLogger({ logName: 'shellyDeviceTest', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: false });
   const shelly = new Shelly(log, 'admin', 'tango');
 
   beforeAll(() => {
-    //
+    consoleLogSpy = jest.spyOn(console, 'log').mockImplementation((...args: any[]) => {
+      // console.error(`Mocked console.log: ${args}`);
+    });
   });
 
   beforeEach(() => {
@@ -162,9 +169,9 @@ describe('Shellies', () => {
       expect(cloud?.hasProperty('enable')).toBeTruthy();
       expect(cloud?.hasProperty('disable')).toBeFalsy();
       expect(cloud?.getValue('name')).toBeUndefined();
-      expect(cloud?.getValue('server')).not.toBeUndefined();
-      expect(cloud?.properties.length).toBeGreaterThan(0);
-      expect(cloud?.properties.length).toBeLessThan(4);
+      expect(cloud?.getValue('server')).toBe('shelly-103-eu.shelly.cloud:6022/jrpc');
+      expect(cloud?.getValue('connected')).toBe(true);
+      expect(cloud?.properties.length).toBe(3);
       if (cloud) {
         for (const [key, property] of cloud) {
           // eslint-disable-next-line jest/no-conditional-expect
@@ -204,15 +211,23 @@ describe('Shellies', () => {
       expect(device).not.toBeUndefined();
       const switch0 = device?.getComponent('switch:0');
       expect(switch0).not.toBeUndefined();
+      expect(switch0?.logComponent()).toBe(24);
       expect(switch0?.hasProperty('name')).toBeTruthy();
       expect(switch0?.getProperty('name')).not.toBeUndefined();
       expect(switch0?.getValue('name')).toBeNull();
+      expect(switch0?.getValue('temperature')).toBeDefined();
+      expect(switch0?.getValue('output')).toBe(false);
+      expect(switch0?.getValue('state')).toBe(false);
 
       const switch1 = device?.getComponent('switch:1');
       expect(switch1).not.toBeUndefined();
+      expect(switch1?.logComponent()).toBe(24);
       expect(switch1?.hasProperty('name')).toBeTruthy();
       expect(switch1?.getProperty('name')).not.toBeUndefined();
       expect(switch1?.getValue('name')).toBeNull();
+      expect(switch1?.getValue('temperature')).toBeDefined();
+      expect(switch1?.getValue('output')).toBe(false);
+      expect(switch1?.getValue('state')).toBe(false);
 
       expect(device?.lastseen).not.toBe(0);
     });
