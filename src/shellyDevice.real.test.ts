@@ -10,7 +10,6 @@ import { jest } from '@jest/globals';
 import { ShellyCoverComponent, ShellySwitchComponent } from './shellyComponent.js';
 
 describe('Shellies', () => {
-  if (getMacAddress() !== '30:f6:ef:69:2b:c5') return;
   let consoleLogSpy: jest.SpiedFunction<typeof console.log>;
 
   const log = new AnsiLogger({ logName: 'shellyDeviceTest', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: false });
@@ -52,6 +51,7 @@ describe('Shellies', () => {
   });
 
   describe('create real gen 1 shellydimmer2 219', () => {
+    if (getMacAddress() !== '30:f6:ef:69:2b:c5') return;
     test('create a gen 1 device and update', async () => {
       const device = await ShellyDevice.create(shelly, log, '192.168.1.219');
       if (!device) return;
@@ -70,6 +70,7 @@ describe('Shellies', () => {
   });
 
   describe('create real gen 2 shellyplus1pm 217', () => {
+    if (getMacAddress() !== '30:f6:ef:69:2b:c5') return;
     test('create a gen 2 device and update', async () => {
       const device = await ShellyDevice.create(shelly, log, '192.168.1.217');
       if (!device) return;
@@ -210,6 +211,7 @@ describe('Shellies', () => {
   });
 
   describe('create real gen 2 shellyplus2pm 218', () => {
+    if (getMacAddress() !== '30:f6:ef:69:2b:c5') return;
     test('send command to a gen 2 device and update', async () => {
       const device = await ShellyDevice.create(shelly, log, '192.168.1.218');
       expect(device).not.toBeUndefined();
