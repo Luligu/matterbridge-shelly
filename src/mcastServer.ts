@@ -21,7 +21,7 @@
  * limitations under the License. *
  */
 
-import { AnsiLogger, TimestampFormat } from 'matterbridge/logger';
+import { AnsiLogger, LogLevel, TimestampFormat } from 'matterbridge/logger';
 import { getIpv4InterfaceAddress } from 'matterbridge/utils';
 import dgram from 'dgram';
 
@@ -34,7 +34,7 @@ export class Multicast {
   dgramClientBound = false;
 
   constructor() {
-    this.log = new AnsiLogger({ logName: 'mcastServer', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: true });
+    this.log = new AnsiLogger({ logName: 'MulticastServer', logTimestampFormat: TimestampFormat.TIME_MILLIS, logLevel: LogLevel.DEBUG });
   }
 
   startDgramServer(callback?: () => void) {
@@ -46,7 +46,7 @@ export class Multicast {
     this.dgramServer = dgram.createSocket({ type: 'udp4', reuseAddr: true });
 
     this.dgramServer.on('error', (err) => {
-      this.log.error(`Dgram multicast server socket error:\n${err.stack}`);
+      this.log.error(`Dgram multicast server socket error:\n${err.message}`);
       this.dgramServer?.close();
     });
 
@@ -60,7 +60,7 @@ export class Multicast {
         return;
       }
       const address = this.dgramServer.address();
-      this.log.info(`Dgram multicast server listening on ${address.address}:${address.port}`);
+      this.log.info(`Dgram multicast server listening on ${address.family} ${address.address}:${address.port}`);
       this.dgramServer.addMembership(MULTICAST_ADDRESS, INTERFACE);
       this.log.info(`Dgram multicast server joined multicast group: ${MULTICAST_ADDRESS} with interface: ${INTERFACE} on port: ${PORT}`);
     });
@@ -127,17 +127,15 @@ export class Multicast {
   }
 }
 
-/*
-if (process.argv.includes('mcastServer') || process.argv.includes('mcastClient')) {
+// Use with: node dist/mcastServer.js testMulticastServer testMulticastClient
+if (process.argv.includes('testMulticastServer') || process.argv.includes('testMulticastClient')) {
   const mcast = new Multicast();
 
-  if (process.argv.includes('mcastServer')) mcast.startDgramServer();
+  if (process.argv.includes('testMulticastServer')) mcast.startDgramServer();
 
-  if (process.argv.includes('mcastClient')) mcast.startDgramClient();
+  if (process.argv.includes('testMulticastClient')) mcast.startDgramClient();
 
   process.on('SIGINT', async function () {
     mcast.stop();
-    process.exit();
   });
 }
-*/

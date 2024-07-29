@@ -103,6 +103,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     log.debug(`- configDiscover: ${CYAN}${config.enableConfigDiscover}`);
     log.debug(`- resetStorageDiscover: ${CYAN}${config.resetStorageDiscover}`);
     log.debug(`- debug: ${CYAN}${config.debug}`);
+    log.debug(`- debugMdns: ${CYAN}${config.debugMdns}`);
     log.debug(`- unregisterOnShutdown: ${CYAN}${config.unregisterOnShutdown}`);
 
     this.shelly = new Shelly(log, this.username, this.password);
@@ -473,7 +474,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
 
     // start Shelly mDNS device discoverer
     if (this.config.enableMdnsDiscover === true) {
-      this.shelly.startMdns(10 * 60 * 1000, this.matterbridge.systemInformation.ipv4Address, 'udp4');
+      this.shelly.startMdns(10 * 60 * 1000, this.matterbridge.systemInformation.ipv4Address, 'udp4', this.config.debugMdns as boolean);
     }
 
     // add all stored devices

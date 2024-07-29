@@ -49,4 +49,5 @@ bridge-groups.json
 
 # other stuff
 matterbridge-shelly
+jest-shelly
 TODO.md

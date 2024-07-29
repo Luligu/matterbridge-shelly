@@ -4,6 +4,23 @@
 import { LogLevel } from 'node-ansi-logger';
 import { MdnsScanner, DiscoveredDeviceListener, DiscoveredDevice } from './mdnsScanner';
 import { jest } from '@jest/globals';
+import path from 'path';
+import { readFileSync } from 'fs';
+import { ResponsePacket } from 'multicast-dns';
+
+async function loadResponse(shellyId: string) {
+  const responseFile = path.join('src', 'mock', `${shellyId}.mdns.json`);
+  try {
+    const response = readFileSync(responseFile, 'utf8');
+    // eslint-disable-next-line no-console
+    console.log(`Loaded response file ${responseFile}`);
+    return JSON.parse(response) as ResponsePacket;
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error(`Error loading response file ${responseFile}: ${err}`);
+    return undefined;
+  }
+}
 
 describe('Shellies MdnsScanner test', () => {
   let consoleLogSpy: jest.SpiedFunction<typeof console.log>;
@@ -51,6 +68,32 @@ describe('Shellies MdnsScanner test', () => {
     }, 4000);
   }, 10000);
 
+  // eslint-disable-next-line jest/no-commented-out-tests
+  /*
+  test('Discover shellyplus1pm-441793D69718', (done) => {
+    consoleLogSpy.mockRestore();
+    // eslint-disable-next-line no-console
+    console.log(`Discovering shellyplus1pm-441793D69718`);
+    discoveredDeviceListener.mockClear();
+    mdns.start(0, undefined, undefined, true);
+    expect(mdns.isScanning).toBeTruthy();
+    setTimeout(() => {
+      mdns.stop(true);
+
+      // eslint-disable-next-line no-console
+      console.log(`Discovering shellyplus1pm-441793D69718`);
+      (mdns as any).discoveredDevices.clear();
+      const response = loadResponse('shellyplus1pm-441793D69718');
+      expect(response).not.toBeUndefined();
+      (mdns as any).scanner.emit('response', response, gen1_RemoteInfo);
+
+      mdns.stop();
+      expect(mdns.isScanning).toBeFalsy();
+      // expect(discoveredDeviceListener).toHaveBeenCalled();
+      done();
+    }, 4000);
+  }, 10000);
+
   test('Shelly gen 1', (done) => {
     discoveredDeviceListener.mockClear();
     mdns.start(3000, undefined, undefined, true);
@@ -92,6 +135,7 @@ describe('Shellies MdnsScanner test', () => {
     (mdns as any).discoveredDevices.clear();
     (mdns as any).scanner.emit('response', gen3_ResponsePacket, gen3_RemoteInfo);
   }, 10000);
+  */
 
   test('Log discovered', () => {
     const size = mdns.logPeripheral();

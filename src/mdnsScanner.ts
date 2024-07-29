@@ -25,6 +25,8 @@ import { AnsiLogger, BLUE, CYAN, LogLevel, MAGENTA, TimestampFormat, db, debugSt
 import mdns, { ResponsePacket } from 'multicast-dns';
 import EventEmitter from 'events';
 import { RemoteInfo, SocketType } from 'dgram';
+import { promises as fs } from 'fs';
+import path from 'path';
 
 export interface DiscoveredDevice {
   id: string;
@@ -90,6 +92,7 @@ export class MdnsScanner extends EventEmitter {
       mdnsOptions.interface = interfaceAddress;
       mdnsOptions.type = type;
       mdnsOptions.ip = type === 'udp4' ? '224.0.0.251' : 'ff02::fb';
+      this.log.debug(`Starting mDNS query service for shelly devices with interface ${mdnsOptions.interface} type ${mdnsOptions.type} ip ${mdnsOptions.ip}...`);
     }
     this.scanner = mdns(mdnsOptions);
 
@@ -143,8 +146,7 @@ export class MdnsScanner extends EventEmitter {
             this.log.info(`MdnsScanner discovered shelly gen: ${CYAN}${gen}${nf} device id: ${hk}${deviceId}${nf} host: ${zb}${a.data}${nf} port: ${zb}${port}${nf}`);
             this.discoveredDevices.set(deviceId, { id: deviceId, host: a.data, port, gen });
             this.emit('discovered', { id: deviceId, host: a.data, port, gen });
-            // console.log('Response:', response, 'Rinfo:', rinfo);
-            // console.log(response.answers);
+            if (process.argv.includes('testMdnsScanner')) await this.saveResponse(deviceId, response);
           }
         }
       }
@@ -188,8 +190,7 @@ export class MdnsScanner extends EventEmitter {
             this.log.info(`MdnsScanner discovered shelly gen: ${CYAN}${gen}${nf} device id: ${hk}${deviceId}${nf} host: ${zb}${a.data}${nf} port: ${zb}${port}${nf}`);
             this.discoveredDevices.set(deviceId, { id: deviceId, host: a.data, port, gen });
             this.emit('discovered', { id: deviceId, host: a.data, port, gen });
-            // console.log('Response:', response, 'Rinfo:', rinfo);
-            // console.log(response.additionals);
+            if (process.argv.includes('testMdnsScanner')) await this.saveResponse(deviceId, response);
           }
         }
       }
@@ -226,13 +227,14 @@ export class MdnsScanner extends EventEmitter {
   /**
    * Stops the MdnsScanner query service.
    */
-  stop() {
+  stop(keepAlive = false) {
     this.log.debug('Stopping mDNS query service...');
     if (this.scannerTimeout) clearTimeout(this.scannerTimeout);
     this.scannerTimeout = undefined;
     if (this.queryTimeout) clearTimeout(this.queryTimeout);
     this.queryTimeout = undefined;
     this._isScanning = false;
+    if (keepAlive) return;
     this.scanner?.removeAllListeners();
     this.scanner?.destroy();
     this.scanner = undefined;
@@ -252,6 +254,42 @@ export class MdnsScanner extends EventEmitter {
       this.log.info(`- id: ${hk}${name}${nf} host: ${zb}${host}${nf} port: ${zb}${port}${nf} gen: ${CYAN}${gen}${nf}`);
     }
     return this.discoveredDevices.size;
+  }
+
+  /**
+   * Saves the response packet to a file.
+   *
+   * @param {shellyId} shellyId - The ID of the Shelly device.
+   * @param {ResponsePacket} response - The response packet to be saved.
+   * @returns {Promise<void>} A promise that resolves when the response is successfully saved, or rejects with an error.
+   */
+  private async saveResponse(shellyId: string, response: ResponsePacket): Promise<void> {
+    const responseFile = path.join('jest-shelly', `${shellyId}.mdns.json`);
+    try {
+      await fs.mkdir('jest-shelly', { recursive: true });
+    } catch (err) {
+      //
+    }
+    try {
+      for (const a of response.answers) {
+        if (a.type === 'TXT') {
+          if (Buffer.isBuffer(a.data)) a.data = a.data.toString();
+          if (Array.isArray(a.data)) a.data = a.data.map((d) => (Buffer.isBuffer(d) ? d.toString() : d));
+        }
+      }
+      for (const a of response.additionals) {
+        if (a.type === 'TXT') {
+          if (Buffer.isBuffer(a.data)) a.data = a.data.toString();
+          if (Array.isArray(a.data)) a.data = a.data.map((d) => (Buffer.isBuffer(d) ? d.toString() : d));
+        }
+      }
+      await fs.writeFile(responseFile, JSON.stringify(response, null, 2), 'utf8');
+      this.log.debug(`Saved response file ${responseFile}`);
+      return Promise.resolve();
+    } catch (err) {
+      this.log.error(`Error saving response file ${responseFile}: ${err}`);
+      return Promise.reject(err);
+    }
   }
 }
 

@@ -1,0 +1,77 @@
+{
+  "id": 0,
+  "type": "response",
+  "flags": 1024,
+  "flag_qr": true,
+  "opcode": "QUERY",
+  "flag_aa": true,
+  "flag_tc": false,
+  "flag_rd": false,
+  "flag_ra": false,
+  "flag_z": false,
+  "flag_ad": false,
+  "flag_cd": false,
+  "rcode": "NOERROR",
+  "questions": [],
+  "answers": [
+    {
+      "name": "_http._tcp.local",
+      "type": "PTR",
+      "ttl": 4500,
+      "class": "IN",
+      "flush": false,
+      "data": "shellyrgbw2-EC64C9D3FFEF._http._tcp.local"
+    },
+    {
+      "name": "shellyrgbw2-EC64C9D3FFEF._http._tcp.local",
+      "type": "SRV",
+      "ttl": 120,
+      "class": "IN",
+      "flush": true,
+      "data": {
+        "priority": 0,
+        "weight": 0,
+        "port": 80,
+        "target": "shellyrgbw2-EC64C9D3FFEF.local"
+      }
+    },
+    {
+      "name": "shellyrgbw2-EC64C9D3FFEF._http._tcp.local",
+      "type": "TXT",
+      "ttl": 120,
+      "class": "IN",
+      "flush": true,
+      "data": [
+        "id=shellyrgbw2-EC64C9D3FFEF",
+        "arch=esp8266",
+        "app=rgbw2-color",
+        "fw_version=1.0",
+        "fw_id=20230913-113259/v1.14.0-gcb84623",
+        "discoverable=false"
+      ]
+    },
+    {
+      "name": "shellyrgbw2-EC64C9D3FFEF.local",
+      "type": "A",
+      "ttl": 120,
+      "class": "IN",
+      "flush": true,
+      "data": "192.168.1.226"
+    },
+    {
+      "name": "shellyrgbw2-EC64C9D3FFEF.local",
+      "type": "NSEC",
+      "ttl": 120,
+      "class": "IN",
+      "flush": true,
+      "data": {
+        "nextDomain": "shellyrgbw2-EC64C9D3FFEF.local",
+        "rrtypes": [
+          "A"
+        ]
+      }
+    }
+  ],
+  "authorities": [],
+  "additionals": []
+}
