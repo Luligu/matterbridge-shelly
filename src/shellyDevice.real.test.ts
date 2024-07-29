@@ -34,6 +34,11 @@ describe('Shellies', () => {
     //
   });
 
+  test('Create AnsiLogger and Shelly', () => {
+    expect(log).toBeDefined();
+    expect(shelly).toBeDefined();
+  });
+
   describe('new not existing ShellyDevice()', () => {
     test('Create a non existing device', async () => {
       const device = await ShellyDevice.create(shelly, log, '192.168.250.219');
