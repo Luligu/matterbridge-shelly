@@ -28,6 +28,7 @@ import EventEmitter from 'events';
 import { ShellyDevice } from './shellyDevice.js';
 import { DiscoveredDevice, MdnsScanner } from './mdnsScanner.js';
 import { CoapServer } from './coapServer.js';
+import { SocketType } from 'dgram';
 
 export class Shelly extends EventEmitter {
   private readonly _devices = new Map<string, ShellyDevice>();
@@ -132,8 +133,8 @@ export class Shelly extends EventEmitter {
     }
   }
 
-  startMdns(mdnsShutdownTimeout?: number, debug = false) {
-    this.mdnsScanner?.start(mdnsShutdownTimeout, undefined, debug);
+  startMdns(mdnsShutdownTimeout?: number, interfaceAddress?: string, type?: SocketType, debug = false) {
+    this.mdnsScanner?.start(mdnsShutdownTimeout, interfaceAddress, type, debug);
   }
 
   startCoap(coapStartTimeout?: number) {

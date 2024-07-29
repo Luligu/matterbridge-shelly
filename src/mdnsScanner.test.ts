@@ -16,8 +16,8 @@ describe('Shellies MdnsScanner test', () => {
   };
 
   beforeAll(() => {
-    consoleLogSpy = jest.spyOn(console, 'log').mockImplementation((...args: any[]) => {
-      // console.error(`Mocked console.log: ${args}`);
+    consoleLogSpy = jest.spyOn(console, 'log').mockImplementation((message?: any, ...optionalParams: any[]) => {
+      // console.error(`Mocked console.log: ${message}`, optionalParams);
     });
     mdns.on('discovered', discoveredDeviceListener);
   });
@@ -49,13 +49,13 @@ describe('Shellies MdnsScanner test', () => {
   });
 
   test('Start discover', (done) => {
-    mdns.start(3000, undefined, true);
+    mdns.start(5000, undefined, undefined, true);
     expect(mdns.isScanning).toBeTruthy();
     setTimeout(() => {
       mdns.stop();
       done();
       expect(mdns.isScanning).toBeFalsy();
-    }, 5000);
+    }, 7000);
   }, 10000);
 
   test('Log discovered', () => {

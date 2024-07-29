@@ -91,7 +91,7 @@ describe('Shellies test', () => {
   });
 
   test('Start mdnsdiscover', (done) => {
-    shellies.startMdns(60, false);
+    shellies.startMdns(60, undefined, undefined, false);
     setTimeout(() => {
       shellies.destroy();
       done();

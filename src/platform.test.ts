@@ -31,7 +31,12 @@ describe('ShellyPlatform', () => {
 
   beforeAll(() => {
     // Creates the mocks for Matterbridge, AnsiLogger, and PlatformConfig
-    mockMatterbridge = { addBridgedDevice: jest.fn(), matterbridgeDirectory: '', removeAllBridgedDevices: jest.fn() } as unknown as Matterbridge;
+    mockMatterbridge = {
+      addBridgedDevice: jest.fn(),
+      matterbridgeDirectory: '',
+      systemInformation: { ipv4Address: undefined },
+      removeAllBridgedDevices: jest.fn(),
+    } as unknown as Matterbridge;
     mockLog = {
       fatal: jest.fn((message) => {
         console.log(`Fatal: ${message}`);
