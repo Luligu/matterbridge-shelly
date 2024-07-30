@@ -89,7 +89,7 @@ export class MdnsScanner extends EventEmitter {
     // Create and initialize the mDNS scanner
     if (mdnsInterface && mdnsInterface !== '' && type && (type === 'udp4' || type === 'udp6')) {
       const mdnsOptions: mdns.Options = {};
-      mdnsOptions.interface = mdnsInterface;
+      // mdnsOptions.interface = mdnsInterface;
       mdnsOptions.type = type;
       mdnsOptions.ip = type === 'udp4' ? '224.0.0.251' : 'ff02::fb';
       mdnsOptions.port = 5353;
@@ -308,8 +308,8 @@ if (process.argv.includes('testMdnsScanner')) {
   const mdnsScanner = new MdnsScanner(LogLevel.DEBUG);
   // mdnsScanner.start(0, 'fd78:cbf8:4939:746:d555:85a9:74f6:9c6', 'udp6', true);
   // mdnsScanner.start(0, undefined, 'udp4', true);
-  mdnsScanner.start(0, '192.168.1.189', 'udp4', true);
-  // mdnsScanner.start(0, undefined, undefined, true);
+  // mdnsScanner.start(0, '192.168.1.189', 'udp4', true);
+  mdnsScanner.start(0, undefined, undefined, true);
   // mdnsScanner.start(0, 'WiFi', 'udp4', true);
 
   process.on('SIGINT', async function () {
