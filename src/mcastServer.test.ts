@@ -13,7 +13,7 @@ describe('Muticast server and client test', () => {
     consoleLogSpy = jest.spyOn(console, 'log').mockImplementation((message?: any, ...optionalParams: any[]) => {
       // console.error(`Mocked console.log: ${message}`, optionalParams);
     });
-    consoleLogSpy.mockRestore();
+    // consoleLogSpy.mockRestore();
   });
 
   beforeEach(() => {
@@ -26,7 +26,6 @@ describe('Muticast server and client test', () => {
 
   afterAll(() => {
     consoleLogSpy.mockRestore();
-    //
   });
 
   test('Create the Multicast class', () => {

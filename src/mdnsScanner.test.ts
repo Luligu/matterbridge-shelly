@@ -7,6 +7,7 @@ import { jest } from '@jest/globals';
 import path from 'path';
 import { readFileSync } from 'fs';
 import { ResponsePacket } from 'multicast-dns';
+import { getIpv4InterfaceAddress } from 'matterbridge/utils';
 
 async function loadResponse(shellyId: string) {
   const responseFile = path.join('src', 'mock', `${shellyId}.mdns.json`);
@@ -50,6 +51,7 @@ describe('Shellies MdnsScanner test', () => {
   afterAll(() => {
     mdns.stop();
     mdns.off('discovered', discoveredDeviceListener);
+    consoleLogSpy.mockRestore();
   });
 
   test('Constructor', () => {
@@ -65,6 +67,17 @@ describe('Shellies MdnsScanner test', () => {
 
   test('Start discover', (done) => {
     mdns.start(3000, undefined, undefined, true);
+    expect(mdns.isScanning).toBeTruthy();
+    setTimeout(() => {
+      mdns.stop();
+      done();
+      expect(mdns.isScanning).toBeFalsy();
+      // expect(discoveredDeviceListener).toHaveBeenCalled();
+    }, 4000);
+  }, 10000);
+
+  test('Start discover with interface', (done) => {
+    mdns.start(3000, getIpv4InterfaceAddress(), 'udp4', true);
     expect(mdns.isScanning).toBeTruthy();
     setTimeout(() => {
       mdns.stop();
