@@ -22,11 +22,7 @@ class MdnsScanner {
     this.socket.on('message', this.onMessage);
     this.socket.on('error', this.onError);
 
-    this.socket.bind(this.multicastPort, () => {
-      if (this.networkInterfaceAddress) {
-        this.socket.setMulticastInterface(this.networkInterfaceAddress);
-      }
-    });
+    this.socket.bind(this.multicastPort);
   }
 
   private getInterfaceAddress(iface?: string): string | undefined {
@@ -50,6 +46,9 @@ class MdnsScanner {
 
   private onListening = () => {
     console.log('Socket is listening');
+    if (this.networkInterfaceAddress) {
+      this.socket.setMulticastInterface(this.networkInterfaceAddress);
+    }
     this.socket.addMembership(this.multicastAddress, this.networkInterfaceAddress);
   };
 
