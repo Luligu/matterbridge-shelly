@@ -27,6 +27,7 @@ import EventEmitter from 'events';
 import { RemoteInfo, SocketType } from 'dgram';
 import { promises as fs } from 'fs';
 import path from 'path';
+import { getIpv4InterfaceAddress } from 'matterbridge/utils';
 
 export interface DiscoveredDevice {
   id: string;
@@ -309,8 +310,8 @@ if (process.argv.includes('testMdnsScanner')) {
   // mdnsScanner.start(0, 'fd78:cbf8:4939:746:d555:85a9:74f6:9c6', 'udp6', true);
   // mdnsScanner.start(0, undefined, 'udp4', true);
   // mdnsScanner.start(0, '192.168.1.189', 'udp4', true);
-  mdnsScanner.start(0, undefined, undefined, true);
-  // mdnsScanner.start(0, 'WiFi', 'udp4', true);
+  // mdnsScanner.start(0, undefined, undefined, true);
+  mdnsScanner.start(0, getIpv4InterfaceAddress(), 'udp4', true);
 
   process.on('SIGINT', async function () {
     mdnsScanner.stop();
