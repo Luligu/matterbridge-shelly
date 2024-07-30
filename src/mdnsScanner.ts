@@ -59,7 +59,7 @@ export class MdnsScanner extends EventEmitter {
    *
    * @returns {boolean} A boolean value indicating whether the MdnsScanner is scanning.
    */
-  get isScanning() {
+  get isScanning(): boolean {
     return this._isScanning;
   }
 
@@ -82,19 +82,25 @@ export class MdnsScanner extends EventEmitter {
    * @param {SocketType} type - Explicitly specify a socket type: "udp4" | "udp6". Default is "udp4".
    * @param {boolean} debug - Indicates whether to enable debug mode (default: false).
    */
-  start(shutdownTimeout?: number, interfaceAddress?: string, type?: SocketType, debug = false) {
+  start(shutdownTimeout?: number, mdnsInterface?: string, type?: SocketType, debug = false) {
     this.log.debug('Starting mDNS query service for shelly devices...');
     this._isScanning = true;
 
     // Create and initialize the mDNS scanner
-    const mdnsOptions: mdns.Options = {};
-    if (interfaceAddress && interfaceAddress !== '' && type && (type === 'udp4' || type === 'udp6')) {
-      mdnsOptions.interface = interfaceAddress;
+    if (mdnsInterface && mdnsInterface !== '' && type && (type === 'udp4' || type === 'udp6')) {
+      const mdnsOptions: mdns.Options = {};
+      mdnsOptions.interface = mdnsInterface;
       mdnsOptions.type = type;
       mdnsOptions.ip = type === 'udp4' ? '224.0.0.251' : 'ff02::fb';
-      this.log.debug(`Starting mDNS query service for shelly devices with interface ${mdnsOptions.interface} type ${mdnsOptions.type} ip ${mdnsOptions.ip}...`);
-    }
-    this.scanner = mdns(mdnsOptions);
+      mdnsOptions.port = 5353;
+      mdnsOptions.multicast = true;
+      mdnsOptions.bind = mdnsInterface;
+      mdnsOptions.reuseAddr = true;
+      this.log.debug(
+        `Starting mDNS query service for shelly devices with interface ${mdnsOptions.interface} bind ${mdnsOptions.bind} type ${mdnsOptions.type} ip ${mdnsOptions.ip}...`,
+      );
+      this.scanner = mdns(mdnsOptions);
+    } else this.scanner = mdns();
 
     this.scanner.on('response', async (response: ResponsePacket, rinfo: RemoteInfo) => {
       let port = 0;
@@ -294,12 +300,17 @@ export class MdnsScanner extends EventEmitter {
 }
 
 // Use with: node dist/mdnsScanner.js testMdnsScanner
+// Additional debug logging
+// const ipConfigCommand = isWindows ? 'ipconfig' : 'ip a';
+// const multicastCommand = isWindows ? 'netsh interface ipv4 show joins' : 'ip maddr show';
+
 if (process.argv.includes('testMdnsScanner')) {
   const mdnsScanner = new MdnsScanner(LogLevel.DEBUG);
   // mdnsScanner.start(0, 'fd78:cbf8:4939:746:d555:85a9:74f6:9c6', 'udp6', true);
   // mdnsScanner.start(0, undefined, 'udp4', true);
-  // mdnsScanner.start(0, '192.168.1.189', 'udp4', true);
-  mdnsScanner.start(0, undefined, undefined, true);
+  mdnsScanner.start(0, '192.168.1.189', 'udp4', true);
+  // mdnsScanner.start(0, undefined, undefined, true);
+  // mdnsScanner.start(0, 'WiFi', 'udp4', true);
 
   process.on('SIGINT', async function () {
     mdnsScanner.stop();

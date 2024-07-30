@@ -93,6 +93,7 @@ describe('Shellies MdnsScanner test', () => {
       done();
     }, 4000);
   }, 10000);
+  */
 
   test('Shelly gen 1', (done) => {
     discoveredDeviceListener.mockClear();
@@ -135,7 +136,6 @@ describe('Shellies MdnsScanner test', () => {
     (mdns as any).discoveredDevices.clear();
     (mdns as any).scanner.emit('response', gen3_ResponsePacket, gen3_RemoteInfo);
   }, 10000);
-  */
 
   test('Log discovered', () => {
     const size = mdns.logPeripheral();

@@ -474,7 +474,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
 
     // start Shelly mDNS device discoverer
     if (this.config.enableMdnsDiscover === true) {
-      this.shelly.startMdns(10 * 60 * 1000, this.matterbridge.systemInformation.ipv4Address, 'udp4', this.config.debugMdns as boolean);
+      this.shelly.startMdns(10 * 60 * 1000, this.config.mdnsInterface as string, 'udp4', this.config.debugMdns as boolean);
     }
 
     // add all stored devices

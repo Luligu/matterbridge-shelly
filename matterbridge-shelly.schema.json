@@ -109,6 +109,15 @@
       "type": "boolean",
       "default": false
     },
+    "debugCoap": {
+      "description": "Enable the debug for the shelly coapServer (development only)",
+      "type": "boolean",
+      "default": false
+    },
+    "mdnsInterface": {
+      "description": "Mdns scanner interface (development only)",
+      "type": "string"
+    },
     "unregisterOnShutdown": {
       "description": "Unregister all devices on shutdown (development only)",
       "type": "boolean",
