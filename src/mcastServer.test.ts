@@ -38,6 +38,7 @@ describe('Muticast server and client test', () => {
     function boundCallback() {
       try {
         expect(mcast?.dgramServerBound).toBeTruthy();
+        done();
       } catch (error) {
         done(error);
       }

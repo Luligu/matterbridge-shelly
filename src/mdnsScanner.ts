@@ -21,13 +21,13 @@
  * limitations under the License. *
  */
 
-import { AnsiLogger, BLUE, CYAN, LogLevel, MAGENTA, TimestampFormat, db, debugStringify, hk, idn, nf, rs, zb } from 'matterbridge/logger';
+import { AnsiLogger, BLUE, CYAN, LogLevel, TimestampFormat, db, debugStringify, hk, idn, ign, nf, rs, zb } from 'matterbridge/logger';
 import mdns, { ResponsePacket } from 'multicast-dns';
 import EventEmitter from 'events';
 import { RemoteInfo, SocketType } from 'dgram';
 import { promises as fs } from 'fs';
 import path from 'path';
-import { getIpv4InterfaceAddress } from 'matterbridge/utils';
+// import { getIpv4InterfaceAddress } from 'matterbridge/utils';
 
 export interface DiscoveredDevice {
   id: string;
@@ -90,12 +90,11 @@ export class MdnsScanner extends EventEmitter {
     // Create and initialize the mDNS scanner
     if (mdnsInterface && mdnsInterface !== '' && type && (type === 'udp4' || type === 'udp6')) {
       const mdnsOptions: mdns.Options = {};
-      // mdnsOptions.interface = mdnsInterface;
+      mdnsOptions.interface = mdnsInterface;
       mdnsOptions.type = type;
       mdnsOptions.ip = type === 'udp4' ? '224.0.0.251' : 'ff02::fb';
       mdnsOptions.port = 5353;
       mdnsOptions.multicast = true;
-      mdnsOptions.bind = mdnsInterface;
       mdnsOptions.reuseAddr = true;
       this.log.debug(
         `Starting mDNS query service for shelly devices with interface ${mdnsOptions.interface} bind ${mdnsOptions.bind} type ${mdnsOptions.type} ip ${mdnsOptions.ip}...`,
@@ -106,8 +105,8 @@ export class MdnsScanner extends EventEmitter {
     this.scanner.on('response', async (response: ResponsePacket, rinfo: RemoteInfo) => {
       let port = 0;
       let gen = 1;
-      if (debug) this.log.debug(`***--- response from ${MAGENTA}${rinfo.address} ${rinfo.family} ${rinfo.port} ${rinfo.size}${db} ---`);
-      if (debug) this.log.debug(`*--- response.answers ---`);
+      if (debug) this.log.debug(`Mdns response from ${ign} ${rinfo.address} ${rinfo.family} ${rinfo.port} ${db}`);
+      if (debug) this.log.debug(`--- response.answers ---`);
       for (const a of response.answers) {
         if (debug && a.type === 'PTR') {
           this.log.debug(`[${idn}${a.type}${rs}${db}] Name: ${CYAN}${a.name}${db} data: ${typeof a.data === 'string' ? a.data : debugStringify(a.data)}`);
@@ -121,6 +120,9 @@ export class MdnsScanner extends EventEmitter {
           this.log.debug(
             `[${idn}${a.type}${rs}${db}] Name: ${CYAN}${a.name}${db} target: ${a.data.target} port: ${a.data.port} priority: ${a.data.priority} weight: ${a.data.weight}`,
           );
+        }
+        if (debug && a.type === 'NSEC') {
+          this.log.debug(`[${idn}${a.type}${rs}${db}] Name: ${CYAN}${a.name}${db} data: ${typeof a.data === 'string' ? a.data : debugStringify(a.data)}`);
         }
         if (debug && a.type === 'A') {
           this.log.debug(`[${idn}${a.type}${rs}${db}] Name: ${CYAN}${a.name}${db} data: ${typeof a.data === 'string' ? a.data : debugStringify(a.data)}`);
@@ -157,7 +159,7 @@ export class MdnsScanner extends EventEmitter {
           }
         }
       }
-      if (debug) this.log.debug(`*--- response.additionals ---`);
+      if (debug) this.log.debug(`--- response.additionals ---`);
       for (const a of response.additionals) {
         if (debug && a.type === 'PTR') {
           this.log.debug(`[${idn}${a.type}${rs}${db}] Name: ${CYAN}${a.name}${db} data: ${typeof a.data === 'string' ? a.data : debugStringify(a.data)}`);
@@ -171,6 +173,9 @@ export class MdnsScanner extends EventEmitter {
           this.log.debug(
             `[${idn}${a.type}${rs}${db}] Name: ${CYAN}${a.name}${db} target: ${a.data.target} port: ${a.data.port} priority: ${a.data.priority} weight: ${a.data.weight}`,
           );
+        }
+        if (debug && a.type === 'NSEC') {
+          this.log.debug(`[${idn}${a.type}${rs}${db}] Name: ${CYAN}${a.name}${db} data: ${typeof a.data === 'string' ? a.data : debugStringify(a.data)}`);
         }
         if (debug && a.type === 'A') {
           this.log.debug(`[${idn}${a.type}${rs}${db}] Name: ${CYAN}${a.name}${db} data: ${typeof a.data === 'string' ? a.data : debugStringify(a.data)}`);
@@ -201,7 +206,7 @@ export class MdnsScanner extends EventEmitter {
           }
         }
       }
-      if (debug) this.log.debug(`--- end ---\n\n`);
+      if (debug) this.log.debug(`--- end ---\n`);
     });
 
     this.scanner.on('error', async (err: Error) => {
@@ -304,16 +309,17 @@ export class MdnsScanner extends EventEmitter {
 // Additional debug logging
 // const ipConfigCommand = isWindows ? 'ipconfig' : 'ip a';
 // const multicastCommand = isWindows ? 'netsh interface ipv4 show joins' : 'ip maddr show';
-
+/*
 if (process.argv.includes('testMdnsScanner')) {
   const mdnsScanner = new MdnsScanner(LogLevel.DEBUG);
   // mdnsScanner.start(0, 'fd78:cbf8:4939:746:d555:85a9:74f6:9c6', 'udp6', true);
   // mdnsScanner.start(0, undefined, 'udp4', true);
   // mdnsScanner.start(0, '192.168.1.189', 'udp4', true);
-  // mdnsScanner.start(0, undefined, undefined, true);
   mdnsScanner.start(0, getIpv4InterfaceAddress(), 'udp4', true);
+  // mdnsScanner.start(0, undefined, undefined, true);
 
   process.on('SIGINT', async function () {
     mdnsScanner.stop();
   });
 }
+*/
