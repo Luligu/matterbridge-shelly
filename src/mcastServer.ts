@@ -71,12 +71,12 @@ export class Multicast {
       }
       const address = this.dgramServer.address();
       this.log.info(`Dgram multicast server listening on ${address.family} ${address.address}:${address.port}`);
-      this.dgramServer.addMembership(MULTICAST_ADDRESS, INTERFACE);
-      this.log.info(`Dgram multicast server joined multicast group: ${MULTICAST_ADDRESS} with interface: ${INTERFACE} on port: ${MULTICAST_PORT}`);
       this.dgramServer.setBroadcast(true);
       this.log.info(`Dgram multicast server broadcast enabled`);
       this.dgramServer.setMulticastTTL(128);
       this.log.info(`Dgram multicast server multicast TTL set to 128`);
+      this.dgramServer.addMembership(MULTICAST_ADDRESS, INTERFACE);
+      this.log.info(`Dgram multicast server joined multicast group: ${MULTICAST_ADDRESS} with interface ${INTERFACE}`);
       this.dgramServerBound = true;
       if (boundCallback) boundCallback();
     });
@@ -118,6 +118,8 @@ export class Multicast {
         this.log.error('Dgram multicast client error binding for multicast messages...');
         return;
       }
+      const address = this.dgramClient.address();
+      this.log.info(`Dgram multicast client listening on ${address.family} ${address.address}:${address.port}`);
       this.dgramClient?.setBroadcast(true);
       this.log.info(`Dgram multicast client broadcast enabled`);
       this.dgramClient?.setMulticastTTL(128);
@@ -125,7 +127,6 @@ export class Multicast {
       this.dgramClient?.addMembership(MULTICAST_ADDRESS, INTERFACE);
       this.log.info(`Dgram multicast client joined multicast group: ${MULTICAST_ADDRESS} with interface: ${INTERFACE}`);
       this.dgramClientBound = true;
-      this.log.info(`Dgram multicast client bound on multicast group: ${MULTICAST_ADDRESS} with interface: ${INTERFACE}`);
       if (boundCallback) boundCallback();
 
       this.clientTimeout = setInterval(() => {
