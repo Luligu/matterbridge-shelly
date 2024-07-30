@@ -14,6 +14,7 @@ class MdnsScanner {
 
   constructor(options: MdnsScannerOptions = {}) {
     this.networkInterfaceAddress = options.interface ? this.getInterfaceAddress(options.interface) : undefined;
+    console.log(`Using network interface address: ${this.networkInterfaceAddress}`);
 
     this.socket = dgram.createSocket({ type: 'udp4', reuseAddr: true });
 
