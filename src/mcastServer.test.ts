@@ -13,6 +13,7 @@ describe('Muticast server and client test', () => {
     consoleLogSpy = jest.spyOn(console, 'log').mockImplementation((message?: any, ...optionalParams: any[]) => {
       // console.error(`Mocked console.log: ${message}`, optionalParams);
     });
+    consoleLogSpy.mockRestore();
   });
 
   beforeEach(() => {
@@ -56,9 +57,10 @@ describe('Muticast server and client test', () => {
 
   // eslint-disable-next-line jest/no-done-callback
   test('Use dgram client', (done) => {
-    function boundCallback() {
+    async function boundCallback() {
       try {
         expect(mcast?.dgramClientBound).toBeTruthy();
+        await wait(2000);
         done();
       } catch (error) {
         done(error);

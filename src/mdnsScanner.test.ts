@@ -57,6 +57,12 @@ describe('Shellies MdnsScanner test', () => {
     expect(mdns.isScanning).toBeFalsy();
   });
 
+  test('Save response', async () => {
+    expect(mdns).not.toBeUndefined();
+    expect(mdns.isScanning).toBeFalsy();
+    await (mdns as any).saveResponse('shellyswitch25-3494546BBF7E', gen1_ResponsePacket);
+  });
+
   test('Start discover', (done) => {
     mdns.start(3000, undefined, undefined, true);
     expect(mdns.isScanning).toBeTruthy();
@@ -144,20 +150,20 @@ describe('Shellies MdnsScanner test', () => {
   });
 });
 
-const gen1_ResponsePacket = {
+const gen1_ResponsePacket: ResponsePacket = {
   id: 0,
   type: 'response',
   flags: 1024,
-  flag_qr: true,
-  opcode: 'QUERY',
-  flag_aa: true,
-  flag_tc: false,
-  flag_rd: false,
-  flag_ra: false,
-  flag_z: false,
-  flag_ad: false,
-  flag_cd: false,
-  rcode: 'NOERROR',
+  // flag_qr: true,
+  // opcode: 'QUERY',
+  // flag_aa: true,
+  // flag_tc: false,
+  // flag_rd: false,
+  // flag_ra: false,
+  // flag_z: false,
+  // flag_ad: false,
+  // flag_cd: false,
+  // rcode: 'NOERROR',
   questions: [],
   answers: [
     {
@@ -203,7 +209,7 @@ const gen1_ResponsePacket = {
       ttl: 120,
       class: 'IN',
       flush: true,
-      data: {},
+      data: { nextDomain: 'shellyswitch25-3494546BBF7E.local', rrtypes: ['A'] },
     },
   ],
   authorities: [],
