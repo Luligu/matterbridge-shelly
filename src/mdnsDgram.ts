@@ -10,6 +10,8 @@ class MdnsScanner {
   private socket: dgram.Socket;
   private multicastAddress = '224.0.0.251';
   private multicastPort = 5353;
+  // private multicastAddress = '224.0.1.187';
+  // private multicastPort = 5683;
   private networkInterfaceAddress: string | undefined;
 
   constructor(options: MdnsScannerOptions = {}) {
@@ -26,20 +28,20 @@ class MdnsScanner {
     this.socket.bind(this.multicastPort);
   }
 
-  private getInterfaceAddress(iface?: string): string | undefined {
-    if (!iface) return undefined;
+  private getInterfaceAddress(networkInterface?: string): string | undefined {
+    if (!networkInterface) return undefined;
 
     const interfaces = os.networkInterfaces();
-    const addresses = interfaces[iface];
+    const addresses = interfaces[networkInterface];
 
     if (!addresses) {
-      throw new Error(`Interface ${iface} not found`);
+      throw new Error(`Interface ${networkInterface} not found`);
     }
 
-    const ipv4Address = addresses.find((addr) => addr.family === 'IPv4');
+    const ipv4Address = addresses.find((addr) => addr.family === 'IPv4' && !addr.internal);
 
     if (!ipv4Address) {
-      throw new Error(`Interface ${iface} does not have an IPv4 address`);
+      throw new Error(`Interface ${networkInterface} does not have an external IPv4 address`);
     }
 
     return ipv4Address.address;
@@ -52,7 +54,7 @@ class MdnsScanner {
     }
     this.socket.addMembership(this.multicastAddress, this.networkInterfaceAddress);
     const address = this.socket.address();
-    console.log(`Socket listening on ${address.family} ${address.address}:${address.port}`);
+    console.log(`Socket is listening on ${address.family} ${address.address}:${address.port}`);
   };
 
   private onMessage = (msg: Buffer, rinfo: dgram.RemoteInfo) => {
@@ -126,7 +128,7 @@ class MdnsScanner {
     for (const [name, addresses] of Object.entries(interfaces)) {
       if (!addresses) continue;
       for (const address of addresses) {
-        console.log(`Interface: ${name} - Address: ${address.address}`);
+        console.log(`Interface: ${name} - Address: ${address.address} type: ${address.family} ${address.internal ? 'internal' : 'external'}`);
       }
     }
   };

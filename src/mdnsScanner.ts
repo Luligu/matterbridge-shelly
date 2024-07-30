@@ -152,7 +152,7 @@ export class MdnsScanner extends EventEmitter {
           const [name, mac] = a.name.replace('.local', '').split('-');
           const deviceId = name.toLowerCase() + '-' + mac.toUpperCase();
           if (!this.discoveredDevices.has(deviceId)) {
-            this.log.info(`MdnsScanner discovered shelly gen: ${CYAN}${gen}${nf} device id: ${hk}${deviceId}${nf} host: ${zb}${a.data}${nf} port: ${zb}${port}${nf}`);
+            this.log.debug(`MdnsScanner discovered shelly gen: ${CYAN}${gen}${nf} device id: ${hk}${deviceId}${nf} host: ${zb}${a.data}${nf} port: ${zb}${port}${nf}`);
             this.discoveredDevices.set(deviceId, { id: deviceId, host: a.data, port, gen });
             this.emit('discovered', { id: deviceId, host: a.data, port, gen });
             if (process.argv.includes('testMdnsScanner')) await this.saveResponse(deviceId, response);
@@ -199,7 +199,7 @@ export class MdnsScanner extends EventEmitter {
           const [name, mac] = a.name.replace('.local', '').split('-');
           const deviceId = name.toLowerCase() + '-' + mac.toUpperCase();
           if (!this.discoveredDevices.has(deviceId)) {
-            this.log.info(`MdnsScanner discovered shelly gen: ${CYAN}${gen}${nf} device id: ${hk}${deviceId}${nf} host: ${zb}${a.data}${nf} port: ${zb}${port}${nf}`);
+            this.log.debug(`MdnsScanner discovered shelly gen: ${CYAN}${gen}${nf} device id: ${hk}${deviceId}${nf} host: ${zb}${a.data}${nf} port: ${zb}${port}${nf}`);
             this.discoveredDevices.set(deviceId, { id: deviceId, host: a.data, port, gen });
             this.emit('discovered', { id: deviceId, host: a.data, port, gen });
             if (process.argv.includes('testMdnsScanner')) await this.saveResponse(deviceId, response);

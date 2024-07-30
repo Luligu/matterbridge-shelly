@@ -104,6 +104,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     log.debug(`- resetStorageDiscover: ${CYAN}${config.resetStorageDiscover}`);
     log.debug(`- debug: ${CYAN}${config.debug}`);
     log.debug(`- debugMdns: ${CYAN}${config.debugMdns}`);
+    log.debug(`- debugCoap: ${CYAN}${config.debugCoap}`);
     log.debug(`- unregisterOnShutdown: ${CYAN}${config.unregisterOnShutdown}`);
 
     this.shelly = new Shelly(log, this.username, this.password);
