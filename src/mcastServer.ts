@@ -42,6 +42,10 @@ export class Multicast {
     const MULTICAST_ADDRESS = '224.0.1.187';
     const MULTICAST_PORT = 5683;
     const INTERFACE = getIpv4InterfaceAddress();
+    if (!INTERFACE) {
+      this.log.error('No ipv4 interface address found for multicast');
+      return;
+    }
 
     this.dgramServer = dgram.createSocket({ type: 'udp4', reuseAddr: true });
 
@@ -75,6 +79,8 @@ export class Multicast {
       this.log.info(`Dgram multicast server broadcast enabled`);
       this.dgramServer.setMulticastTTL(128);
       this.log.info(`Dgram multicast server multicast TTL set to 128`);
+      this.dgramServer.setMulticastInterface(INTERFACE);
+      this.log.info(`Dgram multicast server multicastInterface set to ${INTERFACE}`);
       this.dgramServer.addMembership(MULTICAST_ADDRESS, INTERFACE);
       this.log.info(`Dgram multicast server joined multicast group: ${MULTICAST_ADDRESS} with interface ${INTERFACE}`);
       this.dgramServerBound = true;
@@ -89,6 +95,10 @@ export class Multicast {
     const MULTICAST_ADDRESS = '224.0.1.187';
     const MULTICAST_PORT = 5683;
     const INTERFACE = getIpv4InterfaceAddress();
+    if (!INTERFACE) {
+      this.log.error('No ipv4 interface address found for multicast');
+      return;
+    }
 
     const message = Buffer.from('Test multicast message');
 
@@ -124,6 +134,8 @@ export class Multicast {
       this.log.info(`Dgram multicast client broadcast enabled`);
       this.dgramClient?.setMulticastTTL(128);
       this.log.info(`Dgram multicast client multicast TTL set to 128`);
+      this.dgramClient.setMulticastInterface(INTERFACE);
+      this.log.info(`Dgram multicast server multicastInterface set to ${INTERFACE}`);
       this.dgramClient?.addMembership(MULTICAST_ADDRESS, INTERFACE);
       this.log.info(`Dgram multicast client joined multicast group: ${MULTICAST_ADDRESS} with interface: ${INTERFACE}`);
       this.dgramClientBound = true;
@@ -161,7 +173,6 @@ export class Multicast {
 }
 
 // Use with: node dist/mcastServer.js testMulticastServer testMulticastClient
-/*
 if (process.argv.includes('testMulticastServer') || process.argv.includes('testMulticastClient')) {
   const mcast = new Multicast();
 
@@ -173,4 +184,3 @@ if (process.argv.includes('testMulticastServer') || process.argv.includes('testM
     mcast.stop();
   });
 }
-*/
