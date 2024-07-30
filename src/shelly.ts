@@ -38,14 +38,16 @@ export class Shelly extends EventEmitter {
   private coapServerTimeout?: NodeJS.Timeout;
   public username: string | undefined;
   public password: string | undefined;
+  private debugMdns = false;
+  private debugCoap = false;
 
   constructor(log: AnsiLogger, username?: string, password?: string) {
     super();
     this.log = log;
     this.username = username;
     this.password = password;
-    this.mdnsScanner = new MdnsScanner(this.log.logLevel);
-    this.coapServer = new CoapServer(this.log.logLevel);
+    this.mdnsScanner = new MdnsScanner();
+    this.coapServer = new CoapServer();
 
     this.mdnsScanner.on('discovered', async (device: DiscoveredDevice) => {
       this.log.info(`Discovered shelly gen ${CYAN}${device.gen}${nf} device id ${hk}${device.id}${nf} host ${zb}${device.host}${nf} port ${zb}${device.port}${nf} `);
@@ -147,10 +149,12 @@ export class Shelly extends EventEmitter {
     }
   }
 
-  setLogLevel(level: LogLevel) {
+  setLogLevel(level: LogLevel, debugMdns: boolean, debugCoap: boolean) {
     this.log.logLevel = level;
-    if (this.mdnsScanner) this.mdnsScanner.log.logLevel = level;
-    if (this.coapServer) this.coapServer.log.logLevel = level;
+    this.debugMdns = debugMdns;
+    this.debugCoap = debugCoap;
+    if (this.mdnsScanner) this.mdnsScanner.log.logLevel = debugMdns ? LogLevel.DEBUG : LogLevel.INFO;
+    if (this.coapServer) this.coapServer.log.logLevel = debugCoap ? LogLevel.DEBUG : LogLevel.INFO;
     this.devices.forEach((device) => {
       device.setLogLevel(level);
     });

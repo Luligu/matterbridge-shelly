@@ -291,7 +291,7 @@ export class ShellyComponent extends EventEmitter {
    * @returns The number of the properties.
    */
   logComponent() {
-    this.device.log.debug(`Component ${GREEN}${this.id}${db} (${BLUE}${this.name}${db})`);
+    this.device.log.debug(`Component ${GREEN}${this.id}${db} (${BLUE}${this.name}${db}) has the following ${this._properties.size} properties:`);
     for (const [key, property] of this) {
       this.device.log.debug(`- ${key}: ${property.value && typeof property.value === 'object' ? debugStringify(property.value) : property.value}`);
     }

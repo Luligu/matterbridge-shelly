@@ -6,8 +6,9 @@ import { Shelly } from './shelly.js';
 import { ShellyComponent } from './shellyComponent.js';
 import path from 'path';
 import { jest } from '@jest/globals';
+import { LogLevel } from 'node-ansi-logger';
 
-describe('Shellies', () => {
+describe('Shelly devices test', () => {
   let consoleLogSpy: jest.SpiedFunction<typeof console.log>;
 
   const log = new AnsiLogger({ logName: 'shellyDeviceTest', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: false });
@@ -31,7 +32,7 @@ describe('Shellies', () => {
     //
   });
 
-  describe('new gen 1 shellydimmer2', () => {
+  describe('Test gen 1 shellydimmer2', () => {
     let device: ShellyDevice | undefined = undefined;
 
     beforeEach(async () => {
@@ -68,7 +69,7 @@ describe('Shellies', () => {
       if (!device) return;
       const components = device.components;
       expect(components).toBeDefined();
-      expect(components?.length).toBe(10);
+      expect(components?.length).toBe(12);
     });
 
     test('Create a gen 1 device with components WiFi', async () => {
@@ -133,7 +134,7 @@ describe('Shellies', () => {
     });
   });
 
-  describe('new gen 2 shellyplus2pm roller mode', () => {
+  describe('Test gen 2 shellyplus2pm roller mode', () => {
     let device: ShellyDevice | undefined = undefined;
 
     beforeEach(async () => {
@@ -185,7 +186,7 @@ describe('Shellies', () => {
     });
   });
 
-  describe('new gen 2 shellyplus2pm switch mode', () => {
+  describe('Test gen 2 shellyplus2pm switch mode', () => {
     let device: ShellyDevice | undefined = undefined;
 
     beforeEach(async () => {
@@ -233,25 +234,28 @@ describe('Shellies', () => {
     });
   });
 
-  describe('new gen 2 shellyplus1pm', () => {
-    test('Create a gen 2 device', async () => {
+  describe('Test gen 2 shellyplus1pm', () => {
+    test('Create a gen 2 shellyplus1pm device', async () => {
       const device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shellyplus1pm-441793d69718.json'));
       expect(device).not.toBeUndefined();
+      if (!device) return;
       expect(device?.host).toBe(path.join('src', 'mock', 'shellyplus1pm-441793d69718.json'));
       expect(device?.model).toBe('SNSW-001P16EU');
       expect(device?.id).toBe('shellyplus1pm-441793D69718');
       expect(device?.firmware).toBe('1.3.2-g34c651b');
       expect(device?.auth).toBe(false);
       expect(device?.gen).toBe(2);
+      expect(device.sleepMode).toBe(false);
       if (device) device.destroy();
       expect(device?.lastseen).toBe(0);
     });
   });
 
-  describe('new gen 3 shellypmminig3', () => {
-    test('Create a gen 2 device', async () => {
+  describe('Test gen 3 shellypmminig3', () => {
+    test('Create a gen 2 shellypmminig3 device', async () => {
       const device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shellypmminig3-84fce63957f4.json'));
       expect(device).not.toBeUndefined();
+      if (!device) return;
       expect(device?.host).toBe(path.join('src', 'mock', 'shellypmminig3-84fce63957f4.json'));
       expect(device?.model).toBe('S3PM-001PCEU16');
       expect(device?.id).toBe('shellypmminig3-84FCE63957F4');
@@ -263,10 +267,11 @@ describe('Shellies', () => {
     });
   });
 
-  describe('new gen 3 shelly1minig3', () => {
-    test('Create a gen 2 device', async () => {
+  describe('Test gen 3 shelly1minig3', () => {
+    test('Create a gen 2 shelly1minig3 device', async () => {
       const device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shelly1minig3-543204547478.json'));
       expect(device).not.toBeUndefined();
+      if (!device) return;
       expect(device?.host).toBe(path.join('src', 'mock', 'shelly1minig3-543204547478.json'));
       expect(device?.model).toBe('S3SW-001X8EU');
       expect(device?.id).toBe('shelly1minig3-543204547478');
@@ -274,8 +279,74 @@ describe('Shellies', () => {
       expect(device?.auth).toBe(true);
       expect(device?.gen).toBe(3);
       expect(device?.lastseen).not.toBe(0);
+      expect(device.online).toBe(true);
+      expect(device.sleepMode).toBe(false);
       device?.fetchUpdate();
       if (device) device.destroy();
+    });
+  });
+
+  describe('Test gen 1 shellybutton1', () => {
+    test('Create a gen 1 shellybutton1 device', async () => {
+      const device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shellybutton1-485519F31EA3.json'));
+      expect(device).not.toBeUndefined();
+      if (!device) return;
+      expect(device.profile).toBe(undefined);
+      expect(device.sleepMode).toBe(true);
+      expect(device.host).toBe(path.join('src', 'mock', 'shellybutton1-485519F31EA3.json'));
+      expect(device.model).toBe('SHBTN-2');
+      expect(device.id).toBe('shellybutton1-485519F31EA3');
+      expect(device.firmware).toBe('v1.14.0-gcb84623');
+      expect(device.auth).toBe(false);
+      expect(device.gen).toBe(1);
+      expect(device.mac).toBe('485519F31EA3');
+      expect(device.name).toBe('My Shelly button1');
+      expect(device.hasUpdate).toBe(false);
+      expect(device.lastseen).not.toBe(0);
+      expect(device.online).toBe(true);
+      expect(device.fetchUpdate()).not.toBeNull();
+      if (device) device.destroy();
+    });
+
+    test('Create a gen 1 shellybutton1 device all components', async () => {
+      const device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shellybutton1-485519F31EA3.json'));
+      expect(device).not.toBeUndefined();
+      if (!device) return;
+      expect(device.components.length).toBe(8);
+
+      const coiot = device.getComponent('coiot');
+      expect(coiot).not.toBeUndefined();
+      expect(coiot?.getValue('enabled')).toBe(true);
+      const cloud = device.getComponent('cloud');
+      expect(cloud).not.toBeUndefined();
+      expect(cloud?.getValue('enabled')).toBe(true);
+      const mqtt = device.getComponent('mqtt');
+      expect(mqtt).not.toBeUndefined();
+      expect(mqtt?.getValue('enable')).toBe(false);
+      const sntp = device.getComponent('sntp');
+      expect(sntp).not.toBeUndefined();
+      expect(sntp?.getValue('enabled')).toBe(false);
+
+      if (device) device.destroy();
+    });
+    test('Create a gen 1 shellybutton1 device with input', async () => {
+      const device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shellybutton1-485519F31EA3.json'));
+      expect(device).not.toBeUndefined();
+      if (!device) return;
+      expect(device.logDevice()).toBe(8);
+      expect(device.components.length).toBe(8);
+
+      const input = device.getComponent('input:0');
+      consoleLogSpy.mockRestore();
+      log.logLevel = LogLevel.DEBUG;
+      expect(input?.logComponent()).toBe(4);
+      expect(input).not.toBeUndefined();
+      expect(input?.getValue('input')).toBe(0);
+      expect(input?.getValue('name')).toBe(null);
+      expect(input?.getValue('event')).toBe('');
+      expect(input?.getValue('event_cnt')).toBe(0);
+
+      device.destroy();
     });
   });
 });

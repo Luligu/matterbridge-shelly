@@ -4,7 +4,7 @@
  * @file src\coapServer.ts
  * @author Luca Liguori
  * @date 2024-05-01
- * @version 1.0.0
+ * @version 1.1.0
  *
  * Copyright 2024, 2025 Luca Liguori.
  *
@@ -75,7 +75,6 @@ interface CoIoTDescription {
 
 export class CoapServer extends EventEmitter {
   public readonly log;
-  // private readonly coapAgent;
   private coapServer: Server | undefined;
   private _isListening = false;
   private readonly devices = new Map<string, CoIoTDescription[]>();
@@ -85,15 +84,23 @@ export class CoapServer extends EventEmitter {
     this.log = new AnsiLogger({ logName: 'ShellyCoapServer', logTimestampFormat: TimestampFormat.TIME_MILLIS, logLevel });
 
     this.registerShellyOptions();
-
-    // this.coapAgent = new coap.Agent();
-    // this.coapAgent._nextToken = () => Buffer.alloc(0);
   }
 
-  get isListening() {
+  /**
+   * Indicates whether the CoAP server is currently listening for incoming requests.
+   *
+   * @returns {boolean} A boolean value indicating whether the CoAP is listening.
+   */
+  get isListening(): boolean {
     return this._isListening;
   }
 
+  /**
+   * Retrieves the device description from the specified host using CoAP protocol.
+   * @param {string} host The host from which to retrieve the device description.
+   * @param {number} timeout The timeout value in seconds for the request. Default is 60 seconds.
+   * @returns {Promise<IncomingMessage | null>} A Promise that resolves with the IncomingMessage object representing the response, or null if the request times out.
+   */
   getDeviceDescription(host: string, timeout = 60): Promise<IncomingMessage | null> {
     this.log.debug(`Requesting device description from ${host}...`);
     timeout = Math.min(Math.max(Math.round(timeout), 2), 300);
@@ -133,6 +140,12 @@ export class CoapServer extends EventEmitter {
     });
   }
 
+  /**
+   * Retrieves the device status from the specified host.
+   * @param {string} host - The host to request the device status from.
+   * @param {number} timeout - The timeout value in seconds (default: 60).
+   * @returns {Promise<IncomingMessage | null>} A Promise that resolves with the IncomingMessage containing the device status, or null if the request times out.
+   */
   getDeviceStatus(host: string, timeout = 60): Promise<IncomingMessage | null> {
     this.log.debug(`Requesting device status from ${host}...`);
     timeout = Math.min(Math.max(Math.round(timeout), 2), 300);
@@ -171,6 +184,11 @@ export class CoapServer extends EventEmitter {
     });
   }
 
+  /**
+   * Retrieves the multicast device status using CoIoT (coap) protocol.
+   * @param {number} timeout The timeout value in seconds (default: 60)
+   * @returns {Promise<IncomingMessage | null>} A Promise that resolves with the IncomingMessage object or null if an error occurs or the timeout is reached.
+   */
   getMulticastDeviceStatus(timeout = 60): Promise<IncomingMessage | null> {
     this.log.debug('Requesting CoIoT (coap) multicast device status...');
     timeout = Math.min(Math.max(Math.round(timeout), 2), 300);
@@ -215,6 +233,9 @@ export class CoapServer extends EventEmitter {
     });
   }
 
+  /**
+   * Register the Shelly CoIoT options with the coap server.
+   */
   private registerShellyOptions() {
     coap.registerOption(
       COIOT_OPTION_GLOBAL_DEVID,
@@ -265,6 +286,12 @@ export class CoapServer extends EventEmitter {
     );
   }
 
+  /**
+   * Parses the Shelly message received from the CoIoT (coap) response.
+   *
+   * @param {IncomingMessage} msg - The incoming message object.
+   * @returns {CoapMessage} An object containing the parsed information from the message.
+   */
   private parseShellyMessage(msg: IncomingMessage) {
     this.log.debug(`Parsing device CoIoT (coap) response...`);
 
@@ -402,8 +429,10 @@ export class CoapServer extends EventEmitter {
     return { msg, host, deviceType, deviceId, protocolRevision, validFor, serial, payload } as CoapMessage;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  private listenForStatusUpdates(networkInterface?: string) {
+  /**
+   * Listens for status updates from the CoAP server.
+   */
+  private listenForStatusUpdates() {
     this.coapServer = coap.createServer({
       multicastAddress: COAP_MULTICAST_ADDRESS,
     });
@@ -428,12 +457,22 @@ export class CoapServer extends EventEmitter {
     });
   }
 
-  async registerDevice(host: string) {
+  /**
+   * Registers a device with the specified host.
+   *
+   * @param {string} host - The host of the device to register.
+   * @returns {Promise<void>} - A promise that resolves when the device is registered.
+   */
+  async registerDevice(host: string): Promise<void> {
     this.log.debug(`Registering device ${host}...`);
     await this.getDeviceDescription(host);
     this.log.debug(`Registered device ${host}.`);
   }
 
+  /**
+   * Starts the CoIoT (coap) server for shelly devices.
+   * If the server is already listening, this method does nothing.
+   */
   start() {
     if (this._isListening) return;
     this.log.debug('Starting CoIoT (coap) server for shelly devices...');
@@ -442,12 +481,24 @@ export class CoapServer extends EventEmitter {
     this.log.debug('Started CoIoT (coap) server for shelly devices.');
   }
 
+  /**
+   * Stops the CoIoT (coap) server for shelly devices.
+   *
+   * @remarks
+   * This method stops the CoIoT server by performing the following actions:
+   * - Logs a debug message indicating the server is being stopped.
+   * - Removes all event listeners.
+   * - Sets the `_isListening` flag to `false`.
+   * - Closes the global agent.
+   * - Closes the `coapServer` if it exists.
+   * - Clears the `devices` map.
+   * - Logs a debug message indicating the server has been stopped.
+   */
   stop() {
     this.log.debug('Stopping CoIoT (coap) server for shelly devices...');
     this.removeAllListeners();
     this._isListening = false;
     globalAgent.close();
-    // this.coapAgent.close();
     if (this.coapServer) this.coapServer.close();
     this.devices.clear();
     this.log.debug('Stopped CoIoT (coap) server for shelly devices.');

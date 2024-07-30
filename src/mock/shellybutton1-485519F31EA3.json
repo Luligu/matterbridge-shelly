@@ -1,0 +1,178 @@
+{
+  "shelly": {
+    "type": "SHBTN-2",
+    "mac": "485519F31EA3",
+    "auth": false,
+    "fw": "20230913-113105/v1.14.0-gcb84623",
+    "discoverable": false,
+    "longid": 1,
+    "sleep_mode": true
+  },
+  "settings": {
+    "device": {
+      "type": "SHBTN-2",
+      "mac": "485519F31EA3",
+      "hostname": "shellybutton1-485519F31EA3",
+      "sleep_mode": true
+    },
+    "wifi_ap": {
+      "enabled": false,
+      "ssid": "shellybutton1-485519F31EA3",
+      "key": ""
+    },
+    "wifi_sta": {
+      "enabled": true,
+      "ssid": "FibreBox_X6-12A4C7",
+      "ipv4_method": "dhcp",
+      "ip": null,
+      "gw": null,
+      "mask": null,
+      "dns": null
+    },
+    "wifi_sta1": {
+      "enabled": false,
+      "ssid": null,
+      "ipv4_method": "dhcp",
+      "ip": null,
+      "gw": null,
+      "mask": null,
+      "dns": null
+    },
+    "mqtt": {
+      "enable": false,
+      "server": "192.168.33.3:1883",
+      "user": "",
+      "id": "shellybutton1-485519F31EA3",
+      "reconnect_timeout_max": 60,
+      "reconnect_timeout_min": 2,
+      "clean_session": true,
+      "keep_alive": 60,
+      "max_qos": 0,
+      "retain": false,
+      "update_period": 30
+    },
+    "coiot": {
+      "enabled": true,
+      "update_period": 15,
+      "peer": ""
+    },
+    "sntp": {
+      "server": "time.google.com",
+      "enabled": false
+    },
+    "login": {
+      "enabled": false,
+      "unprotected": false,
+      "username": "admin"
+    },
+    "pin_code": "",
+    "name": "My Shelly button1",
+    "fw": "20230913-113105/v1.14.0-gcb84623",
+    "pon_wifi_reset": false,
+    "discoverable": false,
+    "build_info": {
+      "build_id": "20230913-113105/v1.14.0-gcb84623",
+      "build_timestamp": "2023-09-13T11:31:05Z",
+      "build_version": "1.0"
+    },
+    "cloud": {
+      "enabled": true,
+      "connected": true
+    },
+    "timezone": null,
+    "lat": 500,
+    "lng": 500,
+    "tzautodetect": true,
+    "tz_utc_offset": 0,
+    "tz_dst": false,
+    "tz_dst_auto": true,
+    "time": "",
+    "unixtime": 0,
+    "led_status_disable": false,
+    "debug_enable": false,
+    "allow_cross_origin": false,
+    "actions": {
+      "active": false,
+      "names": [
+        "shortpush_url",
+        "longpush_url",
+        "double_shortpush_url",
+        "triple_shortpush_url"
+      ]
+    },
+    "hwinfo": {
+      "hw_revision": "prod-2020-10",
+      "batch_id": 1
+    },
+    "sleep_mode": {
+      "period": 12,
+      "unit": "h"
+    },
+    "longpush_duration_ms": {
+      "max": 800
+    },
+    "multipush_time_between_pushes_ms": {
+      "max": 500
+    },
+    "remain_awake": 0,
+    "inputs": [
+      {
+        "name": null
+      }
+    ]
+  },
+  "status": {
+    "wifi_sta": {
+      "connected": true,
+      "ssid": "FibreBox_X6-12A4C7",
+      "ip": "192.168.1.233",
+      "rssi": -61
+    },
+    "cloud": {
+      "enabled": true,
+      "connected": true
+    },
+    "mqtt": {
+      "connected": false
+    },
+    "time": "",
+    "unixtime": 0,
+    "serial": 3,
+    "has_update": false,
+    "mac": "485519F31EA3",
+    "cfg_changed_cnt": 0,
+    "actions_stats": {
+      "skipped": 0
+    },
+    "inputs": [
+      {
+        "input": 0,
+        "event": "",
+        "event_cnt": 0
+      }
+    ],
+    "is_valid": true,
+    "bat": {
+      "value": 88,
+      "voltage": 4.1
+    },
+    "charger": true,
+    "act_reasons": [
+      "poweron"
+    ],
+    "connect_retries": 0,
+    "sensor_error": 0,
+    "update": {
+      "status": "idle",
+      "has_update": false,
+      "new_version": "20230913-113105/v1.14.0-gcb84623",
+      "old_version": "20230913-113105/v1.14.0-gcb84623",
+      "beta_version": "20231107-163903/v1.14.1-rc1-g0617c15"
+    },
+    "ram_total": 52456,
+    "ram_free": 40928,
+    "fs_size": 233681,
+    "fs_free": 162146,
+    "uptime": 38
+  }
+}

@@ -7,6 +7,7 @@ If you like this project and find it useful, please consider giving it a star on
 ## [0.7.6] - 2024-07-29
 
 - [shelly]: Refactor MdnsScanner and MdnsScanner jest test.
+- [shelly]: Added support for battery powered devices.
 
 ## [0.7.5] - 2024-07-28
 

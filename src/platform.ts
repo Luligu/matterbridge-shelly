@@ -107,6 +107,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     log.debug(`- unregisterOnShutdown: ${CYAN}${config.unregisterOnShutdown}`);
 
     this.shelly = new Shelly(log, this.username, this.password);
+    this.shelly.setLogLevel(log.logLevel, this.config.debugMdns as boolean, this.config.debugCoap as boolean);
 
     // handle Shelly discovered event
     this.shelly.on('discovered', async (discoveredDevice: DiscoveredDevice) => {
@@ -398,7 +399,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           }
         } else if (component.name === 'Input' && config.exposeInput !== 'disabled') {
           const inputComponent = device.getComponent(key);
-          if (inputComponent && config.exposeInput === 'contact') {
+          if (inputComponent && inputComponent?.hasProperty('state') && config.exposeInput === 'contact') {
             const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.CONTACT_SENSOR], []);
             mbDevice.addFixedLabel('composed', component.name);
             // Set the state attribute
@@ -409,7 +410,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             inputComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
               this.shellyUpdateHandler(mbDevice, device, component, property, value);
             });
-          } else if (inputComponent && config.exposeInput === 'momentary') {
+          } else if (inputComponent && inputComponent?.hasProperty('state') && config.exposeInput === 'momentary') {
             const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.GENERIC_SWITCH], []);
             child.addClusterServer(mbDevice.getDefaultSwitchClusterServer());
             mbDevice.addFixedLabel('composed', component.name);
@@ -421,7 +422,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             inputComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
               this.shellyUpdateHandler(mbDevice, device, component, property, value);
             });
-          } else if (inputComponent && config.exposeInput === 'latching') {
+          } else if (inputComponent && inputComponent?.hasProperty('state') && config.exposeInput === 'latching') {
             const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.GENERIC_SWITCH], []);
             child.addClusterServer(mbDevice.getDefaultLatchingSwitchClusterServer());
             mbDevice.addFixedLabel('composed', component.name);
@@ -551,7 +552,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
 
   override async onChangeLoggerLevel(logLevel: LogLevel) {
     this.log.debug(`Changing logger level for platform ${idn}${this.config.name}${rs}${db}`);
-    this.shelly.setLogLevel(logLevel);
+    this.shelly.setLogLevel(logLevel, this.config.debugMdns as boolean, this.config.debugCoap as boolean);
   }
 
   private async saveStoredDevices(): Promise<boolean> {

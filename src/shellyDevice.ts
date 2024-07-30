@@ -21,7 +21,7 @@
  * limitations under the License. *
  */
 
-import { AnsiLogger, BLUE, CYAN, GREEN, GREY, MAGENTA, RED, RESET, db, debugStringify, er, hk, nf, wr, zb } from 'matterbridge/logger';
+import { AnsiLogger, LogLevel, BLUE, CYAN, GREEN, GREY, MAGENTA, RESET, db, debugStringify, er, hk, nf, wr, zb } from 'matterbridge/logger';
 import { getIpv4InterfaceAddress } from 'matterbridge/utils';
 import { EventEmitter } from 'events';
 import fetch, { RequestInit } from 'node-fetch';
@@ -35,7 +35,6 @@ import { WsClient } from './wsClient.js';
 import { Shelly } from './shelly.js';
 import { ShellyData } from './shellyTypes.js';
 import { ShellyComponent } from './shellyComponent.js';
-import { LogLevel } from 'node-ansi-logger';
 
 export class ShellyDevice extends EventEmitter {
   readonly shelly: Shelly;
@@ -54,6 +53,7 @@ export class ShellyDevice extends EventEmitter {
   gen = 0;
   lastseen = 0;
   hasUpdate = false;
+  sleepMode = false;
   colorUpdateTimeout?: NodeJS.Timeout;
   colorCommandTimeout?: NodeJS.Timeout;
   private lastseenInterval?: NodeJS.Timeout;
@@ -143,7 +143,9 @@ export class ShellyDevice extends EventEmitter {
     // console.log('Shelly:', shelly);
     const device = new ShellyDevice(shelly, log, host);
     device.mac = shellyPayload.mac as string;
+    device.online = true;
     device.lastseen = Date.now();
+    device.sleepMode = (shellyPayload.sleep_mode as boolean) ?? false;
 
     // Gen 1 Shelly device can be mode relay or roller!
     if (shellyPayload.mode) device.profile = (shellyPayload.mode === 'roller' ? 'cover' : 'relay') as 'relay' | 'cover';
@@ -191,12 +193,24 @@ export class ShellyDevice extends EventEmitter {
             device.addComponent(new ShellyComponent(device, `roller:${index++}`, 'Roller', roller as ShellyData));
           }
         }
+        if (key === 'inputs') {
+          let index = 0;
+          for (const input of settingsPayload[key] as ShellyData[]) {
+            device.addComponent(new ShellyComponent(device, `input:${index++}`, 'Input', input as ShellyData));
+          }
+        }
       }
       for (const key in statusPayload) {
         if (key === 'temperature') device.addComponent(new ShellyComponent(device, 'sys', 'Sys'));
         if (key === 'tmp') device.addComponent(new ShellyComponent(device, 'sys', 'Sys'));
         if (key === 'voltage') device.addComponent(new ShellyComponent(device, 'sys', 'Sys'));
         if (key === 'mode') device.addComponent(new ShellyComponent(device, 'sys', 'Sys'));
+        if (key === 'inputs') {
+          let index = 0;
+          for (const input of statusPayload[key] as ShellyData[]) {
+            if (!device.hasComponent(`input:${index}`)) device.addComponent(new ShellyComponent(device, `input:${index++}`, 'Input', input as ShellyData));
+          }
+        }
         if (key === 'meters') {
           let index = 0;
           for (const meter of statusPayload[key] as ShellyData[]) {
@@ -294,6 +308,8 @@ export class ShellyDevice extends EventEmitter {
 
     // Start lastseen interval
     device.lastseenInterval = setInterval(() => {
+      // Check sleep mode
+      if (device.sleepMode) return;
       // Check lastseen interval
       const lastSeenDate = new Date(device.lastseen);
       const lastSeenDateString = lastSeenDate.toLocaleString();
@@ -358,6 +374,12 @@ export class ShellyDevice extends EventEmitter {
             this.updateComponent(`roller:${index++}`, roller as ShellyData);
           }
         }
+        if (key === 'inputs') {
+          let index = 0;
+          for (const input of data[key] as ShellyData[]) {
+            this.updateComponent(`input:${index++}`, input as ShellyData);
+          }
+        }
         if (key === 'meters') {
           let index = 0;
           for (const meter of data[key] as ShellyData[]) {
@@ -414,18 +436,19 @@ export class ShellyDevice extends EventEmitter {
     this.lastseen = Date.now();
   }
 
-  async fetchUpdate(): Promise<void> {
+  async fetchUpdate(): Promise<ShellyData | null> {
     const service = this.gen === 1 ? 'status' : 'Shelly.GetStatus';
     const status = await ShellyDevice.fetch(this.shelly, this.log, this.host, service);
     if (!status) {
       this.log.error(`Error fetching device ${this.id} status. No data found. The device may be offline.`);
       this.online = false;
       this.emit('offline');
-      return;
+      return null;
     }
     this.online = true;
     this.emit('online');
     this.update(status);
+    return status;
   }
 
   // Gen 1
@@ -476,9 +499,9 @@ export class ShellyDevice extends EventEmitter {
         if (service === 'settings') return deviceData.settings;
         if (service === 'Shelly.GetStatus') return deviceData.status;
         if (service === 'Shelly.GetConfig') return deviceData.settings;
-        log.error(`Error fetching device payloads from file ${host}: no service found`);
+        log.error(`Error fetching mock device payloads from file ${host}: no service found`);
       } catch (error) {
-        log.error(`Error reading device payloads from file ${host}:`, error);
+        log.error(`Error reading mock device payloads from file ${host}:`, error);
         return null;
       }
     }
@@ -535,7 +558,6 @@ export class ShellyDevice extends EventEmitter {
             return reponse as ShellyData;
           }
         }
-        // console.log(shelly.username, shelly.password, shelly.username === undefined, shelly.password === undefined);
         log.error(
           `Response error fetching shelly gen ${gen} host ${host} service ${service}${params ? ' with ' + JSON.stringify(params) : ''} url ${url}:` +
             ` ${response.status} (${response.statusText})`,
@@ -547,7 +569,7 @@ export class ShellyDevice extends EventEmitter {
       // console.log(`${GREY}Response from shelly gen ${CYAN}${gen}${GREY} host ${CYAN}${host}${GREY} service ${CYAN}${service}${GREY}:${RESET}`, reponse);
       return reponse as ShellyData;
     } catch (error) {
-      log.error(`${RED}Error fetching shelly gen ${gen} host ${host} service ${service}${params ? ' with ' + JSON.stringify(params) : ''} url ${url}:`, error);
+      log.debug(`Error fetching shelly gen ${gen} host ${host} service ${service}${params ? ' with ' + JSON.stringify(params) : ''} url ${url}:`, error);
       return null;
     }
   }
@@ -566,14 +588,15 @@ export class ShellyDevice extends EventEmitter {
         this.log.debug(`  - ${key}: ${property.value && typeof property.value === 'object' ? debugStringify(property.value) : property.value}`);
       }
     }
+    return this._components.size;
   }
 
   /**
    * Saves the device payloads (shelly, settings, status) to the specified data path.
    * @param {string} dataPath - The path where the device payloads will be saved.
-   * @returns {Promise<void>} - A promise that resolves when the device payloads are successfully saved, or rejects with an error if there was an issue.
+   * @returns {Promise<boolean>} - A promise that resolves when the device payloads are successfully saved, or rejects with an error if there was an issue.
    */
-  async saveDevicePayloads(dataPath: string) {
+  async saveDevicePayloads(dataPath: string): Promise<boolean> {
     this.log.debug(`Saving device payloads for ${hk}${this.id}${db} host ${zb}${this.host}${db}`);
     if (this.shellyPayload && this.statusPayload && this.settingsPayload) {
       try {
@@ -588,11 +611,13 @@ export class ShellyDevice extends EventEmitter {
         const data = JSON.stringify(deviceData, null, 2);
         await fs.writeFile(path.join(dataPath, `${this.id}.json`), data, 'utf8');
         this.log.debug(`Successfully wrote to ${path.join(dataPath, `${this.id}.json`)}`);
+        return true;
       } catch (error) {
         this.log.error(`Error saving device payloads in the directory ${dataPath} file ${path.join(dataPath, `${this.id}.json`)}:`, error);
-        return;
+        return false;
       }
     }
+    return false;
   }
 }
 
