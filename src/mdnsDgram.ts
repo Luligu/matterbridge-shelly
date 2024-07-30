@@ -22,7 +22,11 @@ class MdnsScanner {
     this.socket.on('message', this.onMessage);
     this.socket.on('error', this.onError);
 
-    this.socket.bind(this.multicastPort, this.networkInterfaceAddress);
+    this.socket.bind(this.multicastPort, () => {
+      if (this.networkInterfaceAddress) {
+        this.socket.setMulticastInterface(this.networkInterfaceAddress);
+      }
+    });
   }
 
   private getInterfaceAddress(iface?: string): string | undefined {
