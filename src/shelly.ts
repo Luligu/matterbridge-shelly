@@ -142,10 +142,10 @@ export class Shelly extends EventEmitter {
   startCoap(coapStartTimeout?: number) {
     if (coapStartTimeout) {
       this.coapServerTimeout = setTimeout(() => {
-        this.coapServer?.start();
+        this.coapServer?.start(this.debugCoap);
       }, coapStartTimeout);
     } else {
-      this.coapServer?.start();
+      this.coapServer?.start(this.debugCoap);
     }
   }
 

@@ -551,7 +551,9 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
   }
 
   override async onChangeLoggerLevel(logLevel: LogLevel) {
-    this.log.debug(`Changing logger level for platform ${idn}${this.config.name}${rs}${db}`);
+    this.log.debug(
+      `Changing logger level for platform ${idn}${this.config.name}${rs}${db} to ${logLevel} with debugMdns ${this.config.debugMdns} and debugCoap ${this.config.debugCoap}`,
+    );
     this.shelly.setLogLevel(logLevel, this.config.debugMdns as boolean, this.config.debugCoap as boolean);
   }
 

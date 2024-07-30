@@ -312,7 +312,7 @@ describe('Shelly devices test', () => {
       const device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shellybutton1-485519F31EA3.json'));
       expect(device).not.toBeUndefined();
       if (!device) return;
-      expect(device.components.length).toBe(8);
+      expect(device.components.length).toBe(9);
 
       const coiot = device.getComponent('coiot');
       expect(coiot).not.toBeUndefined();
@@ -327,14 +327,20 @@ describe('Shelly devices test', () => {
       expect(sntp).not.toBeUndefined();
       expect(sntp?.getValue('enabled')).toBe(false);
 
+      const battery = device.getComponent('battery');
+      expect(battery).not.toBeUndefined();
+      expect(battery?.getValue('level')).toBe(88);
+      expect(battery?.getValue('charging')).toBe(true);
+      expect(battery?.getValue('voltage')).toBe(4.1);
+
       if (device) device.destroy();
     });
     test('Create a gen 1 shellybutton1 device with input', async () => {
       const device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shellybutton1-485519F31EA3.json'));
       expect(device).not.toBeUndefined();
       if (!device) return;
-      expect(device.logDevice()).toBe(8);
-      expect(device.components.length).toBe(8);
+      expect(device.logDevice()).toBe(9);
+      expect(device.components.length).toBe(9);
 
       const input = device.getComponent('input:0');
       consoleLogSpy.mockRestore();

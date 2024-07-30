@@ -77,6 +77,7 @@ export class CoapServer extends EventEmitter {
   public readonly log;
   private coapServer: Server | undefined;
   private _isListening = false;
+  private debug = false;
   private readonly devices = new Map<string, CoIoTDescription[]>();
 
   constructor(logLevel: LogLevel = LogLevel.INFO) {
@@ -393,6 +394,16 @@ export class CoapServer extends EventEmitter {
             if (s.D === 'voltage' && b.D.startsWith('emeter')) desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'voltage', range: s.R }); // SHEM
             if (s.D === 'power' && b.D.startsWith('emeter')) desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'power', range: s.R });
             if (s.D === 'energy' && b.D.startsWith('emeter')) desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'total', range: s.R });
+
+            // sensor component
+            if (s.D === 'inputEvent' && b.D.startsWith('sensor'))
+              desc.push({ id: s.I, component: b.D.replace('_', ':').replace('sensor', 'input'), property: 'event', range: s.R }); // SHBTN-2
+            if (s.D === 'inputEventCnt' && b.D.startsWith('sensor'))
+              desc.push({ id: s.I, component: b.D.replace('_', ':').replace('sensor', 'input'), property: 'event_cnt', range: s.R }); // SHBTN-2
+
+            // battery component
+            if (s.D === 'battery' && b.D === 'device') desc.push({ id: s.I, component: 'battery', property: 'level', range: s.R }); // SHBTN-2
+            if (s.D === 'charger' && b.D === 'device') desc.push({ id: s.I, component: 'battery', property: 'charging', range: s.R }); // SHBTN-2
           });
       });
       this.log.debug(`parsing ${MAGENTA}decoding${db}:`);
@@ -473,7 +484,8 @@ export class CoapServer extends EventEmitter {
    * Starts the CoIoT (coap) server for shelly devices.
    * If the server is already listening, this method does nothing.
    */
-  start() {
+  start(debug = false) {
+    this.debug = debug;
     if (this._isListening) return;
     this.log.debug('Starting CoIoT (coap) server for shelly devices...');
     this._isListening = true;
@@ -505,17 +517,19 @@ export class CoapServer extends EventEmitter {
   }
 }
 
-/*
+// Use with: node dist/coapServer.js coapStatus coapDescription
+// Use with: node dist/coapServer.js coapServer coapDescription
 if (process.argv.includes('coapServer') || process.argv.includes('coapDescription') || process.argv.includes('coapStatus') || process.argv.includes('coapMcast')) {
-  const coapServer = new CoapServer(true);
+  const coapServer = new CoapServer(LogLevel.DEBUG);
 
   if (process.argv.includes('coapDescription')) await coapServer.getDeviceDescription('192.168.1.219');
-
   if (process.argv.includes('coapStatus')) await coapServer.getDeviceStatus('192.168.1.219');
 
   if (process.argv.includes('coapDescription')) await coapServer.getDeviceDescription('192.168.1.222');
-
   if (process.argv.includes('coapStatus')) await coapServer.getDeviceStatus('192.168.1.222');
+
+  if (process.argv.includes('coapDescription')) await coapServer.getDeviceDescription('192.168.1.233');
+  if (process.argv.includes('coapStatus')) await coapServer.getDeviceStatus('192.168.1.233');
 
   if (process.argv.includes('coapMcast')) {
     await coapServer.getMulticastDeviceStatus(30);
@@ -529,4 +543,3 @@ if (process.argv.includes('coapServer') || process.argv.includes('coapDescriptio
     // process.exit();
   });
 }
-*/

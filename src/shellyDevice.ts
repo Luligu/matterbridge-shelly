@@ -205,6 +205,9 @@ export class ShellyDevice extends EventEmitter {
         if (key === 'tmp') device.addComponent(new ShellyComponent(device, 'sys', 'Sys'));
         if (key === 'voltage') device.addComponent(new ShellyComponent(device, 'sys', 'Sys'));
         if (key === 'mode') device.addComponent(new ShellyComponent(device, 'sys', 'Sys'));
+        if (key === 'bat') device.addComponent(new ShellyComponent(device, 'battery', 'Battery'));
+        if (key === 'charger') device.addComponent(new ShellyComponent(device, 'battery', 'Battery'));
+
         if (key === 'inputs') {
           let index = 0;
           for (const input of statusPayload[key] as ShellyData[]) {
@@ -392,6 +395,16 @@ export class ShellyDevice extends EventEmitter {
           for (const emeter of data[key] as ShellyData[]) {
             this.updateComponent(`emeter:${index++}`, emeter as ShellyData);
           }
+        }
+
+        if (key === 'bat') {
+          const battery = this.getComponent('battery');
+          battery?.setValue('level', data.bat ? ((data.bat as ShellyData).value as number) : 0);
+          battery?.setValue('voltage', data.bat ? ((data.bat as ShellyData).voltage as number) : 0);
+        }
+        if (key === 'charger') {
+          const battery = this.getComponent('battery');
+          battery?.setValue('charging', data[key] as number);
         }
       }
       // Update state for active components with ison
