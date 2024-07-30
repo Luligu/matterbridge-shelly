@@ -20,6 +20,7 @@ class MdnsScanner {
 
     this.socket.on('listening', this.onListening);
     this.socket.on('message', this.onMessage);
+    this.socket.on('warning', this.onWarning);
     this.socket.on('error', this.onError);
 
     this.socket.bind(this.multicastPort);
@@ -50,16 +51,23 @@ class MdnsScanner {
       this.socket.setMulticastInterface(this.networkInterfaceAddress);
     }
     this.socket.addMembership(this.multicastAddress, this.networkInterfaceAddress);
+    const address = this.socket.address();
+    console.log(`Socket listening on ${address.family} ${address.address}:${address.port}`);
   };
 
   private onMessage = (msg: Buffer, rinfo: dgram.RemoteInfo) => {
     console.log(`Received message from ${rinfo.address}:${rinfo.port}`);
-    console.log(msg.toString());
+    // console.log(msg.toString());
   };
 
   private onError = (err: Error) => {
     console.error(`Socket error:\n${err.stack}`);
     this.socket.close();
+  };
+
+  private onWarning = (err: Error) => {
+    console.error(`Socket warning:\n${err.stack}`);
+    // this.socket.close();
   };
 
   public query = (name = '_services._dns-sd._udp.local', type = 'PTR') => {
