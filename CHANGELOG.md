@@ -6,7 +6,14 @@ If you like this project and find it useful, please consider giving it a star on
 
 ## [0.7.6] - 2024-07-29
 
+### Changed
+
+- [package]: Updated dependencies.
+- [package]: Updated typescript-eslint to 8.0.0.
 - [shelly]: Refactor MdnsScanner and MdnsScanner jest test.
+
+### Added
+
 - [shelly]: Added support for battery powered devices.
 - [shelly]: Added component Battery.
 - [shelly]: Added support for shellybutton1.
