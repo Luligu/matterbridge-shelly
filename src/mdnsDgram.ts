@@ -1,85 +1,100 @@
 /* eslint-disable no-console */
 import dgram from 'dgram';
-import { AnsiLogger, GREEN, idn, LogLevel, rs, TimestampFormat } from 'node-ansi-logger';
+import { AnsiLogger, CYAN, er, GREEN, idn, ign, LogLevel, nf, rs, TimestampFormat } from 'node-ansi-logger';
 import os from 'os';
 
 class MdnsScanner {
   private readonly log;
 
-  private socket: dgram.Socket;
+  private socketUdp4: dgram.Socket;
+  private socketUdp6?: dgram.Socket;
   private multicastAddressIpv4 = '224.0.0.251';
   private multicastAddressIpv6 = 'ff02::fb';
   private multicastPort = 5353;
-  private useIpv4Only = true;
+  private useIpv4Only: boolean;
   // private multicastAddress = '224.0.1.187';
   // private multicastPort = 5683;
   private networkInterfaceAddressIpv4: string | undefined;
   private networkInterfaceAddressIpv6: string | undefined;
+  private networkInterfaceScopeIpv6: string | undefined;
 
-  constructor(networkInterface?: string, useIpv4Only = true) {
+  constructor(networkInterface?: string, useIpv4Only = false) {
     this.log = new AnsiLogger({ logName: 'MdnsScanner', logTimestampFormat: TimestampFormat.TIME_MILLIS, logLevel: LogLevel.DEBUG });
 
     this.useIpv4Only = useIpv4Only;
-    this.networkInterfaceAddressIpv4 = networkInterface ? this.getIpv4InterfaceAddress(networkInterface) : undefined;
-    if (!useIpv4Only) this.networkInterfaceAddressIpv6 = networkInterface ? this.getIpv6InterfaceAddress(networkInterface) : undefined;
-    if (this.networkInterfaceAddressIpv4) this.log.debug(`Using network interface IPv4 address: ${this.networkInterfaceAddressIpv4}`);
-    if (!useIpv4Only && this.networkInterfaceAddressIpv6) this.log.debug(`Using network interface IPv6 address: ${this.networkInterfaceAddressIpv6}`);
 
-    this.socket = dgram.createSocket({ type: useIpv4Only ? 'udp4' : 'udp6', reuseAddr: true });
+    this.networkInterfaceAddressIpv4 = this.getIpv4InterfaceAddress(networkInterface);
+    this.log.debug(`Using network interface IPv4 address: ${this.networkInterfaceAddressIpv4}`);
 
-    this.socket.on('listening', this.onListening);
-    this.socket.on('message', this.onMessage);
-    this.socket.on('warning', this.onWarning);
-    this.socket.on('error', this.onError);
+    if (!useIpv4Only) {
+      this.networkInterfaceAddressIpv6 = this.getIpv6InterfaceAddress(networkInterface)?.address;
+      this.networkInterfaceScopeIpv6 = this.getIpv6InterfaceAddress(networkInterface)?.scopeid;
+      this.log.debug(`Using network interface IPv6 address: ${this.networkInterfaceAddressIpv6} scopeid: ${this.networkInterfaceScopeIpv6}`);
+    }
 
-    if (useIpv4Only) this.socket.bind(this.multicastPort);
-    // Bind the socket to port 5353 and address '::' to handle both IPv4 and IPv6 traffic
-    if (!useIpv4Only) this.socket.bind({ port: this.multicastPort, address: '::', exclusive: false });
+    this.socketUdp4 = dgram.createSocket({ type: 'udp4', reuseAddr: true });
+    this.socketUdp4.on('message', this.onMessage);
+    this.socketUdp4.on('warning', this.onWarning);
+    this.socketUdp4.on('error', this.onError);
+    this.socketUdp4.bind(this.multicastPort, () => {
+      this.log.debug(`Setting multicast interface IPv4: ${this.networkInterfaceAddressIpv4}`);
+      if (this.networkInterfaceAddressIpv4) this.socketUdp4.setMulticastInterface(this.networkInterfaceAddressIpv4);
+      this.log.debug(`Adding multicast membership IPv4: ${this.multicastAddressIpv4} interface: ${this.networkInterfaceAddressIpv4}`);
+      this.socketUdp4.addMembership(this.multicastAddressIpv4, this.networkInterfaceAddressIpv4);
+      this.socketUdp4.setMulticastTTL(255);
+      this.socketUdp4.setMulticastLoopback(true);
+      const address = this.socketUdp4.address();
+      this.log.notice(
+        `MdnsScanner IPv4 is listening using network interface address ${this.networkInterfaceAddressIpv4} bound on ${address.family} ${address.address}:${address.port}`,
+      );
+    });
+
+    if (!useIpv4Only) {
+      this.socketUdp6 = dgram.createSocket({ type: 'udp6', reuseAddr: true });
+      this.socketUdp6.on('message', this.onMessage);
+      this.socketUdp6.on('warning', this.onWarning);
+      this.socketUdp6.on('error', this.onError);
+      this.socketUdp6.bind(this.multicastPort, () => {
+        this.log.debug(`Setting multicast interface IPv6: ${this.networkInterfaceAddressIpv6}`);
+        if (this.networkInterfaceAddressIpv6) this.socketUdp6?.setMulticastInterface(this.networkInterfaceAddressIpv6);
+        this.log.debug(`Adding multicast membership IPv6: ${this.multicastAddressIpv6} interface: ${this.networkInterfaceAddressIpv6}`);
+        this.socketUdp6?.addMembership(this.multicastAddressIpv6, this.networkInterfaceAddressIpv6);
+        this.socketUdp6?.setMulticastTTL(255);
+        this.socketUdp6?.setMulticastLoopback(true);
+        const address = this.socketUdp6?.address();
+        this.log.notice(
+          `MdnsScanner IPv6 is listening using network interface address ${this.networkInterfaceAddressIpv6} bound on ${address?.family} ${address?.address}:${address?.port}`,
+        );
+      });
+    }
   }
 
-  private onListening = () => {
-    if (this.networkInterfaceAddressIpv4) {
-      this.log.debug(`Setting multicast interface IPv4: ${this.networkInterfaceAddressIpv4}`);
-      this.socket.setMulticastInterface(this.networkInterfaceAddressIpv4);
-    }
-    if (!this.useIpv4Only && this.networkInterfaceAddressIpv6) {
-      this.log.debug(`Setting multicast interface IPv6: ${this.networkInterfaceAddressIpv6}`);
-      this.socket.setMulticastInterface(this.networkInterfaceAddressIpv6);
-    }
-    this.log.debug(`Adding multicast membership IPv4: ${this.multicastAddressIpv4} interface: ${this.networkInterfaceAddressIpv4}`);
-    this.socket.addMembership(this.multicastAddressIpv4, this.networkInterfaceAddressIpv4);
-    if (!this.useIpv4Only) {
-      this.log.debug(`Adding multicast membership IPv6: ${this.multicastAddressIpv6} interface: ${this.networkInterfaceAddressIpv6}`);
-      this.socket.addMembership(this.multicastAddressIpv6, this.networkInterfaceAddressIpv6);
-    }
-    const address = this.socket.address();
-    this.log.notice(
-      `Socket is listening using network interface address IPv4=${this.networkInterfaceAddressIpv4}, IPv6=${this.networkInterfaceAddressIpv6} bound on ${address.family} ${address.address}:${address.port}`,
-    );
-  };
-
   private onMessage = (msg: Buffer, rinfo: dgram.RemoteInfo) => {
-    console.log(`\nReceived message from ${rinfo.address}:${rinfo.port}`);
+    this.log.info(`Received message from ${ign}${rinfo.address}:${rinfo.port}${rs}`);
     this.parseMdnsResponse(msg);
   };
 
   private onError = (err: Error) => {
-    console.error(`Socket error:\n${err.message}`);
-    this.socket.close();
+    this.log.error(`Socket error:\n${err.message}`);
+    this.socketUdp4.close();
+    if (this.socketUdp6) this.socketUdp6.close();
   };
 
   private onWarning = (err: Error) => {
-    console.error(`Socket warning:\n${err.message}`);
-    // this.socket.close();
+    this.log.error(`Socket warning:\n${err.message}`);
   };
 
-  public query = (name = '_services._dns-sd._udp.local', type = 'PTR') => {
+  public query(name = '_services._dns-sd._udp.local', type = 'PTR') {
     const queryBuffer = this.buildQuery(name, type);
-    this.socket.send(queryBuffer, 0, queryBuffer.length, this.multicastPort, this.multicastAddressIpv4, (err) => {
-      if (err) console.error(err);
-      else console.log(`Query sent with name: ${name} and type: ${type}`);
+    this.socketUdp4.send(queryBuffer, 0, queryBuffer.length, this.multicastPort, this.multicastAddressIpv4, (err: Error | null) => {
+      if (err) this.log.error(`MdnsScannererr error sending query on udp4: ${err.message}`);
+      else this.log.info(`Query sent on udp4 with name: ${CYAN}${name}${nf} and type: ${CYAN}${type}${nf}`);
     });
-  };
+    this.socketUdp6?.send(queryBuffer, 0, queryBuffer.length, this.multicastPort, this.multicastAddressIpv6, (err: Error | null) => {
+      if (err) this.log.error(`MdnsScannererr error sending query on udp6: ${err.message}`);
+      else this.log.info(`Query sent on udp6 with name: ${CYAN}${name}${nf} and type: ${CYAN}${type}${nf}`);
+    });
+  }
 
   private buildQuery(name: string, type: string): Buffer {
     // Build an mDNS query packet
@@ -121,7 +136,8 @@ class MdnsScanner {
   }
 
   public stop = () => {
-    this.socket.close();
+    this.socketUdp4.close();
+    if (this.socketUdp6) this.socketUdp6.close();
   };
 
   private parseMdnsResponse = (msg: Buffer) => {
@@ -144,7 +160,7 @@ class MdnsScanner {
 
       if (qdcount > 0) console.log(`${GREEN}Questions:${rs}`);
       for (let i = 0; i < qdcount; i++) {
-        const { name, newOffset } = this.readName(msg, offset);
+        const { name, newOffset } = this.readDomainName(msg, offset);
         offset = newOffset;
         const type = msg.readUInt16BE(offset);
         offset += 2;
@@ -156,7 +172,7 @@ class MdnsScanner {
 
       if (ancount > 0) console.log(`${GREEN}Answers:${rs}`);
       for (let i = 0; i < ancount; i++) {
-        const { name, newOffset } = this.readName(msg, offset);
+        const { name, newOffset } = this.readDomainName(msg, offset);
         offset = newOffset;
         const type = msg.readUInt16BE(offset);
         offset += 2;
@@ -172,17 +188,31 @@ class MdnsScanner {
         let decoded = '';
 
         switch (type) {
+          case 1: // A
+            decoded = this.decodeA(rdata, 0, rdlength);
+            break;
+          case 2: // NS
+            decoded = this.decodeNS(msg, offset - rdlength).nsdname; // Pointers inside !!!
+            break;
           case 12: // PTR
-          case 5: // CNAME
-          case 39: // DNAME
-            // decoded = this.readName(rdata, 0).name;
-            decoded = rdata.toString('hex');
+            decoded = this.decodePTR(msg, offset - rdlength); // Pointers inside !!!
             break;
           case 16: // TXT
-            decoded = this.readTXT(rdata, 0, rdlength);
+            decoded = this.decodeTXT(rdata, 0, rdlength);
+            break;
+          case 28: // AAAA
+            decoded = this.decodeAAAA(rdata, 0, rdlength);
+            break;
+          case 33: // SRV
+            // eslint-disable-next-line no-case-declarations
+            const { priority, weight, port, target } = this.decodeSRV(msg, offset - rdlength); // Pointers inside !!!
+            decoded = `Priority: ${priority}, Weight: ${weight}, Port: ${port}, Target: ${target}`;
+            break;
+          case 47: // NSEC
+            decoded = this.readDomainName(rdata, 0).name;
             break;
           default:
-            decoded = rdata.toString('hex');
+            decoded = er + rdata.toString('hex') + rs;
             break;
         }
         console.log(`${name.padEnd(50, ' ')} ${idn}${this.getTypeText(type)}${rs}, Class: ${qclass}, TTL: ${ttl}, Data: ${decoded}`);
@@ -190,9 +220,10 @@ class MdnsScanner {
     } catch (error) {
       console.error('Failed to parse mDNS response:', error);
     }
+    console.log('\n');
   };
 
-  private readName(buffer: Buffer, offset: number): { name: string; newOffset: number } {
+  private readDomainName(buffer: Buffer, offset: number): { name: string; newOffset: number } {
     const labels = [];
     let jumped = false;
     let jumpOffset = offset;
@@ -222,7 +253,7 @@ class MdnsScanner {
     return { name: labels.join('.'), newOffset: jumpOffset };
   }
 
-  private readTXT(buffer: Buffer, offset: number, length: number): string {
+  private decodeTXT(buffer: Buffer, offset: number, length: number): string {
     let result = '';
     const end = offset + length;
 
@@ -234,6 +265,49 @@ class MdnsScanner {
     }
 
     return result.trim();
+  }
+
+  private decodeA(buffer: Buffer, offset: number, length: number): string {
+    const ipBuffer = buffer.subarray(offset, offset + length);
+    const ipAddress = Array.from(ipBuffer).join('.');
+    return ipAddress;
+  }
+
+  private decodeAAAA(buffer: Buffer, offset: number, length: number): string {
+    const ipBuffer = buffer.subarray(offset, offset + length);
+    const ipAddress = ipBuffer.reduce((acc, byte, idx) => {
+      return acc + (idx % 2 === 0 && idx > 0 ? ':' : '') + byte.toString(16).padStart(2, '0');
+    }, '');
+    return ipAddress;
+  }
+
+  private decodePTR(msg: Buffer, offset: number): string {
+    const labels = [];
+
+    while (msg[offset] !== 0) {
+      if ((msg[offset] & 0xc0) === 0xc0) {
+        offset = ((msg[offset] & 0x3f) << 8) | msg[offset + 1];
+      } else {
+        const length = msg[offset];
+        labels.push(msg.toString('utf8', offset + 1, offset + 1 + length));
+        offset += length + 1;
+      }
+    }
+    return labels.join('.');
+  }
+
+  private decodeSRV(msg: Buffer, offset: number): { priority: number; weight: number; port: number; target: string } {
+    const priority = msg.readUInt16BE(offset);
+    const weight = msg.readUInt16BE(offset + 2);
+    const port = msg.readUInt16BE(offset + 4);
+    const target = this.decodePTR(msg, offset + 6);
+    return { priority, weight, port, target: target };
+  }
+
+  // Function to decode NS records from an mDNS message
+  private decodeNS(msg: Buffer, offset: number) {
+    const { name: nsdname, newOffset } = this.readDomainName(msg, offset);
+    return { nsdname, newOffset };
   }
 
   private getTypeText(type: number): string {
@@ -269,10 +343,41 @@ class MdnsScanner {
     }
   }
 
+  /**
+   * Retrieves the IPv4 address of the specified network interface or the first external IPv4 interface if no interface is specified.
+   * Throws an error if no suitable interface or address is found.
+   *
+   * @param {string} networkInterface - The name of the network interface to retrieve the IPv4 address from. If not specified, the first external IPv4 interface will be used.
+   * @returns The IPv4 address of the specified network interface or the first external IPv4 interface.
+   * @throws Error if no suitable interface or address is found.
+   */
   private getIpv4InterfaceAddress(networkInterface?: string): string | undefined {
-    if (!networkInterface || networkInterface === '') return undefined;
+    if (networkInterface === '') networkInterface = undefined;
 
     const interfaces = os.networkInterfaces();
+
+    // Verify that the specified network interface exists
+    if (networkInterface && !interfaces[networkInterface]) {
+      this.log.error(`Interface ${networkInterface} not found. Using first external IPv4 interface.`);
+      networkInterface = undefined;
+    }
+
+    // Find the first external IPv4 interface if no interface is specified
+    for (const [interfaceName, interfaceDetails] of Object.entries(interfaces)) {
+      if (networkInterface || !interfaceDetails) {
+        break;
+      }
+      for (const detail of interfaceDetails) {
+        if (detail.family === 'IPv4' && !detail.internal && networkInterface === undefined) {
+          networkInterface = interfaceName;
+          break;
+        }
+      }
+    }
+    if (!networkInterface) {
+      throw new Error(`Didn't find an external IPv4 network interface`);
+    }
+
     const addresses = interfaces[networkInterface];
 
     if (!addresses) {
@@ -288,10 +393,33 @@ class MdnsScanner {
     return ipv4Address.address;
   }
 
-  private getIpv6InterfaceAddress(networkInterface?: string): string | undefined {
+  private getIpv6InterfaceAddress(networkInterface?: string): { address: string; scopeid: string | undefined } | undefined {
     if (!networkInterface || networkInterface === '') return undefined;
 
     const interfaces = os.networkInterfaces();
+
+    // Verify that the specified network interface exists
+    if (networkInterface && !interfaces[networkInterface]) {
+      this.log.error(`Interface ${networkInterface} not found. Using first external IPv6 interface.`);
+      networkInterface = undefined;
+    }
+
+    // Find the first external IPv6 interface if no interface is specified
+    for (const [interfaceName, interfaceDetails] of Object.entries(interfaces)) {
+      if (networkInterface || !interfaceDetails) {
+        break;
+      }
+      for (const detail of interfaceDetails) {
+        if (detail.family === 'IPv6' && !detail.internal && networkInterface === undefined) {
+          networkInterface = interfaceName;
+          break;
+        }
+      }
+    }
+    if (!networkInterface) {
+      throw new Error(`Didn't find an external IPv6 network interface`);
+    }
+
     const addresses = interfaces[networkInterface];
 
     if (!addresses) {
@@ -301,21 +429,21 @@ class MdnsScanner {
     // Try to find a global unicast address first
     const globalUnicastAddress = addresses.find((addr) => addr.family === 'IPv6' && !addr.internal && addr.scopeid === 0);
     if (globalUnicastAddress) {
-      return globalUnicastAddress.address;
+      return { address: globalUnicastAddress.address, scopeid: globalUnicastAddress.scopeid?.toString() || undefined };
     }
     this.log.debug('No IPv6 global unicast address found');
 
     // If no global unicast address is found, try to find a unique local address
     const uniqueLocalAddress = addresses.find((addr) => addr.family === 'IPv6' && !addr.internal && addr.address.startsWith('fd'));
     if (uniqueLocalAddress) {
-      return uniqueLocalAddress.address;
+      return { address: uniqueLocalAddress.address, scopeid: uniqueLocalAddress.scopeid?.toString() || undefined };
     }
     this.log.debug('No IPv6 unique local address found');
 
-    // If no global unicast address and no unique local address is found, fall back to link-local address
+    // If no global unicast address and no unique local address is found, fall back to link-local address and use scopeid
     const linkLocalAddress = addresses.find((addr) => addr.family === 'IPv6' && !addr.internal && addr.address.startsWith('fe80'));
     if (linkLocalAddress) {
-      return linkLocalAddress.address;
+      return { address: linkLocalAddress.address, scopeid: linkLocalAddress.scopeid?.toString() || undefined };
     }
     this.log.debug('No IPv6 link-local address found');
 
@@ -342,5 +470,10 @@ const scanner = new MdnsScanner(process.argv[2]);
 scanner.query('_http._tcp.local');
 
 setTimeout(() => {
-  scanner.stop();
+  // scanner.stop();
 }, 30000); // Stop scanning after 10 seconds
+
+process.on('SIGINT', () => {
+  scanner.stop();
+  // process.exit();
+});
