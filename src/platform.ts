@@ -586,13 +586,20 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     }
     this.log.info(`Adding shelly device ${hk}${deviceId}${nf} host ${zb}${host}${nf}`);
     const log = new AnsiLogger({ logName: deviceId, logTimestampFormat: TimestampFormat.TIME_MILLIS, logLevel: this.log.logLevel });
-    const device = await ShellyDevice.create(this.shelly, log, host);
-    if (!device) {
-      this.log.error(`Failed to create Shelly device ${hk}${deviceId}${er} host ${zb}${host}${er}`);
-      return;
+    let device = await ShellyDevice.create(this.shelly, log, host);
+    if (device) {
+      await device.saveDevicePayloads(path.join(this.matterbridge.matterbridgePluginDirectory, 'matterbridge-shelly'));
+    } else {
+      this.log.warn(`Failed to create Shelly device ${hk}${deviceId}${wr} host ${zb}${host}${wr}`);
+      const fileName = path.join(this.matterbridge.matterbridgePluginDirectory, 'matterbridge-shelly', `${deviceId}.json`);
+      device = await ShellyDevice.create(this.shelly, log, fileName);
+      if (!device) return;
+      this.log.info(`Loaded from cache Shelly device ${hk}${deviceId}${nf} host ${zb}${host}${nf}`);
+      device.host = host;
+      device.cached = true;
+      device.online = false;
     }
     log.logName = device.name ?? device.id;
-    await device.saveDevicePayloads(path.join(this.matterbridge.matterbridgePluginDirectory, 'matterbridge-shelly'));
     await this.shelly.addDevice(device);
     this.shellyDevices.set(device.id, device);
   }

@@ -39,7 +39,7 @@ import { ShellyComponent } from './shellyComponent.js';
 export class ShellyDevice extends EventEmitter {
   readonly shelly: Shelly;
   readonly log: AnsiLogger;
-  readonly host: string;
+  public host: string;
   readonly username: string | undefined;
   readonly password: string | undefined;
   profile: 'relay' | 'cover' | undefined;
@@ -54,6 +54,7 @@ export class ShellyDevice extends EventEmitter {
   lastseen = 0;
   hasUpdate = false;
   sleepMode = false;
+  cached = false;
   colorUpdateTimeout?: NodeJS.Timeout;
   colorCommandTimeout?: NodeJS.Timeout;
   private lastseenInterval?: NodeJS.Timeout;
@@ -137,10 +138,9 @@ export class ShellyDevice extends EventEmitter {
     let settingsPayload: ShellyData | null = null;
 
     if (!shellyPayload) {
-      log.error(`Error creating device from host ${host}. No shelly data found.`);
+      log.error(`Error creating device at host ${zb}${host}${er}. No shelly data found.`);
       return undefined;
     }
-    // console.log('Shelly:', shelly);
     const device = new ShellyDevice(shelly, log, host);
     device.mac = shellyPayload.mac as string;
     device.online = true;
@@ -276,15 +276,6 @@ export class ShellyDevice extends EventEmitter {
         if (key.startsWith('input:')) device.addComponent(new ShellyComponent(device, key, 'Input', settingsPayload[key] as ShellyData));
         if (key.startsWith('pm1:')) device.addComponent(new ShellyComponent(device, key, 'PowerMeter', settingsPayload[key] as ShellyData));
       }
-      /*
-      for (const key in statusPayload) {
-        if (key.startsWith('switch:')) device.addComponent(new ShellyComponent(device, key, 'Switch', statusPayload[key] as ShellyData));
-        if (key.startsWith('cover:')) device.addComponent(new ShellyComponent(device, key, 'Cover', statusPayload[key] as ShellyData));
-        if (key.startsWith('light:')) device.addComponent(new ShellyComponent(device, key, 'Light', statusPayload[key] as ShellyData));
-        if (key.startsWith('input:')) device.addComponent(new ShellyComponent(device, key, 'Input', statusPayload[key] as ShellyData));
-        if (key.startsWith('pm1:')) device.addComponent(new ShellyComponent(device, key, 'PowerMeter', statusPayload[key] as ShellyData));
-      }
-      */
     }
 
     if (statusPayload) device.update(statusPayload);
@@ -503,7 +494,7 @@ export class ShellyDevice extends EventEmitter {
   static async fetch(shelly: Shelly, log: AnsiLogger, host: string, service: string, params: Record<string, string | number | boolean> = {}): Promise<ShellyData | null> {
     // MOCK: Fetch device data from file if host is a json file
     if (host.endsWith('.json')) {
-      log.warn(`Fetching mock device payloads from file ${host}: service ${service} params ${JSON.stringify(params)}`);
+      log.debug(`Fetching device payloads from file ${host}: service ${service} params ${JSON.stringify(params)}`);
       try {
         const data = await fs.readFile(host, 'utf8');
         const deviceData = JSON.parse(data);
@@ -512,9 +503,9 @@ export class ShellyDevice extends EventEmitter {
         if (service === 'settings') return deviceData.settings;
         if (service === 'Shelly.GetStatus') return deviceData.status;
         if (service === 'Shelly.GetConfig') return deviceData.settings;
-        log.error(`Error fetching mock device payloads from file ${host}: no service found`);
+        log.error(`Error fetching device payloads from file ${host}: no service found`);
       } catch (error) {
-        log.error(`Error reading mock device payloads from file ${host}:`, error);
+        log.error(`Error reading device payloads from file ${host}:`, error);
         return null;
       }
     }

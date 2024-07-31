@@ -27,7 +27,7 @@ import EventEmitter from 'events';
 import { RemoteInfo, SocketType } from 'dgram';
 import { promises as fs } from 'fs';
 import path from 'path';
-// import { getIpv4InterfaceAddress } from 'matterbridge/utils';
+import { getIpv4InterfaceAddress } from 'matterbridge/utils';
 
 export interface DiscoveredDevice {
   id: string;
@@ -309,7 +309,6 @@ export class MdnsScanner extends EventEmitter {
 // Additional debug logging
 // const ipConfigCommand = isWindows ? 'ipconfig' : 'ip a';
 // const multicastCommand = isWindows ? 'netsh interface ipv4 show joins' : 'ip maddr show';
-/*
 if (process.argv.includes('testMdnsScanner')) {
   const mdnsScanner = new MdnsScanner(LogLevel.DEBUG);
   // mdnsScanner.start(0, 'fd78:cbf8:4939:746:d555:85a9:74f6:9c6', 'udp6', true);
@@ -322,4 +321,3 @@ if (process.argv.includes('testMdnsScanner')) {
     mdnsScanner.stop();
   });
 }
-*/
