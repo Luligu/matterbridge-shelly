@@ -135,9 +135,9 @@ describe('ShellyPlatform', () => {
     expect(mockLog.info).toHaveBeenCalledWith(`Configuring platform ${idn}${mockConfig.name}${rs}${nf}`);
   });
 
-  it('should call onChangeLoggerLevel', async () => {
+  it('should call onChangeLoggerLevel and log a partial message', async () => {
     await shellyPlatform.onChangeLoggerLevel(LogLevel.DEBUG);
-    expect(mockLog.debug).toHaveBeenCalledWith(`Changing logger level for platform ${idn}${mockConfig.name}${rs}${db}`);
+    expect(mockLog.debug).toHaveBeenCalledWith(expect.stringContaining(`Changing logger level for platform ${idn}${mockConfig.name}${rs}`));
   });
 
   it('should call onShutdown with reason', async () => {

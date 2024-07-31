@@ -10,29 +10,31 @@ class MdnsScanner {
   private multicastAddressIpv4 = '224.0.0.251';
   private multicastAddressIpv6 = 'ff02::fb';
   private multicastPort = 5353;
+  private useIpv4Only = true;
   // private multicastAddress = '224.0.1.187';
   // private multicastPort = 5683;
   private networkInterfaceAddressIpv4: string | undefined;
   private networkInterfaceAddressIpv6: string | undefined;
 
-  constructor(networkInterface?: string) {
+  constructor(networkInterface?: string, useIpv4Only = true) {
     this.log = new AnsiLogger({ logName: 'MdnsScanner', logTimestampFormat: TimestampFormat.TIME_MILLIS, logLevel: LogLevel.DEBUG });
 
+    this.useIpv4Only = useIpv4Only;
     this.networkInterfaceAddressIpv4 = networkInterface ? this.getIpv4InterfaceAddress(networkInterface) : undefined;
-    this.networkInterfaceAddressIpv6 = networkInterface ? this.getIpv6InterfaceAddress(networkInterface) : undefined;
+    if (!useIpv4Only) this.networkInterfaceAddressIpv6 = networkInterface ? this.getIpv6InterfaceAddress(networkInterface) : undefined;
     if (this.networkInterfaceAddressIpv4) this.log.debug(`Using network interface IPv4 address: ${this.networkInterfaceAddressIpv4}`);
-    if (this.networkInterfaceAddressIpv6) this.log.debug(`Using network interface IPv6 address: ${this.networkInterfaceAddressIpv6}`);
+    if (!useIpv4Only && this.networkInterfaceAddressIpv6) this.log.debug(`Using network interface IPv6 address: ${this.networkInterfaceAddressIpv6}`);
 
-    this.socket = dgram.createSocket({ type: 'udp6', reuseAddr: true });
+    this.socket = dgram.createSocket({ type: useIpv4Only ? 'udp4' : 'udp6', reuseAddr: true });
 
     this.socket.on('listening', this.onListening);
     this.socket.on('message', this.onMessage);
     this.socket.on('warning', this.onWarning);
     this.socket.on('error', this.onError);
 
-    // this.socket.bind(this.multicastPort);
+    if (useIpv4Only) this.socket.bind(this.multicastPort);
     // Bind the socket to port 5353 and address '::' to handle both IPv4 and IPv6 traffic
-    this.socket.bind({ port: this.multicastPort, address: '::', exclusive: false });
+    if (!useIpv4Only) this.socket.bind({ port: this.multicastPort, address: '::', exclusive: false });
   }
 
   private onListening = () => {
@@ -40,16 +42,18 @@ class MdnsScanner {
       this.log.debug(`Setting multicast interface IPv4: ${this.networkInterfaceAddressIpv4}`);
       this.socket.setMulticastInterface(this.networkInterfaceAddressIpv4);
     }
-    if (this.networkInterfaceAddressIpv6) {
+    if (!this.useIpv4Only && this.networkInterfaceAddressIpv6) {
       this.log.debug(`Setting multicast interface IPv6: ${this.networkInterfaceAddressIpv6}`);
       this.socket.setMulticastInterface(this.networkInterfaceAddressIpv6);
     }
-    // this.log.debug(`Adding multicast membership IPv4: ${this.multicastAddressIpv4} interface: ${this.networkInterfaceAddressIpv4}`);
-    // this.socket.addMembership(this.multicastAddressIpv4, this.networkInterfaceAddressIpv4);
-    this.log.debug(`Adding multicast membership IPv6: ${this.multicastAddressIpv6} interface: ${this.networkInterfaceAddressIpv6}`);
-    this.socket.addMembership(this.multicastAddressIpv6, this.networkInterfaceAddressIpv6);
+    this.log.debug(`Adding multicast membership IPv4: ${this.multicastAddressIpv4} interface: ${this.networkInterfaceAddressIpv4}`);
+    this.socket.addMembership(this.multicastAddressIpv4, this.networkInterfaceAddressIpv4);
+    if (!this.useIpv4Only) {
+      this.log.debug(`Adding multicast membership IPv6: ${this.multicastAddressIpv6} interface: ${this.networkInterfaceAddressIpv6}`);
+      this.socket.addMembership(this.multicastAddressIpv6, this.networkInterfaceAddressIpv6);
+    }
     const address = this.socket.address();
-    console.log(
+    this.log.notice(
       `Socket is listening using network interface address IPv4=${this.networkInterfaceAddressIpv4}, IPv6=${this.networkInterfaceAddressIpv6} bound on ${address.family} ${address.address}:${address.port}`,
     );
   };
