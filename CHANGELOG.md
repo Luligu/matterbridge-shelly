@@ -18,7 +18,6 @@ If you like this project and find it useful, please consider giving it a star on
 - [shelly]: Added component Battery.
 - [shelly]: Added support for shellybutton1.
 
-
 ## [0.7.5] - 2024-07-28
 
 ### Changed

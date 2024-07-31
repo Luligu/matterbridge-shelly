@@ -93,12 +93,7 @@
     "allow_cross_origin": false,
     "actions": {
       "active": false,
-      "names": [
-        "shortpush_url",
-        "longpush_url",
-        "double_shortpush_url",
-        "triple_shortpush_url"
-      ]
+      "names": ["shortpush_url", "longpush_url", "double_shortpush_url", "triple_shortpush_url"]
     },
     "hwinfo": {
       "hw_revision": "prod-2020-10",
@@ -157,9 +152,7 @@
       "voltage": 4.1
     },
     "charger": true,
-    "act_reasons": [
-      "poweron"
-    ],
+    "act_reasons": ["poweron"],
     "connect_retries": 0,
     "sensor_error": 0,
     "update": {

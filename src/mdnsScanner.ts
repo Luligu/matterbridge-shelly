@@ -279,6 +279,7 @@ export class MdnsScanner extends EventEmitter {
     const responseFile = path.join('jest-shelly', `${shellyId}.mdns.json`);
     try {
       await fs.mkdir('jest-shelly', { recursive: true });
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
       //
     }

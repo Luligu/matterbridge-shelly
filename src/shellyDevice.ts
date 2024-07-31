@@ -35,7 +35,6 @@ import { WsClient } from './wsClient.js';
 import { Shelly } from './shelly.js';
 import { ShellyData } from './shellyTypes.js';
 import { ShellyComponent } from './shellyComponent.js';
-import { CoapServer } from './coapServer.js';
 
 export class ShellyDevice extends EventEmitter {
   readonly shelly: Shelly;
@@ -525,7 +524,7 @@ export class ShellyDevice extends EventEmitter {
       const headers = options.headers as Record<string, string>;
       log.debug(
         `${GREY}Fetching shelly gen ${CYAN}${gen}${GREY} host ${CYAN}${host}${GREY} service ${CYAN}${service}${GREY}` +
-        `${params ? ` with ${CYAN}` + JSON.stringify(params) + `${GREY}` : ''} url ${BLUE}${url}${RESET}`,
+          `${params ? ` with ${CYAN}` + JSON.stringify(params) + `${GREY}` : ''} url ${BLUE}${url}${RESET}`,
       );
       log.debug(`${GREY}options: ${JSON.stringify(options)}${RESET}`);
       let response;
@@ -568,7 +567,7 @@ export class ShellyDevice extends EventEmitter {
         }
         log.error(
           `Response error fetching shelly gen ${gen} host ${host} service ${service}${params ? ' with ' + JSON.stringify(params) : ''} url ${url}:` +
-          ` ${response.status} (${response.statusText})`,
+            ` ${response.status} (${response.statusText})`,
         );
         return null;
       }

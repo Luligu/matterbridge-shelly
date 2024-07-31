@@ -663,12 +663,12 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       }
       if (event === 'Press') {
         cluster.setCurrentPositionAttribute(1);
-        cluster.triggerSwitchLatchedEvent && cluster.triggerSwitchLatchedEvent({ newPosition: 1 });
+        if (cluster.triggerSwitchLatchedEvent) cluster.triggerSwitchLatchedEvent({ newPosition: 1 });
         this.log.debug(`Trigger ${event} event for ${endpoint.name}:${endpoint.number}`);
       }
       if (event === 'Release') {
         cluster.setCurrentPositionAttribute(0);
-        cluster.triggerSwitchLatchedEvent && cluster.triggerSwitchLatchedEvent({ newPosition: 0 });
+        if (cluster.triggerSwitchLatchedEvent) cluster.triggerSwitchLatchedEvent({ newPosition: 0 });
         this.log.debug(`Trigger ${event} event for ${endpoint.name}:${endpoint.number}`);
       }
     }
