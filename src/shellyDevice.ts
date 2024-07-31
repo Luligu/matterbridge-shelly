@@ -35,6 +35,7 @@ import { WsClient } from './wsClient.js';
 import { Shelly } from './shelly.js';
 import { ShellyData } from './shellyTypes.js';
 import { ShellyComponent } from './shellyComponent.js';
+import { CoapServer } from './coapServer.js';
 
 export class ShellyDevice extends EventEmitter {
   readonly shelly: Shelly;
@@ -280,7 +281,7 @@ export class ShellyDevice extends EventEmitter {
 
     if (statusPayload) device.update(statusPayload);
 
-    // For gen 1 devices check if CoIoT is enabled and peer is set correctly: 192.168.1.189:5683
+    // For gen 1 devices check if CoIoT is enabled and peer is set correctly: like <matterbridge-ipv4>:5683 e.g. 192.168.1.189:5683
     if (device.gen === 1) {
       const CoIoT = device.getComponent('coiot');
       if (CoIoT) {
@@ -308,20 +309,17 @@ export class ShellyDevice extends EventEmitter {
       const lastSeenDate = new Date(device.lastseen);
       const lastSeenDateString = lastSeenDate.toLocaleString();
       if (Date.now() - device.lastseen > 10 * 60 * 1000) {
-        log.warn(`Device ${hk}${device.id}${wr} host ${zb}${device.host}${wr} has not been seen for 10 minutes (last time: ${CYAN}${lastSeenDateString}${wr}).`);
-        device.online = false;
-        device.emit('offline');
+        // log.warn(`Device ${hk}${device.id}${wr} host ${zb}${device.host}${wr} has not been seen for 10 minutes (last time: ${CYAN}${lastSeenDateString}${wr}).`);
         log.info(`Fetching update for device ${hk}${device.id}${nf} host ${zb}${device.host}${nf}.`);
         device.fetchUpdate(); // We don't await for the update to complete
       } else {
         log.debug(`Device ${hk}${device.id}${db} host ${zb}${device.host}${db} has been seen the last time: ${CYAN}${lastSeenDateString}${db}.`);
-        device.online = true;
-        device.emit('online');
       }
+
       // Check WebSocket client for gen 2 and 3 devices
       if (device.gen === 2 || device.gen === 3) {
         if (device.wsClient?.isConnected === false) {
-          log.warn(`WebSocket client for device ${hk}${device.id}${wr} host ${zb}${device.host}${wr} is not connected.`);
+          log.warn(`WebSocket client for device ${hk}${device.id}${wr} host ${zb}${device.host}${wr} is not connected. Starting...`);
           device.wsClient?.start();
         }
       }
@@ -329,9 +327,10 @@ export class ShellyDevice extends EventEmitter {
 
     // Start WebSocket client for gen 2 and 3 devices
     if (device.gen === 2 || device.gen === 3) {
-      device.wsClient = new WsClient(host, 'tango');
+      device.wsClient = new WsClient(host, shelly.password);
       device.startWsClientTimeout = setTimeout(() => {
-        device.wsClient?.start();
+        // Start WebSocket client after 10 seconds only if it's not a cached device. Will try it in the last seen interval.
+        if (!host.endsWith('.json')) device.wsClient?.start();
       }, 10 * 1000);
 
       device.wsClient.on('update', (message) => {
@@ -449,6 +448,11 @@ export class ShellyDevice extends EventEmitter {
       this.emit('offline');
       return null;
     }
+    if (this.cached) {
+      this.cached = false;
+      // Check if device is a cached device and register it to the CoAP server
+      await this.shelly.coapServer?.registerDevice(this.host);
+    }
     this.online = true;
     this.emit('online');
     this.update(status);
@@ -521,7 +525,7 @@ export class ShellyDevice extends EventEmitter {
       const headers = options.headers as Record<string, string>;
       log.debug(
         `${GREY}Fetching shelly gen ${CYAN}${gen}${GREY} host ${CYAN}${host}${GREY} service ${CYAN}${service}${GREY}` +
-          `${params ? ` with ${CYAN}` + JSON.stringify(params) + `${GREY}` : ''} url ${BLUE}${url}${RESET}`,
+        `${params ? ` with ${CYAN}` + JSON.stringify(params) + `${GREY}` : ''} url ${BLUE}${url}${RESET}`,
       );
       log.debug(`${GREY}options: ${JSON.stringify(options)}${RESET}`);
       let response;
@@ -564,7 +568,7 @@ export class ShellyDevice extends EventEmitter {
         }
         log.error(
           `Response error fetching shelly gen ${gen} host ${host} service ${service}${params ? ' with ' + JSON.stringify(params) : ''} url ${url}:` +
-            ` ${response.status} (${response.statusText})`,
+          ` ${response.status} (${response.statusText})`,
         );
         return null;
       }

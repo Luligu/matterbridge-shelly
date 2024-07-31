@@ -34,7 +34,7 @@ export class Shelly extends EventEmitter {
   private readonly _devices = new Map<string, ShellyDevice>();
   private readonly log: AnsiLogger;
   private mdnsScanner: MdnsScanner | undefined;
-  private coapServer: CoapServer | undefined;
+  public coapServer: CoapServer | undefined;
   private coapServerTimeout?: NodeJS.Timeout;
   public username: string | undefined;
   public password: string | undefined;
@@ -108,8 +108,8 @@ export class Shelly extends EventEmitter {
       return this;
     }
     this._devices.set(device.id, device);
-    if (device.gen === 1 && !device.cached && !device.host.endsWith('.json')) {
-      await this.coapServer?.registerDevice(device.host);
+    if (device.gen === 1) {
+      if (!device.cached && !device.host.endsWith('.json')) await this.coapServer?.registerDevice(device.host);
       this.startCoap(10000);
     }
     this.emit('add', device);
