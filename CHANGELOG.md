@@ -23,6 +23,10 @@ If you like this project and find it useful, please consider giving it a star on
 - [shelly]: Verified shelly1minig3 with firmware v. 1.4.0 (mdns is not working)
 - [shelly]: Verified shelly1pmminig3 with firmware v. 1.4.0 (mdns is not working)
 
+- [shelly]: Verified shelly1 with firmware v. 1.14.0
+- [shelly]: Verified shelly1l with firmware v. 1.14.0
+- [shelly]: Verified shellybutton1 with firmware v. 1.14.0
+
 ### Changed
 
 - [package]: Updated dependencies.

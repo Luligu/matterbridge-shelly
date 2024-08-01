@@ -2,7 +2,7 @@
 import dgram from 'dgram';
 import { AnsiLogger, CYAN, er, GREEN, idn, ign, LogLevel, nf, rs, TimestampFormat } from 'node-ansi-logger';
 import os, { NetworkInterfaceInfoIPv4, NetworkInterfaceInfoIPv6 } from 'os';
-import dnsPacket from 'dns-packet';
+// import dnsPacket from 'dns-packet';
 
 // https://github.com/mafintosh/dns-packet
 
@@ -15,17 +15,20 @@ class MdnsScanner {
   private multicastAddressIpv6 = 'ff02::fb';
   private multicastPort = 5353;
   private useIpv4Only: boolean;
-  // private multicastAddress = '224.0.1.187';
+
+  // private multicastAddressIpv4 = '224.0.1.187';
   // private multicastPort = 5683;
+
   private networkInterfaceAddressIpv4: string | undefined;
   private networkInterfaceAddressIpv6: string | undefined;
   private networkInterfaceScopeIpv6: string | undefined;
+
+  public decodeError = false;
 
   public devices = new Map<string, { address: string; port: number }>();
 
   constructor(networkInterface?: string, useIpv4Only = false) {
     this.log = new AnsiLogger({ logName: 'MdnsScanner', logTimestampFormat: TimestampFormat.TIME_MILLIS, logLevel: LogLevel.DEBUG });
-
     this.useIpv4Only = useIpv4Only;
 
     this.networkInterfaceAddressIpv4 = this.getIpv4InterfaceAddress(networkInterface)?.address;
@@ -73,8 +76,15 @@ class MdnsScanner {
   private onMessage = (msg: Buffer, rinfo: dgram.RemoteInfo) => {
     this.log.info(`Received message from ${ign}${rinfo.address}:${rinfo.port}${rs}`);
     this.devices.set(rinfo.address, { address: rinfo.address, port: rinfo.port });
-    console.log(dnsPacket.decode(msg));
-    // this.parseMdnsResponse(msg);
+    /*
+    try {
+      dnsPacket.decode(msg);
+      this.parseMdnsResponse(msg);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error) {
+      this.log.error(`Failed to decode mDNS message from ${rinfo.address}:${rinfo.port}`);
+    }
+    */
   };
 
   private onError = (err: Error) => {
@@ -85,6 +95,7 @@ class MdnsScanner {
 
   private onWarning = (err: Error) => {
     this.log.error(`Socket warning:\n${err.message}`);
+    this.decodeError = true;
   };
 
   public query(name = '_services._dns-sd._udp.local', type = 'PTR') {
@@ -469,9 +480,10 @@ class MdnsScanner {
 
 MdnsScanner.listNetworkInterfaces(); // List available network interfaces
 
-const scanner = new MdnsScanner(process.argv[2]);
+const scanner = new MdnsScanner(process.argv[2], true);
 
-scanner.query('_http._tcp.local');
+scanner.query('_http._tcp.local', 'PTR');
+scanner.query('_shelly._tcp.local', 'PTR');
 
 setTimeout(() => {
   // scanner.stop();
@@ -493,6 +505,41 @@ process.on('SIGINT', () => {
     console.log(`Device: ${device.address}:${device.port}`);
   });
 });
+
+/*
+[19:17:15.075] [MdnsScanner] Failed to decode mDNS message from 192.168.1.218:5353
+[19:17:15.078] [MdnsScanner] Failed to decode mDNS message from 192.168.1.237:5353
+[19:17:15.078] [MdnsScanner] Failed to decode mDNS message from 192.168.1.228:5353
+[19:17:15.079] [MdnsScanner] Failed to decode mDNS message from 192.168.1.229:5353
+[19:17:15.080] [MdnsScanner] Failed to decode mDNS message from 192.168.1.217:5353
+[19:17:15.080] [MdnsScanner] Failed to decode mDNS message from 192.168.1.224:5353
+[19:17:15.081] [MdnsScanner] Failed to decode mDNS message from 192.168.1.239:5353
+[19:17:15.081] [MdnsScanner] Failed to decode mDNS message from 192.168.1.238:5353
+[19:17:18.040] [MdnsScanner] Failed to decode mDNS message from 192.168.1.218:5353
+[19:17:18.041] [MdnsScanner] Failed to decode mDNS message from 192.168.1.228:5353
+[19:17:18.043] [MdnsScanner] Failed to decode mDNS message from 192.168.1.229:5353
+[19:17:18.043] [MdnsScanner] Failed to decode mDNS message from 192.168.1.237:5353
+[19:17:18.044] [MdnsScanner] Failed to decode mDNS message from 192.168.1.239:5353
+[19:17:18.044] [MdnsScanner] Failed to decode mDNS message from 192.168.1.224:5353
+[19:17:18.045] [MdnsScanner] Failed to decode mDNS message from 192.168.1.217:5353
+[19:17:18.045] [MdnsScanner] Failed to decode mDNS message from 192.168.1.238:5353
+[19:18:04.525] [MdnsScanner] Failed to decode mDNS message from 192.168.1.237:5353
+[19:18:04.527] [MdnsScanner] Failed to decode mDNS message from 192.168.1.239:5353
+[19:18:04.528] [MdnsScanner] Failed to decode mDNS message from 192.168.1.238:5353
+[19:18:04.529] [MdnsScanner] Failed to decode mDNS message from 192.168.1.218:5353
+[19:18:04.529] [MdnsScanner] Failed to decode mDNS message from 192.168.1.224:5353
+[19:18:04.530] [MdnsScanner] Failed to decode mDNS message from 192.168.1.229:5353
+[19:18:04.531] [MdnsScanner] Failed to decode mDNS message from 192.168.1.217:5353
+[19:18:04.622] [MdnsScanner] Failed to decode mDNS message from 192.168.1.228:5353
+[19:18:07.497] [MdnsScanner] Failed to decode mDNS message from 192.168.1.239:5353
+[19:18:07.498] [MdnsScanner] Failed to decode mDNS message from 192.168.1.229:5353
+[19:18:07.499] [MdnsScanner] Failed to decode mDNS message from 192.168.1.238:5353
+[19:18:07.500] [MdnsScanner] Failed to decode mDNS message from 192.168.1.218:5353
+[19:18:07.500] [MdnsScanner] Failed to decode mDNS message from 192.168.1.237:5353
+[19:18:07.501] [MdnsScanner] Failed to decode mDNS message from 192.168.1.217:5353
+[19:18:07.502] [MdnsScanner] Failed to decode mDNS message from 192.168.1.224:5353
+[19:18:07.502] [MdnsScanner] Failed to decode mDNS message from 192.168.1.228:5353
+*/
 
 /*
 [17:52:08.021] [MdnsScanner] Received message from 192.168.1.181:5353

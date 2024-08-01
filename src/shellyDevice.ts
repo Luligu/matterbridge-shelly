@@ -318,7 +318,7 @@ export class ShellyDevice extends EventEmitter {
       // Check WebSocket client for gen 2 and 3 devices
       if (device.gen === 2 || device.gen === 3) {
         if (device.wsClient?.isConnected === false) {
-          log.warn(`WebSocket client for device ${hk}${device.id}${wr} host ${zb}${device.host}${wr} is not connected. Starting...`);
+          log.warn(`WebSocket client for device ${hk}${device.id}${wr} host ${zb}${device.host}${wr} is not connected. Starting connection...`);
           device.wsClient?.start();
         }
       }
@@ -442,7 +442,7 @@ export class ShellyDevice extends EventEmitter {
     const service = this.gen === 1 ? 'status' : 'Shelly.GetStatus';
     const status = await ShellyDevice.fetch(this.shelly, this.log, this.host, service);
     if (!status) {
-      this.log.error(`Error fetching device ${this.id} status. No data found. The device may be offline.`);
+      this.log.warn(`Error fetching status for device ${hk}${this.id}${wr} host ${zb}${this.host}${wr}. No data found. The device may be offline.`);
       this.online = false;
       this.emit('offline');
       return null;
@@ -450,8 +450,9 @@ export class ShellyDevice extends EventEmitter {
     if (this.cached) {
       this.cached = false;
       // Check if device is a cached device and register it to the CoAP server
-      await this.shelly.coapServer?.registerDevice(this.host);
+      if (this.gen === 1) await this.shelly.coapServer?.registerDevice(this.host);
     }
+    if (!this.online) this.log.info(`The device ${hk}${this.id}${nf} host ${zb}${this.host}${nf} is online.`);
     this.online = true;
     this.emit('online');
     this.update(status);
