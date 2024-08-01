@@ -2,7 +2,7 @@
 import dgram from 'dgram';
 import { AnsiLogger, CYAN, er, GREEN, idn, ign, LogLevel, nf, rs, TimestampFormat } from 'node-ansi-logger';
 import os, { NetworkInterfaceInfoIPv4, NetworkInterfaceInfoIPv6 } from 'os';
-// import dnsPacket from 'dns-packet';
+import dnsPacket from 'dns-packet';
 
 // https://github.com/mafintosh/dns-packet
 
@@ -20,6 +20,8 @@ class MdnsScanner {
   private networkInterfaceAddressIpv4: string | undefined;
   private networkInterfaceAddressIpv6: string | undefined;
   private networkInterfaceScopeIpv6: string | undefined;
+
+  public devices = new Map<string, { address: string; port: number }>();
 
   constructor(networkInterface?: string, useIpv4Only = false) {
     this.log = new AnsiLogger({ logName: 'MdnsScanner', logTimestampFormat: TimestampFormat.TIME_MILLIS, logLevel: LogLevel.DEBUG });
@@ -70,8 +72,9 @@ class MdnsScanner {
 
   private onMessage = (msg: Buffer, rinfo: dgram.RemoteInfo) => {
     this.log.info(`Received message from ${ign}${rinfo.address}:${rinfo.port}${rs}`);
-    // if (rinfo.address === '192.168.1.237') console.log(dnsPacket.decode(msg));
-    this.parseMdnsResponse(msg);
+    this.devices.set(rinfo.address, { address: rinfo.address, port: rinfo.port });
+    console.log(dnsPacket.decode(msg));
+    // this.parseMdnsResponse(msg);
   };
 
   private onError = (err: Error) => {
@@ -476,5 +479,290 @@ setTimeout(() => {
 
 process.on('SIGINT', () => {
   scanner.stop();
-  // process.exit();
+
+  // Collect devices into an array
+  const devicesArray = Array.from(scanner.devices.entries());
+
+  // Sort the array by device address
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  devicesArray.sort(([keyA, deviceA], [keyB, deviceB]) => deviceA.address.localeCompare(deviceB.address));
+
+  // Log the sorted devices
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  devicesArray.forEach(([key, device]) => {
+    console.log(`Device: ${device.address}:${device.port}`);
+  });
 });
+
+/*
+[17:52:08.021] [MdnsScanner] Received message from 192.168.1.181:5353
+{
+  id: 0,
+  type: 'query',
+  flags: 0,
+  flag_qr: false,
+  opcode: 'QUERY',
+  flag_aa: false,
+  flag_tc: false,
+  flag_rd: false,
+  flag_ra: false,
+  flag_z: false,
+  flag_ad: false,
+  flag_cd: false,
+  rcode: 'NOERROR',
+  questions: [
+    { name: '_shelly._tcp.local', type: 'PTR', class: 'UNKNOWN_32769' }
+  ],
+  answers: [
+    {
+      name: '_shelly._tcp.local',
+      type: 'PTR',
+      ttl: 114,
+      class: 'IN',
+      flush: false,
+      data: 'shellyplus1-e465b8f3028c._shelly._tcp.local'
+    },
+    {
+      name: '_shelly._tcp.local',
+      type: 'PTR',
+      ttl: 114,
+      class: 'IN',
+      flush: false,
+      data: 'shelly1pmmini-348518e04d44._shelly._tcp.local'
+    },
+    {
+      name: '_shelly._tcp.local',
+      type: 'PTR',
+      ttl: 114,
+      class: 'IN',
+      flush: false,
+      data: 'shellyplus2pm-30c92286cb68._shelly._tcp.local'
+    },
+    {
+      name: '_shelly._tcp.local',
+      type: 'PTR',
+      ttl: 114,
+      class: 'IN',
+      flush: false,
+      data: 'shellyplusi4-cc7b5c8aea2c._shelly._tcp.local'
+    },
+    {
+      name: '_shelly._tcp.local',
+      type: 'PTR',
+      ttl: 114,
+      class: 'IN',
+      flush: false,
+      data: 'shellyplus1pm-441793d69718._shelly._tcp.local'
+    },
+    {
+      name: '_shelly._tcp.local',
+      type: 'PTR',
+      ttl: 114,
+      class: 'IN',
+      flush: false,
+      data: 'shelly1mini-348518e0e804._shelly._tcp.local'
+    },
+    {
+      name: '_shelly._tcp.local',
+      type: 'PTR',
+      ttl: 114,
+      class: 'IN',
+      flush: false,
+      data: 'shellyplus2pm-5443b23d81f8._shelly._tcp.local'
+    },
+    {
+      name: '_shelly._tcp.local',
+      type: 'PTR',
+      ttl: 114,
+      class: 'IN',
+      flush: false,
+      data: 'shellyplus2pm-30c922810da0._shelly._tcp.local'
+    },
+    {
+      name: '_shelly._tcp.local',
+      type: 'PTR',
+      ttl: 115,
+      class: 'IN',
+      flush: false,
+      data: 'shellypro2pm-ec62608c9c00._shelly._tcp.local'
+    },
+    {
+      name: '_shelly._tcp.local',
+      type: 'PTR',
+      ttl: 115,
+      class: 'IN',
+      flush: false,
+      data: 'shellypro1pm-ec62608ab9a4._shelly._tcp.local'
+    },
+    {
+      name: '_shelly._tcp.local',
+      type: 'PTR',
+      ttl: 115,
+      class: 'IN',
+      flush: false,
+      data: 'shelly1pmminig3-543204519264._shelly._tcp.local'
+    },
+    {
+      name: '_shelly._tcp.local',
+      type: 'PTR',
+      ttl: 115,
+      class: 'IN',
+      flush: false,
+      data: 'shellypmminig3-84fce63957f4._shelly._tcp.local'
+    },
+    {
+      name: '_shelly._tcp.local',
+      type: 'PTR',
+      ttl: 115,
+      class: 'IN',
+      flush: false,
+      data: 'shelly1minig3-543204547478._shelly._tcp.local'
+    },
+    {
+      name: '_shelly._tcp.local',
+      type: 'PTR',
+      ttl: 115,
+      class: 'IN',
+      flush: false,
+      data: 'shellypro4pm-34987a67d7d0._shelly._tcp.local'
+    }
+  ],
+  authorities: [],
+  additionals: []
+}
+[17:52:08.030] [MdnsScanner] Received message from fe80::2c:2369:caeb:83e2%9:5353
+{
+  id: 0,
+  type: 'query',
+  flags: 0,
+  flag_qr: false,
+  opcode: 'QUERY',
+  flag_aa: false,
+  flag_tc: false,
+  flag_rd: false,
+  flag_ra: false,
+  flag_z: false,
+  flag_ad: false,
+  flag_cd: false,
+  rcode: 'NOERROR',
+  questions: [
+    { name: '_shelly._tcp.local', type: 'PTR', class: 'UNKNOWN_32769' }
+  ],
+  answers: [
+    {
+      name: '_shelly._tcp.local',
+      type: 'PTR',
+      ttl: 114,
+      class: 'IN',
+      flush: false,
+      data: 'shellyplus1-e465b8f3028c._shelly._tcp.local'
+    },
+    {
+      name: '_shelly._tcp.local',
+      type: 'PTR',
+      ttl: 114,
+      class: 'IN',
+      flush: false,
+      data: 'shelly1pmmini-348518e04d44._shelly._tcp.local'
+    },
+    {
+      name: '_shelly._tcp.local',
+      type: 'PTR',
+      ttl: 114,
+      class: 'IN',
+      flush: false,
+      data: 'shellyplus2pm-30c92286cb68._shelly._tcp.local'
+    },
+    {
+      name: '_shelly._tcp.local',
+      type: 'PTR',
+      ttl: 114,
+      class: 'IN',
+      flush: false,
+      data: 'shellyplusi4-cc7b5c8aea2c._shelly._tcp.local'
+    },
+    {
+      name: '_shelly._tcp.local',
+      type: 'PTR',
+      ttl: 114,
+      class: 'IN',
+      flush: false,
+      data: 'shellyplus1pm-441793d69718._shelly._tcp.local'
+    },
+    {
+      name: '_shelly._tcp.local',
+      type: 'PTR',
+      ttl: 114,
+      class: 'IN',
+      flush: false,
+      data: 'shelly1mini-348518e0e804._shelly._tcp.local'
+    },
+    {
+      name: '_shelly._tcp.local',
+      type: 'PTR',
+      ttl: 114,
+      class: 'IN',
+      flush: false,
+      data: 'shellyplus2pm-5443b23d81f8._shelly._tcp.local'
+    },
+    {
+      name: '_shelly._tcp.local',
+      type: 'PTR',
+      ttl: 114,
+      class: 'IN',
+      flush: false,
+      data: 'shellyplus2pm-30c922810da0._shelly._tcp.local'
+    },
+    {
+      name: '_shelly._tcp.local',
+      type: 'PTR',
+      ttl: 115,
+      class: 'IN',
+      flush: false,
+      data: 'shellypro2pm-ec62608c9c00._shelly._tcp.local'
+    },
+    {
+      name: '_shelly._tcp.local',
+      type: 'PTR',
+      ttl: 115,
+      class: 'IN',
+      flush: false,
+      data: 'shellypro1pm-ec62608ab9a4._shelly._tcp.local'
+    },
+    {
+      name: '_shelly._tcp.local',
+      type: 'PTR',
+      ttl: 115,
+      class: 'IN',
+      flush: false,
+      data: 'shelly1pmminig3-543204519264._shelly._tcp.local'
+    },
+    {
+      name: '_shelly._tcp.local',
+      type: 'PTR',
+      ttl: 115,
+      class: 'IN',
+      flush: false,
+      data: 'shellypmminig3-84fce63957f4._shelly._tcp.local'
+    },
+    {
+      name: '_shelly._tcp.local',
+      type: 'PTR',
+      ttl: 115,
+      class: 'IN',
+      flush: false,
+      data: 'shelly1minig3-543204547478._shelly._tcp.local'
+    },
+    {
+      name: '_shelly._tcp.local',
+      type: 'PTR',
+      ttl: 115,
+      class: 'IN',
+      flush: false,
+      data: 'shellypro4pm-34987a67d7d0._shelly._tcp.local'
+    }
+  ],
+  authorities: [],
+  additionals: []
+}
+*/
