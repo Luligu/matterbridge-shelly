@@ -14,6 +14,9 @@ describe('Shelly devices test', () => {
   const log = new AnsiLogger({ logName: 'shellyDeviceTest', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: false });
   const shelly = new Shelly(log, 'admin', 'tango');
 
+  const firmwareGen1 = '1.14.0-gcb84623';
+  const firmwareGen2 = '1.4.0-gb2aeadb';
+
   beforeAll(() => {
     consoleLogSpy = jest.spyOn(console, 'log').mockImplementation((...args: any[]) => {
       // console.error(`Mocked console.log: ${args}`);
@@ -138,7 +141,7 @@ describe('Shelly devices test', () => {
     let device: ShellyDevice | undefined = undefined;
 
     beforeEach(async () => {
-      device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shellyplus2pm-5443b23d81f8.roller.json'));
+      device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shellyplus2pm-5443B23D81F8.cover.json'));
     });
 
     afterEach(() => {
@@ -147,10 +150,10 @@ describe('Shelly devices test', () => {
 
     test('Create a gen 2 device', async () => {
       expect(device).not.toBeUndefined();
-      expect(device?.host).toBe(path.join('src', 'mock', 'shellyplus2pm-5443b23d81f8.roller.json'));
+      expect(device?.host).toBe(path.join('src', 'mock', 'shellyplus2pm-5443B23D81F8.cover.json'));
       expect(device?.model).toBe('SNSW-102P16EU');
       expect(device?.id).toBe('shellyplus2pm-5443B23D81F8');
-      expect(device?.firmware).toBe('1.3.1-gd8534ee');
+      expect(device?.firmware).toBe(firmwareGen2);
       expect(device?.auth).toBe(false);
       expect(device?.gen).toBe(2);
       expect(device?.lastseen).not.toBe(0);
@@ -159,7 +162,7 @@ describe('Shelly devices test', () => {
     test('Create a gen 2 device with name not null', async () => {
       expect(device).not.toBeUndefined();
       expect(device?.name).not.toBeNull();
-      expect(device?.name).toBe('My Shelly 2PM plus');
+      expect(device?.name).toBe('My Shelly 2PM PLUS');
       expect(device?.lastseen).not.toBe(0);
     });
 
@@ -215,7 +218,7 @@ describe('Shelly devices test', () => {
       expect(switch0?.logComponent()).toBe(24);
       expect(switch0?.hasProperty('name')).toBeTruthy();
       expect(switch0?.getProperty('name')).not.toBeUndefined();
-      expect(switch0?.getValue('name')).toBeNull();
+      expect(switch0?.getValue('name')).toBe('My Shelly Plus 2 PM');
       expect(switch0?.getValue('temperature')).toBeDefined();
       expect(switch0?.getValue('output')).toBe(false);
       expect(switch0?.getValue('state')).toBe(false);
@@ -225,7 +228,7 @@ describe('Shelly devices test', () => {
       expect(switch1?.logComponent()).toBe(24);
       expect(switch1?.hasProperty('name')).toBeTruthy();
       expect(switch1?.getProperty('name')).not.toBeUndefined();
-      expect(switch1?.getValue('name')).toBeNull();
+      expect(switch1?.getValue('name')).toBe('My Shelly Plus 2 PM ch2');
       expect(switch1?.getValue('temperature')).toBeDefined();
       expect(switch1?.getValue('output')).toBe(false);
       expect(switch1?.getValue('state')).toBe(false);
@@ -242,7 +245,7 @@ describe('Shelly devices test', () => {
       expect(device?.host).toBe(path.join('src', 'mock', 'shellyplus1pm-441793d69718.json'));
       expect(device?.model).toBe('SNSW-001P16EU');
       expect(device?.id).toBe('shellyplus1pm-441793D69718');
-      expect(device?.firmware).toBe('1.3.2-g34c651b');
+      expect(device?.firmware).toBe(firmwareGen2);
       expect(device?.auth).toBe(false);
       expect(device?.gen).toBe(2);
       expect(device.sleepMode).toBe(false);
@@ -259,7 +262,7 @@ describe('Shelly devices test', () => {
       expect(device?.host).toBe(path.join('src', 'mock', 'shellypmminig3-84fce63957f4.json'));
       expect(device?.model).toBe('S3PM-001PCEU16');
       expect(device?.id).toBe('shellypmminig3-84FCE63957F4');
-      expect(device?.firmware).toBe('1.3.2-g34c651b');
+      expect(device?.firmware).toBe(firmwareGen2);
       expect(device?.auth).toBe(false);
       expect(device?.gen).toBe(3);
       if (device) device.destroy();
@@ -275,7 +278,7 @@ describe('Shelly devices test', () => {
       expect(device?.host).toBe(path.join('src', 'mock', 'shelly1minig3-543204547478.json'));
       expect(device?.model).toBe('S3SW-001X8EU');
       expect(device?.id).toBe('shelly1minig3-543204547478');
-      expect(device?.firmware).toBe('1.3.2-g34c651b');
+      expect(device?.firmware).toBe(firmwareGen2);
       expect(device?.auth).toBe(true);
       expect(device?.gen).toBe(3);
       expect(device?.lastseen).not.toBe(0);
