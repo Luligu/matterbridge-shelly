@@ -1,14 +1,14 @@
 {
   "shelly": {
-    "name": "My Shelly PM mini",
-    "id": "shellypmminig3-84fce63957f4",
-    "mac": "84FCE63957F4",
-    "slot": 1,
-    "model": "S3PM-001PCEU16",
-    "gen": 3,
-    "fw_id": "20240726-114522/1.4.0-gb2aeadb",
+    "name": null,
+    "id": "shelly1mini-348518e0e804",
+    "mac": "348518E0E804",
+    "slot": 0,
+    "model": "SNSW-001X8EU",
+    "gen": 2,
+    "fw_id": "20240726-114504/1.4.0-gb2aeadb",
     "ver": "1.4.0",
-    "app": "MiniPMG3",
+    "app": "Plus1Mini",
     "auth_en": false,
     "auth_domain": null
   },
@@ -22,34 +22,46 @@
         "enable": false
       }
     },
-    "bthome": {},
     "cloud": {
       "enable": true,
       "server": "shelly-103-eu.shelly.cloud:6022/jrpc"
     },
+    "input:0": {
+      "id": 0,
+      "name": null,
+      "type": "switch",
+      "enable": true,
+      "invert": false,
+      "factory_reset": true
+    },
     "mqtt": {
       "enable": false,
       "server": null,
-      "client_id": "shellypmminig3-84fce63957f4",
+      "client_id": "shelly1mini-348518e0e804",
       "user": null,
       "ssl_ca": null,
-      "topic_prefix": "shellypmminig3-84fce63957f4",
+      "topic_prefix": "shelly1mini-348518e0e804",
       "rpc_ntf": true,
       "status_ntf": false,
       "use_client_cert": false,
       "enable_rpc": true,
       "enable_control": true
     },
-    "pm1:0": {
+    "switch:0": {
       "id": 0,
       "name": null,
-      "reverse": false
+      "in_mode": "follow",
+      "initial_state": "match_input",
+      "auto_on": false,
+      "auto_on_delay": 60,
+      "auto_off": false,
+      "auto_off_delay": 60
     },
     "sys": {
       "device": {
-        "name": "My Shelly PM mini",
-        "mac": "84FCE63957F4",
-        "fw_id": "20240726-114522/1.4.0-gb2aeadb",
+        "name": null,
+        "mac": "348518E0E804",
+        "fw_id": "20240726-114504/1.4.0-gb2aeadb",
         "discoverable": true,
         "eco_mode": false
       },
@@ -79,11 +91,11 @@
       "sntp": {
         "server": "time.google.com"
       },
-      "cfg_rev": 16
+      "cfg_rev": 14
     },
     "wifi": {
       "ap": {
-        "ssid": "ShellyPMMiniG3-84FCE63957F4",
+        "ssid": "Shelly1Mini-348518E0E804",
         "is_open": true,
         "enable": false,
         "range_extender": {
@@ -123,64 +135,47 @@
   },
   "status": {
     "ble": {},
-    "bthome": {
-      "errors": [
-        "bluetooth_disabled"
-      ]
-    },
     "cloud": {
       "connected": true
+    },
+    "input:0": {
+      "id": 0,
+      "state": false
     },
     "mqtt": {
       "connected": false
     },
-    "pm1:0": {
+    "switch:0": {
       "id": 0,
-      "voltage": 235.4,
-      "current": 0.068,
-      "apower": 5.8,
-      "freq": 50.1,
-      "aenergy": {
-        "total": 5670.715,
-        "by_minute": [
-          0,
-          213.298,
-          0
-        ],
-        "minute_ts": 1722525300
-      },
-      "ret_aenergy": {
-        "total": 0,
-        "by_minute": [
-          0,
-          0,
-          0
-        ],
-        "minute_ts": 1722525300
+      "source": "HTTP_in",
+      "output": false,
+      "temperature": {
+        "tC": 58.8,
+        "tF": 137.9
       }
     },
     "sys": {
-      "mac": "84FCE63957F4",
+      "mac": "348518E0E804",
       "restart_required": false,
       "time": "17:15",
       "unixtime": 1722525319,
-      "uptime": 19371,
-      "ram_size": 260700,
-      "ram_free": 134844,
-      "fs_size": 1048576,
-      "fs_free": 614400,
-      "cfg_rev": 16,
+      "uptime": 1418,
+      "ram_size": 262400,
+      "ram_free": 142920,
+      "fs_size": 393216,
+      "fs_free": 114688,
+      "cfg_rev": 14,
       "kvs_rev": 0,
-      "schedule_rev": 3,
+      "schedule_rev": 1,
       "webhook_rev": 0,
       "available_updates": {},
-      "reset_reason": 1
+      "reset_reason": 3
     },
     "wifi": {
-      "sta_ip": "192.168.1.220",
+      "sta_ip": "192.168.1.238",
       "status": "got ip",
       "ssid": "FibreBox_X6-12A4C7",
-      "rssi": -50
+      "rssi": -59
     },
     "ws": {
       "connected": false

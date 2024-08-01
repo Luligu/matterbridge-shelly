@@ -17,6 +17,11 @@ If you like this project and find it useful, please consider giving it a star on
 - [shelly]: Verified shellyplus2pm profile switch with firmware v. 1.4.0 (mdns is not working)
 - [shelly]: Verified shellyplus2pm profile cover with firmware v. 1.4.0 (mdns is not working)
 - [shelly]: Verified shellyplusi4 with firmware v. 1.4.0 (mdns is not working)
+- [shelly]: Verified shelly1mini with firmware v. 1.4.0 (mdns is not working)
+- [shelly]: Verified shelly1pmmini with firmware v. 1.4.0 (mdns is not working)
+- [shelly]: Verified shellypmminig3 with firmware v. 1.4.0 (mdns is not working)
+- [shelly]: Verified shelly1minig3 with firmware v. 1.4.0 (mdns is not working)
+- [shelly]: Verified shelly1pmminig3 with firmware v. 1.4.0 (mdns is not working)
 
 ### Changed
 

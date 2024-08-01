@@ -145,7 +145,7 @@ export class MdnsScanner extends EventEmitter {
         if (a.type === 'SRV' && (a.name.startsWith('shelly') || a.name.startsWith('Shelly'))) {
           port = a.data.port;
         }
-        if (a.type === 'TXT' && (a.name.startsWith('shelly') || a.name.startsWith('Shelly')) && a.data.toString().includes('gen=2')) {
+        if (a.type === 'TXT' && (a.name.startsWith('shelly') || a.name.startsWith('Shelly')) && a.data.includes('gen=2')) {
           gen = 2;
         }
         if (a.type === 'A' && (a.name.startsWith('shelly') || a.name.startsWith('Shelly'))) {
@@ -155,7 +155,9 @@ export class MdnsScanner extends EventEmitter {
             this.log.debug(`MdnsScanner discovered shelly gen: ${CYAN}${gen}${nf} device id: ${hk}${deviceId}${nf} host: ${zb}${a.data}${nf} port: ${zb}${port}${nf}`);
             this.discoveredDevices.set(deviceId, { id: deviceId, host: a.data, port, gen });
             this.emit('discovered', { id: deviceId, host: a.data, port, gen });
-            if (process.argv.includes('testMdnsScanner')) await this.saveResponse(deviceId, response);
+            if (process.argv.includes('testMdnsScanner')) {
+              await this.saveResponse(deviceId, response);
+            }
           }
         }
       }
@@ -202,7 +204,9 @@ export class MdnsScanner extends EventEmitter {
             this.log.debug(`MdnsScanner discovered shelly gen: ${CYAN}${gen}${nf} device id: ${hk}${deviceId}${nf} host: ${zb}${a.data}${nf} port: ${zb}${port}${nf}`);
             this.discoveredDevices.set(deviceId, { id: deviceId, host: a.data, port, gen });
             this.emit('discovered', { id: deviceId, host: a.data, port, gen });
-            if (process.argv.includes('testMdnsScanner')) await this.saveResponse(deviceId, response);
+            if (process.argv.includes('testMdnsScanner')) {
+              await this.saveResponse(deviceId, response);
+            }
           }
         }
       }
@@ -297,10 +301,10 @@ export class MdnsScanner extends EventEmitter {
         }
       }
       await fs.writeFile(responseFile, JSON.stringify(response, null, 2), 'utf8');
-      this.log.debug(`Saved response file ${responseFile}`);
+      this.log.info(`**Saved shellyId ${shellyId} response file ${responseFile}`);
       return Promise.resolve();
     } catch (err) {
-      this.log.error(`Error saving response file ${responseFile}: ${err}`);
+      this.log.error(`****Error saving shellyId ${shellyId} response file ${responseFile}: ${err}`);
       return Promise.reject(err);
     }
   }
