@@ -1,7 +1,9 @@
 /* eslint-disable no-console */
 import dgram from 'dgram';
 import { AnsiLogger, CYAN, er, GREEN, idn, ign, LogLevel, nf, rs, TimestampFormat } from 'node-ansi-logger';
-import os from 'os';
+import os, { NetworkInterfaceInfoIPv4, NetworkInterfaceInfoIPv6 } from 'os';
+
+// https://github.com/mafintosh/dns-packet
 
 class MdnsScanner {
   private readonly log;
@@ -23,15 +25,8 @@ class MdnsScanner {
 
     this.useIpv4Only = useIpv4Only;
 
-    this.networkInterfaceAddressIpv4 = this.getIpv4InterfaceAddress(networkInterface);
+    this.networkInterfaceAddressIpv4 = this.getIpv4InterfaceAddress(networkInterface)?.address;
     this.log.debug(`Using network interface IPv4 address: ${this.networkInterfaceAddressIpv4}`);
-
-    if (!useIpv4Only) {
-      this.networkInterfaceAddressIpv6 = this.getIpv6InterfaceAddress(networkInterface)?.address;
-      this.networkInterfaceScopeIpv6 = this.getIpv6InterfaceAddress(networkInterface)?.scopeid;
-      this.log.debug(`Using network interface IPv6 address: ${this.networkInterfaceAddressIpv6} scopeid: ${this.networkInterfaceScopeIpv6}`);
-    }
-
     this.socketUdp4 = dgram.createSocket({ type: 'udp4', reuseAddr: true });
     this.socketUdp4.on('message', this.onMessage);
     this.socketUdp4.on('warning', this.onWarning);
@@ -50,6 +45,9 @@ class MdnsScanner {
     });
 
     if (!useIpv4Only) {
+      this.networkInterfaceAddressIpv6 = this.getIpv6InterfaceAddress(networkInterface)?.address;
+      this.networkInterfaceScopeIpv6 = this.getIpv6InterfaceAddress(networkInterface)?.scopeid.toString();
+      this.log.debug(`Using network interface IPv6 address: ${this.networkInterfaceAddressIpv6} scopeid: ${this.networkInterfaceScopeIpv6}`);
       this.socketUdp6 = dgram.createSocket({ type: 'udp6', reuseAddr: true });
       this.socketUdp6.on('message', this.onMessage);
       this.socketUdp6.on('warning', this.onWarning);
@@ -351,7 +349,7 @@ class MdnsScanner {
    * @returns The IPv4 address of the specified network interface or the first external IPv4 interface.
    * @throws Error if no suitable interface or address is found.
    */
-  private getIpv4InterfaceAddress(networkInterface?: string): string | undefined {
+  private getIpv4InterfaceAddress(networkInterface?: string): NetworkInterfaceInfoIPv4 | undefined {
     if (networkInterface === '') networkInterface = undefined;
 
     const interfaces = os.networkInterfaces();
@@ -390,10 +388,10 @@ class MdnsScanner {
       throw new Error(`Interface ${networkInterface} does not have an external IPv4 address`);
     }
 
-    return ipv4Address.address;
+    return ipv4Address as NetworkInterfaceInfoIPv4;
   }
 
-  private getIpv6InterfaceAddress(networkInterface?: string): { address: string; scopeid: string | undefined } | undefined {
+  private getIpv6InterfaceAddress(networkInterface?: string): NetworkInterfaceInfoIPv6 | undefined {
     if (!networkInterface || networkInterface === '') return undefined;
 
     const interfaces = os.networkInterfaces();
@@ -429,21 +427,21 @@ class MdnsScanner {
     // Try to find a global unicast address first
     const globalUnicastAddress = addresses.find((addr) => addr.family === 'IPv6' && !addr.internal && addr.scopeid === 0);
     if (globalUnicastAddress) {
-      return { address: globalUnicastAddress.address, scopeid: globalUnicastAddress.scopeid?.toString() || undefined };
+      return globalUnicastAddress as NetworkInterfaceInfoIPv6;
     }
     this.log.debug('No IPv6 global unicast address found');
 
     // If no global unicast address is found, try to find a unique local address
     const uniqueLocalAddress = addresses.find((addr) => addr.family === 'IPv6' && !addr.internal && addr.address.startsWith('fd'));
     if (uniqueLocalAddress) {
-      return { address: uniqueLocalAddress.address, scopeid: uniqueLocalAddress.scopeid?.toString() || undefined };
+      return uniqueLocalAddress as NetworkInterfaceInfoIPv6;
     }
     this.log.debug('No IPv6 unique local address found');
 
     // If no global unicast address and no unique local address is found, fall back to link-local address and use scopeid
     const linkLocalAddress = addresses.find((addr) => addr.family === 'IPv6' && !addr.internal && addr.address.startsWith('fe80'));
     if (linkLocalAddress) {
-      return { address: linkLocalAddress.address, scopeid: linkLocalAddress.scopeid?.toString() || undefined };
+      return linkLocalAddress as NetworkInterfaceInfoIPv6;
     }
     this.log.debug('No IPv6 link-local address found');
 

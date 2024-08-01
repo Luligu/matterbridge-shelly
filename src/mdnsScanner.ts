@@ -214,7 +214,7 @@ export class MdnsScanner extends EventEmitter {
     });
 
     this.scanner.on('warning', async (err: Error) => {
-      this.log.error(`Warning in mDNS query service: ${err.message}`);
+      this.log.warn(`Warning in mDNS query service: ${err.message}`);
     });
 
     this.scanner.on('ready', async () => {
