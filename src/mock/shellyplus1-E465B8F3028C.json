@@ -1,6 +1,6 @@
 {
   "shelly": {
-    "name": "Shelly 1 PLUS",
+    "name": "My Shelly 1 PLUS",
     "id": "shellyplus1-e465b8f3028c",
     "mac": "E465B8F3028C",
     "slot": 1,
@@ -59,7 +59,7 @@
     },
     "sys": {
       "device": {
-        "name": "Shelly 1 PLUS",
+        "name": "My Shelly 1 PLUS",
         "mac": "E465B8F3028C",
         "fw_id": "20240726-114504/1.4.0-gb2aeadb",
         "discoverable": true,
@@ -92,7 +92,7 @@
       "sntp": {
         "server": "time.google.com"
       },
-      "cfg_rev": 13
+      "cfg_rev": 14
     },
     "wifi": {
       "ap": {
@@ -149,25 +149,25 @@
     "switch:0": {
       "id": 0,
       "source": "HTTP_in",
-      "output": false,
+      "output": true,
       "temperature": {
-        "tC": 57.1,
-        "tF": 134.8
+        "tC": 63.3,
+        "tF": 145.9
       }
     },
     "sys": {
       "mac": "E465B8F3028C",
       "restart_required": false,
-      "time": "14:18",
-      "unixtime": 1722514706,
-      "uptime": 8780,
-      "ram_size": 253880,
-      "ram_free": 134132,
+      "time": "16:20",
+      "unixtime": 1722522023,
+      "uptime": 16097,
+      "ram_size": 253840,
+      "ram_free": 133560,
       "fs_size": 393216,
       "fs_free": 106496,
-      "cfg_rev": 13,
+      "cfg_rev": 14,
       "kvs_rev": 0,
-      "schedule_rev": 5,
+      "schedule_rev": 9,
       "webhook_rev": 0,
       "available_updates": {},
       "reset_reason": 1
@@ -176,7 +176,7 @@
       "sta_ip": "192.168.1.237",
       "status": "got ip",
       "ssid": "FibreBox_X6-12A4C7",
-      "rssi": -50
+      "rssi": -64
     },
     "ws": {
       "connected": false

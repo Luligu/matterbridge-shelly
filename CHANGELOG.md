@@ -13,6 +13,10 @@ If you like this project and find it useful, please consider giving it a star on
 - [shelly]: Verified shellypro2pm profile cover with firmware v. 1.4.0
 - [shelly]: Verified shellypro4pm with firmware v. 1.4.0
 - [shelly]: Verified shellyplus1 with firmware v. 1.4.0 (mdns is not working)
+- [shelly]: Verified shellyplus1pm with firmware v. 1.4.0 (mdns is not working)
+- [shelly]: Verified shellyplus2pm profile switch with firmware v. 1.4.0 (mdns is not working)
+- [shelly]: Verified shellyplus2pm profile cover with firmware v. 1.4.0 (mdns is not working)
+- [shelly]: Verified shellyplusi4 with firmware v. 1.4.0 (mdns is not working)
 
 ### Changed
 

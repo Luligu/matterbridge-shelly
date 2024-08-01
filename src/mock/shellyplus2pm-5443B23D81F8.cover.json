@@ -1,13 +1,13 @@
 {
   "shelly": {
-    "name": "My shelly plus 2PM",
+    "name": "My Shelly 2PM PLUS",
     "id": "shellyplus2pm-5443b23d81f8",
     "mac": "5443B23D81F8",
-    "slot": 0,
+    "slot": 1,
     "model": "SNSW-102P16EU",
     "gen": 2,
-    "fw_id": "20240430-105737/1.3.1-gd8534ee",
-    "ver": "1.3.1",
+    "fw_id": "20240726-114505/1.4.0-gb2aeadb",
+    "ver": "1.4.0",
     "app": "Plus2PM",
     "auth_en": false,
     "auth_domain": null,
@@ -15,7 +15,7 @@
   },
   "settings": {
     "ble": {
-      "enable": true,
+      "enable": false,
       "rpc": {
         "enable": true
       },
@@ -34,8 +34,8 @@
         "idle_power_thr": 2,
         "idle_confirm_period": 0.25
       },
-      "maxtime_open": 10,
-      "maxtime_close": 10,
+      "maxtime_open": 60,
+      "maxtime_close": 60,
       "initial_state": "stopped",
       "invert_directions": false,
       "in_mode": "dual",
@@ -89,18 +89,18 @@
     },
     "sys": {
       "device": {
-        "name": "My Shelly 2PM plus",
+        "name": "My Shelly 2PM PLUS",
         "mac": "5443B23D81F8",
-        "fw_id": "20240430-105737/1.3.1-gd8534ee",
+        "fw_id": "20240726-114505/1.4.0-gb2aeadb",
         "discoverable": true,
         "eco_mode": false,
         "profile": "cover",
         "addon_type": null
       },
       "location": {
-        "tz": null,
-        "lat": null,
-        "lon": null
+        "tz": "Europe/Monaco",
+        "lat": 43.7312,
+        "lon": 7.4138
       },
       "debug": {
         "level": 2,
@@ -115,7 +115,9 @@
           "addr": null
         }
       },
-      "ui_data": {},
+      "ui_data": {
+        "cover": "50"
+      },
       "rpc_udp": {
         "dst_addr": null,
         "listen_port": null
@@ -123,7 +125,7 @@
       "sntp": {
         "server": "time.google.com"
       },
-      "cfg_rev": 26
+      "cfg_rev": 42
     },
     "wifi": {
       "ap": {
@@ -172,24 +174,28 @@
     },
     "cover:0": {
       "id": 0,
-      "source": "timeout",
-      "state": "open",
+      "source": "init",
+      "state": "stopped",
       "apower": 0,
-      "voltage": 232.8,
+      "voltage": 237.3,
       "current": 0,
       "pf": 0,
       "freq": 50,
       "aenergy": {
         "total": 0,
-        "by_minute": [0, 0, 0],
-        "minute_ts": 1718609280
+        "by_minute": [
+          0,
+          0,
+          0
+        ],
+        "minute_ts": 1722517020
       },
       "temperature": {
-        "tC": 53.6,
-        "tF": 128.5
+        "tC": 51.1,
+        "tF": 123.9
       },
       "pos_control": false,
-      "last_direction": "open"
+      "last_direction": null
     },
     "input:0": {
       "id": 0,
@@ -205,29 +211,25 @@
     "sys": {
       "mac": "5443B23D81F8",
       "restart_required": false,
-      "time": "09:28",
-      "unixtime": 1718609333,
-      "uptime": 122263,
-      "ram_size": 260044,
-      "ram_free": 117332,
-      "fs_size": 458752,
-      "fs_free": 131072,
-      "cfg_rev": 26,
+      "time": "14:57",
+      "unixtime": 1722517079,
+      "uptime": 10,
+      "ram_size": 252140,
+      "ram_free": 121712,
+      "fs_size": 393216,
+      "fs_free": 102400,
+      "cfg_rev": 42,
       "kvs_rev": 0,
-      "schedule_rev": 1,
-      "webhook_rev": 1,
-      "available_updates": {
-        "stable": {
-          "version": "1.3.2"
-        }
-      },
-      "reset_reason": 1
+      "schedule_rev": 6,
+      "webhook_rev": 5,
+      "available_updates": {},
+      "reset_reason": 3
     },
     "wifi": {
       "sta_ip": "192.168.1.218",
       "status": "got ip",
       "ssid": "FibreBox_X6-12A4C7",
-      "rssi": -56
+      "rssi": -33
     },
     "ws": {
       "connected": false

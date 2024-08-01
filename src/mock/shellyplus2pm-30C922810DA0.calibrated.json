@@ -1,8 +1,8 @@
 {
   "shelly": {
-    "name": "My Shelly 2PM PLUS",
-    "id": "shellyplus2pm-5443b23d81f8",
-    "mac": "5443B23D81F8",
+    "name": "Bedroom Shutter",
+    "id": "shellyplus2pm-30c922810da0",
+    "mac": "30C922810DA0",
     "slot": 1,
     "model": "SNSW-102P16EU",
     "gen": 2,
@@ -11,7 +11,7 @@
     "app": "Plus2PM",
     "auth_en": false,
     "auth_domain": null,
-    "profile": "switch"
+    "profile": "cover"
   },
   "settings": {
     "ble": {
@@ -26,6 +26,37 @@
     "cloud": {
       "enable": true,
       "server": "shelly-103-eu.shelly.cloud:6022/jrpc"
+    },
+    "cover:0": {
+      "id": 0,
+      "name": null,
+      "motor": {
+        "idle_power_thr": 2,
+        "idle_confirm_period": 0.25
+      },
+      "maxtime_open": 60,
+      "maxtime_close": 60,
+      "initial_state": "stopped",
+      "invert_directions": false,
+      "in_mode": "dual",
+      "swap_inputs": false,
+      "safety_switch": {
+        "enable": false,
+        "direction": "both",
+        "action": "stop",
+        "allowed_move": null
+      },
+      "power_limit": 2800,
+      "voltage_limit": 280,
+      "undervoltage_limit": 0,
+      "current_limit": 10,
+      "obstruction_detection": {
+        "enable": false,
+        "direction": "both",
+        "action": "stop",
+        "power_thr": 206,
+        "holdoff": 1
+      }
     },
     "input:0": {
       "id": 0,
@@ -46,60 +77,30 @@
     "mqtt": {
       "enable": false,
       "server": null,
-      "client_id": "shellyplus2pm-5443b23d81f8",
+      "client_id": "shellyplus2pm-30c922810da0",
       "user": null,
       "ssl_ca": null,
-      "topic_prefix": "shellyplus2pm-5443b23d81f8",
+      "topic_prefix": "shellyplus2pm-30c922810da0",
       "rpc_ntf": true,
       "status_ntf": false,
       "use_client_cert": false,
       "enable_rpc": true,
       "enable_control": true
     },
-    "switch:0": {
-      "id": 0,
-      "name": "My Shelly Plus 2 PM",
-      "in_mode": "follow",
-      "initial_state": "restore_last",
-      "auto_on": false,
-      "auto_on_delay": 60,
-      "auto_off": false,
-      "auto_off_delay": 60,
-      "power_limit": 2800,
-      "voltage_limit": 280,
-      "undervoltage_limit": 0,
-      "autorecover_voltage_errors": false,
-      "current_limit": 10
-    },
-    "switch:1": {
-      "id": 1,
-      "name": "My Shelly Plus 2 PM ch2",
-      "in_mode": "follow",
-      "initial_state": "restore_last",
-      "auto_on": false,
-      "auto_on_delay": 60,
-      "auto_off": false,
-      "auto_off_delay": 60,
-      "power_limit": 2800,
-      "voltage_limit": 280,
-      "undervoltage_limit": 0,
-      "autorecover_voltage_errors": false,
-      "current_limit": 10
-    },
     "sys": {
       "device": {
-        "name": "My Shelly 2PM PLUS",
-        "mac": "5443B23D81F8",
+        "name": "Bedroom Shutter",
+        "mac": "30C922810DA0",
         "fw_id": "20240726-114505/1.4.0-gb2aeadb",
         "discoverable": true,
         "eco_mode": false,
-        "profile": "switch",
+        "profile": "cover",
         "addon_type": null
       },
       "location": {
         "tz": "Europe/Monaco",
-        "lat": 43.7312,
-        "lon": 7.4138
+        "lat": 43.7314,
+        "lon": 7.419
       },
       "debug": {
         "level": 2,
@@ -114,9 +115,7 @@
           "addr": null
         }
       },
-      "ui_data": {
-        "cover": "50"
-      },
+      "ui_data": {},
       "rpc_udp": {
         "dst_addr": null,
         "listen_port": null
@@ -124,11 +123,11 @@
       "sntp": {
         "server": "time.google.com"
       },
-      "cfg_rev": 41
+      "cfg_rev": 17
     },
     "wifi": {
       "ap": {
-        "ssid": "ShellyPlus2PM-5443B23D81F8",
+        "ssid": "ShellyPlus2PM-30C922810DA0",
         "is_open": true,
         "enable": false,
         "range_extender": {
@@ -171,9 +170,35 @@
     "cloud": {
       "connected": true
     },
+    "cover:0": {
+      "id": 0,
+      "source": "limit_switch",
+      "state": "open",
+      "apower": 0,
+      "voltage": 234.2,
+      "current": 0,
+      "pf": 0,
+      "freq": 50,
+      "aenergy": {
+        "total": 61.385,
+        "by_minute": [
+          0,
+          0,
+          0
+        ],
+        "minute_ts": 1722521280
+      },
+      "temperature": {
+        "tC": 53.7,
+        "tF": 128.7
+      },
+      "pos_control": true,
+      "last_direction": "open",
+      "current_pos": 100
+    },
     "input:0": {
       "id": 0,
-      "state": false
+      "state": true
     },
     "input:1": {
       "id": 1,
@@ -182,92 +207,28 @@
     "mqtt": {
       "connected": false
     },
-    "switch:0": {
-      "id": 0,
-      "source": "init",
-      "output": false,
-      "apower": 0,
-      "voltage": 236.9,
-      "freq": 50,
-      "current": 0,
-      "pf": 0,
-      "aenergy": {
-        "total": 38,
-        "by_minute": [
-          0,
-          0,
-          0
-        ],
-        "minute_ts": 1722516960
-      },
-      "ret_aenergy": {
-        "total": 0,
-        "by_minute": [
-          0,
-          0,
-          0
-        ],
-        "minute_ts": 1722516960
-      },
-      "temperature": {
-        "tC": 51.1,
-        "tF": 123.9
-      }
-    },
-    "switch:1": {
-      "id": 1,
-      "source": "init",
-      "output": false,
-      "apower": 0,
-      "voltage": 237,
-      "freq": 50,
-      "current": 0,
-      "pf": 0,
-      "aenergy": {
-        "total": 34,
-        "by_minute": [
-          0,
-          0,
-          0
-        ],
-        "minute_ts": 1722516960
-      },
-      "ret_aenergy": {
-        "total": 0,
-        "by_minute": [
-          0,
-          0,
-          0
-        ],
-        "minute_ts": 1722516960
-      },
-      "temperature": {
-        "tC": 51.1,
-        "tF": 123.9
-      }
-    },
     "sys": {
-      "mac": "5443B23D81F8",
+      "mac": "30C922810DA0",
       "restart_required": false,
-      "time": "14:56",
-      "unixtime": 1722516979,
-      "uptime": 11030,
-      "ram_size": 252140,
-      "ram_free": 125376,
+      "time": "16:08",
+      "unixtime": 1722521333,
+      "uptime": 74628,
+      "ram_size": 252156,
+      "ram_free": 127080,
       "fs_size": 393216,
       "fs_free": 98304,
-      "cfg_rev": 41,
+      "cfg_rev": 17,
       "kvs_rev": 0,
-      "schedule_rev": 5,
-      "webhook_rev": 4,
+      "schedule_rev": 2,
+      "webhook_rev": 1,
       "available_updates": {},
-      "reset_reason": 1
+      "reset_reason": 3
     },
     "wifi": {
-      "sta_ip": "192.168.1.218",
+      "sta_ip": "192.168.1.229",
       "status": "got ip",
       "ssid": "FibreBox_X6-12A4C7",
-      "rssi": -34
+      "rssi": -43
     },
     "ws": {
       "connected": false
