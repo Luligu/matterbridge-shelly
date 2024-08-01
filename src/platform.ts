@@ -462,7 +462,10 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     // create NodeStorageManager
     this.nodeStorageManager = new NodeStorageManager({
       dir: path.join(this.matterbridge.matterbridgeDirectory, 'matterbridge-shelly'),
+      writeQueue: false,
+      expiredInterval: undefined,
       logging: false,
+      forgiveParseErrors: true,
     });
     this.nodeStorage = await this.nodeStorageManager.createStorage('devices');
     if (this.config.resetStorageDiscover === true) {

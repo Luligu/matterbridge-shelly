@@ -2,6 +2,7 @@
 import dgram from 'dgram';
 import { AnsiLogger, CYAN, er, GREEN, idn, ign, LogLevel, nf, rs, TimestampFormat } from 'node-ansi-logger';
 import os, { NetworkInterfaceInfoIPv4, NetworkInterfaceInfoIPv6 } from 'os';
+// import dnsPacket from 'dns-packet';
 
 // https://github.com/mafintosh/dns-packet
 
@@ -69,6 +70,7 @@ class MdnsScanner {
 
   private onMessage = (msg: Buffer, rinfo: dgram.RemoteInfo) => {
     this.log.info(`Received message from ${ign}${rinfo.address}:${rinfo.port}${rs}`);
+    // if (rinfo.address === '192.168.1.237') console.log(dnsPacket.decode(msg));
     this.parseMdnsResponse(msg);
   };
 
@@ -230,12 +232,13 @@ class MdnsScanner {
     while (length !== 0) {
       // Check for pointer
       if ((length & 0xc0) === 0xc0) {
+        this.log.warn(`Pointer found at offset ${offset.toString(16).padStart(4, '0')}`);
         if (!jumped) {
           jumpOffset = offset + 2;
         }
         const pointer = buffer.readUInt16BE(offset) & 0x3fff;
         offset = pointer;
-        length = buffer.readUInt8(offset);
+        length = buffer.readUInt8(offset); // Error here
         jumped = true;
       } else {
         labels.push(buffer.toString('utf8', offset + 1, offset + 1 + length));

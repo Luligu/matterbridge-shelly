@@ -4,7 +4,15 @@ All notable changes to this project will be documented in this file.
 
 If you like this project and find it useful, please consider giving it a star on GitHub at https://github.com/Luligu/matterbridge-shelly and sponsoring it.
 
-## [0.7.6] - 2024-07-29
+## [0.7.6] - 2024-08-01
+
+### Verified
+
+- [shelly]: Verified shellypro1pm with firmware v. 1.4.0
+- [shelly]: Verified shellypro2pm profile switch with firmware v. 1.4.0
+- [shelly]: Verified shellypro2pm profile cover with firmware v. 1.4.0
+- [shelly]: Verified shellypro4pm with firmware v. 1.4.0
+- [shelly]: Verified shellyplus1 with firmware v. 1.4.0 (mdns is not working)
 
 ### Changed
 

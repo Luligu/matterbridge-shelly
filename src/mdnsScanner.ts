@@ -79,7 +79,7 @@ export class MdnsScanner extends EventEmitter {
    * Starts the mDNS query service for shelly devices.
    *
    * @param {number} shutdownTimeout - The timeout value in milliseconds to stop the MdnsScanner (optional, if not provided the MdnsScanner will not stop).
-   * @param {string} interfaceAddress - Explicitly specify a network interface address. Will use all interfaces when not specified.
+   * @param {string} mdnsInterface - Explicitly specify a network interface name. Will use all interfaces when not specified.
    * @param {SocketType} type - Explicitly specify a socket type: "udp4" | "udp6". Default is "udp4".
    * @param {boolean} debug - Indicates whether to enable debug mode (default: false).
    */
@@ -145,7 +145,7 @@ export class MdnsScanner extends EventEmitter {
         if (a.type === 'SRV' && (a.name.startsWith('shelly') || a.name.startsWith('Shelly'))) {
           port = a.data.port;
         }
-        if (a.type === 'TXT' && a.name.startsWith('Shelly') && a.data.toString() === 'gen=2') {
+        if (a.type === 'TXT' && (a.name.startsWith('shelly') || a.name.startsWith('Shelly')) && a.data.toString().includes('gen=2')) {
           gen = 2;
         }
         if (a.type === 'A' && (a.name.startsWith('shelly') || a.name.startsWith('Shelly'))) {

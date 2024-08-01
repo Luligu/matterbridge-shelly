@@ -1,16 +1,17 @@
 {
   "shelly": {
-    "name": "My Shelly 1PM PRO",
-    "id": "shellypro1pm-ec62608ab9a4",
-    "mac": "EC62608AB9A4",
-    "slot": 0,
-    "model": "SPSW-201PE16EU",
+    "name": "My Shelly 2PM PRO",
+    "id": "shellypro2pm-ec62608c9c00",
+    "mac": "EC62608C9C00",
+    "slot": 1,
+    "model": "SPSW-202PE16EU",
     "gen": 2,
-    "fw_id": "20240726-114511/1.4.0-gb2aeadb",
+    "fw_id": "20240726-114510/1.4.0-gb2aeadb",
     "ver": "1.4.0",
-    "app": "Pro1PM",
+    "app": "Pro2PM",
     "auth_en": false,
-    "auth_domain": null
+    "auth_domain": null,
+    "profile": "switch"
   },
   "settings": {
     "ble": {
@@ -59,10 +60,10 @@
     "mqtt": {
       "enable": false,
       "server": null,
-      "client_id": "shellypro1pm-ec62608ab9a4",
+      "client_id": "shellypro2pm-ec62608c9c00",
       "user": null,
       "ssl_ca": null,
-      "topic_prefix": "shellypro1pm-ec62608ab9a4",
+      "topic_prefix": "shellypro2pm-ec62608c9c00",
       "rpc_ntf": true,
       "status_ntf": false,
       "use_client_cert": false,
@@ -82,22 +83,37 @@
       "voltage_limit": 280,
       "undervoltage_limit": 0,
       "autorecover_voltage_errors": false,
-      "current_limit": 16,
-      "input_id": 0
+      "current_limit": 16
+    },
+    "switch:1": {
+      "id": 1,
+      "name": null,
+      "in_mode": "follow",
+      "initial_state": "match_input",
+      "auto_on": false,
+      "auto_on_delay": 60,
+      "auto_off": false,
+      "auto_off_delay": 60,
+      "power_limit": 4480,
+      "voltage_limit": 280,
+      "undervoltage_limit": 0,
+      "autorecover_voltage_errors": false,
+      "current_limit": 16
     },
     "sys": {
       "device": {
-        "name": "My Shelly 1PM PRO",
-        "mac": "EC62608AB9A4",
-        "fw_id": "20240726-114511/1.4.0-gb2aeadb",
+        "name": "My Shelly 2PM PRO",
+        "mac": "EC62608C9C00",
+        "fw_id": "20240726-114510/1.4.0-gb2aeadb",
         "discoverable": true,
         "eco_mode": false,
+        "profile": "switch",
         "sys_btn_toggle": true
       },
       "location": {
         "tz": "Europe/Monaco",
-        "lat": 43.7314,
-        "lon": 7.419
+        "lat": 43.7312,
+        "lon": 7.4138
       },
       "debug": {
         "level": 2,
@@ -120,11 +136,11 @@
       "sntp": {
         "server": "time.google.com"
       },
-      "cfg_rev": 18
+      "cfg_rev": 14
     },
     "wifi": {
       "ap": {
-        "ssid": "ShellyPro1PM-EC62608AB9A4",
+        "ssid": "ShellyPro2PM-EC62608C9C00",
         "is_open": true,
         "enable": false,
         "range_extender": {
@@ -189,21 +205,21 @@
     },
     "switch:0": {
       "id": 0,
-      "source": "WS_in",
-      "output": true,
-      "apower": 6.3,
-      "voltage": 235.1,
+      "source": "HTTP_in",
+      "output": false,
+      "apower": 0,
+      "voltage": 1.9,
       "freq": 50,
-      "current": 0.076,
-      "pf": 0.36,
+      "current": 0,
+      "pf": 0,
       "aenergy": {
-        "total": 4969.044,
+        "total": 0,
         "by_minute": [
-          110.937,
-          110.877,
-          110.907
+          0,
+          0,
+          0
         ],
-        "minute_ts": 1722507660
+        "minute_ts": 1722505260
       },
       "ret_aenergy": {
         "total": 0,
@@ -212,35 +228,67 @@
           0,
           0
         ],
-        "minute_ts": 1722507660
+        "minute_ts": 1722505260
       },
       "temperature": {
-        "tC": 43.2,
-        "tF": 109.8
+        "tC": 36.5,
+        "tF": 97.7
+      }
+    },
+    "switch:1": {
+      "id": 1,
+      "source": "init",
+      "output": false,
+      "apower": 0,
+      "voltage": 2,
+      "freq": 50,
+      "current": 0,
+      "pf": 0,
+      "aenergy": {
+        "total": 0,
+        "by_minute": [
+          0,
+          0,
+          0
+        ],
+        "minute_ts": 1722505260
+      },
+      "ret_aenergy": {
+        "total": 0,
+        "by_minute": [
+          0,
+          0,
+          0
+        ],
+        "minute_ts": 1722505260
+      },
+      "temperature": {
+        "tC": 38.3,
+        "tF": 101
       }
     },
     "sys": {
-      "mac": "EC62608AB9A4",
+      "mac": "EC62608C9C00",
       "restart_required": false,
-      "time": "12:21",
-      "unixtime": 1722507668,
-      "uptime": 1740,
-      "ram_size": 250892,
-      "ram_free": 111296,
+      "time": "11:41",
+      "unixtime": 1722505315,
+      "uptime": 5658,
+      "ram_size": 249568,
+      "ram_free": 107064,
       "fs_size": 524288,
-      "fs_free": 192512,
-      "cfg_rev": 18,
+      "fs_free": 184320,
+      "cfg_rev": 14,
       "kvs_rev": 0,
-      "schedule_rev": 1,
+      "schedule_rev": 0,
       "webhook_rev": 0,
       "available_updates": {},
-      "reset_reason": 1
+      "reset_reason": 3
     },
     "wifi": {
-      "sta_ip": "192.168.1.227",
+      "sta_ip": "192.168.1.235",
       "status": "got ip",
       "ssid": "FibreBox_X6-12A4C7",
-      "rssi": -44
+      "rssi": -61
     },
     "ws": {
       "connected": false
