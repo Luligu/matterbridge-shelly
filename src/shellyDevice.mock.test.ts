@@ -346,7 +346,7 @@ describe('Shelly devices test', () => {
       expect(device.components.length).toBe(9);
 
       const input = device.getComponent('input:0');
-      consoleLogSpy.mockRestore();
+      // consoleLogSpy.mockRestore();
       log.logLevel = LogLevel.DEBUG;
       expect(input?.logComponent()).toBe(4);
       expect(input).not.toBeUndefined();
