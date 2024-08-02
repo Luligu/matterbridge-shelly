@@ -149,8 +149,12 @@ class MdnsScanner {
   }
 
   public stop = () => {
+    this.socketUdp4.dropMembership(this.multicastAddressIpv4, this.networkInterfaceAddressIpv4);
     this.socketUdp4.close();
-    if (this.socketUdp6) this.socketUdp6.close();
+    if (this.socketUdp6) {
+      this.socketUdp6.dropMembership(this.multicastAddressIpv6, this.networkInterfaceAddressIpv6);
+      this.socketUdp6.close();
+    }
   };
 
   private parseMdnsResponse = (msg: Buffer) => {
@@ -509,7 +513,7 @@ process.on('SIGINT', () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   errorDevicesArray.sort(([keyA, deviceA], [keyB, deviceB]) => deviceA.address.localeCompare(deviceB.address));
   // Log the sorted devices
-  console.error(`Devices found ${devicesArray.length} with errors:`);
+  console.error(`Devices found ${errorDevicesArray.length} with errors:`);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   errorDevicesArray.forEach(([key, device]) => {
     console.error(`Device with error: ${device.address}:${device.port}`);
