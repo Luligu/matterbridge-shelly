@@ -577,7 +577,9 @@ export class ShellyDevice extends EventEmitter {
       // console.log(`${GREY}Response from shelly gen ${CYAN}${gen}${GREY} host ${CYAN}${host}${GREY} service ${CYAN}${service}${GREY}:${RESET}`, reponse);
       return reponse as ShellyData;
     } catch (error) {
-      log.debug(`Error fetching shelly gen ${gen} host ${host} service ${service}${params ? ' with ' + JSON.stringify(params) : ''} url ${url}:`, error);
+      if (error instanceof Error)
+        log.debug(`Error fetching shelly gen ${gen} host ${host} service ${service}${params ? ' with ' + JSON.stringify(params) : ''} url ${url}:`, error.message);
+      else log.debug(`Error fetching shelly gen ${gen} host ${host} service ${service}${params ? ' with ' + JSON.stringify(params) : ''} url ${url}:`, error);
       return null;
     }
   }

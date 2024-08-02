@@ -2,7 +2,7 @@
 import dgram from 'dgram';
 import { AnsiLogger, CYAN, er, GREEN, idn, ign, LogLevel, nf, rs, TimestampFormat } from 'node-ansi-logger';
 import os, { NetworkInterfaceInfoIPv4, NetworkInterfaceInfoIPv6 } from 'os';
-// import dnsPacket from 'dns-packet';
+import dnsPacket from 'dns-packet';
 
 // https://github.com/mafintosh/dns-packet
 
@@ -26,6 +26,7 @@ class MdnsScanner {
   public decodeError = false;
 
   public devices = new Map<string, { address: string; port: number }>();
+  public errorDevices = new Map<string, { address: string; port: number }>();
 
   constructor(networkInterface?: string, useIpv4Only = false) {
     this.log = new AnsiLogger({ logName: 'MdnsScanner', logTimestampFormat: TimestampFormat.TIME_MILLIS, logLevel: LogLevel.DEBUG });
@@ -76,15 +77,13 @@ class MdnsScanner {
   private onMessage = (msg: Buffer, rinfo: dgram.RemoteInfo) => {
     this.log.info(`Received message from ${ign}${rinfo.address}:${rinfo.port}${rs}`);
     this.devices.set(rinfo.address, { address: rinfo.address, port: rinfo.port });
-    /*
     try {
       dnsPacket.decode(msg);
-      this.parseMdnsResponse(msg);
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      // this.parseMdnsResponse(msg);
     } catch (error) {
-      this.log.error(`Failed to decode mDNS message from ${rinfo.address}:${rinfo.port}`);
+      this.errorDevices.set(rinfo.address, { address: rinfo.address, port: rinfo.port });
+      this.log.error(`Failed to decode mDNS message from ${rinfo.address}:${rinfo.port}: ${error instanceof Error ? error.message : error}`);
     }
-    */
   };
 
   private onError = (err: Error) => {
@@ -480,7 +479,7 @@ class MdnsScanner {
 
 MdnsScanner.listNetworkInterfaces(); // List available network interfaces
 
-const scanner = new MdnsScanner(process.argv[2], true);
+const scanner = new MdnsScanner(process.argv[2], false);
 
 scanner.query('_http._tcp.local', 'PTR');
 scanner.query('_shelly._tcp.local', 'PTR');
@@ -494,15 +493,26 @@ process.on('SIGINT', () => {
 
   // Collect devices into an array
   const devicesArray = Array.from(scanner.devices.entries());
-
   // Sort the array by device address
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   devicesArray.sort(([keyA, deviceA], [keyB, deviceB]) => deviceA.address.localeCompare(deviceB.address));
-
   // Log the sorted devices
+  console.log(`Devices found ${devicesArray.length}:`);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   devicesArray.forEach(([key, device]) => {
     console.log(`Device: ${device.address}:${device.port}`);
+  });
+
+  // Collect devices into an array
+  const errorDevicesArray = Array.from(scanner.errorDevices.entries());
+  // Sort the array by device address
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  errorDevicesArray.sort(([keyA, deviceA], [keyB, deviceB]) => deviceA.address.localeCompare(deviceB.address));
+  // Log the sorted devices
+  console.error(`Devices found ${devicesArray.length} with errors:`);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  errorDevicesArray.forEach(([key, device]) => {
+    console.error(`Device with error: ${device.address}:${device.port}`);
   });
 });
 
@@ -812,4 +822,18 @@ process.on('SIGINT', () => {
   authorities: [],
   additionals: []
 }
+*/
+/*
+[11:58:27.605] [MdnsScanner] Failed to decode mDNS message from 192.168.1.229:5353: Cannot decode name (buffer overflow) Shelly Plus2PM 30C922810DA0| 1.4.0| ebee9893| 12:08:02 | Feedback
+[11:58:27.605] [MdnsScanner] Failed to decode mDNS message from 192.168.1.238:5353: Cannot decode name (buffer overflow) Shelly Plus1Mini 348518E0E804| 1.4.0| ebee9893| 12:08:21 | Feedback
+[11:58:27.606] [MdnsScanner] Failed to decode mDNS message from 192.168.1.243:5353: Cannot decode name (buffer overflow) Shelly EM Gen3 84FCE636582C| 1.4.99-dev101493| c9daf7c7| 12:08:37 | Feedback
+[11:58:27.607] [MdnsScanner] Failed to decode mDNS message from 192.168.1.228:5353: Cannot decode name (buffer overflow) Shelly Plus2PM 30C92286CB68| 1.4.0| ebee9893| 12:09:23 | Feedback
+[11:58:27.608] [MdnsScanner] Failed to decode mDNS message from 192.168.1.239:5353: Cannot decode name (buffer overflow) Shelly Plus1PMMini 348518E04D44| 1.4.0| ebee9893| 12:09:42 | Feedback
+[11:58:27.608] [MdnsScanner] Failed to decode mDNS message from 192.168.1.218:5353: Cannot decode name (buffer overflow) Shelly Plus2PM 5443B23D81F8| 1.4.0| ebee9893| 12:09:59 | Feedback
+[11:58:27.608] [MdnsScanner] Failed to decode mDNS message from 192.168.1.237:5353: Cannot decode name (buffer overflow) Shelly Plus1 E465B8F3028C| 1.4.0| ebee9893| 12:10:15 | Feedback
+[11:58:27.609] [MdnsScanner] Failed to decode mDNS message from 192.168.1.224:5353: Cannot decode name (buffer overflow) Shelly PlusI4 CC7B5C8AEA2C| 1.4.0| ebee9893| 12:10:29 | Feedback
+[11:58:27.609] [MdnsScanner] Failed to decode mDNS message from 192.168.1.217:5353: Cannot decode name (buffer overflow) Shelly Plus1PM 441793D69718| 1.4.0| ebee9893| 12:10:45 | Feedback
+[11:58:27.609] [MdnsScanner] Failed to decode mDNS message from 192.168.1.227:5353: Cannot decode name (buffer overflow) Shelly Pro1PM EC62608AB9A4| 1.4.0| ebee9893| 12:16:05 | Feedback
+[11:58:27.609] [MdnsScanner] Failed to decode mDNS message from 192.168.1.235:5353: Cannot decode name (buffer overflow) Shelly Pro2PM EC62608C9C00| 1.4.0| ebee9893| 12:16:28 | Feedback
+[11:58:27.609] [MdnsScanner] Failed to decode mDNS message from 192.168.1.242:5353: Cannot decode name (buffer overflow) Shelly DALI Dimmer Gen3 84FCE636832C| 1.4.99-dev101226| b1cdeea9| 12:18:01 | Feedback
 */

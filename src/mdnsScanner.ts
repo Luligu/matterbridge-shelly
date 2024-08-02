@@ -145,8 +145,11 @@ export class MdnsScanner extends EventEmitter {
         if (a.type === 'SRV' && (a.name.startsWith('shelly') || a.name.startsWith('Shelly'))) {
           port = a.data.port;
         }
-        if (a.type === 'TXT' && (a.name.startsWith('shelly') || a.name.startsWith('Shelly')) && a.data.includes('gen=2')) {
+        if (a.type === 'TXT' && (a.name.startsWith('shelly') || a.name.startsWith('Shelly')) && a.data.toString().includes('gen=2')) {
           gen = 2;
+        }
+        if (a.type === 'TXT' && (a.name.startsWith('shelly') || a.name.startsWith('Shelly')) && a.data.toString().includes('gen=3')) {
+          gen = 3;
         }
         if (a.type === 'A' && (a.name.startsWith('shelly') || a.name.startsWith('Shelly'))) {
           const [name, mac] = a.name.replace('.local', '').split('-');
@@ -194,8 +197,11 @@ export class MdnsScanner extends EventEmitter {
         if (a.type === 'SRV' && a.name.startsWith('shelly')) {
           port = a.data.port;
         }
-        if (a.type === 'TXT' && a.name.startsWith('shelly')) {
-          gen = parseInt(a.data.toString().replace('gen=', ''));
+        if (a.type === 'TXT' && (a.name.startsWith('shelly') || a.name.startsWith('Shelly')) && a.data.toString().includes('gen=2')) {
+          gen = 2;
+        }
+        if (a.type === 'TXT' && (a.name.startsWith('shelly') || a.name.startsWith('Shelly')) && a.data.toString().includes('gen=3')) {
+          gen = 3;
         }
         if (a.type === 'A' && a.name.startsWith('Shelly')) {
           const [name, mac] = a.name.replace('.local', '').split('-');

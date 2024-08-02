@@ -1,0 +1,231 @@
+{
+  "shelly": {
+    "name": "My Shelly EM Gen3",
+    "id": "shellyemg3-84fce636582c",
+    "mac": "84FCE636582C",
+    "slot": 0,
+    "model": "S3EM-002CXCEU",
+    "gen": 3,
+    "fw_id": "20240724-112312/g1216eb0",
+    "ver": "1.4.99-dev101493",
+    "app": "EMG3",
+    "auth_en": false,
+    "auth_domain": null
+  },
+  "settings": {
+    "ble": {
+      "enable": false,
+      "rpc": {
+        "enable": false
+      },
+      "observer": {
+        "enable": false
+      }
+    },
+    "bthome": {},
+    "cloud": {
+      "enable": true,
+      "server": "shelly-api-eu.shelly.cloud:6022/jrpc"
+    },
+    "em1:0": {
+      "id": 0,
+      "name": null,
+      "reverse": false,
+      "ct_type": null
+    },
+    "em1:1": {
+      "id": 1,
+      "name": null,
+      "reverse": false,
+      "ct_type": null
+    },
+    "em1data:0": {},
+    "em1data:1": {},
+    "mqtt": {
+      "enable": false,
+      "server": null,
+      "client_id": "shellyemg3-84fce636582c",
+      "user": null,
+      "ssl_ca": null,
+      "topic_prefix": "shellyemg3-84fce636582c",
+      "rpc_ntf": true,
+      "status_ntf": false,
+      "use_client_cert": false,
+      "enable_rpc": true,
+      "enable_control": true
+    },
+    "switch:0": {
+      "id": 0,
+      "name": null,
+      "initial_state": "off",
+      "auto_on": false,
+      "auto_on_delay": 60,
+      "auto_off": false,
+      "auto_off_delay": 60
+    },
+    "sys": {
+      "device": {
+        "name": "My Shelly EM Gen3",
+        "mac": "84FCE636582C",
+        "fw_id": "20240724-112312/g1216eb0",
+        "discoverable": true,
+        "eco_mode": false,
+        "addon_type": null
+      },
+      "location": {
+        "tz": "Europe/Monaco",
+        "lat": 43.7312,
+        "lon": 7.4138
+      },
+      "debug": {
+        "level": 2,
+        "file_level": null,
+        "mqtt": {
+          "enable": false
+        },
+        "websocket": {
+          "enable": false
+        },
+        "file_log": {
+          "enable": false
+        },
+        "udp": {
+          "addr": "35.205.173.252:8910"
+        }
+      },
+      "ui_data": {},
+      "rpc_udp": {
+        "dst_addr": null,
+        "listen_port": null
+      },
+      "sntp": {
+        "server": "time.google.com"
+      },
+      "cfg_rev": 11
+    },
+    "wifi": {
+      "ap": {
+        "ssid": "ShellyEMG3-84FCE636582C",
+        "is_open": true,
+        "enable": false,
+        "range_extender": {
+          "enable": false
+        }
+      },
+      "sta": {
+        "ssid": "FibreBox_X6-12A4C7",
+        "is_open": false,
+        "enable": true,
+        "ipv4mode": "dhcp",
+        "ip": null,
+        "netmask": null,
+        "gw": null,
+        "nameserver": null
+      },
+      "sta1": {
+        "ssid": null,
+        "is_open": true,
+        "enable": false,
+        "ipv4mode": "dhcp",
+        "ip": null,
+        "netmask": null,
+        "gw": null,
+        "nameserver": null
+      },
+      "roam": {
+        "rssi_thr": -80,
+        "interval": 60
+      }
+    },
+    "ws": {
+      "enable": false,
+      "server": null,
+      "ssl_ca": "ca.pem"
+    }
+  },
+  "status": {
+    "ble": {},
+    "bthome": {
+      "errors": [
+        "bluetooth_disabled"
+      ]
+    },
+    "cloud": {
+      "connected": true
+    },
+    "em1:0": {
+      "id": 0,
+      "current": null,
+      "voltage": null,
+      "act_power": null,
+      "aprt_power": null,
+      "pf": null,
+      "freq": null,
+      "calibration": "factory",
+      "errors": [
+        "ct_type_not_set"
+      ]
+    },
+    "em1:1": {
+      "id": 1,
+      "current": null,
+      "voltage": null,
+      "act_power": null,
+      "aprt_power": null,
+      "pf": null,
+      "freq": null,
+      "calibration": "factory",
+      "errors": [
+        "ct_type_not_set"
+      ]
+    },
+    "em1data:0": {
+      "id": 0,
+      "total_act_energy": 0,
+      "total_act_ret_energy": 0
+    },
+    "em1data:1": {
+      "id": 1,
+      "total_act_energy": 0,
+      "total_act_ret_energy": 0
+    },
+    "mqtt": {
+      "connected": false
+    },
+    "switch:0": {
+      "id": 0,
+      "source": "WS_in",
+      "output": false,
+      "temperature": {
+        "tC": 50,
+        "tF": 122
+      }
+    },
+    "sys": {
+      "mac": "84FCE636582C",
+      "restart_required": false,
+      "time": "08:10",
+      "unixtime": 1722579045,
+      "uptime": 1362,
+      "ram_size": 253424,
+      "ram_free": 126120,
+      "fs_size": 786432,
+      "fs_free": 331776,
+      "cfg_rev": 11,
+      "kvs_rev": 0,
+      "schedule_rev": 0,
+      "webhook_rev": 0,
+      "available_updates": {},
+      "reset_reason": 3
+    },
+    "wifi": {
+      "sta_ip": "192.168.1.243",
+      "status": "got ip",
+      "ssid": "FibreBox_X6-12A4C7",
+      "rssi": -54
+    },
+    "ws": {
+      "connected": false
+    }
+  }
+}

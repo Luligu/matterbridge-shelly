@@ -126,7 +126,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
 
     // handle Shelly add event
     this.shelly.on('add', async (device: ShellyDevice) => {
-      device.log.info(`Shelly added ${idn}${device.name}${rs} gen ${CYAN}${device.gen}${nf} device id ${hk}${device.id}${rs}${nf} host ${zb}${device.host}${nf}`);
+      device.log.info(`Shelly added ${idn}${device.name}${rs} device id ${hk}${device.id}${rs}${nf} host ${zb}${device.host}${nf}`);
+      device.log.info(`- gen: ${CYAN}${device.gen}${nf}`);
       device.log.info(`- mac: ${CYAN}${device.mac}${nf}`);
       device.log.info(`- model: ${CYAN}${device.model}${nf}`);
       device.log.info(`- firmware: ${CYAN}${device.firmware}${nf}`);
@@ -479,7 +480,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
 
     // start Shelly mDNS device discoverer
     if (this.config.enableMdnsDiscover === true) {
-      this.shelly.startMdns(10 * 60 * 1000, this.config.mdnsInterface as string, 'udp4', this.config.debugMdns as boolean);
+      this.shelly.startMdns(10 * 60 * 1000, this.config.interfaceName as string, 'udp4', this.config.debugMdns as boolean);
     }
 
     // add all stored devices
