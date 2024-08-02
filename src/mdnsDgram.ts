@@ -836,4 +836,6 @@ process.on('SIGINT', () => {
 [11:58:27.609] [MdnsScanner] Failed to decode mDNS message from 192.168.1.227:5353: Cannot decode name (buffer overflow) Shelly Pro1PM EC62608AB9A4| 1.4.0| ebee9893| 12:16:05 | Feedback
 [11:58:27.609] [MdnsScanner] Failed to decode mDNS message from 192.168.1.235:5353: Cannot decode name (buffer overflow) Shelly Pro2PM EC62608C9C00| 1.4.0| ebee9893| 12:16:28 | Feedback
 [11:58:27.609] [MdnsScanner] Failed to decode mDNS message from 192.168.1.242:5353: Cannot decode name (buffer overflow) Shelly DALI Dimmer Gen3 84FCE636832C| 1.4.99-dev101226| b1cdeea9| 12:18:01 | Feedback
+[11:58:27.609] [MdnsScanner] Failed to decode mDNS message from 192.168.1.220:5353: Cannot decode name (buffer overflow) Shelly MiniPMG3 84FCE63957F4| 1.4.0| ebee9893| 12:29:36 | Feedback
+[11:58:27.609] [MdnsScanner] Failed to decode mDNS message from 192.168.1.221:5353: Cannot decode name (buffer overflow) Shelly Mini1G3 543204547478| 1.4.0| ebee9893| 12:30:01 | Feedback
 */

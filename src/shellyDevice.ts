@@ -507,9 +507,9 @@ export class ShellyDevice extends EventEmitter {
         if (service === 'settings') return deviceData.settings;
         if (service === 'Shelly.GetStatus') return deviceData.status;
         if (service === 'Shelly.GetConfig') return deviceData.settings;
-        log.error(`Error fetching device payloads from file ${host}: no service found`);
+        log.error(`Error fetching device payloads from file ${host}: no service ${service} found`);
       } catch (error) {
-        log.error(`Error reading device payloads from file ${host}:`, error);
+        log.error(`Error reading device payloads from file ${host}:`, error instanceof Error ? error.message : error);
         return null;
       }
     }
@@ -577,9 +577,9 @@ export class ShellyDevice extends EventEmitter {
       // console.log(`${GREY}Response from shelly gen ${CYAN}${gen}${GREY} host ${CYAN}${host}${GREY} service ${CYAN}${service}${GREY}:${RESET}`, reponse);
       return reponse as ShellyData;
     } catch (error) {
-      if (error instanceof Error)
-        log.debug(`Error fetching shelly gen ${gen} host ${host} service ${service}${params ? ' with ' + JSON.stringify(params) : ''} url ${url}:`, error.message);
-      else log.debug(`Error fetching shelly gen ${gen} host ${host} service ${service}${params ? ' with ' + JSON.stringify(params) : ''} url ${url}:`, error);
+      log.debug(
+        `Error fetching shelly gen ${gen} host ${host} service ${service}${params ? ' with ' + JSON.stringify(params) : ''} url ${url} error: ${error instanceof Error ? error.message : error}`,
+      );
       return null;
     }
   }

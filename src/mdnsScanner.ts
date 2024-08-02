@@ -21,7 +21,7 @@
  * limitations under the License. *
  */
 
-import { AnsiLogger, BLUE, CYAN, LogLevel, TimestampFormat, db, debugStringify, hk, idn, ign, nf, rs, zb } from 'matterbridge/logger';
+import { AnsiLogger, BLUE, CYAN, LogLevel, TimestampFormat, db, debugStringify, er, hk, idn, ign, nf, rs, zb } from 'matterbridge/logger';
 import mdns, { ResponsePacket } from 'multicast-dns';
 import EventEmitter from 'events';
 import { RemoteInfo, SocketType } from 'dgram';
@@ -84,7 +84,6 @@ export class MdnsScanner extends EventEmitter {
    * @param {boolean} debug - Indicates whether to enable debug mode (default: false).
    */
   start(shutdownTimeout?: number, mdnsInterface?: string, type?: SocketType, debug = false) {
-    this.log.debug('Starting mDNS query service for shelly devices...');
     this._isScanning = true;
 
     // Create and initialize the mDNS scanner
@@ -100,7 +99,10 @@ export class MdnsScanner extends EventEmitter {
         `Starting mDNS query service for shelly devices with interface ${mdnsOptions.interface} bind ${mdnsOptions.bind} type ${mdnsOptions.type} ip ${mdnsOptions.ip}...`,
       );
       this.scanner = mdns(mdnsOptions);
-    } else this.scanner = mdns();
+    } else {
+      this.log.debug('Starting mDNS query service for shelly devices...');
+      this.scanner = mdns();
+    }
 
     this.scanner.on('response', async (response: ResponsePacket, rinfo: RemoteInfo) => {
       let port = 0;
@@ -127,29 +129,15 @@ export class MdnsScanner extends EventEmitter {
         if (debug && a.type === 'A') {
           this.log.debug(`[${idn}${a.type}${rs}${db}] Name: ${CYAN}${a.name}${db} data: ${typeof a.data === 'string' ? a.data : debugStringify(a.data)}`);
         }
-        if (debug && a.type === 'PTR' && a.name === '_http._tcp.local') {
-          this.log.debug(`[${BLUE}${a.type}${db}] Name: ${CYAN}${a.name}${db} data: ${typeof a.data === 'string' ? a.data : debugStringify(a.data)}`);
-        }
         if (debug && a.type === 'A' && (a.name.startsWith('shelly') || a.name.startsWith('Shelly'))) {
           this.log.debug(`[${BLUE}${a.type}${db}] Name: ${CYAN}${a.name}${db} data: ${typeof a.data === 'string' ? a.data : debugStringify(a.data)}`);
-        }
-        if (debug && a.type === 'NSEC' && (a.name.startsWith('shelly') || a.name.startsWith('Shelly'))) {
-          this.log.debug(`[${BLUE}${a.type}${db}] Name: ${CYAN}${a.name}${db} data: ${typeof a.data === 'string' ? a.data : debugStringify(a.data)}`);
-        }
-        if (debug && a.type === 'SRV' && (a.name.startsWith('shelly') || a.name.startsWith('Shelly'))) {
-          this.log.debug(`[${BLUE}${a.type}${db}] Name: ${CYAN}${a.name}${db} data: ${typeof a.data === 'string' ? a.data : debugStringify(a.data)}`);
-        }
-        if (debug && a.type === 'TXT' && (a.name.startsWith('shelly') || a.name.startsWith('Shelly'))) {
-          this.log.debug(`[${BLUE}${a.type}${db}] Name: ${CYAN}${a.name}${db} data: ${a.data}`);
         }
         if (a.type === 'SRV' && (a.name.startsWith('shelly') || a.name.startsWith('Shelly'))) {
           port = a.data.port;
         }
-        if (a.type === 'TXT' && (a.name.startsWith('shelly') || a.name.startsWith('Shelly')) && a.data.toString().includes('gen=2')) {
-          gen = 2;
-        }
-        if (a.type === 'TXT' && (a.name.startsWith('shelly') || a.name.startsWith('Shelly')) && a.data.toString().includes('gen=3')) {
-          gen = 3;
+        if (a.type === 'TXT' && (a.name.startsWith('shelly') || a.name.startsWith('Shelly'))) {
+          if (a.data.toString().includes('gen=2')) gen = 2;
+          if (a.data.toString().includes('gen=3')) gen = 3;
         }
         if (a.type === 'A' && (a.name.startsWith('shelly') || a.name.startsWith('Shelly'))) {
           const [name, mac] = a.name.replace('.local', '').split('-');
@@ -159,7 +147,7 @@ export class MdnsScanner extends EventEmitter {
             this.discoveredDevices.set(deviceId, { id: deviceId, host: a.data, port, gen });
             this.emit('discovered', { id: deviceId, host: a.data, port, gen });
             if (process.argv.includes('testMdnsScanner')) {
-              await this.saveResponse(deviceId, response);
+              this.saveResponse(deviceId, response); // No await
             }
           }
         }
@@ -185,25 +173,14 @@ export class MdnsScanner extends EventEmitter {
         if (debug && a.type === 'A') {
           this.log.debug(`[${idn}${a.type}${rs}${db}] Name: ${CYAN}${a.name}${db} data: ${typeof a.data === 'string' ? a.data : debugStringify(a.data)}`);
         }
-        if (debug && a.type === 'PTR' && a.name === '_http._tcp.local') {
-          this.log.debug(`[${BLUE}${a.type}${db}] Name: ${CYAN}${a.name}${db} data: ${typeof a.data === 'string' ? a.data : debugStringify(a.data)}`);
-        }
-        if (debug && a.type === 'A' && a.name.startsWith('shelly')) {
-          this.log.debug(`[${BLUE}${a.type}${db}] Name: ${CYAN}${a.name}${db} data: ${typeof a.data === 'string' ? a.data : debugStringify(a.data)}`);
-        }
-        if (debug && a.type === 'NSEC' && a.name.startsWith('shelly')) {
-          this.log.debug(`[${BLUE}${a.type}${db}] Name: ${CYAN}${a.name}${db} data: ${typeof a.data === 'string' ? a.data : debugStringify(a.data)}`);
-        }
-        if (a.type === 'SRV' && a.name.startsWith('shelly')) {
+        if (a.type === 'SRV' && (a.name.startsWith('shelly') || a.name.startsWith('Shelly'))) {
           port = a.data.port;
         }
-        if (a.type === 'TXT' && (a.name.startsWith('shelly') || a.name.startsWith('Shelly')) && a.data.toString().includes('gen=2')) {
-          gen = 2;
+        if (a.type === 'TXT' && (a.name.startsWith('shelly') || a.name.startsWith('Shelly'))) {
+          if (a.data.toString().includes('gen=2')) gen = 2;
+          if (a.data.toString().includes('gen=3')) gen = 3;
         }
-        if (a.type === 'TXT' && (a.name.startsWith('shelly') || a.name.startsWith('Shelly')) && a.data.toString().includes('gen=3')) {
-          gen = 3;
-        }
-        if (a.type === 'A' && a.name.startsWith('Shelly')) {
+        if (a.type === 'A' && (a.name.startsWith('shelly') || a.name.startsWith('Shelly'))) {
           const [name, mac] = a.name.replace('.local', '').split('-');
           const deviceId = name.toLowerCase() + '-' + mac.toUpperCase();
           if (!this.discoveredDevices.has(deviceId)) {
@@ -211,7 +188,7 @@ export class MdnsScanner extends EventEmitter {
             this.discoveredDevices.set(deviceId, { id: deviceId, host: a.data, port, gen });
             this.emit('discovered', { id: deviceId, host: a.data, port, gen });
             if (process.argv.includes('testMdnsScanner')) {
-              await this.saveResponse(deviceId, response);
+              this.saveResponse(deviceId, response); // No await
             }
           }
         }
@@ -228,7 +205,7 @@ export class MdnsScanner extends EventEmitter {
     });
 
     this.scanner.on('ready', async () => {
-      //
+      this.log.debug(`The mDNS socket is bound`);
     });
 
     // Send the query and set the timeout to send it again every 60 seconds
@@ -307,10 +284,10 @@ export class MdnsScanner extends EventEmitter {
         }
       }
       await fs.writeFile(responseFile, JSON.stringify(response, null, 2), 'utf8');
-      this.log.info(`**Saved shellyId ${shellyId} response file ${responseFile}`);
+      this.log.info(`**Saved shellyId ${hk}${shellyId}${nf} response file ${CYAN}${responseFile}${nf}`);
       return Promise.resolve();
     } catch (err) {
-      this.log.error(`****Error saving shellyId ${shellyId} response file ${responseFile}: ${err}`);
+      this.log.error(`****Error saving shellyId ${hk}${shellyId}${er} response file ${CYAN}${responseFile}${nf}: ${err instanceof Error ? err.message : err}`);
       return Promise.reject(err);
     }
   }
