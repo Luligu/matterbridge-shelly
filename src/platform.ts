@@ -102,6 +102,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     log.debug(`- storageDiscover: ${CYAN}${config.enableStorageDiscover}`);
     log.debug(`- configDiscover: ${CYAN}${config.enableConfigDiscover}`);
     log.debug(`- resetStorageDiscover: ${CYAN}${config.resetStorageDiscover}`);
+    log.debug(`- interfaceName: ${CYAN}${config.interfaceName}`);
     log.debug(`- debug: ${CYAN}${config.debug}`);
     log.debug(`- debugMdns: ${CYAN}${config.debugMdns}`);
     log.debug(`- debugCoap: ${CYAN}${config.debugCoap}`);
@@ -159,7 +160,14 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       });
 
       const child = mbDevice.addChildDeviceTypeWithClusterServer('PowerSource', [powerSource], [PowerSource.Cluster.id]);
-      child.addClusterServer(mbDevice.getDefaultPowerSourceWiredClusterServer());
+      const battery = device.getComponent('battery');
+      if (battery) {
+        battery.logComponent();
+        if (battery.hasProperty('charging')) child.addClusterServer(mbDevice.getDefaultPowerSourceRechargeableBatteryClusterServer());
+        else child.addClusterServer(mbDevice.getDefaultPowerSourceReplaceableBatteryClusterServer());
+      } else {
+        child.addClusterServer(mbDevice.getDefaultPowerSourceWiredClusterServer());
+      }
 
       // Scan the device components
       for (const [key, component] of device) {
@@ -315,11 +323,11 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
 
             // Set the WindowCovering attributes
             /*
-            "positioning": true, // Gen 1 devices
+            "positioning": true, // Gen 1 devices when positioning control is enabled (even if it is not calibrated)
             "pos_control": true, // Gen 2 devices
             "current_pos": 0 // Gen 1 and 2 devices 0-100
             */
-            const position = coverComponent.getValue('current_pos') as number;
+            const position = coverComponent.hasProperty('current_pos') ? (coverComponent.getValue('current_pos') as number) : undefined;
             if (position !== undefined && position !== null && position >= 0 && position <= 100) {
               const matterPos = 10000 - Math.min(Math.max(Math.round(position * 100), 0), 10000);
               child.getClusterServer(WindowCovering.Complete)?.setCurrentPositionLiftPercent100thsAttribute(matterPos);
@@ -436,6 +444,16 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             inputComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
               this.shellyUpdateHandler(mbDevice, device, component, property, value);
             });
+          } else if (inputComponent && inputComponent?.hasProperty('event')) {
+            const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.GENERIC_SWITCH], []);
+            child.addClusterServer(mbDevice.getDefaultSwitchClusterServer());
+            mbDevice.addFixedLabel('composed', component.name);
+            // Set the current position to 0
+            child.getClusterServer(SwitchCluster.with(Switch.Feature.MomentarySwitch))?.setCurrentPositionAttribute(0);
+            // Add event handler
+            inputComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
+              this.shellyUpdateHandler(mbDevice, device, component, property, value);
+            });
           }
         }
       }
@@ -485,7 +503,10 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
 
     // add all stored devices
     if (this.config.enableStorageDiscover === true) {
+      this.log.info(`Loading from storage ${this.storedDevices.size} Shelly devices`);
       this.storedDevices.forEach(async (storedDevice) => {
+        const [name, mac] = storedDevice.id.split('-');
+        storedDevice.id = name.toLowerCase() + '-' + mac.toUpperCase();
         if (storedDevice.id === undefined || storedDevice.host === undefined || !this.isValidIpv4Address(storedDevice.host)) {
           this.log.error(
             `Stored Shelly device id ${hk}${storedDevice.id}${er} host ${zb}${storedDevice.host}${er} is not valid. Please enable resetStorageDiscover in plugin config and restart.`,
@@ -499,7 +520,10 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
 
     // add all configured devices
     if (this.config.enableConfigDiscover === true) {
+      this.log.info(`Loading from config ${Object.entries(this.config.deviceIp as ConfigDeviceIp).length} Shelly devices`);
       Object.entries(this.config.deviceIp as ConfigDeviceIp).forEach(async ([id, host]) => {
+        const [name, mac] = id.split('-');
+        id = name.toLowerCase() + '-' + mac.toUpperCase();
         const configDevice: DiscoveredDevice = { id, host, port: 0, gen: 0 };
         if (configDevice.id === undefined || configDevice.host === undefined || !this.isValidIpv4Address(configDevice.host)) {
           this.log.error(`Config Shelly device id ${hk}${configDevice.id}${er} host ${zb}${configDevice.host}${er} is not valid. Please check the plugin config and restart.`);
@@ -527,21 +551,23 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         }
         if (label?.startsWith('cover') || label?.startsWith('roller')) {
           const coverComponent = shellyDevice.getComponent(label) as ShellyCoverComponent;
-          this.log.info(
-            `Configuring device ${dn}${mbDevice.deviceName}${nf} component ${hk}${label}${nf}:${zb}current_pos ${YELLOW}${coverComponent.getValue('current_pos')}${nf}`,
-          );
-          const position = coverComponent.getValue('current_pos') as number;
-          if (position !== undefined && position !== null && position >= 0 && position <= 100) {
+          const position = coverComponent.hasProperty('current_pos') ? (coverComponent.getValue('current_pos') as number) : undefined;
+          if (position && position !== null && position >= 0 && position <= 100) {
+            this.log.info(`Configuring device ${dn}${mbDevice.deviceName}${nf} component ${hk}${label}${nf}:${zb}current_pos ${YELLOW}${position}${nf}`);
             const matterPos = 10000 - Math.min(Math.max(Math.round(position * 100), 0), 10000);
             mbDevice.setWindowCoveringCurrentTargetStatus(matterPos, matterPos, WindowCovering.MovementStatus.Stopped, childEndpoint);
+          } else {
+            mbDevice.setWindowCoveringTargetAsCurrentAndStopped(childEndpoint);
           }
         }
         if (label?.startsWith('input')) {
-          const switchComponent = shellyDevice.getComponent(label) as ShellyComponent;
-          this.log.info(`Configuring device ${dn}${mbDevice.deviceName}${nf} component ${hk}${label}${nf}:${zb}state ${YELLOW}${switchComponent.getValue('state')}${nf}`);
-          if (this.config.exposeInput === 'contact') childEndpoint.getClusterServer(OnOffCluster)?.setOnOffAttribute(switchComponent.getValue('state') as boolean);
-          if (this.config.exposeInput === 'momentary' || this.config.exposeInput === 'latching')
-            childEndpoint.getClusterServer(Switch.Complete)?.setCurrentPositionAttribute((switchComponent.getValue('state') as boolean) ? 1 : 0);
+          const inputComponent = shellyDevice.getComponent(label) as ShellyComponent;
+          if (inputComponent.hasProperty('state')) {
+            this.log.info(`Configuring device ${dn}${mbDevice.deviceName}${nf} component ${hk}${label}${nf}:${zb}state ${YELLOW}${inputComponent.getValue('state')}${nf}`);
+            if (this.config.exposeInput === 'contact') childEndpoint.getClusterServer(OnOffCluster)?.setOnOffAttribute(inputComponent.getValue('state') as boolean);
+            if (this.config.exposeInput === 'momentary' || this.config.exposeInput === 'latching')
+              childEndpoint.getClusterServer(Switch.Complete)?.setCurrentPositionAttribute((inputComponent.getValue('state') as boolean) ? 1 : 0);
+          }
         }
       });
     });
@@ -819,6 +845,26 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       if (this.config.exposeInput === 'latching') {
         this.triggerSwitchEvent(endpoint, (value as boolean) ? 'Press' : 'Release');
         shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}Switch-currentPosition${db} ${YELLOW}${(value as boolean) ? 1 : 0}${db}`);
+      }
+    }
+    // Update event for Input
+    if (shellyComponent.name === 'Input' && property === 'event_cnt' && typeof value === 'number') {
+      const event = shellyComponent.getValue('event');
+      if (!event) return;
+      if (event === 'S') {
+        this.triggerSwitchEvent(endpoint, 'Single');
+        shellyComponent.setValue('event', '');
+        shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}Switch-triggerSwitchEvent${db} ${YELLOW}Single${db}`);
+      }
+      if (event === 'SS') {
+        this.triggerSwitchEvent(endpoint, 'Double');
+        shellyComponent.setValue('event', '');
+        shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}Switch-triggerSwitchEvent${db} ${YELLOW}Double${db}`);
+      }
+      if (event === 'L') {
+        this.triggerSwitchEvent(endpoint, 'Long');
+        shellyComponent.setValue('event', '');
+        shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}Switch-triggerSwitchEvent${db} ${YELLOW}Long${db}`);
       }
     }
     // Update brightness

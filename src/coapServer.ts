@@ -79,6 +79,7 @@ export class CoapServer extends EventEmitter {
   private _isListening = false;
   private debug = false;
   private readonly devices = new Map<string, CoIoTDescription[]>();
+  private readonly deviceSerial = new Map<string, number>();
 
   constructor(logLevel: LogLevel = LogLevel.INFO) {
     super();
@@ -327,6 +328,7 @@ export class CoapServer extends EventEmitter {
 
     if (headers[COIOT_OPTION_STATUS_SERIAL]) {
       serial = headers[COIOT_OPTION_STATUS_SERIAL];
+      this.deviceSerial.set(host, serial);
     }
 
     try {
@@ -335,14 +337,14 @@ export class CoapServer extends EventEmitter {
       payload = msg.payload.toString();
     }
 
-    this.log.debug(`url:  ${BLUE}${url}${db}`);
-    this.log.debug(`code: ${BLUE}${code}${db}`);
+    this.log.debug(`url:  ${CYAN}${url}${db}`);
+    this.log.debug(`code: ${CYAN}${code}${db}`);
     this.log.debug(`host: ${idn}${host}${rs}${db}`);
-    this.log.debug(`deviceType: ${BLUE}${deviceType}${db}`);
-    this.log.debug(`deviceId: ${BLUE}${deviceId}${db}`);
-    this.log.debug(`protocolRevision: ${protocolRevision}${db}`);
-    this.log.debug(`validFor: ${validFor}`);
-    this.log.debug(`serial: ${serial}`);
+    this.log.debug(`deviceType: ${CYAN}${deviceType}${db}`);
+    this.log.debug(`deviceId: ${CYAN}${deviceId}${db}`);
+    this.log.debug(`protocolRevision: ${CYAN}${protocolRevision}${db}`);
+    this.log.debug(`validFor: ${CYAN}${validFor}${db} seconds`);
+    this.log.debug(`serial (${this.deviceSerial.get(host) === serial ? 'not changed' : 'updated'}): ${CYAN}${serial}${db}`);
     this.log.debug(`payload:${RESET}\n`, payload);
 
     if (msg.url === '/cit/d') {
@@ -416,7 +418,8 @@ export class CoapServer extends EventEmitter {
     if (msg.url === '/cit/s') {
       const descriptions: CoIoTDescription[] = this.devices.get(host) || [];
       if (!descriptions || descriptions.length === 0) {
-        // this.log.warn(`No description found for host ${host}`);
+        this.log.debug(`*No coap description found for host ${host}`);
+        this.getDeviceDescription(host);
       }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const values: CoIoTGValue[] = payload.G.map((v: any[]) => ({
@@ -433,7 +436,7 @@ export class CoapServer extends EventEmitter {
           );
           this.emit('update', host, desc.component, desc.property, desc.range === '0/1' ? v.value === 1 : v.value);
         }
-        // else this.log.warn(`No description found for id ${v.id}`);
+        // else this.log.debug(`No coap description found for id ${v.id}`);
       });
     }
 

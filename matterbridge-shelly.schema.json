@@ -32,7 +32,7 @@
       "default": "switch"
     },
     "exposeInput": {
-      "description": "Choose how to expose the shelly inputs: disabled, contact, momentary or latching switch",
+      "description": "Choose how to expose the shelly inputs: disabled, contact, momentary or latching switch (you may need to repair the controller when changed)",
       "type": "string",
       "enum": [
         "disabled",
@@ -53,14 +53,14 @@
       "default": "evehistory"
     },
     "blackList": {
-      "description": "The devices in the list will not be exposed. Use the device id (e.g. shellyplus2pm-5443b23d81f8)",
+      "description": "The devices in the list will not be exposed. Use the device id (e.g. shellyplus2pm-5443B23D81F8)",
       "type": "array",
       "items": {
         "type": "string"
       }
     },
     "whiteList": {
-      "description": "Only the devices in the list will be exposed. Use the device id (e.g. shellyplus2pm-5443b23d81f8)",
+      "description": "Only the devices in the list will be exposed. Use the device id (e.g. shellyplus2pm-5443B23D81F8)",
       "type": "array",
       "items": {
         "type": "string"

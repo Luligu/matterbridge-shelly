@@ -297,6 +297,25 @@ export class ShellyDevice extends EventEmitter {
       }
     }
 
+    // Check if the device has been calibrated
+    if (device.gen === 1) {
+      if (device.profile === 'cover') {
+        const roller = device.getComponent('roller:0');
+        const pos = roller?.hasProperty('current_pos') ? (roller?.getValue('current_pos') as number) : undefined;
+        if (roller && pos && pos > 100) {
+          device.log.warn(`Roller device ${hk}${device.id}${wr} host ${zb}${device.host}${wr} does not have position control enabled.`);
+        }
+      }
+    } else if (device.gen === 2 || device.gen === 3) {
+      if (device.profile === 'cover') {
+        const cover = device.getComponent('cover:0');
+        // Check if the device has position control enabled
+        if (cover && cover.getValue('pos_control') === false) {
+          device.log.warn(`Cover device ${hk}${device.id}${wr} host ${zb}${device.host}${wr} does not have position control enabled.`);
+        }
+      }
+    }
+
     // Check if device has an available firmware update
     if (device.hasUpdate) log.warn(`Device ${hk}${device.id}${wr} host ${zb}${device.host}${wr} has an available firmware update.`);
 
@@ -393,7 +412,7 @@ export class ShellyDevice extends EventEmitter {
         }
         if (key === 'charger') {
           const battery = this.getComponent('battery');
-          battery?.setValue('charging', data[key] as number);
+          battery?.setValue('charging', data[key] === true ? 1 : 0);
         }
       }
       // Update state for active components with ison

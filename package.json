@@ -1,6 +1,6 @@
 {
   "name": "matterbridge-shelly",
-  "version": "0.7.6-beta3",
+  "version": "0.7.6-beta5",
   "description": "Matterbridge shelly plugin",
   "author": "https://github.com/Luligu",
   "license": "Apache-2.0",
@@ -40,6 +40,7 @@
     "start:bridge": "matterbridge -bridge",
     "start:childbridge": "matterbridge -childbridge",
     "start:mdns": "node dist/mdnsScanner.js mdnsScanner",
+    "start:mdnsNew": "node dist/mdnsDgram.js WiFi",
     "start:coap": "node dist/coapServer.js coapDescription coapStatus coapServer",
     "start:mcast": "node dist/mcastServer.js mcastServer mcastClient",
     "start:ws": "node dist/wsClient.js startWsClient",
