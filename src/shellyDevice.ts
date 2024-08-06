@@ -132,6 +132,17 @@ export class ShellyDevice extends EventEmitter {
     if (this.wsClient) this.wsClient.log.logLevel = logLevel;
   }
 
+  static normalizeId(hostname: string): { type: string; mac: string; id: string } {
+    const match = hostname.match(/^(.*)-([0-9A-F]+)$/i);
+    if (match) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const [_, type, mac] = match;
+      const id = type.toLowerCase() + '-' + mac.toUpperCase();
+      return { type, mac, id };
+    }
+    return { type: '', mac: '', id: hostname };
+  }
+
   static async create(shelly: Shelly, log: AnsiLogger, host: string): Promise<ShellyDevice | undefined> {
     const shellyPayload = await ShellyDevice.fetch(shelly, log, host, 'shelly');
     let statusPayload: ShellyData | null = null;
@@ -160,8 +171,9 @@ export class ShellyDevice extends EventEmitter {
         return undefined;
       }
       device.model = shellyPayload.type as string;
-      const [name, mac] = ((settingsPayload.device as ShellyData).hostname as string).split('-');
-      device.id = name.toLowerCase() + '-' + mac.toUpperCase();
+      device.id = ShellyDevice.normalizeId((settingsPayload.device as ShellyData).hostname as string).id;
+      // const [name, mac] = ((settingsPayload.device as ShellyData).hostname as string).split('-');
+      // device.id = name.toLowerCase() + '-' + mac.toUpperCase();
       device.firmware = (shellyPayload.fw as string).split('/')[1];
       device.auth = shellyPayload.auth as boolean;
       device.name = settingsPayload.name ? (settingsPayload.name as string) : device.id;
@@ -252,8 +264,9 @@ export class ShellyDevice extends EventEmitter {
         return undefined;
       }
       device.model = shellyPayload.model as string;
-      const [name, mac] = (shellyPayload.id as string).split('-');
-      device.id = name.toLowerCase() + '-' + mac.toUpperCase();
+      device.id = ShellyDevice.normalizeId(shellyPayload.id as string).id;
+      // const [name, mac] = (shellyPayload.id as string).split('-');
+      // device.id = name.toLowerCase() + '-' + mac.toUpperCase();
       device.firmware = (shellyPayload.fw_id as string).split('/')[1];
       device.auth = shellyPayload.auth_en as boolean;
       device.gen = shellyPayload.gen;
