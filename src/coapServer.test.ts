@@ -28,7 +28,6 @@ describe('Coap scanner', () => {
 
   afterAll(() => {
     coapServer?.stop();
-
     // Restore the mocked AnsiLogger.log method
     (AnsiLogger.prototype.log as jest.Mock).mockRestore();
   });
@@ -42,21 +41,26 @@ describe('Coap scanner', () => {
   });
 
   test('Getting device description', async () => {
-    await coapServer?.getDeviceDescription('192.168.222.219', 3);
+    await coapServer?.getDeviceDescription('192.168.222.219');
     expect(coapServer?.isListening).toBeFalsy();
-  }, 5000);
+  }, 10000);
 
   test('Getting device status', async () => {
-    await coapServer?.getDeviceStatus('192.168.222.219', 3);
+    await coapServer?.getDeviceStatus('192.168.222.219');
     expect(coapServer?.isListening).toBeFalsy();
-  }, 5000);
+  }, 10000);
 
   test('Getting multicast device status', async () => {
-    await coapServer?.getMulticastDeviceStatus(3);
+    await coapServer?.getMulticastDeviceStatus(5);
     expect(coapServer?.isListening).toBeFalsy();
-  }, 5000);
+  }, 10000);
 
   test('Start scanner', () => {
+    coapServer?.start();
+    expect(coapServer?.isListening).toBeTruthy();
+  }, 5000);
+
+  test('Stop scanner', () => {
     coapServer?.start();
     expect(coapServer?.isListening).toBeTruthy();
   }, 5000);

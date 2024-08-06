@@ -4,7 +4,31 @@ All notable changes to this project will be documented in this file.
 
 If you like this project and find it useful, please consider giving it a star on GitHub at https://github.com/Luligu/matterbridge-shelly and sponsoring it.
 
-## [0.7.6] - 2024-08-02
+## [0.7.6] - 2024-08-05
+
+### Added
+
+- [shelly]: Added support for wifi battery powered devices.
+- [shelly]: Added support for wifi battery powered devices with sleep_mode.
+- [shelly]: Added component Battery (level and charging).
+- [shelly]: Added component Sensor (motion and contact).
+- [shelly]: Added component Lux (luminance).
+- [shelly]: Added component Temperature (temperature).
+- [shelly]: Added component Vibration (vibration).
+- [shelly]: Added support for event, event_cnt Input components (they are always momentary switch in matter).
+- [shelly]: Added support for shellybutton1.
+- [shelly]: Added support for shellymotionsensor.
+- [shelly]: Added support for shellymotion2.
+- [shelly]: Added support for shellydw1.
+- [shelly]: Added support for shellydw2.
+- [fetch]: Added a timeout of 5 secs to fetch.
+
+### Changed
+
+- [package]: Updated dependencies.
+- [package]: Updated typescript-eslint to 8.0.0.
+- [shelly]: Refactor MdnsScanner and MdnsScanner jest test.
+- [shelly]: Refactor CoapServer and CoapServer jest test.
 
 ### Verified
 
@@ -26,24 +50,16 @@ If you like this project and find it useful, please consider giving it a star on
 - [shelly]: Verified shelly1 with firmware v. 1.14.0
 - [shelly]: Verified shelly1l with firmware v. 1.14.0
 - [shelly]: Verified shellybutton1 with firmware v. 1.14.0
-
-### Changed
-
-- [package]: Updated dependencies.
-- [package]: Updated typescript-eslint to 8.0.0.
-- [shelly]: Refactor MdnsScanner and MdnsScanner jest test.
-
-### Added
-
-- [shelly]: Added support for battery powered devices.
-- [shelly]: Added component Battery.
-- [shelly]: Added support for shellybutton1.
+- [shelly]: Verified shellymotionsensor with firmware v. 2.2.4
+- [shelly]: Verified shellymotion2 with firmware v. 2.2.4
+- [shelly]: Verified shellydw1 with firmware v. 1.14.0
+- [shelly]: Verified shellydw2 with firmware v. 1.14.0
 
 ## [0.7.5] - 2024-07-28
 
 ### Changed
 
-- [imports]: Updated matterbridge imports (the plugin needs Matterbridge 1.4.1!).
+- [imports]: Updated matterbridge imports (the plugin needs Matterbridge >= 1.4.1).
 - [package]: Updated dependencies.
 - [logger]: Update node-ansi-logger to 2.0.6.
 - [storage]: Update node-persist-manager to 1.0.8.

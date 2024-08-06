@@ -43,6 +43,7 @@ export type DiscoveredDeviceListener = (data: DiscoveredDevice) => void;
  * @param {LogLevel} logLevel - The log level for the scanner. Defaults to LogLevel.INFO.
  */
 export class MdnsScanner extends EventEmitter {
+  private devices = new Map<string, string>();
   private discoveredDevices = new Map<string, DiscoveredDevice>();
   public readonly log;
   private scanner?: mdns.MulticastDNS;
@@ -71,6 +72,7 @@ export class MdnsScanner extends EventEmitter {
     this.scanner?.query([
       { name: '_http._tcp.local', type: 'PTR' },
       { name: '_shelly._tcp.local', type: 'PTR' },
+      { name: '_services._dns-sd._udp.local', type: 'PTR' },
     ]);
     this.log.debug('Sent mDNS query for shelly devices.');
   }
@@ -107,6 +109,7 @@ export class MdnsScanner extends EventEmitter {
     this.scanner.on('response', async (response: ResponsePacket, rinfo: RemoteInfo) => {
       let port = 0;
       let gen = 1;
+      this.devices.set(rinfo.address, rinfo.address);
       if (debug) this.log.debug(`Mdns response from ${ign} ${rinfo.address} ${rinfo.family} ${rinfo.port} ${db}`);
       if (debug) this.log.debug(`--- response.answers ---`);
       for (const a of response.answers) {
@@ -247,6 +250,12 @@ export class MdnsScanner extends EventEmitter {
    * @returns The number of discovered devices.
    */
   logPeripheral() {
+    this.log.debug(`Discovered ${this.devices.size} devices:`);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    for (const [name, host] of this.devices) {
+      this.log.debug(`- host: ${zb}${host}${nf}`);
+    }
+
     this.log.info(`Discovered ${this.discoveredDevices.size} shelly devices:`);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     for (const [name, { id, host, port, gen }] of this.discoveredDevices) {
@@ -284,10 +293,10 @@ export class MdnsScanner extends EventEmitter {
         }
       }
       await fs.writeFile(responseFile, JSON.stringify(response, null, 2), 'utf8');
-      this.log.info(`**Saved shellyId ${hk}${shellyId}${nf} response file ${CYAN}${responseFile}${nf}`);
+      this.log.debug(`*Saved shellyId ${hk}${shellyId}${db} response file ${CYAN}${responseFile}${db}`);
       return Promise.resolve();
     } catch (err) {
-      this.log.error(`****Error saving shellyId ${hk}${shellyId}${er} response file ${CYAN}${responseFile}${nf}: ${err instanceof Error ? err.message : err}`);
+      this.log.error(`Error saving shellyId ${hk}${shellyId}${er} response file ${CYAN}${responseFile}${nf}: ${err instanceof Error ? err.message : err}`);
       return Promise.reject(err);
     }
   }

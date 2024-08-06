@@ -49,6 +49,9 @@ import {
   electricalSensor,
   ElectricalPowerMeasurement,
   ElectricalEnergyMeasurement,
+  OccupancySensingCluster,
+  IlluminanceMeasurementCluster,
+  TemperatureMeasurementCluster,
 } from 'matterbridge';
 import { EveHistory, EveHistoryCluster } from 'matterbridge/history';
 import { AnsiLogger, BLUE, CYAN, GREEN, LogLevel, TimestampFormat, YELLOW, db, debugStringify, dn, er, hk, idn, nf, or, rs, wr, zb } from 'matterbridge/logger';
@@ -133,11 +136,19 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       device.log.info(`- model: ${CYAN}${device.model}${nf}`);
       device.log.info(`- firmware: ${CYAN}${device.firmware}${nf}`);
       if (device.profile) device.log.info(`- profile: ${CYAN}${device.profile}${nf}`);
+      if (device.sleepMode) device.log.info(`- sleep: ${CYAN}${device.sleepMode}${nf}`);
       device.log.info('- components:');
       for (const [key, component] of device) {
         device.log.info(`  - ${CYAN}${key}${nf} (${GREEN}${component.name}${nf})`);
       }
       if (config.debug) device.logDevice();
+
+      device.getComponent('sensor')?.logComponent();
+      device.getComponent('lux')?.logComponent();
+      device.getComponent('battery')?.logComponent();
+      device.getComponent('motion')?.logComponent();
+      device.getComponent('contact')?.logComponent();
+      device.getComponent('vibration')?.logComponent();
 
       if (device.name === undefined || device.id === undefined || device.model === undefined || device.firmware === undefined) {
         this.log.error(`Shelly device ${hk}${device.id}${er} host ${zb}${device.host}${er} is not valid. Please put it in the blackList and open an issue.`);
@@ -162,9 +173,14 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       const child = mbDevice.addChildDeviceTypeWithClusterServer('PowerSource', [powerSource], [PowerSource.Cluster.id]);
       const battery = device.getComponent('battery');
       if (battery) {
-        battery.logComponent();
-        if (battery.hasProperty('charging')) child.addClusterServer(mbDevice.getDefaultPowerSourceRechargeableBatteryClusterServer());
-        else child.addClusterServer(mbDevice.getDefaultPowerSourceReplaceableBatteryClusterServer());
+        if (battery.hasProperty('charging')) {
+          child.addClusterServer(mbDevice.getDefaultPowerSourceRechargeableBatteryClusterServer());
+        } else {
+          child.addClusterServer(mbDevice.getDefaultPowerSourceReplaceableBatteryClusterServer());
+        }
+        battery.on('update', (component: string, property: string, value: ShellyDataType) => {
+          this.shellyUpdateHandler(mbDevice, device, component, property, value);
+        });
       } else {
         child.addClusterServer(mbDevice.getDefaultPowerSourceWiredClusterServer());
       }
@@ -455,6 +471,61 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               this.shellyUpdateHandler(mbDevice, device, component, property, value);
             });
           }
+        } else if (component.name === 'Sensor' && config.exposeSensor !== 'disabled') {
+          const sensorComponent = device.getComponent(key);
+          if (sensorComponent?.hasProperty('contact_open')) {
+            const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.CONTACT_SENSOR], []);
+            child.addClusterServer(mbDevice.getDefaultBooleanStateClusterServer(sensorComponent.getValue('contact_open') === false));
+            mbDevice.addFixedLabel('composed', component.name);
+            // Add event handler
+            sensorComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
+              this.shellyUpdateHandler(mbDevice, device, component, property, value);
+            });
+          }
+          if (sensorComponent?.hasProperty('motion')) {
+            const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.OCCUPANCY_SENSOR], []);
+            child.addClusterServer(mbDevice.getDefaultOccupancySensingClusterServer(sensorComponent.getValue('motion') as boolean));
+            mbDevice.addFixedLabel('composed', component.name);
+            // Add event handler
+            sensorComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
+              this.shellyUpdateHandler(mbDevice, device, component, property, value);
+            });
+          }
+        } else if (component.name === 'Vibration' && config.exposeVibration !== 'disabled') {
+          const vibrationComponent = device.getComponent(key);
+          if (vibrationComponent?.hasProperty('vibration')) {
+            const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.GENERIC_SWITCH], []);
+            child.addClusterServer(mbDevice.getDefaultSwitchClusterServer());
+            mbDevice.addFixedLabel('composed', component.name);
+            // Add event handler
+            vibrationComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
+              this.shellyUpdateHandler(mbDevice, device, component, property, value);
+            });
+          }
+        } else if (component.name === 'Temperature' && config.exposeTemperature !== 'disabled') {
+          const tempComponent = device.getComponent(key);
+          if (tempComponent?.hasProperty('value')) {
+            const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.TEMPERATURE_SENSOR], []);
+            const matterTemp = Math.min(Math.max(Math.round((tempComponent.getValue('value') as number) * 100), -10000), 10000);
+            child.addClusterServer(mbDevice.getDefaultTemperatureMeasurementClusterServer(matterTemp));
+            mbDevice.addFixedLabel('composed', component.name);
+            // Add event handler
+            tempComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
+              this.shellyUpdateHandler(mbDevice, device, component, property, value);
+            });
+          }
+        } else if (component.name === 'Lux' && config.exposeLux !== 'disabled') {
+          const luxComponent = device.getComponent(key);
+          if (luxComponent?.hasProperty('value')) {
+            const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.LIGHT_SENSOR], []);
+            const matterLux = Math.round(Math.max(Math.min(10000 * Math.log10(luxComponent.getValue('value') as number), 0xfffe), 0));
+            child.addClusterServer(mbDevice.getDefaultIlluminanceMeasurementClusterServer(matterLux));
+            mbDevice.addFixedLabel('composed', component.name);
+            // Add event handler
+            luxComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
+              this.shellyUpdateHandler(mbDevice, device, component, property, value);
+            });
+          }
         }
       }
       // Check if we have a device to register with Matterbridge
@@ -620,11 +691,11 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     if (device) {
       await device.saveDevicePayloads(path.join(this.matterbridge.matterbridgePluginDirectory, 'matterbridge-shelly'));
     } else {
-      this.log.warn(`Failed to create Shelly device ${hk}${deviceId}${wr} host ${zb}${host}${wr}`);
+      // this.log.warn(`Failed to create Shelly device ${hk}${deviceId}${wr} host ${zb}${host}${wr}`);
       const fileName = path.join(this.matterbridge.matterbridgePluginDirectory, 'matterbridge-shelly', `${deviceId}.json`);
       device = await ShellyDevice.create(this.shelly, log, fileName);
       if (!device) return;
-      this.log.info(`Loaded from cache Shelly device ${hk}${deviceId}${nf} host ${zb}${host}${nf}`);
+      this.log.warn(`Loaded from cache Shelly device ${hk}${deviceId}${nf} host ${zb}${host}${nf}`);
       device.host = host;
       device.cached = true;
       device.online = false;
@@ -853,18 +924,57 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       if (!event) return;
       if (event === 'S') {
         this.triggerSwitchEvent(endpoint, 'Single');
-        shellyComponent.setValue('event', '');
         shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}Switch-triggerSwitchEvent${db} ${YELLOW}Single${db}`);
       }
       if (event === 'SS') {
         this.triggerSwitchEvent(endpoint, 'Double');
-        shellyComponent.setValue('event', '');
         shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}Switch-triggerSwitchEvent${db} ${YELLOW}Double${db}`);
       }
       if (event === 'L') {
         this.triggerSwitchEvent(endpoint, 'Long');
-        shellyComponent.setValue('event', '');
         shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}Switch-triggerSwitchEvent${db} ${YELLOW}Long${db}`);
+      }
+    }
+    // Update for Battery
+    if (shellyComponent.name === 'Battery' && property === 'level' && typeof value === 'number') {
+      endpoint.getClusterServer(PowerSource.Complete)?.setBatPercentRemainingAttribute(Math.min(Math.max(value * 2, 0), 200));
+      shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}PowerSource-batPercentRemaining${db} ${YELLOW}${value}${db}`);
+    }
+    if (shellyComponent.name === 'Battery' && property === 'voltage' && typeof value === 'number') {
+      endpoint.getClusterServer(PowerSource.Complete)?.setBatVoltageAttribute(value / 1000);
+      shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}PowerSource-batVoltage${db} ${YELLOW}${value}${db}`);
+    }
+    if (shellyComponent.name === 'Battery' && property === 'charging' && typeof value === 'boolean') {
+      endpoint.getClusterServer(PowerSource.Complete)?.setBatChargeStateAttribute(value ? PowerSource.BatChargeState.IsCharging : PowerSource.BatChargeState.IsNotCharging);
+      shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}PowerSource-batVoltage${db} ${YELLOW}${value}${db}`);
+    }
+    // Update for Motion
+    if (shellyComponent.name === 'Sensor' && property === 'motion' && typeof value === 'boolean') {
+      endpoint.getClusterServer(OccupancySensingCluster)?.setOccupancyAttribute({ occupied: value });
+      shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}OccupancySensing-occupancy${db} ${YELLOW}${value}${db}`);
+    }
+    // Update for Contact
+    if (shellyComponent.name === 'Sensor' && property === 'contact_open' && typeof value === 'boolean') {
+      endpoint.getClusterServer(BooleanStateCluster)?.setStateValueAttribute(!value);
+      shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}BooleanStateCluster-stateValue${db} ${YELLOW}${!value}${db}`);
+    }
+    // Update for Illuminance
+    if (shellyComponent.name === 'Lux' && property === 'value' && typeof value === 'number') {
+      const matterLux = Math.round(Math.max(Math.min(10000 * Math.log10(value), 0xfffe), 0));
+      endpoint.getClusterServer(IlluminanceMeasurementCluster)?.setMeasuredValueAttribute(matterLux);
+      shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}IlluminanceMeasurement-measuredValue${db} ${YELLOW}${matterLux}${db}`);
+    }
+    // Update for Temperature
+    if (shellyComponent.name === 'Temperature' && property === 'value' && typeof value === 'number') {
+      const matterTemp = Math.min(Math.max(Math.round(value * 100), -10000), 10000);
+      endpoint.getClusterServer(TemperatureMeasurementCluster)?.setMeasuredValueAttribute(matterTemp);
+      shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}TemperatureMeasurement-measuredValue${db} ${YELLOW}${matterTemp / 100}${db}`);
+    }
+    // Update for vibration
+    if (shellyComponent.name === 'Vibration' && property === 'vibration' && typeof value === 'boolean') {
+      if (value) {
+        this.triggerSwitchEvent(endpoint, 'Single');
+        shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}Switch-triggerSwitchEvent${db} ${YELLOW}Single${db}`);
       }
     }
     // Update brightness

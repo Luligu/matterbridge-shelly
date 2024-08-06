@@ -1,0 +1,77 @@
+{
+  "id": 0,
+  "type": "response",
+  "flags": 1024,
+  "flag_qr": true,
+  "opcode": "QUERY",
+  "flag_aa": true,
+  "flag_tc": false,
+  "flag_rd": false,
+  "flag_ra": false,
+  "flag_z": false,
+  "flag_ad": false,
+  "flag_cd": false,
+  "rcode": "NOERROR",
+  "questions": [],
+  "answers": [
+    {
+      "name": "shellymotion2-8CF68108A6F5.local",
+      "type": "A",
+      "ttl": 300,
+      "class": "IN",
+      "flush": true,
+      "data": "192.168.1.246"
+    },
+    {
+      "name": "246.1.168.192.in-addr.arpa",
+      "type": "PTR",
+      "ttl": 300,
+      "class": "IN",
+      "flush": true,
+      "data": "shellymotion2-8CF68108A6F5.local"
+    },
+    {
+      "name": "_services._dns-sd._udp.local",
+      "type": "PTR",
+      "ttl": 3600,
+      "class": "IN",
+      "flush": false,
+      "data": "_http._tcp.local"
+    },
+    {
+      "name": "_http._tcp.local",
+      "type": "PTR",
+      "ttl": 3600,
+      "class": "IN",
+      "flush": false,
+      "data": "shellymotion2-8CF68108A6F5._http._tcp.local"
+    },
+    {
+      "name": "shellymotion2-8CF68108A6F5._http._tcp.local",
+      "type": "SRV",
+      "ttl": 3600,
+      "class": "IN",
+      "flush": true,
+      "data": {
+        "priority": 0,
+        "weight": 0,
+        "port": 80,
+        "target": "shellymotion2-8CF68108A6F5.local"
+      }
+    },
+    {
+      "name": "shellymotion2-8CF68108A6F5._http._tcp.local",
+      "type": "TXT",
+      "ttl": 3600,
+      "class": "IN",
+      "flush": true,
+      "data": [
+        "fw_id=20240619-130804/v2.2.4@ee290818",
+        "id=shellymotion2-8CF68108A6F5",
+        "arch=EFM32GG11"
+      ]
+    }
+  ],
+  "authorities": [],
+  "additionals": []
+}

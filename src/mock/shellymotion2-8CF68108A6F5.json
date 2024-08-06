@@ -1,0 +1,168 @@
+{
+  "shelly": {
+    "type": "SHMOS-02",
+    "mac": "8CF68108A6F5",
+    "auth": false,
+    "fw": "20240619-130804/v2.2.4@ee290818",
+    "longid": 1,
+    "discoverable": false
+  },
+  "settings": {
+    "device": {
+      "type": "SHMOS-02",
+      "mac": "8CF68108A6F5",
+      "hostname": "shellymotion2-8CF68108A6F5",
+      "num_outputs": 0
+    },
+    "wifi_ap": {
+      "enabled": false,
+      "ssid": "shellymotion2-8CF68108A6F5"
+    },
+    "wifi_sta": {
+      "enabled": true,
+      "ssid": "FibreBox_X6-12A4C7",
+      "ipv4_method": "dhcp",
+      "ip": null,
+      "gw": null,
+      "mask": null,
+      "dns": null
+    },
+    "mqtt": {
+      "enable": false,
+      "server": "192.168.33.2:1883",
+      "user": null,
+      "id": "shellymotion2-8CF68108A6F5",
+      "clean_session": true,
+      "max_qos": 0,
+      "retain": false,
+      "update_period": 60
+    },
+    "sntp": {
+      "server": "time.google.com",
+      "enabled": true
+    },
+    "login": {
+      "enabled": false,
+      "unprotected": false,
+      "username": "admin",
+      "default_username": "admin"
+    },
+    "pin_code": "",
+    "name": "My Shelly Motion 2",
+    "fw": "20240619-130804/v2.2.4@ee290818",
+    "discoverable": false,
+    "build_info": {
+      "build_id": "20240619-130804/v2.2.4@ee290818",
+      "build_timestamp": "2024-06-19T13:08:04Z",
+      "build_version": "2024061913"
+    },
+    "cloud": {
+      "enabled": true
+    },
+    "coiot": {
+      "enabled": false,
+      "update_period": 3600,
+      "peer": ""
+    },
+    "timezone": "Europe/Monaco",
+    "lat": 43.731201,
+    "lng": 7.4138,
+    "tzautodetect": true,
+    "tz_utc_offset": 7200,
+    "tz_dst": false,
+    "tz_dst_auto": true,
+    "time": "15:12",
+    "sleep_time": 0,
+    "motion": {
+      "sensitivity": 50,
+      "blind_time_minutes": 5,
+      "pulse_count": 1,
+      "operating_mode": 0,
+      "enabled": true
+    },
+    "led_status_disable": false,
+    "tamper_sensitivity": 2,
+    "dark_threshold": 100,
+    "twilight_threshold": 500,
+    "schedule": false,
+    "schedule_rules": [],
+    "hwinfo": {
+      "hw_revision": "dev-prototype",
+      "batch_id": 0
+    },
+    "sleep_mode": {
+      "period": 60,
+      "unit": "m"
+    },
+    "sensors": {
+      "temperature_unit": "C",
+      "temperature_threshold": 0.5
+    },
+    "temperature_offset": 0
+  },
+  "status": {
+    "wifi_sta": {
+      "connected": true,
+      "ssid": "FibreBox_X6-12A4C7",
+      "ip": "192.168.1.246",
+      "rssi": -56
+    },
+    "cloud": {
+      "enabled": true,
+      "connected": true
+    },
+    "mqtt": {
+      "connected": false
+    },
+    "time": "15:12",
+    "unixtime": 1722777121,
+    "serial": 18,
+    "has_update": false,
+    "mac": "8CF68108A6F5",
+    "cfg_changed_cnt": 4,
+    "actions_stats": {
+      "skipped": 0
+    },
+    "sleep_time": 0,
+    "lux": {
+      "value": 441,
+      "illumination": "twilight",
+      "is_valid": true
+    },
+    "tmp": {
+      "value": 26.6,
+      "units": "C",
+      "is_valid": true
+    },
+    "sensor": {
+      "vibration": false,
+      "motion": true,
+      "timestamp": 1722777072,
+      "active": true,
+      "is_valid": true
+    },
+    "bat": {
+      "value": 99,
+      "voltage": 4.091
+    },
+    "charger": false,
+    "update": {
+      "status": "unknown",
+      "has_update": false,
+      "new_version": "20240619-130804/v2.2.4@ee290818",
+      "old_version": "20240619-130804/v2.2.4@ee290818",
+      "beta_version": null
+    },
+    "ram_total": 97280,
+    "ram_free": 22728,
+    "fs_size": 65536,
+    "fs_free": 59404,
+    "uptime": 508,
+    "fw_info": {
+      "device": "shellymotion2-8CF68108A6F5",
+      "fw": "20240619-130804/v2.2.4@ee290818"
+    },
+    "ps_mode": 0,
+    "dbg_flags": 0
+  }
+}

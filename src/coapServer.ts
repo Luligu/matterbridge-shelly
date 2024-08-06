@@ -21,8 +21,8 @@
  * limitations under the License. *
  */
 
-import { AnsiLogger, BLUE, CYAN, LogLevel, MAGENTA, RESET, TimestampFormat, db, debugStringify, idn, rs } from 'matterbridge/logger';
-import coap, { Server, IncomingMessage, OutgoingMessage, globalAgent } from 'coap';
+import { AnsiLogger, BLUE, CYAN, LogLevel, MAGENTA, RESET, TimestampFormat, db, debugStringify, er, idn, rs, zb } from 'matterbridge/logger';
+import coap, { Server, IncomingMessage, OutgoingMessage, globalAgent, parameters } from 'coap';
 import EventEmitter from 'events';
 
 // 192.168.1.189:5683
@@ -85,6 +85,11 @@ export class CoapServer extends EventEmitter {
     super();
     this.log = new AnsiLogger({ logName: 'ShellyCoapServer', logTimestampFormat: TimestampFormat.TIME_MILLIS, logLevel });
 
+    // Set the CoAP parameters to minimum values
+    parameters.maxRetransmit = 1;
+    parameters.maxLatency = 1;
+    if (parameters.refreshTiming) parameters.refreshTiming();
+
     this.registerShellyOptions();
   }
 
@@ -100,89 +105,70 @@ export class CoapServer extends EventEmitter {
   /**
    * Retrieves the device description from the specified host using CoAP protocol.
    * @param {string} host The host from which to retrieve the device description.
-   * @param {number} timeout The timeout value in seconds for the request. Default is 60 seconds.
    * @returns {Promise<IncomingMessage | null>} A Promise that resolves with the IncomingMessage object representing the response, or null if the request times out.
    */
-  getDeviceDescription(host: string, timeout = 60): Promise<IncomingMessage | null> {
-    this.log.debug(`Requesting device description from ${host}...`);
-    timeout = Math.min(Math.max(Math.round(timeout), 2), 300);
+  async getDeviceDescription(host: string): Promise<IncomingMessage | null> {
+    this.log.debug(`Requesting CoIoT (coap) device description from ${zb}${host}${db}...`);
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     return new Promise((resolve, reject) => {
-      const response = coap
+      coap
         .request({
           host,
           method: 'GET',
           pathname: '/cit/d',
-          // agent: this.coapAgent,
+          retrySend: 0,
         })
         .on('response', (msg: IncomingMessage) => {
-          clearTimeout(timer);
           this.log.debug(`CoIoT (coap) received device description ("/cit/d") code ${BLUE}${msg.code}${db} url ${BLUE}${msg.url}${db} rsinfo ${debugStringify(msg.rsinfo)}:`);
           msg.url = '/cit/d';
           this.parseShellyMessage(msg);
           resolve(msg);
         })
+        .on('timeout', (err) => {
+          this.log.error(`CoIoT (coap) timeout requesting device description ("/cit/d") from ${zb}${host}${er}:`, err instanceof Error ? err.message : err);
+          resolve(null);
+        })
         .on('error', (err) => {
-          clearTimeout(timer);
-          this.log.error('CoIoT (coap) error getting device description ("/cit/d"):', err);
-          reject(err);
+          this.log.error(`CoIoT (coap) error requesting device description ("/cit/d") from ${zb}${host}${er}:`, err instanceof Error ? err.message : err);
+          resolve(null);
         })
         .end();
-
-      const timer = setTimeout(
-        () => {
-          this.log.debug('CoIoT (coap) request timeout reached');
-          response.sender.removeAllListeners();
-          response.sender.reset();
-          response.end();
-          resolve(null);
-        },
-        (timeout - 1) * 1000,
-      );
+      this.log.debug(`Sent CoIoT (coap) device description request to ${zb}${host}${db}.`);
     });
   }
 
   /**
    * Retrieves the device status from the specified host.
    * @param {string} host - The host to request the device status from.
-   * @param {number} timeout - The timeout value in seconds (default: 60).
    * @returns {Promise<IncomingMessage | null>} A Promise that resolves with the IncomingMessage containing the device status, or null if the request times out.
    */
-  getDeviceStatus(host: string, timeout = 60): Promise<IncomingMessage | null> {
-    this.log.debug(`Requesting device status from ${host}...`);
-    timeout = Math.min(Math.max(Math.round(timeout), 2), 300);
+  async getDeviceStatus(host: string): Promise<IncomingMessage | null> {
+    this.log.debug(`Requesting CoIoT (coap) device status from ${zb}${host}${db}...`);
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     return new Promise((resolve, reject) => {
-      const response = coap
+      coap
         .request({
           host,
           method: 'GET',
           pathname: '/cit/s',
-          // agent: this.coapAgent,
         })
         .on('response', (msg: IncomingMessage) => {
-          clearTimeout(timer);
           this.log.debug(`CoIoT (coap) received device status ("/cit/s") code ${BLUE}${msg.code}${db} url ${BLUE}${msg.url}${db} rsinfo ${debugStringify(msg.rsinfo)}:`);
           this.parseShellyMessage(msg);
           resolve(msg);
         })
+        .on('timeout', (err) => {
+          this.log.error(`CoIoT (coap) timeout requesting device status ("/cit/s") from ${zb}${host}${er}:`, err instanceof Error ? err.message : err);
+          resolve(null);
+        })
         .on('error', (err) => {
-          clearTimeout(timer);
-          this.log.error('CoIoT (coap) error getting device status ("/cit/s"):', err);
-          reject(err);
+          this.log.error(`CoIoT (coap) error requesting device status ("/cit/s") from ${zb}${host}${er}:`, err instanceof Error ? err.message : err);
+          resolve(null);
         })
         .end();
-
-      const timer = setTimeout(
-        () => {
-          this.log.debug('CoIoT (coap) request timeout reached');
-          response.sender.removeAllListeners();
-          response.sender.reset();
-          response.end();
-          resolve(null);
-        },
-        (timeout - 1) * 1000,
-      );
+      this.log.debug(`Sent CoIoT (coap) device status request to ${zb}${host}${db}.`);
     });
   }
 
@@ -191,47 +177,36 @@ export class CoapServer extends EventEmitter {
    * @param {number} timeout The timeout value in seconds (default: 60)
    * @returns {Promise<IncomingMessage | null>} A Promise that resolves with the IncomingMessage object or null if an error occurs or the timeout is reached.
    */
-  getMulticastDeviceStatus(timeout = 60): Promise<IncomingMessage | null> {
+  async getMulticastDeviceStatus(timeout = 60): Promise<IncomingMessage | null> {
     this.log.debug('Requesting CoIoT (coap) multicast device status...');
-    timeout = Math.min(Math.max(Math.round(timeout), 2), 300);
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     return new Promise((resolve, reject) => {
       this.log.debug('Sending CoAP multicast request...');
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const response = coap
         .request({
           host: COAP_MULTICAST_ADDRESS,
           method: 'GET',
           pathname: '/cit/s',
-          // agent: this.coapAgent,
           multicast: true,
           multicastTimeout: timeout * 1000,
         })
         .on('response', (msg: IncomingMessage) => {
-          clearTimeout(timer);
           this.log.debug(`Multicast device status code ${BLUE}${msg.code}${db} url ${BLUE}${msg.url}${db} rsinfo ${debugStringify(msg.rsinfo)}:`);
           this.parseShellyMessage(msg);
           resolve(msg);
         })
+        .on('timeout', (err) => {
+          this.log.error('CoIoT (coap) timeout requesting multicast device status ("/cit/s"):', err instanceof Error ? err.message : err);
+          resolve(null);
+        })
         .on('error', (err) => {
-          clearTimeout(timer);
-          this.log.error('CoIoT (coap) error requesting multicast device status ("/cit/s"):', err);
+          this.log.error('CoIoT (coap) error requesting multicast device status ("/cit/s"):', err instanceof Error ? err.message : err);
           resolve(null);
         })
         .end();
-      this.log.debug('Sent CoAP multicast request.');
-
-      this.log.debug('Adding CoAP multicast request timeout');
-      const timer = setTimeout(
-        () => {
-          this.log.debug('Multicast request timeout reached');
-          response.sender.removeAllListeners();
-          response.sender.reset();
-          response.end();
-          resolve(null);
-        },
-        (timeout - 1) * 1000,
-      );
+      this.log.debug('Sent CoIoT (coap) multicast device status request');
     });
   }
 
@@ -295,7 +270,7 @@ export class CoapServer extends EventEmitter {
    * @returns {CoapMessage} An object containing the parsed information from the message.
    */
   private parseShellyMessage(msg: IncomingMessage) {
-    this.log.debug(`Parsing device CoIoT (coap) response...`);
+    this.log.debug(`Parsing device CoIoT (coap) response from ${zb}${msg.rsinfo.address}${db}...`);
 
     const host = msg.rsinfo.address;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -328,7 +303,11 @@ export class CoapServer extends EventEmitter {
 
     if (headers[COIOT_OPTION_STATUS_SERIAL]) {
       serial = headers[COIOT_OPTION_STATUS_SERIAL];
-      this.deviceSerial.set(host, serial);
+    }
+
+    if (url === '/cit/s' && this.deviceSerial.get(host) === serial && !['SHDW-1', 'SHDW-2'].includes(deviceType)) {
+      this.log.debug(`No updates (serial not changed) for host ${zb}${host}${db}`);
+      return;
     }
 
     try {
@@ -352,7 +331,7 @@ export class CoapServer extends EventEmitter {
       this.log.debug(`parsing ${MAGENTA}blocks${db}:`);
       const blk: CoIoTBlkComponent[] = payload.blk;
       if (!blk) {
-        this.log.error(`No blk found for host ${host} in ${msg.url}`);
+        this.log.error(`No blk found for host ${zb}${host}${er} in ${msg.url}`);
         return;
       }
       blk.forEach((b) => {
@@ -416,10 +395,56 @@ export class CoapServer extends EventEmitter {
     }
 
     if (msg.url === '/cit/s') {
+      this.deviceSerial.set(host, serial);
       const descriptions: CoIoTDescription[] = this.devices.get(host) || [];
       if (!descriptions || descriptions.length === 0) {
-        this.log.debug(`*No coap description found for host ${host}`);
-        this.getDeviceDescription(host);
+        // Bug on SHMOS-01 and SHMOS-02
+        if (deviceType === 'SHDW-1' || deviceType === 'SHDW-2') {
+          this.log.debug(`*Set coap descriptions for host ${zb}${host}${db} deviceType ${CYAN}SHDW-2${db}`);
+          // battery component
+          descriptions.push({ id: 3111, component: 'battery', property: 'level', range: ['0/100', '-1'] }); // SHDW-1 and SHDW-2
+          // contact component 1 = open, 0 = closed
+          descriptions.push({ id: 3108, component: 'sensor', property: 'contact_open', range: ['0/1', '-1'] }); // SHDW-1 and SHDW-2
+          descriptions.push({ id: 6110, component: 'vibration', property: 'vibration', range: ['0/1', '-1'] }); // SHDW-1 and SHDW-2
+          // luminosity component
+          descriptions.push({ id: 3106, component: 'lux', property: 'value', range: ['U32', '-1'] }); // SHDW-1 and SHDW-2
+          // temperature component
+          descriptions.push({ id: 3101, component: 'temperature', property: 'value', range: ['-55/125', '999'] }); // SHDW-1 and SHDW-2
+          this.devices.set(host, descriptions);
+        } else if (deviceType === 'SHBTN-1' || deviceType === 'SHBTN-2') {
+          this.log.debug(`*Set coap descriptions for host ${zb}${host}${db} deviceType ${CYAN}SHBTN-2${db}`);
+          // battery component
+          descriptions.push({ id: 3111, component: 'battery', property: 'level', range: ['0/100', '-1'] }); // SHMOS-01
+          // input component
+          descriptions.push({ id: 2102, component: 'input:0', property: 'event', range: ['S/L/SS/SSS', ''] }); // SHBTN-2
+          descriptions.push({ id: 2103, component: 'input:0', property: 'event_cnt', range: 'U16' }); // SHBTN-2
+          this.devices.set(host, descriptions);
+        } else if (deviceType === 'SHMOS-01') {
+          this.log.debug(`*Set coap descriptions for host ${zb}${host}${db} deviceType ${CYAN}SHMOS-01${db}`);
+          // battery component
+          descriptions.push({ id: 3111, component: 'battery', property: 'level', range: ['0/100', '-1'] }); // SHMOS-01
+          // motion component
+          descriptions.push({ id: 6107, component: 'sensor', property: 'motion', range: ['0/1', '-1'] }); // SHMOS-01
+          descriptions.push({ id: 6110, component: 'vibration', property: 'vibration', range: ['0/1', '-1'] }); // SHMOS-01
+          // luminosity component
+          descriptions.push({ id: 3106, component: 'lux', property: 'value', range: ['U32', '-1'] }); // SHMOS-01
+          this.devices.set(host, descriptions);
+        } else if (deviceType === 'SHMOS-02') {
+          this.log.debug(`*Set coap descriptions for host ${zb}${host}${db} deviceType ${CYAN}SHMOS-02${db}`);
+          // battery component
+          descriptions.push({ id: 3111, component: 'battery', property: 'level', range: ['0/100', '-1'] }); // SHMOS-02
+          // motion component
+          descriptions.push({ id: 6107, component: 'sensor', property: 'motion', range: ['0/1', '-1'] }); // SHMOS-02
+          descriptions.push({ id: 6110, component: 'vibration', property: 'vibration', range: ['0/1', '-1'] }); // SHMOS-02
+          // luminosity component
+          descriptions.push({ id: 3106, component: 'lux', property: 'value', range: ['U32', '-1'] }); // SHMOS-02
+          // temperature component
+          descriptions.push({ id: 3101, component: 'temperature', property: 'value', range: ['-55/125', '999'] }); // SHDW-1 and SHDW-2
+          this.devices.set(host, descriptions);
+        } else {
+          this.log.debug(`*No coap description found for host ${zb}${host}${db} fetching it...`);
+          this.getDeviceDescription(host); // No await
+        }
       }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const values: CoIoTGValue[] = payload.G.map((v: any[]) => ({
@@ -434,7 +459,16 @@ export class CoapServer extends EventEmitter {
           this.log.debug(
             `- channel ${CYAN}${v.channel}${db} id ${CYAN}${v.id}${db} value ${CYAN}${v.value}${db} => ${CYAN}${desc.component}${db} ${CYAN}${desc.property}${db} ${CYAN}${desc.range === '0/1' ? v.value === 1 : v.value}${db}`,
           );
-          this.emit('update', host, desc.component, desc.property, desc.range === '0/1' ? v.value === 1 : v.value);
+          if (typeof desc.range === 'string' && desc.range === '0/1') {
+            this.log.debug(`sending update for component ${CYAN}${desc.component}${db} property ${CYAN}${desc.property}${db}`);
+            this.emit('update', host, desc.component, desc.property, v.value === 1);
+          } else if (Array.isArray(desc.range) && desc.range[0] === '0/1' && desc.range[1] === '-1') {
+            this.log.debug(`sending update for component ${CYAN}${desc.component}${db} property ${CYAN}${desc.property}${db}`);
+            this.emit('update', host, desc.component, desc.property, v.value === -1 ? null : v.value === 1);
+          } else {
+            this.log.debug(`sending update for component ${CYAN}${desc.component}${db} property ${CYAN}${desc.property}${db}`);
+            this.emit('update', host, desc.component, desc.property, v.value);
+          }
         }
         // else this.log.debug(`No coap description found for id ${v.id}`);
       });
@@ -451,9 +485,17 @@ export class CoapServer extends EventEmitter {
       multicastAddress: COAP_MULTICAST_ADDRESS,
     });
 
+    this.coapServer.on('error', (err) => {
+      this.log.error('CoIoT (coap) server error:', err instanceof Error ? err.message : err);
+    });
+
+    this.coapServer.on('warning', (err) => {
+      this.log.warn('CoIoT (coap) server warning:', err instanceof Error ? err.message : err);
+    });
+
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     this.coapServer.on('request', (msg: IncomingMessage, res: OutgoingMessage) => {
-      this.log.debug(`CoIoT (coap) server got a messagge code ${BLUE}${msg.code}${db} url ${BLUE}${msg.url}${db} rsinfo ${debugStringify(msg.rsinfo)}...`);
+      this.log.debug(`CoIoT (coap) server recevived a messagge code ${BLUE}${msg.code}${db} url ${BLUE}${msg.url}${db} rsinfo ${debugStringify(msg.rsinfo)}`);
       if (msg.code === '0.30' && msg.url === '/cit/s') {
         this.parseShellyMessage(msg);
       } else {
@@ -479,8 +521,8 @@ export class CoapServer extends EventEmitter {
    */
   async registerDevice(host: string): Promise<void> {
     this.log.debug(`Registering device ${host}...`);
-    await this.getDeviceDescription(host);
-    this.log.debug(`Registered device ${host}.`);
+    this.getDeviceDescription(host); // No await
+    // this.log.debug(`Registered device ${host}.`);
   }
 
   /**
@@ -541,8 +583,328 @@ if (process.argv.includes('coapServer') || process.argv.includes('coapDescriptio
 
   if (process.argv.includes('coapServer')) coapServer.start(true);
 
+  if (process.argv.includes('coapServer')) await coapServer.getDeviceDescription('192.168.1.245');
+  if (process.argv.includes('coapServer')) await coapServer.getDeviceStatus('192.168.1.246');
+
   process.on('SIGINT', async function () {
     coapServer.stop();
     // process.exit();
   });
 }
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const SHDW = {
+  'blk': [
+    {
+      'I': 1,
+      'D': 'sensor_0',
+    },
+    {
+      'I': 2,
+      'D': 'device',
+    },
+  ],
+  'sen': [
+    {
+      'I': 9103,
+      'T': 'EVC',
+      'D': 'cfgChanged',
+      'R': 'U16',
+      'L': 2,
+    },
+    {
+      'I': 3108,
+      'T': 'S',
+      'D': 'dwIsOpened',
+      'R': ['0/1', '-1'],
+      'L': 1,
+    },
+    {
+      'I': 3119,
+      'T': 'S',
+      'D': 'dwStateChanged',
+      'R': ['0/1', '-1'],
+      'L': 1,
+    },
+    {
+      'I': 3109,
+      'T': 'S',
+      'D': 'tilt',
+      'U': 'deg',
+      'R': ['0/180', '-1'],
+      'L': 1,
+    },
+    {
+      'I': 6110,
+      'T': 'A',
+      'D': 'vibration',
+      'R': ['0/1', '-1'],
+      'L': 1,
+    },
+    {
+      'I': 3106,
+      'T': 'L',
+      'D': 'luminosity',
+      'U': 'lux',
+      'R': ['U32', '-1'],
+      'L': 1,
+    },
+    {
+      'I': 3110,
+      'T': 'S',
+      'D': 'luminosityLevel',
+      'R': ['dark/twilight/bright', 'unknown'],
+      'L': 1,
+    },
+    {
+      'I': 3101,
+      'T': 'T',
+      'D': 'extTemp',
+      'U': 'C',
+      'R': ['-55/125', '999'],
+      'L': 1,
+    },
+    {
+      'I': 3102,
+      'T': 'T',
+      'D': 'extTemp',
+      'U': 'F',
+      'R': ['-67/257', '999'],
+      'L': 1,
+    },
+    {
+      'I': 3115,
+      'T': 'S',
+      'D': 'sensorError',
+      'R': '0/1',
+      'L': 1,
+    },
+    {
+      'I': 3111,
+      'T': 'B',
+      'D': 'battery',
+      'R': ['0/100', '-1'],
+      'L': 2,
+    },
+    {
+      'I': 9102,
+      'T': 'EV',
+      'D': 'wakeupEvent',
+      'R': ['battery/button/periodic/poweron/sensor/alarm', 'unknown'],
+      'L': 2,
+    },
+  ],
+};
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const SHBTN2 = {
+  'blk': [
+    {
+      'I': 1,
+      'D': 'sensor_0',
+    },
+    {
+      'I': 2,
+      'D': 'device',
+    },
+  ],
+  'sen': [
+    {
+      'I': 9103,
+      'T': 'EVC',
+      'D': 'cfgChanged',
+      'R': 'U16',
+      'L': 2,
+    },
+    {
+      'I': 2102,
+      'T': 'EV',
+      'D': 'inputEvent',
+      'R': ['S/L/SS/SSS', ''],
+      'L': 1,
+    },
+    {
+      'I': 2103,
+      'T': 'EVC',
+      'D': 'inputEventCnt',
+      'R': 'U16',
+      'L': 1,
+    },
+    {
+      'I': 3115,
+      'T': 'S',
+      'D': 'sensorError',
+      'R': '0/1',
+      'L': 1,
+    },
+    {
+      'I': 3112,
+      'T': 'S',
+      'D': 'charger',
+      'R': ['0/1', '-1'],
+      'L': 2,
+    },
+    {
+      'I': 3111,
+      'T': 'B',
+      'D': 'battery',
+      'R': ['0/100', '-1'],
+      'L': 2,
+    },
+    {
+      'I': 9102,
+      'T': 'EV',
+      'D': 'wakeupEvent',
+      'R': ['battery/button/periodic/poweron/sensor/ext_power', 'unknown'],
+      'L': 2,
+    },
+  ],
+};
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const SHMOS01 = {
+  'blk': [
+    {
+      'I': 1,
+      'D': 'sensor_0',
+    },
+    {
+      'I': 2,
+      'D': 'device',
+    },
+  ],
+  'sen': [
+    {
+      'I': 6107,
+      'T': 'A',
+      'D': 'motion',
+      'R': ['0/1', '-1'],
+      'L': 1,
+    },
+    {
+      'I': 3119,
+      'T': 'S',
+      'D': 'timestamp',
+      'U': 's',
+      'R': ['U32', '-1'],
+      'L': 1,
+    },
+    {
+      'I': 3120,
+      'T': 'S',
+      'D': 'motionActive',
+      'R': ['0/1', '-1'],
+      'L': 1,
+    },
+    {
+      'I': 6110,
+      'T': 'A',
+      'D': 'vibration',
+      'R': ['0/1', '-1'],
+      'L': 1,
+    },
+    {
+      'I': 3106,
+      'T': 'L',
+      'D': 'luminosity',
+      'R': ['U32', '-1'],
+      'L': 1,
+    },
+    {
+      'I': 3111,
+      'T': 'B',
+      'D': 'battery',
+      'R': ['0/100', '-1'],
+      'L': 2,
+    },
+    {
+      'I': 9103,
+      'T': 'EVC',
+      'D': 'cfgChanged',
+      'R': 'U16',
+      'L': 2,
+    },
+  ],
+};
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const SHMOS02 = {
+  'blk': [
+    {
+      'I': 1,
+      'D': 'sensor_0',
+    },
+    {
+      'I': 2,
+      'D': 'device',
+    },
+  ],
+  'sen': [
+    {
+      'I': 3101,
+      'T': 'T',
+      'D': 'temp',
+      'U': 'C',
+      'R': ['-55/125', '999'],
+      'L': 1,
+    },
+    {
+      'I': 3102,
+      'T': 'T',
+      'D': 'temp',
+      'U': 'F',
+      'R': ['-67/257', '999'],
+      'L': 1,
+    },
+    {
+      'I': 6107,
+      'T': 'A',
+      'D': 'motion',
+      'R': ['0/1', '-1'],
+      'L': 1,
+    },
+    {
+      'I': 3119,
+      'T': 'S',
+      'D': 'timestamp',
+      'U': 's',
+      'R': ['U32', '-1'],
+      'L': 1,
+    },
+    {
+      'I': 3120,
+      'T': 'A',
+      'D': 'motionActive',
+      'R': ['0/1', '-1'],
+      'L': 1,
+    },
+    {
+      'I': 6110,
+      'T': 'A',
+      'D': 'vibration',
+      'R': ['0/1', '-1'],
+      'L': 1,
+    },
+    {
+      'I': 3106,
+      'T': 'L',
+      'D': 'luminosity',
+      'R': ['U32', '-1'],
+      'L': 1,
+    },
+    {
+      'I': 3111,
+      'T': 'B',
+      'D': 'battery',
+      'R': ['0/100', '-1'],
+      'L': 2,
+    },
+    {
+      'I': 9103,
+      'T': 'EVC',
+      'D': 'cfgChanged',
+      'R': 'U16',
+      'L': 2,
+    },
+  ],
+};

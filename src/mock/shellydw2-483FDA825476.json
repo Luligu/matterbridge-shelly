@@ -1,0 +1,192 @@
+{
+  "shelly": {
+    "type": "SHDW-2",
+    "mac": "483FDA825476",
+    "auth": false,
+    "fw": "20230913-112843/v1.14.0-gcb84623",
+    "discoverable": false,
+    "longid": 1,
+    "sleep_mode": true
+  },
+  "settings": {
+    "device": {
+      "type": "SHDW-2",
+      "mac": "483FDA825476",
+      "hostname": "shellydw2-483FDA825476",
+      "sleep_mode": true
+    },
+    "wifi_ap": {
+      "enabled": false,
+      "ssid": "shellydw2-483FDA825476",
+      "key": ""
+    },
+    "wifi_sta": {
+      "enabled": true,
+      "ssid": "FibreBox_X6-12A4C7",
+      "ipv4_method": "dhcp",
+      "ip": null,
+      "gw": null,
+      "mask": null,
+      "dns": null
+    },
+    "wifi_sta1": {
+      "enabled": false,
+      "ssid": null,
+      "ipv4_method": "dhcp",
+      "ip": null,
+      "gw": null,
+      "mask": null,
+      "dns": null
+    },
+    "mqtt": {
+      "enable": false,
+      "server": "192.168.33.3:1883",
+      "user": "",
+      "id": "shellydw2-483FDA825476",
+      "reconnect_timeout_max": 60,
+      "reconnect_timeout_min": 2,
+      "clean_session": true,
+      "keep_alive": 60,
+      "max_qos": 0,
+      "retain": false,
+      "update_period": 30
+    },
+    "coiot": {
+      "enabled": true,
+      "update_period": 15,
+      "peer": "192.168.1.189:5683"
+    },
+    "sntp": {
+      "server": "time.google.com",
+      "enabled": true
+    },
+    "login": {
+      "enabled": false,
+      "unprotected": false,
+      "username": "admin"
+    },
+    "pin_code": "",
+    "name": "My Shelly Door/Window 2",
+    "fw": "20230913-112843/v1.14.0-gcb84623",
+    "pon_wifi_reset": false,
+    "discoverable": false,
+    "build_info": {
+      "build_id": "20230913-112843/v1.14.0-gcb84623",
+      "build_timestamp": "2023-09-13T11:28:43Z",
+      "build_version": "1.0"
+    },
+    "cloud": {
+      "enabled": true,
+      "connected": true
+    },
+    "timezone": null,
+    "lat": 500,
+    "lng": 500,
+    "tzautodetect": true,
+    "tz_utc_offset": 0,
+    "tz_dst": false,
+    "tz_dst_auto": true,
+    "time": "",
+    "unixtime": 0,
+    "led_status_disable": true,
+    "debug_enable": false,
+    "allow_cross_origin": false,
+    "actions": {
+      "active": false,
+      "names": [
+        "report_url",
+        "dark_url",
+        "twilight_url",
+        "open_url",
+        "close_url",
+        "vibration_url",
+        "temp_over_url",
+        "temp_under_url"
+      ]
+    },
+    "dark_threshold": 100,
+    "twilight_threshold": 300,
+    "sleep_mode": {
+      "period": 12,
+      "unit": "h"
+    },
+    "tilt_enabled": false,
+    "tilt_calibrated": false,
+    "vibration_enabled": true,
+    "vibration_sensitivity": 50,
+    "reverse_open_close": false,
+    "lux_wakeup_enable": true,
+    "sensors": {
+      "temperature_threshold": 1,
+      "temperature_unit": "C"
+    },
+    "temperature_offset": 0
+  },
+  "status": {
+    "wifi_sta": {
+      "connected": true,
+      "ssid": "FibreBox_X6-12A4C7",
+      "ip": "192.168.1.247",
+      "rssi": -57
+    },
+    "cloud": {
+      "enabled": true,
+      "connected": true
+    },
+    "mqtt": {
+      "connected": false
+    },
+    "time": "",
+    "unixtime": 0,
+    "serial": 3,
+    "has_update": false,
+    "mac": "483FDA825476",
+    "cfg_changed_cnt": 0,
+    "actions_stats": {
+      "skipped": 0
+    },
+    "is_valid": true,
+    "tmp": {
+      "value": 29.4,
+      "units": "C",
+      "tC": 29.4,
+      "tF": 84.92,
+      "is_valid": true
+    },
+    "lux": {
+      "value": 378,
+      "illumination": "bright",
+      "is_valid": true
+    },
+    "accel": {
+      "tilt": -1,
+      "vibration": 0
+    },
+    "sensor": {
+      "state": "close",
+      "is_valid": true
+    },
+    "bat": {
+      "value": 100,
+      "voltage": 6.08
+    },
+    "act_reasons": [
+      "button",
+      "sensor",
+      "light"
+    ],
+    "sensor_error": 0,
+    "update": {
+      "status": "idle",
+      "has_update": false,
+      "new_version": "20230913-112843/v1.14.0-gcb84623",
+      "old_version": "20230913-112843/v1.14.0-gcb84623",
+      "beta_version": "20231107-163707/v1.14.1-rc1-g0617c15"
+    },
+    "ram_total": 52216,
+    "ram_free": 40712,
+    "fs_size": 233681,
+    "fs_free": 154616,
+    "uptime": 32
+  }
+}

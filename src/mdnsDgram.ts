@@ -89,7 +89,7 @@ ShellyPlus1PM-441793D69718 ShellyPlus1PM-441793D69718
     // if (rinfo.address !== '192.168.1.181' && rinfo.address !== '192.168.1.217' && rinfo.address !== '192.168.1.218') return;
     this.log.info(`Received message from ${ign}${rinfo.address}:${rinfo.port}${rs}`);
     this.devices.set(rinfo.address, { address: rinfo.address, port: rinfo.port });
-    /*
+
     try {
       const decoded = dnsPacket.decode(msg);
       decoded.questions?.forEach((question) => {
@@ -186,18 +186,14 @@ ShellyPlus1PM-441793D69718 ShellyPlus1PM-441793D69718
           this.log.debug(`Additional: ${idn}${answer.type}${rs}${db} ${answer.name}`);
         }
       });
-      console.log('\n');
-
-      this.parseMdnsResponse(msg);
-      console.log('\n');
+      // console.log('\n');
     } catch (error) {
       this.errorDevices.set(rinfo.address, { address: rinfo.address, port: rinfo.port });
       this.log.error(`Failed to decode mDNS message from ${rinfo.address}:${rinfo.port}: ${error instanceof Error ? error.message : error}`);
     }
-    */
+
     try {
       this.parseMdnsResponse(msg);
-      console.log('\n');
     } catch (error) {
       this.errorDevices.set(rinfo.address, { address: rinfo.address, port: rinfo.port });
       this.log.error(`Failed to decode mDNS message from ${rinfo.address}:${rinfo.port}: ${error instanceof Error ? error.message : error}`);
@@ -295,7 +291,7 @@ ShellyPlus1PM-441793D69718 ShellyPlus1PM-441793D69718
 
       if (qdcount > 0) console.log(`${GREEN}Questions:${rs}`);
       for (let i = 0; i < qdcount; i++) {
-        const { name, newOffset } = this.readDomainName(msg, offset);
+        const { name, newOffset } = this.decodeDomainName(msg, offset);
         offset = newOffset;
         const type = msg.readUInt16BE(offset);
         offset += 2;
@@ -307,7 +303,7 @@ ShellyPlus1PM-441793D69718 ShellyPlus1PM-441793D69718
 
       if (ancount > 0) console.log(`${GREEN}Answers:${rs}`);
       for (let i = 0; i < ancount; i++) {
-        const { name, newOffset } = this.readDomainName(msg, offset);
+        const { name, newOffset } = this.decodeDomainName(msg, offset);
         offset = newOffset;
         const type = msg.readUInt16BE(offset);
         offset += 2;
@@ -320,7 +316,7 @@ ShellyPlus1PM-441793D69718 ShellyPlus1PM-441793D69718
         const rdata = msg.subarray(offset, offset + rdlength);
         offset += rdlength;
 
-        let decoded = '';
+        let decoded;
 
         switch (type) {
           case 1: // A
@@ -339,25 +335,23 @@ ShellyPlus1PM-441793D69718 ShellyPlus1PM-441793D69718
             decoded = this.decodeAAAA(rdata, 0, rdlength);
             break;
           case 33: // SRV
-            // eslint-disable-next-line no-case-declarations
-            const { priority, weight, port, target } = this.decodeSRV(msg, offset - rdlength); // Pointers inside !!!
-            decoded = `Priority: ${priority}, Weight: ${weight}, Port: ${port}, Target: ${target}`;
+            decoded = this.decodeSRV(msg, offset - rdlength);
             break;
           case 47: // NSEC
-            // eslint-disable-next-line no-case-declarations
-            const { nextDomain, rrtypes } = this.decodeNSEC(msg, offset - rdlength);
-            decoded = 'nextDomain ' + nextDomain + ' rrtypes ' + rrtypes.join(', ');
+            decoded = this.decodeNSEC(msg, offset - rdlength);
             break;
           default:
             decoded = er + rdata.toString('hex') + rs;
             break;
         }
-        console.log(`${name.padEnd(50, ' ')} ${idn}${this.rrTypeToString(type)}${rs}, Class: ${qclass}, TTL: ${ttl}, Data: ${decoded}`);
+        console.log(
+          `${name.padEnd(50, ' ')} ${idn}${this.rrTypeToString(type)}${rs}, Class: ${qclass}, TTL: ${ttl}, Data: ${typeof decoded === 'object' ? debugStringify(decoded) : decoded}`,
+        );
       }
 
       if (nscount > 0) console.log(`${GREEN}Authority RRs:${rs}`);
       for (let i = 0; i < nscount; i++) {
-        const { name, newOffset } = this.readDomainName(msg, offset);
+        const { name, newOffset } = this.decodeDomainName(msg, offset);
         offset = newOffset;
         const type = msg.readUInt16BE(offset);
         offset += 2;
@@ -370,51 +364,7 @@ ShellyPlus1PM-441793D69718 ShellyPlus1PM-441793D69718
         const rdata = msg.subarray(offset, offset + rdlength);
         offset += rdlength;
 
-        let decoded = '';
-
-        switch (type) {
-          case 2: // NS
-            decoded = this.decodeNS(msg, offset - rdlength).nsdname; // Pointers inside !!!
-            break;
-          case 12: // PTR
-            decoded = this.decodePTR(msg, offset - rdlength); // Pointers inside !!!
-            break;
-          case 16: // TXT
-            decoded = this.decodeTXT(rdata, 0, rdlength);
-            break;
-          case 33: // SRV
-            // eslint-disable-next-line no-case-declarations
-            const { priority, weight, port, target } = this.decodeSRV(msg, offset - rdlength); // Pointers inside !!!
-            decoded = `Priority: ${priority}, Weight: ${weight}, Port: ${port}, Target: ${target}`;
-            break;
-          case 47: // NSEC
-            // eslint-disable-next-line no-case-declarations
-            const { nextDomain, rrtypes } = this.decodeNSEC(msg, offset - rdlength);
-            decoded = 'nextDomain ' + nextDomain + ' rrtypes ' + rrtypes.join(', ');
-            break;
-          default:
-            decoded = er + rdata.toString('hex') + rs;
-            break;
-        }
-        console.log(`${name.padEnd(50, ' ')} ${idn}${this.rrTypeToString(type)}${rs}, Class: ${qclass}, TTL: ${ttl}, Data: ${decoded}`);
-      }
-
-      if (arcount > 0) console.log(`${GREEN}Additional RRs:${rs}`);
-      for (let i = 0; i < arcount; i++) {
-        const { name, newOffset } = this.readDomainName(msg, offset);
-        offset = newOffset;
-        const type = msg.readUInt16BE(offset);
-        offset += 2;
-        const qclass = msg.readUInt16BE(offset);
-        offset += 2;
-        const ttl = msg.readUInt32BE(offset);
-        offset += 4;
-        const rdlength = msg.readUInt16BE(offset);
-        offset += 2;
-        const rdata = msg.subarray(offset, offset + rdlength);
-        offset += rdlength;
-
-        let decoded = '';
+        let decoded;
 
         switch (type) {
           case 1: // A
@@ -433,20 +383,66 @@ ShellyPlus1PM-441793D69718 ShellyPlus1PM-441793D69718
             decoded = this.decodeAAAA(rdata, 0, rdlength);
             break;
           case 33: // SRV
-            // eslint-disable-next-line no-case-declarations
-            const { priority, weight, port, target } = this.decodeSRV(msg, offset - rdlength); // Pointers inside !!!
-            decoded = `Priority: ${priority}, Weight: ${weight}, Port: ${port}, Target: ${target}`;
+            decoded = this.decodeSRV(msg, offset - rdlength);
             break;
           case 47: // NSEC
-            // eslint-disable-next-line no-case-declarations
-            const { nextDomain, rrtypes } = this.decodeNSEC(msg, offset - rdlength);
-            decoded = 'nextDomain ' + nextDomain + ' rrtypes ' + rrtypes.join(', ');
+            decoded = this.decodeNSEC(msg, offset - rdlength);
             break;
           default:
             decoded = er + rdata.toString('hex') + rs;
             break;
         }
-        console.log(`${name.padEnd(50, ' ')} ${idn}${this.rrTypeToString(type)}${rs}, Class: ${qclass}, TTL: ${ttl}, Data: ${decoded}`);
+        console.log(
+          `${name.padEnd(50, ' ')} ${idn}${this.rrTypeToString(type)}${rs}, Class: ${qclass}, TTL: ${ttl}, Data: ${typeof decoded === 'object' ? debugStringify(decoded) : decoded}`,
+        );
+      }
+
+      if (arcount > 0) console.log(`${GREEN}Additional RRs:${rs}`);
+      for (let i = 0; i < arcount; i++) {
+        const { name, newOffset } = this.decodeDomainName(msg, offset);
+        offset = newOffset;
+        const type = msg.readUInt16BE(offset);
+        offset += 2;
+        const qclass = msg.readUInt16BE(offset);
+        offset += 2;
+        const ttl = msg.readUInt32BE(offset);
+        offset += 4;
+        const rdlength = msg.readUInt16BE(offset);
+        offset += 2;
+        const rdata = msg.subarray(offset, offset + rdlength);
+        offset += rdlength;
+
+        let decoded;
+
+        switch (type) {
+          case 1: // A
+            decoded = this.decodeA(rdata, 0, rdlength);
+            break;
+          case 2: // NS
+            decoded = this.decodeNS(msg, offset - rdlength).nsdname; // Pointers inside !!!
+            break;
+          case 12: // PTR
+            decoded = this.decodePTR(msg, offset - rdlength); // Pointers inside !!!
+            break;
+          case 16: // TXT
+            decoded = this.decodeTXT(rdata, 0, rdlength);
+            break;
+          case 28: // AAAA
+            decoded = this.decodeAAAA(rdata, 0, rdlength);
+            break;
+          case 33: // SRV
+            decoded = this.decodeSRV(msg, offset - rdlength);
+            break;
+          case 47: // NSEC
+            decoded = this.decodeNSEC(msg, offset - rdlength);
+            break;
+          default:
+            decoded = er + rdata.toString('hex') + rs;
+            break;
+        }
+        console.log(
+          `${name.padEnd(50, ' ')} ${idn}${this.rrTypeToString(type)}${rs}, Class: ${qclass}, TTL: ${ttl}, Data: ${typeof decoded === 'object' ? debugStringify(decoded) : decoded}`,
+        );
       }
     } catch (error) {
       console.error('Failed to parse mDNS response:', error);
@@ -454,7 +450,7 @@ ShellyPlus1PM-441793D69718 ShellyPlus1PM-441793D69718
     console.log('\n');
   };
 
-  private readDomainName(buffer: Buffer, offset: number): { name: string; newOffset: number } {
+  private decodeDomainName(buffer: Buffer, offset: number): { name: string; newOffset: number } {
     const labels = [];
     let jumped = false;
     let jumpOffset = offset;
@@ -553,79 +549,40 @@ ShellyPlus1PM-441793D69718 ShellyPlus1PM-441793D69718
 
   // Function to decode NS records from an mDNS message
   private decodeNS(msg: Buffer, offset: number) {
-    const { name: nsdname, newOffset } = this.readDomainName(msg, offset);
+    const { name: nsdname, newOffset } = this.decodeDomainName(msg, offset);
     return { nsdname, newOffset };
   }
 
   // Function to decode NSEC records from an mDNS message
+  // c00c00050000800040 I know this { nextDomain: 'MSL320-bfde._hap._tcp.local', rrtypes: [ 'TXT', 'SRV' ] }
+  /*
+  ID: 0
+  Flags: 33792
+  Questions: 0
+  Answers: 2
+  Authority RRs: 0
+  Additional RRs: 3
+  Answers:
+  _http._tcp.local                                   PTR, Class: 1, TTL: 120, Data: shellyplus1pm-441793d69718._http._tcp.local
+  [19:30:20.200] [MdnsScanner] NSEC rrtypes offset 108 newOffset 110 c04500c02800210001000000780008000000000050c045c028001000010000007800060567656e3d32c04500018001000000780004c0a801d9 00c02800210001000000780008000000000050c045c028001000010000007800060567656e3d32c04500018001000000780004c0a801d9
+  */
   private decodeNSEC(msg: Buffer, offset: number) {
-    const labels = [];
-    const rrtypes: string[] = [];
-    let jumpOffset = undefined;
-    const originalOffset = offset;
+    const { name, newOffset } = this.decodeDomainName(msg, offset);
+    this.log.warn(`***NSEC rrtypes offset ${offset} newOffset ${newOffset}`, msg.toString('hex', offset), msg.toString('hex', newOffset));
+    offset = newOffset;
 
-    while (msg[offset] !== 0) {
-      if ((msg[offset] & 0xc0) === 0xc0) {
-        if (jumpOffset === undefined) {
-          jumpOffset = offset + 2;
-          this.log.warn(`decodeNSEC: jump found at ${offset} jumpOffset ${jumpOffset} ${msg[jumpOffset]}`);
-        }
-        offset = ((msg[offset] & 0x3f) << 8) | msg[offset + 1];
-        if (offset >= msg.length) {
-          this.log.error(`decodeNSEC: pointer ${offset} out of bounds jumping from ${labels.join('.')}`);
-          break;
-        }
-      } else {
-        const length = msg[offset];
-        labels.push(msg.toString('utf8', offset + 1, offset + 1 + length));
-        offset += length + 1;
-        if (offset >= msg.length) {
-          this.log.error(`decodeNSEC: offset ${offset} out of bounds from ${labels.join('.')}`);
-          break;
-        }
+    const blockNumber = msg[offset];
+    const bitmapLength = msg[offset + 1];
+    const bitmap = msg.slice(offset + 2, offset + 2 + bitmapLength);
+
+    const rrTypes: string[] = [];
+    for (let i = 0; i < bitmapLength * 8; i++) {
+      if (bitmap[Math.floor(i / 8)] & (0x80 >> i % 8)) {
+        const rrType = i + blockNumber * 256;
+        rrTypes.push(this.rrTypeToString(rrType));
       }
     }
-    if (jumpOffset !== undefined) {
-      offset = offset + 1;
-      this.log.warn(
-        `***NSEC rrtypes originalOffset ${originalOffset} jumpOffset ${jumpOffset} offset ${offset}`,
-        msg.toString('hex', originalOffset),
-        msg.toString('hex', jumpOffset),
-        msg.toString('hex', offset),
-      );
-      return { nextDomain: labels.join('.'), rrtypes };
-    } else
-      this.log.warn(
-        `***NSEC rrtypes originalOffset ${originalOffset} jumpOffset ${jumpOffset} offset ${offset}`,
-        msg.toString('hex', originalOffset),
-        msg.toString('hex', jumpOffset),
-        msg.toString('hex', offset),
-      );
-
-    // Offset to the beginning of the bitmap
-    const length = msg[offset];
-    let bitmapOffset = offset + 1 + length;
-    const endOfMsg = msg.length;
-
-    // Loop through each bit in the bitmap
-    while (bitmapOffset < endOfMsg) {
-      const windowBlock = msg[bitmapOffset];
-      const bitmapLength = msg[bitmapOffset + 1];
-
-      for (let i = 0; i < bitmapLength; i++) {
-        const byte = msg[bitmapOffset + 2 + i];
-        for (let bit = 0; bit < 8; bit++) {
-          if ((byte & (1 << (7 - bit))) !== 0) {
-            const rrtype = (windowBlock << 8) | (i * 8 + bit);
-            rrtypes.push(this.rrTypeToString(rrtype));
-          }
-        }
-      }
-
-      // Move to the next window block
-      bitmapOffset += 2 + bitmapLength;
-    }
-    return { nextDomain: labels.join('.'), rrtypes };
+    return { nextDomain: name, rrTypes };
   }
 
   // Function to convert RR type number to a string
@@ -638,17 +595,19 @@ ShellyPlus1PM-441793D69718 ShellyPlus1PM-441793D69718
       12: 'PTR',
       15: 'MX',
       16: 'TXT',
-      25: 'SIG',
+      25: 'KEY',
       28: 'AAAA',
       33: 'SRV',
       39: 'DNAME',
       41: 'OPT',
       47: 'NSEC',
       48: 'DNSKEY',
+      255: 'ANY',
       257: 'CAA',
     };
     return rrTypeMap[rrtype] || `TYPE${rrtype}`;
   }
+
   /**
    * Retrieves the IPv4 address of the specified network interface or the first external IPv4 interface if no interface is specified.
    * Throws an error if no suitable interface or address is found.

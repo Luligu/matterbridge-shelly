@@ -202,11 +202,24 @@ export class ShellyDevice extends EventEmitter {
       }
       for (const key in statusPayload) {
         if (key === 'temperature') device.addComponent(new ShellyComponent(device, 'sys', 'Sys'));
-        if (key === 'tmp') device.addComponent(new ShellyComponent(device, 'sys', 'Sys'));
+        if (key === 'overtemperature') device.addComponent(new ShellyComponent(device, 'sys', 'Sys'));
+        if (key === 'tmp') device.addComponent(new ShellyComponent(device, 'temperature', 'Temperature'));
         if (key === 'voltage') device.addComponent(new ShellyComponent(device, 'sys', 'Sys'));
         if (key === 'mode') device.addComponent(new ShellyComponent(device, 'sys', 'Sys'));
         if (key === 'bat') device.addComponent(new ShellyComponent(device, 'battery', 'Battery'));
         if (key === 'charger') device.addComponent(new ShellyComponent(device, 'battery', 'Battery'));
+        if (key === 'lux') device.addComponent(new ShellyComponent(device, 'lux', 'Lux'));
+        if (key === 'sensor') {
+          device.addComponent(new ShellyComponent(device, 'sensor', 'Sensor'));
+          const sensor = statusPayload[key] as ShellyData;
+          if (sensor.vibration !== undefined) device.addComponent(new ShellyComponent(device, 'vibration', 'Vibration'));
+          if (sensor.state !== undefined) device.addComponent(new ShellyComponent(device, 'contact', 'Contact'));
+          if (sensor.motion !== undefined) device.addComponent(new ShellyComponent(device, 'motion', 'Motion'));
+        }
+        if (key === 'accel') {
+          const accel = statusPayload[key] as ShellyData;
+          if (accel.vibration !== undefined) device.addComponent(new ShellyComponent(device, 'vibration', 'Vibration'));
+        }
 
         if (key === 'inputs') {
           let index = 0;
@@ -412,7 +425,33 @@ export class ShellyDevice extends EventEmitter {
         }
         if (key === 'charger') {
           const battery = this.getComponent('battery');
-          battery?.setValue('charging', data[key] === true ? 1 : 0);
+          battery?.setValue('charging', data[key]);
+        }
+        if (key === 'sensor') {
+          this.updateComponent(key, data[key] as ShellyData);
+          // Change the state of the contact_open property of the sensor component
+          const sensor = data.sensor as ShellyData;
+          if (sensor.is_valid === true && sensor.state !== undefined) this.getComponent('sensor')?.setValue('contact_open', sensor.state !== 'close');
+          if (sensor.vibration !== undefined) this.getComponent('vibration')?.setValue('vibration', sensor.vibration);
+          // console.log('sensor', sensor);
+        }
+        if (key === 'accel') {
+          const accel = data.accel as ShellyData;
+          this.log.debug(`***Device ${this.id} has accel data ${accel.vibration}`);
+          if (accel.vibration !== undefined) this.getComponent('vibration')?.setValue('vibration', accel.vibration === 1);
+        }
+        if (key === 'lux') {
+          this.updateComponent(key, data[key] as ShellyData);
+        }
+        if (key === 'tmp') {
+          this.updateComponent('temperature', data[key] as ShellyData);
+          const sensor = data.tmp as ShellyData;
+          if (sensor.is_valid === true && sensor.value !== undefined) this.getComponent('temperature')?.setValue('value', sensor.value);
+        }
+        if (key === 'temperature') {
+          // this.updateComponent('sensor', data[key] as ShellyData);
+          // const sensor = data.temperature as ShellyData;
+          // if (sensor.is_valid === true) this.getComponent('temperature')?.setValue('value', sensor.value);
         }
       }
       // Update state for active components with ison
@@ -533,6 +572,11 @@ export class ShellyDevice extends EventEmitter {
       }
     }
 
+    const controller = new AbortController();
+    const fetchTimeout = setTimeout(() => {
+      controller.abort();
+    }, 5000);
+
     const gen = /^[^A-Z]*$/.test(service) ? 1 : 2;
     const url = gen === 1 ? `http://${host}/${service}` : `http://${host}/rpc`;
     try {
@@ -540,6 +584,7 @@ export class ShellyDevice extends EventEmitter {
         method: 'POST',
         headers: gen === 1 ? { 'Content-Type': 'application/x-www-form-urlencoded' } : { 'Content-Type': 'application/json' },
         body: gen === 1 ? getGen1BodyOptions(params) : getGen2BodyOptions('2.0', 10, 'Matterbridge', service, params),
+        signal: controller.signal,
       };
       const headers = options.headers as Record<string, string>;
       log.debug(
@@ -548,8 +593,9 @@ export class ShellyDevice extends EventEmitter {
       );
       log.debug(`${GREY}options: ${JSON.stringify(options)}${RESET}`);
       let response;
-      if (service === 'shelly') response = await fetch(`http://${host}/${service}`);
+      if (service === 'shelly') response = await fetch(`http://${host}/${service}`, { signal: controller.signal });
       else response = await fetch(url, options);
+      clearTimeout(fetchTimeout);
       log.debug(`${GREY}response ok: ${response.ok}${RESET}`);
       if (!response.ok) {
         // Try with authentication
