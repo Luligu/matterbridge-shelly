@@ -14,7 +14,7 @@ describe('Shelly devices test', () => {
   const log = new AnsiLogger({ logName: 'shellyDeviceTest', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: false });
   const shelly = new Shelly(log, 'admin', 'tango');
 
-  const firmwareGen1 = '1.14.0-gcb84623';
+  const firmwareGen1 = 'v1.14.0-gcb84623';
   const firmwareGen2 = '1.4.0-gb2aeadb';
 
   beforeAll(() => {
@@ -299,7 +299,7 @@ describe('Shelly devices test', () => {
       expect(device.host).toBe(path.join('src', 'mock', 'shellybutton1-485519F31EA3.json'));
       expect(device.model).toBe('SHBTN-2');
       expect(device.id).toBe('shellybutton1-485519F31EA3');
-      expect(device.firmware).toBe('v1.14.0-gcb84623');
+      expect(device.firmware).toBe(firmwareGen1);
       expect(device.auth).toBe(false);
       expect(device.gen).toBe(1);
       expect(device.mac).toBe('485519F31EA3');
@@ -356,6 +356,40 @@ describe('Shelly devices test', () => {
       expect(input?.getValue('event_cnt')).toBe(0);
 
       device.destroy();
+    });
+  });
+
+  describe('Test gen 1 shellyplug-s', () => {
+    test('Create a gen 2 shellyplug-s device', async () => {
+      log.logName = 'shellyplug-s-C38EAB';
+      const device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shellyplug-s-C38EAB.json'));
+      expect(device).not.toBeUndefined();
+      if (!device) return;
+      expect(device.host).toBe(path.join('src', 'mock', 'shellyplug-s-C38EAB.json'));
+      expect(device.model).toBe('SHPLG-S');
+      expect(device.mac).toBe('E868E7C38EAB');
+      expect(device.id).toBe('shellyplug-s-C38EAB');
+      expect(device.firmware).toBe(firmwareGen1);
+      expect(device.auth).toBe(false);
+      expect(device.gen).toBe(1);
+      expect(device.profile).toBe(undefined);
+      expect(device.name).toBe('My Shelly Plug S');
+      expect(device.hasUpdate).toBe(false);
+      expect(device.lastseen).not.toBe(0);
+      expect(device.online).toBe(true);
+      expect(device.cached).toBe(false);
+      expect(device.sleepMode).toBe(false);
+
+      expect(device.components.length).toBe(10);
+      expect(device.getComponentNames()).toStrictEqual(['WiFi', 'MQTT', 'CoIoT', 'Sntp', 'Cloud', 'Relay', 'PowerMeter', 'Sys']);
+      expect(device.getComponentIds()).toStrictEqual(['wifi_ap', 'wifi_sta', 'wifi_sta1', 'mqtt', 'coiot', 'sntp', 'cloud', 'relay:0', 'meter:0', 'sys']);
+
+      expect(device.getComponent('sys')?.getValue('temperature')).toBe(34.05);
+      expect(device.getComponent('sys')?.getValue('overtemperature')).toBe(false);
+
+      expect(await device.fetchUpdate()).not.toBeNull();
+
+      if (device) device.destroy();
     });
   });
 });

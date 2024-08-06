@@ -39,10 +39,10 @@ import { ShellyComponent } from './shellyComponent.js';
 export class ShellyDevice extends EventEmitter {
   readonly shelly: Shelly;
   readonly log: AnsiLogger;
-  public host: string;
   readonly username: string | undefined;
   readonly password: string | undefined;
   profile: 'relay' | 'cover' | undefined;
+  host: string;
   id = '';
   model = '';
   mac = '';
@@ -55,6 +55,7 @@ export class ShellyDevice extends EventEmitter {
   hasUpdate = false;
   sleepMode = false;
   cached = false;
+
   colorUpdateTimeout?: NodeJS.Timeout;
   colorCommandTimeout?: NodeJS.Timeout;
   private lastseenInterval?: NodeJS.Timeout;
@@ -98,6 +99,15 @@ export class ShellyDevice extends EventEmitter {
 
   getComponent(id: string): ShellyComponent | undefined {
     return this._components.get(id);
+  }
+
+  getComponentIds(): string[] {
+    return Array.from(this._components.keys());
+  }
+
+  getComponentNames(): string[] {
+    const names = Array.from(this._components.values()).map((component) => component.name);
+    return Array.from(new Set(names));
   }
 
   addComponent(component: ShellyComponent): ShellyComponent {
@@ -215,7 +225,9 @@ export class ShellyDevice extends EventEmitter {
       for (const key in statusPayload) {
         if (key === 'temperature') device.addComponent(new ShellyComponent(device, 'sys', 'Sys'));
         if (key === 'overtemperature') device.addComponent(new ShellyComponent(device, 'sys', 'Sys'));
-        if (key === 'tmp') device.addComponent(new ShellyComponent(device, 'temperature', 'Temperature'));
+        if (key === 'tmp' && statusPayload.temperature === undefined && statusPayload.overtemperature === undefined) {
+          device.addComponent(new ShellyComponent(device, 'temperature', 'Temperature'));
+        }
         if (key === 'voltage') device.addComponent(new ShellyComponent(device, 'sys', 'Sys'));
         if (key === 'mode') device.addComponent(new ShellyComponent(device, 'sys', 'Sys'));
         if (key === 'bat') device.addComponent(new ShellyComponent(device, 'battery', 'Battery'));
@@ -457,14 +469,15 @@ export class ShellyDevice extends EventEmitter {
           this.updateComponent(key, data[key] as ShellyData);
         }
         if (key === 'tmp') {
-          this.updateComponent('temperature', data[key] as ShellyData);
+          if (data.temperature === undefined && data.overtemperature === undefined) this.updateComponent('temperature', data[key] as ShellyData);
           const sensor = data.tmp as ShellyData;
           if (sensor.is_valid === true && sensor.value !== undefined) this.getComponent('temperature')?.setValue('value', sensor.value);
         }
         if (key === 'temperature') {
-          // this.updateComponent('sensor', data[key] as ShellyData);
-          // const sensor = data.temperature as ShellyData;
-          // if (sensor.is_valid === true) this.getComponent('temperature')?.setValue('value', sensor.value);
+          if (data[key] !== null && data[key] !== undefined && typeof data[key] === 'number') this.getComponent('sys')?.setValue('temperature', data[key]);
+        }
+        if (key === 'overtemperature') {
+          if (data[key] !== null && data[key] !== undefined && typeof data[key] === 'boolean') this.getComponent('sys')?.setValue('overtemperature', data[key]);
         }
       }
       // Update state for active components with ison

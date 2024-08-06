@@ -191,6 +191,8 @@ describe('Shellies', () => {
       expect(component.getProperty('state')?.value).toBe(false);
       component.Toggle();
       expect(component.getProperty('state')?.value).toBe(true);
+      component.Off();
+      expect(component.getProperty('state')?.value).toBe(false);
       device.destroy();
     });
 

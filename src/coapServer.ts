@@ -21,7 +21,7 @@
  * limitations under the License. *
  */
 
-import { AnsiLogger, BLUE, CYAN, LogLevel, MAGENTA, RESET, TimestampFormat, db, debugStringify, er, idn, rs, zb } from 'matterbridge/logger';
+import { AnsiLogger, BLUE, CYAN, LogLevel, MAGENTA, RESET, TimestampFormat, db, debugStringify, er, hk, idn, rs, zb } from 'matterbridge/logger';
 import coap, { Server, IncomingMessage, OutgoingMessage, globalAgent, parameters } from 'coap';
 import EventEmitter from 'events';
 
@@ -105,10 +105,11 @@ export class CoapServer extends EventEmitter {
   /**
    * Retrieves the device description from the specified host using CoAP protocol.
    * @param {string} host The host from which to retrieve the device description.
+   * @param {string} id - The id to request the device status from (default undefined).
    * @returns {Promise<IncomingMessage | null>} A Promise that resolves with the IncomingMessage object representing the response, or null if the request times out.
    */
-  async getDeviceDescription(host: string): Promise<IncomingMessage | null> {
-    this.log.debug(`Requesting CoIoT (coap) device description from ${zb}${host}${db}...`);
+  async getDeviceDescription(host: string, id?: string): Promise<IncomingMessage | null> {
+    this.log.debug(`Requesting CoIoT (coap) device description from ${hk}${id ? id + ' ' : ''}${db}${zb}${host}${db}...`);
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     return new Promise((resolve, reject) => {
@@ -126,25 +127,32 @@ export class CoapServer extends EventEmitter {
           resolve(msg);
         })
         .on('timeout', (err) => {
-          this.log.error(`CoIoT (coap) timeout requesting device description ("/cit/d") from ${zb}${host}${er}:`, err instanceof Error ? err.message : err);
+          this.log.error(
+            `CoIoT (coap) timeout requesting device description ("/cit/d") from ${hk}${id ? id + ' ' : ''}${er}${zb}${host}${er}:`,
+            err instanceof Error ? err.message : err,
+          );
           resolve(null);
         })
         .on('error', (err) => {
-          this.log.error(`CoIoT (coap) error requesting device description ("/cit/d") from ${zb}${host}${er}:`, err instanceof Error ? err.message : err);
+          this.log.error(
+            `CoIoT (coap) error requesting device description ("/cit/d") from ${hk}${id ? id + ' ' : ''}${er}${zb}${host}${er}:`,
+            err instanceof Error ? err.message : err,
+          );
           resolve(null);
         })
         .end();
-      this.log.debug(`Sent CoIoT (coap) device description request to ${zb}${host}${db}.`);
+      this.log.debug(`Sent CoIoT (coap) device description request to ${hk}${id ? id + ' ' : ''}${db}${zb}${host}${db}.`);
     });
   }
 
   /**
    * Retrieves the device status from the specified host.
    * @param {string} host - The host to request the device status from.
+   * @param {string} id - The id to request the device status from (default undefined).
    * @returns {Promise<IncomingMessage | null>} A Promise that resolves with the IncomingMessage containing the device status, or null if the request times out.
    */
-  async getDeviceStatus(host: string): Promise<IncomingMessage | null> {
-    this.log.debug(`Requesting CoIoT (coap) device status from ${zb}${host}${db}...`);
+  async getDeviceStatus(host: string, id?: string): Promise<IncomingMessage | null> {
+    this.log.debug(`Requesting CoIoT (coap) device status from ${hk}${id ? id + ' ' : ''}${db}${zb}${host}${db}...`);
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     return new Promise((resolve, reject) => {
@@ -160,15 +168,18 @@ export class CoapServer extends EventEmitter {
           resolve(msg);
         })
         .on('timeout', (err) => {
-          this.log.error(`CoIoT (coap) timeout requesting device status ("/cit/s") from ${zb}${host}${er}:`, err instanceof Error ? err.message : err);
+          this.log.error(
+            `CoIoT (coap) timeout requesting device status ("/cit/s") from ${hk}${id ? id + ' ' : ''}${er}${zb}${host}${er}:`,
+            err instanceof Error ? err.message : err,
+          );
           resolve(null);
         })
         .on('error', (err) => {
-          this.log.error(`CoIoT (coap) error requesting device status ("/cit/s") from ${zb}${host}${er}:`, err instanceof Error ? err.message : err);
+          this.log.error(`CoIoT (coap) error requesting device status ("/cit/s") from ${hk}${id ? id + ' ' : ''}${er}${zb}${host}${er}:`, err instanceof Error ? err.message : err);
           resolve(null);
         })
         .end();
-      this.log.debug(`Sent CoIoT (coap) device status request to ${zb}${host}${db}.`);
+      this.log.debug(`Sent CoIoT (coap) device status request to ${hk}${id ? id + ' ' : ''}${db}${zb}${host}${db}.`);
     });
   }
 
@@ -443,7 +454,7 @@ export class CoapServer extends EventEmitter {
           this.devices.set(host, descriptions);
         } else {
           this.log.debug(`*No coap description found for host ${zb}${host}${db} fetching it...`);
-          this.getDeviceDescription(host); // No await
+          this.getDeviceDescription(host, deviceType); // No await
         }
       }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -517,11 +528,12 @@ export class CoapServer extends EventEmitter {
    * Registers a device with the specified host.
    *
    * @param {string} host - The host of the device to register.
+   * @param {string} id - The id to request the device status from (default undefined).
    * @returns {Promise<void>} - A promise that resolves when the device is registered.
    */
-  async registerDevice(host: string): Promise<void> {
+  async registerDevice(host: string, id?: string): Promise<void> {
     this.log.debug(`Registering device ${host}...`);
-    this.getDeviceDescription(host); // No await
+    this.getDeviceDescription(host, id); // No await
     // this.log.debug(`Registered device ${host}.`);
   }
 

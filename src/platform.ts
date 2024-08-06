@@ -504,7 +504,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           }
         } else if (component.name === 'Temperature' && config.exposeTemperature !== 'disabled') {
           const tempComponent = device.getComponent(key);
-          if (tempComponent?.hasProperty('value')) {
+          if (tempComponent?.hasProperty('value') && typeof tempComponent.getValue('value') === 'number') {
             const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.TEMPERATURE_SENSOR], []);
             const matterTemp = Math.min(Math.max(Math.round((tempComponent.getValue('value') as number) * 100), -10000), 10000);
             child.addClusterServer(mbDevice.getDefaultTemperatureMeasurementClusterServer(matterTemp));
@@ -576,8 +576,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     if (this.config.enableStorageDiscover === true) {
       this.log.info(`Loading from storage ${this.storedDevices.size} Shelly devices`);
       this.storedDevices.forEach(async (storedDevice) => {
-        const [name, mac] = storedDevice.id.split('-');
-        storedDevice.id = name.toLowerCase() + '-' + mac.toUpperCase();
+        storedDevice.id = ShellyDevice.normalizeId(storedDevice.id).id;
         if (storedDevice.id === undefined || storedDevice.host === undefined || !this.isValidIpv4Address(storedDevice.host)) {
           this.log.error(
             `Stored Shelly device id ${hk}${storedDevice.id}${er} host ${zb}${storedDevice.host}${er} is not valid. Please enable resetStorageDiscover in plugin config and restart.`,
@@ -593,8 +592,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     if (this.config.enableConfigDiscover === true) {
       this.log.info(`Loading from config ${Object.entries(this.config.deviceIp as ConfigDeviceIp).length} Shelly devices`);
       Object.entries(this.config.deviceIp as ConfigDeviceIp).forEach(async ([id, host]) => {
-        const [name, mac] = id.split('-');
-        id = name.toLowerCase() + '-' + mac.toUpperCase();
+        id = ShellyDevice.normalizeId(id).id;
         const configDevice: DiscoveredDevice = { id, host, port: 0, gen: 0 };
         if (configDevice.id === undefined || configDevice.host === undefined || !this.isValidIpv4Address(configDevice.host)) {
           this.log.error(`Config Shelly device id ${hk}${configDevice.id}${er} host ${zb}${configDevice.host}${er} is not valid. Please check the plugin config and restart.`);

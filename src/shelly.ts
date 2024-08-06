@@ -109,7 +109,7 @@ export class Shelly extends EventEmitter {
     }
     this._devices.set(device.id, device);
     if (device.gen === 1) {
-      if (!device.cached && !device.host.endsWith('.json')) this.coapServer?.registerDevice(device.host); // No await to register device for CoIoT updates
+      if (!device.cached && !device.host.endsWith('.json')) this.coapServer?.registerDevice(device.host, device.id); // No await to register device for CoIoT updates
       this.startCoap(10000);
     }
     this.emit('add', device);
