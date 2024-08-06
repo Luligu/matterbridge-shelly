@@ -463,7 +463,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             inputComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
               this.shellyUpdateHandler(mbDevice, device, component, property, value);
             });
-          } else if (inputComponent && inputComponent?.hasProperty('event')) {
+          } else if (inputComponent && inputComponent?.hasProperty('event') && config.exposeInputEvent !== 'disabled') {
             const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.GENERIC_SWITCH], []);
             child.addClusterServer(mbDevice.getDefaultSwitchClusterServer());
             mbDevice.addFixedLabel('composed', component.name);
@@ -476,7 +476,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           }
         } else if (component.name === 'Sensor' && config.exposeSensor !== 'disabled') {
           const sensorComponent = device.getComponent(key);
-          if (sensorComponent?.hasProperty('contact_open')) {
+          if (sensorComponent?.hasProperty('contact_open') && config.exposeContact !== 'disabled') {
             const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.CONTACT_SENSOR], []);
             child.addClusterServer(mbDevice.getDefaultBooleanStateClusterServer(sensorComponent.getValue('contact_open') === false));
             mbDevice.addFixedLabel('composed', component.name);
@@ -485,7 +485,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               this.shellyUpdateHandler(mbDevice, device, component, property, value);
             });
           }
-          if (sensorComponent?.hasProperty('motion')) {
+          if (sensorComponent?.hasProperty('motion') && config.exposeMotion !== 'disabled') {
             const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.OCCUPANCY_SENSOR], []);
             child.addClusterServer(mbDevice.getDefaultOccupancySensingClusterServer(sensorComponent.getValue('motion') as boolean));
             mbDevice.addFixedLabel('composed', component.name);
