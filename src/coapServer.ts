@@ -24,6 +24,8 @@
 import { AnsiLogger, BLUE, CYAN, LogLevel, MAGENTA, RESET, TimestampFormat, db, debugStringify, er, hk, idn, rs, zb } from 'matterbridge/logger';
 import coap, { Server, IncomingMessage, OutgoingMessage, globalAgent, parameters } from 'coap';
 import EventEmitter from 'events';
+import path from 'path';
+import { promises as fs } from 'fs';
 
 // 192.168.1.189:5683
 
@@ -77,9 +79,10 @@ export class CoapServer extends EventEmitter {
   public readonly log;
   private coapServer: Server | undefined;
   private _isListening = false;
-  private debug = false;
+  private _debug = false;
   private readonly devices = new Map<string, CoIoTDescription[]>();
   private readonly deviceSerial = new Map<string, number>();
+  private _dataPath = '';
 
   constructor(logLevel: LogLevel = LogLevel.INFO) {
     super();
@@ -91,6 +94,24 @@ export class CoapServer extends EventEmitter {
     if (parameters.refreshTiming) parameters.refreshTiming();
 
     this.registerShellyOptions();
+  }
+
+  /**
+   * Sets the data path.
+   *
+   * @param {string} path - The new data path.
+   */
+  set dataPath(path: string) {
+    this._dataPath = path;
+  }
+
+  /**
+   * Sets the debug mode.
+   *
+   * @param {boolean} debug - The new debug mode.
+   */
+  set debug(debug: boolean) {
+    this._debug = debug;
   }
 
   /**
@@ -338,6 +359,7 @@ export class CoapServer extends EventEmitter {
     this.log.debug(`payload:${RESET}\n`, payload);
 
     if (msg.url === '/cit/d') {
+      if (this._debug) this.saveResponse(deviceType + '-' + deviceId + '.coap.citd.json', payload);
       const desc: CoIoTDescription[] = [];
       this.log.debug(`parsing ${MAGENTA}blocks${db}:`);
       const blk: CoIoTBlkComponent[] = payload.blk;
@@ -358,6 +380,7 @@ export class CoapServer extends EventEmitter {
             // sys component
             if (s.D === 'mode') desc.push({ id: s.I, component: 'sys', property: 'profile', range: s.R });
             if (s.D === 'deviceTemp' && s.U !== 'F' && b.D === 'device') desc.push({ id: s.I, component: 'sys', property: 'temperature', range: s.R }); // SHSW-25
+            if (s.D === 'overtemp' && b.D === 'device') desc.push({ id: s.I, component: 'sys', property: 'overtemperature', range: s.R }); // SHSW-25
             if (s.D === 'voltage' && b.D === 'device') desc.push({ id: s.I, component: 'sys', property: 'voltage', range: s.R }); // SHSW-25
 
             // light component
@@ -406,6 +429,7 @@ export class CoapServer extends EventEmitter {
     }
 
     if (msg.url === '/cit/s') {
+      if (this._debug) this.saveResponse(deviceType + '-' + deviceId + '.coap.cits.json', payload);
       this.deviceSerial.set(host, serial);
       const descriptions: CoIoTDescription[] = this.devices.get(host) || [];
       if (!descriptions || descriptions.length === 0) {
@@ -542,7 +566,7 @@ export class CoapServer extends EventEmitter {
    * If the server is already listening, this method does nothing.
    */
   start(debug = false) {
-    this.debug = debug;
+    this._debug = debug;
     if (this._isListening) return;
     this.log.debug('Starting CoIoT (coap) server for shelly devices...');
     this._isListening = true;
@@ -571,6 +595,25 @@ export class CoapServer extends EventEmitter {
     if (this.coapServer) this.coapServer.close();
     this.devices.clear();
     this.log.debug('Stopped CoIoT (coap) server for shelly devices.');
+  }
+
+  /**
+   * Saves the response packet to a file.
+   *
+   * @param {shellyId} shellyId - The ID of the Shelly device.
+   * @param {ResponsePacket} response - The response packet to be saved.
+   * @returns {Promise<void>} A promise that resolves when the response is successfully saved, or rejects with an error.
+   */
+  private async saveResponse(shellyId: string, payload: object): Promise<void> {
+    const responseFile = path.join(this._dataPath, `${shellyId}`);
+    try {
+      await fs.writeFile(responseFile, JSON.stringify(payload, null, 2), 'utf8');
+      this.log.debug(`*Saved shellyId ${hk}${shellyId}${db} coap response file ${CYAN}${responseFile}${db}`);
+      return Promise.resolve();
+    } catch (err) {
+      this.log.error(`Error saving shellyId ${hk}${shellyId}${er} coap response file ${CYAN}${responseFile}${er}: ${err instanceof Error ? err.message : err}`);
+      return Promise.reject(err);
+    }
   }
 }
 

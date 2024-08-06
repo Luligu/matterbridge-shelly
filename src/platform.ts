@@ -113,6 +113,9 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
 
     this.shelly = new Shelly(log, this.username, this.password);
     this.shelly.setLogLevel(log.logLevel, this.config.debugMdns as boolean, this.config.debugCoap as boolean);
+    this.shelly.dataPath = path.join(matterbridge.matterbridgePluginDirectory, 'matterbridge-shelly');
+    this.shelly.debugMdns = this.config.debugMdns as boolean;
+    this.shelly.debugCoap = this.config.debugCoap as boolean;
 
     // handle Shelly discovered event
     this.shelly.on('discovered', async (discoveredDevice: DiscoveredDevice) => {

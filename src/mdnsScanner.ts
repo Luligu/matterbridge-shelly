@@ -50,10 +50,30 @@ export class MdnsScanner extends EventEmitter {
   private _isScanning = false;
   private scannerTimeout?: NodeJS.Timeout;
   private queryTimeout?: NodeJS.Timeout;
+  private _dataPath = '';
+  private _debug = false;
 
   constructor(logLevel: LogLevel = LogLevel.INFO) {
     super();
     this.log = new AnsiLogger({ logName: 'ShellyMdnsScanner', logTimestampFormat: TimestampFormat.TIME_MILLIS, logLevel });
+  }
+
+  /**
+   * Sets the data path.
+   *
+   * @param {string} path - The new data path.
+   */
+  set dataPath(path: string) {
+    this._dataPath = path;
+  }
+
+  /**
+   * Sets the debug mode.
+   *
+   * @param {boolean} debug - The new debug mode.
+   */
+  set debug(debug: boolean) {
+    this._debug = debug;
   }
 
   /**
@@ -87,6 +107,7 @@ export class MdnsScanner extends EventEmitter {
    */
   start(shutdownTimeout?: number, mdnsInterface?: string, type?: SocketType, debug = false) {
     this._isScanning = true;
+    this._debug = debug;
 
     // Create and initialize the mDNS scanner
     if (mdnsInterface && mdnsInterface !== '' && type && (type === 'udp4' || type === 'udp6')) {
@@ -149,7 +170,7 @@ export class MdnsScanner extends EventEmitter {
             this.log.debug(`MdnsScanner discovered shelly gen: ${CYAN}${gen}${nf} device id: ${hk}${deviceId}${nf} host: ${zb}${a.data}${nf} port: ${zb}${port}${nf}`);
             this.discoveredDevices.set(deviceId, { id: deviceId, host: a.data, port, gen });
             this.emit('discovered', { id: deviceId, host: a.data, port, gen });
-            if (process.argv.includes('testMdnsScanner')) {
+            if (debug || process.argv.includes('testMdnsScanner')) {
               this.saveResponse(deviceId, response); // No await
             }
           }
@@ -190,7 +211,7 @@ export class MdnsScanner extends EventEmitter {
             this.log.debug(`MdnsScanner discovered shelly gen: ${CYAN}${gen}${nf} device id: ${hk}${deviceId}${nf} host: ${zb}${a.data}${nf} port: ${zb}${port}${nf}`);
             this.discoveredDevices.set(deviceId, { id: deviceId, host: a.data, port, gen });
             this.emit('discovered', { id: deviceId, host: a.data, port, gen });
-            if (process.argv.includes('testMdnsScanner')) {
+            if (debug || process.argv.includes('testMdnsScanner')) {
               this.saveResponse(deviceId, response); // No await
             }
           }
@@ -272,13 +293,7 @@ export class MdnsScanner extends EventEmitter {
    * @returns {Promise<void>} A promise that resolves when the response is successfully saved, or rejects with an error.
    */
   private async saveResponse(shellyId: string, response: ResponsePacket): Promise<void> {
-    const responseFile = path.join('jest-shelly', `${shellyId}.mdns.json`);
-    try {
-      await fs.mkdir('jest-shelly', { recursive: true });
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (err) {
-      //
-    }
+    const responseFile = path.join(this._dataPath, `${shellyId}.mdns.json`);
     try {
       for (const a of response.answers) {
         if (a.type === 'TXT') {
@@ -296,7 +311,7 @@ export class MdnsScanner extends EventEmitter {
       this.log.debug(`*Saved shellyId ${hk}${shellyId}${db} response file ${CYAN}${responseFile}${db}`);
       return Promise.resolve();
     } catch (err) {
-      this.log.error(`Error saving shellyId ${hk}${shellyId}${er} response file ${CYAN}${responseFile}${nf}: ${err instanceof Error ? err.message : err}`);
+      this.log.error(`Error saving shellyId ${hk}${shellyId}${er} response file ${CYAN}${responseFile}${er}: ${err instanceof Error ? err.message : err}`);
       return Promise.reject(err);
     }
   }

@@ -38,8 +38,9 @@ export class Shelly extends EventEmitter {
   private coapServerTimeout?: NodeJS.Timeout;
   public username: string | undefined;
   public password: string | undefined;
-  private debugMdns = false;
-  private debugCoap = false;
+  private _debugMdns = false;
+  private _debugCoap = false;
+  private _dataPath = '';
 
   constructor(log: AnsiLogger, username?: string, password?: string) {
     super();
@@ -81,6 +82,20 @@ export class Shelly extends EventEmitter {
     this.coapServer?.removeAllListeners();
     this.coapServer?.stop();
     this.coapServer = undefined;
+  }
+
+  set dataPath(path: string) {
+    this._dataPath = path;
+    if (this.mdnsScanner) this.mdnsScanner.dataPath = path;
+    if (this.coapServer) this.coapServer.dataPath = path;
+  }
+
+  set debugMdns(debug: boolean) {
+    if (this.mdnsScanner) this.mdnsScanner.debug = debug;
+  }
+
+  set debugCoap(debug: boolean) {
+    if (this.coapServer) this.coapServer.debug = debug;
   }
 
   hasDevice(id: string): boolean {
@@ -142,17 +157,17 @@ export class Shelly extends EventEmitter {
   startCoap(coapStartTimeout?: number) {
     if (coapStartTimeout) {
       this.coapServerTimeout = setTimeout(() => {
-        this.coapServer?.start(this.debugCoap);
+        this.coapServer?.start(this._debugCoap);
       }, coapStartTimeout);
     } else {
-      this.coapServer?.start(this.debugCoap);
+      this.coapServer?.start(this._debugCoap);
     }
   }
 
   setLogLevel(level: LogLevel, debugMdns: boolean, debugCoap: boolean) {
     this.log.logLevel = level;
-    this.debugMdns = debugMdns;
-    this.debugCoap = debugCoap;
+    this._debugMdns = debugMdns;
+    this._debugCoap = debugCoap;
     if (this.mdnsScanner) this.mdnsScanner.log.logLevel = debugMdns ? LogLevel.DEBUG : LogLevel.INFO;
     if (this.coapServer) this.coapServer.log.logLevel = debugCoap ? LogLevel.DEBUG : LogLevel.INFO;
     this.devices.forEach((device) => {

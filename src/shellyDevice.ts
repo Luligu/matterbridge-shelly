@@ -534,7 +534,7 @@ export class ShellyDevice extends EventEmitter {
     if (this.cached) {
       this.cached = false;
       // Check if device is a cached device and register it to the CoAP server
-      if (this.gen === 1) await this.shelly.coapServer?.registerDevice(this.host);
+      if (this.gen === 1) await this.shelly.coapServer?.registerDevice(this.host, this.id);
     }
     if (!this.online) this.log.info(`The device ${hk}${this.id}${nf} host ${zb}${this.host}${nf} is online.`);
     this.online = true;
