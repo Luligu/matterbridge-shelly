@@ -15,13 +15,15 @@ If you like this project and find it useful, please consider giving it a star on
 - [shelly]: Added component Lux (luminance).
 - [shelly]: Added component Temperature (temperature).
 - [shelly]: Added component Vibration (vibration).
+- [shelly]: Added component Flood (flood).
 - [shelly]: Added support for event, event_cnt Input components (they are always momentary switch in matter).
 - [shelly]: Added support for shellybutton1.
 - [shelly]: Added support for shellymotionsensor.
 - [shelly]: Added support for shellymotion2.
 - [shelly]: Added support for shellydw1.
 - [shelly]: Added support for shellydw2.
-- [fetch]: Added a timeout of 5 secs to fetch.
+- [shelly]: Added support for shellyflood.
+- [fetch]: Added a timeout of 5 secs to fetch (for devices with sleep mode).
 
 ### Changed
 
@@ -46,14 +48,18 @@ If you like this project and find it useful, please consider giving it a star on
 - [shelly]: Verified shellypmminig3 with firmware v. 1.4.0 (mdns is not working)
 - [shelly]: Verified shelly1minig3 with firmware v. 1.4.0 (mdns is not working)
 - [shelly]: Verified shelly1pmminig3 with firmware v. 1.4.0 (mdns is not working)
-
 - [shelly]: Verified shelly1 with firmware v. 1.14.0
 - [shelly]: Verified shelly1l with firmware v. 1.14.0
 - [shelly]: Verified shellybutton1 with firmware v. 1.14.0
 - [shelly]: Verified shellymotionsensor with firmware v. 2.2.4
 - [shelly]: Verified shellymotion2 with firmware v. 2.2.4
+- [shelly]: Verified shellyflood with firmware v. 1.14.0
 - [shelly]: Verified shellydw1 with firmware v. 1.14.0
 - [shelly]: Verified shellydw2 with firmware v. 1.14.0
+- [shelly]: Verified shellyplug-s with firmware v. 1.14.0
+- [shelly]: Verified shellyplugsg3 with firmware v. 1.2.2
+- [shelly]: Verified shellyemg3 with firmware v. g1216eb0
+- [shelly]: Verified shellyddimmerg3 with firmware v. g55db545
 
 ## [0.7.5] - 2024-07-28
 

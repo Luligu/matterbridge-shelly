@@ -17,15 +17,31 @@
     {
       "name": "ShellyEMG3-84FCE636582C.local",
       "type": "A",
-      "ttl": 0,
+      "ttl": 120,
       "class": "IN",
       "flush": true,
       "data": "192.168.1.243"
     },
     {
+      "name": "ShellyEMG3-84FCE636582C.local",
+      "type": "PTR",
+      "ttl": 120,
+      "class": "IN",
+      "flush": true,
+      "data": "243.1.168.192.in-addr.arpa"
+    },
+    {
+      "name": "_services._dns-sd._udp.local",
+      "type": "PTR",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": "_shelly._tcp.local"
+    },
+    {
       "name": "_shelly._tcp.local",
       "type": "PTR",
-      "ttl": 0,
+      "ttl": 120,
       "class": "IN",
       "flush": false,
       "data": "shellyemg3-84fce636582c._shelly._tcp.local"
@@ -33,7 +49,7 @@
     {
       "name": "shellyemg3-84fce636582c._shelly._tcp.local",
       "type": "SRV",
-      "ttl": 0,
+      "ttl": 120,
       "class": "IN",
       "flush": true,
       "data": {
@@ -46,7 +62,7 @@
     {
       "name": "shellyemg3-84fce636582c._shelly._tcp.local",
       "type": "TXT",
-      "ttl": 0,
+      "ttl": 120,
       "class": "IN",
       "flush": true,
       "data": [
@@ -56,9 +72,17 @@
       ]
     },
     {
+      "name": "_services._dns-sd._udp.local",
+      "type": "PTR",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": "_http._tcp.local"
+    },
+    {
       "name": "_http._tcp.local",
       "type": "PTR",
-      "ttl": 0,
+      "ttl": 120,
       "class": "IN",
       "flush": false,
       "data": "shellyemg3-84fce636582c._http._tcp.local"
@@ -66,7 +90,7 @@
     {
       "name": "shellyemg3-84fce636582c._http._tcp.local",
       "type": "SRV",
-      "ttl": 0,
+      "ttl": 120,
       "class": "IN",
       "flush": true,
       "data": {
@@ -79,7 +103,7 @@
     {
       "name": "shellyemg3-84fce636582c._http._tcp.local",
       "type": "TXT",
-      "ttl": 0,
+      "ttl": 120,
       "class": "IN",
       "flush": true,
       "data": [

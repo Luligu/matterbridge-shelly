@@ -152,6 +152,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       device.getComponent('motion')?.logComponent();
       device.getComponent('contact')?.logComponent();
       device.getComponent('vibration')?.logComponent();
+      device.getComponent('flood')?.logComponent();
 
       if (device.name === undefined || device.id === undefined || device.model === undefined || device.firmware === undefined) {
         this.log.error(`Shelly device ${hk}${device.id}${er} host ${zb}${device.host}${er} is not valid. Please put it in the blackList and open an issue.`);
@@ -514,6 +515,17 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             mbDevice.addFixedLabel('composed', component.name);
             // Add event handler
             tempComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
+              this.shellyUpdateHandler(mbDevice, device, component, property, value);
+            });
+          }
+        } else if (component.name === 'Flood' && config.exposeFlood !== 'disabled') {
+          const floodComponent = device.getComponent(key);
+          if (floodComponent?.hasProperty('flood') && typeof floodComponent.getValue('flood') === 'boolean') {
+            const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.CONTACT_SENSOR], []);
+            child.addClusterServer(mbDevice.getDefaultBooleanStateClusterServer(floodComponent.getValue('flood') as boolean));
+            mbDevice.addFixedLabel('composed', component.name);
+            // Add event handler
+            floodComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
               this.shellyUpdateHandler(mbDevice, device, component, property, value);
             });
           }
@@ -958,6 +970,11 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     if (shellyComponent.name === 'Sensor' && property === 'contact_open' && typeof value === 'boolean') {
       endpoint.getClusterServer(BooleanStateCluster)?.setStateValueAttribute(!value);
       shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}BooleanStateCluster-stateValue${db} ${YELLOW}${!value}${db}`);
+    }
+    // Update for Flood
+    if (shellyComponent.name === 'Flood' && property === 'flood' && typeof value === 'boolean') {
+      endpoint.getClusterServer(BooleanStateCluster)?.setStateValueAttribute(value);
+      shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}BooleanStateCluster-stateValue${db} ${YELLOW}${value}${db}`);
     }
     // Update for Illuminance
     if (shellyComponent.name === 'Lux' && property === 'value' && typeof value === 'number') {

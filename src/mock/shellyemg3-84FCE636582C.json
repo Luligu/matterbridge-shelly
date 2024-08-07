@@ -25,19 +25,19 @@
     "bthome": {},
     "cloud": {
       "enable": true,
-      "server": "shelly-api-eu.shelly.cloud:6022/jrpc"
+      "server": "shelly-103-eu.shelly.cloud:6022/jrpc"
     },
     "em1:0": {
       "id": 0,
       "name": null,
       "reverse": false,
-      "ct_type": null
+      "ct_type": "50A"
     },
     "em1:1": {
       "id": 1,
       "name": null,
       "reverse": false,
-      "ct_type": null
+      "ct_type": "50A"
     },
     "em1data:0": {},
     "em1data:1": {},
@@ -101,7 +101,7 @@
       "sntp": {
         "server": "time.google.com"
       },
-      "cfg_rev": 11
+      "cfg_rev": 15
     },
     "wifi": {
       "ap": {
@@ -155,29 +155,23 @@
     },
     "em1:0": {
       "id": 0,
-      "current": null,
-      "voltage": null,
-      "act_power": null,
-      "aprt_power": null,
-      "pf": null,
-      "freq": null,
-      "calibration": "factory",
-      "errors": [
-        "ct_type_not_set"
-      ]
+      "current": 0.02,
+      "voltage": 237.3,
+      "act_power": 0,
+      "aprt_power": 4.8,
+      "pf": 0,
+      "freq": 50,
+      "calibration": "factory"
     },
     "em1:1": {
       "id": 1,
-      "current": null,
-      "voltage": null,
-      "act_power": null,
-      "aprt_power": null,
-      "pf": null,
-      "freq": null,
-      "calibration": "factory",
-      "errors": [
-        "ct_type_not_set"
-      ]
+      "current": 0.02,
+      "voltage": 237.3,
+      "act_power": 0,
+      "aprt_power": 4.8,
+      "pf": 0,
+      "freq": 50,
+      "calibration": "factory"
     },
     "em1data:0": {
       "id": 0,
@@ -194,35 +188,35 @@
     },
     "switch:0": {
       "id": 0,
-      "source": "WS_in",
+      "source": "init",
       "output": false,
       "temperature": {
-        "tC": 50,
-        "tF": 122
+        "tC": 56.2,
+        "tF": 133.2
       }
     },
     "sys": {
       "mac": "84FCE636582C",
       "restart_required": false,
-      "time": "08:10",
-      "unixtime": 1722579045,
-      "uptime": 1362,
-      "ram_size": 253424,
-      "ram_free": 126120,
+      "time": "23:13",
+      "unixtime": 1722978832,
+      "uptime": 9711,
+      "ram_size": 253168,
+      "ram_free": 122824,
       "fs_size": 786432,
       "fs_free": 331776,
-      "cfg_rev": 11,
+      "cfg_rev": 15,
       "kvs_rev": 0,
       "schedule_rev": 0,
       "webhook_rev": 0,
       "available_updates": {},
-      "reset_reason": 3
+      "reset_reason": 1
     },
     "wifi": {
       "sta_ip": "192.168.1.243",
       "status": "got ip",
       "ssid": "FibreBox_X6-12A4C7",
-      "rssi": -54
+      "rssi": -52
     },
     "ws": {
       "connected": false

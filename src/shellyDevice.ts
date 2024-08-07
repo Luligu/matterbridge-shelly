@@ -233,6 +233,7 @@ export class ShellyDevice extends EventEmitter {
         if (key === 'bat') device.addComponent(new ShellyComponent(device, 'battery', 'Battery'));
         if (key === 'charger') device.addComponent(new ShellyComponent(device, 'battery', 'Battery'));
         if (key === 'lux') device.addComponent(new ShellyComponent(device, 'lux', 'Lux'));
+        if (key === 'flood') device.addComponent(new ShellyComponent(device, 'flood', 'Flood'));
         if (key === 'sensor') {
           device.addComponent(new ShellyComponent(device, 'sensor', 'Sensor'));
           const sensor = statusPayload[key] as ShellyData;
@@ -313,6 +314,7 @@ export class ShellyDevice extends EventEmitter {
         if (key.startsWith('light:')) device.addComponent(new ShellyComponent(device, key, 'Light', settingsPayload[key] as ShellyData));
         if (key.startsWith('input:')) device.addComponent(new ShellyComponent(device, key, 'Input', settingsPayload[key] as ShellyData));
         if (key.startsWith('pm1:')) device.addComponent(new ShellyComponent(device, key, 'PowerMeter', settingsPayload[key] as ShellyData));
+        if (key.startsWith('em1:')) device.addComponent(new ShellyComponent(device, key, 'PowerMeter', settingsPayload[key] as ShellyData));
       }
     }
 
@@ -468,6 +470,9 @@ export class ShellyDevice extends EventEmitter {
         if (key === 'lux') {
           this.updateComponent(key, data[key] as ShellyData);
         }
+        if (key === 'flood') {
+          if (typeof data[key] === 'boolean') this.getComponent('flood')?.setValue('flood', data[key]);
+        }
         if (key === 'tmp') {
           if (data.temperature === undefined && data.overtemperature === undefined) this.updateComponent('temperature', data[key] as ShellyData);
           const sensor = data.tmp as ShellyData;
@@ -508,6 +513,7 @@ export class ShellyDevice extends EventEmitter {
         if (key.startsWith('light:')) this.updateComponent(key, data[key] as ShellyData);
         if (key.startsWith('input:')) this.updateComponent(key, data[key] as ShellyData);
         if (key.startsWith('pm1:')) this.updateComponent(key, data[key] as ShellyData);
+        if (key.startsWith('em1:')) this.updateComponent(key, data[key] as ShellyData);
       }
       // Update state for active components with output
       for (const key in data) {

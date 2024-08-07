@@ -50,7 +50,7 @@ export class MdnsScanner extends EventEmitter {
   private _isScanning = false;
   private scannerTimeout?: NodeJS.Timeout;
   private queryTimeout?: NodeJS.Timeout;
-  private _dataPath = '';
+  private _dataPath = 'temp';
   private _debug = false;
 
   constructor(logLevel: LogLevel = LogLevel.INFO) {

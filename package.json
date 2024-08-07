@@ -1,6 +1,6 @@
 {
   "name": "matterbridge-shelly",
-  "version": "0.7.6-beta12",
+  "version": "0.7.6-beta14",
   "description": "Matterbridge shelly plugin",
   "author": "https://github.com/Luligu",
   "license": "Apache-2.0",
@@ -36,6 +36,7 @@
   "scripts": {
     "build": "tsc",
     "watch": "tsc --watch",
+    "start:slim": "node dist/mdnsDgramSlim.js",
     "start:frontend": "matterbridge",
     "start:bridge": "matterbridge -bridge",
     "start:childbridge": "matterbridge -childbridge",

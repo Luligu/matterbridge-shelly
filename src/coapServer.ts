@@ -82,7 +82,7 @@ export class CoapServer extends EventEmitter {
   private _debug = false;
   private readonly devices = new Map<string, CoIoTDescription[]>();
   private readonly deviceSerial = new Map<string, number>();
-  private _dataPath = '';
+  private _dataPath = 'temp';
 
   constructor(logLevel: LogLevel = LogLevel.INFO) {
     super();
@@ -435,7 +435,7 @@ export class CoapServer extends EventEmitter {
       if (!descriptions || descriptions.length === 0) {
         // Bug on SHMOS-01 and SHMOS-02
         if (deviceType === 'SHDW-1' || deviceType === 'SHDW-2') {
-          this.log.debug(`*Set coap descriptions for host ${zb}${host}${db} deviceType ${CYAN}SHDW-2${db}`);
+          this.log.debug(`*Set coap descriptions for host ${zb}${host}${db} deviceType ${CYAN}SHDW-1/SHDW-2${db}`);
           // battery component
           descriptions.push({ id: 3111, component: 'battery', property: 'level', range: ['0/100', '-1'] }); // SHDW-1 and SHDW-2
           // contact component 1 = open, 0 = closed
@@ -447,7 +447,7 @@ export class CoapServer extends EventEmitter {
           descriptions.push({ id: 3101, component: 'temperature', property: 'value', range: ['-55/125', '999'] }); // SHDW-1 and SHDW-2
           this.devices.set(host, descriptions);
         } else if (deviceType === 'SHBTN-1' || deviceType === 'SHBTN-2') {
-          this.log.debug(`*Set coap descriptions for host ${zb}${host}${db} deviceType ${CYAN}SHBTN-2${db}`);
+          this.log.debug(`*Set coap descriptions for host ${zb}${host}${db} deviceType ${CYAN}SHBTN-1/SHBTN-2${db}`);
           // battery component
           descriptions.push({ id: 3111, component: 'battery', property: 'level', range: ['0/100', '-1'] }); // SHMOS-01
           // input component
@@ -475,6 +475,15 @@ export class CoapServer extends EventEmitter {
           descriptions.push({ id: 3106, component: 'lux', property: 'value', range: ['U32', '-1'] }); // SHMOS-02
           // temperature component
           descriptions.push({ id: 3101, component: 'temperature', property: 'value', range: ['-55/125', '999'] }); // SHDW-1 and SHDW-2
+          this.devices.set(host, descriptions);
+        } else if (deviceType === 'SHWT-1') {
+          this.log.debug(`*Set coap descriptions for host ${zb}${host}${db} deviceType ${CYAN}SHWT-1${db}`);
+          // battery component
+          descriptions.push({ id: 3111, component: 'battery', property: 'level', range: ['0/100', '-1'] }); // SHWT-1
+          // flood component
+          descriptions.push({ id: 6106, component: 'flood', property: 'flood', range: ['0/1', '-1'] }); // SHWT-1
+          // temperature component
+          descriptions.push({ id: 3101, component: 'temperature', property: 'value', range: ['-55/125', '999'] }); // SHWT-1
           this.devices.set(host, descriptions);
         } else {
           this.log.debug(`*No coap description found for host ${zb}${host}${db} fetching it...`);
