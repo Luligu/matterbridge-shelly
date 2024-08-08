@@ -294,7 +294,7 @@ describe('ShellyComponent', () => {
     expect(component.getValue('state')).toBe(true);
   });
 
-  it('should update brightness and color', () => {
+  it('should not update brightness and color', () => {
     const mockFetch = jest.spyOn(ShellyDevice, 'fetch').mockResolvedValue({});
     const component = new ShellyComponent(device, 'light:0', 'Light', { output: true, gain: 50, red: 20, green: 30, blue: 40 });
     expect(component.getProperty('state')).not.toBeUndefined();
@@ -309,10 +309,10 @@ describe('ShellyComponent', () => {
     expect(component.getValue('blue')).toBe(40);
     (component as ShellyLightComponent).Level(34);
     (component as ShellyLightComponent).ColorRGB(10, 20, 30);
-    expect(component.getValue('brightness')).toBe(34);
-    expect(component.getValue('red')).toBe(10);
-    expect(component.getValue('green')).toBe(20);
-    expect(component.getValue('blue')).toBe(30);
+    expect(component.getValue('brightness')).toBe(50);
+    expect(component.getValue('red')).toBe(20);
+    expect(component.getValue('green')).toBe(30);
+    expect(component.getValue('blue')).toBe(40);
     mockFetch.mockRestore();
   });
 

@@ -1,3 +1,4 @@
+/* eslint-disable jest/no-done-callback */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Multicast } from './mcastServer';
@@ -33,7 +34,6 @@ describe('Muticast server and client test', () => {
     expect(mcast).not.toBeUndefined();
   });
 
-  // eslint-disable-next-line jest/no-done-callback
   test('Use dgram server', (done) => {
     function boundCallback() {
       try {
@@ -54,7 +54,6 @@ describe('Muticast server and client test', () => {
     mcast?.startDgramServer(boundCallback, messageCallback);
   }, 60000);
 
-  // eslint-disable-next-line jest/no-done-callback
   test('Use dgram client', (done) => {
     async function boundCallback() {
       try {
@@ -67,6 +66,30 @@ describe('Muticast server and client test', () => {
     }
     mcast?.startDgramClient(boundCallback);
   }, 60000);
+
+  test('Server connect event', async () => {
+    consoleLogSpy.mockClear();
+    (mcast as any)?.dgramServer?.emit('connect');
+    expect(consoleLogSpy).toHaveBeenCalledWith(expect.anything(), expect.stringContaining('Dgram multicast server socket connected'), expect.anything());
+  });
+
+  test('Server error event', async () => {
+    consoleLogSpy.mockClear();
+    (mcast as any)?.dgramServer?.emit('error', new Error('Test error'));
+    expect(consoleLogSpy).toHaveBeenCalledWith(expect.anything(), expect.stringContaining('Dgram multicast server socket error'), expect.anything());
+  });
+
+  test('Client connect event', async () => {
+    consoleLogSpy.mockClear();
+    (mcast as any)?.dgramClient?.emit('connect');
+    expect(consoleLogSpy).toHaveBeenCalledWith(expect.anything(), expect.stringContaining('Dgram multicast client socket connected'), expect.anything());
+  });
+
+  test('Client error event', async () => {
+    consoleLogSpy.mockClear();
+    (mcast as any)?.dgramClient?.emit('error', new Error('Test error'));
+    expect(consoleLogSpy).toHaveBeenCalledWith(expect.anything(), expect.stringContaining('Dgram multicast client socket error'), expect.anything());
+  });
 
   test('Stop the Multicast class', async () => {
     mcast?.stop();

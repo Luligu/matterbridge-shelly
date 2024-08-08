@@ -34,6 +34,7 @@ describe('ShellyPlatform', () => {
     mockMatterbridge = {
       addBridgedDevice: jest.fn(),
       matterbridgeDirectory: '',
+      matterbridgePluginDirectory: 'temp',
       systemInformation: { ipv4Address: undefined },
       removeAllBridgedDevices: jest.fn(),
     } as unknown as Matterbridge;

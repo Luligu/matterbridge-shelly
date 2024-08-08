@@ -182,32 +182,3 @@ export class Shelly extends EventEmitter {
     }
   }
 }
-
-/*
-if (process.argv.includes('shelly')) {
-  logInterfaces();
-  const debug = false;
-  const log = new AnsiLogger({ logName: 'Shellies', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: debug });
-  const shelly = new Shelly(log);
-  shelly.startMdns(300, false);
-
-  shelly.on('discovered', async (discoveredDevice: DiscoveredDevice) => {
-    const log = new AnsiLogger({ logName: discoveredDevice.id, logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: debug });
-    const device = await ShellyDevice.create(shelly, log, discoveredDevice.host);
-    if (!device) return;
-    await shelly.addDevice(device);
-  });
-
-  shelly.on('add', async (device: ShellyDevice) => {
-    log.info(
-      `Added shelly device ${hk}${device.id}${nf}: name ${CYAN}${device.name}${nf} ip ${MAGENTA}${device.host}${nf} model ${CYAN}${device.model}${nf} auth ${CYAN}${device.auth}${nf}`,
-    );
-  });
-
-  process.on('SIGINT', async function () {
-    shelly.logDevices();
-    shelly.destroy();
-    // process.exit();
-  });
-}
-*/

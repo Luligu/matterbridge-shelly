@@ -52,6 +52,7 @@ export class Multicast {
     this.dgramServer.on('error', (err) => {
       this.log.error(`Dgram multicast server socket error:\n${err.message}`);
       this.dgramServer?.close();
+      this.dgramServer = undefined;
     });
 
     this.dgramServer.on('close', () => {
@@ -106,7 +107,10 @@ export class Multicast {
 
     this.dgramClient.on('error', (err) => {
       this.log.error(`Dgram multicast client socket error:\n${err.message}`);
+      if (this.clientTimeout) clearTimeout(this.clientTimeout);
+      this.clientTimeout = undefined;
       this.dgramClient?.close();
+      this.dgramClient = undefined;
     });
 
     this.dgramClient.on('close', () => {

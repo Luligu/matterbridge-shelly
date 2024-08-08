@@ -82,7 +82,7 @@ describe('Shellies', () => {
       expect(device?.host).toBe('192.168.1.217');
       expect(device?.model).toBe('SNSW-001P16EU');
       expect(device?.id).toBe('shellyplus1pm-441793D69718');
-      expect(device?.firmware).toBe(firmwareGen2);
+      expect(device?.firmware).toBe('1.4.2-beta1-g84969a6'); // firmwareGen2
       expect(device?.auth).toBe(false);
 
       await device.fetchUpdate();
@@ -227,7 +227,7 @@ describe('Shellies', () => {
       expect(device?.host).toBe('192.168.1.218');
       expect(device?.model).toBe('SNSW-102P16EU');
       expect(device?.id).toBe('shellyplus2pm-5443B23D81F8');
-      expect(device?.firmware).toBe(firmwareGen2);
+      expect(device?.firmware).toBe('1.4.2-beta1-g84969a6'); // firmwareGen2
       expect(device?.auth).toBe(false);
 
       await device.fetchUpdate();
@@ -267,6 +267,27 @@ describe('Shellies', () => {
       console.log('send wrong command to a gen 2 device and update');
       res = await ShellyDevice.fetch(shelly, log, '192.168.1.218', 'relay/0', { 'turn': 'toggle' });
       expect(res).toBeNull();
+      device.destroy();
+    });
+  });
+
+  describe('create real gen 3 shelly1minig3 221 with auth', () => {
+    if (getMacAddress() !== '30:f6:ef:69:2b:c5') return;
+    test('send command to a gen 2 device and update', async () => {
+      const device = await ShellyDevice.create(shelly, log, '192.168.1.221');
+      expect(device).not.toBeUndefined();
+      if (!device) return;
+      expect(device.gen).toBe(3);
+      expect(device.host).toBe('192.168.1.221');
+      expect(device.model).toBe('S3SW-001X8EU');
+      expect(device.id).toBe('shelly1minig3-543204547478');
+      expect(device.firmware).toBe(firmwareGen2); // firmwareGen2
+      expect(device.auth).toBe(true);
+
+      await device.fetchUpdate();
+
+      await device.saveDevicePayloads('temp');
+
       device.destroy();
     });
   });

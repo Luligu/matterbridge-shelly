@@ -219,6 +219,7 @@ class MdnsScanner {
   }
 
   private buildQuery(name: string, type: string, classId = 1): Buffer {
+    /*
     return dnsPacket.encode({
       type: 'query',
       id: 0,
@@ -230,13 +231,14 @@ class MdnsScanner {
         },
       ],
     });
-    /*
+    */
+
     // Build an mDNS query packet
     const parts = name.split('.').filter((part) => part.length > 0);
     const query = Buffer.alloc(12 + parts.reduce((len, part) => len + part.length + 1, 0) + 5);
 
     // Transaction ID: 2 bytes
-    query.writeUInt16BE(0, 0);
+    query.writeUInt16BE(8283, 0);
 
     // Flags: 2 bytes
     query.writeUInt16BE(0, 2);
@@ -267,7 +269,6 @@ class MdnsScanner {
     query.writeUInt16BE(classId, offset);
 
     return query;
-    */
   }
 
   public stop = () => {
@@ -297,7 +298,7 @@ class MdnsScanner {
 
       let offset = 12;
 
-      if (qdcount > 0) console.log(`${GREEN}Questions:${rs}`);
+      if (qdcount > 0) console.log(`${GREEN}Questions ${qdcount}:${rs}`);
       for (let i = 0; i < qdcount; i++) {
         const { name, newOffset } = this.decodeDomainName(msg, offset);
         offset = newOffset;
@@ -309,7 +310,7 @@ class MdnsScanner {
         console.log(`${name.padEnd(50, ' ')} ${idn}${this.rrTypeToString(type)}${rs}, Class: ${qclass}`);
       }
 
-      if (ancount > 0) console.log(`${GREEN}Answers:${rs}`);
+      if (ancount > 0) console.log(`${GREEN}Answers ${ancount}:${rs}`);
       for (let i = 0; i < ancount; i++) {
         const { name, newOffset } = this.decodeDomainName(msg, offset);
         offset = newOffset;
@@ -358,7 +359,7 @@ class MdnsScanner {
         if (name.startsWith('shelly')) this.shellyDevices.set(rinfo.address, { address: rinfo.address, id: name.split('.')[0], gen: 0 });
       }
 
-      if (nscount > 0) console.log(`${GREEN}Authority RRs:${rs}`);
+      if (nscount > 0) console.log(`${GREEN}Authority RRs ${nscount}:${rs}`);
       for (let i = 0; i < nscount; i++) {
         const { name, newOffset } = this.decodeDomainName(msg, offset);
         offset = newOffset;
@@ -407,7 +408,7 @@ class MdnsScanner {
         if (name.startsWith('shelly')) this.shellyDevices.set(rinfo.address, { address: rinfo.address, id: name.split('.')[0], gen: 0 });
       }
 
-      if (arcount > 0) console.log(`${GREEN}Additional RRs:${rs}`);
+      if (arcount > 0) console.log(`${GREEN}Additional RRs ${arcount}:${rs}`);
       for (let i = 0; i < arcount; i++) {
         const { name, newOffset } = this.decodeDomainName(msg, offset);
         offset = newOffset;
@@ -736,19 +737,21 @@ const scanner = new MdnsScanner(process.argv[2], process.argv[3] === 'true' ? tr
 
 scanner.query('_shelly._tcp.local', 'PTR');
 scanner.query('_http._tcp.local', 'PTR');
-// scanner.query('_services._dns-sd._udp.local', 'PTR');
+scanner.query('_services._dns-sd._udp.local', 'PTR');
 
 const interval = setInterval(() => {
   scanner.query('_shelly._tcp.local', 'PTR');
   scanner.query('_http._tcp.local', 'PTR');
-  // scanner.query('_services._dns-sd._udp.local', 'PTR');
-}, 60000); // Query every 60 seconds
+  scanner.query('_services._dns-sd._udp.local', 'PTR');
+}, 10000); // Query every 10 seconds
 
 setTimeout(() => {
-  // scanner.stop();
-}, 30000); // Stop scanning after 10 seconds
+  clearInterval(interval);
+  scanner.stop();
+  logDevices();
+}, 60000); // Stop scanning after 60 seconds
 
-process.on('SIGINT', () => {
+function logDevices() {
   // Collect devices into an array
   const shellyArray = Array.from(scanner.shellyDevices.entries());
   // Sort the array by device address
@@ -784,7 +787,10 @@ process.on('SIGINT', () => {
   errorDevicesArray.forEach(([key, device]) => {
     console.error(`Device with error: ${device.address}:${device.port}`);
   });
+}
 
+process.on('SIGINT', () => {
   clearInterval(interval);
   scanner.stop();
+  logDevices();
 });

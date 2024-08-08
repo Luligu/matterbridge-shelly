@@ -4,7 +4,7 @@
  * @file src\shellyComponent.ts
  * @author Luca Liguori
  * @date 2024-05-01
- * @version 1.0.0
+ * @version 2.0.0
  *
  * Copyright 2024, 2025 Luca Liguori.
  *
@@ -56,8 +56,8 @@ export type ShellySwitchComponent = ShellyComponent & SwitchComponent;
 
 export type ShellyCoverComponent = ShellyComponent & CoverComponent;
 
-function isLightComponent(name: string): name is 'Light' {
-  return ['Light'].includes(name);
+function isLightComponent(name: string): name is 'Light' | 'White' | 'Rgb' | 'Rgbw' {
+  return ['Light', 'White', 'Rgb', 'Rgbw'].includes(name);
 }
 
 function isSwitchComponent(name: string): name is 'Relay' | 'Switch' {
@@ -125,7 +125,7 @@ export class ShellyComponent extends EventEmitter {
       (this as unknown as ShellyLightComponent).Level = function (level: number) {
         if (!this.hasProperty('brightness')) return;
         const adjustedLevel = Math.min(Math.max(Math.round(level), 0), 100);
-        this.setValue('brightness', adjustedLevel);
+        // this.setValue('brightness', adjustedLevel);
         if (device.gen === 1 && !this.hasProperty('gain'))
           ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { brightness: adjustedLevel });
         if (device.gen === 1 && this.hasProperty('gain'))
@@ -134,15 +134,25 @@ export class ShellyComponent extends EventEmitter {
       };
 
       (this as unknown as ShellyLightComponent).ColorRGB = function (red: number, green: number, blue: number) {
-        if (!this.hasProperty('red') || !this.hasProperty('green') || !this.hasProperty('blue')) return;
-        red = Math.min(Math.max(Math.round(red), 0), 255);
-        green = Math.min(Math.max(Math.round(green), 0), 255);
-        blue = Math.min(Math.max(Math.round(blue), 0), 255);
-        this.setValue('red', red);
-        this.setValue('green', green);
-        this.setValue('blue', blue);
-        if (device.gen === 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { red, green, blue });
-        if (device.gen !== 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${this.name}.Set`, { id: this.index, red, green, blue });
+        if (this.hasProperty('red') && this.hasProperty('green') && this.hasProperty('blue')) {
+          red = Math.min(Math.max(Math.round(red), 0), 255);
+          green = Math.min(Math.max(Math.round(green), 0), 255);
+          blue = Math.min(Math.max(Math.round(blue), 0), 255);
+          // this.setValue('red', red);
+          // this.setValue('green', green);
+          // this.setValue('blue', blue);
+          if (device.gen === 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { red, green, blue });
+          if (device.gen !== 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${this.name}.Set`, { id: this.index, red, green, blue });
+        }
+        if (this.hasProperty('rgb') && this.getValue('rgb') !== null && this.getValue('rgb') !== undefined && Array.isArray(this.getValue('rgb'))) {
+          red = Math.min(Math.max(Math.round(red), 0), 255);
+          green = Math.min(Math.max(Math.round(green), 0), 255);
+          blue = Math.min(Math.max(Math.round(blue), 0), 255);
+          // this.setValue('rgb', [red, green, blue]);
+          if (device.gen === 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { red, green, blue });
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          if (device.gen !== 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${this.name}.Set`, { id: this.index, rgb: [red, green, blue] as any });
+        }
       };
     }
 
@@ -172,6 +182,30 @@ export class ShellyComponent extends EventEmitter {
         if (device.gen !== 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${this.name}.GoToPosition`, { id: this.index, pos: pos });
       };
     }
+  }
+
+  /**
+   * Checks if the component is a light component.
+   * @returns {boolean} True if the component is a light component, false otherwise.
+   */
+  isLightComponent(): boolean {
+    return ['Light', 'White', 'Rgb', 'Rgbw'].includes(this.name);
+  }
+
+  /**
+   * Checks if the component is a switch.
+   * @returns {boolean} True if the component is a switch, false otherwise.
+   */
+  isSwitchComponent(): boolean {
+    return ['Relay', 'Switch'].includes(this.name);
+  }
+
+  /**
+   * Checks if the component is a cover component.
+   * @returns {boolean} True if the component is a cover component, false otherwise.
+   */
+  isCoverComponent(): boolean {
+    return ['Cover', 'Roller'].includes(this.name);
   }
 
   /**

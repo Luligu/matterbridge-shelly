@@ -149,15 +149,13 @@ export class CoapServer extends EventEmitter {
         })
         .on('timeout', (err) => {
           this.log.error(
-            `CoIoT (coap) timeout requesting device description ("/cit/d") from ${hk}${id ? id + ' ' : ''}${er}${zb}${host}${er}:`,
-            err instanceof Error ? err.message : err,
+            `CoIoT (coap) timeout requesting device description ("/cit/d") from ${hk}${id ? id + ' ' : ''}${er}${zb}${host}${er}: ${err instanceof Error ? err.message : err}`,
           );
           resolve(null);
         })
         .on('error', (err) => {
           this.log.error(
-            `CoIoT (coap) error requesting device description ("/cit/d") from ${hk}${id ? id + ' ' : ''}${er}${zb}${host}${er}:`,
-            err instanceof Error ? err.message : err,
+            `CoIoT (coap) error requesting device description ("/cit/d") from ${hk}${id ? id + ' ' : ''}${er}${zb}${host}${er}: ${err instanceof Error ? err.message : err}`,
           );
           resolve(null);
         })
@@ -190,13 +188,14 @@ export class CoapServer extends EventEmitter {
         })
         .on('timeout', (err) => {
           this.log.error(
-            `CoIoT (coap) timeout requesting device status ("/cit/s") from ${hk}${id ? id + ' ' : ''}${er}${zb}${host}${er}:`,
-            err instanceof Error ? err.message : err,
+            `CoIoT (coap) timeout requesting device status ("/cit/s") from ${hk}${id ? id + ' ' : ''}${er}${zb}${host}${er}: ${err instanceof Error ? err.message : err}`,
           );
           resolve(null);
         })
         .on('error', (err) => {
-          this.log.error(`CoIoT (coap) error requesting device status ("/cit/s") from ${hk}${id ? id + ' ' : ''}${er}${zb}${host}${er}:`, err instanceof Error ? err.message : err);
+          this.log.error(
+            `CoIoT (coap) error requesting device status ("/cit/s") from ${hk}${id ? id + ' ' : ''}${er}${zb}${host}${er}: ${err instanceof Error ? err.message : err}`,
+          );
           resolve(null);
         })
         .end();
@@ -409,6 +408,7 @@ export class CoapServer extends EventEmitter {
             if (s.D === 'voltage' && b.D.startsWith('emeter')) desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'voltage', range: s.R }); // SHEM
             if (s.D === 'power' && b.D.startsWith('emeter')) desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'power', range: s.R });
             if (s.D === 'energy' && b.D.startsWith('emeter')) desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'total', range: s.R });
+            if (s.D === 'current' && b.D.startsWith('emeter')) desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'current', range: s.R });
 
             // sensor component
             if (s.D === 'inputEvent' && b.D.startsWith('sensor'))

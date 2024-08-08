@@ -106,8 +106,9 @@ export class MdnsScanner extends EventEmitter {
    * @param {boolean} debug - Indicates whether to enable debug mode (default: false).
    */
   start(shutdownTimeout?: number, mdnsInterface?: string, type?: SocketType, debug = false) {
-    this._isScanning = true;
     this._debug = debug;
+    if (this._isScanning) return;
+    this._isScanning = true;
 
     // Create and initialize the mDNS scanner
     if (mdnsInterface && mdnsInterface !== '' && type && (type === 'udp4' || type === 'udp6')) {
