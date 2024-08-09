@@ -4,7 +4,7 @@
  * @file src\wsClient.ts
  * @author Luca Liguori
  * @date 2024-05-01
- * @version 1.0.0
+ * @version 2.0.0
  *
  * Copyright 2024, 2025 Luca Liguori.
  *
@@ -21,7 +21,7 @@
  * limitations under the License. *
  */
 
-import { AnsiLogger, BLUE, CYAN, TimestampFormat, db, er, nf, rs, wr, zb } from 'matterbridge/logger';
+import { AnsiLogger, BLUE, CYAN, LogLevel, TimestampFormat, db, er, nf, rs, wr, zb } from 'matterbridge/logger';
 import WebSocket from 'ws';
 import crypto from 'crypto';
 import EventEmitter from 'events';
@@ -255,9 +255,10 @@ export class WsClient extends EventEmitter {
     });
   }
 
-  start() {
+  start(logLevel: LogLevel) {
+    this.log.logLevel = logLevel;
     this.log.debug(`Starting ws client for Shelly device on address ${this.wsHost}`);
-    this.listenForStatusUpdates();
+    this.listenForStatusUpdates(); // Na await to start listening for status updates
     this.log.debug(`Started ws client for Shelly device on address ${this.wsHost}`);
   }
 

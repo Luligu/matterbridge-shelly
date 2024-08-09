@@ -458,7 +458,7 @@ export class ShellyDevice extends EventEmitter {
       if (device.gen === 2 || device.gen === 3) {
         if (device.wsClient?.isConnected === false) {
           log.warn(`WebSocket client for device ${hk}${device.id}${wr} host ${zb}${device.host}${wr} is not connected. Starting connection...`);
-          device.wsClient?.start();
+          device.wsClient?.start(device.log.logLevel);
         }
       }
     }, 60 * 1000);
@@ -468,7 +468,7 @@ export class ShellyDevice extends EventEmitter {
       device.wsClient = new WsClient(host, shelly.password);
       device.startWsClientTimeout = setTimeout(() => {
         // Start WebSocket client after 10 seconds only if it's not a cached device. Will try it in the last seen interval.
-        if (!host.endsWith('.json')) device.wsClient?.start();
+        if (!host.endsWith('.json')) device.wsClient?.start(device.log.logLevel);
       }, 10 * 1000);
 
       device.wsClient.on('update', (message) => {

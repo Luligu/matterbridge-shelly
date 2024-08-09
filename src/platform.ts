@@ -149,6 +149,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       }
       if (config.debug) device.logDevice();
 
+      /*
       device.getComponent('sensor')?.logComponent();
       device.getComponent('lux')?.logComponent();
       device.getComponent('battery')?.logComponent();
@@ -156,6 +157,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       device.getComponent('contact')?.logComponent();
       device.getComponent('vibration')?.logComponent();
       device.getComponent('flood')?.logComponent();
+      */
 
       if (device.name === undefined || device.id === undefined || device.model === undefined || device.firmware === undefined) {
         this.log.error(`Shelly device ${hk}${device.id}${er} host ${zb}${device.host}${er} is not valid. Please put it in the blackList and open an issue.`);
