@@ -29,6 +29,7 @@ import { ShellyDevice } from './shellyDevice.js';
 import { DiscoveredDevice, MdnsScanner } from './mdnsScanner.js';
 import { CoapServer } from './coapServer.js';
 import { SocketType } from 'dgram';
+import { WsClient } from './wsClient.js';
 
 export class Shelly extends EventEmitter {
   private readonly _devices = new Map<string, ShellyDevice>();
@@ -170,6 +171,7 @@ export class Shelly extends EventEmitter {
     this._debugCoap = debugCoap;
     if (this.mdnsScanner) this.mdnsScanner.log.logLevel = debugMdns ? LogLevel.DEBUG : LogLevel.INFO;
     if (this.coapServer) this.coapServer.log.logLevel = debugCoap ? LogLevel.DEBUG : LogLevel.INFO;
+    WsClient.logLevel = level;
     this.devices.forEach((device) => {
       device.setLogLevel(level);
     });
