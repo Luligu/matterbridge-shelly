@@ -192,7 +192,7 @@
     "wifi": {
       "sta_ip": "192.168.1.224",
       "status": "got ip",
-      "ssid": "FibreBox_X6-12A4C7",
+      "ssid": "FibreBox_X6-12A4C7 ",
       "rssi": -56
     },
     "ws": {
