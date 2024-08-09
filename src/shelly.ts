@@ -165,13 +165,14 @@ export class Shelly extends EventEmitter {
     }
   }
 
-  setLogLevel(level: LogLevel, debugMdns: boolean, debugCoap: boolean) {
+  setLogLevel(level: LogLevel, debugMdns: boolean, debugCoap: boolean, debugWs: boolean) {
+    // Called 2 times in platform.ts: 1) at startup, 2) after onChangeLoggerLevel
     this.log.logLevel = level;
     this._debugMdns = debugMdns;
     this._debugCoap = debugCoap;
     if (this.mdnsScanner) this.mdnsScanner.log.logLevel = debugMdns ? LogLevel.DEBUG : LogLevel.INFO;
     if (this.coapServer) this.coapServer.log.logLevel = debugCoap ? LogLevel.DEBUG : LogLevel.INFO;
-    WsClient.logLevel = level;
+    WsClient.logLevel = debugWs ? LogLevel.DEBUG : LogLevel.INFO;
     this.devices.forEach((device) => {
       device.setLogLevel(level);
     });

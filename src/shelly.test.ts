@@ -161,11 +161,11 @@ describe('Shellies test', () => {
   });
 
   test('Set log level', () => {
-    shellies.setLogLevel(LogLevel.DEBUG, true, true);
+    shellies.setLogLevel(LogLevel.DEBUG, true, true, true);
     expect((shellies as any).log.logLevel).toBe(LogLevel.DEBUG);
     expect((shellies as any).mdnsScanner._debug).toBe(true);
     expect((shellies as any).coapServer._debug).toBe(true);
-    shellies.setLogLevel(LogLevel.INFO, false, false);
+    shellies.setLogLevel(LogLevel.INFO, false, false, true);
     expect((shellies as any).log.logLevel).toBe(LogLevel.INFO);
   });
 });

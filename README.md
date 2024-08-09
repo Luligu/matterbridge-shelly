@@ -13,13 +13,14 @@
 
 ---
 
-This plugin allows you to expose Shelly Gen 1, Gen 2, and Gen 3 devices to Matter.
+This plugin allows you to expose Shelly Gen 1, Gen 2, Gen 3 and BLU devices to Matter.
 
 Features:
 
 - Shellies are automatically discovered using mDNS.
 - Shelly wifi battery powered devices are supported.
 - Shelly wifi battery powered devices with sleep_mode are supported.
+- Shelly BLU devices are supported through local devices configured as ble observer.
 - Discovered shellies are stored in local storage for quick loading on startup.
 - The components exposed are Light (with brightness and RGB color), Switch, Relay, Roller, Cover, PowerMeter and Input.
 - All components expose the electrical measurements with the EveHistory cluster (displayed on HA), waiting for the controllers to upgrade to the Matter 1.3 specs.

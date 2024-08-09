@@ -26,3 +26,69 @@ export declare type ParamsTypes = boolean | number | string;
 export type ShellyData = Record<string, ShellyDataType>;
 
 export type ShellyDataType = string | number | boolean | null | undefined | object;
+
+// Define the interface for the BTHomeDeviceComponent status object
+export interface BTHomeDeviceComponentStatus {
+  id: number;
+  rssi: number;
+  battery: number;
+  packet_id: number;
+  last_updated_ts: number;
+}
+
+// Define the interface for the BTHomeDeviceComponent config object
+export interface BTHomeDeviceComponentConfig {
+  id: number;
+  addr: string;
+  name: string;
+  key: ShellyDataType;
+  meta: {
+    ui: {
+      view: string;
+      local_name: string;
+      icon: ShellyDataType;
+    };
+  };
+}
+
+// Define the main interface for the BTHomeDeviceComponent
+export interface BTHomeDeviceComponent {
+  key: string;
+  status: BTHomeDeviceComponentStatus;
+  config: BTHomeDeviceComponentConfig;
+}
+
+// Define the interface for the BTHomeSensorComponent status object
+export interface BTHomeSensorComponentStatus {
+  id: number;
+  value: ShellyDataType;
+  last_updated_ts: number;
+}
+
+// Define the interface for the BTHomeSensorComponent config object
+export interface BTHomeSensorComponentConfig {
+  id: number;
+  addr: string;
+  name: string;
+  obj_id: number;
+  idx: number;
+  meta: {
+    ui: {
+      icon: ShellyDataType;
+    };
+  };
+}
+
+// Define the main interface for BTHomeSensorComponent
+export interface BTHomeSensorComponent {
+  key: string;
+  status: BTHomeSensorComponentStatus;
+  config: BTHomeSensorComponentConfig;
+}
+
+// Define the generic interface for BTHomeDeviceComponent and BTHomeSensorComponent
+export interface BTHomeComponent {
+  key: string;
+  status: BTHomeDeviceComponentStatus | BTHomeSensorComponentStatus;
+  config: BTHomeDeviceComponentStatus | BTHomeSensorComponentConfig;
+}

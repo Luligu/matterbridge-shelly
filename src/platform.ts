@@ -54,7 +54,7 @@ import {
   TemperatureMeasurementCluster,
 } from 'matterbridge';
 import { EveHistory, EveHistoryCluster } from 'matterbridge/history';
-import { AnsiLogger, BLUE, CYAN, GREEN, LogLevel, TimestampFormat, YELLOW, db, debugStringify, dn, er, hk, idn, nf, or, rs, wr, zb } from 'matterbridge/logger';
+import { AnsiLogger, BLUE, CYAN, GREEN, LogLevel, TimestampFormat, YELLOW, db, debugStringify, dn, er, hk, idn, nf, nt, or, rs, wr, zb } from 'matterbridge/logger';
 import { NodeStorage, NodeStorageManager } from 'matterbridge/storage';
 import { hslColorToRgbColor, rgbColorToHslColor } from 'matterbridge/utils';
 
@@ -107,15 +107,17 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     log.debug(`- mdnsDiscover: ${CYAN}${config.enableMdnsDiscover}`);
     log.debug(`- storageDiscover: ${CYAN}${config.enableStorageDiscover}`);
     log.debug(`- configDiscover: ${CYAN}${config.enableConfigDiscover}`);
-    log.debug(`- resetStorageDiscover: ${CYAN}${config.resetStorageDiscover}`);
+    log.debug(`- bleDiscover: ${CYAN}${config.enableBleDiscover}`);
+    log.debug(`- resetStorage: ${CYAN}${config.resetStorageDiscover}`);
     log.debug(`- interfaceName: ${CYAN}${config.interfaceName}`);
     log.debug(`- debug: ${CYAN}${config.debug}`);
     log.debug(`- debugMdns: ${CYAN}${config.debugMdns}`);
     log.debug(`- debugCoap: ${CYAN}${config.debugCoap}`);
+    log.debug(`- debugWs: ${CYAN}${config.debugWs}`);
     log.debug(`- unregisterOnShutdown: ${CYAN}${config.unregisterOnShutdown}`);
 
     this.shelly = new Shelly(log, this.username, this.password);
-    this.shelly.setLogLevel(log.logLevel, this.config.debugMdns as boolean, this.config.debugCoap as boolean);
+    this.shelly.setLogLevel(log.logLevel, this.config.debugMdns as boolean, this.config.debugCoap as boolean, this.config.debugWs as boolean);
     this.shelly.dataPath = path.join(matterbridge.matterbridgePluginDirectory, 'matterbridge-shelly');
     this.shelly.debugMdns = this.config.debugMdns as boolean;
     this.shelly.debugCoap = this.config.debugCoap as boolean;
@@ -149,20 +151,25 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       }
       if (config.debug) device.logDevice();
 
-      /*
-      device.getComponent('sensor')?.logComponent();
-      device.getComponent('lux')?.logComponent();
-      device.getComponent('battery')?.logComponent();
-      device.getComponent('motion')?.logComponent();
-      device.getComponent('contact')?.logComponent();
-      device.getComponent('vibration')?.logComponent();
-      device.getComponent('flood')?.logComponent();
-      */
+      // Scan the device components for ble enables
+      if (config.enableBleDiscover === true) {
+        const ble = device.getComponent('ble');
+        if (ble && ble.hasProperty('enable') && ble.getValue('enable') === true && ble.hasProperty('observer') && ble.hasProperty('rpc')) {
+          const observer = ble.getValue('observer') as ShellyData;
+          const rpc = ble.getValue('rpc') as ShellyData;
+          if (observer.enable === true && rpc.enable === true) {
+            this.log.notice(`Shelly device ${hk}${device.id}${nt} host ${zb}${device.host}${nt} is a ble observer with ble rpc enabled. Scanning BLU devices...`);
+            // for( const component of device.componentsPayload as object[])
+          }
+        }
+      }
 
+      // Validate the device data
       if (device.name === undefined || device.id === undefined || device.model === undefined || device.firmware === undefined) {
         this.log.error(`Shelly device ${hk}${device.id}${er} host ${zb}${device.host}${er} is not valid. Please put it in the blackList and open an issue.`);
         return;
       }
+
       // Create a new Matterbridge device for the switch
       const mbDevice = new MatterbridgeDevice(bridgedNode, undefined, config.debug as boolean);
       mbDevice.createDefaultBridgedDeviceBasicInformationClusterServer(
@@ -688,7 +695,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     this.log.debug(
       `Changing logger level for platform ${idn}${this.config.name}${rs}${db} to ${logLevel} with debugMdns ${this.config.debugMdns} and debugCoap ${this.config.debugCoap}`,
     );
-    this.shelly.setLogLevel(logLevel, this.config.debugMdns as boolean, this.config.debugCoap as boolean);
+    this.shelly.setLogLevel(logLevel, this.config.debugMdns as boolean, this.config.debugCoap as boolean, this.config.debugWs as boolean);
   }
 
   private async saveStoredDevices(): Promise<boolean> {

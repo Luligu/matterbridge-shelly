@@ -256,8 +256,7 @@ export class WsClient extends EventEmitter {
     });
   }
 
-  start(logLevel: LogLevel) {
-    this.log.logLevel = logLevel;
+  start() {
     this.log.debug(`Starting ws client for Shelly device on address ${this.wsHost}`);
     this.listenForStatusUpdates(); // Na await to start listening for status updates
     this.log.debug(`Started ws client for Shelly device on address ${this.wsHost}`);

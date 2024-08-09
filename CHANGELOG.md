@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 
 If you like this project and find it useful, please consider giving it a star on GitHub at https://github.com/Luligu/matterbridge-shelly and sponsoring it.
 
+## [0.8.1] - 2024-08-10
+
+### Changed
+
+- [package]: Updated dependencies.
+- [package]: Update readmeMD with guide lines to add wifi battery powered devices.
+
+### Added
+
+- [plugin]: Added debugWs option to the config.
+- [plugin]: Enabled enableBleDiscover option in the config.
+
+### Fixed
+
+<a href="https://www.buymeacoffee.com/luligugithub">
+  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+</a>
+
 ## [0.8.0] - 2024-08-09
 
 ### Added

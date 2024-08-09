@@ -21,7 +21,7 @@
  * limitations under the License. *
  */
 
-import { AnsiLogger, LogLevel, BLUE, CYAN, GREEN, GREY, MAGENTA, RESET, db, debugStringify, er, hk, nf, wr, zb } from 'matterbridge/logger';
+import { AnsiLogger, LogLevel, BLUE, CYAN, GREEN, GREY, MAGENTA, RESET, db, debugStringify, er, hk, nf, wr, zb, rs } from 'matterbridge/logger';
 import { getIpv4InterfaceAddress } from 'matterbridge/utils';
 import { EventEmitter } from 'events';
 import fetch, { RequestInit } from 'node-fetch';
@@ -33,7 +33,7 @@ import { parseDigestAuthenticateHeader, createDigestShellyAuth, createBasicShell
 
 import { WsClient } from './wsClient.js';
 import { Shelly } from './shelly.js';
-import { ShellyData } from './shellyTypes.js';
+import { BTHomeComponent, BTHomeDeviceComponent, BTHomeSensorComponent, ShellyData } from './shellyTypes.js';
 import { ShellyComponent, ShellyCoverComponent, ShellyLightComponent, ShellySwitchComponent } from './shellyComponent.js';
 
 /**
@@ -75,6 +75,9 @@ export class ShellyDevice extends EventEmitter {
   private shellyPayload: ShellyData | null = null;
   private statusPayload: ShellyData | null = null;
   private settingsPayload: ShellyData | null = null;
+  private componentsPayload: ShellyData | null = null;
+  readonly bthomeDevices = new Map<string, { id: number; name: string; model: string; type: string }>();
+  readonly bthomeSensors = new Map<string, { id: number; name: string; addr: string; sensorId: number }>();
 
   private constructor(shelly: Shelly, log: AnsiLogger, host: string) {
     super();
@@ -203,7 +206,7 @@ export class ShellyDevice extends EventEmitter {
    */
   setLogLevel(logLevel: LogLevel) {
     this.log.logLevel = logLevel;
-    if (this.wsClient) this.wsClient.log.logLevel = logLevel;
+    // if (this.wsClient) this.wsClient.log.logLevel = logLevel;
   }
 
   /**
@@ -224,6 +227,81 @@ export class ShellyDevice extends EventEmitter {
   }
 
   /**
+   * Retrieves the name of a BTHome sensor based on its object ID.
+   *
+   * @param {number} objId - The object ID of the BTHome sensor.
+   * @returns The name of the Bluetooth home object.
+   */
+  getBTHomeObjIdText(objId: number): string {
+    const objIdsMap: Record<number, string> = {
+      0x01: 'Battery',
+      0x05: 'Illuminance',
+      0x21: 'Motion',
+      0x2d: 'Contact', // 1 - open, 0 - closed
+      0x2e: 'Humidity',
+      0x3a: 'Button',
+      0x3f: 'Rotation',
+      0x45: 'Temperature',
+    };
+    return objIdsMap[objId] || `SensorId${objId}`;
+  }
+
+  /**
+   * Retrieves the name of a BTHome device based on its model.
+   *
+   * @param {number} model - The object ID of the BTHome sensor.
+   * @returns The name of the Bluetooth home object.
+   */
+  getBTHomeModelText(model: string): string {
+    const modelsMap: Record<string, string> = {
+      'SBBT-002C': 'Shelly BLU Button1',
+      'SBDW-002C': 'Shelly BLU DoorWindow',
+      'SBHT-003C': 'Shelly BLU HT',
+      'SBMO-003Z': 'Shelly BLU Motion',
+      'SBBT-004CEU': 'Shelly BLU Wall Switch 4',
+      'SBBT-004CUS': 'Shelly BLU RC Button 4',
+    };
+    return modelsMap[model] || `SensorId${model}`;
+  }
+
+  scanBTHomeComponent(components: BTHomeComponent[]) {
+    if (components.length > 0) this.log.debug(`Scanning the device ${zb}${this.host}${db} for BTHome devices and components:`);
+    for (const component of components as unknown as BTHomeDeviceComponent[]) {
+      if (component.key.startsWith('bthomedevice:')) {
+        this.log.debug(
+          `- BLU device id ${CYAN}${component.status.id}${db} address ${CYAN}${component.config.addr}${db} ` +
+            `name ${CYAN}${component.config.name ?? `${this.getBTHomeModelText(component.config.meta.ui.local_name)} ` + component.config.addr}${db} ` +
+            `model ${CYAN}${this.getBTHomeModelText(component.config.meta.ui.local_name)}${db} ` +
+            `type ${CYAN}${component.config.meta.ui.local_name}${db}`,
+        );
+        this.bthomeDevices.set(component.config.addr, {
+          id: component.config.id,
+          name: component.config.name ?? `${this.getBTHomeModelText(component.config.meta.ui.local_name)} ` + component.config.addr,
+          model: this.getBTHomeModelText(component.config.meta.ui.local_name),
+          type: component.config.meta.ui.local_name,
+        });
+      }
+    }
+    for (const component of components as unknown as BTHomeSensorComponent[]) {
+      if (component.key.startsWith('bthomesensor:')) {
+        this.log.debug(
+          `- BLU sensor id ${CYAN}${component.status.id}${db} address ${CYAN}${component.config.addr}${db} ` +
+            `name ${CYAN}${component.config.name ?? this.getBTHomeObjIdText(component.config.obj_id)}${db} ` +
+            `value ${CYAN}${component.status.value}${db} ` +
+            `sensor ${CYAN}${this.getBTHomeObjIdText(component.config.obj_id)}${db} ${CYAN}(${component.config.obj_id}${db})`,
+        );
+        this.bthomeSensors.set(component.key, {
+          id: component.config.id,
+          name: component.config.name ?? this.getBTHomeObjIdText(component.config.obj_id),
+          addr: component.config.addr,
+          sensorId: component.config.obj_id,
+        });
+      }
+    }
+    this.log.debug('BTHome devices:', rs, this.bthomeDevices);
+    this.log.debug('BTHome sensors:', rs, this.bthomeSensors);
+  }
+  /**
    * Creates a ShellyDevice instance.
    *
    * @param {Shelly} shelly The Shelly instance.
@@ -235,6 +313,7 @@ export class ShellyDevice extends EventEmitter {
     const shellyPayload = await ShellyDevice.fetch(shelly, log, host, 'shelly');
     let statusPayload: ShellyData | null = null;
     let settingsPayload: ShellyData | null = null;
+    let componentsPayload: ShellyData | null = null;
 
     if (!shellyPayload) {
       log.error(`Error creating device at host ${zb}${host}${er}. No shelly data found.`);
@@ -356,6 +435,12 @@ export class ShellyDevice extends EventEmitter {
         log.error(`Error creating device gen 2 from host ${host}. No data found.`);
         return undefined;
       }
+      // Scan for BTHome devices and components
+      componentsPayload = await ShellyDevice.fetch(shelly, log, host, 'Shelly.GetComponents');
+      if (componentsPayload) {
+        const btHomeComponents = componentsPayload.components as BTHomeComponent[];
+        device.scanBTHomeComponent(btHomeComponents);
+      }
       device.model = shellyPayload.model as string;
       device.id = ShellyDevice.normalizeId(shellyPayload.id as string).id;
       device.firmware = (shellyPayload.fw_id as string).split('/')[1];
@@ -458,7 +543,7 @@ export class ShellyDevice extends EventEmitter {
       if (device.gen === 2 || device.gen === 3) {
         if (device.wsClient?.isConnected === false) {
           log.warn(`WebSocket client for device ${hk}${device.id}${wr} host ${zb}${device.host}${wr} is not connected. Starting connection...`);
-          device.wsClient?.start(device.log.logLevel);
+          device.wsClient?.start();
         }
       }
     }, 60 * 1000);
@@ -468,7 +553,7 @@ export class ShellyDevice extends EventEmitter {
       device.wsClient = new WsClient(host, shelly.password);
       device.startWsClientTimeout = setTimeout(() => {
         // Start WebSocket client after 10 seconds only if it's not a cached device. Will try it in the last seen interval.
-        if (!host.endsWith('.json')) device.wsClient?.start(device.log.logLevel);
+        if (!host.endsWith('.json')) device.wsClient?.start();
       }, 10 * 1000);
 
       device.wsClient.on('update', (message) => {
@@ -480,6 +565,7 @@ export class ShellyDevice extends EventEmitter {
     device.shellyPayload = shellyPayload;
     device.statusPayload = statusPayload;
     device.settingsPayload = settingsPayload;
+    device.componentsPayload = componentsPayload;
     return device;
   }
 
@@ -807,6 +893,7 @@ export class ShellyDevice extends EventEmitter {
           shelly: this.shellyPayload,
           settings: this.settingsPayload,
           status: this.statusPayload,
+          components: this.componentsPayload ? this.componentsPayload.components : [],
         };
         const data = JSON.stringify(deviceData, null, 2);
         await fs.writeFile(path.join(dataPath, `${this.id}.json`), data, 'utf8');
