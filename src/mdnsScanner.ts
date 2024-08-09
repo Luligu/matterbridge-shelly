@@ -296,6 +296,9 @@ export class MdnsScanner extends EventEmitter {
   private async saveResponse(shellyId: string, response: ResponsePacket): Promise<void> {
     const responseFile = path.join(this._dataPath, `${shellyId}.mdns.json`);
     try {
+      await fs.mkdir(this._dataPath, { recursive: true });
+      this.log.debug(`Successfully created directory ${this._dataPath}`);
+
       for (const a of response.answers) {
         if (a.type === 'TXT') {
           if (Buffer.isBuffer(a.data)) a.data = a.data.toString();
