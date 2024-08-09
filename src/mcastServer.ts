@@ -21,7 +21,7 @@
  * limitations under the License. *
  */
 
-import { AnsiLogger, TimestampFormat } from 'matterbridge/logger';
+import { AnsiLogger, LogLevel, TimestampFormat } from 'matterbridge/logger';
 import { getIpv4InterfaceAddress } from 'matterbridge/utils';
 import dgram from 'dgram';
 
@@ -34,24 +34,39 @@ export class Multicast {
   dgramClientBound = false;
 
   constructor() {
-    this.log = new AnsiLogger({ logName: 'mcastServer', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: true });
+    this.log = new AnsiLogger({ logName: 'MulticastServer', logTimestampFormat: TimestampFormat.TIME_MILLIS, logLevel: LogLevel.DEBUG });
   }
 
-  startDgramServer(callback?: () => void) {
+  startDgramServer(boundCallback?: () => void, messageCallback?: (msg: Buffer, rinfo: dgram.RemoteInfo) => void) {
     this.log.info('Starting dgram multicast server...');
     const MULTICAST_ADDRESS = '224.0.1.187';
-    const PORT = 5683;
+    const MULTICAST_PORT = 5683;
     const INTERFACE = getIpv4InterfaceAddress();
+    if (!INTERFACE) {
+      this.log.error('No ipv4 interface address found for multicast');
+      return;
+    }
 
     this.dgramServer = dgram.createSocket({ type: 'udp4', reuseAddr: true });
 
     this.dgramServer.on('error', (err) => {
-      this.log.error(`Dgram multicast server socket error:\n${err.stack}`);
+      this.log.error(`Dgram multicast server socket error:\n${err.message}`);
       this.dgramServer?.close();
+      this.dgramServer = undefined;
+    });
+
+    this.dgramServer.on('close', () => {
+      this.log.info(`Dgram multicast server socket closed`);
+      this.dgramServerBound = false;
+    });
+
+    this.dgramServer.on('connect', () => {
+      this.log.info(`Dgram multicast server socket connected`);
     });
 
     this.dgramServer.on('message', (msg, rinfo) => {
-      this.log.info(`Message "${msg}" received from ${rinfo.address}:${rinfo.port}`);
+      this.log.info(`Dgram multicast server received message "${msg}" from ${rinfo.address}:${rinfo.port}`);
+      if (messageCallback) messageCallback(msg, rinfo);
     });
 
     this.dgramServer.on('listening', () => {
@@ -60,84 +75,116 @@ export class Multicast {
         return;
       }
       const address = this.dgramServer.address();
-      this.log.info(`Dgram multicast server listening on ${address.address}:${address.port}`);
+      this.log.info(`Dgram multicast server listening on ${address.family} ${address.address}:${address.port}`);
+      this.dgramServer.setBroadcast(true);
+      this.log.info(`Dgram multicast server broadcast enabled`);
+      this.dgramServer.setMulticastTTL(128);
+      this.log.info(`Dgram multicast server multicast TTL set to 128`);
+      this.dgramServer.setMulticastInterface(INTERFACE);
+      this.log.info(`Dgram multicast server multicastInterface set to ${INTERFACE}`);
       this.dgramServer.addMembership(MULTICAST_ADDRESS, INTERFACE);
-      this.log.info(`Dgram multicast server joined multicast group: ${MULTICAST_ADDRESS} with interface: ${INTERFACE} on port: ${PORT}`);
+      this.log.info(`Dgram multicast server joined multicast group: ${MULTICAST_ADDRESS} with interface ${INTERFACE}`);
+      this.dgramServerBound = true;
+      if (boundCallback) boundCallback();
     });
 
-    this.dgramServer.bind(PORT, INTERFACE, () => {
-      if (!this.dgramServer) {
-        this.log.error('Dgram multicast server error binding for multicast messages...');
-        return;
-      }
-      this.dgramServer.setBroadcast(true);
-      this.dgramServer.setMulticastTTL(128);
-      this.dgramServerBound = true;
-      this.log.info(`Dgram multicast server bound with interface: ${INTERFACE} on port: ${PORT}`);
-      if (callback) callback();
-    });
+    this.dgramServer.bind(MULTICAST_PORT, INTERFACE);
   }
 
-  startDgramClient(callback?: () => void) {
+  startDgramClient(boundCallback?: () => void) {
     this.log.info('Starting dgram multicast client...');
     const MULTICAST_ADDRESS = '224.0.1.187';
-    const PORT = 5683;
+    const MULTICAST_PORT = 5683;
     const INTERFACE = getIpv4InterfaceAddress();
+    if (!INTERFACE) {
+      this.log.error('No ipv4 interface address found for multicast');
+      return;
+    }
 
     const message = Buffer.from('Test multicast message');
 
     this.dgramClient = dgram.createSocket({ type: 'udp4', reuseAddr: true });
 
-    this.dgramClient.bind(() => {
+    this.dgramClient.on('error', (err) => {
+      this.log.error(`Dgram multicast client socket error:\n${err.message}`);
+      if (this.clientTimeout) clearTimeout(this.clientTimeout);
+      this.clientTimeout = undefined;
+      this.dgramClient?.close();
+      this.dgramClient = undefined;
+    });
+
+    this.dgramClient.on('close', () => {
+      this.log.info(`Dgram multicast client socket closed`);
+      this.dgramClientBound = false;
+    });
+
+    this.dgramClient.on('connect', () => {
+      this.log.info(`Dgram multicast client socket connected`);
+    });
+
+    this.dgramClient.on('message', (msg, rinfo) => {
+      this.log.info(`Dgram multicast client message "${msg}" received from ${rinfo.address}:${rinfo.port}`);
+    });
+
+    this.dgramClient.on('listening', () => {
+      this.log.info(`Dgram multicast client socket listening`);
       if (!this.dgramClient) {
         this.log.error('Dgram multicast client error binding for multicast messages...');
         return;
       }
+      const address = this.dgramClient.address();
+      this.log.info(`Dgram multicast client listening on ${address.family} ${address.address}:${address.port}`);
       this.dgramClient?.setBroadcast(true);
+      this.log.info(`Dgram multicast client broadcast enabled`);
       this.dgramClient?.setMulticastTTL(128);
+      this.log.info(`Dgram multicast client multicast TTL set to 128`);
+      this.dgramClient.setMulticastInterface(INTERFACE);
+      this.log.info(`Dgram multicast server multicastInterface set to ${INTERFACE}`);
       this.dgramClient?.addMembership(MULTICAST_ADDRESS, INTERFACE);
+      this.log.info(`Dgram multicast client joined multicast group: ${MULTICAST_ADDRESS} with interface: ${INTERFACE}`);
       this.dgramClientBound = true;
-      this.log.info(`Dgram multicast client bound on multicast group: ${MULTICAST_ADDRESS} with interface: ${INTERFACE}`);
-      if (callback) callback();
+      if (boundCallback) boundCallback();
 
       this.clientTimeout = setInterval(() => {
-        this.dgramClient?.send(message, 0, message.length, PORT, MULTICAST_ADDRESS, (error: Error | null) => {
+        this.dgramClient?.send(message, 0, message.length, MULTICAST_PORT, MULTICAST_ADDRESS, (error: Error | null) => {
           if (error) {
             this.log.error(`Dgram multicast client failed to send message: ${error.stack}`);
           } else {
-            this.log.info(`Dgram multicast client sent message "Test multicast message" to ${MULTICAST_ADDRESS}:${PORT}`);
+            this.log.info(`Dgram multicast client sent message "Test multicast message" to ${MULTICAST_ADDRESS}:${MULTICAST_PORT}`);
           }
         });
       }, 1000); // Send message every second
     });
+
+    this.dgramClient.bind();
   }
 
   stop() {
     this.log.info('Stopping dgram server for shelly devices...');
     if (this.dgramServer) this.dgramServer.close();
     this.dgramServer = undefined;
+    this.dgramServerBound = false;
 
     this.log.info('Stopping dgram client for shelly devices...');
     if (this.clientTimeout) clearTimeout(this.clientTimeout);
     this.clientTimeout = undefined;
     if (this.dgramClient) this.dgramClient.close();
     this.dgramClient = undefined;
+    this.dgramClientBound = false;
 
     this.log.info('Stopped dgram server and client for shelly devices.');
   }
 }
 
-/*
-if (process.argv.includes('mcastServer') || process.argv.includes('mcastClient')) {
+// Use with: node dist/mcastServer.js testMulticastServer testMulticastClient
+if (process.argv.includes('testMulticastServer') || process.argv.includes('testMulticastClient')) {
   const mcast = new Multicast();
 
-  if (process.argv.includes('mcastServer')) mcast.startDgramServer();
+  if (process.argv.includes('testMulticastServer')) mcast.startDgramServer();
 
-  if (process.argv.includes('mcastClient')) mcast.startDgramClient();
+  if (process.argv.includes('testMulticastClient')) mcast.startDgramClient();
 
   process.on('SIGINT', async function () {
     mcast.stop();
-    process.exit();
   });
 }
-*/

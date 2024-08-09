@@ -4,7 +4,7 @@
  * @file src\shellyComponent.ts
  * @author Luca Liguori
  * @date 2024-05-01
- * @version 1.0.0
+ * @version 2.0.0
  *
  * Copyright 2024, 2025 Luca Liguori.
  *
@@ -56,8 +56,8 @@ export type ShellySwitchComponent = ShellyComponent & SwitchComponent;
 
 export type ShellyCoverComponent = ShellyComponent & CoverComponent;
 
-function isLightComponent(name: string): name is 'Light' {
-  return ['Light'].includes(name);
+function isLightComponent(name: string): name is 'Light' | 'White' | 'Rgb' | 'Rgbw' {
+  return ['Light', 'White', 'Rgb', 'Rgbw'].includes(name);
 }
 
 function isSwitchComponent(name: string): name is 'Relay' | 'Switch' {
@@ -68,13 +68,19 @@ function isCoverComponent(name: string): name is 'Cover' | 'Roller' {
   return ['Cover', 'Roller'].includes(name);
 }
 
+/**
+ * Creates a new instance of the ShellyComponent class.
+ * @param {ShellyDevice} device - The Shelly device associated with the component.
+ * @param {string} id - The ID of the component.
+ * @param {string} name - The name of the component.
+ * @param {ShellyData} [data] - The data associated with the component.
+ */
 export class ShellyComponent extends EventEmitter {
   readonly device: ShellyDevice;
   readonly id: string;
   readonly index: number;
   readonly name: string;
   private readonly _properties = new Map<string, ShellyProperty>();
-  // private readonly stateName = ['Light', 'Relay', 'Switch'];
 
   constructor(device: ShellyDevice, id: string, name: string, data?: ShellyData) {
     super();
@@ -86,15 +92,14 @@ export class ShellyComponent extends EventEmitter {
       this.addProperty(new ShellyProperty(this, prop, data[prop] as ShellyDataType));
 
       // Add a state property for Light, Relay, and Switch components
-      if (isSwitchComponent(name) || (isLightComponent(name) && (prop === 'ison' || prop === 'output'))) this.addProperty(new ShellyProperty(this, 'state', data[prop]));
+      if ((isSwitchComponent(name) || isLightComponent(name)) && (prop === 'ison' || prop === 'output')) this.addProperty(new ShellyProperty(this, 'state', data[prop]));
 
-      // Add a brightness property for Light, Relay, and Switch components
+      // Add a brightness property for Light components
       if (isLightComponent(name) && prop === 'gain') this.addProperty(new ShellyProperty(this, 'brightness', data[prop]));
     }
 
     // Extend the class prototype to include the Switch Relay Light methods dynamically
     if (isSwitchComponent(name) || isLightComponent(name)) {
-      // console.log('Component:', this);
       (this as unknown as ShellySwitchComponent).On = function () {
         this.setValue('state', true);
         if (device.gen === 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { turn: 'on' });
@@ -120,7 +125,7 @@ export class ShellyComponent extends EventEmitter {
       (this as unknown as ShellyLightComponent).Level = function (level: number) {
         if (!this.hasProperty('brightness')) return;
         const adjustedLevel = Math.min(Math.max(Math.round(level), 0), 100);
-        this.setValue('brightness', adjustedLevel);
+        // this.setValue('brightness', adjustedLevel);
         if (device.gen === 1 && !this.hasProperty('gain'))
           ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { brightness: adjustedLevel });
         if (device.gen === 1 && this.hasProperty('gain'))
@@ -129,15 +134,25 @@ export class ShellyComponent extends EventEmitter {
       };
 
       (this as unknown as ShellyLightComponent).ColorRGB = function (red: number, green: number, blue: number) {
-        if (!this.hasProperty('red') || !this.hasProperty('green') || !this.hasProperty('blue')) return;
-        red = Math.min(Math.max(Math.round(red), 0), 255);
-        green = Math.min(Math.max(Math.round(green), 0), 255);
-        blue = Math.min(Math.max(Math.round(blue), 0), 255);
-        this.setValue('red', red);
-        this.setValue('green', green);
-        this.setValue('blue', blue);
-        if (device.gen === 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { red, green, blue });
-        if (device.gen !== 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${this.name}.Set`, { id: this.index, red, green, blue });
+        if (this.hasProperty('red') && this.hasProperty('green') && this.hasProperty('blue')) {
+          red = Math.min(Math.max(Math.round(red), 0), 255);
+          green = Math.min(Math.max(Math.round(green), 0), 255);
+          blue = Math.min(Math.max(Math.round(blue), 0), 255);
+          // this.setValue('red', red);
+          // this.setValue('green', green);
+          // this.setValue('blue', blue);
+          if (device.gen === 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { red, green, blue });
+          if (device.gen !== 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${this.name}.Set`, { id: this.index, red, green, blue });
+        }
+        if (this.hasProperty('rgb') && this.getValue('rgb') !== null && this.getValue('rgb') !== undefined && Array.isArray(this.getValue('rgb'))) {
+          red = Math.min(Math.max(Math.round(red), 0), 255);
+          green = Math.min(Math.max(Math.round(green), 0), 255);
+          blue = Math.min(Math.max(Math.round(blue), 0), 255);
+          // this.setValue('rgb', [red, green, blue]);
+          if (device.gen === 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { red, green, blue });
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          if (device.gen !== 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${this.name}.Set`, { id: this.index, rgb: [red, green, blue] as any });
+        }
       };
     }
 
@@ -169,19 +184,71 @@ export class ShellyComponent extends EventEmitter {
     }
   }
 
+  /**
+   * Checks if the component is a light component.
+   * @returns {boolean} True if the component is a light component, false otherwise.
+   */
+  isLightComponent(): boolean {
+    return ['Light', 'White', 'Rgb', 'Rgbw'].includes(this.name);
+  }
+
+  /**
+   * Checks if the component is a switch.
+   * @returns {boolean} True if the component is a switch, false otherwise.
+   */
+  isSwitchComponent(): boolean {
+    return ['Relay', 'Switch'].includes(this.name);
+  }
+
+  /**
+   * Checks if the component is a cover component.
+   * @returns {boolean} True if the component is a cover component, false otherwise.
+   */
+  isCoverComponent(): boolean {
+    return ['Cover', 'Roller'].includes(this.name);
+  }
+
+  /**
+   * Checks if the component has a property with the specified key.
+   *
+   * @param {string} key - The key of the property to check.
+   * @returns {boolean} true if the component has the property, false otherwise.
+   */
   hasProperty(key: string): boolean {
     return this._properties.has(key);
   }
 
+  /**
+   * Retrieves the value of a property based on the specified key.
+   *
+   * @param {string} key - The key of the property to retrieve.
+   * @returns {ShellyProperty | undefined} The value of the property, or undefined if the property does not exist.
+   */
   getProperty(key: string): ShellyProperty | undefined {
     return this._properties.get(key);
   }
 
+  /**
+   * Adds a property to the ShellyComponent.
+   *
+   * @param {ShellyProperty} property - The property to add.
+   * @returns {ShellyComponent} The updated ShellyComponent instance.
+   */
   addProperty(property: ShellyProperty): ShellyComponent {
     this._properties.set(property.key, property);
     return this;
   }
 
+  /**
+   * Sets the value of a property in the ShellyComponent.
+   * If the property already exists, it updates the value.
+   * If the property doesn't exist, it adds a new property with the specified value.
+   * Emits an 'update' event after updating the value.
+   *
+   * @param {string} key - The key of the property.
+   * @param {ShellyDataType} value - The value to set for the property.
+   * @returns {ShellyComponent} The updated ShellyComponent instance.
+   */
   setValue(key: string, value: ShellyDataType): ShellyComponent {
     const property = this.getProperty(key);
     if (property) {
@@ -206,6 +273,13 @@ export class ShellyComponent extends EventEmitter {
     return this;
   }
 
+  /**
+   * Retrieves the value of a property based on the provided key.
+   * If the property is found, its value is returned. Otherwise, an error message is logged and `undefined` is returned.
+   *
+   * @param {string} key - The key of the property to retrieve.
+   * @returns {ShellyDataType} The value of the property if found, otherwise `undefined`.
+   */
   getValue(key: string): ShellyDataType {
     const property = this.getProperty(key);
     if (property) return property.value;
@@ -225,6 +299,10 @@ export class ShellyComponent extends EventEmitter {
     }
   }
 
+  /**
+   * Updates the component with the provided data.
+   * @param {ShellyData} componentData - The data to update the component with.
+   */
   update(componentData: ShellyData) {
     for (const key in componentData) {
       const property = this.getProperty(key);
@@ -242,10 +320,15 @@ export class ShellyComponent extends EventEmitter {
     }
   }
 
+  /**
+   * Logs the component details and properties.
+   * @returns The number of the properties.
+   */
   logComponent() {
-    this.device.log.debug(`Component ${GREEN}${this.id}${db} (${BLUE}${this.name}${db})`);
+    this.device.log.debug(`Component ${GREEN}${this.id}${db} (${BLUE}${this.name}${db}) has the following ${this._properties.size} properties:`);
     for (const [key, property] of this) {
       this.device.log.debug(`- ${key}: ${property.value && typeof property.value === 'object' ? debugStringify(property.value) : property.value}`);
     }
+    return this._properties.size;
   }
 }

@@ -1,6 +1,29 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { parseBasicAuthenticateHeader, parseDigestAuthenticateHeader, createBasicShellyAuth, createDigestShellyAuth, getGen1BodyOptions, getGen2BodyOptions } from './auth';
+import { jest } from '@jest/globals';
 
 describe('Authenticathe utility test', () => {
+  let consoleLogSpy: jest.SpiedFunction<typeof console.log>;
+
+  beforeAll(() => {
+    consoleLogSpy = jest.spyOn(console, 'log').mockImplementation((message?: any, ...optionalParams: any[]) => {
+      // console.error(`Mocked console.log: ${message}`, optionalParams);
+    });
+  });
+
+  beforeEach(() => {
+    //
+  });
+
+  afterEach(() => {
+    //
+  });
+
+  afterAll(() => {
+    consoleLogSpy.mockRestore();
+  });
+
   test('parseBasicAuthenticateHeader', () => {
     expect(parseBasicAuthenticateHeader('Basic realm="Shelly')).toStrictEqual({
       realm: 'Shelly',

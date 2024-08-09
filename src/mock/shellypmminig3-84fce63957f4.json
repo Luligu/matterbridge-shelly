@@ -1,13 +1,13 @@
 {
   "shelly": {
-    "name": "My mini power meter gen 3",
+    "name": "My Shelly PM mini",
     "id": "shellypmminig3-84fce63957f4",
     "mac": "84FCE63957F4",
     "slot": 1,
     "model": "S3PM-001PCEU16",
     "gen": 3,
-    "fw_id": "20240522-112836/1.3.2-g34c651b",
-    "ver": "1.3.2",
+    "fw_id": "20240726-114522/1.4.0-gb2aeadb",
+    "ver": "1.4.0",
     "app": "MiniPMG3",
     "auth_en": false,
     "auth_domain": null
@@ -42,20 +42,21 @@
     },
     "pm1:0": {
       "id": 0,
-      "name": null
+      "name": null,
+      "reverse": false
     },
     "sys": {
       "device": {
         "name": "My Shelly PM mini",
         "mac": "84FCE63957F4",
-        "fw_id": "20240522-112836/1.3.2-g34c651b",
+        "fw_id": "20240726-114522/1.4.0-gb2aeadb",
         "discoverable": true,
         "eco_mode": false
       },
       "location": {
-        "tz": null,
-        "lat": null,
-        "lon": null
+        "tz": "Europe/Monaco",
+        "lat": 43.7312,
+        "lon": 7.4138
       },
       "debug": {
         "level": 2,
@@ -78,7 +79,7 @@
       "sntp": {
         "server": "time.google.com"
       },
-      "cfg_rev": 14
+      "cfg_rev": 16
     },
     "wifi": {
       "ap": {
@@ -133,34 +134,34 @@
     },
     "pm1:0": {
       "id": 0,
-      "voltage": 234.2,
-      "current": 0.057,
-      "apower": 5.4,
-      "freq": 50,
+      "voltage": 235.4,
+      "current": 0.068,
+      "apower": 5.8,
+      "freq": 50.1,
       "aenergy": {
-        "total": 509.289,
-        "by_minute": [0, 0, 213.298],
-        "minute_ts": 1718609280
+        "total": 5670.715,
+        "by_minute": [0, 213.298, 0],
+        "minute_ts": 1722525300
       },
       "ret_aenergy": {
         "total": 0,
         "by_minute": [0, 0, 0],
-        "minute_ts": 1718609280
+        "minute_ts": 1722525300
       }
     },
     "sys": {
       "mac": "84FCE63957F4",
       "restart_required": false,
-      "time": "09:28",
-      "unixtime": 1718609333,
-      "uptime": 122265,
-      "ram_size": 261648,
-      "ram_free": 153328,
+      "time": "17:15",
+      "unixtime": 1722525319,
+      "uptime": 19371,
+      "ram_size": 260700,
+      "ram_free": 134844,
       "fs_size": 1048576,
-      "fs_free": 712704,
-      "cfg_rev": 14,
+      "fs_free": 614400,
+      "cfg_rev": 16,
       "kvs_rev": 0,
-      "schedule_rev": 2,
+      "schedule_rev": 3,
       "webhook_rev": 0,
       "available_updates": {},
       "reset_reason": 1
@@ -169,7 +170,7 @@
       "sta_ip": "192.168.1.220",
       "status": "got ip",
       "ssid": "FibreBox_X6-12A4C7",
-      "rssi": -54
+      "rssi": -50
     },
     "ws": {
       "connected": false

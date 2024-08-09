@@ -1,13 +1,13 @@
 {
   "shelly": {
-    "name": "My mini switch 1 ch gen 3",
+    "name": "My Shelly 1 mini",
     "id": "shelly1minig3-543204547478",
     "mac": "543204547478",
     "slot": 0,
     "model": "S3SW-001X8EU",
     "gen": 3,
-    "fw_id": "20240522-112834/1.3.2-g34c651b",
-    "ver": "1.3.2",
+    "fw_id": "20240726-114508/1.4.0-gb2aeadb",
+    "ver": "1.4.0",
     "app": "Mini1G3",
     "auth_en": true,
     "auth_domain": "shelly1minig3-543204547478"
@@ -35,6 +35,13 @@
       "invert": false,
       "factory_reset": true
     },
+    "knx": {
+      "enable": false,
+      "ia": "15.15.255",
+      "routing": {
+        "addr": "224.0.23.12:3671"
+      }
+    },
     "mqtt": {
       "enable": false,
       "server": null,
@@ -50,7 +57,7 @@
     },
     "switch:0": {
       "id": 0,
-      "name": null,
+      "name": "My Shelly 1 Mini",
       "in_mode": "momentary",
       "initial_state": "restore_last",
       "auto_on": false,
@@ -62,14 +69,14 @@
       "device": {
         "name": "My Shelly 1 mini",
         "mac": "543204547478",
-        "fw_id": "20240522-112834/1.3.2-g34c651b",
+        "fw_id": "20240726-114508/1.4.0-gb2aeadb",
         "discoverable": true,
         "eco_mode": false
       },
       "location": {
-        "tz": null,
-        "lat": null,
-        "lon": null
+        "tz": "Europe/Monaco",
+        "lat": 43.7314,
+        "lon": 7.419
       },
       "debug": {
         "level": 2,
@@ -92,7 +99,7 @@
       "sntp": {
         "server": "time.google.com"
       },
-      "cfg_rev": 21
+      "cfg_rev": 24
     },
     "wifi": {
       "ap": {
@@ -146,6 +153,7 @@
       "id": 0,
       "state": null
     },
+    "knx": {},
     "mqtt": {
       "connected": false
     },
@@ -154,23 +162,23 @@
       "source": "init",
       "output": false,
       "temperature": {
-        "tC": 57,
-        "tF": 134.6
+        "tC": 58.7,
+        "tF": 137.6
       }
     },
     "sys": {
       "mac": "543204547478",
       "restart_required": false,
-      "time": "09:28",
-      "unixtime": 1718609333,
-      "uptime": 122266,
-      "ram_size": 260792,
-      "ram_free": 151180,
+      "time": "17:15",
+      "unixtime": 1722525319,
+      "uptime": 19371,
+      "ram_size": 260144,
+      "ram_free": 133552,
       "fs_size": 1048576,
-      "fs_free": 708608,
-      "cfg_rev": 21,
+      "fs_free": 593920,
+      "cfg_rev": 24,
       "kvs_rev": 8,
-      "schedule_rev": 0,
+      "schedule_rev": 1,
       "webhook_rev": 0,
       "available_updates": {},
       "reset_reason": 1
@@ -179,7 +187,7 @@
       "sta_ip": "192.168.1.221",
       "status": "got ip",
       "ssid": "FibreBox_X6-12A4C7",
-      "rssi": -65
+      "rssi": -59
     },
     "ws": {
       "connected": false

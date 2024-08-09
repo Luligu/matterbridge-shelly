@@ -24,6 +24,12 @@
 import { ShellyComponent } from './shellyComponent.js';
 import { ShellyDataType } from './shellyTypes.js';
 
+/**
+ * Creates a new instance of the ShellyProperty class.
+ * @param {ShellyComponent} component - The component that the property belongs to.
+ * @param {string} key - The name of the property.
+ * @param {ShellyDataType} value - The initial value of the property.
+ */
 export class ShellyProperty {
   readonly component: ShellyComponent;
   readonly key: string;
@@ -35,10 +41,19 @@ export class ShellyProperty {
     this.component = component;
   }
 
+  /**
+   * Gets the value of the Shelly property.
+   *
+   * @returns {ShellyDataType} The value of the Shelly property.
+   */
   get value(): ShellyDataType {
     return this._value;
   }
 
+  /**
+   * Setter for the value property.
+   * @param {ShellyDataType} value - The new value for the property.
+   */
   set value(value: ShellyDataType) {
     this._value = value;
   }

@@ -1,13 +1,13 @@
 {
   "shelly": {
-    "name": "My shelly plus 2PM",
+    "name": "My Shelly 2PM PLUS",
     "id": "shellyplus2pm-5443b23d81f8",
     "mac": "5443B23D81F8",
-    "slot": 0,
+    "slot": 1,
     "model": "SNSW-102P16EU",
     "gen": 2,
-    "fw_id": "20240430-105737/1.3.1-gd8534ee",
-    "ver": "1.3.1",
+    "fw_id": "20240726-114505/1.4.0-gb2aeadb",
+    "ver": "1.4.0",
     "app": "Plus2PM",
     "auth_en": false,
     "auth_domain": null,
@@ -15,7 +15,7 @@
   },
   "settings": {
     "ble": {
-      "enable": true,
+      "enable": false,
       "rpc": {
         "enable": true
       },
@@ -58,9 +58,9 @@
     },
     "switch:0": {
       "id": 0,
-      "name": null,
+      "name": "My Shelly Plus 2 PM",
       "in_mode": "follow",
-      "initial_state": "match_input",
+      "initial_state": "restore_last",
       "auto_on": false,
       "auto_on_delay": 60,
       "auto_off": false,
@@ -73,9 +73,9 @@
     },
     "switch:1": {
       "id": 1,
-      "name": null,
+      "name": "My Shelly Plus 2 PM ch2",
       "in_mode": "follow",
-      "initial_state": "match_input",
+      "initial_state": "restore_last",
       "auto_on": false,
       "auto_on_delay": 60,
       "auto_off": false,
@@ -88,18 +88,18 @@
     },
     "sys": {
       "device": {
-        "name": "My shelly plus 2PM",
+        "name": "My Shelly 2PM PLUS",
         "mac": "5443B23D81F8",
-        "fw_id": "20240430-105737/1.3.1-gd8534ee",
+        "fw_id": "20240726-114505/1.4.0-gb2aeadb",
         "discoverable": true,
         "eco_mode": false,
         "profile": "switch",
         "addon_type": null
       },
       "location": {
-        "tz": null,
-        "lat": null,
-        "lon": null
+        "tz": "Europe/Monaco",
+        "lat": 43.7312,
+        "lon": 7.4138
       },
       "debug": {
         "level": 2,
@@ -114,7 +114,9 @@
           "addr": null
         }
       },
-      "ui_data": {},
+      "ui_data": {
+        "cover": "50"
+      },
       "rpc_udp": {
         "dst_addr": null,
         "listen_port": null
@@ -122,7 +124,7 @@
       "sntp": {
         "server": "time.google.com"
       },
-      "cfg_rev": 27
+      "cfg_rev": 41
     },
     "wifi": {
       "ap": {
@@ -185,23 +187,23 @@
       "source": "init",
       "output": false,
       "apower": 0,
-      "voltage": 236.3,
+      "voltage": 236.9,
       "freq": 50,
       "current": 0,
       "pf": 0,
       "aenergy": {
-        "total": 0,
+        "total": 38,
         "by_minute": [0, 0, 0],
-        "minute_ts": 1718643780
+        "minute_ts": 1722516960
       },
       "ret_aenergy": {
         "total": 0,
         "by_minute": [0, 0, 0],
-        "minute_ts": 1718643780
+        "minute_ts": 1722516960
       },
       "temperature": {
-        "tC": 53.1,
-        "tF": 127.5
+        "tC": 51.1,
+        "tF": 123.9
       }
     },
     "switch:1": {
@@ -209,51 +211,47 @@
       "source": "init",
       "output": false,
       "apower": 0,
-      "voltage": 236.4,
+      "voltage": 237,
       "freq": 50,
       "current": 0,
       "pf": 0,
       "aenergy": {
-        "total": 0,
+        "total": 34,
         "by_minute": [0, 0, 0],
-        "minute_ts": 1718643780
+        "minute_ts": 1722516960
       },
       "ret_aenergy": {
         "total": 0,
         "by_minute": [0, 0, 0],
-        "minute_ts": 1718643780
+        "minute_ts": 1722516960
       },
       "temperature": {
-        "tC": 53.1,
-        "tF": 127.5
+        "tC": 51.1,
+        "tF": 123.9
       }
     },
     "sys": {
       "mac": "5443B23D81F8",
       "restart_required": false,
-      "time": "19:03",
-      "unixtime": 1718643803,
-      "uptime": 37,
-      "ram_size": 260224,
-      "ram_free": 117760,
-      "fs_size": 458752,
-      "fs_free": 131072,
-      "cfg_rev": 27,
+      "time": "14:56",
+      "unixtime": 1722516979,
+      "uptime": 11030,
+      "ram_size": 252140,
+      "ram_free": 125376,
+      "fs_size": 393216,
+      "fs_free": 98304,
+      "cfg_rev": 41,
       "kvs_rev": 0,
-      "schedule_rev": 2,
-      "webhook_rev": 2,
-      "available_updates": {
-        "stable": {
-          "version": "1.3.2"
-        }
-      },
-      "reset_reason": 3
+      "schedule_rev": 5,
+      "webhook_rev": 4,
+      "available_updates": {},
+      "reset_reason": 1
     },
     "wifi": {
       "sta_ip": "192.168.1.218",
       "status": "got ip",
       "ssid": "FibreBox_X6-12A4C7",
-      "rssi": -53
+      "rssi": -34
     },
     "ws": {
       "connected": false

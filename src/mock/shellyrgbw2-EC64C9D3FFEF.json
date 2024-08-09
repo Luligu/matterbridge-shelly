@@ -3,17 +3,19 @@
     "type": "SHRGBW2",
     "mac": "EC64C9D3FFEF",
     "auth": false,
-    "fw": "20221013-134509/v1.12-1-g1abbae93c-rgbw2-prod",
+    "fw": "20230913-113259/v1.14.0-gcb84623",
     "discoverable": false,
     "longid": 1,
-    "num_outputs": 1
+    "num_outputs": 1,
+    "mode": "color"
   },
   "settings": {
     "device": {
       "type": "SHRGBW2",
       "mac": "EC64C9D3FFEF",
       "hostname": "shellyrgbw2-EC64C9D3FFEF",
-      "num_outputs": 1
+      "num_outputs": 1,
+      "mode": "color"
     },
     "wifi_ap": {
       "enabled": false,
@@ -58,7 +60,7 @@
     "coiot": {
       "enabled": true,
       "update_period": 15,
-      "peer": "",
+      "peer": "192.168.1.189:5683",
       "execute_enable": false
     },
     "sntp": {
@@ -72,27 +74,28 @@
     },
     "pin_code": "",
     "name": "My Shelly RGBW2",
-    "fw": "20221013-134509/v1.12-1-g1abbae93c-rgbw2-prod",
+    "fw": "20230913-113259/v1.14.0-gcb84623",
     "factory_reset_from_switch": true,
+    "pon_wifi_reset": false,
     "discoverable": false,
     "build_info": {
-      "build_id": "20221013-134509/v1.12-1-g1abbae93c-rgbw2-prod",
-      "build_timestamp": "2022-10-13T13:45:09Z",
+      "build_id": "20230913-113259/v1.14.0-gcb84623",
+      "build_timestamp": "2023-09-13T11:32:59Z",
       "build_version": "1.0"
     },
     "cloud": {
       "enabled": true,
       "connected": true
     },
-    "timezone": null,
-    "lat": null,
-    "lng": null,
+    "timezone": "Europe/Monaco",
+    "lat": 43.731201,
+    "lng": 7.4138,
     "tzautodetect": true,
     "tz_utc_offset": 7200,
     "tz_dst": false,
     "tz_dst_auto": true,
-    "time": "11:11",
-    "unixtime": 1718961096,
+    "time": "23:10",
+    "unixtime": 1722978605,
     "led_status_disable": false,
     "debug_enable": false,
     "allow_cross_origin": false,
@@ -112,14 +115,14 @@
       {
         "name": null,
         "ison": false,
-        "red": 0,
-        "green": 0,
+        "red": 30,
+        "green": 226,
         "blue": 255,
-        "white": 0,
-        "gain": 50,
+        "white": 255,
+        "gain": 100,
         "transition": 1000,
         "effect": 0,
-        "default_state": "switch",
+        "default_state": "last",
         "auto_on": 0,
         "auto_off": 0,
         "schedule": false,
@@ -147,7 +150,7 @@
       "connected": true,
       "ssid": "FibreBox_X6-12A4C7",
       "ip": "192.168.1.226",
-      "rssi": -54
+      "rssi": -47
     },
     "cloud": {
       "enabled": true,
@@ -156,10 +159,10 @@
     "mqtt": {
       "connected": false
     },
-    "time": "11:11",
-    "unixtime": 1718961096,
-    "serial": 8,
-    "has_update": true,
+    "time": "23:10",
+    "unixtime": 1722978605,
+    "serial": 660,
+    "has_update": false,
     "mac": "EC64C9D3FFEF",
     "cfg_changed_cnt": 0,
     "actions_stats": {
@@ -170,17 +173,17 @@
     "lights": [
       {
         "ison": false,
-        "source": "input",
+        "source": "http",
         "has_timer": false,
         "timer_started": 0,
         "timer_duration": 0,
         "timer_remaining": 0,
         "mode": "color",
-        "red": 0,
-        "green": 0,
+        "red": 30,
+        "green": 226,
         "blue": 255,
-        "white": 0,
-        "gain": 50,
+        "white": 255,
+        "gain": 100,
         "effect": 0,
         "transition": 0,
         "power": 0,
@@ -192,7 +195,7 @@
         "power": 0,
         "is_valid": true,
         "overpower": false,
-        "timestamp": 1718968296,
+        "timestamp": 1722985805,
         "counters": [0, 0, 0],
         "total": 0
       }
@@ -205,16 +208,16 @@
       }
     ],
     "update": {
-      "status": "pending",
-      "has_update": true,
+      "status": "idle",
+      "has_update": false,
       "new_version": "20230913-113259/v1.14.0-gcb84623",
-      "old_version": "20221013-134509/v1.12-1-g1abbae93c-rgbw2-prod",
+      "old_version": "20230913-113259/v1.14.0-gcb84623",
       "beta_version": "20231107-164040/v1.14.1-rc1-g0617c15"
     },
-    "ram_total": 51688,
-    "ram_free": 39488,
+    "ram_total": 51672,
+    "ram_free": 39444,
     "fs_size": 233681,
-    "fs_free": 152608,
-    "uptime": 355
+    "fs_free": 152357,
+    "uptime": 29931
   }
 }

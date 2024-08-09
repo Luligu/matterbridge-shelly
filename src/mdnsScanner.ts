@@ -4,7 +4,7 @@
  * @file src\mdnsScanner.ts
  * @author Luca Liguori
  * @date 2024-05-01
- * @version 1.0.0
+ * @version 1.1.0
  *
  * Copyright 2024, 2025 Luca Liguori.
  *
@@ -21,9 +21,13 @@
  * limitations under the License. *
  */
 
-import { AnsiLogger, BLUE, CYAN, LogLevel, TimestampFormat, db, debugStringify, hk, idn, nf, rs, zb } from 'matterbridge/logger';
+import { AnsiLogger, BLUE, CYAN, LogLevel, TimestampFormat, db, debugStringify, er, hk, idn, ign, nf, rs, zb } from 'matterbridge/logger';
 import mdns, { ResponsePacket } from 'multicast-dns';
 import EventEmitter from 'events';
+import { RemoteInfo, SocketType } from 'dgram';
+import { promises as fs } from 'fs';
+import path from 'path';
+import { getIpv4InterfaceAddress } from 'matterbridge/utils';
 
 export interface DiscoveredDevice {
   id: string;
@@ -39,16 +43,37 @@ export type DiscoveredDeviceListener = (data: DiscoveredDevice) => void;
  * @param {LogLevel} logLevel - The log level for the scanner. Defaults to LogLevel.INFO.
  */
 export class MdnsScanner extends EventEmitter {
+  private devices = new Map<string, string>();
   private discoveredDevices = new Map<string, DiscoveredDevice>();
   public readonly log;
   private scanner?: mdns.MulticastDNS;
   private _isScanning = false;
   private scannerTimeout?: NodeJS.Timeout;
   private queryTimeout?: NodeJS.Timeout;
+  private _dataPath = 'temp';
+  private _debug = false;
 
   constructor(logLevel: LogLevel = LogLevel.INFO) {
     super();
-    this.log = new AnsiLogger({ logName: 'ShellyMdnsDiscover', logTimestampFormat: TimestampFormat.TIME_MILLIS, logLevel });
+    this.log = new AnsiLogger({ logName: 'ShellyMdnsScanner', logTimestampFormat: TimestampFormat.TIME_MILLIS, logLevel });
+  }
+
+  /**
+   * Sets the data path.
+   *
+   * @param {string} path - The new data path.
+   */
+  set dataPath(path: string) {
+    this._dataPath = path;
+  }
+
+  /**
+   * Sets the debug mode.
+   *
+   * @param {boolean} debug - The new debug mode.
+   */
+  set debug(debug: boolean) {
+    this._debug = debug;
   }
 
   /**
@@ -56,7 +81,7 @@ export class MdnsScanner extends EventEmitter {
    *
    * @returns {boolean} A boolean value indicating whether the MdnsScanner is scanning.
    */
-  get isScanning() {
+  get isScanning(): boolean {
     return this._isScanning;
   }
 
@@ -67,6 +92,7 @@ export class MdnsScanner extends EventEmitter {
     this.scanner?.query([
       { name: '_http._tcp.local', type: 'PTR' },
       { name: '_shelly._tcp.local', type: 'PTR' },
+      { name: '_services._dns-sd._udp.local', type: 'PTR' },
     ]);
     this.log.debug('Sent mDNS query for shelly devices.');
   }
@@ -75,54 +101,79 @@ export class MdnsScanner extends EventEmitter {
    * Starts the mDNS query service for shelly devices.
    *
    * @param {number} shutdownTimeout - The timeout value in milliseconds to stop the MdnsScanner (optional, if not provided the MdnsScanner will not stop).
+   * @param {string} mdnsInterface - Explicitly specify a network interface name. Will use all interfaces when not specified.
+   * @param {SocketType} type - Explicitly specify a socket type: "udp4" | "udp6". Default is "udp4".
    * @param {boolean} debug - Indicates whether to enable debug mode (default: false).
    */
-  start(shutdownTimeout?: number, debug = false) {
-    this.log.debug('Starting mDNS query service for shelly devices...');
+  start(shutdownTimeout?: number, mdnsInterface?: string, type?: SocketType, debug = false) {
+    this._debug = debug;
+    if (this._isScanning) return;
     this._isScanning = true;
 
-    this.scanner = mdns();
-    this.scanner.on('response', async (response: ResponsePacket) => {
+    // Create and initialize the mDNS scanner
+    if (mdnsInterface && mdnsInterface !== '' && type && (type === 'udp4' || type === 'udp6')) {
+      const mdnsOptions: mdns.Options = {};
+      mdnsOptions.interface = mdnsInterface;
+      mdnsOptions.type = type;
+      mdnsOptions.ip = type === 'udp4' ? '224.0.0.251' : 'ff02::fb';
+      mdnsOptions.port = 5353;
+      mdnsOptions.multicast = true;
+      mdnsOptions.reuseAddr = true;
+      this.log.debug(
+        `Starting mDNS query service for shelly devices with interface ${mdnsOptions.interface} bind ${mdnsOptions.bind} type ${mdnsOptions.type} ip ${mdnsOptions.ip}...`,
+      );
+      this.scanner = mdns(mdnsOptions);
+    } else {
+      this.log.debug('Starting mDNS query service for shelly devices...');
+      this.scanner = mdns();
+    }
+
+    this.scanner.on('response', async (response: ResponsePacket, rinfo: RemoteInfo) => {
       let port = 0;
       let gen = 1;
-      if (debug) this.log.debug(`***--- start ---`);
-      // if (debug && response.answers.length === 0 && response.additionals.length === 0) this.log.debug('ResponsePacket:\n', response);
+      this.devices.set(rinfo.address, rinfo.address);
+      if (debug) this.log.debug(`Mdns response from ${ign} ${rinfo.address} ${rinfo.family} ${rinfo.port} ${db}`);
       if (debug) this.log.debug(`--- response.answers ---`);
       for (const a of response.answers) {
         if (debug && a.type === 'PTR') {
           this.log.debug(`[${idn}${a.type}${rs}${db}] Name: ${CYAN}${a.name}${db} data: ${typeof a.data === 'string' ? a.data : debugStringify(a.data)}`);
         }
         if (debug && a.type === 'TXT') {
-          // this.log.debug(`[${idn}${a.type}${rs}${db}] Name: ${CYAN}${a.name}${db} data: ${typeof a.data === 'string' ? a.data : debugStringify(a.data)}`);
+          if (typeof a.data === 'string') this.log.debug(`[${idn}${a.type}${rs}${db}] Name: ${CYAN}${a.name}${db} data: ${a.data}`);
+          else if (Buffer.isBuffer(a.data)) this.log.debug(`[${idn}${a.type}${rs}${db}] Name: ${CYAN}${a.name}${db} data: ${a.data.toString()}`);
+          else if (Array.isArray(a.data)) this.log.debug(`[${idn}${a.type}${rs}${db}] Name: ${CYAN}${a.name}${db} data: ${a.data.map((d) => d.toString()).join(', ')}`);
         }
-        if (debug && a.type === 'PTR' && a.name === '_http._tcp.local') {
-          this.log.debug(`[${BLUE}${a.type}${db}] Name: ${CYAN}${a.name}${db} data: ${typeof a.data === 'string' ? a.data : debugStringify(a.data)}`);
+        if (debug && a.type === 'SRV') {
+          this.log.debug(
+            `[${idn}${a.type}${rs}${db}] Name: ${CYAN}${a.name}${db} target: ${a.data.target} port: ${a.data.port} priority: ${a.data.priority} weight: ${a.data.weight}`,
+          );
+        }
+        if (debug && a.type === 'NSEC') {
+          this.log.debug(`[${idn}${a.type}${rs}${db}] Name: ${CYAN}${a.name}${db} data: ${typeof a.data === 'string' ? a.data : debugStringify(a.data)}`);
+        }
+        if (debug && a.type === 'A') {
+          this.log.debug(`[${idn}${a.type}${rs}${db}] Name: ${CYAN}${a.name}${db} data: ${typeof a.data === 'string' ? a.data : debugStringify(a.data)}`);
         }
         if (debug && a.type === 'A' && (a.name.startsWith('shelly') || a.name.startsWith('Shelly'))) {
           this.log.debug(`[${BLUE}${a.type}${db}] Name: ${CYAN}${a.name}${db} data: ${typeof a.data === 'string' ? a.data : debugStringify(a.data)}`);
         }
-        if (debug && a.type === 'NSEC' && (a.name.startsWith('shelly') || a.name.startsWith('Shelly'))) {
-          this.log.debug(`[${BLUE}${a.type}${db}] Name: ${CYAN}${a.name}${db} data: ${typeof a.data === 'string' ? a.data : debugStringify(a.data)}`);
-        }
-        if (debug && a.type === 'SRV' && (a.name.startsWith('shelly') || a.name.startsWith('Shelly'))) {
-          this.log.debug(`[${BLUE}${a.type}${db}] Name: ${CYAN}${a.name}${db} data: ${typeof a.data === 'string' ? a.data : debugStringify(a.data)}`);
-        }
-        if (debug && a.type === 'TXT' && (a.name.startsWith('shelly') || a.name.startsWith('Shelly'))) {
-          this.log.debug(`[${BLUE}${a.type}${db}] Name: ${CYAN}${a.name}${db} data: ${a.data}`);
-        }
         if (a.type === 'SRV' && (a.name.startsWith('shelly') || a.name.startsWith('Shelly'))) {
           port = a.data.port;
         }
-        if (a.type === 'TXT' && a.name.startsWith('Shelly') && a.data.toString() === 'gen=2') {
-          gen = 2;
+        if (a.type === 'TXT' && (a.name.startsWith('shelly') || a.name.startsWith('Shelly'))) {
+          if (a.data.toString().includes('gen=2')) gen = 2;
+          if (a.data.toString().includes('gen=3')) gen = 3;
         }
         if (a.type === 'A' && (a.name.startsWith('shelly') || a.name.startsWith('Shelly'))) {
           const [name, mac] = a.name.replace('.local', '').split('-');
           const deviceId = name.toLowerCase() + '-' + mac.toUpperCase();
           if (!this.discoveredDevices.has(deviceId)) {
-            this.log.info(`Discovered shelly gen: ${CYAN}${gen}${nf} device id: ${hk}${deviceId}${nf} host: ${zb}${a.data}${nf} port: ${zb}${port}${nf}`);
+            this.log.debug(`MdnsScanner discovered shelly gen: ${CYAN}${gen}${nf} device id: ${hk}${deviceId}${nf} host: ${zb}${a.data}${nf} port: ${zb}${port}${nf}`);
             this.discoveredDevices.set(deviceId, { id: deviceId, host: a.data, port, gen });
             this.emit('discovered', { id: deviceId, host: a.data, port, gen });
+            if (debug || process.argv.includes('testMdnsScanner')) {
+              this.saveResponse(deviceId, response); // No await
+            }
           }
         }
       }
@@ -132,40 +183,54 @@ export class MdnsScanner extends EventEmitter {
           this.log.debug(`[${idn}${a.type}${rs}${db}] Name: ${CYAN}${a.name}${db} data: ${typeof a.data === 'string' ? a.data : debugStringify(a.data)}`);
         }
         if (debug && a.type === 'TXT') {
-          // this.log.debug(`[${idn}${a.type}${rs}${db}] Name: ${CYAN}${a.name}${db} data: ${typeof a.data === 'string' ? a.data : debugStringify(a.data)}`);
-        }
-        if (debug && a.type === 'PTR' && a.name === '_http._tcp.local') {
-          this.log.debug(`[${BLUE}${a.type}${db}] Name: ${CYAN}${a.name}${db} data: ${typeof a.data === 'string' ? a.data : debugStringify(a.data)}`);
-        }
-        if (debug && a.type === 'A' && a.name.startsWith('shelly')) {
-          this.log.debug(`[${BLUE}${a.type}${db}] Name: ${CYAN}${a.name}${db} data: ${typeof a.data === 'string' ? a.data : debugStringify(a.data)}`);
-        }
-        if (debug && a.type === 'NSEC' && a.name.startsWith('shelly')) {
-          this.log.debug(`[${BLUE}${a.type}${db}] Name: ${CYAN}${a.name}${db} data: ${typeof a.data === 'string' ? a.data : debugStringify(a.data)}`);
+          if (typeof a.data === 'string') this.log.debug(`[${idn}${a.type}${rs}${db}] Name: ${CYAN}${a.name}${db} data: ${a.data}`);
+          else if (Buffer.isBuffer(a.data)) this.log.debug(`[${idn}${a.type}${rs}${db}] Name: ${CYAN}${a.name}${db} data: ${a.data.toString()}`);
+          else if (Array.isArray(a.data)) this.log.debug(`[${idn}${a.type}${rs}${db}] Name: ${CYAN}${a.name}${db} data: ${a.data.map((d) => d.toString()).join(', ')}`);
         }
         if (debug && a.type === 'SRV') {
-          this.log.debug(`[${BLUE}${a.type}${db}] Name: ${CYAN}${a.name}${db} data: ${typeof a.data === 'string' ? a.data : debugStringify(a.data)}`);
+          this.log.debug(
+            `[${idn}${a.type}${rs}${db}] Name: ${CYAN}${a.name}${db} target: ${a.data.target} port: ${a.data.port} priority: ${a.data.priority} weight: ${a.data.weight}`,
+          );
         }
-        if (debug && a.type === 'TXT') {
-          this.log.debug(`[${BLUE}${a.type}${db}] Name: ${CYAN}${a.name}${db} data: ${a.data}`);
+        if (debug && a.type === 'NSEC') {
+          this.log.debug(`[${idn}${a.type}${rs}${db}] Name: ${CYAN}${a.name}${db} data: ${typeof a.data === 'string' ? a.data : debugStringify(a.data)}`);
         }
-        if (a.type === 'SRV' && a.name.startsWith('shelly')) {
+        if (debug && a.type === 'A') {
+          this.log.debug(`[${idn}${a.type}${rs}${db}] Name: ${CYAN}${a.name}${db} data: ${typeof a.data === 'string' ? a.data : debugStringify(a.data)}`);
+        }
+        if (a.type === 'SRV' && (a.name.startsWith('shelly') || a.name.startsWith('Shelly'))) {
           port = a.data.port;
         }
-        if (a.type === 'TXT' && a.name.startsWith('shelly')) {
-          gen = parseInt(a.data.toString().replace('gen=', ''));
+        if (a.type === 'TXT' && (a.name.startsWith('shelly') || a.name.startsWith('Shelly'))) {
+          if (a.data.toString().includes('gen=2')) gen = 2;
+          if (a.data.toString().includes('gen=3')) gen = 3;
         }
-        if (a.type === 'A' && a.name.startsWith('Shelly')) {
+        if (a.type === 'A' && (a.name.startsWith('shelly') || a.name.startsWith('Shelly'))) {
           const [name, mac] = a.name.replace('.local', '').split('-');
           const deviceId = name.toLowerCase() + '-' + mac.toUpperCase();
           if (!this.discoveredDevices.has(deviceId)) {
-            this.log.info(`Discovered shelly gen: ${CYAN}${gen}${nf} device id: ${hk}${deviceId}${nf} host: ${zb}${a.data}${nf} port: ${zb}${port}${nf}`);
+            this.log.debug(`MdnsScanner discovered shelly gen: ${CYAN}${gen}${nf} device id: ${hk}${deviceId}${nf} host: ${zb}${a.data}${nf} port: ${zb}${port}${nf}`);
             this.discoveredDevices.set(deviceId, { id: deviceId, host: a.data, port, gen });
             this.emit('discovered', { id: deviceId, host: a.data, port, gen });
+            if (debug || process.argv.includes('testMdnsScanner')) {
+              this.saveResponse(deviceId, response); // No await
+            }
           }
         }
       }
-      if (debug) this.log.debug(`--- end ---`);
+      if (debug) this.log.debug(`--- end ---\n`);
+    });
+
+    this.scanner.on('error', async (err: Error) => {
+      this.log.error(`Error in mDNS query service: ${err.message}`);
+    });
+
+    this.scanner.on('warning', async (err: Error) => {
+      this.log.warn(`Warning in mDNS query service: ${err.message}`);
+    });
+
+    this.scanner.on('ready', async () => {
+      this.log.debug(`The mDNS socket is bound`);
     });
 
     // Send the query and set the timeout to send it again every 60 seconds
@@ -186,13 +251,14 @@ export class MdnsScanner extends EventEmitter {
   /**
    * Stops the MdnsScanner query service.
    */
-  stop() {
+  stop(keepAlive = false) {
     this.log.debug('Stopping mDNS query service...');
     if (this.scannerTimeout) clearTimeout(this.scannerTimeout);
     this.scannerTimeout = undefined;
     if (this.queryTimeout) clearTimeout(this.queryTimeout);
     this.queryTimeout = undefined;
     this._isScanning = false;
+    if (keepAlive) return;
     this.scanner?.removeAllListeners();
     this.scanner?.destroy();
     this.scanner = undefined;
@@ -206,6 +272,12 @@ export class MdnsScanner extends EventEmitter {
    * @returns The number of discovered devices.
    */
   logPeripheral() {
+    this.log.debug(`Discovered ${this.devices.size} devices:`);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    for (const [name, host] of this.devices) {
+      this.log.debug(`- host: ${zb}${host}${nf}`);
+    }
+
     this.log.info(`Discovered ${this.discoveredDevices.size} shelly devices:`);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     for (const [name, { id, host, port, gen }] of this.discoveredDevices) {
@@ -213,17 +285,55 @@ export class MdnsScanner extends EventEmitter {
     }
     return this.discoveredDevices.size;
   }
+
+  /**
+   * Saves the response packet to a file.
+   *
+   * @param {shellyId} shellyId - The ID of the Shelly device.
+   * @param {ResponsePacket} response - The response packet to be saved.
+   * @returns {Promise<void>} A promise that resolves when the response is successfully saved, or rejects with an error.
+   */
+  private async saveResponse(shellyId: string, response: ResponsePacket): Promise<void> {
+    const responseFile = path.join(this._dataPath, `${shellyId}.mdns.json`);
+    try {
+      await fs.mkdir(this._dataPath, { recursive: true });
+      this.log.debug(`Successfully created directory ${this._dataPath}`);
+
+      for (const a of response.answers) {
+        if (a.type === 'TXT') {
+          if (Buffer.isBuffer(a.data)) a.data = a.data.toString();
+          if (Array.isArray(a.data)) a.data = a.data.map((d) => (Buffer.isBuffer(d) ? d.toString() : d));
+        }
+      }
+      for (const a of response.additionals) {
+        if (a.type === 'TXT') {
+          if (Buffer.isBuffer(a.data)) a.data = a.data.toString();
+          if (Array.isArray(a.data)) a.data = a.data.map((d) => (Buffer.isBuffer(d) ? d.toString() : d));
+        }
+      }
+      await fs.writeFile(responseFile, JSON.stringify(response, null, 2), 'utf8');
+      this.log.debug(`*Saved shellyId ${hk}${shellyId}${db} response file ${CYAN}${responseFile}${db}`);
+      return Promise.resolve();
+    } catch (err) {
+      this.log.error(`Error saving shellyId ${hk}${shellyId}${er} response file ${CYAN}${responseFile}${er}: ${err instanceof Error ? err.message : err}`);
+      return Promise.reject(err);
+    }
+  }
 }
 
-/*
-// node dist/mdnsScanner.js mdnsScanner
-if (process.argv.includes('mdnsScanner')) {
-  const mdnsScanner = new MdnsScanner(true);
-  mdnsScanner.start(undefined, true);
+// Use with: node dist/mdnsScanner.js testMdnsScanner
+// Additional debug logging
+// const ipConfigCommand = isWindows ? 'ipconfig' : 'ip a';
+// const multicastCommand = isWindows ? 'netsh interface ipv4 show joins' : 'ip maddr show';
+if (process.argv.includes('testMdnsScanner')) {
+  const mdnsScanner = new MdnsScanner(LogLevel.DEBUG);
+  // mdnsScanner.start(0, 'fd78:cbf8:4939:746:d555:85a9:74f6:9c6', 'udp6', true);
+  // mdnsScanner.start(0, undefined, 'udp4', true);
+  // mdnsScanner.start(0, '192.168.1.189', 'udp4', true);
+  mdnsScanner.start(0, getIpv4InterfaceAddress(), 'udp4', true);
+  // mdnsScanner.start(0, undefined, undefined, true);
 
   process.on('SIGINT', async function () {
     mdnsScanner.stop();
-    // process.exit();
   });
 }
-*/

@@ -28,23 +28,27 @@ import EventEmitter from 'events';
 import { ShellyDevice } from './shellyDevice.js';
 import { DiscoveredDevice, MdnsScanner } from './mdnsScanner.js';
 import { CoapServer } from './coapServer.js';
+import { SocketType } from 'dgram';
 
 export class Shelly extends EventEmitter {
   private readonly _devices = new Map<string, ShellyDevice>();
   private readonly log: AnsiLogger;
   private mdnsScanner: MdnsScanner | undefined;
-  private coapServer: CoapServer | undefined;
+  public coapServer: CoapServer | undefined;
   private coapServerTimeout?: NodeJS.Timeout;
   public username: string | undefined;
   public password: string | undefined;
+  private _debugMdns = false;
+  private _debugCoap = false;
+  private _dataPath = '';
 
   constructor(log: AnsiLogger, username?: string, password?: string) {
     super();
     this.log = log;
     this.username = username;
     this.password = password;
-    this.mdnsScanner = new MdnsScanner(this.log.logLevel);
-    this.coapServer = new CoapServer(this.log.logLevel);
+    this.mdnsScanner = new MdnsScanner();
+    this.coapServer = new CoapServer();
 
     this.mdnsScanner.on('discovered', async (device: DiscoveredDevice) => {
       this.log.info(`Discovered shelly gen ${CYAN}${device.gen}${nf} device id ${hk}${device.id}${nf} host ${zb}${device.host}${nf} port ${zb}${device.port}${nf} `);
@@ -80,6 +84,20 @@ export class Shelly extends EventEmitter {
     this.coapServer = undefined;
   }
 
+  set dataPath(path: string) {
+    this._dataPath = path;
+    if (this.mdnsScanner) this.mdnsScanner.dataPath = path;
+    if (this.coapServer) this.coapServer.dataPath = path;
+  }
+
+  set debugMdns(debug: boolean) {
+    if (this.mdnsScanner) this.mdnsScanner.debug = debug;
+  }
+
+  set debugCoap(debug: boolean) {
+    if (this.coapServer) this.coapServer.debug = debug;
+  }
+
   hasDevice(id: string): boolean {
     return this._devices.has(id);
   }
@@ -105,8 +123,8 @@ export class Shelly extends EventEmitter {
       return this;
     }
     this._devices.set(device.id, device);
-    if (device.gen === 1 && !device.host.endsWith('.json')) {
-      await this.coapServer?.registerDevice(device.host);
+    if (device.gen === 1) {
+      if (!device.cached && !device.host.endsWith('.json')) this.coapServer?.registerDevice(device.host, device.id); // No await to register device for CoIoT updates
       this.startCoap(10000);
     }
     this.emit('add', device);
@@ -132,24 +150,26 @@ export class Shelly extends EventEmitter {
     }
   }
 
-  startMdns(mdnsShutdownTimeout?: number, debug = false) {
-    this.mdnsScanner?.start(mdnsShutdownTimeout, debug);
+  startMdns(mdnsShutdownTimeout?: number, mdnsInterface?: string, type?: SocketType, debug = false) {
+    this.mdnsScanner?.start(mdnsShutdownTimeout, mdnsInterface, type, debug);
   }
 
   startCoap(coapStartTimeout?: number) {
     if (coapStartTimeout) {
       this.coapServerTimeout = setTimeout(() => {
-        this.coapServer?.start();
+        this.coapServer?.start(this._debugCoap);
       }, coapStartTimeout);
     } else {
-      this.coapServer?.start();
+      this.coapServer?.start(this._debugCoap);
     }
   }
 
-  setLogLevel(level: LogLevel) {
+  setLogLevel(level: LogLevel, debugMdns: boolean, debugCoap: boolean) {
     this.log.logLevel = level;
-    if (this.mdnsScanner) this.mdnsScanner.log.logLevel = level;
-    if (this.coapServer) this.coapServer.log.logLevel = level;
+    this._debugMdns = debugMdns;
+    this._debugCoap = debugCoap;
+    if (this.mdnsScanner) this.mdnsScanner.log.logLevel = debugMdns ? LogLevel.DEBUG : LogLevel.INFO;
+    if (this.coapServer) this.coapServer.log.logLevel = debugCoap ? LogLevel.DEBUG : LogLevel.INFO;
     this.devices.forEach((device) => {
       device.setLogLevel(level);
     });
@@ -162,32 +182,3 @@ export class Shelly extends EventEmitter {
     }
   }
 }
-
-/*
-if (process.argv.includes('shelly')) {
-  logInterfaces();
-  const debug = false;
-  const log = new AnsiLogger({ logName: 'Shellies', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: debug });
-  const shelly = new Shelly(log);
-  shelly.startMdns(300, false);
-
-  shelly.on('discovered', async (discoveredDevice: DiscoveredDevice) => {
-    const log = new AnsiLogger({ logName: discoveredDevice.id, logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: debug });
-    const device = await ShellyDevice.create(shelly, log, discoveredDevice.host);
-    if (!device) return;
-    await shelly.addDevice(device);
-  });
-
-  shelly.on('add', async (device: ShellyDevice) => {
-    log.info(
-      `Added shelly device ${hk}${device.id}${nf}: name ${CYAN}${device.name}${nf} ip ${MAGENTA}${device.host}${nf} model ${CYAN}${device.model}${nf} auth ${CYAN}${device.auth}${nf}`,
-    );
-  });
-
-  process.on('SIGINT', async function () {
-    shelly.logDevices();
-    shelly.destroy();
-    // process.exit();
-  });
-}
-*/

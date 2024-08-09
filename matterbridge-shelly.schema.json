@@ -28,7 +28,7 @@
       "default": "switch"
     },
     "exposeInput": {
-      "description": "Choose how to expose the shelly inputs: disabled, contact, momentary or latching switch",
+      "description": "Choose how to expose the shelly inputs: disabled, contact, momentary or latching switch (you may need to repair the controller when changed)",
       "type": "string",
       "enum": ["disabled", "contact", "momentary", "latching"],
       "default": "disabled"
@@ -40,14 +40,14 @@
       "default": "evehistory"
     },
     "blackList": {
-      "description": "The devices in the list will not be exposed. Use the device id (e.g. shellyplus2pm-5443b23d81f8)",
+      "description": "The devices in the list will not be exposed. Use the device id (e.g. shellyplus2pm-5443B23D81F8)",
       "type": "array",
       "items": {
         "type": "string"
       }
     },
     "whiteList": {
-      "description": "Only the devices in the list will be exposed. Use the device id (e.g. shellyplus2pm-5443b23d81f8)",
+      "description": "Only the devices in the list will be exposed. Use the device id (e.g. shellyplus2pm-5443B23D81F8)",
       "type": "array",
       "items": {
         "type": "string"
@@ -90,6 +90,20 @@
       "description": "Enable the debug for the plugin (development only)",
       "type": "boolean",
       "default": false
+    },
+    "debugMdns": {
+      "description": "Enable the debug for the shelly mdnsScanner (development only)",
+      "type": "boolean",
+      "default": false
+    },
+    "debugCoap": {
+      "description": "Enable the debug for the shelly coapServer (development only)",
+      "type": "boolean",
+      "default": false
+    },
+    "interfaceName": {
+      "description": "Network interface name for shellies (development only)",
+      "type": "string"
     },
     "unregisterOnShutdown": {
       "description": "Unregister all devices on shutdown (development only)",
