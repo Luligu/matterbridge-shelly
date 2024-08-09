@@ -68,9 +68,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": [
-        "gen=2"
-      ]
+      "data": ["gen=2"]
     },
     {
       "name": "ShellyProEM50-A0DD6CA09158.local",
@@ -99,11 +97,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": [
-        "gen=2",
-        "app=ProEM",
-        "ver=1.4.0"
-      ]
+      "data": ["gen=2", "app=ProEM", "ver=1.4.0"]
     },
     {
       "name": "ShellyProEM50-A0DD6CA09158.local",

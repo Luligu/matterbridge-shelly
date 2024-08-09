@@ -42,7 +42,7 @@ If you like this project and find it useful, please consider giving it a star on
 - [shelly]: Verified shellypro2pm profile cover with firmware v. 1.4.0
 - [shelly]: Verified shellypro4pm with firmware v. 1.4.0
 - [shelly]: Verified shellyproem50 with firmware v. 1.4.0
-- [shelly]: Verified shellyplus1 with firmware v. 1.4.0 
+- [shelly]: Verified shellyplus1 with firmware v. 1.4.0
 - [shelly]: Verified shellyplus1pm with firmware v. 1.4.0
 - [shelly]: Verified shellyplus2pm profile switch with firmware v. 1.4.0
 - [shelly]: Verified shellyplus2pm profile cover with firmware v. 1.4.0
@@ -66,6 +66,10 @@ If you like this project and find it useful, please consider giving it a star on
 - [shelly]: Verified shellyem3 with firmware v. 1.14.0
 - [shelly]: Verified shellyemg3 with firmware v. g1216eb0
 - [shelly]: Verified shellyddimmerg3 with firmware v. g55db545
+
+<a href="https://www.buymeacoffee.com/luligugithub">
+  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+</a>
 
 ## [0.7.5] - 2024-07-28
 

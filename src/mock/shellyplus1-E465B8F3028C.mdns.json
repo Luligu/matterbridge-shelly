@@ -49,11 +49,7 @@
       "ttl": 0,
       "class": "IN",
       "flush": true,
-      "data": [
-        "gen=2",
-        "app=Plus1",
-        "ver=1.4.0"
-      ]
+      "data": ["gen=2", "app=Plus1", "ver=1.4.0"]
     },
     {
       "name": "_http._tcp.local",
@@ -82,9 +78,7 @@
       "ttl": 0,
       "class": "IN",
       "flush": true,
-      "data": [
-        "gen=2"
-      ]
+      "data": ["gen=2"]
     }
   ],
   "authorities": [],

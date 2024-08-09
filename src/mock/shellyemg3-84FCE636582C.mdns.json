@@ -65,11 +65,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": true,
-      "data": [
-        "gen=3",
-        "app=EMG3",
-        "ver=1.4.99-dev101493"
-      ]
+      "data": ["gen=3", "app=EMG3", "ver=1.4.99-dev101493"]
     },
     {
       "name": "_services._dns-sd._udp.local",
@@ -106,9 +102,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": true,
-      "data": [
-        "gen=3"
-      ]
+      "data": ["gen=3"]
     }
   ],
   "authorities": [],

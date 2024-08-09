@@ -102,23 +102,14 @@
     "fw_mode": "SHRGBW2!color",
     "actions": {
       "active": false,
-      "names": [
-        "btn_on_url",
-        "btn_off_url",
-        "out_on_url",
-        "out_off_url",
-        "longpush_url",
-        "shortpush_url"
-      ]
+      "names": ["btn_on_url", "btn_off_url", "out_on_url", "out_off_url", "longpush_url", "shortpush_url"]
     },
     "hwinfo": {
       "hw_revision": "dev-prototype",
       "batch_id": 0
     },
     "mode": "color",
-    "alt_modes": [
-      "white"
-    ],
+    "alt_modes": ["white"],
     "dcpower": 1,
     "lights": [
       {
@@ -205,11 +196,7 @@
         "is_valid": true,
         "overpower": false,
         "timestamp": 1722985805,
-        "counters": [
-          0,
-          0,
-          0
-        ],
+        "counters": [0, 0, 0],
         "total": 0
       }
     ],

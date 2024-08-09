@@ -52,9 +52,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": [
-        "gen=3"
-      ]
+      "data": ["gen=3"]
     },
     {
       "name": "ShellyDDimmerG3-84FCE636832C.local",
@@ -83,11 +81,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": [
-        "gen=3",
-        "app=DDimmerG3",
-        "ver=1.4.99-dev101226"
-      ]
+      "data": ["gen=3", "app=DDimmerG3", "ver=1.4.99-dev101226"]
     },
     {
       "name": "ShellyDDimmerG3-84FCE636832C.local",

@@ -24,32 +24,19 @@
     "exposeSwitch": {
       "description": "Choose how to expose the shelly switches: as a switch (don't use it for Alexa), light or outlet",
       "type": "string",
-      "enum": [
-        "switch",
-        "light",
-        "outlet"
-      ],
+      "enum": ["switch", "light", "outlet"],
       "default": "switch"
     },
     "exposeInput": {
       "description": "Choose how to expose the shelly inputs: disabled, contact, momentary or latching switch (you may need to repair the controller when changed)",
       "type": "string",
-      "enum": [
-        "disabled",
-        "contact",
-        "momentary",
-        "latching"
-      ],
+      "enum": ["disabled", "contact", "momentary", "latching"],
       "default": "disabled"
     },
     "exposePowerMeter": {
       "description": "Choose how to expose the shelly power meters: disabled, matter13 (will use Matter 1.3 electricalSensor) or evehistory (use Matter EveHistoryCluster)",
       "type": "string",
-      "enum": [
-        "disabled",
-        "matter13",
-        "evehistory"
-      ],
+      "enum": ["disabled", "matter13", "evehistory"],
       "default": "evehistory"
     },
     "blackList": {

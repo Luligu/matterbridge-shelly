@@ -52,9 +52,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": [
-        "gen=3"
-      ]
+      "data": ["gen=3"]
     },
     {
       "name": "Shelly1PMMiniG3-543204519264.local",
@@ -83,11 +81,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": [
-        "gen=3",
-        "app=Mini1PMG3",
-        "ver=1.4.0"
-      ]
+      "data": ["gen=3", "app=Mini1PMG3", "ver=1.4.0"]
     },
     {
       "name": "Shelly1PMMiniG3-543204519264.local",

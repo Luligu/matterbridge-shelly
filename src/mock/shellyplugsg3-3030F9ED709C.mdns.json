@@ -68,9 +68,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": [
-        "gen=3"
-      ]
+      "data": ["gen=3"]
     },
     {
       "name": "ShellyPlugSG3-3030F9ED709C.local",
@@ -99,11 +97,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": [
-        "gen=3",
-        "app=PlugSG3",
-        "ver=1.2.2-plugsg3prod0"
-      ]
+      "data": ["gen=3", "app=PlugSG3", "ver=1.2.2-plugsg3prod0"]
     },
     {
       "name": "ShellyPlugSG3-3030F9ED709C.local",

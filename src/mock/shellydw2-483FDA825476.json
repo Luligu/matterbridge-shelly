@@ -93,16 +93,7 @@
     "allow_cross_origin": false,
     "actions": {
       "active": false,
-      "names": [
-        "report_url",
-        "dark_url",
-        "twilight_url",
-        "open_url",
-        "close_url",
-        "vibration_url",
-        "temp_over_url",
-        "temp_under_url"
-      ]
+      "names": ["report_url", "dark_url", "twilight_url", "open_url", "close_url", "vibration_url", "temp_over_url", "temp_under_url"]
     },
     "dark_threshold": 100,
     "twilight_threshold": 300,
@@ -170,11 +161,7 @@
       "value": 100,
       "voltage": 6.08
     },
-    "act_reasons": [
-      "button",
-      "sensor",
-      "light"
-    ],
+    "act_reasons": ["button", "sensor", "light"],
     "sensor_error": 0,
     "update": {
       "status": "idle",

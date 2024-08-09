@@ -124,9 +124,7 @@
   "status": {
     "ble": {},
     "bthome": {
-      "errors": [
-        "bluetooth_disabled"
-      ]
+      "errors": ["bluetooth_disabled"]
     },
     "cloud": {
       "connected": true
@@ -142,20 +140,12 @@
       "freq": 50.1,
       "aenergy": {
         "total": 5670.715,
-        "by_minute": [
-          0,
-          213.298,
-          0
-        ],
+        "by_minute": [0, 213.298, 0],
         "minute_ts": 1722525300
       },
       "ret_aenergy": {
         "total": 0,
-        "by_minute": [
-          0,
-          0,
-          0
-        ],
+        "by_minute": [0, 0, 0],
         "minute_ts": 1722525300
       }
     },
