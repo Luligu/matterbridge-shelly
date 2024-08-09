@@ -18,6 +18,8 @@ This plugin allows you to expose Shelly Gen 1, Gen 2, and Gen 3 devices to Matte
 Features:
 
 - Shellies are automatically discovered using mDNS.
+- Shelly wifi battery powered devices are supported.
+- Shelly wifi battery powered devices with sleep_mode are supported.
 - Discovered shellies are stored in local storage for quick loading on startup.
 - The components exposed are Light (with brightness and RGB color), Switch, Relay, Roller, Cover, PowerMeter and Input.
 - All components expose the electrical measurements with the EveHistory cluster (displayed on HA), waiting for the controllers to upgrade to the Matter 1.3 specs.
@@ -27,6 +29,7 @@ Features:
 - The Matter device takes the name configured in the Shelly device's web page.
 - If the device has a firmware update available, a message is displayed.
 - If the device's CoIoT protocol is not correctly configured, a message is displayed.
+- If the device cover/roller component is not calibrated, a message is displayed.
 - A 10-minute timer checks if the device has reported within that time frame, and fetch un update.
 
 If you like this project and find it useful, please consider giving it a star on GitHub at https://github.com/Luligu/matterbridge-shelly and sponsoring it.
@@ -63,7 +66,17 @@ For Gen. 1 devices:
 
 - CoIoT: the CoIoT (coap) service must be enabled in the settings of the device and the CoIoT peer must be mcast. If mcast is not working on your network put in the peer field the Matterbridge ipv4Address and port 5683 (e.g. 192.168.1.100:5683). Multicast may not work for all networks due to router or access poit configuration or network topology (I cannot help you on this, just check your router or access point configuration). If CoIoT is not configured correctly you will not receive any update from the device.
 
+For battery powered devices:
+
+- only for the first time when you want to register them: check that enableMdnsDiscover and enableStorageDiscover are flagged in the plugin configuration. Restart matterbridge (the mdns discovery is active for the first 10 minutes) and awake each device you want to register.
+
 ## How to install
+
+### With the frontend (preferred method)
+
+Just open the frontend, select the matterbridge-shelly plugin and click on install
+
+### Without the frontend
 
 On windows:
 
@@ -102,7 +115,7 @@ If your devices are password protected put there the password. It must be unique
 
 ### exposeSwitch
 
-Choose how to expose the shelly switches: as a switch, light or outlet.
+Choose how to expose the shelly switches: as a switch (don't use it with Alexa), light or outlet.
 
 ### exposeInput
 
@@ -110,7 +123,7 @@ Choose how to expose the shelly inputs: disabled, contact or momentary switch
 
 ### exposePowerMeter
 
-Choose how to expose the shelly power meters: disabled, matter13 (use Matter 1.3 electricalSensor under development) or evehistory (use Matter EveHistoryCluster)
+Choose how to expose the shelly power meters: disabled, matter13 (it uses Matter 1.3 electricalSensor device type) or evehistory (uses the Matter EveHistoryCluster)
 
 ### blackList
 
@@ -132,7 +145,7 @@ Once a device is discovered, it is added to the shelly storage.
 
 ### enableStorageDiscover
 
-Should always be enabled to automatically add all the devices already discovered.
+Should always be enabled to automatically add all the devices discovered.
 
 ### resetStorageDiscover
 
@@ -145,6 +158,18 @@ Should be enabled only if the mdns is not working in your network. It adds the d
 ### debug
 
 Should be enabled only if you want to debug some issue in the log.
+
+### debugMdns
+
+Should be enabled only if you want to debug some issue with mdns in the log.
+
+### debugCoap
+
+Should be enabled only if you want to debug some issue with CoIoT in the log.
+
+### debugWs
+
+Should be enabled only if you want to debug some issue with WebSocket in the log.
 
 ### unregisterOnShutdown
 
@@ -173,6 +198,10 @@ These are the config values:
   "resetStorageDiscover": false
   "enableConfigDiscover": false,
   "debug": false,
+  "debugMdns": false,
+  "debugCoap": false,
+  "debugWs": false,
+  "interfaceName": ""
   "unregisterOnShutdown": false,
 }
 ```

@@ -50,7 +50,7 @@ describe('WS client', () => {
   });
 
   test('Simulate connection timeout', async () => {
-    wsClient?.start();
+    wsClient?.start(LogLevel.DEBUG);
     expect(wsClient.isConnecting).toBeTruthy();
     expect(wsClient.isConnected).toBeFalsy();
 

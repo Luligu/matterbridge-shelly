@@ -4,7 +4,7 @@
  * @file src\wsClient.ts
  * @author Luca Liguori
  * @date 2024-05-01
- * @version 1.0.0
+ * @version 2.0.0
  *
  * Copyright 2024, 2025 Luca Liguori.
  *
@@ -21,7 +21,7 @@
  * limitations under the License. *
  */
 
-import { AnsiLogger, BLUE, CYAN, TimestampFormat, db, er, nf, rs, wr, zb } from 'matterbridge/logger';
+import { AnsiLogger, CYAN, LogLevel, TimestampFormat, db, er, nf, rs, wr, zb } from 'matterbridge/logger';
 import WebSocket from 'ws';
 import crypto from 'crypto';
 import EventEmitter from 'events';
@@ -90,6 +90,7 @@ interface Response {
 
 export class WsClient extends EventEmitter {
   public readonly log;
+  public static logLevel = LogLevel.INFO;
   private wsClient: WebSocket | undefined;
   private _isConnected = false;
   private _isConnecting = false;
@@ -124,7 +125,7 @@ export class WsClient extends EventEmitter {
 
   constructor(wsHost: string, password?: string) {
     super();
-    this.log = new AnsiLogger({ logName: 'ShellyWsClient', logTimestampFormat: TimestampFormat.TIME_MILLIS });
+    this.log = new AnsiLogger({ logName: 'ShellyWsClient', logTimestampFormat: TimestampFormat.TIME_MILLIS, logLevel: WsClient.logLevel });
     this.wsHost = wsHost;
     this.wsUrl = `ws://${this.wsHost}/rpc`;
     this.password = password;
@@ -239,25 +240,26 @@ export class WsClient extends EventEmitter {
         this.requestFrameWithAuth.auth = createDigestShellyAuth('admin', this.password, auth.nonce, crypto.randomInt(0, 999999999), auth.realm, auth.nc);
         this.wsClient?.send(JSON.stringify(this.requestFrameWithAuth));
       } else if (response.result && response.id === this.requestId && response.dst === 'Matterbridge') {
-        this.log.debug(`Received Shelly.GetStatus response from ${CYAN}${this.id}${db} on ${BLUE}${this.wsHost}${db}:${rs}\n`, response.result);
+        this.log.debug(`Received Shelly.GetStatus response from ${CYAN}${this.id}${db} on ${zb}${this.wsHost}${db}:${rs}\n`, response.result);
         this.emit('response', response.result);
       } else if (response.method && (response.method === 'NotifyStatus' || response.method === 'NotifyFullStatus') && response.dst === 'Matterbridge') {
-        this.log.debug(`Received NotifyStatus from ${CYAN}${this.id}${db} on ${BLUE}${this.wsHost}${db}:${rs}\n`, response.params);
+        this.log.debug(`Received NotifyStatus from ${CYAN}${this.id}${db} on ${zb}${this.wsHost}${db}:${rs}\n`, response.params);
         this.emit('update', response.params);
       } else if (response.method && response.method === 'NotifyEvent' && response.dst === 'Matterbridge') {
-        this.log.debug(`Received NotifyEvent from ${CYAN}${this.id}${db} on ${BLUE}${this.wsHost}${db}:${rs}\n`, response.params.events);
+        this.log.debug(`Received NotifyEvent from ${CYAN}${this.id}${db} on ${zb}${this.wsHost}${db}:${rs}\n`, response.params.events);
         this.emit('event', response.params.events);
       } else if (response.error && response.id === this.requestId && response.dst === 'Matterbridge') {
-        this.log.error(`Received error response from ${CYAN}${this.id}${er} on ${BLUE}${this.wsHost}${er}:${rs}\n`, response);
+        this.log.error(`Received error response from ${CYAN}${this.id}${er} on ${zb}${this.wsHost}${er}:${rs}\n`, response);
       } else {
-        this.log.warn(`Received unknown response from ${CYAN}${this.id}${wr} on ${BLUE}${this.wsHost}${wr}:${rs}\n`, response);
+        this.log.warn(`Received unknown response from ${CYAN}${this.id}${wr} on ${zb}${this.wsHost}${wr}:${rs}\n`, response);
       }
     });
   }
 
-  start() {
+  start(logLevel: LogLevel) {
+    this.log.logLevel = logLevel;
     this.log.debug(`Starting ws client for Shelly device on address ${this.wsHost}`);
-    this.listenForStatusUpdates();
+    this.listenForStatusUpdates(); // Na await to start listening for status updates
     this.log.debug(`Started ws client for Shelly device on address ${this.wsHost}`);
   }
 
