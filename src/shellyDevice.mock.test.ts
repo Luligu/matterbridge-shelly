@@ -707,7 +707,7 @@ describe('Shelly devices test', () => {
     test('Create a gen 2 shellyplusi4 device', async () => {
       id = 'shellyplusi4-CC7B5C8AEA2C';
       log.logName = id;
-
+      consoleLogSpy.mockRestore();
       device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', id + '.json'));
       expect(device).not.toBeUndefined();
       if (!device) return;
