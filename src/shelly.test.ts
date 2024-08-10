@@ -39,7 +39,7 @@ describe('Shellies test', () => {
   });
 
   test('Check has/get device', async () => {
-    const device = await ShellyDevice.create(shellies, log, path.join('src', 'mock', 'shellyplus2pm-5443b23d81f8.switch.json'));
+    const device = await ShellyDevice.create(shellies, log, path.join('src', 'mock', 'shellyplus2pm-5443B23D81F8.switch.json'));
     if (!device) return;
     expect(shellies.hasDevice(device.id)).toBeFalsy();
     expect(shellies.getDevice(device.id)).toBeUndefined();
@@ -58,7 +58,7 @@ describe('Shellies test', () => {
   });
 
   test('Check add device gen 2', async () => {
-    const device2g = await ShellyDevice.create(shellies, log, path.join('src', 'mock', 'shellyplus1pm-441793d69718.json'));
+    const device2g = await ShellyDevice.create(shellies, log, path.join('src', 'mock', 'shellyplus1pm-441793D69718.json'));
     if (!device2g) return;
     expect(shellies.devices.length).toBe(1);
     expect(shellies.hasDevice(device2g.id)).toBeFalsy();

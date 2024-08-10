@@ -193,7 +193,7 @@ describe('Shelly devices test', () => {
     let device: ShellyDevice | undefined = undefined;
 
     beforeEach(async () => {
-      device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shellyplus2pm-5443b23d81f8.switch.json'));
+      device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shellyplus2pm-5443B23D81F8.switch.json'));
     });
 
     afterEach(() => {
@@ -239,7 +239,7 @@ describe('Shelly devices test', () => {
 
   describe('Test gen 2 shellyplus1pm', () => {
     test('Create a gen 2 shellyplus1pm device', async () => {
-      const device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shellyplus1pm-441793d69718.json'));
+      const device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shellyplus1pm-441793D69718.json'));
       expect(device).not.toBeUndefined();
       if (!device) return;
       expect(device?.host).toBe(path.join('src', 'mock', 'shellyplus1pm-441793d69718.json'));
@@ -256,7 +256,7 @@ describe('Shelly devices test', () => {
 
   describe('Test gen 3 shellypmminig3', () => {
     test('Create a gen 2 shellypmminig3 device', async () => {
-      const device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shellypmminig3-84fce63957f4.json'));
+      const device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shellypmminig3-84FCE63957F4.json'));
       expect(device).not.toBeUndefined();
       if (!device) return;
       expect(device?.host).toBe(path.join('src', 'mock', 'shellypmminig3-84fce63957f4.json'));
