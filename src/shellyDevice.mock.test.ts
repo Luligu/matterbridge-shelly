@@ -242,7 +242,7 @@ describe('Shelly devices test', () => {
       const device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shellyplus1pm-441793D69718.json'));
       expect(device).not.toBeUndefined();
       if (!device) return;
-      expect(device?.host).toBe(path.join('src', 'mock', 'shellyplus1pm-441793d69718.json'));
+      expect(device?.host).toBe(path.join('src', 'mock', 'shellyplus1pm-441793D69718.json'));
       expect(device?.model).toBe('SNSW-001P16EU');
       expect(device?.id).toBe('shellyplus1pm-441793D69718');
       expect(device?.firmware).toBe(firmwareGen2);
@@ -259,7 +259,7 @@ describe('Shelly devices test', () => {
       const device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shellypmminig3-84FCE63957F4.json'));
       expect(device).not.toBeUndefined();
       if (!device) return;
-      expect(device?.host).toBe(path.join('src', 'mock', 'shellypmminig3-84fce63957f4.json'));
+      expect(device?.host).toBe(path.join('src', 'mock', 'shellypmminig3-84FCE63957F4.json'));
       expect(device?.model).toBe('S3PM-001PCEU16');
       expect(device?.id).toBe('shellypmminig3-84FCE63957F4');
       expect(device?.firmware).toBe(firmwareGen2);
