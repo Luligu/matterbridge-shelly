@@ -23,7 +23,7 @@ describe('WS client', () => {
     jest.spyOn(WebSocket.prototype, 'send').mockImplementation(() => {
       // console.log(`Mocked send`);
     });
-    wsClient = new WsClient('192.168.58.96');
+    wsClient = new WsClient('Unknown', '192.168.58.96');
   });
 
   beforeEach(() => {

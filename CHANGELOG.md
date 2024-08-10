@@ -11,6 +11,7 @@ If you like this project and find it useful, please consider giving it a star on
 - [package]: Updated dependencies.
 - [package]: Update readme.MD with guide lines to add wifi battery powered devices.
 - [package]: Update readme.MD with guide lines to add BLU devices.
+- [shelly]: Refactor WsClient and WsClient jest test.
 
 ### Added
 

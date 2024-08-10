@@ -21,7 +21,7 @@
  * limitations under the License. *
  */
 
-import { AnsiLogger, LogLevel, BLUE, CYAN, GREEN, GREY, MAGENTA, RESET, db, debugStringify, er, hk, nf, wr, zb, rs } from 'matterbridge/logger';
+import { AnsiLogger, LogLevel, BLUE, CYAN, GREEN, GREY, MAGENTA, RESET, db, debugStringify, er, hk, nf, wr, zb, rs, YELLOW } from 'matterbridge/logger';
 import { getIpv4InterfaceAddress } from 'matterbridge/utils';
 import { EventEmitter } from 'events';
 import fetch, { RequestInit } from 'node-fetch';
@@ -33,7 +33,7 @@ import { parseDigestAuthenticateHeader, createDigestShellyAuth, createBasicShell
 
 import { WsClient } from './wsClient.js';
 import { Shelly } from './shelly.js';
-import { BTHomeComponent, BTHomeDeviceComponent, BTHomeSensorComponent, ShellyData } from './shellyTypes.js';
+import { BTHomeComponent, BTHomeDeviceComponent, BTHomeEvent, BTHomeSensorComponent, BTHomeStatusDevice, BTHomeStatusSensor, ShellyData } from './shellyTypes.js';
 import { ShellyComponent, ShellyCoverComponent, ShellyLightComponent, ShellySwitchComponent } from './shellyComponent.js';
 
 /**
@@ -76,8 +76,8 @@ export class ShellyDevice extends EventEmitter {
   private statusPayload: ShellyData | null = null;
   private settingsPayload: ShellyData | null = null;
   private componentsPayload: ShellyData | null = null;
-  readonly bthomeDevices = new Map<string, { id: number; name: string; model: string; type: string }>();
-  readonly bthomeSensors = new Map<string, { id: number; name: string; addr: string; sensorId: number }>();
+  readonly bthomeDevices = new Map<string, { id: number; key: string; name: string; addr: string; model: string; type: string; rssi: number }>();
+  readonly bthomeSensors = new Map<string, { id: number; key: string; name: string; addr: string; sensorId: number }>();
 
   private constructor(shelly: Shelly, log: AnsiLogger, host: string) {
     super();
@@ -265,41 +265,45 @@ export class ShellyDevice extends EventEmitter {
   }
 
   scanBTHomeComponent(components: BTHomeComponent[]) {
-    if (components.length > 0) this.log.debug(`Scanning the device ${zb}${this.host}${db} for BTHome devices and components:`);
+    if (components.length > 0) this.log.debug(`Scanning the device ${zb}${this.host}${db} for BTHome devices and sensors:`);
     for (const component of components as unknown as BTHomeDeviceComponent[]) {
       if (component.key.startsWith('bthomedevice:')) {
         this.log.debug(
-          `- BLU device id ${CYAN}${component.status.id}${db} address ${CYAN}${component.config.addr}${db} ` +
+          `- BLU device id ${CYAN}${component.status.id}${db} key ${CYAN}${component.key}${db} address ${CYAN}${component.config.addr}${db} ` +
             `name ${CYAN}${component.config.name ?? `${this.getBTHomeModelText(component.config.meta.ui.local_name)} ` + component.config.addr}${db} ` +
             `model ${CYAN}${this.getBTHomeModelText(component.config.meta.ui.local_name)}${db} ` +
-            `type ${CYAN}${component.config.meta.ui.local_name}${db}`,
+            `type ${CYAN}${component.config.meta.ui.local_name}${db} rssi ${CYAN}${component.status.rssi}${db}`,
         );
         this.bthomeDevices.set(component.config.addr, {
           id: component.config.id,
+          key: component.key,
+          addr: component.config.addr,
           name: component.config.name ?? `${this.getBTHomeModelText(component.config.meta.ui.local_name)} ` + component.config.addr,
           model: this.getBTHomeModelText(component.config.meta.ui.local_name),
           type: component.config.meta.ui.local_name,
+          rssi: component.status.rssi,
         });
       }
     }
     for (const component of components as unknown as BTHomeSensorComponent[]) {
       if (component.key.startsWith('bthomesensor:')) {
         this.log.debug(
-          `- BLU sensor id ${CYAN}${component.status.id}${db} address ${CYAN}${component.config.addr}${db} ` +
+          `- BLU sensor id ${CYAN}${component.status.id}${db} key ${CYAN}${component.key}${db} address ${CYAN}${component.config.addr}${db} ` +
             `name ${CYAN}${component.config.name ?? this.getBTHomeObjIdText(component.config.obj_id)}${db} ` +
             `value ${CYAN}${component.status.value}${db} ` +
             `sensor ${CYAN}${this.getBTHomeObjIdText(component.config.obj_id)}${db} ${CYAN}(${component.config.obj_id}${db})`,
         );
         this.bthomeSensors.set(component.key, {
           id: component.config.id,
+          key: component.key,
           name: component.config.name ?? this.getBTHomeObjIdText(component.config.obj_id),
           addr: component.config.addr,
           sensorId: component.config.obj_id,
         });
       }
     }
-    this.log.debug('BTHome devices:', rs, this.bthomeDevices);
-    this.log.debug('BTHome sensors:', rs, this.bthomeSensors);
+    if (this.bthomeDevices.size > 0) this.log.debug(`BTHome devices map:${rs}\n`, this.bthomeDevices);
+    if (this.bthomeSensors.size > 0) this.log.debug(`BTHome sensors map:${rs}\n`, this.bthomeSensors);
   }
   /**
    * Creates a ShellyDevice instance.
@@ -483,7 +487,7 @@ export class ShellyDevice extends EventEmitter {
       }
     }
 
-    if (statusPayload) device.update(statusPayload);
+    if (statusPayload) device.onUpdate(statusPayload);
 
     // For gen 1 devices check if CoIoT is enabled and peer is set correctly: like <matterbridge-ipv4>:5683 e.g. 192.168.1.189:5683
     if (device.gen === 1) {
@@ -536,7 +540,10 @@ export class ShellyDevice extends EventEmitter {
         log.info(`Fetching update for device ${hk}${device.id}${nf} host ${zb}${device.host}${nf}.`);
         device.fetchUpdate(); // We don't await for the update to complete
       } else {
-        log.debug(`Device ${hk}${device.id}${db} host ${zb}${device.host}${db} has been seen the last time: ${CYAN}${lastSeenDateString}${db}.`);
+        log.debug(
+          `Device ${hk}${device.id}${db} host ${zb}${device.host}${db} sleep ${CYAN}${device.sleepMode}${db} cached ${CYAN}${device.cached}${db} ` +
+            `has been seen the last time: ${CYAN}${lastSeenDateString}${db}.`,
+        );
       }
 
       // Check WebSocket client for gen 2 and 3 devices
@@ -550,7 +557,7 @@ export class ShellyDevice extends EventEmitter {
 
     // Start WebSocket client for gen 2 and 3 devices
     if (device.gen === 2 || device.gen === 3) {
-      device.wsClient = new WsClient(host, shelly.password);
+      device.wsClient = new WsClient(device.id, host, shelly.password);
       device.startWsClientTimeout = setTimeout(() => {
         // Start WebSocket client after 10 seconds only if it's not a cached device. Will try it in the last seen interval.
         if (!host.endsWith('.json')) device.wsClient?.start();
@@ -558,7 +565,12 @@ export class ShellyDevice extends EventEmitter {
 
       device.wsClient.on('update', (message) => {
         log.debug(`WebSocket update from device ${hk}${device.id}${db} host ${zb}${device.host}${db}`);
-        device.update(message);
+        device.onUpdate(message);
+      });
+
+      device.wsClient.on('event', (events: BTHomeEvent[]) => {
+        log.debug(`WebSocket event from device ${hk}${device.id}${db} host ${zb}${device.host}${db}`);
+        device.onEvent(events);
       });
     }
 
@@ -570,12 +582,80 @@ export class ShellyDevice extends EventEmitter {
   }
 
   /**
+   * Event handler from device WsClient.
+   *
+   * @param {object[]} events - The data to update the device with.
+   *
+   * @returns {void}
+   */
+  onEvent(events: BTHomeEvent[]): void {
+    for (const event of events) {
+      if (event.component.startsWith('bthomesensor:')) {
+        const sensor = this.bthomeSensors.get(event.component);
+        if (sensor) {
+          this.log.debug(
+            `****Device ${hk}${this.id}${db} has event ${YELLOW}${event.event}${db} from BTHomeSensor addr ${CYAN}${sensor.addr}${db} named ${sensor.name} ` +
+              `sensorId ${this.getBTHomeObjIdText(sensor.sensorId)} (${sensor.sensorId})`,
+          );
+        }
+      }
+    }
+    this.lastseen = Date.now();
+  }
+
+  /**
    * Updates the device with the provided data.
    *
    * @param {ShellyData} data - The data to update the device with.
+   *
    * @returns {void}
    */
-  update(data: ShellyData) {
+  onUpdate(data: ShellyData): void {
+    // Scan for BTHome devices and components
+    for (const key in data) {
+      if (key.startsWith('bthomedevice:')) {
+        /*
+        {
+          ts: 1723285884.55,
+          'bthomedevice:201': { id: 201, last_updated_ts: 1723285884, packet_id: 205, rssi: -76 }
+        }
+        */
+        let device = undefined;
+        for (const _device of this.bthomeDevices.values()) {
+          if (_device.key === key) {
+            device = _device;
+          }
+        }
+        if (device) {
+          const bthomeDevice = data[key] as BTHomeStatusDevice;
+          this.log.debug(
+            `****Device ${hk}${this.id}${db} has device update from BTHomeDevice id ${CYAN}${device.id}${db} key ${CYAN}${device.key}${db} ` +
+              `addr ${CYAN}${device.addr}${db} name ${device.name} model ${device.model} (${device.type}) rssi ${YELLOW}${bthomeDevice.rssi}${db}`,
+          );
+          if (bthomeDevice.rssi !== undefined && bthomeDevice.rssi !== null && typeof bthomeDevice.rssi === 'number') {
+            device.rssi = bthomeDevice.rssi;
+            this.log.debug(`****Device ${hk}${this.id}${db} has updated rssi ${YELLOW}${device.rssi}${db} for BTHomeDevice id ${CYAN}${device.id}${db}`);
+            console.log('BTHome devices map:', this.bthomeDevices);
+          }
+        }
+      } else if (key.startsWith('bthomesensor:')) {
+        /*
+        {
+          ts: 1723285884.55,
+          'bthomesensor:205': { id: 205, last_updated_ts: 1723285884, value: 27.8 }
+        }
+        */
+        const sensor = this.bthomeSensors.get(key);
+        if (sensor) {
+          const bthomeSensor = data[key] as BTHomeStatusSensor;
+          this.log.debug(
+            `****Device ${hk}${this.id}${db} has sensor update from BTHomeSensor id ${CYAN}${sensor.id}${db} key ${CYAN}${sensor.key}${db} ` +
+              `addr ${CYAN}${sensor.addr}${db} named ${sensor.name} ` +
+              `sensorId ${this.getBTHomeObjIdText(sensor.sensorId)} (${sensor.sensorId}): ${YELLOW}${bthomeSensor.value}${db}`,
+          );
+        }
+      }
+    }
     if (this.gen === 1) {
       // Update active components
       for (const key in data) {
@@ -724,7 +804,7 @@ export class ShellyDevice extends EventEmitter {
     if (!this.online) this.log.info(`The device ${hk}${this.id}${nf} host ${zb}${this.host}${nf} is online.`);
     this.online = true;
     this.emit('online');
-    this.update(status);
+    this.onUpdate(status);
     return status;
   }
 
