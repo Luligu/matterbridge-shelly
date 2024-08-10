@@ -4,17 +4,19 @@ All notable changes to this project will be documented in this file.
 
 If you like this project and find it useful, please consider giving it a star on GitHub at https://github.com/Luligu/matterbridge-shelly and sponsoring it.
 
-## [0.8.1] - 2024-08-10
+## [0.9.0] - 2024-08-12
 
 ### Changed
 
 - [package]: Updated dependencies.
-- [package]: Update readmeMD with guide lines to add wifi battery powered devices.
+- [package]: Update readme.MD with guide lines to add wifi battery powered devices.
+- [package]: Update readme.MD with guide lines to add BLU devices.
 
 ### Added
 
 - [plugin]: Added debugWs option to the config.
 - [plugin]: Enabled enableBleDiscover option in the config.
+- [shelly]: Added support for BLU devices.
 
 ### Fixed
 

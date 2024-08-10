@@ -13,14 +13,14 @@
 
 ---
 
-This plugin allows you to expose Shelly Gen 1, Gen 2, Gen 3 and BLU devices to Matter.
+This plugin allows you to expose all Shelly Gen 1, Gen 2, Gen 3 and BLU devices to Matter.
 
 Features:
 
 - Shellies are automatically discovered using mDNS.
 - Shelly wifi battery powered devices are supported.
 - Shelly wifi battery powered devices with sleep_mode are supported.
-- Shelly BLU devices are supported through local devices configured as ble observer.
+- Shelly BLU devices are supported through local devices configured as ble gateway.
 - Discovered shellies are stored in local storage for quick loading on startup.
 - The components exposed are Light (with brightness and RGB color), Switch, Relay, Roller, Cover, PowerMeter and Input.
 - All components expose the electrical measurements with the EveHistory cluster (displayed on HA), waiting for the controllers to upgrade to the Matter 1.3 specs.
@@ -67,9 +67,14 @@ For Gen. 1 devices:
 
 - CoIoT: the CoIoT (coap) service must be enabled in the settings of the device and the CoIoT peer must be mcast. If mcast is not working on your network put in the peer field the Matterbridge ipv4Address and port 5683 (e.g. 192.168.1.100:5683). Multicast may not work for all networks due to router or access poit configuration or network topology (I cannot help you on this, just check your router or access point configuration). If CoIoT is not configured correctly you will not receive any update from the device.
 
-For battery powered devices:
+For wifi battery powered devices:
 
 - only for the first time when you want to register them: check that enableMdnsDiscover and enableStorageDiscover are flagged in the plugin configuration. Restart matterbridge (the mdns discovery is active for the first 10 minutes) and awake each device you want to register.
+
+For BLU devices:
+
+- BLU devices are supported through a local Shelly device acting as a ble gateway. To enable this feature, choose one or more devices that have the BLE component and support the ble gateway. In the gateway device web page, enable both "Enable Bluetooth" and "Enable Bluetooth gateway". Then, go to the "Components" section and add your BLU device in "Bluetooth (BTHome) devices". Give a meaningful name to your device and restart Matterbridge.
+
 
 ## How to install
 
