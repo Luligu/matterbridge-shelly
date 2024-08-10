@@ -1,0 +1,230 @@
+{
+  "shelly": {
+    "name": "Plug S G3",
+    "id": "shellyplugsg3-3030f9ed709c",
+    "mac": "3030F9ED709C",
+    "slot": 1,
+    "model": "S3PL-00112EU",
+    "gen": 3,
+    "fw_id": "20240403-113426/1.2.2-plugsg3prod0-gfa89584",
+    "ver": "1.2.2-plugsg3prod0",
+    "app": "PlugSG3",
+    "auth_en": false,
+    "auth_domain": null
+  },
+  "settings": {
+    "ble": {
+      "enable": true,
+      "rpc": {
+        "enable": true
+      },
+      "observer": {
+        "enable": false
+      }
+    },
+    "cloud": {
+      "enable": true,
+      "server": "shelly-api-eu.shelly.cloud:6022/jrpc"
+    },
+    "mqtt": {
+      "enable": false,
+      "server": null,
+      "client_id": "shellyplugsg3-3030f9ed709c",
+      "user": null,
+      "ssl_ca": null,
+      "topic_prefix": "shellyplugsg3-3030f9ed709c",
+      "rpc_ntf": true,
+      "status_ntf": false,
+      "use_client_cert": false,
+      "enable_rpc": true,
+      "enable_control": true
+    },
+    "plugs_ui": {
+      "leds": {
+        "mode": "power",
+        "colors": {
+          "switch:0": {
+            "on": {
+              "rgb": [0, 100, 0],
+              "brightness": 100
+            },
+            "off": {
+              "rgb": [100, 0, 0],
+              "brightness": 100
+            }
+          },
+          "power": {
+            "brightness": 100
+          }
+        },
+        "night_mode": {
+          "enable": false,
+          "brightness": 100,
+          "active_between": []
+        }
+      },
+      "controls": {
+        "switch:0": {
+          "in_mode": "momentary"
+        }
+      }
+    },
+    "script:1": {
+      "id": 1,
+      "name": "aioshelly_ble_integration",
+      "enable": false
+    },
+    "switch:0": {
+      "id": 0,
+      "name": null,
+      "initial_state": "off",
+      "auto_on": false,
+      "auto_on_delay": 60,
+      "auto_off": false,
+      "auto_off_delay": 60,
+      "power_limit": 2500,
+      "voltage_limit": 280,
+      "autorecover_voltage_errors": false,
+      "current_limit": 12
+    },
+    "sys": {
+      "device": {
+        "name": "Plug S G3",
+        "mac": "3030F9ED709C",
+        "fw_id": "20240403-113426/1.2.2-plugsg3prod0-gfa89584",
+        "discoverable": true,
+        "eco_mode": false
+      },
+      "location": {
+        "tz": "Asia/Amman",
+        "lat": 31.9555,
+        "lon": 35.9435
+      },
+      "debug": {
+        "level": 2,
+        "file_level": null,
+        "mqtt": {
+          "enable": false
+        },
+        "websocket": {
+          "enable": false
+        },
+        "udp": {
+          "addr": null
+        }
+      },
+      "ui_data": {},
+      "rpc_udp": {
+        "dst_addr": null,
+        "listen_port": null
+      },
+      "sntp": {
+        "server": "time.google.com"
+      },
+      "cfg_rev": 9
+    },
+    "wifi": {
+      "ap": {
+        "ssid": "ShellyPlugSG3-3030F9ED709C",
+        "is_open": true,
+        "enable": false,
+        "range_extender": {
+          "enable": false
+        }
+      },
+      "sta": {
+        "ssid": "Tamer Umniah",
+        "is_open": false,
+        "enable": true,
+        "ipv4mode": "dhcp",
+        "ip": null,
+        "netmask": null,
+        "gw": null,
+        "nameserver": null
+      },
+      "sta1": {
+        "ssid": null,
+        "is_open": true,
+        "enable": false,
+        "ipv4mode": "dhcp",
+        "ip": null,
+        "netmask": null,
+        "gw": null,
+        "nameserver": null
+      },
+      "roam": {
+        "rssi_thr": -80,
+        "interval": 60
+      }
+    },
+    "ws": {
+      "enable": false,
+      "server": null,
+      "ssl_ca": "ca.pem"
+    }
+  },
+  "status": {
+    "ble": {},
+    "cloud": {
+      "connected": true
+    },
+    "mqtt": {
+      "connected": false
+    },
+    "plugs_ui": {},
+    "script:1": {
+      "id": 1,
+      "running": false,
+      "mem_free": 25200
+    },
+    "switch:0": {
+      "id": 0,
+      "source": "HTTP_in",
+      "output": false,
+      "apower": 0,
+      "voltage": 235.8,
+      "freq": 50,
+      "current": 0,
+      "aenergy": {
+        "total": 0,
+        "by_minute": [0, 0, 0],
+        "minute_ts": 1722955080
+      },
+      "ret_aenergy": {
+        "total": 0,
+        "by_minute": [0, 0, 0],
+        "minute_ts": 1722955080
+      },
+      "temperature": {
+        "tC": 45.9,
+        "tF": 114.5
+      }
+    },
+    "sys": {
+      "mac": "3030F9ED709C",
+      "restart_required": false,
+      "time": "17:38",
+      "unixtime": 1722955104,
+      "uptime": 42780,
+      "ram_size": 254128,
+      "ram_free": 89568,
+      "fs_size": 1048576,
+      "fs_free": 712704,
+      "cfg_rev": 9,
+      "kvs_rev": 0,
+      "schedule_rev": 0,
+      "webhook_rev": 0,
+      "available_updates": {},
+      "reset_reason": 1
+    },
+    "wifi": {
+      "sta_ip": "192.168.68.148",
+      "status": "got ip",
+      "ssid": "Tamer Umniah",
+      "rssi": -20
+    },
+    "ws": {
+      "connected": false
+    }
+  }
+}

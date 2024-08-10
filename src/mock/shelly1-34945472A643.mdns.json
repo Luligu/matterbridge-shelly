@@ -1,0 +1,68 @@
+{
+  "id": 0,
+  "type": "response",
+  "flags": 1024,
+  "flag_qr": true,
+  "opcode": "QUERY",
+  "flag_aa": true,
+  "flag_tc": false,
+  "flag_rd": false,
+  "flag_ra": false,
+  "flag_z": false,
+  "flag_ad": false,
+  "flag_cd": false,
+  "rcode": "NOERROR",
+  "questions": [],
+  "answers": [
+    {
+      "name": "_http._tcp.local",
+      "type": "PTR",
+      "ttl": 4500,
+      "class": "IN",
+      "flush": false,
+      "data": "shelly1-34945472A643._http._tcp.local"
+    },
+    {
+      "name": "shelly1-34945472A643._http._tcp.local",
+      "type": "SRV",
+      "ttl": 120,
+      "class": "IN",
+      "flush": true,
+      "data": {
+        "priority": 0,
+        "weight": 0,
+        "port": 80,
+        "target": "shelly1-34945472A643.local"
+      }
+    },
+    {
+      "name": "shelly1-34945472A643._http._tcp.local",
+      "type": "TXT",
+      "ttl": 120,
+      "class": "IN",
+      "flush": true,
+      "data": ["id=shelly1-34945472A643", "arch=esp8266", "app=switch1", "fw_version=1.0", "fw_id=20230913-112003/v1.14.0-gcb84623", "discoverable=false", "discoverable=false"]
+    },
+    {
+      "name": "shelly1-34945472A643.local",
+      "type": "A",
+      "ttl": 120,
+      "class": "IN",
+      "flush": true,
+      "data": "192.168.1.240"
+    },
+    {
+      "name": "shelly1-34945472A643.local",
+      "type": "NSEC",
+      "ttl": 120,
+      "class": "IN",
+      "flush": true,
+      "data": {
+        "nextDomain": "shelly1-34945472A643.local",
+        "rrtypes": ["A"]
+      }
+    }
+  ],
+  "authorities": [],
+  "additionals": []
+}

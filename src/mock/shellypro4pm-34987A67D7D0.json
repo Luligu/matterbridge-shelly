@@ -1,0 +1,380 @@
+{
+  "shelly": {
+    "name": "My Shelly 4PM PRO",
+    "id": "shellypro4pm-34987a67d7d0",
+    "mac": "34987A67D7D0",
+    "slot": 1,
+    "model": "SPSW-104PE16EU",
+    "gen": 2,
+    "fw_id": "20240726-114529/1.4.0-gb2aeadb",
+    "ver": "1.4.0",
+    "app": "Pro4PM",
+    "auth_en": false,
+    "auth_domain": null
+  },
+  "settings": {
+    "ble": {
+      "enable": false,
+      "rpc": {
+        "enable": true
+      },
+      "observer": {
+        "enable": false
+      }
+    },
+    "bthome": {},
+    "cloud": {
+      "enable": true,
+      "server": "shelly-103-eu.shelly.cloud:6022/jrpc"
+    },
+    "eth": {
+      "enable": true,
+      "ipv4mode": "dhcp",
+      "ip": null,
+      "netmask": null,
+      "gw": null,
+      "nameserver": null
+    },
+    "input:0": {
+      "id": 0,
+      "name": null,
+      "type": "switch",
+      "enable": true,
+      "invert": false
+    },
+    "input:1": {
+      "id": 1,
+      "name": null,
+      "type": "switch",
+      "enable": true,
+      "invert": false
+    },
+    "input:2": {
+      "id": 2,
+      "name": null,
+      "type": "switch",
+      "enable": true,
+      "invert": false
+    },
+    "input:3": {
+      "id": 3,
+      "name": null,
+      "type": "switch",
+      "enable": true,
+      "invert": false
+    },
+    "knx": {
+      "enable": false,
+      "ia": "15.15.255",
+      "routing": {
+        "addr": "224.0.23.12:3671"
+      }
+    },
+    "mqtt": {
+      "enable": false,
+      "server": null,
+      "client_id": "shellypro4pm-34987a67d7d0",
+      "user": null,
+      "ssl_ca": null,
+      "topic_prefix": "shellypro4pm-34987a67d7d0",
+      "rpc_ntf": true,
+      "status_ntf": false,
+      "use_client_cert": false,
+      "enable_rpc": true,
+      "enable_control": true
+    },
+    "switch:0": {
+      "id": 0,
+      "name": null,
+      "in_mode": "follow",
+      "initial_state": "match_input",
+      "auto_on": false,
+      "auto_on_delay": 60,
+      "auto_off": false,
+      "auto_off_delay": 60,
+      "power_limit": 4480,
+      "voltage_limit": 280,
+      "undervoltage_limit": 0,
+      "autorecover_voltage_errors": false,
+      "current_limit": 16
+    },
+    "switch:1": {
+      "id": 1,
+      "name": null,
+      "in_mode": "follow",
+      "initial_state": "match_input",
+      "auto_on": false,
+      "auto_on_delay": 60,
+      "auto_off": false,
+      "auto_off_delay": 60,
+      "power_limit": 4480,
+      "voltage_limit": 280,
+      "undervoltage_limit": 0,
+      "autorecover_voltage_errors": false,
+      "current_limit": 16
+    },
+    "switch:2": {
+      "id": 2,
+      "name": null,
+      "in_mode": "follow",
+      "initial_state": "match_input",
+      "auto_on": false,
+      "auto_on_delay": 60,
+      "auto_off": false,
+      "auto_off_delay": 60,
+      "power_limit": 4480,
+      "voltage_limit": 280,
+      "undervoltage_limit": 0,
+      "autorecover_voltage_errors": false,
+      "current_limit": 16
+    },
+    "switch:3": {
+      "id": 3,
+      "name": null,
+      "in_mode": "follow",
+      "initial_state": "match_input",
+      "auto_on": false,
+      "auto_on_delay": 60,
+      "auto_off": false,
+      "auto_off_delay": 60,
+      "power_limit": 4480,
+      "voltage_limit": 280,
+      "undervoltage_limit": 0,
+      "autorecover_voltage_errors": false,
+      "current_limit": 16
+    },
+    "sys": {
+      "device": {
+        "name": "My Shelly 4PM PRO",
+        "mac": "34987A67D7D0",
+        "fw_id": "20240726-114529/1.4.0-gb2aeadb",
+        "discoverable": true,
+        "eco_mode": false
+      },
+      "location": {
+        "tz": "Europe/Monaco",
+        "lat": 43.7312,
+        "lon": 7.4138
+      },
+      "debug": {
+        "level": 2,
+        "file_level": null,
+        "mqtt": {
+          "enable": false
+        },
+        "websocket": {
+          "enable": false
+        },
+        "udp": {
+          "addr": null
+        }
+      },
+      "ui_data": {},
+      "rpc_udp": {
+        "dst_addr": null,
+        "listen_port": null
+      },
+      "sntp": {
+        "server": "time.google.com"
+      },
+      "cfg_rev": 14
+    },
+    "ui": {
+      "idle_brightness": 100
+    },
+    "wifi": {
+      "ap": {
+        "ssid": "ShellyPro4PM-34987A67D7D0",
+        "is_open": true,
+        "enable": false,
+        "range_extender": {
+          "enable": false
+        }
+      },
+      "sta": {
+        "ssid": "FibreBox_X6-12A4C7",
+        "is_open": false,
+        "enable": true,
+        "ipv4mode": "dhcp",
+        "ip": null,
+        "netmask": null,
+        "gw": null,
+        "nameserver": null
+      },
+      "sta1": {
+        "ssid": null,
+        "is_open": true,
+        "enable": false,
+        "ipv4mode": "dhcp",
+        "ip": null,
+        "netmask": null,
+        "gw": null,
+        "nameserver": null
+      },
+      "roam": {
+        "rssi_thr": -80,
+        "interval": 60
+      }
+    },
+    "ws": {
+      "enable": false,
+      "server": null,
+      "ssl_ca": "ca.pem"
+    }
+  },
+  "status": {
+    "ble": {},
+    "bthome": {
+      "errors": ["bluetooth_disabled"]
+    },
+    "cloud": {
+      "connected": true
+    },
+    "eth": {
+      "ip": null
+    },
+    "input:0": {
+      "id": 0,
+      "state": false
+    },
+    "input:1": {
+      "id": 1,
+      "state": false
+    },
+    "input:2": {
+      "id": 2,
+      "state": false
+    },
+    "input:3": {
+      "id": 3,
+      "state": false
+    },
+    "knx": {},
+    "mqtt": {
+      "connected": false
+    },
+    "switch:0": {
+      "id": 0,
+      "source": "init",
+      "output": true,
+      "apower": 3.9,
+      "voltage": 235.2,
+      "freq": 50,
+      "current": 0.044,
+      "pf": 0.61,
+      "aenergy": {
+        "total": 77.291,
+        "by_minute": [65.956, 66.532, 65.911],
+        "minute_ts": 1722505260
+      },
+      "ret_aenergy": {
+        "total": 0,
+        "by_minute": [0, 0, 0],
+        "minute_ts": 1722505260
+      },
+      "temperature": {
+        "tC": 48.8,
+        "tF": 119.9
+      }
+    },
+    "switch:1": {
+      "id": 1,
+      "source": "init",
+      "output": true,
+      "apower": 7.7,
+      "voltage": 235.2,
+      "freq": 50,
+      "current": 0.087,
+      "pf": 0.38,
+      "aenergy": {
+        "total": 181.698,
+        "by_minute": [133.063, 133.225, 133.166],
+        "minute_ts": 1722505260
+      },
+      "ret_aenergy": {
+        "total": 0,
+        "by_minute": [0, 0, 0],
+        "minute_ts": 1722505260
+      },
+      "temperature": {
+        "tC": 48.8,
+        "tF": 119.9
+      }
+    },
+    "switch:2": {
+      "id": 2,
+      "source": "init",
+      "output": false,
+      "apower": 0,
+      "voltage": 233.1,
+      "freq": 50,
+      "current": 0,
+      "pf": 0,
+      "aenergy": {
+        "total": 0,
+        "by_minute": [0, 0, 0],
+        "minute_ts": 1722505260
+      },
+      "ret_aenergy": {
+        "total": 0,
+        "by_minute": [0, 0, 0],
+        "minute_ts": 1722505260
+      },
+      "temperature": {
+        "tC": 48.8,
+        "tF": 119.9
+      }
+    },
+    "switch:3": {
+      "id": 3,
+      "source": "HTTP_in",
+      "output": false,
+      "apower": 0,
+      "voltage": 233.1,
+      "freq": 50,
+      "current": 0,
+      "pf": 0,
+      "aenergy": {
+        "total": 0,
+        "by_minute": [0, 0, 0],
+        "minute_ts": 1722505260
+      },
+      "ret_aenergy": {
+        "total": 0,
+        "by_minute": [0, 0, 0],
+        "minute_ts": 1722505260
+      },
+      "temperature": {
+        "tC": 48.8,
+        "tF": 119.9
+      }
+    },
+    "sys": {
+      "mac": "34987A67D7D0",
+      "restart_required": false,
+      "time": "11:41",
+      "unixtime": 1722505315,
+      "uptime": 5732,
+      "ram_size": 248168,
+      "ram_free": 89912,
+      "fs_size": 524288,
+      "fs_free": 180224,
+      "cfg_rev": 14,
+      "kvs_rev": 0,
+      "schedule_rev": 1,
+      "webhook_rev": 0,
+      "available_updates": {},
+      "reset_reason": 3
+    },
+    "ui": {},
+    "wifi": {
+      "sta_ip": "192.168.1.234",
+      "status": "got ip",
+      "ssid": "FibreBox_X6-12A4C7",
+      "rssi": -44
+    },
+    "ws": {
+      "connected": false
+    }
+  }
+}
