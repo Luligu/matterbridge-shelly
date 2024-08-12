@@ -4,7 +4,7 @@
  * @file src\shelly.ts
  * @author Luca Liguori
  * @date 2024-05-01
- * @version 1.0.0
+ * @version 2.0.0
  *
  * Copyright 2024, 2025 Luca Liguori.
  *
@@ -31,6 +31,12 @@ import { CoapServer } from './coapServer.js';
 import { SocketType } from 'dgram';
 import { WsClient } from './wsClient.js';
 
+/**
+ * Creates a new instance of the Shelly class.
+ * @param {AnsiLogger} log - The logger instance.
+ * @param {string} [username] - The username for authentication.
+ * @param {string} [password] - The password for authentication.
+ */
 export class Shelly extends EventEmitter {
   private readonly _devices = new Map<string, ShellyDevice>();
   private readonly log: AnsiLogger;
@@ -43,6 +49,12 @@ export class Shelly extends EventEmitter {
   private _debugCoap = false;
   private _dataPath = '';
 
+  /**
+   * Creates a new instance of the Shelly class.
+   * @param {AnsiLogger} log - The logger instance.
+   * @param {string} [username] - The username for authentication.
+   * @param {string} [password] - The password for authentication.
+   */
   constructor(log: AnsiLogger, username?: string, password?: string) {
     super();
     this.log = log;
@@ -65,10 +77,28 @@ export class Shelly extends EventEmitter {
         if (!shellyDevice.hasComponent(component)) this.log.error(`Device ${hk}${shellyDevice.id}${er} host ${zb}${host}${er} does not have component ${CYAN}${component}${nf}`);
         shellyDevice.getComponent(component)?.setValue(property, value);
         shellyDevice.lastseen = Date.now();
+        if (!shellyDevice.online) {
+          shellyDevice.online = true;
+          shellyDevice.emit('online');
+          this.log.debug(`Device ${hk}${shellyDevice.id}${db} host ${zb}${host}${db} received a CoIoT message: setting online to true`);
+        }
+        if (shellyDevice.cached) {
+          shellyDevice.cached = false;
+          this.log.debug(`Device ${hk}${shellyDevice.id}${db} host ${zb}${host}${db} received a CoIoT message: setting cached to false`);
+        }
       }
     });
   }
 
+  /**
+   * Destroys the instance of the class.
+   *
+   * This method stops the CoAP server, removes all devices, and cleans up event listeners.
+   * It also stops the mDNS scanner and clears the reference to it.
+   *
+   * @remarks
+   * This method should be called when the instance is no longer needed to free up resources.
+   */
   destroy() {
     if (this.coapServerTimeout) clearTimeout(this.coapServerTimeout);
     this.coapServerTimeout = undefined;
@@ -85,39 +115,84 @@ export class Shelly extends EventEmitter {
     this.coapServer = undefined;
   }
 
+  /**
+   * Sets the data path for the Shelly instance.
+   *
+   * @param {string} path - The new data path to set.
+   */
   set dataPath(path: string) {
     this._dataPath = path;
     if (this.mdnsScanner) this.mdnsScanner.dataPath = path;
     if (this.coapServer) this.coapServer.dataPath = path;
   }
 
+  /**
+   * Sets the debug mode for mDNS scanning.
+   *
+   * @param {boolean} debug - A boolean value indicating whether to enable debug mode.
+   */
   set debugMdns(debug: boolean) {
     if (this.mdnsScanner) this.mdnsScanner.debug = debug;
   }
 
+  /**
+   * Sets the debug mode for CoAP server.
+   *
+   * @param {boolean} debug - A boolean value indicating whether to enable debug mode or not.
+   */
   set debugCoap(debug: boolean) {
     if (this.coapServer) this.coapServer.debug = debug;
   }
 
+  /**
+   * Checks if a device with the specified ID exists.
+   *
+   * @param {string} id - The ID of the device to check.
+   * @returns {boolean} - Returns true if the device exists, otherwise returns false.
+   */
   hasDevice(id: string): boolean {
     return this._devices.has(id);
   }
 
+  /**
+   * Checks if a device with the specified host exists.
+   *
+   * @param {string} host - The host of the device to check.
+   * @returns {boolean} - Returns true if a device with the specified host exists, otherwise returns false.
+   */
   hasDeviceHost(host: string): boolean {
     const devices = this.devices.filter((device) => device.host === host);
     return devices.length > 0;
   }
 
+  /**
+   * Retrieves a ShellyDevice object by its ID.
+   *
+   * @param {string} id - The ID of the device to retrieve.
+   * @returns {ShellyDevice | undefined} The ShellyDevice object with the specified ID, or undefined if not found.
+   */
   getDevice(id: string): ShellyDevice | undefined {
     return this._devices.get(id);
   }
 
+  /**
+   * Retrieves a ShellyDevice object based on the provided host.
+   *
+   * @param {string} host - The host of the device.
+   * @returns {ShellyDevice | undefined} The ShellyDevice object matching the provided host, or undefined if not found.
+   */
   getDeviceByHost(host: string): ShellyDevice | undefined {
     const devices = this.devices.filter((device) => device.host === host);
     if (devices.length === 0) return undefined;
     return this._devices.get(devices[0].id);
   }
 
+  /**
+   * Adds a device to the Shelly instance.
+   *
+   * @param {ShellyDevice} device - The ShellyDevice object to be added.
+   * @returns {Promise<Shelly>} A Promise that resolves to the updated Shelly instance.
+   */
   async addDevice(device: ShellyDevice): Promise<Shelly> {
     if (this.hasDevice(device.id)) {
       this.log.warn(`Shelly device ${hk}${device.id}${wr}: name ${CYAN}${device.name}${wr} ip ${MAGENTA}${device.host}${wr} model ${CYAN}${device.model}${wr} already exists`);
@@ -132,6 +207,12 @@ export class Shelly extends EventEmitter {
     return this;
   }
 
+  /**
+   * Removes a device from the Shelly instance.
+   *
+   * @param {ShellyDevice | string} deviceOrId - The device or its ID to be removed.
+   * @returns {Shelly} The updated Shelly instance.
+   */
   removeDevice(device: ShellyDevice): Shelly;
   // eslint-disable-next-line @typescript-eslint/unified-signatures
   removeDevice(deviceId: string): Shelly;
@@ -141,20 +222,44 @@ export class Shelly extends EventEmitter {
     return this;
   }
 
+  /**
+   * Gets the array of Shelly devices.
+   *
+   * @returns An array of ShellyDevice objects.
+   */
   get devices(): ShellyDevice[] {
     return Array.from(this._devices.values());
   }
 
+  /**
+   * Returns an iterable iterator for the ShellyDevice objects in the Shelly class.
+   *
+   * @returns {IterableIterator<[string, ShellyDevice]>} An iterable iterator that yields key-value pairs of device IDs and ShellyDevice objects.
+   */
   *[Symbol.iterator](): IterableIterator<[string, ShellyDevice]> {
     for (const [id, device] of this._devices.entries()) {
       yield [id, device];
     }
   }
 
+  /**
+   * Starts the mDNS scanner.
+   *
+   * @param {number} mdnsShutdownTimeout - The timeout for shutting down the mDNS scanner.
+   * @param {string} mdnsInterface - The network interface to use for mDNS scanning.
+   * @param {SocketType} type - The socket type to use for mDNS scanning.
+   * @param {boolean} debug - Whether to enable debug mode for mDNS scanning.
+   */
   startMdns(mdnsShutdownTimeout?: number, mdnsInterface?: string, type?: SocketType, debug = false) {
     this.mdnsScanner?.start(mdnsShutdownTimeout, mdnsInterface, type, debug);
   }
 
+  /**
+   * Starts the CoAP server.
+   *
+   * @param {number} [coapStartTimeout] - The timeout value in milliseconds before starting the CoAP server.
+   * @returns {void}
+   */
   startCoap(coapStartTimeout?: number) {
     if (coapStartTimeout) {
       this.coapServerTimeout = setTimeout(() => {
@@ -165,18 +270,30 @@ export class Shelly extends EventEmitter {
     }
   }
 
-  setLogLevel(level: LogLevel, debugMdns: boolean, debugCoap: boolean) {
+  /**
+   * Sets the log level and debug flags for the Shelly instance.
+   *
+   * @param {LogLevel} level - The log level to set.
+   * @param {boolean} debugMdns - Whether to enable debug logging for mDNS.
+   * @param {boolean} debugCoap - Whether to enable debug logging for CoAP.
+   * @param {boolean} debugWs - Whether to enable debug logging for WebSocket.
+   */
+  setLogLevel(level: LogLevel, debugMdns: boolean, debugCoap: boolean, debugWs: boolean) {
+    // Called 2 times in platform.ts: 1) at startup, 2) after onChangeLoggerLevel
     this.log.logLevel = level;
     this._debugMdns = debugMdns;
     this._debugCoap = debugCoap;
     if (this.mdnsScanner) this.mdnsScanner.log.logLevel = debugMdns ? LogLevel.DEBUG : LogLevel.INFO;
     if (this.coapServer) this.coapServer.log.logLevel = debugCoap ? LogLevel.DEBUG : LogLevel.INFO;
-    WsClient.logLevel = level;
+    WsClient.logLevel = debugWs ? LogLevel.DEBUG : LogLevel.INFO;
     this.devices.forEach((device) => {
       device.setLogLevel(level);
     });
   }
 
+  /**
+   * Logs information about the Shellies devices.
+   */
   logDevices() {
     this.log.debug(`${BRIGHT}Shellies${db} (${this.devices.length}):`);
     for (const [id, device] of this) {

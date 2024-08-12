@@ -1,12 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { ShellyDevice } from './shellyDevice.js';
-import { AnsiLogger, TimestampFormat } from 'matterbridge/logger';
+import { AnsiLogger, TimestampFormat, LogLevel } from 'matterbridge/logger';
 import { Shelly } from './shelly.js';
 import { ShellyComponent } from './shellyComponent.js';
 import path from 'path';
 import { jest } from '@jest/globals';
-import { LogLevel } from 'node-ansi-logger';
 
 describe('Shelly devices test', () => {
   let consoleLogSpy: jest.SpiedFunction<typeof console.log>;
@@ -193,7 +192,7 @@ describe('Shelly devices test', () => {
     let device: ShellyDevice | undefined = undefined;
 
     beforeEach(async () => {
-      device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shellyplus2pm-5443b23d81f8.switch.json'));
+      device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shellyplus2pm-5443B23D81F8.switch.json'));
     });
 
     afterEach(() => {
@@ -239,10 +238,10 @@ describe('Shelly devices test', () => {
 
   describe('Test gen 2 shellyplus1pm', () => {
     test('Create a gen 2 shellyplus1pm device', async () => {
-      const device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shellyplus1pm-441793d69718.json'));
+      const device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shellyplus1pm-441793D69718.json'));
       expect(device).not.toBeUndefined();
       if (!device) return;
-      expect(device?.host).toBe(path.join('src', 'mock', 'shellyplus1pm-441793d69718.json'));
+      expect(device?.host).toBe(path.join('src', 'mock', 'shellyplus1pm-441793D69718.json'));
       expect(device?.model).toBe('SNSW-001P16EU');
       expect(device?.id).toBe('shellyplus1pm-441793D69718');
       expect(device?.firmware).toBe(firmwareGen2);
@@ -256,10 +255,10 @@ describe('Shelly devices test', () => {
 
   describe('Test gen 3 shellypmminig3', () => {
     test('Create a gen 2 shellypmminig3 device', async () => {
-      const device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shellypmminig3-84fce63957f4.json'));
+      const device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shellypmminig3-84FCE63957F4.json'));
       expect(device).not.toBeUndefined();
       if (!device) return;
-      expect(device?.host).toBe(path.join('src', 'mock', 'shellypmminig3-84fce63957f4.json'));
+      expect(device?.host).toBe(path.join('src', 'mock', 'shellypmminig3-84FCE63957F4.json'));
       expect(device?.model).toBe('S3PM-001PCEU16');
       expect(device?.id).toBe('shellypmminig3-84FCE63957F4');
       expect(device?.firmware).toBe(firmwareGen2);

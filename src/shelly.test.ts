@@ -39,7 +39,7 @@ describe('Shellies test', () => {
   });
 
   test('Check has/get device', async () => {
-    const device = await ShellyDevice.create(shellies, log, path.join('src', 'mock', 'shellyplus2pm-5443b23d81f8.switch.json'));
+    const device = await ShellyDevice.create(shellies, log, path.join('src', 'mock', 'shellyplus2pm-5443B23D81F8.switch.json'));
     if (!device) return;
     expect(shellies.hasDevice(device.id)).toBeFalsy();
     expect(shellies.getDevice(device.id)).toBeUndefined();
@@ -58,7 +58,7 @@ describe('Shellies test', () => {
   });
 
   test('Check add device gen 2', async () => {
-    const device2g = await ShellyDevice.create(shellies, log, path.join('src', 'mock', 'shellyplus1pm-441793d69718.json'));
+    const device2g = await ShellyDevice.create(shellies, log, path.join('src', 'mock', 'shellyplus1pm-441793D69718.json'));
     if (!device2g) return;
     expect(shellies.devices.length).toBe(1);
     expect(shellies.hasDevice(device2g.id)).toBeFalsy();
@@ -161,11 +161,11 @@ describe('Shellies test', () => {
   });
 
   test('Set log level', () => {
-    shellies.setLogLevel(LogLevel.DEBUG, true, true);
+    shellies.setLogLevel(LogLevel.DEBUG, true, true, true);
     expect((shellies as any).log.logLevel).toBe(LogLevel.DEBUG);
     expect((shellies as any).mdnsScanner._debug).toBe(true);
     expect((shellies as any).coapServer._debug).toBe(true);
-    shellies.setLogLevel(LogLevel.INFO, false, false);
+    shellies.setLogLevel(LogLevel.INFO, false, false, true);
     expect((shellies as any).log.logLevel).toBe(LogLevel.INFO);
   });
 });

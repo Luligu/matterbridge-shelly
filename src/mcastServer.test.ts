@@ -70,25 +70,25 @@ describe('Muticast server and client test', () => {
   test('Server connect event', async () => {
     consoleLogSpy.mockClear();
     (mcast as any)?.dgramServer?.emit('connect');
-    expect(consoleLogSpy).toHaveBeenCalledWith(expect.anything(), expect.stringContaining('Dgram multicast server socket connected'), expect.anything());
+    expect(consoleLogSpy).toHaveBeenCalledWith(expect.anything(), expect.stringContaining('Dgram multicast server socket connected'));
   });
 
   test('Server error event', async () => {
     consoleLogSpy.mockClear();
     (mcast as any)?.dgramServer?.emit('error', new Error('Test error'));
-    expect(consoleLogSpy).toHaveBeenCalledWith(expect.anything(), expect.stringContaining('Dgram multicast server socket error'), expect.anything());
+    expect(consoleLogSpy).toHaveBeenCalledWith(expect.anything(), expect.stringContaining('Dgram multicast server socket error'));
   });
 
   test('Client connect event', async () => {
     consoleLogSpy.mockClear();
     (mcast as any)?.dgramClient?.emit('connect');
-    expect(consoleLogSpy).toHaveBeenCalledWith(expect.anything(), expect.stringContaining('Dgram multicast client socket connected'), expect.anything());
+    expect(consoleLogSpy).toHaveBeenCalledWith(expect.anything(), expect.stringContaining('Dgram multicast client socket connected'));
   });
 
   test('Client error event', async () => {
     consoleLogSpy.mockClear();
     (mcast as any)?.dgramClient?.emit('error', new Error('Test error'));
-    expect(consoleLogSpy).toHaveBeenCalledWith(expect.anything(), expect.stringContaining('Dgram multicast client socket error'), expect.anything());
+    expect(consoleLogSpy).toHaveBeenCalledWith(expect.anything(), expect.stringContaining('Dgram multicast client socket error'));
   });
 
   test('Stop the Multicast class', async () => {

@@ -13,13 +13,14 @@
 
 ---
 
-This plugin allows you to expose Shelly Gen 1, Gen 2, and Gen 3 devices to Matter.
+This plugin allows you to expose all Shelly Gen 1, Gen 2, Gen 3 and BLU devices to Matter.
 
 Features:
 
 - Shellies are automatically discovered using mDNS.
-- Shelly wifi battery powered devices are supported.
-- Shelly wifi battery powered devices with sleep_mode are supported.
+- Shelly wifi battery-powered devices are supported.
+- Shelly wifi battery-powered devices with sleep_mode are supported.
+- Shelly BLU devices are supported through local devices configured as ble gateway.
 - Discovered shellies are stored in local storage for quick loading on startup.
 - The components exposed are Light (with brightness and RGB color), Switch, Relay, Roller, Cover, PowerMeter and Input.
 - All components expose the electrical measurements with the EveHistory cluster (displayed on HA), waiting for the controllers to upgrade to the Matter 1.3 specs.
@@ -60,15 +61,20 @@ See the complete guidelines on [Matterbridge](https://github.com/Luligu/matterbr
 
 ### Any shelly device
 
-A working shelly device gen. 1 or 2 or 3.
+A working shelly device gen. 1 or 2 or 3 or BLU.
 
 For Gen. 1 devices:
 
 - CoIoT: the CoIoT (coap) service must be enabled in the settings of the device and the CoIoT peer must be mcast. If mcast is not working on your network put in the peer field the Matterbridge ipv4Address and port 5683 (e.g. 192.168.1.100:5683). Multicast may not work for all networks due to router or access poit configuration or network topology (I cannot help you on this, just check your router or access point configuration). If CoIoT is not configured correctly you will not receive any update from the device.
 
-For battery powered devices:
+For wifi battery-powered devices:
 
 - only for the first time when you want to register them: check that enableMdnsDiscover and enableStorageDiscover are flagged in the plugin configuration. Restart matterbridge (the mdns discovery is active for the first 10 minutes) and awake each device you want to register.
+
+For BLU devices:
+
+- BLU devices are supported through a local Shelly device acting as a ble gateway. To enable this feature, choose one or more devices that have the ble component and support the ble gateway (e.g. PRO and gen. 3 devices). In the gateway device web page, enable both "Enable Bluetooth" and "Enable Bluetooth gateway". Then, go to the "Components" section and add your BLU devices in "Bluetooth (BTHome) devices". Give a meaningful name to your device if desired and restart Matterbridge.
+
 
 ## How to install
 
@@ -94,7 +100,7 @@ sudo npm install -g matterbridge-shelly
 matterbridge -add matterbridge-shelly
 ```
 
-Then start Matterbridge
+Then start Matterbridge from a terminal
 
 ```
 matterbridge -bridge
@@ -119,11 +125,11 @@ Choose how to expose the shelly switches: as a switch (don't use it with Alexa),
 
 ### exposeInput
 
-Choose how to expose the shelly inputs: disabled, contact or momentary switch
+Choose how to expose the shelly inputs: disabled, contact, momentary or latching switch
 
 ### exposePowerMeter
 
-Choose how to expose the shelly power meters: disabled, matter13 (it uses Matter 1.3 electricalSensor device type) or evehistory (uses the Matter EveHistoryCluster)
+Choose how to expose the shelly power meters: disabled, matter13 (it uses Matter 1.3 electricalSensor device type) or evehistory (it uses the Matter EveHistoryCluster)
 
 ### blackList
 
@@ -145,7 +151,7 @@ Once a device is discovered, it is added to the shelly storage.
 
 ### enableStorageDiscover
 
-Should always be enabled to automatically add all the devices discovered.
+Should always be enabled to automatically add all the devices previously discovered.
 
 ### resetStorageDiscover
 
@@ -157,19 +163,19 @@ Should be enabled only if the mdns is not working in your network. It adds the d
 
 ### debug
 
-Should be enabled only if you want to debug some issue in the log.
+Should be enabled only if you want to debug some issue using the log.
 
 ### debugMdns
 
-Should be enabled only if you want to debug some issue with mdns in the log.
+Should be enabled only if you want to debug some issue with mdns using the log.
 
 ### debugCoap
 
-Should be enabled only if you want to debug some issue with CoIoT in the log.
+Should be enabled only if you want to debug some issue with CoIoT using the log.
 
 ### debugWs
 
-Should be enabled only if you want to debug some issue with WebSocket in the log.
+Should be enabled only if you want to debug some issue with WebSocket using the log.
 
 ### unregisterOnShutdown
 
@@ -186,7 +192,7 @@ These are the config values:
   "username": "<USERNAME>",
   "password": "<PASSWORD>",
   "exposeSwitch": "switch" | "light" | "outlet"
-  "exposeInput": "disabled" | "contact" | "momentary"
+  "exposeInput": "disabled" | "contact" | "momentary" | "latching"
   "blackList": [],
   "whiteList": [],
   "deviceIp": {
@@ -212,14 +218,14 @@ On windows:
 
 ```
 cd $HOME\.matterbridge
-notepad matterbridge-somfy-tahoma.config.json
+notepad matterbridge-shelly.config.json
 ```
 
 On linux:
 
 ```
 cd ~/.matterbridge
-nano matterbridge-somfy-tahoma.config.json
+nano matterbridge-shelly.config.json
 ```
 
 Restart Matterbridge for the changes to take effect.

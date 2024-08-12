@@ -1,6 +1,6 @@
 {
   "name": "matterbridge-shelly",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "description": "Matterbridge shelly plugin",
   "author": "https://github.com/Luligu",
   "license": "Apache-2.0",
@@ -47,8 +47,8 @@
     "start:ws": "node dist/wsClient.js startWsClient",
     "start:shellyDevice": "node dist/shellyDevice.js startShelly",
     "start:shelly": "node dist/shelly.js shelly",
-    "test": "eslint --max-warnings=0 .",
-    "testxxx": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "testxxx": "eslint --max-warnings=0 .",
+    "test": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js",
     "test:verbose": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js --verbose",
     "test:watch": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
     "test:coverage": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js --coverage",
@@ -105,11 +105,11 @@
     "ws": "^8.18.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.8.0",
+    "@eslint/js": "^9.9.0",
     "@types/eslint__js": "^8.42.3",
     "@types/jest": "^29.5.12",
     "@types/multicast-dns": "^7.2.4",
-    "@types/node": "^22.1.0",
+    "@types/node": "^22.2.0",
     "@types/ws": "^8.5.12",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-jest": "^28.8.0",

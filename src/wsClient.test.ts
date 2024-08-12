@@ -23,7 +23,7 @@ describe('WS client', () => {
     jest.spyOn(WebSocket.prototype, 'send').mockImplementation(() => {
       // console.log(`Mocked send`);
     });
-    wsClient = new WsClient('192.168.58.96');
+    wsClient = new WsClient('Unknown', '192.168.58.96');
   });
 
   beforeEach(() => {
@@ -50,7 +50,7 @@ describe('WS client', () => {
   });
 
   test('Simulate connection timeout', async () => {
-    wsClient?.start(LogLevel.DEBUG);
+    wsClient?.start();
     expect(wsClient.isConnecting).toBeTruthy();
     expect(wsClient.isConnected).toBeFalsy();
 

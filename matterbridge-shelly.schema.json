@@ -94,10 +94,9 @@
       "default": false
     },
     "enableBleDiscover": {
-      "description": "Enable ble discovery for shelly devices (under development)",
+      "description": "Enable ble discovery for shelly BLU devices (it will register the BLU devices paired in each ble gateway)",
       "type": "boolean",
-      "readOnly": true,
-      "default": false
+      "default": true
     },
     "debug": {
       "description": "Enable the debug for the plugin (development only)",

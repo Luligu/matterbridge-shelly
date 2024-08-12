@@ -21,7 +21,7 @@
  * limitations under the License. *
  */
 
-import { AnsiLogger, CYAN, LogLevel, TimestampFormat, db, er, nf, rs, wr, zb } from 'matterbridge/logger';
+import { AnsiLogger, CYAN, LogLevel, TimestampFormat, db, er, hk, nf, rs, wr, zb } from 'matterbridge/logger';
 import WebSocket from 'ws';
 import crypto from 'crypto';
 import EventEmitter from 'events';
@@ -88,6 +88,30 @@ interface Response {
   result: Params;
 }
 
+interface WsClientEvent {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  response: [response: any];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  update: [params: any];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  event: [event: any];
+}
+
+/**
+ * WebSocket client for connecting to a Shelly device.
+ *
+ * @remarks
+ * The WsClient class provides methods for establishing a WebSocket connection to a Shelly device,
+ * sending requests to the device, and receiving status updates and events from the device.
+ * It also includes functionality for handling ping/pong messages to ensure the connection is alive.
+ *
+ * @example
+ * ```typescript
+ * const wsClient = new WsClient('shellyplus1-E465B8F3028C', '192.168.1.237', 'password');
+ * wsClient.start();
+ * wsClient.sendRequest('Shelly.GetStatus');
+ * ```
+ */
 export class WsClient extends EventEmitter {
   public readonly log;
   public static logLevel = LogLevel.INFO;
@@ -96,6 +120,7 @@ export class WsClient extends EventEmitter {
   private _isConnecting = false;
   private id?: string;
   private wsHost;
+  private wsDeviceId: string;
   private wsUrl;
   private auth = false;
   private password;
@@ -123,10 +148,18 @@ export class WsClient extends EventEmitter {
     auth: { realm: '', username: 'admin', nonce: 0, cnonce: 0, response: '', algorithm: 'SHA-256' },
   };
 
-  constructor(wsHost: string, password?: string) {
+  /**
+   * Constructs a new instance of the WsClient class.
+   *
+   * @param {string} wsDeviceId - The ID of the WebSocket device.
+   * @param {string} wsHost - The host of the WebSocket server.
+   * @param {string} [password] - The optional password for authentication.
+   */
+  constructor(wsDeviceId: string, wsHost: string, password?: string) {
     super();
     this.log = new AnsiLogger({ logName: 'ShellyWsClient', logTimestampFormat: TimestampFormat.TIME_MILLIS, logLevel: WsClient.logLevel });
     this.wsHost = wsHost;
+    this.wsDeviceId = wsDeviceId;
     this.wsUrl = `ws://${this.wsHost}/rpc`;
     this.password = password;
     this.requestId = crypto.randomInt(0, 9999);
@@ -134,17 +167,53 @@ export class WsClient extends EventEmitter {
     this.requestFrameWithAuth.id = this.requestId;
   }
 
+  override emit<K extends keyof WsClientEvent>(eventName: K, ...args: WsClientEvent[K]): boolean {
+    return super.emit(eventName, ...args);
+  }
+
+  override on<K extends keyof WsClientEvent>(eventName: K, listener: (...args: WsClientEvent[K]) => void): this {
+    return super.on(eventName, listener);
+  }
+
+  /**
+   * Sets the host value for the WebSocket client.
+   *
+   * @param {string} value - The new host value to set.
+   */
+  setHost(value: string) {
+    this.wsHost = value;
+    this.wsUrl = `ws://${this.wsHost}/rpc`;
+  }
+
+  /**
+   * Gets the connection status of the WebSocket client.
+   *
+   * @returns {boolean} The connection status of the WebSocket client.
+   */
   get isConnected() {
     return this._isConnected;
   }
 
+  /**
+   * Gets the current connection status.
+   *
+   * @returns {boolean} A boolean value indicating whether the client is currently connecting.
+   */
   get isConnecting() {
     return this._isConnecting;
   }
 
+  /**
+   * Sends a request to the WebSocket server.
+   *
+   * @param {string} method - The method to be passed to the requestFrame. Defaults to 'Shelly.GetStatus'.
+   * @param {object} params - The parameters to be passed to the requestFrame. Defaults to an empty object.
+   *
+   * @returns void
+   */
   async sendRequest(method = 'Shelly.GetStatus', params: Params = {}) {
     if (!this.wsClient || !this._isConnected) {
-      this.log.error(`SendRequest error: WebSocket client is not connected to ${zb}${this.wsHost}${er}`);
+      this.log.error(`SendRequest error: WebSocket client is not connected to device ${hk}${this.wsDeviceId}${er} host ${zb}${this.wsHost}${er}`);
       return;
     }
     this.requestFrame.method = method;
@@ -152,15 +221,25 @@ export class WsClient extends EventEmitter {
     this.wsClient?.send(JSON.stringify(this.requestFrame));
   }
 
+  /**
+   * Starts the PingPong functionality with the specified ping timeout.
+   *
+   * @remarks
+   * This method starts the ping interval and pong timeout.
+   *
+   * @param {number} pingTimeout - The timeout value for ping messages in milliseconds. Default is 30000.
+   *
+   * @returns void
+   */
   private startPingPong(pingTimeout = 30000) {
-    this.log.debug(`Start PingPong with host ${zb}${this.wsHost}${db}.`);
+    this.log.debug(`Start PingPong with device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}.`);
     this.pingInterval = setInterval(() => {
       if (this.wsClient?.readyState === WebSocket.OPEN) {
         this.wsClient.ping(); // Send a ping message
 
         // Set a timeout to wait for a pong response
         this.pongTimeout = setTimeout(() => {
-          this.log.error(`Pong not received from ${zb}${this.wsHost}${er}, closing connection.`);
+          this.log.error(`Pong not received from device ${hk}${this.wsDeviceId}${er} host ${zb}${this.wsHost}${er}, closing connection.`);
           this.wsClient?.terminate(); // Close the connection if pong is not received
         }, pingTimeout);
       }
@@ -170,12 +249,20 @@ export class WsClient extends EventEmitter {
     this.wsClient?.on('pong', () => {
       clearTimeout(this.pongTimeout);
       this.pongTimeout = undefined;
-      this.log.debug(`Pong received from ${zb}${this.wsHost}${db}, connection is alive.`);
+      this.log.debug(`Pong received from device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}, connection is alive.`);
     });
   }
 
+  /**
+   * Stops the PingPong functionality.
+   *
+   * @remarks
+   * This method clears the ping interval and pong timeout if they are set.
+   *
+   * @returns void
+   */
   private stopPingPong() {
-    this.log.debug(`Stop PingPong with host ${zb}${this.wsHost}${db}.`);
+    this.log.debug(`Stop PingPong with device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}.`);
     if (this.pingInterval) {
       clearInterval(this.pingInterval);
       this.pingInterval = undefined;
@@ -186,6 +273,16 @@ export class WsClient extends EventEmitter {
     }
   }
 
+  /**
+   * Listens for status updates from the WebSocket connection.
+   *
+   * @remarks
+   * This method establishes a WebSocket connection and handles various events such as open, error, close, and message.
+   * It sends requests and receives responses from the WebSocket server.
+   * The received responses are parsed and appropriate actions are taken based on the response type.
+   *
+   * @returns void
+   */
   async listenForStatusUpdates() {
     try {
       this._isConnecting = true;
@@ -197,11 +294,11 @@ export class WsClient extends EventEmitter {
 
     // Handle the open event
     this.wsClient.on('open', () => {
-      this.log.debug(`WebSocket connection opened with Shelly device host ${zb}${this.wsHost}${db}`);
+      this.log.debug(`WebSocket connection opened with Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}`);
       this._isConnecting = false;
       this._isConnected = true;
       if (this.wsClient?.readyState === WebSocket.OPEN) this.wsClient?.send(JSON.stringify(this.requestFrame));
-      else this.log.error(`WebSocket connection not open with Shelly device on address ${zb}${this.wsHost}${er}`);
+      else this.log.error(`WebSocket connection not open with Shelly device ${hk}${this.wsDeviceId}${er} host ${zb}${this.wsHost}${er}`);
 
       // Start the ping/pong mechanism
       this.startPingPong();
@@ -209,13 +306,13 @@ export class WsClient extends EventEmitter {
 
     // Handle errors
     this.wsClient.on('error', (error: Error) => {
-      this.log.error(`WebSocket error with Shelly device on address ${zb}${this.wsHost}${rs} readyState: ${this.wsClient?.readyState}\n`, error);
+      this.log.error(`WebSocket error with Shelly device ${hk}${this.wsDeviceId}${er} host ${zb}${this.wsHost}${er}: ${error instanceof Error ? error.message : error}`);
       this._isConnecting = false;
     });
 
     // Handle the close event
     this.wsClient.on('close', () => {
-      this.log.info(`WebSocket connection closed with Shelly device on address ${zb}${this.wsHost}${nf}`);
+      this.log.info(`WebSocket connection closed with Shelly device ${hk}${this.wsDeviceId}${nf} host ${zb}${this.wsHost}${nf}`);
       this._isConnected = false;
       this.stopPingPong();
     });
@@ -256,16 +353,32 @@ export class WsClient extends EventEmitter {
     });
   }
 
-  start(logLevel: LogLevel) {
-    this.log.logLevel = logLevel;
-    this.log.debug(`Starting ws client for Shelly device on address ${this.wsHost}`);
+  /**
+   * Starts the WebSocket client for the Shelly device.
+   *
+   * @remarks
+   * This method initializes the WebSocket client and starts listening for status updates.
+   *
+   * @returns void
+   */
+  start() {
+    this.log.debug(`Starting ws client for Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}`);
     this.listenForStatusUpdates(); // Na await to start listening for status updates
-    this.log.debug(`Started ws client for Shelly device on address ${this.wsHost}`);
+    this.log.debug(`Started ws client for Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}`);
   }
 
+  /**
+   * Stops the WebSocket client for the Shelly device.
+   *
+   * @remarks
+   * This method stops the WebSocket client and performs necessary cleanup operations.
+   * If the client is currently connecting, it will wait for a maximum of 5 seconds before forcefully terminating the connection.
+   *
+   * @returns void
+   */
   stop() {
     this.log.debug(
-      `Stopping ws client for Shelly device on address ${this.wsHost} state ${this.wsClient?.readyState} connencting ${this._isConnecting} connected ${this._isConnected} `,
+      `Stopping ws client for Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db} state ${this.wsClient?.readyState} connencting ${this._isConnecting} connected ${this._isConnected} `,
     );
     this.stopPingPong();
     if (this._isConnecting) {
@@ -276,14 +389,14 @@ export class WsClient extends EventEmitter {
         this._isConnecting = false;
         this._isConnected = false;
         this.wsClient?.removeAllListeners();
-        this.log.debug(`Stopped ws client for Shelly device on address ${this.wsHost}`);
+        this.log.debug(`Stopped ws client for Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}`);
       }, 5000);
       return;
     }
     if (this._isConnected) this.wsClient?.close();
     this._isConnected = false;
     this.wsClient?.removeAllListeners();
-    this.log.debug(`Stopped ws client for Shelly device on address ${this.wsHost}`);
+    this.log.debug(`Stopped ws client for Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}`);
   }
 }
 
