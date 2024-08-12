@@ -4,20 +4,22 @@ All notable changes to this project will be documented in this file.
 
 If you like this project and find it useful, please consider giving it a star on GitHub at https://github.com/Luligu/matterbridge-shelly and sponsoring it.
 
-## [0.9.0] - 2024-08-12
+## [0.8.1] - 2024-08-12
 
 ### Changed
 
 - [package]: Updated dependencies.
-- [package]: Update readme.MD with guide lines to add wifi battery powered devices.
-- [package]: Update readme.MD with guide lines to add BLU devices.
-- [shelly]: Refactor WsClient and WsClient jest test.
+- [package]: Updated readme.MD with guidelines for adding wifi battery-powered devices.
+- [package]: Update readme.MD with guidelines to add BLU devices.
+- [shelly]: Refactor WsClient and WsClient jest tests.
+- [fetch]: Changed timeout for fetch to 10 secs.
 
 ### Added
 
 - [plugin]: Added debugWs option to the config.
 - [plugin]: Enabled enableBleDiscover option in the config.
-- [shelly]: Added support for BLU devices.
+- [shelly]: Added support for BLU devices (alpha stage).
+- [shelly]: Added strict type checking to updates from devices.
 
 ### Fixed
 

@@ -88,6 +88,15 @@ interface Response {
   result: Params;
 }
 
+interface WsClientEvent {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  response: [response: any];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  update: [params: any];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  event: [event: any];
+}
+
 /**
  * WebSocket client for connecting to a Shelly device.
  *
@@ -156,6 +165,24 @@ export class WsClient extends EventEmitter {
     this.requestId = crypto.randomInt(0, 9999);
     this.requestFrame.id = this.requestId;
     this.requestFrameWithAuth.id = this.requestId;
+  }
+
+  override emit<K extends keyof WsClientEvent>(eventName: K, ...args: WsClientEvent[K]): boolean {
+    return super.emit(eventName, ...args);
+  }
+
+  override on<K extends keyof WsClientEvent>(eventName: K, listener: (...args: WsClientEvent[K]) => void): this {
+    return super.on(eventName, listener);
+  }
+
+  /**
+   * Sets the host value for the WebSocket client.
+   *
+   * @param {string} value - The new host value to set.
+   */
+  setHost(value: string) {
+    this.wsHost = value;
+    this.wsUrl = `ws://${this.wsHost}/rpc`;
   }
 
   /**
@@ -279,7 +306,7 @@ export class WsClient extends EventEmitter {
 
     // Handle errors
     this.wsClient.on('error', (error: Error) => {
-      this.log.error(`WebSocket error with Shelly device ${hk}${this.wsDeviceId}${er} host ${zb}${this.wsHost}${rs} readyState: ${this.wsClient?.readyState}\n`, error);
+      this.log.error(`WebSocket error with Shelly device ${hk}${this.wsDeviceId}${er} host ${zb}${this.wsHost}${er}: ${error instanceof Error ? error.message : error}`);
       this._isConnecting = false;
     });
 

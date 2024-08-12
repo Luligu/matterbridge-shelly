@@ -1,12 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { ShellyDevice } from './shellyDevice.js';
-import { AnsiLogger, TimestampFormat } from 'matterbridge/logger';
+import { AnsiLogger, TimestampFormat, LogLevel } from 'matterbridge/logger';
 import { Shelly } from './shelly.js';
 import { ShellyComponent } from './shellyComponent.js';
 import path from 'path';
 import { jest } from '@jest/globals';
-import { LogLevel } from 'node-ansi-logger';
 
 describe('Shelly devices test', () => {
   let consoleLogSpy: jest.SpiedFunction<typeof console.log>;
