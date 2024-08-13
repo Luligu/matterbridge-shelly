@@ -66,11 +66,7 @@
         "eco_mode": false,
         "addon_type": null
       },
-      "location": {
-        "tz": "Europe/Monaco",
-        "lat": 43.7312,
-        "lon": 7.4138
-      },
+      "location": null,
       "debug": {
         "level": 2,
         "file_level": null,

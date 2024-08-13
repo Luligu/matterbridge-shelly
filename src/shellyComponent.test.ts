@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { AnsiLogger, LogLevel, TimestampFormat } from 'matterbridge/logger';
-import { ShellyComponent, ShellyCoverComponent, ShellyLightComponent, ShellySwitchComponent } from './shellyComponent';
+import { isCoverComponent, isLightComponent, isSwitchComponent, ShellyComponent, ShellyCoverComponent, ShellyLightComponent, ShellySwitchComponent } from './shellyComponent';
 import { ShellyDevice } from './shellyDevice';
 import { ShellyProperty } from './shellyProperty';
 import { ShellyData } from './shellyTypes';
@@ -78,6 +78,13 @@ describe('ShellyComponent', () => {
     expect((component as ShellyLightComponent).Off).toBeUndefined();
     expect((component as ShellyLightComponent).Toggle).toBeUndefined();
     expect((component as ShellyLightComponent).Level).toBeUndefined();
+
+    expect(component.isSwitchComponent()).toBeFalsy();
+    expect(component.isLightComponent()).toBeFalsy();
+    expect(component.isCoverComponent()).toBeFalsy();
+    expect(isSwitchComponent(component)).toBeFalsy();
+    expect(isLightComponent(component)).toBeFalsy();
+    expect(isCoverComponent(component)).toBeFalsy();
   });
 
   it('should construct properly with light type component', () => {
@@ -92,6 +99,13 @@ describe('ShellyComponent', () => {
     expect((component as ShellyLightComponent).Off).not.toBeUndefined();
     expect((component as ShellyLightComponent).Toggle).not.toBeUndefined();
     expect((component as ShellyLightComponent).Level).not.toBeUndefined();
+
+    expect(component.isSwitchComponent()).toBeFalsy();
+    expect(component.isLightComponent()).toBeTruthy();
+    expect(component.isCoverComponent()).toBeFalsy();
+    expect(isSwitchComponent(component)).toBeFalsy();
+    expect(isLightComponent(component)).toBeTruthy();
+    expect(isCoverComponent(component)).toBeFalsy();
 
     (component as ShellyLightComponent).On();
     (component as ShellyLightComponent).Off();
@@ -115,6 +129,13 @@ describe('ShellyComponent', () => {
     expect((component as ShellyLightComponent).Toggle).not.toBeUndefined();
     expect((component as ShellyLightComponent).Level).not.toBeUndefined();
 
+    expect(component.isSwitchComponent()).toBeFalsy();
+    expect(component.isLightComponent()).toBeTruthy();
+    expect(component.isCoverComponent()).toBeFalsy();
+    expect(isSwitchComponent(component)).toBeFalsy();
+    expect(isLightComponent(component)).toBeTruthy();
+    expect(isCoverComponent(component)).toBeFalsy();
+
     (component as ShellyLightComponent).On();
     (component as ShellyLightComponent).Off();
     (component as ShellyLightComponent).Toggle();
@@ -137,6 +158,13 @@ describe('ShellyComponent', () => {
     expect((component as ShellySwitchComponent).Toggle).not.toBeUndefined();
     expect((component as ShellyLightComponent).Level).toBeUndefined();
 
+    expect(component.isSwitchComponent()).toBeTruthy();
+    expect(component.isLightComponent()).toBeFalsy();
+    expect(component.isCoverComponent()).toBeFalsy();
+    expect(isSwitchComponent(component)).toBeTruthy();
+    expect(isLightComponent(component)).toBeFalsy();
+    expect(isCoverComponent(component)).toBeFalsy();
+
     (component as ShellySwitchComponent).On();
     (component as ShellySwitchComponent).Off();
     (component as ShellySwitchComponent).Toggle();
@@ -156,6 +184,13 @@ describe('ShellyComponent', () => {
     expect((component as ShellyLightComponent).Off).not.toBeUndefined();
     expect((component as ShellyLightComponent).Toggle).not.toBeUndefined();
     expect((component as ShellyLightComponent).Level).toBeUndefined();
+
+    expect(component.isSwitchComponent()).toBeTruthy();
+    expect(component.isLightComponent()).toBeFalsy();
+    expect(component.isCoverComponent()).toBeFalsy();
+    expect(isSwitchComponent(component)).toBeTruthy();
+    expect(isLightComponent(component)).toBeFalsy();
+    expect(isCoverComponent(component)).toBeFalsy();
   });
 
   it('should construct properly with cover type component', () => {
@@ -174,6 +209,13 @@ describe('ShellyComponent', () => {
     expect((component as ShellyCoverComponent).Close).not.toBeUndefined();
     expect((component as ShellyCoverComponent).Stop).not.toBeUndefined();
     expect((component as ShellyCoverComponent).GoToPosition).not.toBeUndefined();
+
+    expect(component.isSwitchComponent()).toBeFalsy();
+    expect(component.isLightComponent()).toBeFalsy();
+    expect(component.isCoverComponent()).toBeTruthy();
+    expect(isSwitchComponent(component)).toBeFalsy();
+    expect(isLightComponent(component)).toBeFalsy();
+    expect(isCoverComponent(component)).toBeTruthy();
 
     (component as ShellyCoverComponent).Open();
     (component as ShellyCoverComponent).Close();
@@ -202,6 +244,13 @@ describe('ShellyComponent', () => {
     expect((component as ShellyCoverComponent).Close).not.toBeUndefined();
     expect((component as ShellyCoverComponent).Stop).not.toBeUndefined();
     expect((component as ShellyCoverComponent).GoToPosition).not.toBeUndefined();
+
+    expect(component.isSwitchComponent()).toBeFalsy();
+    expect(component.isLightComponent()).toBeFalsy();
+    expect(component.isCoverComponent()).toBeTruthy();
+    expect(isSwitchComponent(component)).toBeFalsy();
+    expect(isLightComponent(component)).toBeFalsy();
+    expect(isCoverComponent(component)).toBeTruthy();
 
     (component as ShellyCoverComponent).Open();
     (component as ShellyCoverComponent).Close();

@@ -70,11 +70,7 @@
         "eco_mode": false,
         "addon_type": null
       },
-      "location": {
-        "tz": "Europe/Monaco",
-        "lat": 43.7312,
-        "lon": 7.4138
-      },
+      "location": null,
       "debug": {
         "level": 2,
         "file_level": null,
@@ -159,7 +155,11 @@
       "current": 0,
       "aenergy": {
         "total": 138,
-        "by_minute": [0, 0, 0],
+        "by_minute": [
+          0,
+          0,
+          0
+        ],
         "minute_ts": 1722516540
       },
       "temperature": {

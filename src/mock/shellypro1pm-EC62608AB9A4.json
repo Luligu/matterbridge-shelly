@@ -94,11 +94,7 @@
         "eco_mode": false,
         "sys_btn_toggle": true
       },
-      "location": {
-        "tz": "Europe/Monaco",
-        "lat": 43.7314,
-        "lon": 7.419
-      },
+      "location": null,
       "debug": {
         "level": 2,
         "file_level": null,
@@ -165,7 +161,9 @@
   "status": {
     "ble": {},
     "bthome": {
-      "errors": ["bluetooth_disabled"]
+      "errors": [
+        "bluetooth_disabled"
+      ]
     },
     "cloud": {
       "connected": true
@@ -196,12 +194,20 @@
       "pf": 0.36,
       "aenergy": {
         "total": 4969.044,
-        "by_minute": [110.937, 110.877, 110.907],
+        "by_minute": [
+          110.937,
+          110.877,
+          110.907
+        ],
         "minute_ts": 1722507660
       },
       "ret_aenergy": {
         "total": 0,
-        "by_minute": [0, 0, 0],
+        "by_minute": [
+          0,
+          0,
+          0
+        ],
         "minute_ts": 1722507660
       },
       "temperature": {
