@@ -1311,11 +1311,11 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       }
     }
     // Update for Battery
-    if (shellyComponent.name === 'Battery' && property === 'level' && isValidNumber(value)) {
+    if (shellyComponent.name === 'Battery' && property === 'level' && isValidNumber(value, 0, 100)) {
       endpoint.getClusterServer(PowerSource.Complete)?.setBatPercentRemainingAttribute(Math.min(Math.max(value * 2, 0), 200));
       shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}PowerSource-batPercentRemaining${db} ${YELLOW}${value}${db}`);
     }
-    if (shellyComponent.name === 'Battery' && property === 'voltage' && isValidNumber(value)) {
+    if (shellyComponent.name === 'Battery' && property === 'voltage' && isValidNumber(value, 0)) {
       endpoint.getClusterServer(PowerSource.Complete)?.setBatVoltageAttribute(value / 1000);
       shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}PowerSource-batVoltage${db} ${YELLOW}${value}${db}`);
     }
@@ -1339,37 +1339,26 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}BooleanStateCluster-stateValue${db} ${YELLOW}${value}${db}`);
     }
     // Update for Illuminance
-    if (shellyComponent.name === 'Lux' && property === 'value' && isValidNumber(value)) {
+    if (shellyComponent.name === 'Lux' && property === 'value' && isValidNumber(value, 0)) {
       const matterLux = Math.round(Math.max(Math.min(10000 * Math.log10(value), 0xfffe), 0));
       endpoint.getClusterServer(IlluminanceMeasurementCluster)?.setMeasuredValueAttribute(matterLux);
       shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}IlluminanceMeasurement-measuredValue${db} ${YELLOW}${matterLux}${db}`);
     }
     // Update for Temperature when has value
     if (shellyComponent.name === 'Temperature' && property === 'value' && isValidNumber(value, -100, +100)) {
-      const matterTemp = Math.min(Math.max(Math.round(value * 100), -10000), 10000);
-      endpoint.getClusterServer(TemperatureMeasurementCluster)?.setMeasuredValueAttribute(matterTemp);
-      shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}TemperatureMeasurement-measuredValue${db} ${YELLOW}${matterTemp / 100}${db}`);
+      this.setAttribute(endpoint, TemperatureMeasurementCluster, 'measuredValue', value * 100, true);
     }
     // Update for Temperature when has tC
     if (shellyComponent.name === 'Temperature' && property === 'tC' && isValidNumber(value, -100, +100)) {
-      const matterTemp = Math.min(Math.max(Math.round(value * 100), -10000), 10000);
-      this.setAttribute(endpoint, TemperatureMeasurementCluster, 'measuredValue', matterTemp, true);
-      // endpoint.getClusterServer(TemperatureMeasurementCluster)?.setMeasuredValueAttribute(matterTemp);
-      // shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}TemperatureMeasurement-measuredValue${db} ${YELLOW}${matterTemp / 100}${db}`);
+      this.setAttribute(endpoint, TemperatureMeasurementCluster, 'measuredValue', value * 100, true);
     }
     // Update for Humidity when has rh
     if (shellyComponent.name === 'Humidity' && property === 'rh' && isValidNumber(value, 0, 100)) {
-      const matterHumidity = Math.min(Math.max(Math.round(value * 100), -10000), 10000);
-      this.setAttribute(endpoint, RelativeHumidityMeasurementCluster, 'measuredValue', matterHumidity, true);
-      // endpoint.getClusterServer(RelativeHumidityMeasurementCluster)?.setMeasuredValueAttribute(matterHumidity);
-      // shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}TemperatureMeasurement-measuredValue${db} ${YELLOW}${matterHumidity / 100}${db}`);
+      this.setAttribute(endpoint, RelativeHumidityMeasurementCluster, 'measuredValue', value * 100, true);
     }
     // Update for vibration
     if (shellyComponent.name === 'Vibration' && property === 'vibration' && isValidBoolean(value)) {
-      if (value) {
-        this.triggerSwitchEvent(endpoint, 'Single');
-        shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}Switch-triggerSwitchEvent${db} ${YELLOW}Single${db}`);
-      }
+      if (value) this.triggerSwitchEvent(endpoint, 'Single', true);
     }
     // Update cover
     if (shellyComponent.name === 'Cover' || shellyComponent.name === 'Roller') {
@@ -1484,6 +1473,15 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       }
     }
   }
+
+  private updater: { component: string | string[]; property: string; typeof: string; min?: number; max?: number; cluster: string; attribute: string }[] = [
+    { component: ['Light', 'Switch'], property: 'state', typeof: 'boolean', cluster: 'OnOff', attribute: 'onOff' },
+    { component: ['Light', 'Switch'], property: 'brightness', typeof: 'number', min: 0, max: 100, cluster: 'LevelControl', attribute: 'currentLevel' },
+    { component: ['Light', 'Rgb', 'Rgbw'], property: 'red', typeof: 'array', min: 0, max: 255, cluster: 'ColorControl', attribute: '' },
+    { component: ['Light', 'Rgb', 'Rgbw'], property: 'green', typeof: 'array', min: 0, max: 255, cluster: 'ColorControl', attribute: '' },
+    { component: ['Light', 'Rgb', 'Rgbw'], property: 'blue', typeof: 'array', min: 0, max: 255, cluster: 'ColorControl', attribute: '' },
+    { component: ['Light', 'Rgb', 'Rgbw'], property: 'rgb', typeof: 'array', min: 3, max: 3, cluster: 'ColorControl', attribute: '' },
+  ];
 
   private validateWhiteBlackList(entityName: string) {
     if (this.whiteList.length > 0 && !this.whiteList.find((name) => name === entityName)) {

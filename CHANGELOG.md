@@ -18,7 +18,7 @@ If you like this project and find it useful, please consider giving it a star on
 - [shelly]: Added component Humidity (humidity).
 - [shelly]: Added detection of sleeping devices Gen. 2 and Gen. 3 (e.g. shellyhtg3).
 - [shelly]: Added WsServer to get updates and events from Gen. 2 and Gen 3. devices with sleep mode.
-- [shelly]: Added support for shellyhtg3.
+- [shelly]: Added support for shellyhtg3 (beta).
 
 <a href="https://www.buymeacoffee.com/luligugithub">
   <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
