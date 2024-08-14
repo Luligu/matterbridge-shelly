@@ -179,6 +179,12 @@ describe('ShellyPlatform', () => {
     expect(isValidObject(undefined)).toBe(false);
     expect(isValidObject({ x: 1, y: 4 })).toBe(true);
     expect(isValidObject([1, 4, 'string'])).toBe(false);
+
+    expect(isValidObject({ x: 1, y: 4 }, 1, 2)).toBe(true);
+    expect(isValidObject({ x: 1, y: 4 }, 2, 2)).toBe(true);
+    expect(isValidObject({ x: 1, y: 4 }, 2, 3)).toBe(true);
+    expect(isValidObject({ x: 1, y: 4 }, 3, 3)).toBe(false);
+    expect(isValidObject({ x: 1, y: 4 }, 1, 1)).toBe(false);
   });
 
   it('should validate array', () => {
@@ -192,6 +198,11 @@ describe('ShellyPlatform', () => {
     expect(isValidArray(undefined)).toBe(false);
     expect(isValidArray({ x: 1, y: 4 })).toBe(false);
     expect(isValidArray([1, 4, 'string'])).toBe(true);
+
+    expect(isValidArray([1, 4, 'string'], 3, 3)).toBe(true);
+    expect(isValidArray([1, 4, 'string'], 4, 4)).toBe(false);
+    expect(isValidArray([1, 4, 'string'], 1, 2)).toBe(false);
+    expect(isValidArray([1, 4, 'string'], 0, 3)).toBe(true);
   });
 
   it('should validate null', () => {

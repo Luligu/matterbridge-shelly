@@ -789,8 +789,10 @@ function logDevices() {
   });
 }
 
+/*
 process.on('SIGINT', () => {
   clearInterval(interval);
   scanner.stop();
   logDevices();
 });
+*/

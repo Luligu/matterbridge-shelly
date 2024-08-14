@@ -33,9 +33,9 @@ import { parseDigestAuthenticateHeader, createDigestShellyAuth, createBasicShell
 
 import { WsClient } from './wsClient.js';
 import { Shelly } from './shelly.js';
-import { BTHomeComponent, BTHomeDeviceComponent, BTHomeEvent, BTHomeSensorComponent, BTHomeStatusDevice, BTHomeStatusSensor, ShellyData, ShellyDataType } from './shellyTypes.js';
+import { BTHomeComponent, BTHomeDeviceComponent, BTHomeSensorComponent, BTHomeStatusDevice, BTHomeStatusSensor, ShellyData, ShellyDataType } from './shellyTypes.js';
 import { isCoverComponent, isLightComponent, isSwitchComponent, ShellyComponent } from './shellyComponent.js';
-import { isValidNumber } from './platform.js';
+import { isValidNumber, isValidObject, isValidString } from './platform.js';
 
 interface ShellyDeviceEvent {
   online: [];
@@ -341,8 +341,8 @@ export class ShellyDevice extends EventEmitter {
         });
       }
     }
-    if (this.bthomeDevices.size > 0) this.log.debug(`BTHome devices map:${rs}\n`, this.bthomeDevices);
-    if (this.bthomeSensors.size > 0) this.log.debug(`BTHome sensors map:${rs}\n`, this.bthomeSensors);
+    // if (this.bthomeDevices.size > 0) this.log.debug(`BTHome devices map:${rs}\n`, this.bthomeDevices);
+    // if (this.bthomeSensors.size > 0) this.log.debug(`BTHome sensors map:${rs}\n`, this.bthomeSensors);
   }
   /**
    * Creates a ShellyDevice instance.
@@ -618,7 +618,7 @@ export class ShellyDevice extends EventEmitter {
         }
       });
 
-      device.wsClient.on('update', (message) => {
+      device.wsClient.on('update', (params) => {
         log.debug(`WebSocket update from device ${hk}${device.id}${db} host ${zb}${device.host}${db}`);
         device.lastseen = Date.now();
         if (!device.online) {
@@ -630,10 +630,10 @@ export class ShellyDevice extends EventEmitter {
           device.cached = false;
           log.debug(`Device ${hk}${device.id}${db} host ${zb}${device.host}${db} received a WebSocket message: setting cached to false`);
         }
-        device.onUpdate(message);
+        device.onUpdate(params);
       });
 
-      device.wsClient.on('event', (events: BTHomeEvent[]) => {
+      device.wsClient.on('event', (events) => {
         log.debug(`WebSocket event from device ${hk}${device.id}${db} host ${zb}${device.host}${db}`);
         device.lastseen = Date.now();
         if (!device.online) {
@@ -663,9 +663,9 @@ export class ShellyDevice extends EventEmitter {
    *
    * @returns {void}
    */
-  onEvent(events: BTHomeEvent[]): void {
+  onEvent(events: ShellyData[]): void {
     for (const event of events) {
-      if (event.component.startsWith('bthomesensor:')) {
+      if (isValidObject(event) && isValidString(event.event) && isValidString(event.component) && event.component.startsWith('bthomesensor:')) {
         const sensor = this.bthomeSensors.get(event.component);
         if (sensor) {
           this.log.debug(

@@ -1,6 +1,6 @@
 {
   "name": "matterbridge-shelly",
-  "version": "0.8.2-beta5",
+  "version": "0.9.0-beta4",
   "description": "Matterbridge shelly plugin",
   "author": "https://github.com/Luligu",
   "license": "Apache-2.0",
@@ -47,7 +47,6 @@
     "start:ws": "node dist/wsClient.js startWsClient",
     "start:shellyDevice": "node dist/shellyDevice.js startShelly",
     "start:shelly": "node dist/shelly.js shelly",
-    "testxxx": "eslint --max-warnings=0 .",
     "test": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js",
     "test:verbose": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js --verbose",
     "test:watch": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js --watch",

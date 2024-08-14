@@ -4,24 +4,32 @@ All notable changes to this project will be documented in this file.
 
 If you like this project and find it useful, please consider giving it a star on GitHub at https://github.com/Luligu/matterbridge-shelly and sponsoring it.
 
-- [shelly]: Added support for shellyhtg3.
-
-## [0.8.2] - 2024-08-14
+## [0.9.0] - 2024-08-14
 
 ### Added
 
 - [shelly]: Added support for BLU devices (beta).
+- [shelly]: Added support for Shelly BLU Button1 - SBBT-002C.
+- [shelly]: Added support for Shelly BLU DoorWindow - SBDW-002C.
+- [shelly]: Added support for Shelly Shelly BLU HT - SBHT-003C.
+- [shelly]: Added support for Shelly BLU Motion - SBMO-003Z.
 - [shelly]: Added PowerSource.BatChargeLevel.Warning state when the battery is below 20%.
 - [shelly]: Added PowerSource.BatChargeLevel.Critical state when the battery is below 10%.
 - [shelly]: Added component Humidity (humidity).
-- [shelly]: Added detection of sleeping devices Gen. 2 and 3.
+- [shelly]: Added detection of sleeping devices Gen. 2 and Gen. 3 (e.g. shellyhtg3).
+- [shelly]: Added WsServer to get updates and events from Gen. 2 and Gen 3. devices with sleep mode.
+- [shelly]: Added support for shellyhtg3.
+
+<a href="https://www.buymeacoffee.com/luligugithub">
+  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+</a>
 
 ## [0.8.1] - 2024-08-12
 
 ### Changed
 
 - [package]: Updated dependencies.
-- [package]: Updated readme.MD with guidelines for adding wifi battery-powered devices.
+- [package]: Updated readme.MD with guidelines to add wifi battery-powered devices.
 - [package]: Update readme.MD with guidelines to add BLU devices.
 - [shelly]: Refactor WsClient and WsClient jest tests.
 - [fetch]: Changed timeout for fetch to 10 secs.
@@ -30,11 +38,11 @@ If you like this project and find it useful, please consider giving it a star on
 
 - [plugin]: Added debugWs option to the config.
 - [plugin]: Enabled enableBleDiscover option in the config.
-- [shelly]: Added support for BLU devices (alpha stage).
+- [shelly]: Added support for BLU devices (alpha).
 
 ### Fixed
 
-- [shelly]: Added strict type checking to updates from devices to prevent validation error caused by unsupported devices or firmware.
+- [shelly]: Added strict type checking to updates from devices to prevent validation errors caused by unsupported devices or firmware.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
   <img src="./yellow-button.png" alt="Buy me a coffee" width="120">

@@ -60,6 +60,7 @@ import {
   Attributes,
   Commands,
   Events,
+  AtLeastOne,
 } from 'matterbridge';
 import { EveHistory, EveHistoryCluster } from 'matterbridge/history';
 import { AnsiLogger, BLUE, CYAN, GREEN, LogLevel, TimestampFormat, YELLOW, db, debugStringify, dn, er, hk, idn, nf, or, rs, wr, zb } from 'matterbridge/logger';
@@ -131,8 +132,12 @@ export function isValidString(value: any, minLength?: number, maxLength?: number
  * @returns {boolean} A boolean indicating whether the value is a valid object.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function isValidObject(value: any): value is object {
-  return value !== undefined && value !== null && typeof value === 'object' && !Array.isArray(value);
+export function isValidObject(value: any, minLength?: number, maxLength?: number): value is object {
+  if (value === undefined || value === null || typeof value !== 'object' || Array.isArray(value)) return false;
+  const keys = Object.keys(value);
+  if (minLength !== undefined && keys.length < minLength) return false;
+  if (maxLength !== undefined && keys.length > maxLength) return false;
+  return true;
 }
 
 /**
@@ -142,8 +147,11 @@ export function isValidObject(value: any): value is object {
  * @returns {boolean} A boolean indicating whether the value is a valid array.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function isValidArray(value: any): value is unknown[] {
-  return value !== undefined && value !== null && Array.isArray(value);
+export function isValidArray(value: any, minLength?: number, maxLength?: number): value is unknown[] {
+  if (value === undefined || value === null || !Array.isArray(value)) return false;
+  if (minLength !== undefined && value.length < minLength) return false;
+  if (maxLength !== undefined && value.length > maxLength) return false;
+  return true;
 }
 
 /**
@@ -272,21 +280,16 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             this.log.info(
               `- ${idn}${bthomeDevice.name}${rs}${nf} address ${CYAN}${bthomeDevice.addr}${nf} ` + `model ${CYAN}${bthomeDevice.model}${nf} (${CYAN}${bthomeDevice.type}${nf})`,
             );
-            let definition: DeviceTypeDefinition | undefined;
-            if (bthomeDevice.model === 'Shelly BLU DoorWindow') definition = DeviceTypes.CONTACT_SENSOR;
-            else if (bthomeDevice.model === 'Shelly BLU Motion') definition = DeviceTypes.OCCUPANCY_SENSOR;
-            else if (bthomeDevice.model === 'Shelly BLU Button1') definition = DeviceTypes.GENERIC_SWITCH;
-            else if (bthomeDevice.model === 'Shelly BLU HT') definition = DeviceTypes.TEMPERATURE_SENSOR;
+            let definition: AtLeastOne<DeviceTypeDefinition> | undefined;
+            if (bthomeDevice.model === 'Shelly BLU DoorWindow') definition = [DeviceTypes.CONTACT_SENSOR, DeviceTypes.LIGHT_SENSOR, DeviceTypes.GENERIC_SWITCH];
+            else if (bthomeDevice.model === 'Shelly BLU Motion') definition = [DeviceTypes.OCCUPANCY_SENSOR, DeviceTypes.LIGHT_SENSOR, DeviceTypes.GENERIC_SWITCH];
+            else if (bthomeDevice.model === 'Shelly BLU Button1') definition = [DeviceTypes.GENERIC_SWITCH];
+            else if (bthomeDevice.model === 'Shelly BLU HT') definition = [DeviceTypes.TEMPERATURE_SENSOR, DeviceTypes.HUMIDITY_SENSOR, DeviceTypes.GENERIC_SWITCH];
             else this.log.error(`Shelly device ${hk}${device.id}${er} host ${zb}${device.host}${er} has an unknown BLU device model ${CYAN}${bthomeDevice.model}${nf}`);
             if (definition) {
               const mbDevice = new MatterbridgeDevice(definition, undefined, config.debug as boolean);
               mbDevice.createDefaultBridgedDeviceBasicInformationClusterServer(bthomeDevice.name, bthomeDevice.addr, 0xfff1, 'Shelly', bthomeDevice.model);
               mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer();
-              if (bthomeDevice.model === 'Shelly BLU DoorWindow') mbDevice.addDeviceType(DeviceTypes.LIGHT_SENSOR);
-              if (bthomeDevice.model === 'Shelly BLU HT') mbDevice.addDeviceType(DeviceTypes.HUMIDITY_SENSOR);
-              if (bthomeDevice.model === 'Shelly BLU HT') mbDevice.addDeviceType(DeviceTypes.LIGHT_SENSOR);
-              if (bthomeDevice.model === 'Shelly BLU HT') mbDevice.addDeviceType(DeviceTypes.GENERIC_SWITCH);
-              if (bthomeDevice.model === 'Shelly BLU Motion') mbDevice.addDeviceType(DeviceTypes.LIGHT_SENSOR);
               mbDevice.addRequiredClusterServers(mbDevice);
               try {
                 await this.registerDevice(mbDevice);
@@ -660,7 +663,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           } else if (inputComponent && inputComponent?.hasProperty('state') && config.exposeInput === 'momentary') {
             const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.GENERIC_SWITCH], []);
             child.addClusterServer(mbDevice.getDefaultSwitchClusterServer());
-            mbDevice.addFixedLabel('composed', component.name);
+            if (!composed) mbDevice.addFixedLabel('composed', component.name);
+            composed = true;
             // Set the state attribute
             const state = inputComponent.getValue('state') as boolean;
             if (isValidBoolean(state)) child.getClusterServer(SwitchCluster.with(Switch.Feature.MomentarySwitch))?.setCurrentPositionAttribute(state ? 1 : 0);
@@ -671,7 +675,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           } else if (inputComponent && inputComponent?.hasProperty('state') && config.exposeInput === 'latching') {
             const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.GENERIC_SWITCH], []);
             child.addClusterServer(mbDevice.getDefaultLatchingSwitchClusterServer());
-            mbDevice.addFixedLabel('composed', component.name);
+            if (!composed) mbDevice.addFixedLabel('composed', component.name);
+            composed = true;
             // Set the state attribute
             const state = inputComponent.getValue('state') as boolean;
             if (isValidBoolean(state)) child.getClusterServer(SwitchCluster.with(Switch.Feature.LatchingSwitch))?.setCurrentPositionAttribute(state ? 1 : 0);
@@ -682,7 +687,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           } else if (inputComponent && inputComponent?.hasProperty('event') && config.exposeInputEvent !== 'disabled') {
             const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.GENERIC_SWITCH], []);
             child.addClusterServer(mbDevice.getDefaultSwitchClusterServer());
-            mbDevice.addFixedLabel('composed', component.name);
+            if (!composed) mbDevice.addFixedLabel('composed', component.name);
+            composed = true;
             // Set the current position to 0
             child.getClusterServer(SwitchCluster.with(Switch.Feature.MomentarySwitch))?.setCurrentPositionAttribute(0);
             // Add event handler
@@ -961,7 +967,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       const fileName = path.join(this.matterbridge.matterbridgePluginDirectory, 'matterbridge-shelly', `${deviceId}.json`);
       device = await ShellyDevice.create(this.shelly, log, fileName);
       if (!device) return;
-      this.log.warn(`Loaded from cache Shelly device ${hk}${deviceId}${nf} host ${zb}${host}${nf}`);
+      this.log.warn(`Loaded from cache Shelly device ${hk}${deviceId}${wr} host ${zb}${host}${wr}`);
       device.setHost(host);
       device.cached = true;
       device.online = false;
@@ -991,6 +997,14 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     }
     const capitalizedAttributeName = attribute.charAt(0).toUpperCase() + attribute.slice(1);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if (!(clusterServer as any)[`get${capitalizedAttributeName}Attribute`]) {
+      if (log)
+        this.log.error(`getAttribute error: Getter get${capitalizedAttributeName}Attribute not found on Cluster ${cluster.name} on endpoint ${endpoint.name}:${endpoint.number}`);
+      return;
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-empty-object-type
+    const getter = (clusterServer as any)[`get${capitalizedAttributeName}Attribute`] as () => {};
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if (!(clusterServer as any)[`set${capitalizedAttributeName}Attribute`]) {
       if (log)
         this.log.error(`setAttribute error: Setter set${capitalizedAttributeName}Attribute not found on Cluster ${cluster.name} on endpoint ${endpoint.name}:${endpoint.number}`);
@@ -998,10 +1012,12 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-empty-object-type
     const setter = (clusterServer as any)[`set${capitalizedAttributeName}Attribute`] as (value: any) => {};
+    const oldValue = getter();
     setter(value);
     if (log)
       this.log.info(
         `**${db}Update endpoint ${or}${endpoint.name}:${endpoint.number}${db} attribute ${hk}${cluster.name}.${capitalizedAttributeName}${db} ` +
+          `from ${YELLOW}${typeof oldValue === 'object' ? debugStringify(value) : oldValue}${db} ` +
           `to ${YELLOW}${typeof value === 'object' ? debugStringify(value) : value}${db}`,
       );
   }
@@ -1025,7 +1041,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
   }
 
   // TODO remove and use matterbridge method
-  protected triggerSwitchEvent(endpoint: Endpoint, event: string, log = false) {
+  protected triggerSwitchEvent(endpoint: Endpoint, event: 'Single' | 'Double' | 'Long' | 'Press' | 'Release', log = false) {
     if (['Single', 'Double', 'Long'].includes(event)) {
       const cluster = endpoint.getClusterServer(
         SwitchCluster.with(
@@ -1328,11 +1344,25 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       endpoint.getClusterServer(IlluminanceMeasurementCluster)?.setMeasuredValueAttribute(matterLux);
       shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}IlluminanceMeasurement-measuredValue${db} ${YELLOW}${matterLux}${db}`);
     }
-    // Update for Temperature
-    if (shellyComponent.name === 'Temperature' && property === 'value' && isValidNumber(value)) {
+    // Update for Temperature when has value
+    if (shellyComponent.name === 'Temperature' && property === 'value' && isValidNumber(value, -100, +100)) {
       const matterTemp = Math.min(Math.max(Math.round(value * 100), -10000), 10000);
       endpoint.getClusterServer(TemperatureMeasurementCluster)?.setMeasuredValueAttribute(matterTemp);
       shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}TemperatureMeasurement-measuredValue${db} ${YELLOW}${matterTemp / 100}${db}`);
+    }
+    // Update for Temperature when has tC
+    if (shellyComponent.name === 'Temperature' && property === 'tC' && isValidNumber(value, -100, +100)) {
+      const matterTemp = Math.min(Math.max(Math.round(value * 100), -10000), 10000);
+      this.setAttribute(endpoint, TemperatureMeasurementCluster, 'measuredValue', matterTemp, true);
+      // endpoint.getClusterServer(TemperatureMeasurementCluster)?.setMeasuredValueAttribute(matterTemp);
+      // shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}TemperatureMeasurement-measuredValue${db} ${YELLOW}${matterTemp / 100}${db}`);
+    }
+    // Update for Humidity when has rh
+    if (shellyComponent.name === 'Humidity' && property === 'rh' && isValidNumber(value, 0, 100)) {
+      const matterHumidity = Math.min(Math.max(Math.round(value * 100), -10000), 10000);
+      this.setAttribute(endpoint, RelativeHumidityMeasurementCluster, 'measuredValue', matterHumidity, true);
+      // endpoint.getClusterServer(RelativeHumidityMeasurementCluster)?.setMeasuredValueAttribute(matterHumidity);
+      // shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}TemperatureMeasurement-measuredValue${db} ${YELLOW}${matterHumidity / 100}${db}`);
     }
     // Update for vibration
     if (shellyComponent.name === 'Vibration' && property === 'vibration' && isValidBoolean(value)) {

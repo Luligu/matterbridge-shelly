@@ -628,6 +628,7 @@ export class CoapServer extends EventEmitter {
 
 // Use with: node dist/coapServer.js coapStatus coapDescription
 // Use with: node dist/coapServer.js coapServer coapDescription
+/*
 if (process.argv.includes('coapServer') || process.argv.includes('coapDescription') || process.argv.includes('coapStatus') || process.argv.includes('coapMcast')) {
   const coapServer = new CoapServer(LogLevel.DEBUG);
 
@@ -655,6 +656,7 @@ if (process.argv.includes('coapServer') || process.argv.includes('coapDescriptio
     // process.exit();
   });
 }
+*/
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const SHDW = {

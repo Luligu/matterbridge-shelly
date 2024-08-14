@@ -26,6 +26,7 @@ import WebSocket from 'ws';
 import crypto from 'crypto';
 import EventEmitter from 'events';
 import { createDigestShellyAuth } from './auth.js';
+import { ShellyDevice } from './shellyDevice.js';
 
 interface AuthParams {
   realm: string; // device_id
@@ -94,7 +95,7 @@ interface WsClientEvent {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   update: [params: any];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  event: [event: any];
+  event: [events: any];
 }
 
 /**
@@ -320,35 +321,39 @@ export class WsClient extends EventEmitter {
     // Handle messages from the WebSocket
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     this.wsClient.on('message', (data: WebSocket.RawData, isBinary: boolean) => {
-      const response = JSON.parse(data.toString());
-      this.id = response.src;
+      try {
+        const response = JSON.parse(data.toString());
+        this.id = ShellyDevice.normalizeId(response.src).id;
 
-      // Handle the response error code 401 (auth required)
-      if (response.error && response.error.code === 401 && response.id === this.requestId && response.dst === 'Matterbridge') {
-        this.auth = true;
-        if (!this.password) {
-          this.log.error(`Authentication required for ${response.src} but the password is not set. Exiting...`);
-          return;
+        // Handle the response error code 401 (auth required)
+        if (response.error && response.error.code === 401 && response.id === this.requestId && response.dst === 'Matterbridge') {
+          this.auth = true;
+          if (!this.password) {
+            this.log.error(`Authentication required for ${response.src} but the password is not set. Exiting...`);
+            return;
+          }
+          this.requestFrameWithAuth.method = this.requestFrame.method;
+          this.requestFrameWithAuth.params = this.requestFrame.params;
+          const auth: ResponseErrorMessage = JSON.parse(response.error.message);
+          this.log.debug(`Auth requested: ${response.error.message}`);
+          this.requestFrameWithAuth.auth = createDigestShellyAuth('admin', this.password, auth.nonce, crypto.randomInt(0, 999999999), auth.realm, auth.nc);
+          this.wsClient?.send(JSON.stringify(this.requestFrameWithAuth));
+        } else if (response.result && response.id === this.requestId && response.dst === 'Matterbridge') {
+          this.log.debug(`Received ${CYAN}Shelly.GetStatus${db} response from ${hk}${this.id}${db} host ${zb}${this.wsHost}${db}:${rs}\n`, response.result);
+          this.emit('response', response.result);
+        } else if (response.method && (response.method === 'NotifyStatus' || response.method === 'NotifyFullStatus') && response.dst === 'Matterbridge') {
+          this.log.debug(`Received ${CYAN}${response.method}${db} from ${hk}${this.id}${db} host ${zb}${this.wsHost}${db}:${rs}\n`, response.params);
+          this.emit('update', response.params);
+        } else if (response.method && response.method === 'NotifyEvent' && response.dst === 'Matterbridge') {
+          this.log.debug(`Received ${CYAN}${response.method}${db} from ${hk}${this.id}${db} host ${zb}${this.wsHost}${db}:${rs}\n`, response.params.events);
+          this.emit('event', response.params.events);
+        } else if (response.error && response.id === this.requestId && response.dst === 'Matterbridge') {
+          this.log.error(`Received ${CYAN}error response${er} from ${hk}${this.id}${er} host ${zb}${this.wsHost}${er}:${rs}\n`, response);
+        } else {
+          this.log.warn(`Received ${CYAN}unknown response${wr} from ${hk}${this.id}${wr} host ${zb}${this.wsHost}${wr}:${rs}\n`, response);
         }
-        this.requestFrameWithAuth.method = this.requestFrame.method;
-        this.requestFrameWithAuth.params = this.requestFrame.params;
-        const auth: ResponseErrorMessage = JSON.parse(response.error.message);
-        this.log.debug(`Auth requested: ${response.error.message}`);
-        this.requestFrameWithAuth.auth = createDigestShellyAuth('admin', this.password, auth.nonce, crypto.randomInt(0, 999999999), auth.realm, auth.nc);
-        this.wsClient?.send(JSON.stringify(this.requestFrameWithAuth));
-      } else if (response.result && response.id === this.requestId && response.dst === 'Matterbridge') {
-        this.log.debug(`Received Shelly.GetStatus response from ${CYAN}${this.id}${db} on ${zb}${this.wsHost}${db}:${rs}\n`, response.result);
-        this.emit('response', response.result);
-      } else if (response.method && (response.method === 'NotifyStatus' || response.method === 'NotifyFullStatus') && response.dst === 'Matterbridge') {
-        this.log.debug(`Received NotifyStatus from ${CYAN}${this.id}${db} on ${zb}${this.wsHost}${db}:${rs}\n`, response.params);
-        this.emit('update', response.params);
-      } else if (response.method && response.method === 'NotifyEvent' && response.dst === 'Matterbridge') {
-        this.log.debug(`Received NotifyEvent from ${CYAN}${this.id}${db} on ${zb}${this.wsHost}${db}:${rs}\n`, response.params.events);
-        this.emit('event', response.params.events);
-      } else if (response.error && response.id === this.requestId && response.dst === 'Matterbridge') {
-        this.log.error(`Received error response from ${CYAN}${this.id}${er} on ${zb}${this.wsHost}${er}:${rs}\n`, response);
-      } else {
-        this.log.warn(`Received unknown response from ${CYAN}${this.id}${wr} on ${zb}${this.wsHost}${wr}:${rs}\n`, response);
+      } catch (error) {
+        this.log.error(`WebSocket client error parsing message from ${hk}${this.id}${er} host ${zb}${this.wsHost}${er}: ${error instanceof Error ? error.message : error}`);
       }
     });
   }
