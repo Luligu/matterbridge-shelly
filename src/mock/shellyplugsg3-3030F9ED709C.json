@@ -45,11 +45,19 @@
         "colors": {
           "switch:0": {
             "on": {
-              "rgb": [0, 100, 0],
+              "rgb": [
+                0,
+                100,
+                0
+              ],
               "brightness": 100
             },
             "off": {
-              "rgb": [100, 0, 0],
+              "rgb": [
+                100,
+                0,
+                0
+              ],
               "brightness": 100
             }
           },
@@ -95,11 +103,7 @@
         "discoverable": true,
         "eco_mode": false
       },
-      "location": {
-        "tz": "Asia/Amman",
-        "lat": 31.9555,
-        "lon": 35.9435
-      },
+      "location": null,
       "debug": {
         "level": 2,
         "file_level": null,
@@ -187,12 +191,20 @@
       "current": 0,
       "aenergy": {
         "total": 0,
-        "by_minute": [0, 0, 0],
+        "by_minute": [
+          0,
+          0,
+          0
+        ],
         "minute_ts": 1722955080
       },
       "ret_aenergy": {
         "total": 0,
-        "by_minute": [0, 0, 0],
+        "by_minute": [
+          0,
+          0,
+          0
+        ],
         "minute_ts": 1722955080
       },
       "temperature": {

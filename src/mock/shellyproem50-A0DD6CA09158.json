@@ -84,11 +84,7 @@
         "addon_type": null,
         "sys_btn_toggle": true
       },
-      "location": {
-        "tz": "Europe/Monaco",
-        "lat": 43.7312,
-        "lon": 7.4138
-      },
+      "location": null,
       "debug": {
         "level": 2,
         "file_level": null,
@@ -155,7 +151,9 @@
   "status": {
     "ble": {},
     "bthome": {
-      "errors": ["bluetooth_disabled"]
+      "errors": [
+        "bluetooth_disabled"
+      ]
     },
     "cloud": {
       "connected": true

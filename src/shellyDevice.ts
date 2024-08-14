@@ -33,9 +33,9 @@ import { parseDigestAuthenticateHeader, createDigestShellyAuth, createBasicShell
 
 import { WsClient } from './wsClient.js';
 import { Shelly } from './shelly.js';
-import { BTHomeComponent, BTHomeDeviceComponent, BTHomeEvent, BTHomeSensorComponent, BTHomeStatusDevice, BTHomeStatusSensor, ShellyData, ShellyDataType } from './shellyTypes.js';
-import { ShellyComponent, ShellyCoverComponent, ShellyLightComponent, ShellySwitchComponent } from './shellyComponent.js';
-import { isValidNumber } from './platform.js';
+import { BTHomeComponent, BTHomeDeviceComponent, BTHomeSensorComponent, BTHomeStatusDevice, BTHomeStatusSensor, ShellyData, ShellyDataType } from './shellyTypes.js';
+import { isCoverComponent, isLightComponent, isSwitchComponent, ShellyComponent } from './shellyComponent.js';
+import { isValidNumber, isValidObject, isValidString } from './platform.js';
 
 interface ShellyDeviceEvent {
   online: [];
@@ -86,7 +86,7 @@ export class ShellyDevice extends EventEmitter {
   private statusPayload: ShellyData | null = null;
   private settingsPayload: ShellyData | null = null;
   private componentsPayload: ShellyData | null = null;
-  readonly bthomeDevices = new Map<string, { id: number; key: string; name: string; addr: string; model: string; type: string; rssi: number }>();
+  readonly bthomeDevices = new Map<string, { id: number; key: string; name: string; addr: string; model: string; type: string; rssi: number; last_updated_ts: number }>();
   readonly bthomeSensors = new Map<string, { id: number; key: string; name: string; addr: string; sensorId: number; value?: ShellyDataType }>();
 
   private constructor(shelly: Shelly, log: AnsiLogger, host: string) {
@@ -151,6 +151,15 @@ export class ShellyDevice extends EventEmitter {
    * @param {string} id - The ID of the component to retrieve.
    * @returns {ShellyComponent | ShellyLightComponent | ShellySwitchComponent | ShellyCoverComponent | undefined} The ShellyComponent with the specified ID, or undefined if not found.
    */
+  getComponent<T extends ShellyComponent>(id: string): T | undefined {
+    const component = this._components.get(id);
+    if (!component) return undefined;
+    if (isLightComponent(component)) return component as unknown as T;
+    if (isSwitchComponent(component)) return component as unknown as T;
+    if (isCoverComponent(component)) return component as unknown as T;
+    return component as T;
+  }
+  /*
   getComponent(id: string): ShellyComponent | ShellyLightComponent | ShellySwitchComponent | ShellyCoverComponent | undefined {
     const component = this._components.get(id);
     if (!component) return undefined;
@@ -159,6 +168,7 @@ export class ShellyDevice extends EventEmitter {
     else if (component.isCoverComponent()) return component as ShellyCoverComponent;
     else return component as ShellyComponent;
   }
+  */
 
   /**
    * Retrieves an array of component IDs.
@@ -271,7 +281,7 @@ export class ShellyDevice extends EventEmitter {
       0x3f: 'Rotation',
       0x45: 'Temperature',
     };
-    return objIdsMap[objId] || `Sensor Id unknown ${objId}`;
+    return objIdsMap[objId] || `Unknown sensor id ${objId}`;
   }
 
   /**
@@ -289,7 +299,7 @@ export class ShellyDevice extends EventEmitter {
       'SBBT-004CEU': 'Shelly BLU Wall Switch 4',
       'SBBT-004CUS': 'Shelly BLU RC Button 4',
     };
-    return modelsMap[model] || `Shelly BLU unknown model ${model}`;
+    return modelsMap[model] || `Unknown Shelly BLU model ${model}`;
   }
 
   scanBTHomeComponent(components: BTHomeComponent[]) {
@@ -310,6 +320,7 @@ export class ShellyDevice extends EventEmitter {
           model: this.getBTHomeModelText(component.config.meta.ui.local_name),
           type: component.config.meta.ui.local_name,
           rssi: component.status.rssi,
+          last_updated_ts: component.status.last_updated_ts,
         });
       }
     }
@@ -330,8 +341,8 @@ export class ShellyDevice extends EventEmitter {
         });
       }
     }
-    if (this.bthomeDevices.size > 0) this.log.debug(`BTHome devices map:${rs}\n`, this.bthomeDevices);
-    if (this.bthomeSensors.size > 0) this.log.debug(`BTHome sensors map:${rs}\n`, this.bthomeSensors);
+    // if (this.bthomeDevices.size > 0) this.log.debug(`BTHome devices map:${rs}\n`, this.bthomeDevices);
+    // if (this.bthomeSensors.size > 0) this.log.debug(`BTHome sensors map:${rs}\n`, this.bthomeSensors);
   }
   /**
    * Creates a ShellyDevice instance.
@@ -467,6 +478,9 @@ export class ShellyDevice extends EventEmitter {
         log.debug(`****Error creating device gen 2 from host ${zb}${host}${db}. No data found.`);
         return undefined;
       }
+      // Set sleep mode for gen 2 and 3 devices
+      if ((statusPayload.sys as ShellyData).wakeup_period) device.sleepMode = true;
+
       // Scan for BTHome devices and components
       componentsPayload = await ShellyDevice.fetch(shelly, log, host, 'Shelly.GetComponents');
       if (componentsPayload && componentsPayload.components) {
@@ -512,6 +526,8 @@ export class ShellyDevice extends EventEmitter {
         if (key.startsWith('input:')) device.addComponent(new ShellyComponent(device, key, 'Input', settingsPayload[key] as ShellyData));
         if (key.startsWith('pm1:')) device.addComponent(new ShellyComponent(device, key, 'PowerMeter', settingsPayload[key] as ShellyData));
         if (key.startsWith('em1:')) device.addComponent(new ShellyComponent(device, key, 'PowerMeter', settingsPayload[key] as ShellyData));
+        if (key.startsWith('temperature:')) device.addComponent(new ShellyComponent(device, key, 'Temperature', settingsPayload[key] as ShellyData));
+        if (key.startsWith('humidity:')) device.addComponent(new ShellyComponent(device, key, 'Humidity', settingsPayload[key] as ShellyData));
       }
     }
 
@@ -572,7 +588,7 @@ export class ShellyDevice extends EventEmitter {
 
       // Check WebSocket client for gen 2 and 3 devices
       if (device.gen === 2 || device.gen === 3) {
-        if (device.wsClient?.isConnected === false) {
+        if (!device.sleepMode && device.wsClient?.isConnected === false) {
           log.notice(`WebSocket client for device ${hk}${device.id}${nt} host ${zb}${device.host}${nt} is not connected. Starting connection...`);
           device.wsClient?.start();
         }
@@ -602,7 +618,7 @@ export class ShellyDevice extends EventEmitter {
         }
       });
 
-      device.wsClient.on('update', (message) => {
+      device.wsClient.on('update', (params) => {
         log.debug(`WebSocket update from device ${hk}${device.id}${db} host ${zb}${device.host}${db}`);
         device.lastseen = Date.now();
         if (!device.online) {
@@ -614,10 +630,10 @@ export class ShellyDevice extends EventEmitter {
           device.cached = false;
           log.debug(`Device ${hk}${device.id}${db} host ${zb}${device.host}${db} received a WebSocket message: setting cached to false`);
         }
-        device.onUpdate(message);
+        device.onUpdate(params);
       });
 
-      device.wsClient.on('event', (events: BTHomeEvent[]) => {
+      device.wsClient.on('event', (events) => {
         log.debug(`WebSocket event from device ${hk}${device.id}${db} host ${zb}${device.host}${db}`);
         device.lastseen = Date.now();
         if (!device.online) {
@@ -647,13 +663,13 @@ export class ShellyDevice extends EventEmitter {
    *
    * @returns {void}
    */
-  onEvent(events: BTHomeEvent[]): void {
+  onEvent(events: ShellyData[]): void {
     for (const event of events) {
-      if (event.component.startsWith('bthomesensor:')) {
+      if (isValidObject(event) && isValidString(event.event) && isValidString(event.component) && event.component.startsWith('bthomesensor:')) {
         const sensor = this.bthomeSensors.get(event.component);
         if (sensor) {
           this.log.debug(
-            `****Device ${hk}${this.id}${db} has event ${YELLOW}${event.event}${db} from BTHomeSensor addr ${idn}${sensor.addr}${rs}${db} ` +
+            `Device ${hk}${this.id}${db} has event ${YELLOW}${event.event}${db} from BTHomeSensor addr ${idn}${sensor.addr}${rs}${db} ` +
               `name ${CYAN}${sensor.name}${db} sensorId ${CYAN}${this.getBTHomeObjIdText(sensor.sensorId)}${db} (${CYAN}${sensor.sensorId}${db})`,
           );
           this.emit('bthomesensor_event', sensor.addr, this.getBTHomeObjIdText(sensor.sensorId), event.event);
@@ -684,12 +700,13 @@ export class ShellyDevice extends EventEmitter {
         if (device) {
           const bthomeDevice = data[key] as BTHomeStatusDevice;
           this.log.debug(
-            `****Device ${hk}${this.id}${db} has device update from BTHomeDevice id ${CYAN}${device.id}${db} key ${CYAN}${device.key}${db} ` +
-              `addr ${idn}${device.addr}${rs}${db} name ${device.name} model ${device.model} (${device.type}) rssi ${YELLOW}${bthomeDevice.rssi}${db}`,
+            `Device ${hk}${this.id}${db} has device update from BTHomeDevice id ${CYAN}${device.id}${db} key ${CYAN}${device.key}${db} ` +
+              `addr ${idn}${device.addr}${rs}${db} name ${device.name} model ${device.model} (${device.type}) ` +
+              `rssi ${YELLOW}${bthomeDevice.rssi}${db} last_updated_ts ${YELLOW}${bthomeDevice.last_updated_ts}${db}`,
           );
-          if (isValidNumber(bthomeDevice.rssi)) {
-            device.rssi = bthomeDevice.rssi;
-            this.log.debug(`****Device ${hk}${this.id}${db} has updated rssi ${YELLOW}${device.rssi}${db} for BTHomeDevice id ${CYAN}${device.key}${db}`);
+          if (isValidNumber(bthomeDevice.rssi, -100, 0) || isValidNumber(bthomeDevice.last_updated_ts, 0)) {
+            if (isValidNumber(bthomeDevice.rssi, -100, 0)) device.rssi = bthomeDevice.rssi;
+            if (isValidNumber(bthomeDevice.last_updated_ts, 0)) device.last_updated_ts = bthomeDevice.last_updated_ts;
             this.emit('bthomedevice_update', device.addr, bthomeDevice.rssi, bthomeDevice.last_updated_ts);
             // this.log.debug(`BTHome devices map:${rs}\n`, this.bthomeDevices);
           }
@@ -699,13 +716,12 @@ export class ShellyDevice extends EventEmitter {
         if (sensor) {
           const bthomeSensor = data[key] as BTHomeStatusSensor;
           this.log.debug(
-            `****Device ${hk}${this.id}${db} has sensor update from BTHomeSensor id ${CYAN}${sensor.id}${db} key ${CYAN}${sensor.key}${db} ` +
+            `Device ${hk}${this.id}${db} has sensor update from BTHomeSensor id ${CYAN}${sensor.id}${db} key ${CYAN}${sensor.key}${db} ` +
               `addr ${idn}${sensor.addr}${rs}${db} name ${CYAN}${sensor.name}${db} ` +
               `sensorId ${CYAN}${this.getBTHomeObjIdText(sensor.sensorId)}${db} (${CYAN}${sensor.sensorId}${db}): ${YELLOW}${bthomeSensor.value}${db}`,
           );
           if (bthomeSensor.value !== undefined && bthomeSensor.value !== null) {
             sensor.value = bthomeSensor.value;
-            this.log.debug(`****Device ${hk}${this.id}${db} has updated value ${YELLOW}${bthomeSensor.value}${db} for BTHomeSensor id ${CYAN}${sensor.key}${db}`);
             this.emit('bthomesensor_update', sensor.addr, this.getBTHomeObjIdText(sensor.sensorId), bthomeSensor.value);
             // this.log.debug(`BTHome sensors map:${rs}\n`, this.bthomeSensors);
           }
@@ -825,6 +841,8 @@ export class ShellyDevice extends EventEmitter {
         if (key.startsWith('input:')) this.updateComponent(key, data[key] as ShellyData);
         if (key.startsWith('pm1:')) this.updateComponent(key, data[key] as ShellyData);
         if (key.startsWith('em1:')) this.updateComponent(key, data[key] as ShellyData);
+        if (key.startsWith('temperature:')) this.updateComponent(key, data[key] as ShellyData);
+        if (key.startsWith('humidity:')) this.updateComponent(key, data[key] as ShellyData);
       }
       // Update state for active components with output
       for (const key in data) {
@@ -1033,6 +1051,18 @@ export class ShellyDevice extends EventEmitter {
           status: this.statusPayload,
           components: this.componentsPayload ? this.componentsPayload.components : [],
         };
+        // Remove sensitive data for Gen 1 devices
+        if (this.gen === 1) {
+          deviceData.settings.timezone = null;
+          deviceData.settings.lat = null;
+          deviceData.settings.lng = null;
+        }
+        // Remove sensitive data for Gen 2 and 3 devices
+        if (this.gen === 2 || this.gen === 3) {
+          if (deviceData.settings.sys) {
+            (deviceData.settings.sys as ShellyData).location = null;
+          }
+        }
         const data = JSON.stringify(deviceData, null, 2);
         await fs.writeFile(path.join(dataPath, `${this.id}.json`), data, 'utf8');
         this.log.debug(`Successfully wrote to ${path.join(dataPath, `${this.id}.json`)}`);

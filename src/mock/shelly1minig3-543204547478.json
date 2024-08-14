@@ -73,11 +73,7 @@
         "discoverable": true,
         "eco_mode": false
       },
-      "location": {
-        "tz": "Europe/Monaco",
-        "lat": 43.7314,
-        "lon": 7.419
-      },
+      "location": null,
       "debug": {
         "level": 2,
         "file_level": null,
@@ -144,7 +140,9 @@
   "status": {
     "ble": {},
     "bthome": {
-      "errors": ["bluetooth_disabled"]
+      "errors": [
+        "bluetooth_disabled"
+      ]
     },
     "cloud": {
       "connected": true

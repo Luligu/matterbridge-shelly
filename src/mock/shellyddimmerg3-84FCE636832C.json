@@ -93,11 +93,7 @@
         "fw_id": "20240719-122242/g55db545",
         "discoverable": true
       },
-      "location": {
-        "tz": "Europe/Monaco",
-        "lat": 43.7312,
-        "lon": 7.4138
-      },
+      "location": null,
       "debug": {
         "level": 2,
         "file_level": null,
@@ -167,7 +163,9 @@
   "status": {
     "ble": {},
     "bthome": {
-      "errors": ["bluetooth_disabled"]
+      "errors": [
+        "bluetooth_disabled"
+      ]
     },
     "cloud": {
       "connected": true

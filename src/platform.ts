@@ -53,6 +53,14 @@ import {
   IlluminanceMeasurementCluster,
   TemperatureMeasurementCluster,
   DeviceTypeDefinition,
+  RelativeHumidityMeasurementCluster,
+  Cluster,
+  BitSchema,
+  TypeFromPartialBitSchema,
+  Attributes,
+  Commands,
+  Events,
+  AtLeastOne,
 } from 'matterbridge';
 import { EveHistory, EveHistoryCluster } from 'matterbridge/history';
 import { AnsiLogger, BLUE, CYAN, GREEN, LogLevel, TimestampFormat, YELLOW, db, debugStringify, dn, er, hk, idn, nf, or, rs, wr, zb } from 'matterbridge/logger';
@@ -64,7 +72,7 @@ import path from 'path';
 import { Shelly } from './shelly.js';
 import { DiscoveredDevice } from './mdnsScanner.js';
 import { ShellyDevice } from './shellyDevice.js';
-import { ShellyComponent, ShellyCoverComponent, ShellyLightComponent, ShellySwitchComponent } from './shellyComponent.js';
+import { isLightComponent, ShellyComponent, ShellyCoverComponent, ShellyLightComponent, ShellySwitchComponent } from './shellyComponent.js';
 import { ShellyData, ShellyDataType } from './shellyTypes.js';
 
 type ConfigDeviceIp = Record<string, string>;
@@ -105,6 +113,8 @@ export function isValidBoolean(value: any): value is boolean {
  * Checks if a value is a valid string.
  *
  * @param {any} value - The value to be checked.
+ * @param {number} minLength - The min string length (optional).
+ * @param {number} maxLength - The max string length (optional).
  * @returns {boolean} A boolean indicating whether the value is a valid string.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -122,8 +132,12 @@ export function isValidString(value: any, minLength?: number, maxLength?: number
  * @returns {boolean} A boolean indicating whether the value is a valid object.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function isValidObject(value: any): value is object {
-  return value !== undefined && value !== null && typeof value === 'object' && !Array.isArray(value);
+export function isValidObject(value: any, minLength?: number, maxLength?: number): value is object {
+  if (value === undefined || value === null || typeof value !== 'object' || Array.isArray(value)) return false;
+  const keys = Object.keys(value);
+  if (minLength !== undefined && keys.length < minLength) return false;
+  if (maxLength !== undefined && keys.length > maxLength) return false;
+  return true;
 }
 
 /**
@@ -133,8 +147,11 @@ export function isValidObject(value: any): value is object {
  * @returns {boolean} A boolean indicating whether the value is a valid array.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function isValidArray(value: any): value is unknown[] {
-  return value !== undefined && value !== null && Array.isArray(value);
+export function isValidArray(value: any, minLength?: number, maxLength?: number): value is unknown[] {
+  if (value === undefined || value === null || !Array.isArray(value)) return false;
+  if (minLength !== undefined && value.length < minLength) return false;
+  if (maxLength !== undefined && value.length > maxLength) return false;
+  return true;
 }
 
 /**
@@ -164,7 +181,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
   public storedDevices = new Map<ShellyDeviceId, DiscoveredDevice>();
   public shellyDevices = new Map<ShellyDeviceId, ShellyDevice>();
   public bridgedDevices = new Map<ShellyDeviceId, MatterbridgeDevice>();
-  public bluDevices = new Map<string, MatterbridgeDevice>();
+  public bluBridgedDevices = new Map<string, MatterbridgeDevice>();
 
   // NodeStorageManager
   private nodeStorageManager?: NodeStorageManager;
@@ -263,25 +280,90 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             this.log.info(
               `- ${idn}${bthomeDevice.name}${rs}${nf} address ${CYAN}${bthomeDevice.addr}${nf} ` + `model ${CYAN}${bthomeDevice.model}${nf} (${CYAN}${bthomeDevice.type}${nf})`,
             );
-            let definition: DeviceTypeDefinition | undefined;
-            if (bthomeDevice.model === 'Shelly BLU DoorWindow') definition = DeviceTypes.CONTACT_SENSOR;
-            else if (bthomeDevice.model === 'Shelly BLU Motion') definition = DeviceTypes.OCCUPANCY_SENSOR;
-            else if (bthomeDevice.model === 'Shelly BLU Button1') definition = DeviceTypes.GENERIC_SWITCH;
-            else if (bthomeDevice.model === 'Shelly BLU HT') definition = DeviceTypes.TEMPERATURE_SENSOR;
+            let definition: AtLeastOne<DeviceTypeDefinition> | undefined;
+            if (bthomeDevice.model === 'Shelly BLU DoorWindow') definition = [DeviceTypes.CONTACT_SENSOR, DeviceTypes.LIGHT_SENSOR, DeviceTypes.GENERIC_SWITCH];
+            else if (bthomeDevice.model === 'Shelly BLU Motion') definition = [DeviceTypes.OCCUPANCY_SENSOR, DeviceTypes.LIGHT_SENSOR, DeviceTypes.GENERIC_SWITCH];
+            else if (bthomeDevice.model === 'Shelly BLU Button1') definition = [DeviceTypes.GENERIC_SWITCH];
+            else if (bthomeDevice.model === 'Shelly BLU HT') definition = [DeviceTypes.TEMPERATURE_SENSOR, DeviceTypes.HUMIDITY_SENSOR, DeviceTypes.GENERIC_SWITCH];
             else this.log.error(`Shelly device ${hk}${device.id}${er} host ${zb}${device.host}${er} has an unknown BLU device model ${CYAN}${bthomeDevice.model}${nf}`);
             if (definition) {
               const mbDevice = new MatterbridgeDevice(definition, undefined, config.debug as boolean);
               mbDevice.createDefaultBridgedDeviceBasicInformationClusterServer(bthomeDevice.name, bthomeDevice.addr, 0xfff1, 'Shelly', bthomeDevice.model);
               mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer();
               mbDevice.addRequiredClusterServers(mbDevice);
-              if (bthomeDevice.model === 'Shelly BLU DoorWindow') mbDevice.createDefaultIlluminanceMeasurementClusterServer();
-              if (bthomeDevice.model === 'Shelly BLU HT') mbDevice.createDefaultRelativeHumidityMeasurementClusterServer();
-              if (bthomeDevice.model === 'Shelly BLU HT') mbDevice.createDefaultSwitchClusterServer();
-              if (bthomeDevice.model === 'Shelly BLU Motion') mbDevice.createDefaultIlluminanceMeasurementClusterServer();
-              await this.registerDevice(mbDevice);
-              this.bluDevices.set(key, mbDevice);
+              try {
+                await this.registerDevice(mbDevice);
+                this.bluBridgedDevices.set(key, mbDevice);
+              } catch (error) {
+                this.log.error(
+                  `Shelly device ${hk}${device.id}${er} host ${zb}${device.host}${er} failed to register BLU device ${idn}${bthomeDevice.name}${er}: ${error instanceof Error ? error.message : error}`,
+                );
+              }
             }
           }
+          device.on('bthomedevice_update', (addr: string, rssi: number, last_updated_ts: number) => {
+            if (!isValidString(addr, 11) || !isValidNumber(rssi, -100, 0) || !isValidNumber(last_updated_ts)) return;
+            const blu = this.bluBridgedDevices.get(addr);
+            if (!blu) {
+              this.log.error(`Shelly device ${hk}${device.id}${er} host ${zb}${device.host}${er} sent an unknown BLU device address ${CYAN}${addr}${er}`);
+              return;
+            }
+            const lastUpdatedTime = new Date(last_updated_ts * 1000);
+            this.log.info(
+              `**BLU observer message for BLU device ${idn}${blu?.deviceName ?? addr}${rs}${nf}: rssi ${YELLOW}${rssi}${nf} last_updated ${YELLOW}${lastUpdatedTime.toLocaleTimeString()}${nf}`,
+            );
+          });
+          device.on('bthomesensor_update', (addr: string, sensor: string, value: ShellyDataType) => {
+            if (!isValidString(addr, 11) || !isValidString(sensor, 6)) return;
+            const blu = this.bluBridgedDevices.get(addr);
+            if (!blu) {
+              this.log.error(`Shelly device ${hk}${device.id}${er} host ${zb}${device.host}${er} sent an unknown BLU device address ${CYAN}${addr}${er}`);
+              return;
+            }
+            this.log.info(`**BLU observer message for BLU device ${idn}${blu?.deviceName ?? addr}${rs}${nf}: sensor ${YELLOW}${sensor}${nf} value ${YELLOW}${value}${nf}`);
+            if (blu && sensor === 'Battery' && isValidNumber(value, 0, 100)) {
+              this.setAttribute(blu, PowerSource.Complete, 'batPercentRemaining', value * 2, true);
+              if (value < 10) this.setAttribute(blu, PowerSource.Complete, 'batChargeLevel', PowerSource.BatChargeLevel.Critical, true);
+              else if (value < 20) this.setAttribute(blu, PowerSource.Complete, 'batChargeLevel', PowerSource.BatChargeLevel.Warning, true);
+              else this.setAttribute(blu, PowerSource.Complete, 'batChargeLevel', PowerSource.BatChargeLevel.Ok, true);
+            }
+            if (blu && sensor === 'Temperature' && isValidNumber(value, -100, 100)) {
+              this.setAttribute(blu, TemperatureMeasurementCluster, 'measuredValue', value * 100, true);
+            }
+            if (blu && sensor === 'Humidity' && isValidNumber(value, 0, 100)) {
+              this.setAttribute(blu, RelativeHumidityMeasurementCluster, 'measuredValue', value * 100, true);
+            }
+            if (blu && sensor === 'Illuminance' && isValidNumber(value, 0, 10000)) {
+              const matterLux = Math.round(Math.max(Math.min(10000 * Math.log10(value), 0xfffe), 0));
+              this.setAttribute(blu, IlluminanceMeasurementCluster, 'measuredValue', matterLux, true);
+            }
+            if (blu && sensor === 'Motion' && isValidBoolean(value)) {
+              this.setAttribute(blu, OccupancySensingCluster, 'occupancy', { occupied: value }, true);
+            }
+            if (blu && sensor === 'Contact' && isValidBoolean(value)) {
+              this.setAttribute(blu, BooleanStateCluster, 'stateValue', !value, true);
+            }
+          });
+          device.on('bthomesensor_event', (addr: string, sensor: string, event: string) => {
+            if (!isValidString(addr, 11) || !isValidString(sensor, 6)) return;
+            const blu = this.bluBridgedDevices.get(addr);
+            if (!blu) {
+              this.log.error(`Shelly device ${hk}${device.id}${er} host ${zb}${device.host}${er} sent an unknown BLU device address ${CYAN}${addr}${er}`);
+              return;
+            }
+            this.log.info(`**BLU observer message for BLU device ${idn}${blu?.deviceName ?? addr}${rs}${nf}: sensor ${YELLOW}${sensor}${nf} event ${YELLOW}${event}${nf}`);
+            if (blu && sensor === 'Button' && isValidString(event, 9)) {
+              if (event === 'single_push') {
+                this.triggerSwitchEvent(blu, 'Single', true);
+              }
+              if (event === 'double_push') {
+                this.triggerSwitchEvent(blu, 'Double', true);
+              }
+              if (event === 'long_push') {
+                this.triggerSwitchEvent(blu, 'Long', true);
+              }
+            }
+          });
         }
       }
 
@@ -321,7 +403,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         let composed = false;
         if (component.name === 'Light' || component.name === 'Rgb') {
           const lightComponent = device.getComponent(key);
-          if (lightComponent) {
+          if (/* lightComponent &&*/ isLightComponent(lightComponent)) {
             // Set the device type
             let deviceType = DeviceTypes.ON_OFF_LIGHT;
             if (lightComponent.hasProperty('brightness')) deviceType = DeviceTypes.DIMMABLE_LIGHT;
@@ -407,7 +489,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             });
           }
         } else if (component.name === 'Switch' || component.name === 'Relay') {
-          const switchComponent = device.getComponent(key) as ShellySwitchComponent;
+          const switchComponent = device.getComponent(key);
           if (switchComponent) {
             let deviceType = onOffSwitch;
             if (config.exposeSwitch === 'light') deviceType = DeviceTypes.ON_OFF_LIGHT;
@@ -581,7 +663,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           } else if (inputComponent && inputComponent?.hasProperty('state') && config.exposeInput === 'momentary') {
             const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.GENERIC_SWITCH], []);
             child.addClusterServer(mbDevice.getDefaultSwitchClusterServer());
-            mbDevice.addFixedLabel('composed', component.name);
+            if (!composed) mbDevice.addFixedLabel('composed', component.name);
+            composed = true;
             // Set the state attribute
             const state = inputComponent.getValue('state') as boolean;
             if (isValidBoolean(state)) child.getClusterServer(SwitchCluster.with(Switch.Feature.MomentarySwitch))?.setCurrentPositionAttribute(state ? 1 : 0);
@@ -592,7 +675,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           } else if (inputComponent && inputComponent?.hasProperty('state') && config.exposeInput === 'latching') {
             const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.GENERIC_SWITCH], []);
             child.addClusterServer(mbDevice.getDefaultLatchingSwitchClusterServer());
-            mbDevice.addFixedLabel('composed', component.name);
+            if (!composed) mbDevice.addFixedLabel('composed', component.name);
+            composed = true;
             // Set the state attribute
             const state = inputComponent.getValue('state') as boolean;
             if (isValidBoolean(state)) child.getClusterServer(SwitchCluster.with(Switch.Feature.LatchingSwitch))?.setCurrentPositionAttribute(state ? 1 : 0);
@@ -603,7 +687,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           } else if (inputComponent && inputComponent?.hasProperty('event') && config.exposeInputEvent !== 'disabled') {
             const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.GENERIC_SWITCH], []);
             child.addClusterServer(mbDevice.getDefaultSwitchClusterServer());
-            mbDevice.addFixedLabel('composed', component.name);
+            if (!composed) mbDevice.addFixedLabel('composed', component.name);
+            composed = true;
             // Set the current position to 0
             child.getClusterServer(SwitchCluster.with(Switch.Feature.MomentarySwitch))?.setCurrentPositionAttribute(0);
             // Add event handler
@@ -635,7 +720,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           }
         } else if (component.name === 'Vibration' && config.exposeVibration !== 'disabled') {
           const vibrationComponent = device.getComponent(key);
-          if (vibrationComponent?.hasProperty('vibration')) {
+          if (vibrationComponent?.hasProperty('vibration') && isValidBoolean(vibrationComponent.getValue('vibration'))) {
             const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.GENERIC_SWITCH], []);
             child.addClusterServer(mbDevice.getDefaultSwitchClusterServer());
             if (!composed) mbDevice.addFixedLabel('composed', component.name);
@@ -655,6 +740,30 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             composed = true;
             // Add event handler
             tempComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
+              this.shellyUpdateHandler(mbDevice, device, component, property, value);
+            });
+          }
+          if (tempComponent?.hasProperty('tC') && isValidNumber(tempComponent.getValue('tC'), -100, 100)) {
+            const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.TEMPERATURE_SENSOR], []);
+            const matterTemp = Math.min(Math.max(Math.round((tempComponent.getValue('tC') as number) * 100), -10000), 10000);
+            child.addClusterServer(mbDevice.getDefaultTemperatureMeasurementClusterServer(matterTemp));
+            if (!composed) mbDevice.addFixedLabel('composed', component.name);
+            composed = true;
+            // Add event handler
+            tempComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
+              this.shellyUpdateHandler(mbDevice, device, component, property, value);
+            });
+          }
+        } else if (component.name === 'Humidity' && config.exposeHumidity !== 'disabled') {
+          const humidityComponent = device.getComponent(key);
+          if (humidityComponent?.hasProperty('rh') && isValidNumber(humidityComponent.getValue('rh'), 0, 100)) {
+            const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.HUMIDITY_SENSOR], []);
+            const matterHumidity = Math.min(Math.max(Math.round((humidityComponent.getValue('rh') as number) * 100), -10000), 10000);
+            child.addClusterServer(mbDevice.getDefaultRelativeHumidityMeasurementClusterServer(matterHumidity));
+            if (!composed) mbDevice.addFixedLabel('composed', component.name);
+            composed = true;
+            // Add event handler
+            humidityComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
               this.shellyUpdateHandler(mbDevice, device, component, property, value);
             });
           }
@@ -858,7 +967,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       const fileName = path.join(this.matterbridge.matterbridgePluginDirectory, 'matterbridge-shelly', `${deviceId}.json`);
       device = await ShellyDevice.create(this.shelly, log, fileName);
       if (!device) return;
-      this.log.warn(`Loaded from cache Shelly device ${hk}${deviceId}${nf} host ${zb}${host}${nf}`);
+      this.log.warn(`Loaded from cache Shelly device ${hk}${deviceId}${wr} host ${zb}${host}${wr}`);
       device.setHost(host);
       device.cached = true;
       device.online = false;
@@ -866,6 +975,51 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     log.logName = device.name ?? device.id;
     await this.shelly.addDevice(device);
     this.shellyDevices.set(device.id, device);
+  }
+
+  // TODO remove and use matterbridge method
+  protected setAttribute<F extends BitSchema, SF extends TypeFromPartialBitSchema<F>, A extends Attributes, C extends Commands, E extends Events>(
+    endpoint: Endpoint,
+    cluster: Cluster<F, SF, A, C, E>,
+    attribute: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    value: any,
+    log = false,
+  ) {
+    const clusterServer = endpoint.getClusterServer(cluster);
+    if (!clusterServer) {
+      if (log) this.log.error(`setAttribute error: Cluster ${cluster.name} not found on endpoint ${endpoint.name}:${endpoint.number}`);
+      return;
+    }
+    if (!clusterServer.isAttributeSupportedByName(attribute)) {
+      if (log) this.log.error(`setAttribute error: Attribute ${attribute} not found on Cluster ${cluster.name} on endpoint ${endpoint.name}:${endpoint.number}`);
+      return;
+    }
+    const capitalizedAttributeName = attribute.charAt(0).toUpperCase() + attribute.slice(1);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if (!(clusterServer as any)[`get${capitalizedAttributeName}Attribute`]) {
+      if (log)
+        this.log.error(`getAttribute error: Getter get${capitalizedAttributeName}Attribute not found on Cluster ${cluster.name} on endpoint ${endpoint.name}:${endpoint.number}`);
+      return;
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-empty-object-type
+    const getter = (clusterServer as any)[`get${capitalizedAttributeName}Attribute`] as () => {};
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if (!(clusterServer as any)[`set${capitalizedAttributeName}Attribute`]) {
+      if (log)
+        this.log.error(`setAttribute error: Setter set${capitalizedAttributeName}Attribute not found on Cluster ${cluster.name} on endpoint ${endpoint.name}:${endpoint.number}`);
+      return;
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-empty-object-type
+    const setter = (clusterServer as any)[`set${capitalizedAttributeName}Attribute`] as (value: any) => {};
+    const oldValue = getter();
+    setter(value);
+    if (log)
+      this.log.info(
+        `**${db}Update endpoint ${or}${endpoint.name}:${endpoint.number}${db} attribute ${hk}${cluster.name}.${capitalizedAttributeName}${db} ` +
+          `from ${YELLOW}${typeof oldValue === 'object' ? debugStringify(value) : oldValue}${db} ` +
+          `to ${YELLOW}${typeof value === 'object' ? debugStringify(value) : value}${db}`,
+      );
   }
 
   // TODO remove and use matterbridge method
@@ -887,7 +1041,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
   }
 
   // TODO remove and use matterbridge method
-  protected triggerSwitchEvent(endpoint: Endpoint, event: string) {
+  protected triggerSwitchEvent(endpoint: Endpoint, event: 'Single' | 'Double' | 'Long' | 'Press' | 'Release', log = false) {
     if (['Single', 'Double', 'Long'].includes(event)) {
       const cluster = endpoint.getClusterServer(
         SwitchCluster.with(
@@ -898,7 +1052,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         ),
       );
       if (!cluster || !cluster.getFeatureMapAttribute().momentarySwitch) {
-        this.log.error(`triggerSwitchEvent ${event} error: Switch cluster with MomentarySwitch not found on endpoint ${endpoint.name}:${endpoint.number}`);
+        if (log) this.log.error(`triggerSwitchEvent ${event} error: Switch cluster with MomentarySwitch not found on endpoint ${endpoint.name}:${endpoint.number}`);
         return;
       }
       if (event === 'Single') {
@@ -908,7 +1062,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         cluster.triggerShortReleaseEvent({ previousPosition: 1 });
         cluster.setCurrentPositionAttribute(0);
         cluster.triggerMultiPressCompleteEvent({ previousPosition: 1, totalNumberOfPressesCounted: 1 });
-        this.log.debug(`Trigger 'Single press' event for ${endpoint.name}:${endpoint.number}`);
+        if (log) this.log.info(`**${db}Trigger endpoint ${or}${endpoint.name}:${endpoint.number}${db} event ${hk}${cluster.name}.SinglePress${db}`);
       }
       if (event === 'Double') {
         cluster.setCurrentPositionAttribute(1);
@@ -921,7 +1075,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         cluster.setCurrentPositionAttribute(0);
         cluster.triggerShortReleaseEvent({ previousPosition: 1 });
         cluster.triggerMultiPressCompleteEvent({ previousPosition: 1, totalNumberOfPressesCounted: 2 });
-        this.log.debug(`Trigger 'Double press' event for ${endpoint.name}:${endpoint.number}`);
+        if (log) this.log.info(`**${db}Trigger endpoint ${or}${endpoint.name}:${endpoint.number}${db} event ${hk}${cluster.name}.DoublePress${db}`);
       }
       if (event === 'Long') {
         cluster.setCurrentPositionAttribute(1);
@@ -929,24 +1083,26 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         cluster.triggerLongPressEvent({ newPosition: 1 });
         cluster.setCurrentPositionAttribute(0);
         cluster.triggerLongReleaseEvent({ previousPosition: 1 });
-        this.log.debug(`Trigger 'Long press' event for ${endpoint.name}:${endpoint.number}`);
+        if (log) this.log.info(`**${db}Trigger endpoint ${or}${endpoint.name}:${endpoint.number}${db} event ${hk}${cluster.name}.LongPress${db}`);
       }
     }
     if (['Press', 'Release'].includes(event)) {
       const cluster = endpoint.getClusterServer(Switch.Complete);
       if (!cluster || !cluster.getFeatureMapAttribute().latchingSwitch) {
-        this.log.error(`triggerSwitchEvent ${event} error: Switch cluster with LatchingSwitch not found on endpoint ${endpoint.name}:${endpoint.number}`);
+        if (log) this.log.error(`triggerSwitchEvent ${event} error: Switch cluster with LatchingSwitch not found on endpoint ${endpoint.name}:${endpoint.number}`);
         return;
       }
       if (event === 'Press') {
         cluster.setCurrentPositionAttribute(1);
+        if (log) this.log.info(`**${db}Update endpoint ${or}${endpoint.name}:${endpoint.number}${db} attribute ${hk}${cluster.name}.CurrentPosition${db} to ${YELLOW}1${db}`);
         if (cluster.triggerSwitchLatchedEvent) cluster.triggerSwitchLatchedEvent({ newPosition: 1 });
-        this.log.debug(`Trigger ${event} event for ${endpoint.name}:${endpoint.number}`);
+        if (log) this.log.info(`**${db}Trigger endpoint ${or}${endpoint.name}:${endpoint.number}${db} event ${hk}${cluster.name}.Press${db}`);
       }
       if (event === 'Release') {
         cluster.setCurrentPositionAttribute(0);
+        if (log) this.log.info(`**${db}Update endpoint ${or}${endpoint.name}:${endpoint.number}${db} attribute ${hk}${cluster.name}.CurrentPosition${db} to ${YELLOW}0${db}`);
         if (cluster.triggerSwitchLatchedEvent) cluster.triggerSwitchLatchedEvent({ newPosition: 0 });
-        this.log.debug(`Trigger ${event} event for ${endpoint.name}:${endpoint.number}`);
+        if (log) this.log.info(`**${db}Trigger endpoint ${or}${endpoint.name}:${endpoint.number}${db} event ${hk}${cluster.name}.Release${db}`);
       }
     }
   }
@@ -1155,11 +1311,11 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       }
     }
     // Update for Battery
-    if (shellyComponent.name === 'Battery' && property === 'level' && isValidNumber(value)) {
+    if (shellyComponent.name === 'Battery' && property === 'level' && isValidNumber(value, 0, 100)) {
       endpoint.getClusterServer(PowerSource.Complete)?.setBatPercentRemainingAttribute(Math.min(Math.max(value * 2, 0), 200));
       shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}PowerSource-batPercentRemaining${db} ${YELLOW}${value}${db}`);
     }
-    if (shellyComponent.name === 'Battery' && property === 'voltage' && isValidNumber(value)) {
+    if (shellyComponent.name === 'Battery' && property === 'voltage' && isValidNumber(value, 0)) {
       endpoint.getClusterServer(PowerSource.Complete)?.setBatVoltageAttribute(value / 1000);
       shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}PowerSource-batVoltage${db} ${YELLOW}${value}${db}`);
     }
@@ -1183,23 +1339,26 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}BooleanStateCluster-stateValue${db} ${YELLOW}${value}${db}`);
     }
     // Update for Illuminance
-    if (shellyComponent.name === 'Lux' && property === 'value' && isValidNumber(value)) {
+    if (shellyComponent.name === 'Lux' && property === 'value' && isValidNumber(value, 0)) {
       const matterLux = Math.round(Math.max(Math.min(10000 * Math.log10(value), 0xfffe), 0));
       endpoint.getClusterServer(IlluminanceMeasurementCluster)?.setMeasuredValueAttribute(matterLux);
       shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}IlluminanceMeasurement-measuredValue${db} ${YELLOW}${matterLux}${db}`);
     }
-    // Update for Temperature
-    if (shellyComponent.name === 'Temperature' && property === 'value' && isValidNumber(value)) {
-      const matterTemp = Math.min(Math.max(Math.round(value * 100), -10000), 10000);
-      endpoint.getClusterServer(TemperatureMeasurementCluster)?.setMeasuredValueAttribute(matterTemp);
-      shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}TemperatureMeasurement-measuredValue${db} ${YELLOW}${matterTemp / 100}${db}`);
+    // Update for Temperature when has value
+    if (shellyComponent.name === 'Temperature' && property === 'value' && isValidNumber(value, -100, +100)) {
+      this.setAttribute(endpoint, TemperatureMeasurementCluster, 'measuredValue', value * 100, true);
+    }
+    // Update for Temperature when has tC
+    if (shellyComponent.name === 'Temperature' && property === 'tC' && isValidNumber(value, -100, +100)) {
+      this.setAttribute(endpoint, TemperatureMeasurementCluster, 'measuredValue', value * 100, true);
+    }
+    // Update for Humidity when has rh
+    if (shellyComponent.name === 'Humidity' && property === 'rh' && isValidNumber(value, 0, 100)) {
+      this.setAttribute(endpoint, RelativeHumidityMeasurementCluster, 'measuredValue', value * 100, true);
     }
     // Update for vibration
     if (shellyComponent.name === 'Vibration' && property === 'vibration' && isValidBoolean(value)) {
-      if (value) {
-        this.triggerSwitchEvent(endpoint, 'Single');
-        shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}Switch-triggerSwitchEvent${db} ${YELLOW}Single${db}`);
-      }
+      if (value) this.triggerSwitchEvent(endpoint, 'Single', true);
     }
     // Update cover
     if (shellyComponent.name === 'Cover' || shellyComponent.name === 'Roller') {
@@ -1306,13 +1465,23 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         // Calculate power from current and voltage
         const voltage = shellyComponent.hasProperty('voltage') ? (shellyComponent.getValue('voltage') as number) : undefined;
         if (isValidNumber(voltage, 0)) {
-          const power = value * voltage;
+          let power = value * voltage;
+          power = Math.round(power * 10000) / 10000;
           if (isValidNumber(power, 0)) cluster?.setConsumptionAttribute(power);
           if (cluster) shellyDevice.log.info(`${db}Update endpoint ${or}${endpoint.number}${db} attribute ${hk}EveHistory-consumption${db} ${YELLOW}${power}${db}`);
         }
       }
     }
   }
+
+  private updater: { component: string | string[]; property: string; typeof: string; min?: number; max?: number; cluster: string; attribute: string }[] = [
+    { component: ['Light', 'Switch'], property: 'state', typeof: 'boolean', cluster: 'OnOff', attribute: 'onOff' },
+    { component: ['Light', 'Switch'], property: 'brightness', typeof: 'number', min: 0, max: 100, cluster: 'LevelControl', attribute: 'currentLevel' },
+    { component: ['Light', 'Rgb', 'Rgbw'], property: 'red', typeof: 'array', min: 0, max: 255, cluster: 'ColorControl', attribute: '' },
+    { component: ['Light', 'Rgb', 'Rgbw'], property: 'green', typeof: 'array', min: 0, max: 255, cluster: 'ColorControl', attribute: '' },
+    { component: ['Light', 'Rgb', 'Rgbw'], property: 'blue', typeof: 'array', min: 0, max: 255, cluster: 'ColorControl', attribute: '' },
+    { component: ['Light', 'Rgb', 'Rgbw'], property: 'rgb', typeof: 'array', min: 3, max: 3, cluster: 'ColorControl', attribute: '' },
+  ];
 
   private validateWhiteBlackList(entityName: string) {
     if (this.whiteList.length > 0 && !this.whiteList.find((name) => name === entityName)) {

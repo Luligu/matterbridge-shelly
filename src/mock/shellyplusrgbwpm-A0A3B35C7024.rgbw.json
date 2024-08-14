@@ -85,7 +85,11 @@
       "night_mode": {
         "enable": false,
         "brightness": 50,
-        "rgb": [255, 255, 255],
+        "rgb": [
+          255,
+          255,
+          255
+        ],
         "white": 128,
         "active_between": []
       },
@@ -93,7 +97,11 @@
       "button_presets": {
         "button_doublepush": {
           "brightness": 100,
-          "rgb": [255, 255, 255],
+          "rgb": [
+            255,
+            255,
+            255
+          ],
           "white": 255
         }
       },
@@ -109,11 +117,7 @@
         "profile": "rgbw",
         "addon_type": null
       },
-      "location": {
-        "tz": "Europe/Monaco",
-        "lat": 43.7312,
-        "lon": 7.4138
-      },
+      "location": null,
       "debug": {
         "level": 2,
         "file_level": null,
@@ -205,7 +209,11 @@
       "id": 0,
       "source": "HTTP_in",
       "output": false,
-      "rgb": [0, 0, 128],
+      "rgb": [
+        0,
+        0,
+        128
+      ],
       "brightness": 50,
       "white": 128,
       "temperature": {
@@ -214,7 +222,11 @@
       },
       "aenergy": {
         "total": 0.8,
-        "by_minute": [0, 0, 0],
+        "by_minute": [
+          0,
+          0,
+          0
+        ],
         "minute_ts": 1722607380
       },
       "apower": 0,

@@ -30,6 +30,9 @@ import { DiscoveredDevice, MdnsScanner } from './mdnsScanner.js';
 import { CoapServer } from './coapServer.js';
 import { SocketType } from 'dgram';
 import { WsClient } from './wsClient.js';
+import { WsServer } from './wsServer.js';
+import { ShellyData } from './shellyTypes.js';
+import { isValidArray, isValidObject } from './platform.js';
 
 /**
  * Creates a new instance of the Shelly class.
@@ -42,6 +45,7 @@ export class Shelly extends EventEmitter {
   private readonly log: AnsiLogger;
   private mdnsScanner: MdnsScanner | undefined;
   public coapServer: CoapServer | undefined;
+  public wsServer: WsServer | undefined;
   private coapServerTimeout?: NodeJS.Timeout;
   public username: string | undefined;
   public password: string | undefined;
@@ -62,6 +66,49 @@ export class Shelly extends EventEmitter {
     this.password = password;
     this.mdnsScanner = new MdnsScanner();
     this.coapServer = new CoapServer();
+    this.wsServer = new WsServer();
+
+    // Handle wssupdate from WsServer
+    this.wsServer.on('wssupdate', async (shellyId: string, params: ShellyData) => {
+      const device = this.getDevice(shellyId);
+      if (!device) {
+        this.log.debug(`Received wssupdate from a not registered device id ${hk}${shellyId}${db}`);
+        return;
+      }
+      // this.log.debug(`Received wssupdate from device id ${hk}${shellyId}${db} host ${zb}${device.host}${db}:${rs}\n`, params);
+      this.log.debug(`Received wssupdate from device id ${hk}${shellyId}${db} host ${zb}${device.host}${db}`);
+      if (!device.online) {
+        device.online = true;
+        device.emit('online');
+        this.log.debug(`Device ${hk}${device.id}${db} host ${zb}${device.host}${db} sent a WebSocket message: setting online to true`);
+      }
+      if (device.cached) {
+        device.cached = false;
+        this.log.debug(`Device ${hk}${device.id}${db} host ${zb}${device.host}${db} sent a WebSocket message: setting cached to false`);
+      }
+      if (isValidObject(params, 1)) device.onUpdate(params);
+    });
+
+    // Handle wssevent from WsServer
+    this.wsServer.on('wssevent', async (shellyId: string, params: ShellyData) => {
+      const device = this.getDevice(shellyId);
+      if (!device) {
+        this.log.debug(`Received wssevent from a not registered device id ${hk}${shellyId}${db}`);
+        return;
+      }
+      // this.log.debug(`Received wssevent from device id ${hk}${shellyId}${db} host ${zb}${device.host}${db}:${rs}\n`, params);
+      this.log.debug(`Received wssevent from device id ${hk}${shellyId}${db} host ${zb}${device.host}${db}`);
+      if (!device.online) {
+        device.online = true;
+        device.emit('online');
+        this.log.debug(`Device ${hk}${device.id}${db} host ${zb}${device.host}${db} sent a WebSocket message: setting online to true`);
+      }
+      if (device.cached) {
+        device.cached = false;
+        this.log.debug(`Device ${hk}${device.id}${db} host ${zb}${device.host}${db} sent a WebSocket message: setting cached to false`);
+      }
+      if (isValidObject(params, 1) && isValidArray(params.events, 1)) device.onEvent(params.events as ShellyData[]);
+    });
 
     this.mdnsScanner.on('discovered', async (device: DiscoveredDevice) => {
       this.log.info(`Discovered shelly gen ${CYAN}${device.gen}${nf} device id ${hk}${device.id}${nf} host ${zb}${device.host}${nf} port ${zb}${device.port}${nf} `);
@@ -107,6 +154,9 @@ export class Shelly extends EventEmitter {
       this.removeDevice(device);
     });
     this.removeAllListeners();
+    this.wsServer?.removeAllListeners();
+    this.wsServer?.stop();
+    this.wsServer = undefined;
     this.mdnsScanner?.removeAllListeners();
     this.mdnsScanner?.stop();
     this.mdnsScanner = undefined;
@@ -203,6 +253,9 @@ export class Shelly extends EventEmitter {
       if (!device.cached && !device.host.endsWith('.json')) this.coapServer?.registerDevice(device.host, device.id); // No await to register device for CoIoT updates
       this.startCoap(10000);
     }
+    if (device.gen === 2 || device.gen === 3) {
+      if (device.sleepMode) this.wsServer?.start();
+    }
     this.emit('add', device);
     return this;
   }
@@ -285,6 +338,7 @@ export class Shelly extends EventEmitter {
     this._debugCoap = debugCoap;
     if (this.mdnsScanner) this.mdnsScanner.log.logLevel = debugMdns ? LogLevel.DEBUG : LogLevel.INFO;
     if (this.coapServer) this.coapServer.log.logLevel = debugCoap ? LogLevel.DEBUG : LogLevel.INFO;
+    if (this.wsServer) this.wsServer.log.logLevel = debugWs ? LogLevel.DEBUG : LogLevel.INFO;
     WsClient.logLevel = debugWs ? LogLevel.DEBUG : LogLevel.INFO;
     this.devices.forEach((device) => {
       device.setLogLevel(level);

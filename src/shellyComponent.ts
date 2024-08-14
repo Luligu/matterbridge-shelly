@@ -56,24 +56,23 @@ export type ShellySwitchComponent = ShellyComponent & SwitchComponent;
 
 export type ShellyCoverComponent = ShellyComponent & CoverComponent;
 
-function isLightComponent(name: string): name is 'Light' | 'White' | 'Rgb' | 'Rgbw' {
-  return ['Light', 'White', 'Rgb', 'Rgbw'].includes(name);
+export function isLightComponent(component: ShellyComponent | undefined): component is ShellyLightComponent {
+  if (component === undefined) return false;
+  return ['Light', 'White', 'Rgb', 'Rgbw'].includes(component.name);
 }
 
-function isSwitchComponent(name: string): name is 'Relay' | 'Switch' {
-  return ['Relay', 'Switch'].includes(name);
+export function isSwitchComponent(component: ShellyComponent | undefined): component is ShellySwitchComponent {
+  if (component === undefined) return false;
+  return ['Relay', 'Switch'].includes(component.name);
 }
 
-function isCoverComponent(name: string): name is 'Cover' | 'Roller' {
-  return ['Cover', 'Roller'].includes(name);
+export function isCoverComponent(component: ShellyComponent | undefined): component is ShellyCoverComponent {
+  if (component === undefined) return false;
+  return ['Cover', 'Roller'].includes(component.name);
 }
 
 /**
- * Creates a new instance of the ShellyComponent class.
- * @param {ShellyDevice} device - The Shelly device associated with the component.
- * @param {string} id - The ID of the component.
- * @param {string} name - The name of the component.
- * @param {ShellyData} [data] - The data associated with the component.
+ * Rappresents the ShellyComponent class.
  */
 export class ShellyComponent extends EventEmitter {
   readonly device: ShellyDevice;
@@ -82,6 +81,13 @@ export class ShellyComponent extends EventEmitter {
   readonly name: string;
   private readonly _properties = new Map<string, ShellyProperty>();
 
+  /**
+   * Creates a new instance of the ShellyComponent class.
+   * @param {ShellyDevice} device - The Shelly device associated with the component.
+   * @param {string} id - The ID of the component.
+   * @param {string} name - The name of the component.
+   * @param {ShellyData} [data] - The data associated with the component.
+   */
   constructor(device: ShellyDevice, id: string, name: string, data?: ShellyData) {
     super();
     this.id = id;
@@ -92,14 +98,14 @@ export class ShellyComponent extends EventEmitter {
       this.addProperty(new ShellyProperty(this, prop, data[prop] as ShellyDataType));
 
       // Add a state property for Light, Relay, and Switch components
-      if ((isSwitchComponent(name) || isLightComponent(name)) && (prop === 'ison' || prop === 'output')) this.addProperty(new ShellyProperty(this, 'state', data[prop]));
+      if ((this.isSwitchComponent() || this.isLightComponent()) && (prop === 'ison' || prop === 'output')) this.addProperty(new ShellyProperty(this, 'state', data[prop]));
 
       // Add a brightness property for Light components
-      if (isLightComponent(name) && prop === 'gain') this.addProperty(new ShellyProperty(this, 'brightness', data[prop]));
+      if (this.isLightComponent() && prop === 'gain') this.addProperty(new ShellyProperty(this, 'brightness', data[prop]));
     }
 
     // Extend the class prototype to include the Switch Relay Light methods dynamically
-    if (isSwitchComponent(name) || isLightComponent(name)) {
+    if (this.isSwitchComponent() || this.isLightComponent()) {
       (this as unknown as ShellySwitchComponent).On = function () {
         this.setValue('state', true);
         if (device.gen === 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { turn: 'on' });
@@ -121,7 +127,7 @@ export class ShellyComponent extends EventEmitter {
     }
 
     // Extend the class prototype to include the Light methods dynamically
-    if (isLightComponent(name)) {
+    if (this.isLightComponent()) {
       (this as unknown as ShellyLightComponent).Level = function (level: number) {
         if (!this.hasProperty('brightness')) return;
         const adjustedLevel = Math.min(Math.max(Math.round(level), 0), 100);
@@ -157,7 +163,7 @@ export class ShellyComponent extends EventEmitter {
     }
 
     // Extend the class prototype to include the Cover methods dynamically
-    if (isCoverComponent(name)) {
+    if (this.isCoverComponent()) {
       (this as unknown as ShellyCoverComponent).Open = function () {
         this.setValue('state', 'open');
         if (device.gen === 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { go: 'open' });

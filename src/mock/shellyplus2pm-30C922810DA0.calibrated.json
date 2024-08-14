@@ -97,11 +97,7 @@
         "profile": "cover",
         "addon_type": null
       },
-      "location": {
-        "tz": "Europe/Monaco",
-        "lat": 43.7314,
-        "lon": 7.419
-      },
+      "location": null,
       "debug": {
         "level": 2,
         "file_level": null,
@@ -181,7 +177,11 @@
       "freq": 50,
       "aenergy": {
         "total": 61.385,
-        "by_minute": [0, 0, 0],
+        "by_minute": [
+          0,
+          0,
+          0
+        ],
         "minute_ts": 1722521280
       },
       "temperature": {

@@ -177,6 +177,7 @@ export class Multicast {
 }
 
 // Use with: node dist/mcastServer.js testMulticastServer testMulticastClient
+/*
 if (process.argv.includes('testMulticastServer') || process.argv.includes('testMulticastClient')) {
   const mcast = new Multicast();
 
@@ -188,3 +189,4 @@ if (process.argv.includes('testMulticastServer') || process.argv.includes('testM
     mcast.stop();
   });
 }
+*/
