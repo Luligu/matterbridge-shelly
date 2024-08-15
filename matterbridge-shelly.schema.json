@@ -42,6 +42,15 @@
       ],
       "default": "disabled"
     },
+    "exposeInputEvent": {
+      "description": "Choose weather to expose the shelly input events: momentary or disabled (you may need to repair the controller when changed)",
+      "type": "string",
+      "enum": [
+        "momentary",
+        "disabled"
+      ],
+      "default": "momentary"
+    },
     "exposePowerMeter": {
       "description": "Choose how to expose the shelly power meters: disabled, matter13 (will use Matter 1.3 electricalSensor) or evehistory (use Matter EveHistoryCluster)",
       "type": "string",

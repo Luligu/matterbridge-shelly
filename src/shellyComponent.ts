@@ -4,7 +4,7 @@
  * @file src\shellyComponent.ts
  * @author Luca Liguori
  * @date 2024-05-01
- * @version 2.0.0
+ * @version 2.1.0
  *
  * Copyright 2024, 2025 Luca Liguori.
  *
@@ -58,7 +58,7 @@ export type ShellyCoverComponent = ShellyComponent & CoverComponent;
 
 export function isLightComponent(component: ShellyComponent | undefined): component is ShellyLightComponent {
   if (component === undefined) return false;
-  return ['Light', 'White', 'Rgb', 'Rgbw'].includes(component.name);
+  return ['Light', 'Rgb', 'Rgbw'].includes(component.name);
 }
 
 export function isSwitchComponent(component: ShellyComponent | undefined): component is ShellySwitchComponent {
@@ -98,37 +98,37 @@ export class ShellyComponent extends EventEmitter {
       this.addProperty(new ShellyProperty(this, prop, data[prop] as ShellyDataType));
 
       // Add a state property for Light, Relay, and Switch components
-      if ((this.isSwitchComponent() || this.isLightComponent()) && (prop === 'ison' || prop === 'output')) this.addProperty(new ShellyProperty(this, 'state', data[prop]));
+      if ((isSwitchComponent(this) || isLightComponent(this)) && (prop === 'ison' || prop === 'output')) this.addProperty(new ShellyProperty(this, 'state', data[prop]));
 
       // Add a brightness property for Light components
-      if (this.isLightComponent() && prop === 'gain') this.addProperty(new ShellyProperty(this, 'brightness', data[prop]));
+      if (isLightComponent(this) && prop === 'gain') this.addProperty(new ShellyProperty(this, 'brightness', data[prop]));
     }
 
-    // Extend the class prototype to include the Switch Relay Light methods dynamically
-    if (this.isSwitchComponent() || this.isLightComponent()) {
-      (this as unknown as ShellySwitchComponent).On = function () {
-        this.setValue('state', true);
+    // Extend the ShellyComponent class prototype to include the Switch Relay Light methods dynamically
+    if (isSwitchComponent(this) || isLightComponent(this)) {
+      this.On = function () {
+        // this.setValue('state', true);
         if (device.gen === 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { turn: 'on' });
         if (device.gen !== 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${this.name}.Set`, { id: this.index, on: true });
       };
 
-      (this as unknown as ShellySwitchComponent).Off = function () {
-        this.setValue('state', false);
+      this.Off = function () {
+        // this.setValue('state', false);
         if (device.gen === 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { turn: 'off' });
         if (device.gen !== 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${this.name}.Set`, { id: this.index, on: false });
       };
 
-      (this as unknown as ShellySwitchComponent).Toggle = function () {
-        const currentState = this.getValue('state');
-        this.setValue('state', !currentState);
+      this.Toggle = function () {
+        // const currentState = this.getValue('state');
+        // this.setValue('state', !currentState);
         if (device.gen === 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { turn: 'toggle' });
         if (device.gen !== 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${this.name}.Toggle`, { id: this.index });
       };
     }
 
-    // Extend the class prototype to include the Light methods dynamically
-    if (this.isLightComponent()) {
-      (this as unknown as ShellyLightComponent).Level = function (level: number) {
+    // Extend the ShellyComponent class prototype to include the Light methods dynamically
+    if (isLightComponent(this)) {
+      this.Level = function (level: number) {
         if (!this.hasProperty('brightness')) return;
         const adjustedLevel = Math.min(Math.max(Math.round(level), 0), 100);
         // this.setValue('brightness', adjustedLevel);
@@ -139,7 +139,7 @@ export class ShellyComponent extends EventEmitter {
         if (device.gen !== 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${this.name}.Set`, { id: this.index, brightness: adjustedLevel });
       };
 
-      (this as unknown as ShellyLightComponent).ColorRGB = function (red: number, green: number, blue: number) {
+      this.ColorRGB = function (red: number, green: number, blue: number) {
         if (this.hasProperty('red') && this.hasProperty('green') && this.hasProperty('blue')) {
           red = Math.min(Math.max(Math.round(red), 0), 255);
           green = Math.min(Math.max(Math.round(green), 0), 255);
@@ -162,56 +162,32 @@ export class ShellyComponent extends EventEmitter {
       };
     }
 
-    // Extend the class prototype to include the Cover methods dynamically
-    if (this.isCoverComponent()) {
-      (this as unknown as ShellyCoverComponent).Open = function () {
-        this.setValue('state', 'open');
+    // Extend the ShellyComponent class prototype to include the Cover methods dynamically
+    if (isCoverComponent(this)) {
+      this.Open = function () {
+        // this.setValue('state', 'open');
         if (device.gen === 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { go: 'open' });
         if (device.gen !== 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${this.name}.Open`, { id: this.index });
       };
 
-      (this as unknown as ShellyCoverComponent).Close = function () {
-        this.setValue('state', 'close');
+      this.Close = function () {
+        // this.setValue('state', 'close');
         if (device.gen === 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { go: 'close' });
         if (device.gen !== 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${this.name}.Close`, { id: this.index });
       };
 
-      (this as unknown as ShellyCoverComponent).Stop = function () {
-        this.setValue('state', 'stop');
+      this.Stop = function () {
+        // this.setValue('state', 'stop');
         if (device.gen === 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { go: 'stop' });
         if (device.gen !== 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${this.name}.Stop`, { id: this.index });
       };
 
-      (this as unknown as ShellyCoverComponent).GoToPosition = function (pos: number) {
+      this.GoToPosition = function (pos: number) {
         pos = Math.min(Math.max(Math.round(pos), 0), 100);
         if (device.gen === 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { go: 'to_pos', roller_pos: pos });
         if (device.gen !== 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${this.name}.GoToPosition`, { id: this.index, pos: pos });
       };
     }
-  }
-
-  /**
-   * Checks if the component is a light component.
-   * @returns {boolean} True if the component is a light component, false otherwise.
-   */
-  isLightComponent(): boolean {
-    return ['Light', 'White', 'Rgb', 'Rgbw'].includes(this.name);
-  }
-
-  /**
-   * Checks if the component is a switch.
-   * @returns {boolean} True if the component is a switch, false otherwise.
-   */
-  isSwitchComponent(): boolean {
-    return ['Relay', 'Switch'].includes(this.name);
-  }
-
-  /**
-   * Checks if the component is a cover component.
-   * @returns {boolean} True if the component is a cover component, false otherwise.
-   */
-  isCoverComponent(): boolean {
-    return ['Cover', 'Roller'].includes(this.name);
   }
 
   /**

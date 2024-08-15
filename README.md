@@ -69,7 +69,9 @@ For Gen. 1 devices:
 
 For wifi battery-powered devices:
 
-- only for the first time when you want to register them: check that enableMdnsDiscover and enableStorageDiscover are flagged in the plugin configuration. Restart matterbridge (the mdns discovery is active for the first 10 minutes) and awake each device you want to register.
+- Gen. 1: only for the first time, when you want to register them: check that enableMdnsDiscover and enableStorageDiscover are flagged in the plugin configuration. Restart matterbridge (the mdns discovery is active for the first 10 minutes) and awake each device you want to register.
+
+- Gen. 2/3: in the device web page go to "Settings", then "Outbound websocket" and enable it, select "TLS no validation" and put in the server field "ws://<matterbridge-ip>:8080" (you can find the matterbridge ip address in the frontend). Then, only for the first time, when you want to register them: check that enableMdnsDiscover and enableStorageDiscover are flagged in the plugin configuration. Restart matterbridge (the mdns discovery is active for the first 10 minutes) and awake each device you want to register.
 
 For BLU devices:
 
