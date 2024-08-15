@@ -65,13 +65,13 @@ A working shelly device gen. 1 or 2 or 3 or BLU.
 
 For Gen. 1 devices:
 
-- CoIoT: the CoIoT (coap) service must be enabled in the settings of the device and the CoIoT peer must be mcast. If mcast is not working on your network put in the peer field the Matterbridge ipv4Address and port 5683 (e.g. 192.168.1.100:5683). Multicast may not work for all networks due to router or access poit configuration or network topology (I cannot help you on this, just check your router or access point configuration). If CoIoT is not configured correctly you will not receive any update from the device.
+- CoIoT: the CoIoT (coap) service must be enabled in the settings of the device and the CoIoT peer must be mcast. If mcast is not working on your network put in the peer field "<matterbridge-ipv4>:5683" (you can find the matterbridge ipv4Address address in the frontend) and port 5683 (e.g. 192.168.1.100:5683). Multicast may not work for all networks due to router or access poit configuration or network topology (I cannot help you on this, just check your router or access point configuration). If CoIoT is not configured correctly you will not receive any update from the device.
 
 For wifi battery-powered devices:
 
-- Gen. 1: only for the first time, when you want to register them: check that enableMdnsDiscover and enableStorageDiscover are flagged in the plugin configuration. Restart matterbridge (the mdns discovery is active for the first 10 minutes) and awake each device you want to register.
+- Gen. 1: only for the first time, when you want to register them: check that enableMdnsDiscover and enableStorageDiscover are flagged in the plugin configuration. Restart matterbridge (the mdns discovery is active for the first 10 minutes) and awake each device you want to register pressing the device button.
 
-- Gen. 2/3: in the device web page go to "Settings", then "Outbound websocket" and enable it, select "TLS no validation" and put in the server field "ws://<matterbridge-ip>:8080" (you can find the matterbridge ip address in the frontend). Then, only for the first time, when you want to register them: check that enableMdnsDiscover and enableStorageDiscover are flagged in the plugin configuration. Restart matterbridge (the mdns discovery is active for the first 10 minutes) and awake each device you want to register.
+- Gen. 2/3: in the device web page go to "Settings", then "Outbound websocket" and enable it, select "TLS no validation" and put in the server field "ws://<matterbridge-ipv4>:8080" (you can find the matterbridge ipv4Address address in the frontend). Then, only for the first time, when you want to register them: check that enableMdnsDiscover and enableStorageDiscover are flagged in the plugin configuration. Restart matterbridge (the mdns discovery is active for the first 10 minutes) and awake each device you want to register pressing the device button.
 
 For BLU devices:
 
@@ -129,6 +129,10 @@ Choose how to expose the shelly switches: as a switch (don't use it with Alexa),
 
 Choose how to expose the shelly inputs: disabled, contact, momentary or latching switch
 
+### exposeInputEvent
+
+Choose how to expose the shelly input events: momentary switch or disabled
+
 ### exposePowerMeter
 
 Choose how to expose the shelly power meters: disabled, matter13 (it uses Matter 1.3 electricalSensor device type) or evehistory (it uses the Matter EveHistoryCluster)
@@ -148,7 +152,7 @@ E.g. "shelly1minig3-543204547478": "192.168.1.221"
 
 ### enableMdnsDiscover
 
-Should always be enabled to discover new devices. It turn off automatically after 10 minutes to reduce network traffic.
+Should always be enabled to discover new devices. It turns off automatically after 10 minutes to reduce network traffic.
 Once a device is discovered, it is added to the shelly storage.
 
 ### enableStorageDiscover
@@ -177,7 +181,7 @@ Should be enabled only if you want to debug some issue with CoIoT using the log.
 
 ### debugWs
 
-Should be enabled only if you want to debug some issue with WebSocket using the log.
+Should be enabled only if you want to debug some issue with the WebSocket client or server using the log.
 
 ### unregisterOnShutdown
 
@@ -195,6 +199,7 @@ These are the config values:
   "password": "<PASSWORD>",
   "exposeSwitch": "switch" | "light" | "outlet"
   "exposeInput": "disabled" | "contact" | "momentary" | "latching"
+  "exposeInputEvent": "momentary" | "disabled"
   "blackList": [],
   "whiteList": [],
   "deviceIp": {

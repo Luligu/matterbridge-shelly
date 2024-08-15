@@ -123,7 +123,7 @@
       "default": false
     },
     "debugWs": {
-      "description": "Enable the debug for the shelly wsClient (development only)",
+      "description": "Enable the debug for the shelly WsClient or WsServer (development only)",
       "type": "boolean",
       "default": false
     },
