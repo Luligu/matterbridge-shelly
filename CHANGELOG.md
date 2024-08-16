@@ -15,6 +15,7 @@ If you like this project and find it useful, please consider giving it a star on
 
 ### Added
 
+- [plugin]: Added exposeInputEvent option to the config.
 - [package]: Updated readme.MD with guidelines to add gen. 2 and 3 wifi battery-powered devices (e.g. shellyhtg3).
 
 <a href="https://www.buymeacoffee.com/luligugithub">
