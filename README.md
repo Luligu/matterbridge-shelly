@@ -45,13 +45,11 @@ I would like to express my appreciation to [Tamer Salah](https://github.com/tamm
 
 Follow these steps to install or update Matterbridge if it is not already installed and up to date:
 
-on Windows:
-
 ```
 npm install -g matterbridge
 ```
 
-on Linux (you need the necessary permissions):
+on Linux you may need the necessary permissions:
 
 ```
 sudo npm install -g matterbridge
@@ -77,12 +75,11 @@ For BLU devices:
 
 - BLU devices are supported through a local Shelly device acting as a ble gateway. To enable this feature, choose one or more devices that have the ble component and support the ble gateway (e.g. PRO and gen. 3 devices). In the gateway device web page, enable both "Enable Bluetooth" and "Enable Bluetooth gateway". Then, go to the "Components" section and add your BLU devices in "Bluetooth (BTHome) devices". Give a meaningful name to your device if desired and restart Matterbridge.
 
-
 ## How to install
 
 ### With the frontend (preferred method)
 
-Just open the frontend, select the matterbridge-shelly plugin and click on install
+Just open the frontend, select the matterbridge-shelly plugin and click on install.
 
 ### Without the frontend
 
@@ -115,7 +112,7 @@ You may need to set some config values:
 ### username
 
 If your devices are password protected put there the username. It must be unique for all the devices.
-Is only used for gen 1 devices. Gen 2 and 3 devices have always admin.
+It is only used for gen 1 devices. Gen 2 and 3 devices have always admin.
 
 ### password
 
@@ -127,15 +124,15 @@ Choose how to expose the shelly switches: as a switch (don't use it with Alexa),
 
 ### exposeInput
 
-Choose how to expose the shelly inputs: disabled, contact, momentary or latching switch
+Choose how to expose the shelly inputs: disabled, contact, momentary or latching switch (default disabled)
 
 ### exposeInputEvent
 
-Choose how to expose the shelly input events: momentary switch or disabled
+Choose how to expose the shelly input events: momentary switch or disabled (default disabled)
 
 ### exposePowerMeter
 
-Choose how to expose the shelly power meters: disabled, matter13 (it uses Matter 1.3 electricalSensor device type) or evehistory (it uses the Matter EveHistoryCluster)
+Choose how to expose the shelly power meters: disabled, matter13 (it uses Matter 1.3 electricalSensor device type still not supported by any controller) or evehistory (it uses the Matter EveHistoryCluster that is supported only by Home Assistant)
 
 ### blackList
 
@@ -199,7 +196,7 @@ These are the config values:
   "password": "<PASSWORD>",
   "exposeSwitch": "switch" | "light" | "outlet"
   "exposeInput": "disabled" | "contact" | "momentary" | "latching"
-  "exposeInputEvent": "momentary" | "disabled"
+  "exposeInputEvent": "disabled" | "momentary"
   "blackList": [],
   "whiteList": [],
   "deviceIp": {
