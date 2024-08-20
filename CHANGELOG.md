@@ -4,6 +4,29 @@ All notable changes to this project will be documented in this file.
 
 If you like this project and find it useful, please consider giving it a star on GitHub at https://github.com/Luligu/matterbridge-shelly and sponsoring it.
 
+## [0.9.1] - 2024-08-20
+
+### Changed
+
+- [shelly]: Refactor ShellyComponent and ShellyComponent jest tests.
+- [shelly]: Refactor ShellyUpdateHandler with stronger type checking.
+- [shelly]: Refactor LightCommandHandler with stronger type checking.
+- [shelly]: Refactor CoverCommandHandler with stronger type checking.
+
+### Added
+
+- [plugin]: Added exposeInputEvent option to the config.
+- [package]: Updated readme.MD with guidelines to add gen. 2 and 3 wifi battery-powered devices (e.g. shellyhtg3).
+- [shelly]: Added support for shelly0110dimg3.
+
+### Fixed
+
+- [package]: Fixed dependencies.
+
+<a href="https://www.buymeacoffee.com/luligugithub">
+  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+</a>
+
 ## [0.9.0] - 2024-08-14
 
 ### Added

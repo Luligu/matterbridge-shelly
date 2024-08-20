@@ -701,7 +701,7 @@ export class ShellyDevice extends EventEmitter {
           const bthomeDevice = data[key] as BTHomeStatusDevice;
           this.log.debug(
             `Device ${hk}${this.id}${db} has device update from BTHomeDevice id ${CYAN}${device.id}${db} key ${CYAN}${device.key}${db} ` +
-              `addr ${idn}${device.addr}${rs}${db} name ${device.name} model ${device.model} (${device.type}) ` +
+              `addr ${idn}${device.addr}${rs}${db} name ${CYAN}${device.name}${db} model ${CYAN}${device.model}${db} (${CYAN}${device.type}${db}) ` +
               `rssi ${YELLOW}${bthomeDevice.rssi}${db} last_updated_ts ${YELLOW}${bthomeDevice.last_updated_ts}${db}`,
           );
           if (isValidNumber(bthomeDevice.rssi, -100, 0) || isValidNumber(bthomeDevice.last_updated_ts, 0)) {

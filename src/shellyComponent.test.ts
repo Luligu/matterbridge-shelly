@@ -17,6 +17,7 @@ describe('ShellyComponent', () => {
   const shelly = new Shelly(log);
   let device: ShellyDevice;
   let device2: ShellyDevice;
+  let device3: ShellyDevice;
 
   let id: string;
   let name: string;
@@ -32,8 +33,10 @@ describe('ShellyComponent', () => {
 
     const mockDevice = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shellydimmer2-98CDAC0D01BB.json'));
     const mockDevice2 = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shellyplus1pm-441793D69718.json'));
+    const mockDevice3 = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shellyplusrgbwpm-A0A3B35C7024.rgb.json'));
     if (mockDevice) device = mockDevice;
     if (mockDevice2) device2 = mockDevice2;
+    if (mockDevice3) device3 = mockDevice3;
   });
 
   beforeEach(async () => {
@@ -51,6 +54,7 @@ describe('ShellyComponent', () => {
     shelly.destroy();
     device.destroy();
     device2.destroy();
+    device3.destroy();
 
     consoleLogSpy.mockRestore();
     loggerLogSpy.mockRestore();
@@ -79,9 +83,6 @@ describe('ShellyComponent', () => {
     expect((component as ShellyLightComponent).Toggle).toBeUndefined();
     expect((component as ShellyLightComponent).Level).toBeUndefined();
 
-    expect(component.isSwitchComponent()).toBeFalsy();
-    expect(component.isLightComponent()).toBeFalsy();
-    expect(component.isCoverComponent()).toBeFalsy();
     expect(isSwitchComponent(component)).toBeFalsy();
     expect(isLightComponent(component)).toBeFalsy();
     expect(isCoverComponent(component)).toBeFalsy();
@@ -100,9 +101,6 @@ describe('ShellyComponent', () => {
     expect((component as ShellyLightComponent).Toggle).not.toBeUndefined();
     expect((component as ShellyLightComponent).Level).not.toBeUndefined();
 
-    expect(component.isSwitchComponent()).toBeFalsy();
-    expect(component.isLightComponent()).toBeTruthy();
-    expect(component.isCoverComponent()).toBeFalsy();
     expect(isSwitchComponent(component)).toBeFalsy();
     expect(isLightComponent(component)).toBeTruthy();
     expect(isCoverComponent(component)).toBeFalsy();
@@ -129,9 +127,6 @@ describe('ShellyComponent', () => {
     expect((component as ShellyLightComponent).Toggle).not.toBeUndefined();
     expect((component as ShellyLightComponent).Level).not.toBeUndefined();
 
-    expect(component.isSwitchComponent()).toBeFalsy();
-    expect(component.isLightComponent()).toBeTruthy();
-    expect(component.isCoverComponent()).toBeFalsy();
     expect(isSwitchComponent(component)).toBeFalsy();
     expect(isLightComponent(component)).toBeTruthy();
     expect(isCoverComponent(component)).toBeFalsy();
@@ -158,9 +153,6 @@ describe('ShellyComponent', () => {
     expect((component as ShellySwitchComponent).Toggle).not.toBeUndefined();
     expect((component as ShellyLightComponent).Level).toBeUndefined();
 
-    expect(component.isSwitchComponent()).toBeTruthy();
-    expect(component.isLightComponent()).toBeFalsy();
-    expect(component.isCoverComponent()).toBeFalsy();
     expect(isSwitchComponent(component)).toBeTruthy();
     expect(isLightComponent(component)).toBeFalsy();
     expect(isCoverComponent(component)).toBeFalsy();
@@ -185,9 +177,6 @@ describe('ShellyComponent', () => {
     expect((component as ShellyLightComponent).Toggle).not.toBeUndefined();
     expect((component as ShellyLightComponent).Level).toBeUndefined();
 
-    expect(component.isSwitchComponent()).toBeTruthy();
-    expect(component.isLightComponent()).toBeFalsy();
-    expect(component.isCoverComponent()).toBeFalsy();
     expect(isSwitchComponent(component)).toBeTruthy();
     expect(isLightComponent(component)).toBeFalsy();
     expect(isCoverComponent(component)).toBeFalsy();
@@ -210,9 +199,6 @@ describe('ShellyComponent', () => {
     expect((component as ShellyCoverComponent).Stop).not.toBeUndefined();
     expect((component as ShellyCoverComponent).GoToPosition).not.toBeUndefined();
 
-    expect(component.isSwitchComponent()).toBeFalsy();
-    expect(component.isLightComponent()).toBeFalsy();
-    expect(component.isCoverComponent()).toBeTruthy();
     expect(isSwitchComponent(component)).toBeFalsy();
     expect(isLightComponent(component)).toBeFalsy();
     expect(isCoverComponent(component)).toBeTruthy();
@@ -245,9 +231,6 @@ describe('ShellyComponent', () => {
     expect((component as ShellyCoverComponent).Stop).not.toBeUndefined();
     expect((component as ShellyCoverComponent).GoToPosition).not.toBeUndefined();
 
-    expect(component.isSwitchComponent()).toBeFalsy();
-    expect(component.isLightComponent()).toBeFalsy();
-    expect(component.isCoverComponent()).toBeTruthy();
     expect(isSwitchComponent(component)).toBeFalsy();
     expect(isLightComponent(component)).toBeFalsy();
     expect(isCoverComponent(component)).toBeTruthy();
@@ -307,6 +290,24 @@ describe('ShellyComponent', () => {
     expect(component.getValue('key')).toBeUndefined();
   });
 
+  it('should be Light', () => {
+    const component = new ShellyComponent(device, 'light:0', 'Light', { ison: true });
+    expect(isLightComponent(component)).toBe(true);
+    expect(isLightComponent(undefined)).toBe(false);
+  });
+
+  it('should be Switch', () => {
+    const component = new ShellyComponent(device, 'switch:0', 'Switch', { ison: true });
+    expect(isSwitchComponent(component)).toBe(true);
+    expect(isSwitchComponent(undefined)).toBe(false);
+  });
+
+  it('should be Cover', () => {
+    const component = new ShellyComponent(device, 'cover:0', 'Cover', { ison: true });
+    expect(isCoverComponent(component)).toBe(true);
+    expect(isCoverComponent(undefined)).toBe(false);
+  });
+
   it('should update state true for ison', () => {
     const component = new ShellyComponent(device, 'light:0', 'Light', { ison: true });
     expect(component.getValue('ison')).toBe(true);
@@ -362,6 +363,24 @@ describe('ShellyComponent', () => {
     expect(component.getValue('red')).toBe(20);
     expect(component.getValue('green')).toBe(30);
     expect(component.getValue('blue')).toBe(40);
+    mockFetch.mockRestore();
+  });
+
+  it('should not update brightness and color for Rgb', () => {
+    const mockFetch = jest.spyOn(ShellyDevice, 'fetch').mockResolvedValue({});
+    const component = new ShellyComponent(device3, 'light:0', 'Light', { output: true, brightness: 50, rgb: [20, 30, 40] });
+    expect(component.getProperty('state')).not.toBeUndefined();
+    expect(component.getValue('state')).toBe(true);
+    expect(component.getProperty('brightness')).not.toBeUndefined();
+    expect(component.getValue('brightness')).toBe(50);
+    expect(component.getProperty('red')).toBeUndefined();
+    expect(component.getProperty('green')).toBeUndefined();
+    expect(component.getProperty('blue')).toBeUndefined();
+    expect(component.getProperty('rgb')).toBeDefined();
+    (component as ShellyLightComponent).Level(34);
+    (component as ShellyLightComponent).ColorRGB(10, 20, 30);
+    expect(component.getValue('brightness')).toBe(50);
+    expect(component.getValue('rgb')).toEqual([20, 30, 40]);
     mockFetch.mockRestore();
   });
 

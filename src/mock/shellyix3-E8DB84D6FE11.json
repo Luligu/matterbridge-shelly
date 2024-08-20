@@ -1,0 +1,216 @@
+{
+  "shelly": {
+    "type": "SHIX3-1",
+    "mac": "E8DB84D6FE11",
+    "auth": false,
+    "fw": "20230913-114336/v1.14.0-gcb84623",
+    "discoverable": true,
+    "longid": 1,
+    "num_inputs": 3,
+    "num_outputs": 0
+  },
+  "settings": {
+    "device": {
+      "type": "SHIX3-1",
+      "mac": "E8DB84D6FE11",
+      "hostname": "shellyix3-E8DB84D6FE11",
+      "num_inputs": 3,
+      "num_outputs": 0
+    },
+    "wifi_ap": {
+      "enabled": false,
+      "ssid": "shellyix3-E8DB84D6FE11",
+      "key": ""
+    },
+    "wifi_sta": {
+      "enabled": true,
+      "ssid": "Kachlon",
+      "ipv4_method": "static",
+      "ip": "192.168.1.47",
+      "gw": null,
+      "mask": "255.255.255.0",
+      "dns": null
+    },
+    "wifi_sta1": {
+      "enabled": true,
+      "ssid": "Kachlon",
+      "ipv4_method": "dhcp",
+      "ip": null,
+      "gw": null,
+      "mask": null,
+      "dns": null
+    },
+    "ap_roaming": {
+      "enabled": false,
+      "threshold": -70
+    },
+    "mqtt": {
+      "enable": false,
+      "server": "192.168.33.3:1883",
+      "user": "",
+      "id": "shellyix3-E8DB84D6FE11",
+      "reconnect_timeout_max": 60,
+      "reconnect_timeout_min": 2,
+      "clean_session": true,
+      "keep_alive": 60,
+      "max_qos": 0,
+      "retain": false,
+      "update_period": 30
+    },
+    "coiot": {
+      "enabled": true,
+      "update_period": 15,
+      "peer": "192.168.1.57:5683"
+    },
+    "sntp": {
+      "server": "time.google.com",
+      "enabled": true
+    },
+    "login": {
+      "enabled": false,
+      "unprotected": false,
+      "username": "admin"
+    },
+    "pin_code": "",
+    "name": "Gaya Shelly-i3 fans",
+    "fw": "20230913-114336/v1.14.0-gcb84623",
+    "factory_reset_from_switch": true,
+    "pon_wifi_reset": false,
+    "discoverable": true,
+    "build_info": {
+      "build_id": "20230913-114336/v1.14.0-gcb84623",
+      "build_timestamp": "2023-09-13T11:43:36Z",
+      "build_version": "1.0"
+    },
+    "cloud": {
+      "enabled": false,
+      "connected": false
+    },
+    "timezone": "Asia/Jerusalem",
+    "lat": 32.062901,
+    "lng": 34.8703,
+    "tzautodetect": true,
+    "tz_utc_offset": 10800,
+    "tz_dst": false,
+    "tz_dst_auto": true,
+    "time": "",
+    "unixtime": 0,
+    "led_status_disable": false,
+    "debug_enable": false,
+    "allow_cross_origin": false,
+    "actions": {
+      "active": false,
+      "names": [
+        "btn_on_url",
+        "btn_off_url",
+        "shortpush_url",
+        "longpush_url",
+        "double_shortpush_url",
+        "triple_shortpush_url",
+        "shortpush_longpush_url",
+        "longpush_shortpush_url",
+        "btn_on_url",
+        "btn_off_url",
+        "shortpush_url",
+        "longpush_url",
+        "double_shortpush_url",
+        "triple_shortpush_url",
+        "shortpush_longpush_url",
+        "longpush_shortpush_url",
+        "btn_on_url",
+        "btn_off_url",
+        "shortpush_url",
+        "longpush_url",
+        "double_shortpush_url",
+        "triple_shortpush_url",
+        "shortpush_longpush_url",
+        "longpush_shortpush_url"
+      ]
+    },
+    "hwinfo": {
+      "hw_revision": "prod-2020-04-21",
+      "batch_id": 1
+    },
+    "longpush_duration_ms": {
+      "min": 800,
+      "max": 3000
+    },
+    "multipush_time_between_pushes_ms": {
+      "max": 500
+    },
+    "inputs": [
+      {
+        "name": "Fan bed",
+        "btn_type": "toggle",
+        "btn_reverse": 0
+      },
+      {
+        "name": "Fan PC",
+        "btn_type": "toggle",
+        "btn_reverse": 0
+      },
+      {
+        "name": null,
+        "btn_type": "momentary",
+        "btn_reverse": 0
+      }
+    ],
+    "eco_mode_enabled": false
+  },
+  "status": {
+    "wifi_sta": {
+      "connected": true,
+      "ssid": "Kachlon",
+      "ip": "192.168.1.47",
+      "rssi": -43
+    },
+    "cloud": {
+      "enabled": false,
+      "connected": false
+    },
+    "mqtt": {
+      "connected": false
+    },
+    "time": "",
+    "unixtime": 0,
+    "serial": 1,
+    "has_update": false,
+    "mac": "E8DB84D6FE11",
+    "cfg_changed_cnt": 0,
+    "actions_stats": {
+      "skipped": 0
+    },
+    "inputs": [
+      {
+        "input": 0,
+        "event": "",
+        "event_cnt": 0,
+        "last_sequence": ""
+      },
+      {
+        "input": 0,
+        "event": "",
+        "event_cnt": 0,
+        "last_sequence": ""
+      },
+      {
+        "input": 0,
+        "event": "",
+        "event_cnt": 0,
+        "last_sequence": ""
+      }
+    ],
+    "temperature_status": "Normal",
+    "update": {
+      "status": "unknown",
+      "has_update": false,
+      "new_version": "",
+      "old_version": "20230913-114336/v1.14.0-gcb84623"
+    },
+    "ram_total": 52368,
+    "ram_free": 40160,
+    "fs_size": 233681,
+    "fs_free": 155620,
+    "uptime": 542
+  }
+}
