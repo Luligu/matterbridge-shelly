@@ -1056,6 +1056,54 @@ describe('Shelly devices test', () => {
 
       if (device) device.destroy();
     });
+
+    test('Create a gen 3 shelly0110dimg3 device', async () => {
+      id = 'shelly0110dimg3-34B7DA902E24';
+      log.logName = id;
+
+      device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', id + '.json'));
+      expect(device).not.toBeUndefined();
+      if (!device) return;
+      expect(device.host).toBe(path.join('src', 'mock', id + '.json'));
+      expect(device.model).toBe('S3DM-0010WW');
+      expect(device.mac).toBe('34B7DA902E24');
+      expect(device.id).toBe(id);
+      expect(device.firmware).toBe('1.4.2-beta1-g84969a6'); // firmwareGen1
+      expect(device.auth).toBe(false);
+      expect(device.gen).toBe(3);
+      expect(device.profile).toBe(undefined);
+      expect(device.name).toBe('Dimmer 0/1-10V PM Gen3');
+      expect(device.hasUpdate).toBe(true);
+      expect(device.lastseen).not.toBe(0);
+      expect(device.online).toBe(true);
+      expect(device.cached).toBe(false);
+      expect(device.sleepMode).toBe(false);
+
+      expect(device.components.length).toBe(12);
+      // console.error(device.getComponentNames());
+      expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Input', 'Light', 'MQTT', 'Sys', 'Sntp', 'WiFi', 'WS']);
+      // console.error(device.getComponentIds());
+      expect(device.getComponentIds()).toStrictEqual(['ble', 'cloud', 'input:0', 'input:1', 'light:0', 'mqtt', 'sys', 'sntp', 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws']);
+
+      expect(device.getComponent('sys')?.getValue('temperature')).toBe(undefined);
+      expect(device.getComponent('sys')?.getValue('overtemperature')).toBe(undefined);
+
+      expect(device.getComponent('light:0')?.hasProperty('state')).toBe(true);
+      expect(device.getComponent('light:0')?.hasProperty('brightness')).toBe(true);
+      expect(device.getComponent('light:0')?.hasProperty('rgb')).toBe(false);
+      expect(device.getComponent('light:0')?.hasProperty('red')).toBe(false);
+      expect(device.getComponent('light:0')?.hasProperty('green')).toBe(false);
+      expect(device.getComponent('light:0')?.hasProperty('blu')).toBe(false);
+
+      expect(device.getComponent('light:0')?.hasProperty('voltage')).toBe(true);
+      expect(device.getComponent('light:0')?.hasProperty('current')).toBe(true);
+      expect(device.getComponent('light:0')?.hasProperty('apower')).toBe(true);
+      expect(device.getComponent('light:0')?.hasProperty('aenergy')).toBe(true);
+
+      expect(await device.fetchUpdate()).not.toBeNull();
+
+      if (device) device.destroy();
+    });
   });
 
   describe('Test all pro devices', () => {

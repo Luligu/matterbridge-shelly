@@ -423,6 +423,24 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             if (!composed) mbDevice.addFixedLabel('composed', component.name);
             composed = true;
 
+            // Add the electrical EveHistory cluster
+            if (
+              config.exposePowerMeter === 'evehistory' &&
+              lightComponent.hasProperty('voltage') &&
+              lightComponent.hasProperty('current') &&
+              lightComponent.hasProperty('apower') &&
+              lightComponent.hasProperty('aenergy')
+            ) {
+              child.addClusterServer(
+                mbDevice.getDefaultStaticEveHistoryClusterServer(
+                  lightComponent.getValue('voltage') as number,
+                  lightComponent.getValue('current') as number,
+                  lightComponent.getValue('apower') as number,
+                  ((lightComponent.getValue('aenergy') as ShellyData).total as number) / 1000,
+                ),
+              );
+            }
+
             // Set the onOff attribute
             const state = lightComponent.getValue('state');
             if (isValidBoolean(state)) child.getClusterServer(OnOffCluster)?.setOnOffAttribute(state);

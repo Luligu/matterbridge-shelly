@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /**
- * This file contains the class WsClient.
+ * This file contains the class WsServer.
  *
  * @file src\wsServer.ts
  * @author Luca Liguori
  * @date 2024-08-13
- * @version 1.1.0
+ * @version 1.2.0
  *
  * Copyright 2024, 2025 Luca Liguori.
  *
@@ -101,12 +101,14 @@ export class WsServer extends EventEmitter {
    *
    * @remarks
    * This method listens to a WebSocket connection and handles various events such as open, error, close, and message.
-   * It receives updates and events from the WebSocket client.
+   * It receives updates and events from the WebSocket server.
    * The received responses are parsed and appropriate actions are taken based on the response type.
+   *
+   * @param port - The port number on which the WebSocket server will listen. Defaults to 8485.
    *
    * @returns void
    */
-  async listenForStatusUpdates(port = 8080) {
+  private async listenForStatusUpdates(port = 8485) {
     try {
       // Create an HTTP server
       this.httpServer = createServer((req, res) => {
@@ -116,7 +118,7 @@ export class WsServer extends EventEmitter {
       // Create a WebSocket server
       this.wsServer = new WebSocketServer({ server: this.httpServer });
     } catch (error) {
-      this.log.error(`Failed to create the WebSocketServer: ${error}`);
+      this.log.error(`Failed to create the HttpServer and WebSocketServer: ${error}`);
       return;
     }
 
@@ -209,20 +211,26 @@ export class WsServer extends EventEmitter {
 
     // Start the server
     this.httpServer.listen(port, () => {
-      this.log.debug(`WebSocketServer is listening on port ${port}`);
+      this.log.debug(`HttpServer for WebSocketServer is listening on port ${port}`);
       this._isListening = true;
     });
   }
 
   /**
-   * Starts the WebSocket client for the Shelly device.
+   * Starts the WebSocket server for the Shelly devices.
    *
    * @remarks
-   * This method initializes the WebSocket client and starts listening for status updates.
+   * This method initializes the WebSocket server and starts listening for status updates.
+   *
+   * @param port - The port number on which the WebSocket server will listen. Defaults to 8485.
    *
    * @returns void
    */
-  start(port = 8080) {
+  start(port = 8485) {
+    if (this._isListening) {
+      this.log.debug(`WebSocketServer is already listening.`);
+      return;
+    }
     this.log.debug(`Starting WebSocketServer...`);
     this.listenForStatusUpdates(port); // Na await to start listening for status updates
     this.log.debug(`Started WebSocketServer.`);

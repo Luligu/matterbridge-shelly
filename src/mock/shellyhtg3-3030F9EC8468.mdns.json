@@ -68,9 +68,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": [
-        "gen=3"
-      ]
+      "data": ["gen=3"]
     },
     {
       "name": "ShellyHTG3-3030F9EC8468.local",
@@ -99,11 +97,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": [
-        "gen=3",
-        "app=HTG3",
-        "ver=1.4.2-beta1"
-      ]
+      "data": ["gen=3", "app=HTG3", "ver=1.4.2-beta1"]
     },
     {
       "name": "ShellyHTG3-3030F9EC8468.local",
