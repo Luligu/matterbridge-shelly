@@ -16,7 +16,7 @@ describe('Shellies', () => {
   const shelly = new Shelly(log, 'admin', 'tango');
 
   const firmwareGen1 = '1.14.0-gcb84623';
-  const firmwareGen2 = '1.4.0-gb2aeadb';
+  const firmwareGen2 = '1.4.2-gc2639da';
 
   beforeAll(() => {
     consoleLogSpy = jest.spyOn(console, 'log').mockImplementation((...args: any[]) => {
@@ -82,7 +82,7 @@ describe('Shellies', () => {
       expect(device?.host).toBe('192.168.1.217');
       expect(device?.model).toBe('SNSW-001P16EU');
       expect(device?.id).toBe('shellyplus1pm-441793D69718');
-      expect(device?.firmware).toBe('1.4.2-beta1-g84969a6'); // firmwareGen2
+      expect(device?.firmware).toBe(firmwareGen2);
       expect(device?.auth).toBe(false);
 
       await device.fetchUpdate();
@@ -227,7 +227,7 @@ describe('Shellies', () => {
       expect(device?.host).toBe('192.168.1.218');
       expect(device?.model).toBe('SNSW-102P16EU');
       expect(device?.id).toBe('shellyplus2pm-5443B23D81F8');
-      expect(device?.firmware).toBe('1.4.2-beta1-g84969a6'); // firmwareGen2
+      expect(device?.firmware).toBe(firmwareGen2);
       expect(device?.auth).toBe(false);
 
       await device.fetchUpdate();
@@ -281,7 +281,7 @@ describe('Shellies', () => {
       expect(device.host).toBe('192.168.1.221');
       expect(device.model).toBe('S3SW-001X8EU');
       expect(device.id).toBe('shelly1minig3-543204547478');
-      expect(device.firmware).toBe(firmwareGen2); // firmwareGen2
+      expect(device.firmware).toBe(firmwareGen2);
       expect(device.auth).toBe(true);
 
       await device.fetchUpdate();
