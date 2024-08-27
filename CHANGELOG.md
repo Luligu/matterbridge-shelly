@@ -12,6 +12,7 @@ If you like this project and find it useful, please consider giving it a star on
 - [shelly]: Refactor ShellyUpdateHandler with stronger type checking.
 - [shelly]: Refactor LightCommandHandler with stronger type checking.
 - [shelly]: Refactor CoverCommandHandler with stronger type checking.
+- [package]: Updated dependencies.
 
 ### Added
 

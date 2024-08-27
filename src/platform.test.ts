@@ -4,7 +4,8 @@
 import { Matterbridge, MatterbridgeDevice, PlatformConfig } from 'matterbridge';
 import { wait } from 'matterbridge/utils';
 import { AnsiLogger, db, idn, LogLevel, nf, rs } from 'matterbridge/logger';
-import { ShellyPlatform, isValidArray, isValidBoolean, isValidNull, isValidNumber, isValidObject, isValidString, isValidUndefined } from './platform';
+import { ShellyPlatform } from './platform';
+import { isValidArray, isValidBoolean, isValidNull, isValidNumber, isValidObject, isValidString, isValidUndefined } from 'matterbridge/utils';
 import { jest } from '@jest/globals';
 
 describe('ShellyPlatform', () => {

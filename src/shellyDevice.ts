@@ -22,7 +22,7 @@
  */
 
 import { AnsiLogger, LogLevel, BLUE, CYAN, GREEN, GREY, MAGENTA, RESET, db, debugStringify, er, hk, nf, wr, zb, rs, YELLOW, idn, nt } from 'matterbridge/logger';
-import { getIpv4InterfaceAddress } from 'matterbridge/utils';
+import { getIpv4InterfaceAddress, isValidNumber, isValidObject, isValidString } from 'matterbridge/utils';
 import { EventEmitter } from 'events';
 import fetch, { RequestInit } from 'node-fetch';
 import crypto from 'crypto';
@@ -35,7 +35,7 @@ import { WsClient } from './wsClient.js';
 import { Shelly } from './shelly.js';
 import { BTHomeComponent, BTHomeDeviceComponent, BTHomeSensorComponent, BTHomeStatusDevice, BTHomeStatusSensor, ShellyData, ShellyDataType } from './shellyTypes.js';
 import { isCoverComponent, isLightComponent, isSwitchComponent, ShellyComponent } from './shellyComponent.js';
-import { isValidNumber, isValidObject, isValidString } from './platform.js';
+import {} from './platform.js';
 
 interface ShellyDeviceEvent {
   online: [];
