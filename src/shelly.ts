@@ -32,7 +32,7 @@ import { SocketType } from 'dgram';
 import { WsClient } from './wsClient.js';
 import { WsServer } from './wsServer.js';
 import { ShellyData } from './shellyTypes.js';
-import { isValidArray, isValidObject } from './platform.js';
+import { isValidArray, isValidObject } from 'matterbridge/utils';
 
 /**
  * Creates a new instance of the Shelly class.

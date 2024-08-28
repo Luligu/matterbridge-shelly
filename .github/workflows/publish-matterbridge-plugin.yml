@@ -20,10 +20,10 @@ jobs:
 
       - name: Verify Node.js version
         run: node -v
-  
+
       - name: Verify Npm version
         run: npm -v
-              
+            
       - name: Install matterbridge
         run: npm install -g matterbridge
 
