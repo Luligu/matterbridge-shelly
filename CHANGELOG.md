@@ -6,9 +6,14 @@ If you like this project and find it useful, please consider giving it a star on
 
 ## [0.9.3] - 2024-08-29
 
+### Added
+
+- [shelly]: When an already discovered device is discovered with a new address, the change is registered and takes effect after restarting.
+- [shelly]: Added support for shellypro3em.
+
 ### Fixed
 
-- [package]: Fixed WindowCovering.MovementStatus
+- [shelly]: Fixed WindowCovering.MovementStatus for Gen. 1 rollers
 
 <a href="https://www.buymeacoffee.com/luligugithub">
   <img src="./yellow-button.png" alt="Buy me a coffee" width="120">

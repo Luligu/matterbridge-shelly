@@ -525,6 +525,7 @@ export class ShellyDevice extends EventEmitter {
         if (key.startsWith('input:')) device.addComponent(new ShellyComponent(device, key, 'Input', settingsPayload[key] as ShellyData));
         if (key.startsWith('pm1:')) device.addComponent(new ShellyComponent(device, key, 'PowerMeter', settingsPayload[key] as ShellyData));
         if (key.startsWith('em1:')) device.addComponent(new ShellyComponent(device, key, 'PowerMeter', settingsPayload[key] as ShellyData));
+        if (key.startsWith('em:')) device.addComponent(new ShellyComponent(device, key, 'PowerMeter', settingsPayload[key] as ShellyData));
         if (key.startsWith('temperature:')) device.addComponent(new ShellyComponent(device, key, 'Temperature', settingsPayload[key] as ShellyData));
         if (key.startsWith('humidity:')) device.addComponent(new ShellyComponent(device, key, 'Humidity', settingsPayload[key] as ShellyData));
       }
@@ -840,6 +841,9 @@ export class ShellyDevice extends EventEmitter {
         if (key.startsWith('input:')) this.updateComponent(key, data[key] as ShellyData);
         if (key.startsWith('pm1:')) this.updateComponent(key, data[key] as ShellyData);
         if (key.startsWith('em1:')) this.updateComponent(key, data[key] as ShellyData);
+        if (key.startsWith('emdata1:')) this.updateComponent(key.replace('emdata1:', 'em1:'), data[key] as ShellyData);
+        if (key.startsWith('em:')) this.updateComponent(key, data[key] as ShellyData);
+        if (key.startsWith('emdata:')) this.updateComponent(key.replace('emdata:', 'em:'), data[key] as ShellyData);
         if (key.startsWith('temperature:')) this.updateComponent(key, data[key] as ShellyData);
         if (key.startsWith('humidity:')) this.updateComponent(key, data[key] as ShellyData);
       }
