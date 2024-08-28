@@ -8,7 +8,7 @@ If you like this project and find it useful, please consider giving it a star on
 
 ### Added
 
-- [shelly]: When an already discovered device is discovered with a new address, the change is registered and takes effect after restarting.
+- [shelly]: When an already discovered and stored device is discovered with a new address, the change is registered and takes effect after restarting.
 - [shelly]: Added support for shellypro3em.
 
 ### Fixed
