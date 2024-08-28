@@ -35,7 +35,6 @@ import { WsClient } from './wsClient.js';
 import { Shelly } from './shelly.js';
 import { BTHomeComponent, BTHomeDeviceComponent, BTHomeSensorComponent, BTHomeStatusDevice, BTHomeStatusSensor, ShellyData, ShellyDataType } from './shellyTypes.js';
 import { isCoverComponent, isLightComponent, isSwitchComponent, ShellyComponent } from './shellyComponent.js';
-import {} from './platform.js';
 
 interface ShellyDeviceEvent {
   online: [];
