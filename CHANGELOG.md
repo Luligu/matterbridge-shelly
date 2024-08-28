@@ -11,11 +11,6 @@ If you like this project and find it useful, please consider giving it a star on
 - [package]: Updated dependencies.
 - [covers]: refactor Cover and Roller components for WindowCovering cluster.
 
-### Added
-
-- [plugin]: Added exposeInputEvent option to the config.
-- [shelly]: Added support for shelly0110dimg3.
-
 ### Fixed
 
 - [package]: Fixed dependencies.

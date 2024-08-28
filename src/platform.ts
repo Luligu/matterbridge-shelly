@@ -332,7 +332,6 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               lightComponent.hasProperty('aenergy')
             ) {
               child.addClusterServer(
-                // mbDevice.getDefaultStaticEveHistoryClusterServer(
                 MatterHistory.getEveHistoryClusterServer(
                   lightComponent.getValue('voltage') as number,
                   lightComponent.getValue('current') as number,
@@ -430,7 +429,6 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               switchComponent.hasProperty('aenergy')
             ) {
               child.addClusterServer(
-                // mbDevice.getDefaultStaticEveHistoryClusterServer(
                 MatterHistory.getEveHistoryClusterServer(
                   switchComponent.getValue('voltage') as number,
                   switchComponent.getValue('current') as number,
@@ -474,7 +472,6 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               coverComponent.hasProperty('aenergy')
             ) {
               child.addClusterServer(
-                // mbDevice.getDefaultStaticEveHistoryClusterServer(
                 MatterHistory.getEveHistoryClusterServer(
                   coverComponent.getValue('voltage') as number,
                   coverComponent.getValue('current') as number,
