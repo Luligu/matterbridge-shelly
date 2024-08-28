@@ -1003,25 +1003,28 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     // Matter uses 10000 = fully closed   0 = fully opened
     // Shelly uses 0 = fully closed   100 = fully opened
     const coverCluster = endpoint.getClusterServer(
-      WindowCoveringCluster.with(WindowCovering.Feature.Lift, WindowCovering.Feature.PositionAwareLift, WindowCovering.Feature.AbsolutePosition),
+      WindowCoveringCluster.with(WindowCovering.Feature.Lift, WindowCovering.Feature.PositionAwareLift /* , WindowCovering.Feature.AbsolutePosition*/),
     );
     if (!coverCluster) {
       shellyDevice.log.error('shellyCoverCommandHandler error: cluster WindowCoveringCluster not found');
       return false;
     }
     if (command === 'Stop') {
+      shellyDevice.log.info(`${db}Sent command ${hk}${componentName}${nf}:${command}()${db} to shelly device ${idn}${shellyDevice?.id}${rs}${db}`);
       coverComponent.Stop();
-      shellyDevice.log.info(`${db}Sent command ${hk}${componentName}${nf}:${command}()${db} to shelly device ${idn}${shellyDevice?.id}${rs}${db}`);
     } else if (command === 'Open') {
+      matterbridgeDevice.setAttribute(WindowCoveringCluster.id, 'targetPositionLiftPercent100ths', 0, shellyDevice.log, endpoint);
+      shellyDevice.log.info(`${db}Sent command ${hk}${componentName}${nf}:${command}()${db} to shelly device ${idn}${shellyDevice?.id}${rs}${db}`);
       coverComponent.Open();
-      shellyDevice.log.info(`${db}Sent command ${hk}${componentName}${nf}:${command}()${db} to shelly device ${idn}${shellyDevice?.id}${rs}${db}`);
     } else if (command === 'Close') {
-      coverComponent.Close();
+      matterbridgeDevice.setAttribute(WindowCoveringCluster.id, 'targetPositionLiftPercent100ths', 10000, shellyDevice.log, endpoint);
       shellyDevice.log.info(`${db}Sent command ${hk}${componentName}${nf}:${command}()${db} to shelly device ${idn}${shellyDevice?.id}${rs}${db}`);
+      coverComponent.Close();
     } else if (command === 'GoToPosition' && isValidNumber(pos, 0, 10000)) {
+      matterbridgeDevice.setAttribute(WindowCoveringCluster.id, 'targetPositionLiftPercent100ths', pos, shellyDevice.log, endpoint);
       const shellyPos = 100 - Math.max(Math.min(Math.round(pos / 100), 100), 0);
-      coverComponent.GoToPosition(shellyPos);
       shellyDevice.log.info(`${db}Sent command ${hk}${componentName}${nf}:${command}(${shellyPos})${db} to shelly device ${idn}${shellyDevice?.id}${rs}${db}`);
+      coverComponent.GoToPosition(shellyPos);
     }
     return true;
   }
@@ -1152,13 +1155,6 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     }
     // Update cover
     if (shellyComponent.name === 'Cover' || shellyComponent.name === 'Roller') {
-      const windowCoveringCluster = endpoint.getClusterServer(
-        WindowCoveringCluster.with(WindowCovering.Feature.Lift, WindowCovering.Feature.PositionAwareLift, WindowCovering.Feature.AbsolutePosition),
-      );
-      if (!windowCoveringCluster) {
-        shellyDevice.log.error('shellyUpdateHandler error: cluster WindowCoveringCluster not found');
-        return;
-      }
       // Matter uses 10000 = fully closed   0 = fully opened
       // Shelly uses 0 = fully closed   100 = fully opened
 
@@ -1174,7 +1170,6 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       if (property === 'state' && isValidString(value)) {
         // Gen 1 devices send stop
         if (value === 'stopped' || value === 'stop') {
-          // matterbridgeDevice.setWindowCoveringTargetAsCurrentAndStopped(endpoint);
           const current = matterbridgeDevice.getAttribute(WindowCoveringCluster.id, 'currentPositionLiftPercent100ths', shellyDevice.log, endpoint);
           if (!isValidNumber(current, 0, 10000)) {
             this.log.error(`Error: current position not found on endpoint ${or}${endpoint.name}:${endpoint.number}${db} ${hk}WindowCovering${db}`);
@@ -1182,45 +1177,35 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           }
           matterbridgeDevice.setAttribute(WindowCoveringCluster.id, 'targetPositionLiftPercent100ths', current, shellyDevice.log, endpoint);
           const status = WindowCovering.MovementStatus.Stopped;
-          matterbridgeDevice.setAttribute(WindowCoveringCluster.id, 'operationalStatus', { global: status, lift: status, tilt: undefined }, shellyDevice.log, endpoint);
+          matterbridgeDevice.setAttribute(WindowCoveringCluster.id, 'operationalStatus', { global: status, lift: status, tilt: status }, shellyDevice.log, endpoint);
         }
         // Gen 1 devices send close
         if (value === 'closed' || value === 'close') {
-          // matterbridgeDevice.setWindowCoveringCurrentTargetStatus(10000, 10000, WindowCovering.MovementStatus.Stopped, endpoint);
           matterbridgeDevice.setAttribute(WindowCoveringCluster.id, 'targetPositionLiftPercent100ths', 10000, shellyDevice.log, endpoint);
           matterbridgeDevice.setAttribute(WindowCoveringCluster.id, 'currentPositionLiftPercent100ths', 10000, shellyDevice.log, endpoint);
           const status = WindowCovering.MovementStatus.Stopped;
-          matterbridgeDevice.setAttribute(WindowCoveringCluster.id, 'operationalStatus', { global: status, lift: status, tilt: undefined }, shellyDevice.log, endpoint);
+          matterbridgeDevice.setAttribute(WindowCoveringCluster.id, 'operationalStatus', { global: status, lift: status, tilt: status }, shellyDevice.log, endpoint);
         }
         // Gen 1 devices send open
         if (value === 'open') {
-          // matterbridgeDevice.setWindowCoveringCurrentTargetStatus(0, 0, WindowCovering.MovementStatus.Stopped, endpoint);
           matterbridgeDevice.setAttribute(WindowCoveringCluster.id, 'targetPositionLiftPercent100ths', 0, shellyDevice.log, endpoint);
           matterbridgeDevice.setAttribute(WindowCoveringCluster.id, 'currentPositionLiftPercent100ths', 0, shellyDevice.log, endpoint);
           const status = WindowCovering.MovementStatus.Stopped;
-          matterbridgeDevice.setAttribute(WindowCoveringCluster.id, 'operationalStatus', { global: status, lift: status, tilt: undefined }, shellyDevice.log, endpoint);
+          matterbridgeDevice.setAttribute(WindowCoveringCluster.id, 'operationalStatus', { global: status, lift: status, tilt: status }, shellyDevice.log, endpoint);
         }
         if (value === 'opening') {
-          // windowCoveringCluster?.setTargetPositionLiftPercent100thsAttribute(0);
-          // matterbridgeDevice.setWindowCoveringStatus(WindowCovering.MovementStatus.Opening, endpoint);
-          matterbridgeDevice.setAttribute(WindowCoveringCluster.id, 'targetPositionLiftPercent100ths', 0, shellyDevice.log);
           const status = WindowCovering.MovementStatus.Opening;
-          matterbridgeDevice.setAttribute(WindowCoveringCluster.id, 'operationalStatus', { global: status, lift: status, tilt: undefined }, shellyDevice.log, endpoint);
+          matterbridgeDevice.setAttribute(WindowCoveringCluster.id, 'operationalStatus', { global: status, lift: status, tilt: status }, shellyDevice.log, endpoint);
         }
         if (value === 'closing') {
-          // windowCoveringCluster?.setTargetPositionLiftPercent100thsAttribute(10000);
-          // matterbridgeDevice.setWindowCoveringStatus(WindowCovering.MovementStatus.Closing, endpoint);
-          matterbridgeDevice.setAttribute(WindowCoveringCluster.id, 'targetPositionLiftPercent100ths', 10000, shellyDevice.log);
           const status = WindowCovering.MovementStatus.Closing;
-          matterbridgeDevice.setAttribute(WindowCoveringCluster.id, 'operationalStatus', { global: status, lift: status, tilt: undefined }, shellyDevice.log, endpoint);
+          matterbridgeDevice.setAttribute(WindowCoveringCluster.id, 'operationalStatus', { global: status, lift: status, tilt: status }, shellyDevice.log, endpoint);
         }
       } else if (property === 'current_pos' && isValidNumber(value, 0, 100)) {
         const matterPos = 10000 - Math.min(Math.max(Math.round(value * 100), 0), 10000);
-        // windowCoveringCluster?.setCurrentPositionLiftPercent100thsAttribute(matterPos);
         matterbridgeDevice.setAttribute(WindowCoveringCluster.id, 'currentPositionLiftPercent100ths', matterPos, shellyDevice.log, endpoint);
       } else if (property === 'target_pos' && isValidNumber(value, 0, 100)) {
         const matterPos = 10000 - Math.min(Math.max(Math.round(value * 100), 0), 10000);
-        // windowCoveringCluster?.setTargetPositionLiftPercent100thsAttribute(matterPos);
         matterbridgeDevice.setAttribute(WindowCoveringCluster.id, 'targetPositionLiftPercent100ths', matterPos, shellyDevice.log, endpoint);
       }
       /*

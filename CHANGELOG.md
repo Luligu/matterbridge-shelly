@@ -4,6 +4,26 @@ All notable changes to this project will be documented in this file.
 
 If you like this project and find it useful, please consider giving it a star on GitHub at https://github.com/Luligu/matterbridge-shelly and sponsoring it.
 
+## [0.9.1] - 2024-08-28
+
+### Changed
+
+- [package]: Updated dependencies.
+- [covers]: refactor Cover and Roller components for WindowCovering cluster.
+
+### Added
+
+- [plugin]: Added exposeInputEvent option to the config.
+- [shelly]: Added support for shelly0110dimg3.
+
+### Fixed
+
+- [package]: Fixed dependencies.
+
+<a href="https://www.buymeacoffee.com/luligugithub">
+  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+</a>
+
 ## [0.9.1] - 2024-08-20
 
 ### Changed
