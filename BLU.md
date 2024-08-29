@@ -11,6 +11,11 @@ How to add the BLU devices:
 ![image](https://github.com/user-attachments/assets/1286b23a-6a16-4016-a0ef-cc4abc221118)
 
 - Give a meaningful name to your device if desired (it will be used by your controller).
+- Check if the ble gateway is correctly receiving the updates from the BLU devices.
+
+![image](https://github.com/user-attachments/assets/27998b62-00bc-4e61-ac7f-493e4e419faf)
+![image](https://github.com/user-attachments/assets/458df93b-5a22-4b61-b312-38f6da6ff6e8)
+  
 - In the plugin config enable bleDiscover.
 
 ![image](https://github.com/user-attachments/assets/aa004f25-2ae8-4656-b0c1-a0b5155c6902)
