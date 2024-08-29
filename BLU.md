@@ -56,6 +56,6 @@ this means that the plugin has found the connected ble device.
 
 ![image](https://github.com/user-attachments/assets/a01a04f0-2508-41ba-b3b4-46217efca922)
 
-
+If you don't receive updates, try to pair the BLU devices to another Gen3 or Pro device. Then restart again MatterBridge.
 
 
