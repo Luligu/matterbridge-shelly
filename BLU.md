@@ -8,6 +8,7 @@ How to add the BLU devices:
 - Then, go to the "Components" section and add your BLU devices in "Bluetooth (BTHome) devices".
 
 ![image](https://github.com/user-attachments/assets/d18ac23f-5f30-4ab0-b8c6-3c3dec11f931)
+![image](https://github.com/user-attachments/assets/1286b23a-6a16-4016-a0ef-cc4abc221118)
 
 - Give a meaningful name to your device if desired (it will be used by your controller).
 - In the plugin config enable bleDiscover.
