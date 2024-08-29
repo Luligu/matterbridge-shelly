@@ -1,0 +1,468 @@
+{
+  "shelly": {
+    "name": "Breaker box PRO-3EM",
+    "id": "shellypro3em-a0dd6ca0c27c",
+    "mac": "A0DD6CA0C27C",
+    "slot": 1,
+    "model": "SPEM-003CEBEU",
+    "gen": 2,
+    "fw_id": "20240822-121054/1.4.3-g143ff62",
+    "ver": "1.4.3",
+    "app": "Pro3EM",
+    "auth_en": false,
+    "auth_domain": null,
+    "profile": "monophase"
+  },
+  "settings": {
+    "ble": {
+      "enable": true,
+      "rpc": {
+        "enable": true
+      },
+      "observer": {
+        "enable": false
+      }
+    },
+    "bthome": {},
+    "cloud": {
+      "enable": false,
+      "server": "iot.shelly.cloud:6012/jrpc"
+    },
+    "em1:0": {
+      "id": 0,
+      "name": null,
+      "reverse": false,
+      "ct_type": "120A"
+    },
+    "em1:1": {
+      "id": 1,
+      "name": null,
+      "reverse": false,
+      "ct_type": "120A"
+    },
+    "em1:2": {
+      "id": 2,
+      "name": null,
+      "reverse": false,
+      "ct_type": "120A"
+    },
+    "em1data:0": {},
+    "em1data:1": {},
+    "em1data:2": {},
+    "eth": {
+      "enable": true,
+      "ipv4mode": "dhcp",
+      "ip": null,
+      "netmask": null,
+      "gw": null,
+      "nameserver": null
+    },
+    "modbus": {
+      "enable": true
+    },
+    "mqtt": {
+      "enable": false,
+      "server": null,
+      "client_id": "shellypro3em-a0dd6ca0c27c",
+      "user": null,
+      "ssl_ca": null,
+      "topic_prefix": "shellypro3em-a0dd6ca0c27c",
+      "rpc_ntf": true,
+      "status_ntf": false,
+      "use_client_cert": false,
+      "enable_rpc": true,
+      "enable_control": true
+    },
+    "sys": {
+      "device": {
+        "name": "Breaker box PRO-3EM",
+        "mac": "A0DD6CA0C27C",
+        "fw_id": "20240822-121054/1.4.3-g143ff62",
+        "discoverable": true,
+        "eco_mode": false,
+        "profile": "monophase",
+        "addon_type": null,
+        "sys_btn_toggle": true
+      },
+      "location": null,
+      "debug": {
+        "level": 2,
+        "file_level": null,
+        "mqtt": {
+          "enable": false
+        },
+        "websocket": {
+          "enable": false
+        },
+        "udp": {
+          "addr": null
+        }
+      },
+      "ui_data": {},
+      "rpc_udp": {
+        "dst_addr": null,
+        "listen_port": null
+      },
+      "sntp": {
+        "server": "time.google.com"
+      },
+      "cfg_rev": 9
+    },
+    "temperature:0": {
+      "id": 0,
+      "name": null,
+      "report_thr_C": 5,
+      "offset_C": 0
+    },
+    "wifi": {
+      "ap": {
+        "ssid": "ShellyPro3EM-A0DD6CA0C27C",
+        "is_open": true,
+        "enable": true,
+        "range_extender": {
+          "enable": false
+        }
+      },
+      "sta": {
+        "ssid": "FibreBox_X6-12A4C7",
+        "is_open": false,
+        "enable": true,
+        "ipv4mode": "dhcp",
+        "ip": null,
+        "netmask": null,
+        "gw": null,
+        "nameserver": null
+      },
+      "sta1": {
+        "ssid": null,
+        "is_open": true,
+        "enable": false,
+        "ipv4mode": "dhcp",
+        "ip": null,
+        "netmask": null,
+        "gw": null,
+        "nameserver": null
+      },
+      "roam": {
+        "rssi_thr": -80,
+        "interval": 60
+      }
+    },
+    "ws": {
+      "enable": false,
+      "server": null,
+      "ssl_ca": "ca.pem"
+    }
+  },
+  "status": {
+    "ble": {},
+    "bthome": {
+      "errors": [
+        "observer_disabled"
+      ]
+    },
+    "cloud": {
+      "connected": false
+    },
+    "em1:0": {
+      "id": 0,
+      "current": 0.028,
+      "voltage": 0,
+      "act_power": 0,
+      "aprt_power": 0,
+      "pf": 0,
+      "freq": 0,
+      "calibration": "factory"
+    },
+    "em1:1": {
+      "id": 1,
+      "current": 0.028,
+      "voltage": 0,
+      "act_power": 0,
+      "aprt_power": 0,
+      "pf": 0,
+      "freq": 0,
+      "calibration": "factory"
+    },
+    "em1:2": {
+      "id": 2,
+      "current": 0.027,
+      "voltage": 236.1,
+      "act_power": 0,
+      "aprt_power": 6.5,
+      "pf": 0,
+      "freq": 50,
+      "calibration": "factory"
+    },
+    "em1data:0": {
+      "id": 0,
+      "total_act_energy": 0.01,
+      "total_act_ret_energy": 0
+    },
+    "em1data:1": {
+      "id": 1,
+      "total_act_energy": 0.01,
+      "total_act_ret_energy": 0
+    },
+    "em1data:2": {
+      "id": 2,
+      "total_act_energy": 0.01,
+      "total_act_ret_energy": 0.01
+    },
+    "eth": {
+      "ip": null
+    },
+    "modbus": {},
+    "mqtt": {
+      "connected": false
+    },
+    "sys": {
+      "mac": "A0DD6CA0C27C",
+      "restart_required": false,
+      "time": "16:49",
+      "unixtime": 1724856556,
+      "uptime": 4020,
+      "ram_size": 262000,
+      "ram_free": 91208,
+      "fs_size": 524288,
+      "fs_free": 180224,
+      "cfg_rev": 9,
+      "kvs_rev": 0,
+      "schedule_rev": 1,
+      "webhook_rev": 1,
+      "available_updates": {},
+      "reset_reason": 3
+    },
+    "temperature:0": {
+      "id": 0,
+      "tC": 47.9,
+      "tF": 118.2
+    },
+    "wifi": {
+      "sta_ip": "192.168.1.80",
+      "status": "got ip",
+      "ssid": "FibreBox_X6-12A4C7",
+      "rssi": -58
+    },
+    "ws": {
+      "connected": false
+    }
+  },
+  "components": [
+    {
+      "key": "ble",
+      "status": {},
+      "config": {
+        "enable": true,
+        "rpc": {
+          "enable": true
+        },
+        "observer": {
+          "enable": false
+        }
+      }
+    },
+    {
+      "key": "bthome",
+      "status": {
+        "errors": [
+          "observer_disabled"
+        ]
+      },
+      "config": {}
+    },
+    {
+      "key": "cloud",
+      "status": {
+        "connected": false
+      },
+      "config": {
+        "enable": false,
+        "server": "iot.shelly.cloud:6012/jrpc"
+      }
+    },
+    {
+      "key": "em1:0",
+      "status": {
+        "id": 0,
+        "current": 0.028,
+        "voltage": 0,
+        "act_power": 0,
+        "aprt_power": 0,
+        "pf": 0,
+        "freq": 0,
+        "calibration": "factory"
+      },
+      "config": {
+        "id": 0,
+        "name": null,
+        "reverse": false,
+        "ct_type": "120A"
+      }
+    },
+    {
+      "key": "em1:1",
+      "status": {
+        "id": 1,
+        "current": 0.028,
+        "voltage": 0,
+        "act_power": 0,
+        "aprt_power": 0,
+        "pf": 0,
+        "freq": 0,
+        "calibration": "factory"
+      },
+      "config": {
+        "id": 1,
+        "name": null,
+        "reverse": false,
+        "ct_type": "120A"
+      }
+    },
+    {
+      "key": "em1:2",
+      "status": {
+        "id": 2,
+        "current": 0.027,
+        "voltage": 236.1,
+        "act_power": 0,
+        "aprt_power": 6.5,
+        "pf": 0,
+        "freq": 50,
+        "calibration": "factory"
+      },
+      "config": {
+        "id": 2,
+        "name": null,
+        "reverse": false,
+        "ct_type": "120A"
+      }
+    },
+    {
+      "key": "em1data:0",
+      "status": {
+        "id": 0,
+        "total_act_energy": 0.01,
+        "total_act_ret_energy": 0
+      },
+      "config": {}
+    },
+    {
+      "key": "em1data:1",
+      "status": {
+        "id": 1,
+        "total_act_energy": 0.01,
+        "total_act_ret_energy": 0
+      },
+      "config": {}
+    },
+    {
+      "key": "em1data:2",
+      "status": {
+        "id": 2,
+        "total_act_energy": 0.01,
+        "total_act_ret_energy": 0.01
+      },
+      "config": {}
+    },
+    {
+      "key": "eth",
+      "status": {
+        "ip": null
+      },
+      "config": {
+        "enable": true,
+        "ipv4mode": "dhcp",
+        "ip": null,
+        "netmask": null,
+        "gw": null,
+        "nameserver": null
+      }
+    },
+    {
+      "key": "modbus",
+      "status": {},
+      "config": {
+        "enable": true
+      }
+    },
+    {
+      "key": "mqtt",
+      "status": {
+        "connected": false
+      },
+      "config": {
+        "enable": false,
+        "server": null,
+        "client_id": "shellypro3em-a0dd6ca0c27c",
+        "user": null,
+        "ssl_ca": null,
+        "topic_prefix": "shellypro3em-a0dd6ca0c27c",
+        "rpc_ntf": true,
+        "status_ntf": false,
+        "use_client_cert": false,
+        "enable_rpc": true,
+        "enable_control": true
+      }
+    },
+    {
+      "key": "sys",
+      "status": {
+        "mac": "A0DD6CA0C27C",
+        "restart_required": false,
+        "time": "16:49",
+        "unixtime": 1724856557,
+        "uptime": 4021,
+        "ram_size": 261996,
+        "ram_free": 90012,
+        "fs_size": 524288,
+        "fs_free": 180224,
+        "cfg_rev": 9,
+        "kvs_rev": 0,
+        "schedule_rev": 1,
+        "webhook_rev": 1,
+        "available_updates": {},
+        "reset_reason": 3
+      },
+      "config": {
+        "device": {
+          "name": "Breaker box PRO-3EM",
+          "mac": "A0DD6CA0C27C",
+          "fw_id": "20240822-121054/1.4.3-g143ff62",
+          "discoverable": true,
+          "eco_mode": false,
+          "profile": "monophase",
+          "addon_type": null,
+          "sys_btn_toggle": true
+        },
+        "location": {
+          "tz": "Europe/Monaco",
+          "lat": 43.7312,
+          "lon": 7.4138
+        },
+        "debug": {
+          "level": 2,
+          "file_level": null,
+          "mqtt": {
+            "enable": false
+          },
+          "websocket": {
+            "enable": false
+          },
+          "udp": {
+            "addr": null
+          }
+        },
+        "ui_data": {},
+        "rpc_udp": {
+          "dst_addr": null,
+          "listen_port": null
+        },
+        "sntp": {
+          "server": "time.google.com"
+        },
+        "cfg_rev": 9
+      }
+    }
+  ]
+}

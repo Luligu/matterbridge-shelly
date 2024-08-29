@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 
 If you like this project and find it useful, please consider giving it a star on GitHub at https://github.com/Luligu/matterbridge-shelly and sponsoring it.
 
+## [0.9.3] - 2024-08-29
+
+### Added
+
+- [shelly]: When an already discovered and stored device is discovered with a new address, the change is registered and takes effect after restarting.
+- [shelly]: Added support for shellypro3em (monophase only).
+- [shelly]: Added a guide to add and debug BLU devices https://github.com/Luligu/matterbridge-shelly/blob/dev/BLU.md.
+
+### Fixed
+
+- [shelly]: Fixed WindowCovering.MovementStatus for Gen. 1 rollers
+
+<a href="https://www.buymeacoffee.com/luligugithub">
+  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+</a>
+
 ## [0.9.2] - 2024-08-28
 
 ### Changed
