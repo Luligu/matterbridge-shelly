@@ -22,8 +22,8 @@ Features:
 - Shelly wifi battery-powered devices with sleep_mode are supported.
 - Shelly BLU devices are supported through local devices configured as ble gateway.
 - Discovered shellies are stored in local storage for quick loading on startup.
-- The components exposed are Light (with brightness and RGB color), Switch, Relay, Roller, Cover, PowerMeter and Input.
-- All components expose the electrical measurements with the EveHistory cluster (displayed on HA), waiting for the controllers to upgrade to the Matter 1.3 specs.
+- The components exposed are Light (with brightness and RGB color), Switch, Relay, Roller, Cover, PowerMeter, Temperature, Humidity and Input.
+- PowerMeters expose the electrical measurements with the EveHistory cluster (displayed only in Home Assistant), waiting for the controllers to upgrade to the Matter 1.3 specs.
 - Shellies are controlled locally, eliminating the need for cloud or MQTT (which can both be disabled).
 - Shelly Gen 1 devices are controlled using the CoIoT protocol (see the note below).
 - Shelly Gen 2 and Gen 3 devices are controlled using WebSocket.
@@ -34,6 +34,14 @@ Features:
 - A 10-minute timer checks if the device has reported within that time frame, and fetch un update.
 
 If you like this project and find it useful, please consider giving it a star on GitHub at https://github.com/Luligu/matterbridge-shelly and sponsoring it.
+
+## Sponsor
+
+This project is proudly sponsored by:
+
+[![Sponsor Logo](https://github.com/Luligu/matterbridge/blob/main/screenshot/Shelly.png)](https://www.shelly.com/en)
+
+[Shelly Group](https://corporate.shelly.com/about-shelly-group/)
 
 ## Acknowledgements
 
@@ -103,7 +111,7 @@ matterbridge -add matterbridge-shelly
 Then start Matterbridge from a terminal
 
 ```
-matterbridge -bridge
+matterbridge
 ```
 
 ## How to use it
