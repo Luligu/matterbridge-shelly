@@ -37,6 +37,8 @@ If you like this project and find it useful, please consider giving it a star on
 
 ## Sponsor
 
+This project is proudly sponsored by:
+
 <a href="https://www.shelly.com/en">
   <img src="https://github.com/Luligu/matterbridge/blob/main/screenshot/Shelly.png" alt="Shelly logo" width="100" />
 </a>
