@@ -67,11 +67,11 @@ See the complete guidelines on [Matterbridge](https://github.com/Luligu/matterbr
 
 ### Any shelly device
 
-A working shelly device gen. 1 or 2 or 3 or BLU.
+A shelly device gen. 1 or 2 or 3 or BLU.
 
 For Gen. 1 devices:
 
-- CoIoT: the CoIoT (coap) service must be enabled in the settings of the device and the CoIoT peer must be mcast. If mcast is not working on your network put in the peer field "<matterbridge-ipv4>:5683" (you can find the matterbridge ipv4Address address in the frontend) and port 5683 (e.g. 192.168.1.100:5683). Multicast may not work for all networks due to router or access poit configuration or network topology (I cannot help you on this, just check your router or access point configuration). If CoIoT is not configured correctly you will not receive any update from the device.
+- CoIoT: the CoIoT (coap) service must be enabled in the settings of the device and the CoIoT peer must be mcast. If mcast is not working on your network put in the peer field "matterbridge-ipv4-address:5683" (you can find the matterbridge ipv4Address address in the frontend) and port 5683 (e.g. 192.168.1.100:5683). Multicast may not work for all networks due to router or access poit configuration or network topology (I cannot help you on this, just check your router or access point configuration). If CoIoT is not configured correctly you will not receive any update from the device.
 
 For wifi battery-powered devices:
 
