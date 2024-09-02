@@ -119,7 +119,7 @@ matterbridge
 
 ## How to use it
 
-You may need to set some config values:
+You may need to set some config values in the frontend:
 
 ### username
 
