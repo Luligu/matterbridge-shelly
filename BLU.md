@@ -1,8 +1,11 @@
 # Shelly BLU devices
 
 ## How to add the BLU devices:
+
 - BLU devices are supported through a local Shelly device acting as a ble gateway.
-- To enable this feature, choose one or more devices that have the ble component and support the ble gateway (e.g. PRO and gen. 3 devices). To choose the ble gateway, consider the distance between the ble gataeway and your BLU device and choose the ble gateway with the better signal.
+
+- To enable this feature, choose one or more devices that have the ble component and support the ble gateway (e.g. PRO and gen. 3 devices). To choose the ble gateway, consider the distance between the ble gataeway and your BLU device and choose the ble gateway with the better signal. It is also important to consider the signal between the gatway and you network: when possible choose a ble gateway that has an ethernet connection.
+
 - In the gateway device web page, enable both "Enable Bluetooth" and "Enable Bluetooth gateway".
 
 ![image](https://github.com/user-attachments/assets/fa2b1712-a957-496b-8f98-8a6827bb5dbd)
@@ -56,6 +59,6 @@ this means that the plugin has found the connected ble device.
 
 ![image](https://github.com/user-attachments/assets/a01a04f0-2508-41ba-b3b4-46217efca922)
 
-
+If you don't receive updates, try to pair the BLU devices to another Gen3 or Pro device. Then restart again MatterBridge.
 
 

@@ -389,8 +389,12 @@ export class WsClient extends EventEmitter {
     if (this._isConnecting) {
       this.stopTimeout = setTimeout(() => {
         this.stopTimeout = undefined;
-        if (this._isConnected) this.wsClient?.close();
-        if (this._isConnecting) this.wsClient?.terminate();
+        try {
+          if (this._isConnected) this.wsClient?.close();
+          if (this._isConnecting) this.wsClient?.terminate();
+        } catch (error) {
+          this.log.error(`Error stopping ws client for Shelly device ${hk}${this.wsDeviceId}${er} host ${zb}${this.wsHost}${er}: ${error}`);
+        }
         this._isConnecting = false;
         this._isConnected = false;
         this.wsClient?.removeAllListeners();

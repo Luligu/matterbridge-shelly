@@ -29,7 +29,7 @@
         "light",
         "outlet"
       ],
-      "default": "switch"
+      "default": "outlet"
     },
     "exposeInput": {
       "description": "Choose how to expose the shelly inputs: disabled, contact, momentary or latching switch (you may need to pair again the controller when changed)",
@@ -59,7 +59,7 @@
         "matter13",
         "evehistory"
       ],
-      "default": "evehistory"
+      "default": "disabled"
     },
     "blackList": {
       "description": "The devices in the list will not be exposed. Use the device id (e.g. shellyplus2pm-5443B23D81F8)",

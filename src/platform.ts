@@ -800,7 +800,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     }
 
     // add all configured devices
-    if (this.config.enableConfigDiscover === true) {
+    if (this.config.enableConfigDiscover === true && this.config.deviceIp !== undefined) {
       this.log.info(`Loading from config ${Object.entries(this.config.deviceIp as ConfigDeviceIp).length} Shelly devices`);
       Object.entries(this.config.deviceIp as ConfigDeviceIp).forEach(async ([id, host]) => {
         id = ShellyDevice.normalizeId(id).id;
