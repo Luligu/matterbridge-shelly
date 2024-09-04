@@ -53,8 +53,10 @@ import {
   RelativeHumidityMeasurementCluster,
   AtLeastOne,
   PowerSourceCluster,
+  ElectricalPowerMeasurement,
+  ElectricalEnergyMeasurement,
 } from 'matterbridge';
-import { ElectricalPowerMeasurement, ElectricalEnergyMeasurement } from 'matterbridge/cluster';
+import {} from 'matterbridge/cluster';
 
 import { EveHistory, EveHistoryCluster, MatterHistory } from 'matterbridge/history';
 import { AnsiLogger, BLUE, CYAN, GREEN, LogLevel, TimestampFormat, YELLOW, db, debugStringify, dn, er, hk, idn, nf, or, rs, wr, zb } from 'matterbridge/logger';
