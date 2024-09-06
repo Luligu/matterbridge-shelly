@@ -490,9 +490,7 @@ describe('Shelly devices test', () => {
       expect(device.sleepMode).toBe(true);
 
       expect(device.components.length).toBe(10);
-      // console.error(device.getComponentNames());
       expect(device.getComponentNames()).toStrictEqual(['WiFi', 'MQTT', 'CoIoT', 'Sntp', 'Cloud', 'Flood', 'Temperature', 'Battery']);
-      // console.error(device.getComponentIds());
       expect(device.getComponentIds()).toStrictEqual(['wifi_ap', 'wifi_sta', 'wifi_sta1', 'mqtt', 'coiot', 'sntp', 'cloud', 'flood', 'temperature', 'battery']);
 
       expect(device.getComponent('flood')?.getValue('flood')).toBe(false);
