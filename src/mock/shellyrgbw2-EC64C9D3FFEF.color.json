@@ -1,27 +1,25 @@
 {
   "shelly": {
-    "type": "SHDM-2",
-    "mac": "98CDAC0D01BB",
-    "auth": true,
-    "fw": "20230913-114008/v1.14.0-gcb84623",
+    "type": "SHRGBW2",
+    "mac": "EC64C9D3FFEF",
+    "auth": false,
+    "fw": "20230913-113259/v1.14.0-gcb84623",
     "discoverable": false,
     "longid": 1,
-    "num_inputs": 2,
     "num_outputs": 1,
-    "num_meters": 1
+    "mode": "color"
   },
   "settings": {
     "device": {
-      "type": "SHDM-2",
-      "mac": "98CDAC0D01BB",
-      "hostname": "shellydimmer2-98CDAC0D01BB",
-      "num_inputs": 2,
+      "type": "SHRGBW2",
+      "mac": "EC64C9D3FFEF",
+      "hostname": "shellyrgbw2-EC64C9D3FFEF",
       "num_outputs": 1,
-      "num_meters": 1
+      "mode": "color"
     },
     "wifi_ap": {
       "enabled": false,
-      "ssid": "shellydimmer2-98CDAC0D01BB",
+      "ssid": "shellyrgbw2-EC64C9D3FFEF",
       "key": ""
     },
     "wifi_sta": {
@@ -43,14 +41,14 @@
       "dns": null
     },
     "ap_roaming": {
-      "enabled": true,
+      "enabled": false,
       "threshold": -70
     },
     "mqtt": {
       "enable": false,
       "server": "192.168.33.3:1883",
       "user": "",
-      "id": "shellydimmer2-98CDAC0D01BB",
+      "id": "shellyrgbw2-EC64C9D3FFEF",
       "reconnect_timeout_max": 60,
       "reconnect_timeout_min": 2,
       "clean_session": true,
@@ -62,26 +60,27 @@
     "coiot": {
       "enabled": true,
       "update_period": 15,
-      "peer": "192.168.1.189:5683"
+      "peer": "192.168.1.189:5683",
+      "execute_enable": false
     },
     "sntp": {
       "server": "time.google.com",
       "enabled": true
     },
     "login": {
-      "enabled": true,
+      "enabled": false,
       "unprotected": false,
       "username": "admin"
     },
     "pin_code": "",
-    "name": "My Shelly dimmer2",
-    "fw": "20230913-114008/v1.14.0-gcb84623",
+    "name": "My Shelly RGBW2",
+    "fw": "20230913-113259/v1.14.0-gcb84623",
     "factory_reset_from_switch": true,
     "pon_wifi_reset": false,
     "discoverable": false,
     "build_info": {
-      "build_id": "20230913-114008/v1.14.0-gcb84623",
-      "build_timestamp": "2023-09-13T11:40:08Z",
+      "build_id": "20230913-113259/v1.14.0-gcb84623",
+      "build_timestamp": "2023-09-13T11:32:59Z",
       "build_version": "1.0"
     },
     "cloud": {
@@ -96,58 +95,55 @@
     "tz_dst": false,
     "tz_dst_auto": true,
     "time": "11:15",
-    "unixtime": 1725614126,
+    "unixtime": 1725614127,
     "led_status_disable": false,
     "debug_enable": false,
     "allow_cross_origin": false,
+    "fw_mode": "SHRGBW2!color",
     "actions": {
       "active": false,
       "names": [
-        "btn1_on_url",
-        "btn1_off_url",
-        "btn1_longpush_url",
-        "btn1_shortpush_url",
-        "btn2_on_url",
-        "btn2_off_url",
-        "btn2_longpush_url",
-        "btn2_shortpush_url",
+        "btn_on_url",
+        "btn_off_url",
         "out_on_url",
-        "out_off_url"
+        "out_off_url",
+        "longpush_url",
+        "shortpush_url"
       ]
     },
     "hwinfo": {
-      "hw_revision": "prod-2021-02",
+      "hw_revision": "dev-prototype",
       "batch_id": 0
     },
-    "mode": "white",
-    "pulse_mode": 2,
-    "pulse_mode_detected": 1,
-    "pulse_mode_rebooted": 0,
-    "load_autodetect": 1,
-    "calibrated": false,
-    "transition": 1000,
-    "fade_rate": 3,
-    "min_brightness": 0,
-    "zcross_debounce": 100,
-    "bypass": false,
+    "mode": "color",
+    "alt_modes": [
+      "white"
+    ],
+    "dcpower": 1,
     "lights": [
       {
-        "name": "Shelly dimmer channel name",
+        "name": null,
         "ison": false,
+        "red": 11,
+        "green": 0,
+        "blue": 255,
+        "white": 0,
+        "gain": 100,
+        "transition": 1000,
+        "effect": 0,
         "default_state": "last",
         "auto_on": 0,
         "auto_off": 0,
         "schedule": false,
+        "btn_type": "toggle",
+        "btn_reverse": 0,
         "night_mode": {
           "enabled": false,
           "start_time": "00:00",
           "end_time": "00:00",
           "brightness": 0
         },
-        "schedule_rules": [],
-        "btn_type": "one_button",
-        "btn_debounce": 80,
-        "swap_inputs": 0
+        "schedule_rules": []
       }
     ],
     "night_mode": {
@@ -156,19 +152,14 @@
       "end_time": "00:00",
       "brightness": 0
     },
-    "warm_up": {
-      "enabled": 0,
-      "brightness": 100,
-      "time": 50
-    },
-    "eco_mode_enabled": false
+    "eco_mode_enabled": true
   },
   "status": {
     "wifi_sta": {
       "connected": true,
       "ssid": "FibreBox_X6-12A4C7",
-      "ip": "192.168.1.219",
-      "rssi": -61
+      "ip": "192.168.1.226",
+      "rssi": -64
     },
     "cloud": {
       "enabled": true,
@@ -178,14 +169,16 @@
       "connected": false
     },
     "time": "11:15",
-    "unixtime": 1725614126,
-    "serial": 977,
+    "unixtime": 1725614127,
+    "serial": 978,
     "has_update": false,
-    "mac": "98CDAC0D01BB",
+    "mac": "EC64C9D3FFEF",
     "cfg_changed_cnt": 0,
     "actions_stats": {
       "skipped": 0
     },
+    "mode": "color",
+    "input": 0,
     "lights": [
       {
         "ison": false,
@@ -194,17 +187,24 @@
         "timer_started": 0,
         "timer_duration": 0,
         "timer_remaining": 0,
-        "mode": "white",
-        "brightness": 100,
-        "transition": 0
+        "mode": "color",
+        "red": 11,
+        "green": 0,
+        "blue": 255,
+        "white": 0,
+        "gain": 100,
+        "effect": 0,
+        "transition": 0,
+        "power": 0,
+        "overpower": false
       }
     ],
     "meters": [
       {
         "power": 0,
-        "overpower": 0,
         "is_valid": true,
-        "timestamp": 1725621326,
+        "overpower": false,
+        "timestamp": 1725621327,
         "counters": [
           0,
           0,
@@ -215,43 +215,23 @@
     ],
     "inputs": [
       {
-        "input": 1,
-        "event": "",
-        "event_cnt": 1
-      },
-      {
         "input": 0,
         "event": "",
         "event_cnt": 0
       }
     ],
-    "tmp": {
-      "tC": 53.2,
-      "tF": 127.75,
-      "is_valid": true
-    },
-    "calibrated": false,
-    "calib_progress": 0,
-    "calib_status": 0,
-    "calib_running": 0,
-    "wire_mode": 1,
-    "forced_neutral": false,
-    "overtemperature": false,
-    "loaderror": 0,
-    "overpower": false,
-    "debug": 0,
     "update": {
       "status": "idle",
       "has_update": false,
-      "new_version": "20230913-114008/v1.14.0-gcb84623",
-      "old_version": "20230913-114008/v1.14.0-gcb84623",
-      "beta_version": "20231107-164738/v1.14.1-rc1-g0617c15"
+      "new_version": "20230913-113259/v1.14.0-gcb84623",
+      "old_version": "20230913-113259/v1.14.0-gcb84623",
+      "beta_version": "20231107-164040/v1.14.1-rc1-g0617c15"
     },
-    "ram_total": 49672,
-    "ram_free": 37016,
+    "ram_total": 51672,
+    "ram_free": 39444,
     "fs_size": 233681,
-    "fs_free": 119476,
-    "uptime": 44052
+    "fs_free": 152357,
+    "uptime": 44087
   },
   "components": []
 }

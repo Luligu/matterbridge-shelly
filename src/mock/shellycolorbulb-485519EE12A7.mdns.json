@@ -1,55 +1,19 @@
 {
   "id": 0,
   "type": "response",
-  "flags": 1024,
+  "flags": 1152,
   "flag_qr": true,
   "opcode": "QUERY",
   "flag_aa": true,
   "flag_tc": false,
   "flag_rd": false,
-  "flag_ra": false,
+  "flag_ra": true,
   "flag_z": false,
   "flag_ad": false,
   "flag_cd": false,
   "rcode": "NOERROR",
   "questions": [],
   "answers": [
-    {
-      "name": "_http._tcp.local",
-      "type": "PTR",
-      "ttl": 4500,
-      "class": "IN",
-      "flush": false,
-      "data": "shellydimmer2-98CDAC0D01BB._http._tcp.local"
-    },
-    {
-      "name": "shellydimmer2-98CDAC0D01BB._http._tcp.local",
-      "type": "SRV",
-      "ttl": 120,
-      "class": "IN",
-      "flush": true,
-      "data": {
-        "priority": 0,
-        "weight": 0,
-        "port": 80,
-        "target": "shellydimmer2-98CDAC0D01BB.local"
-      }
-    },
-    {
-      "name": "shellydimmer2-98CDAC0D01BB._http._tcp.local",
-      "type": "TXT",
-      "ttl": 120,
-      "class": "IN",
-      "flush": true,
-      "data": [
-        "id=shellydimmer2-98CDAC0D01BB",
-        "arch=esp8266",
-        "app=dimmer-l51",
-        "fw_version=1.0",
-        "fw_id=20230913-114008/v1.14.0-gcb84623",
-        "discoverable=false"
-      ]
-    },
     {
       "name": "_services._dns-sd._udp.local",
       "type": "PTR",
@@ -59,21 +23,57 @@
       "data": "_http._tcp.local"
     },
     {
-      "name": "shellydimmer2-98CDAC0D01BB.local",
+      "name": "_http._tcp.local",
+      "type": "PTR",
+      "ttl": 4500,
+      "class": "IN",
+      "flush": false,
+      "data": "shellycolorbulb-485519EE12A7._http._tcp.local"
+    },
+    {
+      "name": "shellycolorbulb-485519EE12A7._http._tcp.local",
+      "type": "SRV",
+      "ttl": 120,
+      "class": "IN",
+      "flush": true,
+      "data": {
+        "priority": 0,
+        "weight": 0,
+        "port": 80,
+        "target": "shellycolorbulb-485519EE12A7.local"
+      }
+    },
+    {
+      "name": "shellycolorbulb-485519EE12A7._http._tcp.local",
+      "type": "TXT",
+      "ttl": 120,
+      "class": "IN",
+      "flush": true,
+      "data": [
+        "id=shellycolorbulb-485519EE12A7",
+        "arch=esp8266",
+        "app=color-bulb",
+        "fw_version=1.0",
+        "fw_id=20230913-111548/v1.14.0-gcb84623",
+        "discoverable=false"
+      ]
+    },
+    {
+      "name": "shellycolorbulb-485519EE12A7.local",
       "type": "A",
       "ttl": 120,
       "class": "IN",
       "flush": true,
-      "data": "192.168.1.219"
+      "data": "192.168.1.155"
     },
     {
-      "name": "shellydimmer2-98CDAC0D01BB.local",
+      "name": "shellycolorbulb-485519EE12A7.local",
       "type": "NSEC",
       "ttl": 120,
       "class": "IN",
       "flush": true,
       "data": {
-        "nextDomain": "shellydimmer2-98CDAC0D01BB.local",
+        "nextDomain": "shellycolorbulb-485519EE12A7.local",
         "rrtypes": [
           "A"
         ]

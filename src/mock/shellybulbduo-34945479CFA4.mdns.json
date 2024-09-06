@@ -20,10 +20,10 @@
       "ttl": 4500,
       "class": "IN",
       "flush": false,
-      "data": "shellydimmer2-98CDAC0D01BB._http._tcp.local"
+      "data": "ShellyBulbDuo-34945479CFA4._http._tcp.local"
     },
     {
-      "name": "shellydimmer2-98CDAC0D01BB._http._tcp.local",
+      "name": "ShellyBulbDuo-34945479CFA4._http._tcp.local",
       "type": "SRV",
       "ttl": 120,
       "class": "IN",
@@ -32,21 +32,21 @@
         "priority": 0,
         "weight": 0,
         "port": 80,
-        "target": "shellydimmer2-98CDAC0D01BB.local"
+        "target": "ShellyBulbDuo-34945479CFA4.local"
       }
     },
     {
-      "name": "shellydimmer2-98CDAC0D01BB._http._tcp.local",
+      "name": "ShellyBulbDuo-34945479CFA4._http._tcp.local",
       "type": "TXT",
       "ttl": 120,
       "class": "IN",
       "flush": true,
       "data": [
-        "id=shellydimmer2-98CDAC0D01BB",
+        "id=ShellyBulbDuo-34945479CFA4",
         "arch=esp8266",
-        "app=dimmer-l51",
+        "app=bulbduo",
         "fw_version=1.0",
-        "fw_id=20230913-114008/v1.14.0-gcb84623",
+        "fw_id=20230913-111821/v1.14.0-gcb84623",
         "discoverable=false"
       ]
     },
@@ -59,21 +59,21 @@
       "data": "_http._tcp.local"
     },
     {
-      "name": "shellydimmer2-98CDAC0D01BB.local",
+      "name": "ShellyBulbDuo-34945479CFA4.local",
       "type": "A",
       "ttl": 120,
       "class": "IN",
       "flush": true,
-      "data": "192.168.1.219"
+      "data": "192.168.1.154"
     },
     {
-      "name": "shellydimmer2-98CDAC0D01BB.local",
+      "name": "ShellyBulbDuo-34945479CFA4.local",
       "type": "NSEC",
       "ttl": 120,
       "class": "IN",
       "flush": true,
       "data": {
-        "nextDomain": "shellydimmer2-98CDAC0D01BB.local",
+        "nextDomain": "ShellyBulbDuo-34945479CFA4.local",
         "rrtypes": [
           "A"
         ]
