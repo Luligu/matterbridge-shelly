@@ -319,17 +319,21 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         let composed = false;
         if (component.name === 'Light' || component.name === 'Rgb') {
           const lightComponent = device.getComponent(key);
-          if (/* lightComponent &&*/ isLightComponent(lightComponent)) {
-            // Set the device type
+          if (isLightComponent(lightComponent)) {
+            // Set the device type and clusters based on the light component properties
             let deviceType = DeviceTypes.ON_OFF_LIGHT;
-            if (lightComponent.hasProperty('brightness')) deviceType = DeviceTypes.DIMMABLE_LIGHT;
-            if ((lightComponent.hasProperty('red') && lightComponent.hasProperty('green') && lightComponent.hasProperty('blue')) || lightComponent.hasProperty('rgb'))
-              deviceType = DeviceTypes.COLOR_TEMPERATURE_LIGHT;
-            // Set the clusterIds
             const clusterIds: ClusterId[] = [OnOff.Cluster.id];
-            if (lightComponent.hasProperty('brightness')) clusterIds.push(LevelControl.Cluster.id);
-            if ((lightComponent.hasProperty('red') && lightComponent.hasProperty('green') && lightComponent.hasProperty('blue')) || lightComponent.hasProperty('rgb'))
+            if (lightComponent.hasProperty('brightness')) {
+              deviceType = DeviceTypes.DIMMABLE_LIGHT;
+              clusterIds.push(LevelControl.Cluster.id);
+            }
+            if (
+              (lightComponent.hasProperty('red') && lightComponent.hasProperty('green') && lightComponent.hasProperty('blue') && device.profile !== 'white') ||
+              lightComponent.hasProperty('rgb')
+            ) {
+              deviceType = DeviceTypes.COLOR_TEMPERATURE_LIGHT;
               clusterIds.push(ColorControl.Cluster.id);
+            }
             const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [deviceType], clusterIds);
             mbDevice.configureColorControlCluster(true, false, false, ColorControl.ColorMode.CurrentHueAndCurrentSaturation, child);
 
@@ -538,22 +542,22 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               // Set the electrical attributes
               const epm = child.getClusterServer(ElectricalPowerMeasurement.Complete);
               const voltage = pmComponent.hasProperty('voltage') ? pmComponent.getValue('voltage') : undefined;
-              if (isValidNumber(voltage, 0)) epm?.setVoltageAttribute(voltage);
+              if (isValidNumber(voltage, 0)) epm?.setVoltageAttribute(voltage * 1000);
 
               const current = pmComponent.hasProperty('current') ? pmComponent.getValue('current') : undefined;
-              if (isValidNumber(current, 0)) epm?.setActiveCurrentAttribute(current);
+              if (isValidNumber(current, 0)) epm?.setActiveCurrentAttribute(current * 1000);
 
               const power1 = pmComponent.hasProperty('power') ? pmComponent.getValue('power') : undefined; // Gen 1 devices
-              if (isValidNumber(power1, 0)) epm?.setActivePowerAttribute(power1);
+              if (isValidNumber(power1, 0)) epm?.setActivePowerAttribute(power1 * 1000);
               const power2 = pmComponent.hasProperty('apower') ? pmComponent.getValue('apower') : undefined; // Gen 2 devices
-              if (isValidNumber(power2, 0)) epm?.setActivePowerAttribute(power2);
+              if (isValidNumber(power2, 0)) epm?.setActivePowerAttribute(power2 * 1000);
 
               const eem = child.getClusterServer(ElectricalEnergyMeasurement.Complete);
               const energy1 = pmComponent.hasProperty('total') ? pmComponent.getValue('total') : undefined; // Gen 1 devices in watts
-              if (isValidNumber(energy1, 0)) eem?.setCumulativeEnergyImportedAttribute({ energy: energy1 / 1000 });
+              if (isValidNumber(energy1, 0)) eem?.setCumulativeEnergyImportedAttribute({ energy: energy1 });
               const energy2 = pmComponent.hasProperty('aenergy') ? pmComponent.getValue('aenergy') : undefined; // Gen 2 devices in watts
               if (isValidObject(energy2) && isValidNumber((energy2 as ShellyData).total, 0))
-                eem?.setCumulativeEnergyImportedAttribute({ energy: ((energy2 as ShellyData).total as number) / 1000 });
+                eem?.setCumulativeEnergyImportedAttribute({ energy: (energy2 as ShellyData).total as number });
             } else if (config.exposePowerMeter === 'evehistory') {
               // Add the powerSource device type with the EveHistory cluster for HA
               ClusterRegistry.register(EveHistory.Complete);
