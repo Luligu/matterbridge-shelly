@@ -422,6 +422,11 @@ export class ShellyDevice extends EventEmitter {
             device.addComponent(new ShellyComponent(device, `input:${index++}`, 'Input', input as ShellyData));
           }
         }
+        // Fix for Shelly DUO RGBW that has mode in settings and not in shellyPayload
+        if (key === 'mode' && device.model === 'SHCB-1') {
+          device.profile = settingsPayload[key] as 'color' | 'white';
+          device.addComponent(new ShellyComponent(device, 'sys', 'Sys'));
+        }
       }
       for (const key in statusPayload) {
         if (key === 'temperature') device.addComponent(new ShellyComponent(device, 'sys', 'Sys'));
@@ -810,7 +815,7 @@ export class ShellyDevice extends EventEmitter {
           if (data[key] !== null && data[key] !== undefined && typeof data[key] === 'boolean') this.getComponent('sys')?.setValue('overtemperature', data[key]);
         }
       }
-      // Update state for active components with ison
+      // Update state for active components with ison and gain
       for (const key in data) {
         if (key === 'lights' || key === 'relays') {
           let index = 0;
