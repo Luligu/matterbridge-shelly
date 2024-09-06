@@ -20,7 +20,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": "shellypro1pm-ec62608ab9a4._http._tcp.local"
+      "data": "shellypro1pm-ec6260927f7c._http._tcp.local"
     },
     {
       "name": "_shelly._tcp.local",
@@ -28,7 +28,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": "shellypro1pm-ec62608ab9a4._shelly._tcp.local"
+      "data": "shellypro1pm-ec6260927f7c._shelly._tcp.local"
     },
     {
       "name": "_services._dns-sd._udp.local",
@@ -50,7 +50,7 @@
   "authorities": [],
   "additionals": [
     {
-      "name": "shellypro1pm-ec62608ab9a4._http._tcp.local",
+      "name": "shellypro1pm-ec6260927f7c._http._tcp.local",
       "type": "SRV",
       "ttl": 120,
       "class": "IN",
@@ -59,11 +59,11 @@
         "priority": 0,
         "weight": 0,
         "port": 80,
-        "target": "ShellyPro1PM-EC62608AB9A4.local"
+        "target": "ShellyPro1PM-EC6260927F7C.local"
       }
     },
     {
-      "name": "shellypro1pm-ec62608ab9a4._http._tcp.local",
+      "name": "shellypro1pm-ec6260927f7c._http._tcp.local",
       "type": "TXT",
       "ttl": 120,
       "class": "IN",
@@ -73,15 +73,15 @@
       ]
     },
     {
-      "name": "ShellyPro1PM-EC62608AB9A4.local",
+      "name": "ShellyPro1PM-EC6260927F7C.local",
       "type": "A",
       "ttl": 120,
       "class": "IN",
       "flush": true,
-      "data": "192.168.1.227"
+      "data": "192.168.1.151"
     },
     {
-      "name": "shellypro1pm-ec62608ab9a4._shelly._tcp.local",
+      "name": "shellypro1pm-ec6260927f7c._shelly._tcp.local",
       "type": "SRV",
       "ttl": 120,
       "class": "IN",
@@ -90,11 +90,11 @@
         "priority": 0,
         "weight": 0,
         "port": 80,
-        "target": "ShellyPro1PM-EC62608AB9A4.local"
+        "target": "ShellyPro1PM-EC6260927F7C.local"
       }
     },
     {
-      "name": "shellypro1pm-ec62608ab9a4._shelly._tcp.local",
+      "name": "shellypro1pm-ec6260927f7c._shelly._tcp.local",
       "type": "TXT",
       "ttl": 120,
       "class": "IN",
@@ -106,12 +106,12 @@
       ]
     },
     {
-      "name": "ShellyPro1PM-EC62608AB9A4.local",
+      "name": "ShellyPro1PM-EC6260927F7C.local",
       "type": "A",
       "ttl": 120,
       "class": "IN",
       "flush": true,
-      "data": "192.168.1.227"
+      "data": "192.168.1.151"
     }
   ]
 }

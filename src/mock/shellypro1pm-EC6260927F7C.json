@@ -1,8 +1,8 @@
 {
   "shelly": {
-    "name": "My Shelly 1PM PRO",
-    "id": "shellypro1pm-ec62608ab9a4",
-    "mac": "EC62608AB9A4",
+    "name": "My Shelly 1PM PRO II",
+    "id": "shellypro1pm-ec6260927f7c",
+    "mac": "EC6260927F7C",
     "slot": 1,
     "model": "SPSW-201PE16EU",
     "gen": 2,
@@ -14,12 +14,12 @@
   },
   "settings": {
     "ble": {
-      "enable": true,
+      "enable": false,
       "rpc": {
         "enable": true
       },
       "observer": {
-        "enable": true
+        "enable": false
       }
     },
     "bthome": {},
@@ -59,10 +59,10 @@
     "mqtt": {
       "enable": false,
       "server": null,
-      "client_id": "shellypro1pm-ec62608ab9a4",
+      "client_id": "shellypro1pm-ec6260927f7c",
       "user": null,
       "ssl_ca": null,
-      "topic_prefix": "shellypro1pm-ec62608ab9a4",
+      "topic_prefix": "shellypro1pm-ec6260927f7c",
       "rpc_ntf": true,
       "status_ntf": false,
       "use_client_cert": false,
@@ -87,12 +87,12 @@
     },
     "sys": {
       "device": {
-        "name": "My Shelly 1PM PRO",
-        "mac": "EC62608AB9A4",
+        "name": "My Shelly 1PM PRO II",
+        "mac": "EC6260927F7C",
         "fw_id": "20240819-074450/1.4.2-gc2639da",
         "discoverable": true,
         "eco_mode": false,
-        "sys_btn_toggle": true
+        "sys_btn_toggle": false
       },
       "location": null,
       "debug": {
@@ -116,11 +116,11 @@
       "sntp": {
         "server": "time.google.com"
       },
-      "cfg_rev": 36
+      "cfg_rev": 13
     },
     "wifi": {
       "ap": {
-        "ssid": "ShellyPro1PM-EC62608AB9A4",
+        "ssid": "ShellyPro1PM-EC6260927F7C",
         "is_open": true,
         "enable": false,
         "range_extender": {
@@ -160,7 +160,11 @@
   },
   "status": {
     "ble": {},
-    "bthome": {},
+    "bthome": {
+      "errors": [
+        "bluetooth_disabled"
+      ]
+    },
     "cloud": {
       "connected": true
     },
@@ -183,17 +187,17 @@
       "id": 0,
       "source": "HTTP_in",
       "output": true,
-      "apower": 6.3,
-      "voltage": 234.8,
+      "apower": 0,
+      "voltage": 4.3,
       "freq": 50,
-      "current": 0.066,
-      "pf": 0.62,
+      "current": 0,
+      "pf": 0,
       "aenergy": {
-        "total": 9492.4,
+        "total": 0,
         "by_minute": [
-          101.605,
-          101.605,
-          101.53
+          0,
+          0,
+          0
         ],
         "minute_ts": 1725565560
       },
@@ -207,21 +211,21 @@
         "minute_ts": 1725565560
       },
       "temperature": {
-        "tC": 42,
-        "tF": 107.7
+        "tC": 46,
+        "tF": 114.7
       }
     },
     "sys": {
-      "mac": "EC62608AB9A4",
+      "mac": "EC6260927F7C",
       "restart_required": false,
       "time": "21:46",
       "unixtime": 1725565578,
-      "uptime": 15226,
-      "ram_size": 265320,
-      "ram_free": 95188,
+      "uptime": 15228,
+      "ram_size": 250988,
+      "ram_free": 113952,
       "fs_size": 524288,
-      "fs_free": 188416,
-      "cfg_rev": 36,
+      "fs_free": 192512,
+      "cfg_rev": 13,
       "kvs_rev": 0,
       "schedule_rev": 1,
       "webhook_rev": 0,
@@ -229,10 +233,10 @@
       "reset_reason": 1
     },
     "wifi": {
-      "sta_ip": "192.168.1.227",
+      "sta_ip": "192.168.1.151",
       "status": "got ip",
       "ssid": "FibreBox_X6-12A4C7",
-      "rssi": -63
+      "rssi": -69
     },
     "ws": {
       "connected": false
@@ -243,167 +247,23 @@
       "key": "ble",
       "status": {},
       "config": {
-        "enable": true,
+        "enable": false,
         "rpc": {
           "enable": true
         },
         "observer": {
-          "enable": true
+          "enable": false
         }
       }
     },
     {
       "key": "bthome",
-      "status": {},
+      "status": {
+        "errors": [
+          "bluetooth_disabled"
+        ]
+      },
       "config": {}
-    },
-    {
-      "key": "bthomedevice:200",
-      "status": {
-        "id": 200,
-        "rssi": -72,
-        "battery": 100,
-        "packet_id": 235,
-        "last_updated_ts": 1725553794
-      },
-      "config": {
-        "id": 200,
-        "addr": "38:39:8f:8b:d2:29",
-        "name": "My Shelly BLU Button",
-        "key": null,
-        "meta": {
-          "ui": {
-            "view": "regular",
-            "local_name": "SBBT-002C",
-            "icon": null
-          }
-        }
-      }
-    },
-    {
-      "key": "bthomedevice:201",
-      "status": {
-        "id": 201,
-        "rssi": -60,
-        "battery": 100,
-        "packet_id": 55,
-        "last_updated_ts": 1725561804
-      },
-      "config": {
-        "id": 201,
-        "addr": "7c:c6:b6:bd:7a:9a",
-        "name": null,
-        "key": null,
-        "meta": {
-          "ui": {
-            "view": "regular",
-            "local_name": "SBHT-003C",
-            "icon": null
-          }
-        }
-      }
-    },
-    {
-      "key": "bthomesensor:200",
-      "status": {
-        "id": 200,
-        "value": 100,
-        "last_updated_ts": 1725553794
-      },
-      "config": {
-        "id": 200,
-        "addr": "38:39:8f:8b:d2:29",
-        "name": "Battery",
-        "obj_id": 1,
-        "idx": 0,
-        "meta": {
-          "ui": {
-            "icon": null
-          }
-        }
-      }
-    },
-    {
-      "key": "bthomesensor:201",
-      "status": {
-        "id": 201,
-        "last_updated_ts": 0
-      },
-      "config": {
-        "id": 201,
-        "addr": "38:39:8f:8b:d2:29",
-        "name": "Button",
-        "obj_id": 58,
-        "idx": 0,
-        "meta": {
-          "ui": {
-            "icon": null
-          }
-        }
-      }
-    },
-    {
-      "key": "bthomesensor:202",
-      "status": {
-        "id": 202,
-        "value": 100,
-        "last_updated_ts": 1725561804
-      },
-      "config": {
-        "id": 202,
-        "addr": "7c:c6:b6:bd:7a:9a",
-        "name": null,
-        "obj_id": 1,
-        "idx": 0,
-        "meta": null
-      }
-    },
-    {
-      "key": "bthomesensor:203",
-      "status": {
-        "id": 203,
-        "value": 63,
-        "last_updated_ts": 1725561804
-      },
-      "config": {
-        "id": 203,
-        "addr": "7c:c6:b6:bd:7a:9a",
-        "name": null,
-        "obj_id": 46,
-        "idx": 0,
-        "meta": null
-      }
-    },
-    {
-      "key": "bthomesensor:204",
-      "status": {
-        "id": 204,
-        "last_updated_ts": 0
-      },
-      "config": {
-        "id": 204,
-        "addr": "7c:c6:b6:bd:7a:9a",
-        "name": null,
-        "obj_id": 58,
-        "idx": 0,
-        "meta": null
-      }
-    },
-    {
-      "key": "bthomesensor:205",
-      "status": {
-        "id": 205,
-        "value": 25,
-        "last_updated_ts": 1725561804
-      },
-      "config": {
-        "id": 205,
-        "addr": "7c:c6:b6:bd:7a:9a",
-        "name": null,
-        "obj_id": 69,
-        "idx": 0,
-        "meta": null
-      }
     },
     {
       "key": "cloud",
@@ -427,6 +287,172 @@
         "netmask": null,
         "gw": null,
         "nameserver": null
+      }
+    },
+    {
+      "key": "input:0",
+      "status": {
+        "id": 0,
+        "state": false
+      },
+      "config": {
+        "id": 0,
+        "name": null,
+        "type": "switch",
+        "enable": true,
+        "invert": false
+      }
+    },
+    {
+      "key": "input:1",
+      "status": {
+        "id": 1,
+        "state": false
+      },
+      "config": {
+        "id": 1,
+        "name": null,
+        "type": "switch",
+        "enable": true,
+        "invert": false
+      }
+    },
+    {
+      "key": "knx",
+      "status": {},
+      "config": {
+        "enable": false,
+        "ia": "15.15.255",
+        "routing": {
+          "addr": "224.0.23.12:3671"
+        }
+      }
+    },
+    {
+      "key": "mqtt",
+      "status": {
+        "connected": false
+      },
+      "config": {
+        "enable": false,
+        "server": null,
+        "client_id": "shellypro1pm-ec6260927f7c",
+        "user": null,
+        "ssl_ca": null,
+        "topic_prefix": "shellypro1pm-ec6260927f7c",
+        "rpc_ntf": true,
+        "status_ntf": false,
+        "use_client_cert": false,
+        "enable_rpc": true,
+        "enable_control": true
+      }
+    },
+    {
+      "key": "switch:0",
+      "status": {
+        "id": 0,
+        "source": "HTTP_in",
+        "output": true,
+        "apower": 0,
+        "voltage": 4.3,
+        "freq": 50,
+        "current": 0,
+        "pf": 0,
+        "aenergy": {
+          "total": 0,
+          "by_minute": [
+            0,
+            0,
+            0
+          ],
+          "minute_ts": 1725565560
+        },
+        "ret_aenergy": {
+          "total": 0,
+          "by_minute": [
+            0,
+            0,
+            0
+          ],
+          "minute_ts": 1725565560
+        },
+        "temperature": {
+          "tC": 44.6,
+          "tF": 112.2
+        }
+      },
+      "config": {
+        "id": 0,
+        "name": null,
+        "in_mode": "follow",
+        "initial_state": "match_input",
+        "auto_on": false,
+        "auto_on_delay": 60,
+        "auto_off": false,
+        "auto_off_delay": 60,
+        "power_limit": 4480,
+        "voltage_limit": 280,
+        "undervoltage_limit": 0,
+        "autorecover_voltage_errors": false,
+        "current_limit": 16,
+        "input_id": 0
+      }
+    },
+    {
+      "key": "sys",
+      "status": {
+        "mac": "EC6260927F7C",
+        "restart_required": false,
+        "time": "21:46",
+        "unixtime": 1725565578,
+        "uptime": 15228,
+        "ram_size": 250984,
+        "ram_free": 112304,
+        "fs_size": 524288,
+        "fs_free": 192512,
+        "cfg_rev": 13,
+        "kvs_rev": 0,
+        "schedule_rev": 1,
+        "webhook_rev": 0,
+        "available_updates": {},
+        "reset_reason": 1
+      },
+      "config": {
+        "device": {
+          "name": "My Shelly 1PM PRO II",
+          "mac": "EC6260927F7C",
+          "fw_id": "20240819-074450/1.4.2-gc2639da",
+          "discoverable": true,
+          "eco_mode": false,
+          "sys_btn_toggle": false
+        },
+        "location": {
+          "tz": "Europe/Monaco",
+          "lat": 43.7312,
+          "lon": 7.4138
+        },
+        "debug": {
+          "level": 2,
+          "file_level": null,
+          "mqtt": {
+            "enable": false
+          },
+          "websocket": {
+            "enable": false
+          },
+          "udp": {
+            "addr": null
+          }
+        },
+        "ui_data": {},
+        "rpc_udp": {
+          "dst_addr": null,
+          "listen_port": null
+        },
+        "sntp": {
+          "server": "time.google.com"
+        },
+        "cfg_rev": 13
       }
     }
   ]
