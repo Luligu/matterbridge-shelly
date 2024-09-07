@@ -107,6 +107,11 @@
       "type": "boolean",
       "default": true
     },
+    "postfix": {
+      "description": "Add this unique postfix to each device serial to avoid collision with other instances (you may loose the configuration of the devices in your controller when changing this value or you may need to pair again the controller).",
+      "type": "string",
+      "default": ""
+    },
     "debug": {
       "description": "Enable the debug for the plugin (development only)",
       "type": "boolean",

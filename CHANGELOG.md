@@ -10,6 +10,10 @@ If you like this project and find it useful, please consider giving it a star on
 
 ## [0.9.7] - 2024-09-08
 
+### Added
+
+- [config]: Added option "postfix" to postfix the matter serial number to avoid eventual collisionis with other devices on the network (default empty string).
+
 ### Verified
 
 - [shelly]: Verified shellyprodm1pm with firmware v. 1.4.2 and added Jest test (this needs to be calibrated to enable level control).

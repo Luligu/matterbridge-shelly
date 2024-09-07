@@ -95,6 +95,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
   private password = '';
   private whiteList: string[] = [];
   private blackList: string[] = [];
+  private postfix;
 
   constructor(matterbridge: Matterbridge, log: AnsiLogger, config: PlatformConfig) {
     super(matterbridge, log, config);
@@ -103,6 +104,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     if (config.password) this.password = config.password as string;
     if (config.whiteList) this.whiteList = config.whiteList as string[];
     if (config.blackList) this.blackList = config.blackList as string[];
+    this.postfix = (config.postfix as string) ?? '';
+    if (!isValidString(this.postfix, 0, 3)) this.postfix = '';
 
     log.debug(`Initializing platform: ${idn}${this.config.name}${rs}${db}`);
     log.debug(`- username: ${CYAN}${config.username}`);
@@ -120,6 +123,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     log.debug(`- debugMdns: ${CYAN}${config.debugMdns}`);
     log.debug(`- debugCoap: ${CYAN}${config.debugCoap}`);
     log.debug(`- debugWs: ${CYAN}${config.debugWs}`);
+    log.debug(`- postfixHostname: ${CYAN}${config.postfixHostname}`);
     log.debug(`- unregisterOnShutdown: ${CYAN}${config.unregisterOnShutdown}`);
 
     this.shelly = new Shelly(log, this.username, this.password);
@@ -199,7 +203,13 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             else this.log.error(`Shelly device ${hk}${device.id}${er} host ${zb}${device.host}${er} has an unknown BLU device model ${CYAN}${bthomeDevice.model}${nf}`);
             if (definition) {
               const mbDevice = new MatterbridgeDevice(definition, undefined, config.debug as boolean);
-              mbDevice.createDefaultBridgedDeviceBasicInformationClusterServer(bthomeDevice.name, bthomeDevice.addr, 0xfff1, 'Shelly', bthomeDevice.model);
+              mbDevice.createDefaultBridgedDeviceBasicInformationClusterServer(
+                bthomeDevice.name,
+                bthomeDevice.addr + (this.postfix ? '-' + this.postfix : ''),
+                0xfff1,
+                'Shelly',
+                bthomeDevice.model,
+              );
               mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer();
               mbDevice.addRequiredClusterServers(mbDevice);
               try {
@@ -287,7 +297,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       const mbDevice = new MatterbridgeDevice(bridgedNode, undefined, config.debug as boolean);
       mbDevice.createDefaultBridgedDeviceBasicInformationClusterServer(
         device.name,
-        device.id,
+        device.id + (this.postfix ? '-' + this.postfix : ''),
         0xfff1,
         'Shelly',
         device.model,
