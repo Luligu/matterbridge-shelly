@@ -20,6 +20,7 @@ If you like this project and find it useful, please consider giving it a star on
 - [shelly]: Verified shellyprodm1pm with firmware v. 1.4.2 and added Jest test (this device needs to be calibrated to enable level control).
 - [shelly]: Verified shelly1g3 with firmware v. 1.4.2 and added Jest test.
 - [shelly]: Verified shelly1pmg3 with firmware v. 1.4.2 and added Jest test.
+- [shelly]: Verified shellyi4g3 with firmware v. 1.4.2 and added Jest test.
 
 
 ### Changed
