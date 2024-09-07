@@ -87,35 +87,47 @@
       "enabled": true,
       "connected": true
     },
+    "timezone": null,
+    "lat": null,
+    "lng": null,
     "tzautodetect": true,
     "tz_utc_offset": 7200,
     "tz_dst": false,
     "tz_dst_auto": true,
-    "time": "23:10",
-    "unixtime": 1722978605,
+    "time": "11:15",
+    "unixtime": 1725614127,
     "led_status_disable": false,
     "debug_enable": false,
     "allow_cross_origin": false,
     "fw_mode": "SHRGBW2!color",
     "actions": {
       "active": false,
-      "names": ["btn_on_url", "btn_off_url", "out_on_url", "out_off_url", "longpush_url", "shortpush_url"]
+      "names": [
+        "btn_on_url",
+        "btn_off_url",
+        "out_on_url",
+        "out_off_url",
+        "longpush_url",
+        "shortpush_url"
+      ]
     },
     "hwinfo": {
       "hw_revision": "dev-prototype",
       "batch_id": 0
     },
     "mode": "color",
-    "alt_modes": ["white"],
+    "alt_modes": [
+      "white"
+    ],
     "dcpower": 1,
     "lights": [
       {
         "name": null,
         "ison": false,
-        "red": 30,
-        "green": 226,
+        "red": 11,
+        "green": 0,
         "blue": 255,
-        "white": 255,
+        "white": 0,
         "gain": 100,
         "transition": 1000,
         "effect": 0,
@@ -147,7 +159,7 @@
       "connected": true,
       "ssid": "FibreBox_X6-12A4C7",
       "ip": "192.168.1.226",
-      "rssi": -47
+      "rssi": -64
     },
     "cloud": {
       "enabled": true,
@@ -156,9 +168,9 @@
     "mqtt": {
       "connected": false
     },
-    "time": "23:10",
-    "unixtime": 1722978605,
-    "serial": 660,
+    "time": "11:15",
+    "unixtime": 1725614127,
+    "serial": 978,
     "has_update": false,
     "mac": "EC64C9D3FFEF",
     "cfg_changed_cnt": 0,
@@ -176,10 +188,10 @@
         "timer_duration": 0,
         "timer_remaining": 0,
         "mode": "color",
-        "red": 30,
-        "green": 226,
+        "red": 11,
+        "green": 0,
         "blue": 255,
-        "white": 255,
+        "white": 0,
         "gain": 100,
         "effect": 0,
         "transition": 0,
@@ -192,8 +204,12 @@
         "power": 0,
         "is_valid": true,
         "overpower": false,
-        "timestamp": 1722985805,
-        "counters": [0, 0, 0],
+        "timestamp": 1725621327,
+        "counters": [
+          0,
+          0,
+          0
+        ],
         "total": 0
       }
     ],
@@ -215,6 +231,7 @@
     "ram_free": 39444,
     "fs_size": 233681,
     "fs_free": 152357,
-    "uptime": 29931
-  }
+    "uptime": 44087
+  },
+  "components": []
 }

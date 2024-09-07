@@ -1,14 +1,14 @@
 {
   "shelly": {
-    "name": "My Shelly 1PM PLUS",
-    "id": "shellyplus1pm-441793d69718",
-    "mac": "441793D69718",
+    "name": "My Shelly 1PM PRO II",
+    "id": "shellypro1pm-ec6260927f7c",
+    "mac": "EC6260927F7C",
     "slot": 1,
-    "model": "SNSW-001P16EU",
+    "model": "SPSW-201PE16EU",
     "gen": 2,
-    "fw_id": "20240819-074343/1.4.2-gc2639da",
+    "fw_id": "20240819-074450/1.4.2-gc2639da",
     "ver": "1.4.2",
-    "app": "Plus1PM",
+    "app": "Pro1PM",
     "auth_en": false,
     "auth_domain": null
   },
@@ -22,25 +22,47 @@
         "enable": false
       }
     },
+    "bthome": {},
     "cloud": {
       "enable": true,
       "server": "shelly-103-eu.shelly.cloud:6022/jrpc"
     },
+    "eth": {
+      "enable": true,
+      "ipv4mode": "dhcp",
+      "ip": null,
+      "netmask": null,
+      "gw": null,
+      "nameserver": null
+    },
     "input:0": {
       "id": 0,
       "name": null,
-      "type": "button",
+      "type": "switch",
       "enable": true,
-      "invert": false,
-      "factory_reset": true
+      "invert": false
+    },
+    "input:1": {
+      "id": 1,
+      "name": null,
+      "type": "switch",
+      "enable": true,
+      "invert": false
+    },
+    "knx": {
+      "enable": false,
+      "ia": "15.15.255",
+      "routing": {
+        "addr": "224.0.23.12:3671"
+      }
     },
     "mqtt": {
       "enable": false,
       "server": null,
-      "client_id": "shellyplus1pm-441793d69718",
+      "client_id": "shellypro1pm-ec6260927f7c",
       "user": null,
       "ssl_ca": null,
-      "topic_prefix": "shellyplus1pm-441793d69718",
+      "topic_prefix": "shellypro1pm-ec6260927f7c",
       "rpc_ntf": true,
       "status_ntf": false,
       "use_client_cert": false,
@@ -49,26 +71,28 @@
     },
     "switch:0": {
       "id": 0,
-      "name": "My Shelly 1PM plus",
-      "in_mode": "momentary",
-      "initial_state": "restore_last",
+      "name": null,
+      "in_mode": "follow",
+      "initial_state": "match_input",
       "auto_on": false,
       "auto_on_delay": 60,
       "auto_off": false,
       "auto_off_delay": 60,
       "power_limit": 4480,
       "voltage_limit": 280,
+      "undervoltage_limit": 0,
       "autorecover_voltage_errors": false,
-      "current_limit": 16
+      "current_limit": 16,
+      "input_id": 0
     },
     "sys": {
       "device": {
-        "name": "My Shelly 1PM PLUS",
-        "mac": "441793D69718",
-        "fw_id": "20240819-074343/1.4.2-gc2639da",
+        "name": "My Shelly 1PM PRO II",
+        "mac": "EC6260927F7C",
+        "fw_id": "20240819-074450/1.4.2-gc2639da",
         "discoverable": true,
         "eco_mode": false,
-        "addon_type": null
+        "sys_btn_toggle": false
       },
       "location": null,
       "debug": {
@@ -92,11 +116,11 @@
       "sntp": {
         "server": "time.google.com"
       },
-      "cfg_rev": 36
+      "cfg_rev": 13
     },
     "wifi": {
       "ap": {
-        "ssid": "ShellyPlus1PM-441793D69718",
+        "ssid": "ShellyPro1PM-EC6260927F7C",
         "is_open": true,
         "enable": false,
         "range_extender": {
@@ -136,59 +160,83 @@
   },
   "status": {
     "ble": {},
+    "bthome": {
+      "errors": [
+        "bluetooth_disabled"
+      ]
+    },
     "cloud": {
       "connected": true
     },
+    "eth": {
+      "ip": null
+    },
     "input:0": {
       "id": 0,
-      "state": null
+      "state": false
     },
+    "input:1": {
+      "id": 1,
+      "state": false
+    },
+    "knx": {},
     "mqtt": {
       "connected": false
     },
     "switch:0": {
       "id": 0,
-      "source": "init",
-      "output": false,
+      "source": "HTTP_in",
+      "output": true,
       "apower": 0,
-      "voltage": 234.3,
+      "voltage": 4.3,
+      "freq": 50,
       "current": 0,
+      "pf": 0,
       "aenergy": {
-        "total": 140,
+        "total": 0,
         "by_minute": [
           0,
           0,
           0
         ],
-        "minute_ts": 1725544140
+        "minute_ts": 1725565560
+      },
+      "ret_aenergy": {
+        "total": 0,
+        "by_minute": [
+          0,
+          0,
+          0
+        ],
+        "minute_ts": 1725565560
       },
       "temperature": {
-        "tC": 63,
-        "tF": 145.4
+        "tC": 46,
+        "tF": 114.7
       }
     },
     "sys": {
-      "mac": "441793D69718",
+      "mac": "EC6260927F7C",
       "restart_required": false,
-      "time": "15:49",
-      "unixtime": 1725544155,
-      "uptime": 28575,
-      "ram_size": 253656,
-      "ram_free": 136400,
-      "fs_size": 393216,
-      "fs_free": 106496,
-      "cfg_rev": 36,
+      "time": "21:46",
+      "unixtime": 1725565578,
+      "uptime": 15228,
+      "ram_size": 250988,
+      "ram_free": 113952,
+      "fs_size": 524288,
+      "fs_free": 192512,
+      "cfg_rev": 13,
       "kvs_rev": 0,
-      "schedule_rev": 2,
+      "schedule_rev": 1,
       "webhook_rev": 0,
       "available_updates": {},
       "reset_reason": 1
     },
     "wifi": {
-      "sta_ip": "192.168.1.217",
+      "sta_ip": "192.168.1.151",
       "status": "got ip",
       "ssid": "FibreBox_X6-12A4C7",
-      "rssi": -71
+      "rssi": -69
     },
     "ws": {
       "connected": false
@@ -209,6 +257,15 @@
       }
     },
     {
+      "key": "bthome",
+      "status": {
+        "errors": [
+          "bluetooth_disabled"
+        ]
+      },
+      "config": {}
+    },
+    {
       "key": "cloud",
       "status": {
         "connected": true
@@ -219,18 +276,56 @@
       }
     },
     {
+      "key": "eth",
+      "status": {
+        "ip": null
+      },
+      "config": {
+        "enable": true,
+        "ipv4mode": "dhcp",
+        "ip": null,
+        "netmask": null,
+        "gw": null,
+        "nameserver": null
+      }
+    },
+    {
       "key": "input:0",
       "status": {
         "id": 0,
-        "state": null
+        "state": false
       },
       "config": {
         "id": 0,
         "name": null,
-        "type": "button",
+        "type": "switch",
         "enable": true,
-        "invert": false,
-        "factory_reset": true
+        "invert": false
+      }
+    },
+    {
+      "key": "input:1",
+      "status": {
+        "id": 1,
+        "state": false
+      },
+      "config": {
+        "id": 1,
+        "name": null,
+        "type": "switch",
+        "enable": true,
+        "invert": false
+      }
+    },
+    {
+      "key": "knx",
+      "status": {},
+      "config": {
+        "enable": false,
+        "ia": "15.15.255",
+        "routing": {
+          "addr": "224.0.23.12:3671"
+        }
       }
     },
     {
@@ -241,10 +336,10 @@
       "config": {
         "enable": false,
         "server": null,
-        "client_id": "shellyplus1pm-441793d69718",
+        "client_id": "shellypro1pm-ec6260927f7c",
         "user": null,
         "ssl_ca": null,
-        "topic_prefix": "shellyplus1pm-441793d69718",
+        "topic_prefix": "shellypro1pm-ec6260927f7c",
         "rpc_ntf": true,
         "status_ntf": false,
         "use_client_cert": false,
@@ -256,67 +351,80 @@
       "key": "switch:0",
       "status": {
         "id": 0,
-        "source": "init",
-        "output": false,
+        "source": "HTTP_in",
+        "output": true,
         "apower": 0,
-        "voltage": 234.3,
+        "voltage": 4.3,
+        "freq": 50,
         "current": 0,
+        "pf": 0,
         "aenergy": {
-          "total": 140,
+          "total": 0,
           "by_minute": [
             0,
             0,
             0
           ],
-          "minute_ts": 1725544140
+          "minute_ts": 1725565560
+        },
+        "ret_aenergy": {
+          "total": 0,
+          "by_minute": [
+            0,
+            0,
+            0
+          ],
+          "minute_ts": 1725565560
         },
         "temperature": {
-          "tC": 62.7,
-          "tF": 144.9
+          "tC": 44.6,
+          "tF": 112.2
         }
       },
       "config": {
         "id": 0,
-        "name": "My Shelly 1PM plus",
-        "in_mode": "momentary",
-        "initial_state": "restore_last",
+        "name": null,
+        "in_mode": "follow",
+        "initial_state": "match_input",
         "auto_on": false,
         "auto_on_delay": 60,
         "auto_off": false,
         "auto_off_delay": 60,
         "power_limit": 4480,
         "voltage_limit": 280,
+        "undervoltage_limit": 0,
         "autorecover_voltage_errors": false,
-        "current_limit": 16
+        "current_limit": 16,
+        "input_id": 0
       }
     },
     {
       "key": "sys",
       "status": {
-        "mac": "441793D69718",
+        "mac": "EC6260927F7C",
         "restart_required": false,
-        "time": "15:49",
-        "unixtime": 1725544155,
-        "uptime": 28575,
-        "ram_size": 253660,
-        "ram_free": 134812,
-        "fs_size": 393216,
-        "fs_free": 106496,
-        "cfg_rev": 36,
+        "time": "21:46",
+        "unixtime": 1725565578,
+        "uptime": 15228,
+        "ram_size": 250984,
+        "ram_free": 112304,
+        "fs_size": 524288,
+        "fs_free": 192512,
+        "cfg_rev": 13,
         "kvs_rev": 0,
-        "schedule_rev": 2,
+        "schedule_rev": 1,
         "webhook_rev": 0,
         "available_updates": {},
         "reset_reason": 1
       },
       "config": {
         "device": {
-          "name": "My Shelly 1PM PLUS",
-          "mac": "441793D69718",
-          "fw_id": "20240819-074343/1.4.2-gc2639da",
+          "name": "My Shelly 1PM PRO II",
+          "mac": "EC6260927F7C",
+          "fw_id": "20240819-074450/1.4.2-gc2639da",
           "discoverable": true,
           "eco_mode": false,
-          "addon_type": null
+          "sys_btn_toggle": false
         },
         "location": {
           "tz": "Europe/Monaco",
@@ -344,50 +452,7 @@
         "sntp": {
           "server": "time.google.com"
         },
-        "cfg_rev": 36
-      }
-    },
-    {
-      "key": "wifi",
-      "status": {
-        "sta_ip": "192.168.1.217",
-        "status": "got ip",
-        "ssid": "FibreBox_X6-12A4C7",
-        "rssi": -70
-      },
-      "config": {
-        "ap": {
-          "ssid": "ShellyPlus1PM-441793D69718",
-          "is_open": true,
-          "enable": false,
-          "range_extender": {
-            "enable": false
-          }
-        },
-        "sta": {
-          "ssid": "FibreBox_X6-12A4C7",
-          "is_open": false,
-          "enable": true,
-          "ipv4mode": "dhcp",
-          "ip": null,
-          "netmask": null,
-          "gw": null,
-          "nameserver": null
-        },
-        "sta1": {
-          "ssid": null,
-          "is_open": true,
-          "enable": false,
-          "ipv4mode": "dhcp",
-          "ip": null,
-          "netmask": null,
-          "gw": null,
-          "nameserver": null
-        },
-        "roam": {
-          "rssi_thr": -80,
-          "interval": 60
-        }
+        "cfg_rev": 13
       }
     }
   ]

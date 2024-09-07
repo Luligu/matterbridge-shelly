@@ -4,6 +4,32 @@ All notable changes to this project will be documented in this file.
 
 If you like this project and find it useful, please consider giving it a star on GitHub at https://github.com/Luligu/matterbridge-shelly and sponsoring it.
 
+### Breaking Changes
+
+- Unless you are using docker (in that case all is already updated when you pull the image), please update Matterbridge to 1.5.4 to work with matterbridge-shelly >= 0.9.5. This is a one time issue due to the update to matter.js 0.10.0.
+
+## [0.9.6] - 2024-09-06
+
+### Added
+
+### Verified
+
+- [shelly]: Verified shellyplusplugs with firmware v. 1.4.2 and added Jest test.
+- [shelly]: Verified shellybulbduo with firmware v. 1.14.0 and added Jest test.
+- [shelly]: Verified shellycolorbulb (mode color and white) with firmware v. 1.14.0 and added Jest test.
+
+### Fixed
+
+- [shelly]: Fixed mode detection (color/white) for Shelly DUO RGBW.
+
+### Changed
+
+- [package]: Updated dependencies.
+
+<a href="https://www.buymeacoffee.com/luligugithub">
+  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+</a>
+
 ## [0.9.5] - 2024-09-04
 
 ### Added

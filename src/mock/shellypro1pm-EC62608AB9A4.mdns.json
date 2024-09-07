@@ -29,6 +29,22 @@
       "class": "IN",
       "flush": false,
       "data": "shellypro1pm-ec62608ab9a4._shelly._tcp.local"
+    },
+    {
+      "name": "_services._dns-sd._udp.local",
+      "type": "PTR",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": "_shelly._tcp.local"
+    },
+    {
+      "name": "_services._dns-sd._udp.local",
+      "type": "PTR",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": "_http._tcp.local"
     }
   ],
   "authorities": [],
@@ -52,7 +68,9 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": ["gen=2"]
+      "data": [
+        "gen=2"
+      ]
     },
     {
       "name": "ShellyPro1PM-EC62608AB9A4.local",
@@ -81,7 +99,11 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": ["gen=2", "app=Pro1PM", "ver=1.4.0"]
+      "data": [
+        "gen=2",
+        "app=Pro1PM",
+        "ver=1.4.2"
+      ]
     },
     {
       "name": "ShellyPro1PM-EC62608AB9A4.local",
