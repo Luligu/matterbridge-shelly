@@ -817,6 +817,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       this.log.notice(`Waiting for the configured number of ${this.failsafeCount} devices to be loaded`);
       const isSafe = await waiter('failsafeCount', () => this.shellyDevices.size + this.bluBridgedDevices.size >= this.failsafeCount, false, 60000, 1000);
       if (!isSafe) {
+        this.log.error(`The plugin did not reach the configured number of ${this.failsafeCount} devices. Registered ${this.shellyDevices.size} devices.`);
         throw new Error(`The plugin did not reach the configured number of ${this.failsafeCount} devices. Registered ${this.shellyDevices.size} devices.`);
       }
     }
