@@ -1,0 +1,396 @@
+{
+  "shelly": {
+    "name": "My Shelly 1 Gen3",
+    "id": "shelly1g3-34b7dacac830",
+    "mac": "34B7DACAC830",
+    "slot": 1,
+    "model": "S3SW-001X16EU",
+    "gen": 3,
+    "fw_id": "20240819-074630/1.4.2-gc2639da",
+    "ver": "1.4.2",
+    "app": "S1G3",
+    "auth_en": false,
+    "auth_domain": null
+  },
+  "settings": {
+    "ble": {
+      "enable": false,
+      "rpc": {
+        "enable": true
+      },
+      "observer": {
+        "enable": false
+      }
+    },
+    "bthome": {},
+    "cloud": {
+      "enable": true,
+      "server": "shelly-103-eu.shelly.cloud:6022/jrpc"
+    },
+    "input:0": {
+      "id": 0,
+      "name": null,
+      "type": "switch",
+      "enable": true,
+      "invert": false,
+      "factory_reset": true
+    },
+    "knx": {
+      "enable": false,
+      "ia": "15.15.255",
+      "routing": {
+        "addr": "224.0.23.12:3671"
+      }
+    },
+    "mqtt": {
+      "enable": false,
+      "server": null,
+      "client_id": "shelly1g3-34b7dacac830",
+      "user": null,
+      "ssl_ca": null,
+      "topic_prefix": "shelly1g3-34b7dacac830",
+      "rpc_ntf": true,
+      "status_ntf": false,
+      "use_client_cert": false,
+      "enable_rpc": true,
+      "enable_control": true
+    },
+    "switch:0": {
+      "id": 0,
+      "name": null,
+      "in_mode": "follow",
+      "initial_state": "match_input",
+      "auto_on": false,
+      "auto_on_delay": 60,
+      "auto_off": false,
+      "auto_off_delay": 60
+    },
+    "sys": {
+      "device": {
+        "name": "My Shelly 1 Gen3",
+        "mac": "34B7DACAC830",
+        "fw_id": "20240819-074630/1.4.2-gc2639da",
+        "discoverable": true,
+        "eco_mode": false,
+        "addon_type": null
+      },
+      "location": null,
+      "debug": {
+        "level": 2,
+        "file_level": null,
+        "mqtt": {
+          "enable": false
+        },
+        "websocket": {
+          "enable": false
+        },
+        "udp": {
+          "addr": null
+        }
+      },
+      "ui_data": {},
+      "rpc_udp": {
+        "dst_addr": null,
+        "listen_port": null
+      },
+      "sntp": {
+        "server": "time.google.com"
+      },
+      "cfg_rev": 14
+    },
+    "wifi": {
+      "ap": {
+        "ssid": "Shelly1G3-34B7DACAC830",
+        "is_open": true,
+        "enable": false,
+        "range_extender": {
+          "enable": false
+        }
+      },
+      "sta": {
+        "ssid": "FibreBox_X6-12A4C7",
+        "is_open": false,
+        "enable": true,
+        "ipv4mode": "dhcp",
+        "ip": null,
+        "netmask": null,
+        "gw": null,
+        "nameserver": null
+      },
+      "sta1": {
+        "ssid": null,
+        "is_open": true,
+        "enable": false,
+        "ipv4mode": "dhcp",
+        "ip": null,
+        "netmask": null,
+        "gw": null,
+        "nameserver": null
+      },
+      "roam": {
+        "rssi_thr": -80,
+        "interval": 60
+      }
+    },
+    "ws": {
+      "enable": false,
+      "server": null,
+      "ssl_ca": "ca.pem"
+    }
+  },
+  "status": {
+    "ble": {},
+    "bthome": {
+      "errors": [
+        "bluetooth_disabled"
+      ]
+    },
+    "cloud": {
+      "connected": true
+    },
+    "input:0": {
+      "id": 0,
+      "state": false
+    },
+    "knx": {},
+    "mqtt": {
+      "connected": false
+    },
+    "switch:0": {
+      "id": 0,
+      "source": "WS_in",
+      "output": false,
+      "temperature": {
+        "tC": 45.5,
+        "tF": 113.9
+      }
+    },
+    "sys": {
+      "mac": "34B7DACAC830",
+      "restart_required": false,
+      "time": "23:21",
+      "unixtime": 1725744078,
+      "uptime": 194,
+      "ram_size": 259336,
+      "ram_free": 134980,
+      "fs_size": 1048576,
+      "fs_free": 589824,
+      "cfg_rev": 14,
+      "kvs_rev": 0,
+      "schedule_rev": 0,
+      "webhook_rev": 0,
+      "available_updates": {},
+      "reset_reason": 3
+    },
+    "wifi": {
+      "sta_ip": "192.168.1.157",
+      "status": "got ip",
+      "ssid": "FibreBox_X6-12A4C7",
+      "rssi": -61
+    },
+    "ws": {
+      "connected": false
+    }
+  },
+  "components": [
+    {
+      "key": "ble",
+      "status": {},
+      "config": {
+        "enable": false,
+        "rpc": {
+          "enable": true
+        },
+        "observer": {
+          "enable": false
+        }
+      }
+    },
+    {
+      "key": "bthome",
+      "status": {
+        "errors": [
+          "bluetooth_disabled"
+        ]
+      },
+      "config": {}
+    },
+    {
+      "key": "cloud",
+      "status": {
+        "connected": true
+      },
+      "config": {
+        "enable": true,
+        "server": "shelly-103-eu.shelly.cloud:6022/jrpc"
+      }
+    },
+    {
+      "key": "input:0",
+      "status": {
+        "id": 0,
+        "state": false
+      },
+      "config": {
+        "id": 0,
+        "name": null,
+        "type": "switch",
+        "enable": true,
+        "invert": false,
+        "factory_reset": true
+      }
+    },
+    {
+      "key": "knx",
+      "status": {},
+      "config": {
+        "enable": false,
+        "ia": "15.15.255",
+        "routing": {
+          "addr": "224.0.23.12:3671"
+        }
+      }
+    },
+    {
+      "key": "mqtt",
+      "status": {
+        "connected": false
+      },
+      "config": {
+        "enable": false,
+        "server": null,
+        "client_id": "shelly1g3-34b7dacac830",
+        "user": null,
+        "ssl_ca": null,
+        "topic_prefix": "shelly1g3-34b7dacac830",
+        "rpc_ntf": true,
+        "status_ntf": false,
+        "use_client_cert": false,
+        "enable_rpc": true,
+        "enable_control": true
+      }
+    },
+    {
+      "key": "switch:0",
+      "status": {
+        "id": 0,
+        "source": "WS_in",
+        "output": false,
+        "temperature": {
+          "tC": 45.5,
+          "tF": 113.9
+        }
+      },
+      "config": {
+        "id": 0,
+        "name": null,
+        "in_mode": "follow",
+        "initial_state": "match_input",
+        "auto_on": false,
+        "auto_on_delay": 60,
+        "auto_off": false,
+        "auto_off_delay": 60
+      }
+    },
+    {
+      "key": "sys",
+      "status": {
+        "mac": "34B7DACAC830",
+        "restart_required": false,
+        "time": "23:21",
+        "unixtime": 1725744079,
+        "uptime": 194,
+        "ram_size": 259328,
+        "ram_free": 133180,
+        "fs_size": 1048576,
+        "fs_free": 589824,
+        "cfg_rev": 14,
+        "kvs_rev": 0,
+        "schedule_rev": 0,
+        "webhook_rev": 0,
+        "available_updates": {},
+        "reset_reason": 3
+      },
+      "config": {
+        "device": {
+          "name": "My Shelly 1 Gen3",
+          "mac": "34B7DACAC830",
+          "fw_id": "20240819-074630/1.4.2-gc2639da",
+          "discoverable": true,
+          "eco_mode": false,
+          "addon_type": null
+        },
+        "location": {
+          "tz": "Europe/Monaco",
+          "lat": 43.7314,
+          "lon": 7.419
+        },
+        "debug": {
+          "level": 2,
+          "file_level": null,
+          "mqtt": {
+            "enable": false
+          },
+          "websocket": {
+            "enable": false
+          },
+          "udp": {
+            "addr": null
+          }
+        },
+        "ui_data": {},
+        "rpc_udp": {
+          "dst_addr": null,
+          "listen_port": null
+        },
+        "sntp": {
+          "server": "time.google.com"
+        },
+        "cfg_rev": 14
+      }
+    },
+    {
+      "key": "wifi",
+      "status": {
+        "sta_ip": "192.168.1.157",
+        "status": "got ip",
+        "ssid": "FibreBox_X6-12A4C7",
+        "rssi": -61
+      },
+      "config": {
+        "ap": {
+          "ssid": "Shelly1G3-34B7DACAC830",
+          "is_open": true,
+          "enable": false,
+          "range_extender": {
+            "enable": false
+          }
+        },
+        "sta": {
+          "ssid": "FibreBox_X6-12A4C7",
+          "is_open": false,
+          "enable": true,
+          "ipv4mode": "dhcp",
+          "ip": null,
+          "netmask": null,
+          "gw": null,
+          "nameserver": null
+        },
+        "sta1": {
+          "ssid": null,
+          "is_open": true,
+          "enable": false,
+          "ipv4mode": "dhcp",
+          "ip": null,
+          "netmask": null,
+          "gw": null,
+          "nameserver": null
+        },
+        "roam": {
+          "rssi_thr": -80,
+          "interval": 60
+        }
+      }
+    }
+  ]
+}
