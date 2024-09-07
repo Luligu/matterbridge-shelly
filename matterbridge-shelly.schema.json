@@ -107,6 +107,11 @@
       "type": "boolean",
       "default": true
     },
+    "failsafeCount": {
+      "description": "Enable the failsafe count of added devices to put the plugin in error mode. This is to avoid to loose the controller configuration in case of network issues (default 0 = disabled).",
+      "type": "number",
+      "default": 0
+    },
     "postfix": {
       "description": "Add this unique postfix to each device serial to avoid collision with other instances (you may loose the configuration of the devices in your controller when changing this value or you may need to pair again the controller).",
       "type": "string",

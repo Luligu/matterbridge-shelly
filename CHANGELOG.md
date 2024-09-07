@@ -13,6 +13,7 @@ If you like this project and find it useful, please consider giving it a star on
 ### Added
 
 - [config]: Added option "postfix" to postfix the matter serial number to avoid eventual collisionis with other devices on the network (default empty string).
+- [config]: Added option "failsafeCount" to avoid to start the bridge when some network issue prevents to load all devices (default 0 = disabled).
 
 ### Verified
 

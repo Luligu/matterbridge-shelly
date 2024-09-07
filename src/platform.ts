@@ -61,7 +61,7 @@ import {} from 'matterbridge/cluster';
 import { EveHistory, EveHistoryCluster, MatterHistory } from 'matterbridge/history';
 import { AnsiLogger, BLUE, CYAN, GREEN, LogLevel, TimestampFormat, YELLOW, db, debugStringify, dn, er, hk, idn, nf, or, rs, wr, zb } from 'matterbridge/logger';
 import { NodeStorage, NodeStorageManager } from 'matterbridge/storage';
-import { hslColorToRgbColor, rgbColorToHslColor, isValidIpv4Address, isValidString, isValidNumber, isValidBoolean, isValidArray, isValidObject } from 'matterbridge/utils';
+import { hslColorToRgbColor, rgbColorToHslColor, isValidIpv4Address, isValidString, isValidNumber, isValidBoolean, isValidArray, isValidObject, waiter } from 'matterbridge/utils';
 
 import path from 'path';
 
@@ -96,6 +96,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
   private whiteList: string[] = [];
   private blackList: string[] = [];
   private postfix;
+  private failsafeCount;
 
   constructor(matterbridge: Matterbridge, log: AnsiLogger, config: PlatformConfig) {
     super(matterbridge, log, config);
@@ -106,6 +107,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     if (config.blackList) this.blackList = config.blackList as string[];
     this.postfix = (config.postfix as string) ?? '';
     if (!isValidString(this.postfix, 0, 3)) this.postfix = '';
+    this.failsafeCount = (config.failsafeCount as number) ?? 0;
+    if (!isValidNumber(this.failsafeCount, 0)) this.failsafeCount = 0;
 
     log.debug(`Initializing platform: ${idn}${this.config.name}${rs}${db}`);
     log.debug(`- username: ${CYAN}${config.username}`);
@@ -118,12 +121,13 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     log.debug(`- configDiscover: ${CYAN}${config.enableConfigDiscover}`);
     log.debug(`- bleDiscover: ${CYAN}${config.enableBleDiscover}`);
     log.debug(`- resetStorage: ${CYAN}${config.resetStorageDiscover}`);
+    log.debug(`- postfixHostname: ${CYAN}${config.postfixHostname}`);
+    log.debug(`- failsafeCount: ${CYAN}${config.failsafeCount}`);
     log.debug(`- interfaceName: ${CYAN}${config.interfaceName}`);
     log.debug(`- debug: ${CYAN}${config.debug}`);
     log.debug(`- debugMdns: ${CYAN}${config.debugMdns}`);
     log.debug(`- debugCoap: ${CYAN}${config.debugCoap}`);
     log.debug(`- debugWs: ${CYAN}${config.debugWs}`);
-    log.debug(`- postfixHostname: ${CYAN}${config.postfixHostname}`);
     log.debug(`- unregisterOnShutdown: ${CYAN}${config.unregisterOnShutdown}`);
 
     this.shelly = new Shelly(log, this.username, this.password);
@@ -806,6 +810,15 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         this.log.debug(`Loading from config Shelly device ${hk}${configDevice.id}${db} host ${zb}${configDevice.host}${db}`);
         this.shelly.emit('discovered', configDevice);
       });
+    }
+
+    // Wait for the failsafe count
+    if (this.failsafeCount > 0) {
+      this.log.notice(`Waiting for the configured number of ${this.failsafeCount} devices to be loaded`);
+      const isSafe = await waiter('failsafeCount', () => this.shellyDevices.size + this.bluBridgedDevices.size >= this.failsafeCount, false, 60000, 1000);
+      if (!isSafe) {
+        throw new Error(`The plugin did not reach the configured number of ${this.failsafeCount} devices. Registered ${this.shellyDevices.size} devices.`);
+      }
     }
   }
 
