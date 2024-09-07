@@ -1575,5 +1575,51 @@ describe('Shelly devices test', () => {
 
       if (device) device.destroy();
     });
+
+    test('Create a pro shellyprodm1pm device', async () => {
+      id = 'shellyprodm1pm-34987A4957C4';
+      log.logName = id;
+
+      device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', id + '.json'));
+      expect(device).not.toBeUndefined();
+      if (!device) return;
+      expect(device.host).toBe(path.join('src', 'mock', id + '.json'));
+      expect(device.model).toBe('SPDM-001PE01EU');
+      expect(device.mac).toBe('34987A4957C4');
+      expect(device.id).toBe(id);
+      expect(device.firmware).toBe('1.4.2-gc2639da'); // firmwareGen2
+      expect(device.auth).toBe(false);
+      expect(device.gen).toBe(2);
+      expect(device.profile).toBe(undefined);
+      expect(device.name).toBe('My Shelly Dimmer 1PM PRO');
+      expect(device.hasUpdate).toBe(false);
+      expect(device.lastseen).not.toBe(0);
+      expect(device.online).toBe(true);
+      expect(device.cached).toBe(false);
+      expect(device.sleepMode).toBe(false);
+
+      expect(device.components.length).toBe(13);
+      expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Eth', 'Input', 'Light', 'MQTT', 'Sys', 'Sntp', 'WiFi', 'WS']);
+      expect(device.getComponentIds()).toStrictEqual(['ble', 'cloud', 'eth', 'input:0', 'input:1', 'light:0', 'mqtt', 'sys', 'sntp', 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws']);
+
+      expect(device.getComponent('sys')?.getValue('temperature')).toBe(undefined);
+      expect(device.getComponent('sys')?.getValue('overtemperature')).toBe(undefined);
+
+      expect(device.getComponent('input:0')?.hasProperty('state')).toBe(true);
+      expect(device.getComponent('input:1')?.hasProperty('state')).toBe(true);
+
+      expect(device.getComponent('light:0')?.hasProperty('state')).toBe(true);
+      expect(device.getComponent('light:0')?.hasProperty('output')).toBe(true);
+      expect(device.getComponent('light:0')?.hasProperty('brightness')).toBe(true);
+      expect(device.getComponent('light:0')?.hasProperty('voltage')).toBe(true);
+      expect(device.getComponent('light:0')?.hasProperty('current')).toBe(true);
+      expect(device.getComponent('light:0')?.hasProperty('apower')).toBe(true);
+      expect(device.getComponent('light:0')?.hasProperty('aenergy')).toBe(true);
+      expect((device.getComponent('light:0')?.getValue('aenergy') as ShellyData).total).toBeGreaterThanOrEqual(0);
+
+      expect(await device.fetchUpdate()).not.toBeNull();
+
+      if (device) device.destroy();
+    });
   });
 });
