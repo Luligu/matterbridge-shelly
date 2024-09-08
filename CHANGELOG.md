@@ -14,6 +14,7 @@ If you like this project and find it useful, please consider giving it a star on
 
 - [config]: Added option "postfix" to postfix the matter serial number to avoid eventual collisions with other devices on the network (default empty string).
 - [config]: Added option "failsafeCount" to avoid to start the bridge when some network issue prevents to load all devices (default 0 = disabled).
+- [matterbridge]: Added a check of the current Matterbridge version (required v1.5.4).
 
 ### Verified
 

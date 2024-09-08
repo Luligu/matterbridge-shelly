@@ -918,12 +918,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       return true;
     };
 
-    if (!compareVersions(this.matterbridge.matterbridgeVersion, version)) {
-      this.log.error(
-        `This plugin requires Matterbridge version >= ${version}. Current Matterbridge version ${this.matterbridge.matterbridgeVersion} is less than required version ${version}`,
-      );
-      return false;
-    }
+    if (!compareVersions(this.matterbridge.matterbridgeVersion, version)) return false;
     return true;
   }
 
