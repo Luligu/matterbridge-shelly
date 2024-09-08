@@ -557,6 +557,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             if (config.exposePowerMeter === 'matter13') {
               // Add the Matter 1.3 electricalSensor device type with the ElectricalPowerMeasurement and ElectricalEnergyMeasurement clusters
               const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [electricalSensor], [ElectricalPowerMeasurement.Cluster.id, ElectricalEnergyMeasurement.Cluster.id]);
+
               // Set the electrical attributes
               const epm = child.getClusterServer(ElectricalPowerMeasurement.Complete);
               const voltage = pmComponent.hasProperty('voltage') ? pmComponent.getValue('voltage') : undefined;
@@ -571,11 +572,13 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               if (isValidNumber(power2, 0)) epm?.setActivePowerAttribute(power2 * 1000);
 
               const eem = child.getClusterServer(ElectricalEnergyMeasurement.Complete);
-              const energy1 = pmComponent.hasProperty('total') ? pmComponent.getValue('total') : undefined; // Gen 1 devices in watts
-              if (isValidNumber(energy1, 0)) eem?.setCumulativeEnergyImportedAttribute({ energy: energy1 });
-              const energy2 = pmComponent.hasProperty('aenergy') ? pmComponent.getValue('aenergy') : undefined; // Gen 2 devices in watts
+
+              const energy1 = pmComponent.hasProperty('total') ? pmComponent.getValue('total') : undefined; // Gen 1 devices in w/h
+              if (isValidNumber(energy1, 0)) eem?.setCumulativeEnergyImportedAttribute({ energy: energy1 * 1000 });
+
+              const energy2 = pmComponent.hasProperty('aenergy') ? pmComponent.getValue('aenergy') : undefined; // Gen 2 devices in w/h
               if (isValidObject(energy2) && isValidNumber((energy2 as ShellyData).total, 0))
-                eem?.setCumulativeEnergyImportedAttribute({ energy: (energy2 as ShellyData).total as number });
+                eem?.setCumulativeEnergyImportedAttribute({ energy: ((energy2 as ShellyData).total as number) * 1000 });
             } else if (config.exposePowerMeter === 'evehistory') {
               // Add the powerSource device type with the EveHistory cluster for HA
               ClusterRegistry.register(EveHistory.Complete);
@@ -592,9 +595,9 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               const power2 = pmComponent.hasProperty('apower') ? pmComponent.getValue('apower') : undefined; // Gen 2 devices
               if (isValidNumber(power2, 0)) child.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy))?.setConsumptionAttribute(power2);
 
-              const energy1 = pmComponent.hasProperty('total') ? pmComponent.getValue('total') : undefined; // Gen 1 devices in watts
+              const energy1 = pmComponent.hasProperty('total') ? pmComponent.getValue('total') : undefined; // Gen 1 devices in w/h
               if (isValidNumber(energy1, 0)) child.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy))?.setTotalConsumptionAttribute(energy1 / 1000);
-              const energy2 = pmComponent.hasProperty('aenergy') ? pmComponent.getValue('aenergy') : undefined; // Gen 2 devices in watts
+              const energy2 = pmComponent.hasProperty('aenergy') ? pmComponent.getValue('aenergy') : undefined; // Gen 2 devices in w/h
               if (isValidObject(energy2) && isValidNumber((energy2 as ShellyData).total, 0))
                 child.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy))?.setTotalConsumptionAttribute(((energy2 as ShellyData).total as number) / 1000);
             }
@@ -814,12 +817,22 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
 
     // Wait for the failsafe count
     if (this.failsafeCount > 0) {
-      const registered = this.shellyDevices.size + this.bluBridgedDevices.size;
-      this.log.notice(`Waiting for the configured number of ${this.failsafeCount} devices to be loaded: ${registered} devices loaded.`);
-      const isSafe = await waiter('failsafeCount', () => registered >= this.failsafeCount, false, 60000, 1000);
+      this.log.notice(`Waiting for the configured number of ${this.failsafeCount} devices to be loaded.`);
+      const isSafe = await waiter(
+        'failsafeCount',
+        () => this.shellyDevices.size + this.bluBridgedDevices.size >= this.failsafeCount,
+        false,
+        60000,
+        1000,
+        this.config.debug as boolean,
+      );
       if (!isSafe) {
-        this.log.error(`The plugin did not add the configured number of ${this.failsafeCount} devices. Registered ${registered} devices.`);
-        throw new Error(`The plugin did not add the configured number of ${this.failsafeCount} devices. Registered ${registered} devices.`);
+        this.log.error(
+          `The plugin did not add the configured number of ${this.failsafeCount} devices. Registered ${this.shellyDevices.size + this.bluBridgedDevices.size} devices.`,
+        );
+        throw new Error(
+          `The plugin did not add the configured number of ${this.failsafeCount} devices. Registered ${this.shellyDevices.size + this.bluBridgedDevices.size} devices.`,
+        );
       }
     }
   }
