@@ -37,6 +37,7 @@ describe('ShellyPlatform', () => {
       matterbridgeDirectory: '',
       matterbridgePluginDirectory: 'temp',
       systemInformation: { ipv4Address: undefined },
+      matterbridgeVersion: '1.5.4',
       removeAllBridgedDevices: jest.fn(),
     } as unknown as Matterbridge;
     mockLog = {
@@ -230,6 +231,18 @@ describe('ShellyPlatform', () => {
     expect(isValidUndefined(undefined)).toBe(true);
     expect(isValidUndefined({ x: 1, y: 4 })).toBe(false);
     expect(isValidUndefined([1, 4, 'string'])).toBe(false);
+  });
+
+  it('should validate version', () => {
+    mockMatterbridge.matterbridgeVersion = '1.5.4';
+    expect(shellyPlatform.verifyMatterbridgeVersion('1.5.3')).toBe(true);
+    expect(shellyPlatform.verifyMatterbridgeVersion('1.5.4')).toBe(true);
+    expect(shellyPlatform.verifyMatterbridgeVersion('2.0.0')).toBe(false);
+
+    mockMatterbridge.matterbridgeVersion = '1.5.4-dev.1';
+    expect(shellyPlatform.verifyMatterbridgeVersion('1.5.3')).toBe(true);
+    expect(shellyPlatform.verifyMatterbridgeVersion('1.5.4')).toBe(true);
+    expect(shellyPlatform.verifyMatterbridgeVersion('2.0.0')).toBe(false);
   });
 
   it('should call onStart with reason', async () => {

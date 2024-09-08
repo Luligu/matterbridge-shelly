@@ -101,6 +101,11 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
   constructor(matterbridge: Matterbridge, log: AnsiLogger, config: PlatformConfig) {
     super(matterbridge, log, config);
 
+    // Verify that Matterbridge is the correct version
+    if (!this.verifyMatterbridgeVersion('1.5.4')) {
+      throw new Error(`The shelly plugin requires Matterbridge version >= "1.5.4". Please update Matterbridge to the latest version in the frontend."`);
+    }
+
     if (config.username) this.username = config.username as string;
     if (config.password) this.password = config.password as string;
     if (config.whiteList) this.whiteList = config.whiteList as string[];
@@ -815,21 +820,18 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       });
     }
 
-    // Wait for the failsafe count
+    // Wait for the failsafe count to be met
     if (this.failsafeCount > 0) {
       this.log.notice(`Waiting for the configured number of ${this.failsafeCount} devices to be loaded.`);
       const isSafe = await waiter(
         'failsafeCount',
         () => this.shellyDevices.size + this.bluBridgedDevices.size >= this.failsafeCount,
         false,
-        60000,
+        55000,
         1000,
         this.config.debug as boolean,
       );
       if (!isSafe) {
-        this.log.error(
-          `The plugin did not add the configured number of ${this.failsafeCount} devices. Registered ${this.shellyDevices.size + this.bluBridgedDevices.size} devices.`,
-        );
         throw new Error(
           `The plugin did not add the configured number of ${this.failsafeCount} devices. Registered ${this.shellyDevices.size + this.bluBridgedDevices.size} devices.`,
         );
@@ -897,6 +899,32 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       `Changing logger level for platform ${idn}${this.config.name}${rs}${db} to ${logLevel} with debugMdns ${this.config.debugMdns} and debugCoap ${this.config.debugCoap}`,
     );
     this.shelly.setLogLevel(logLevel, this.config.debugMdns as boolean, this.config.debugCoap as boolean, this.config.debugWs as boolean);
+  }
+
+  verifyMatterbridgeVersion(version: string): boolean {
+    const compareVersions = (matterbridgeVersion: string, requiredVersion: string): boolean => {
+      const stripTag = (v: string) => v.split('-')[0];
+      const v1Parts = stripTag(matterbridgeVersion).split('.').map(Number);
+      const v2Parts = stripTag(requiredVersion).split('.').map(Number);
+      for (let i = 0; i < Math.max(v1Parts.length, v2Parts.length); i++) {
+        const v1Part = v1Parts[i] || 0;
+        const v2Part = v2Parts[i] || 0;
+        if (v1Part < v2Part) {
+          return false;
+        } else if (v1Part > v2Part) {
+          return true;
+        }
+      }
+      return true;
+    };
+
+    if (!compareVersions(this.matterbridge.matterbridgeVersion, version)) {
+      this.log.error(
+        `This plugin requires Matterbridge version >= ${version}. Current Matterbridge version ${this.matterbridge.matterbridgeVersion} is less than required version ${version}`,
+      );
+      return false;
+    }
+    return true;
   }
 
   private async saveStoredDevices(): Promise<boolean> {
