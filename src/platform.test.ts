@@ -235,14 +235,16 @@ describe('ShellyPlatform', () => {
 
   it('should validate version', () => {
     mockMatterbridge.matterbridgeVersion = '1.5.4';
-    expect(shellyPlatform.verifyMatterbridgeVersion('1.5.3')).toBe(true);
-    expect(shellyPlatform.verifyMatterbridgeVersion('1.5.4')).toBe(true);
-    expect(shellyPlatform.verifyMatterbridgeVersion('2.0.0')).toBe(false);
+    expect(shellyPlatform.localVerifyMatterbridgeVersion('1.5.3')).toBe(true);
+    expect(shellyPlatform.localVerifyMatterbridgeVersion('1.5.4')).toBe(true);
+    expect(shellyPlatform.localVerifyMatterbridgeVersion('2.0.0')).toBe(false);
+  });
 
+  it('should validate version beta', () => {
     mockMatterbridge.matterbridgeVersion = '1.5.4-dev.1';
-    expect(shellyPlatform.verifyMatterbridgeVersion('1.5.3')).toBe(true);
-    expect(shellyPlatform.verifyMatterbridgeVersion('1.5.4')).toBe(true);
-    expect(shellyPlatform.verifyMatterbridgeVersion('2.0.0')).toBe(false);
+    expect(shellyPlatform.localVerifyMatterbridgeVersion('1.5.3')).toBe(true);
+    expect(shellyPlatform.localVerifyMatterbridgeVersion('1.5.4')).toBe(true);
+    expect(shellyPlatform.localVerifyMatterbridgeVersion('2.0.0')).toBe(false);
   });
 
   it('should call onStart with reason', async () => {
