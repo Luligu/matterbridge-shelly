@@ -113,7 +113,7 @@
       "default": 0
     },
     "postfix": {
-      "description": "Add this unique postfix to each device serial to avoid collision with other instances (you may loose the configuration of the devices in your controller when changing this value or you may need to pair again the controller).",
+      "description": "Add this unique postfix (3 characters max) to each device serial to avoid collision with other instances (you may loose the configuration of the devices in your controller when changing this value or you may need to pair again the controller).",
       "type": "string",
       "default": ""
     },

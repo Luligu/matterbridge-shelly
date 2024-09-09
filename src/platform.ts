@@ -102,7 +102,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     super(matterbridge, log, config);
 
     // Verify that Matterbridge is the correct version
-    if (!this.verifyMatterbridgeVersion('1.5.4')) {
+    if (!this.localVerifyMatterbridgeVersion('1.5.4')) {
       throw new Error(`The shelly plugin requires Matterbridge version >= "1.5.4". Please update Matterbridge to the latest version in the frontend."`);
     }
 
@@ -901,7 +901,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     this.shelly.setLogLevel(logLevel, this.config.debugMdns as boolean, this.config.debugCoap as boolean, this.config.debugWs as boolean);
   }
 
-  verifyMatterbridgeVersion(version: string): boolean {
+  localVerifyMatterbridgeVersion(version: string): boolean {
     const compareVersions = (matterbridgeVersion: string, requiredVersion: string): boolean => {
       const stripTag = (v: string) => v.split('-')[0];
       const v1Parts = stripTag(matterbridgeVersion).split('.').map(Number);
