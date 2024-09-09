@@ -2,11 +2,11 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Matterbridge, MatterbridgeDevice, PlatformConfig } from 'matterbridge';
-import { wait } from 'matterbridge/utils';
 import { AnsiLogger, db, idn, LogLevel, nf, rs } from 'matterbridge/logger';
-import { ShellyPlatform } from './platform';
-import { isValidArray, isValidBoolean, isValidNull, isValidNumber, isValidObject, isValidString, isValidUndefined } from 'matterbridge/utils';
+import { isValidArray, isValidBoolean, isValidNull, isValidNumber, isValidObject, isValidString, isValidUndefined, wait } from 'matterbridge/utils';
 import { jest } from '@jest/globals';
+
+import { ShellyPlatform } from './platform';
 
 describe('ShellyPlatform', () => {
   let mockMatterbridge: Matterbridge;
