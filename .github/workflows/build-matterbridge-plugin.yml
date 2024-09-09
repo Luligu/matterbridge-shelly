@@ -28,7 +28,7 @@ jobs:
         run: npm -v
             
       - name: Install matterbridge
-        run: npm install -g matterbridge --verbose
+        run: npm install -g matterbridge
 
       - name: Install dependencies
         run: npm ci
