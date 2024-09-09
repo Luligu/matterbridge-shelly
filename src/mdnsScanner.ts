@@ -128,10 +128,10 @@ export class MdnsScanner extends EventEmitter {
     }
 
     this.scanner.on('response', async (response: ResponsePacket, rinfo: RemoteInfo) => {
-      let port = 0;
+      let port = 80; // shellymotionsensor, shellymotion2 send A record before SRV
       let gen = 1;
       this.devices.set(rinfo.address, rinfo.address);
-      if (debug) this.log.debug(`Mdns response from ${ign} ${rinfo.address} ${rinfo.family} ${rinfo.port} ${db}`);
+      if (debug) this.log.debug(`Mdns response from ${ign} ${rinfo.address} family ${rinfo.family} port ${rinfo.port} ${db}`);
       if (debug) this.log.debug(`--- response.answers ---`);
       for (const a of response.answers) {
         if (debug && a.type === 'PTR') {

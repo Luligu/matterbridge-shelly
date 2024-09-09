@@ -2,11 +2,11 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Matterbridge, MatterbridgeDevice, PlatformConfig } from 'matterbridge';
-import { wait } from 'matterbridge/utils';
 import { AnsiLogger, db, idn, LogLevel, nf, rs } from 'matterbridge/logger';
-import { ShellyPlatform } from './platform';
-import { isValidArray, isValidBoolean, isValidNull, isValidNumber, isValidObject, isValidString, isValidUndefined } from 'matterbridge/utils';
+import { isValidArray, isValidBoolean, isValidNull, isValidNumber, isValidObject, isValidString, isValidUndefined, wait } from 'matterbridge/utils';
 import { jest } from '@jest/globals';
+
+import { ShellyPlatform } from './platform';
 
 describe('ShellyPlatform', () => {
   let mockMatterbridge: Matterbridge;
@@ -37,6 +37,7 @@ describe('ShellyPlatform', () => {
       matterbridgeDirectory: '',
       matterbridgePluginDirectory: 'temp',
       systemInformation: { ipv4Address: undefined },
+      matterbridgeVersion: '1.5.4',
       removeAllBridgedDevices: jest.fn(),
     } as unknown as Matterbridge;
     mockLog = {
@@ -230,6 +231,20 @@ describe('ShellyPlatform', () => {
     expect(isValidUndefined(undefined)).toBe(true);
     expect(isValidUndefined({ x: 1, y: 4 })).toBe(false);
     expect(isValidUndefined([1, 4, 'string'])).toBe(false);
+  });
+
+  it('should validate version', () => {
+    mockMatterbridge.matterbridgeVersion = '1.5.4';
+    expect(shellyPlatform.localVerifyMatterbridgeVersion('1.5.3')).toBe(true);
+    expect(shellyPlatform.localVerifyMatterbridgeVersion('1.5.4')).toBe(true);
+    expect(shellyPlatform.localVerifyMatterbridgeVersion('2.0.0')).toBe(false);
+  });
+
+  it('should validate version beta', () => {
+    mockMatterbridge.matterbridgeVersion = '1.5.4-dev.1';
+    expect(shellyPlatform.localVerifyMatterbridgeVersion('1.5.3')).toBe(true);
+    expect(shellyPlatform.localVerifyMatterbridgeVersion('1.5.4')).toBe(true);
+    expect(shellyPlatform.localVerifyMatterbridgeVersion('2.0.0')).toBe(false);
   });
 
   it('should call onStart with reason', async () => {

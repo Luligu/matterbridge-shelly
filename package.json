@@ -1,6 +1,6 @@
 {
   "name": "matterbridge-shelly",
-  "version": "0.9.6",
+  "version": "0.9.7",
   "description": "Matterbridge shelly plugin",
   "author": "https://github.com/Luligu",
   "license": "Apache-2.0",
@@ -48,7 +48,7 @@
   "scripts": {
     "build": "tsc",
     "watch": "tsc --watch",
-    "start:frontend": "matterbridge",
+    "start": "matterbridge",
     "start:bridge": "matterbridge -bridge",
     "start:childbridge": "matterbridge -childbridge",
     "test": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js",
@@ -123,8 +123,5 @@
     "ts-jest": "29.2.5",
     "typescript": "5.5.4",
     "typescript-eslint": "8.3.0"
-  },
-  "xxxoverrides": {
-    "eslint": "latest"
   }
 }

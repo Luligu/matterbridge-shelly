@@ -6,11 +6,33 @@ If you like this project and find it useful, please consider giving it a star on
 
 ### Breaking Changes
 
-- Unless you are using docker (in that case all is already updated when you pull the image), please update Matterbridge to 1.5.4 to work with matterbridge-shelly >= 0.9.5. This is a one time issue due to the update to matter.js 0.10.0.
+- Unless you are using docker (in that case all is already updated when you pull the image), please update Matterbridge to 1.5.4 to work with matterbridge-shelly >= 0.9.5.  This is a one time issue due to the update to matter.js 0.10.0.
 
-## [0.9.6] - 2024-09-06
+## [0.9.7] - 2024-09-09
 
 ### Added
+
+- [config]: Added option "postfix" to postfix the matter serial number to avoid eventual collisions with other devices on the network (default empty string).
+- [config]: Added option "failsafeCount" to avoid to start the bridge when some network issue prevents to load all devices (default 0 = disabled).
+- [matterbridge]: Added a check of the current Matterbridge version (required v1.5.4).
+
+### Verified
+
+- [shelly]: Verified shellyprodm1pm with firmware v. 1.4.2 and added Jest test (this device needs to be calibrated to enable level control).
+- [shelly]: Verified shelly1g3 with firmware v. 1.4.2 and added Jest test.
+- [shelly]: Verified shelly1pmg3 with firmware v. 1.4.2 and added Jest test.
+- [shelly]: Verified shellyi4g3 with firmware v. 1.4.2 and added Jest test.
+
+
+### Changed
+
+- [package]: Updated dependencies.
+
+<a href="https://www.buymeacoffee.com/luligugithub">
+  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+</a>
+
+## [0.9.6] - 2024-09-06
 
 ### Verified
 

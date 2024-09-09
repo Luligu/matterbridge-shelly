@@ -56,12 +56,11 @@ import {
   ElectricalPowerMeasurement,
   ElectricalEnergyMeasurement,
 } from 'matterbridge';
-import {} from 'matterbridge/cluster';
 
 import { EveHistory, EveHistoryCluster, MatterHistory } from 'matterbridge/history';
 import { AnsiLogger, BLUE, CYAN, GREEN, LogLevel, TimestampFormat, YELLOW, db, debugStringify, dn, er, hk, idn, nf, or, rs, wr, zb } from 'matterbridge/logger';
 import { NodeStorage, NodeStorageManager } from 'matterbridge/storage';
-import { hslColorToRgbColor, rgbColorToHslColor, isValidIpv4Address, isValidString, isValidNumber, isValidBoolean, isValidArray, isValidObject } from 'matterbridge/utils';
+import { hslColorToRgbColor, rgbColorToHslColor, isValidIpv4Address, isValidString, isValidNumber, isValidBoolean, isValidArray, isValidObject, waiter } from 'matterbridge/utils';
 
 import path from 'path';
 
@@ -95,14 +94,25 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
   private password = '';
   private whiteList: string[] = [];
   private blackList: string[] = [];
+  private postfix;
+  private failsafeCount;
 
   constructor(matterbridge: Matterbridge, log: AnsiLogger, config: PlatformConfig) {
     super(matterbridge, log, config);
+
+    // Verify that Matterbridge is the correct version
+    if (!this.localVerifyMatterbridgeVersion('1.5.4')) {
+      throw new Error(`The shelly plugin requires Matterbridge version >= "1.5.4". Please update Matterbridge to the latest version in the frontend."`);
+    }
 
     if (config.username) this.username = config.username as string;
     if (config.password) this.password = config.password as string;
     if (config.whiteList) this.whiteList = config.whiteList as string[];
     if (config.blackList) this.blackList = config.blackList as string[];
+    this.postfix = (config.postfix as string) ?? '';
+    if (!isValidString(this.postfix, 0, 3)) this.postfix = '';
+    this.failsafeCount = (config.failsafeCount as number) ?? 0;
+    if (!isValidNumber(this.failsafeCount, 0)) this.failsafeCount = 0;
 
     log.debug(`Initializing platform: ${idn}${this.config.name}${rs}${db}`);
     log.debug(`- username: ${CYAN}${config.username}`);
@@ -115,6 +125,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     log.debug(`- configDiscover: ${CYAN}${config.enableConfigDiscover}`);
     log.debug(`- bleDiscover: ${CYAN}${config.enableBleDiscover}`);
     log.debug(`- resetStorage: ${CYAN}${config.resetStorageDiscover}`);
+    log.debug(`- postfixHostname: ${CYAN}${config.postfixHostname}`);
+    log.debug(`- failsafeCount: ${CYAN}${config.failsafeCount}`);
     log.debug(`- interfaceName: ${CYAN}${config.interfaceName}`);
     log.debug(`- debug: ${CYAN}${config.debug}`);
     log.debug(`- debugMdns: ${CYAN}${config.debugMdns}`);
@@ -199,7 +211,13 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             else this.log.error(`Shelly device ${hk}${device.id}${er} host ${zb}${device.host}${er} has an unknown BLU device model ${CYAN}${bthomeDevice.model}${nf}`);
             if (definition) {
               const mbDevice = new MatterbridgeDevice(definition, undefined, config.debug as boolean);
-              mbDevice.createDefaultBridgedDeviceBasicInformationClusterServer(bthomeDevice.name, bthomeDevice.addr, 0xfff1, 'Shelly', bthomeDevice.model);
+              mbDevice.createDefaultBridgedDeviceBasicInformationClusterServer(
+                bthomeDevice.name,
+                bthomeDevice.addr + (this.postfix ? '-' + this.postfix : ''),
+                0xfff1,
+                'Shelly',
+                bthomeDevice.model,
+              );
               mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer();
               mbDevice.addRequiredClusterServers(mbDevice);
               try {
@@ -287,7 +305,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       const mbDevice = new MatterbridgeDevice(bridgedNode, undefined, config.debug as boolean);
       mbDevice.createDefaultBridgedDeviceBasicInformationClusterServer(
         device.name,
-        device.id,
+        device.id + (this.postfix ? '-' + this.postfix : ''),
         0xfff1,
         'Shelly',
         device.model,
@@ -543,6 +561,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             if (config.exposePowerMeter === 'matter13') {
               // Add the Matter 1.3 electricalSensor device type with the ElectricalPowerMeasurement and ElectricalEnergyMeasurement clusters
               const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [electricalSensor], [ElectricalPowerMeasurement.Cluster.id, ElectricalEnergyMeasurement.Cluster.id]);
+
               // Set the electrical attributes
               const epm = child.getClusterServer(ElectricalPowerMeasurement.Complete);
               const voltage = pmComponent.hasProperty('voltage') ? pmComponent.getValue('voltage') : undefined;
@@ -557,11 +576,13 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               if (isValidNumber(power2, 0)) epm?.setActivePowerAttribute(power2 * 1000);
 
               const eem = child.getClusterServer(ElectricalEnergyMeasurement.Complete);
-              const energy1 = pmComponent.hasProperty('total') ? pmComponent.getValue('total') : undefined; // Gen 1 devices in watts
-              if (isValidNumber(energy1, 0)) eem?.setCumulativeEnergyImportedAttribute({ energy: energy1 });
-              const energy2 = pmComponent.hasProperty('aenergy') ? pmComponent.getValue('aenergy') : undefined; // Gen 2 devices in watts
+
+              const energy1 = pmComponent.hasProperty('total') ? pmComponent.getValue('total') : undefined; // Gen 1 devices in w/h
+              if (isValidNumber(energy1, 0)) eem?.setCumulativeEnergyImportedAttribute({ energy: energy1 * 1000 });
+
+              const energy2 = pmComponent.hasProperty('aenergy') ? pmComponent.getValue('aenergy') : undefined; // Gen 2 devices in w/h
               if (isValidObject(energy2) && isValidNumber((energy2 as ShellyData).total, 0))
-                eem?.setCumulativeEnergyImportedAttribute({ energy: (energy2 as ShellyData).total as number });
+                eem?.setCumulativeEnergyImportedAttribute({ energy: ((energy2 as ShellyData).total as number) * 1000 });
             } else if (config.exposePowerMeter === 'evehistory') {
               // Add the powerSource device type with the EveHistory cluster for HA
               ClusterRegistry.register(EveHistory.Complete);
@@ -578,9 +599,9 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               const power2 = pmComponent.hasProperty('apower') ? pmComponent.getValue('apower') : undefined; // Gen 2 devices
               if (isValidNumber(power2, 0)) child.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy))?.setConsumptionAttribute(power2);
 
-              const energy1 = pmComponent.hasProperty('total') ? pmComponent.getValue('total') : undefined; // Gen 1 devices in watts
+              const energy1 = pmComponent.hasProperty('total') ? pmComponent.getValue('total') : undefined; // Gen 1 devices in w/h
               if (isValidNumber(energy1, 0)) child.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy))?.setTotalConsumptionAttribute(energy1 / 1000);
-              const energy2 = pmComponent.hasProperty('aenergy') ? pmComponent.getValue('aenergy') : undefined; // Gen 2 devices in watts
+              const energy2 = pmComponent.hasProperty('aenergy') ? pmComponent.getValue('aenergy') : undefined; // Gen 2 devices in w/h
               if (isValidObject(energy2) && isValidNumber((energy2 as ShellyData).total, 0))
                 child.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy))?.setTotalConsumptionAttribute(((energy2 as ShellyData).total as number) / 1000);
             }
@@ -797,6 +818,24 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         this.shelly.emit('discovered', configDevice);
       });
     }
+
+    // Wait for the failsafe count to be met
+    if (this.failsafeCount > 0) {
+      this.log.notice(`Waiting for the configured number of ${this.failsafeCount} devices to be loaded.`);
+      const isSafe = await waiter(
+        'failsafeCount',
+        () => this.shellyDevices.size + this.bluBridgedDevices.size >= this.failsafeCount,
+        false,
+        55000,
+        1000,
+        this.config.debug as boolean,
+      );
+      if (!isSafe) {
+        throw new Error(
+          `The plugin did not add the configured number of ${this.failsafeCount} devices. Registered ${this.shellyDevices.size + this.bluBridgedDevices.size} devices.`,
+        );
+      }
+    }
   }
 
   override async onConfigure() {
@@ -859,6 +898,30 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       `Changing logger level for platform ${idn}${this.config.name}${rs}${db} to ${logLevel} with debugMdns ${this.config.debugMdns} and debugCoap ${this.config.debugCoap}`,
     );
     this.shelly.setLogLevel(logLevel, this.config.debugMdns as boolean, this.config.debugCoap as boolean, this.config.debugWs as boolean);
+  }
+
+  localVerifyMatterbridgeVersion(version: string): boolean {
+    const compareVersions = (matterbridgeVersion: string, requiredVersion: string): boolean => {
+      const stripTag = (v: string) => {
+        const parts = v.split('-');
+        return parts.length > 0 ? parts[0] : v;
+      };
+      const v1Parts = stripTag(matterbridgeVersion).split('.').map(Number);
+      const v2Parts = stripTag(requiredVersion).split('.').map(Number);
+      for (let i = 0; i < Math.max(v1Parts.length, v2Parts.length); i++) {
+        const v1Part = v1Parts[i] || 0;
+        const v2Part = v2Parts[i] || 0;
+        if (v1Part < v2Part) {
+          return false;
+        } else if (v1Part > v2Part) {
+          return true;
+        }
+      }
+      return true;
+    };
+
+    if (!compareVersions(this.matterbridge.matterbridgeVersion, version)) return false;
+    return true;
   }
 
   private async saveStoredDevices(): Promise<boolean> {

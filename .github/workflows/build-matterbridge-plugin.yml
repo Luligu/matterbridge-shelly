@@ -28,10 +28,10 @@ jobs:
         run: npm -v
             
       - name: Install matterbridge
-        run: npm install -g matterbridge
+        run: npm install -g matterbridge --verbose
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
   
       - name: Lint the project
         run: npm run lint
