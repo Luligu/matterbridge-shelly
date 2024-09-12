@@ -42,8 +42,6 @@ import {
   LevelControlCluster,
   BooleanStateCluster,
   ClusterRegistry,
-  SwitchCluster,
-  Switch,
   ColorControlCluster,
   electricalSensor,
   OccupancySensingCluster,
@@ -67,7 +65,7 @@ import path from 'path';
 import { Shelly } from './shelly.js';
 import { DiscoveredDevice } from './mdnsScanner.js';
 import { ShellyDevice } from './shellyDevice.js';
-import { isLightComponent, isSwitchComponent, ShellyComponent, ShellyCoverComponent, ShellyLightComponent, ShellySwitchComponent } from './shellyComponent.js';
+import { isLightComponent, isSwitchComponent, ShellyCoverComponent, ShellyLightComponent, ShellySwitchComponent } from './shellyComponent.js';
 import { ShellyData, ShellyDataType } from './shellyTypes.js';
 
 type ConfigDeviceIp = Record<string, string>;
@@ -301,7 +299,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         }
       }
 
-      // Create a new Matterbridge device for the switch
+      // Create a new Matterbridge device
       const mbDevice = new MatterbridgeDevice(bridgedNode, undefined, config.debug as boolean);
       mbDevice.createDefaultBridgedDeviceBasicInformationClusterServer(
         device.name,
@@ -610,57 +608,76 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               this.shellyUpdateHandler(mbDevice, device, component, property, value);
             });
           }
-        } else if (component.name === 'Input' && config.exposeInput !== 'disabled') {
+        } else if (component.name === 'Input') {
           const inputComponent = device.getComponent(key);
+          if (inputComponent && inputComponent?.hasProperty('enable') && inputComponent?.getValue('enable') === false) continue;
           if (inputComponent && inputComponent?.hasProperty('state') && config.exposeInput === 'contact') {
-            const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.CONTACT_SENSOR], []);
-            // Set the state attribute
             const state = inputComponent.getValue('state') as boolean;
-            if (isValidBoolean(state)) child.getClusterServer(BooleanStateCluster)?.setStateValueAttribute(state);
-            // Add event handler
-            inputComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
-              this.shellyUpdateHandler(mbDevice, device, component, property, value);
-            });
+            if (isValidBoolean(state)) {
+              const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.CONTACT_SENSOR], []);
+              // Set the state attribute
+              child.getClusterServer(BooleanStateCluster)?.setStateValueAttribute(state);
+              // Add event handler
+              inputComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
+                this.shellyUpdateHandler(mbDevice, device, component, property, value);
+              });
+            }
           } else if (inputComponent && inputComponent?.hasProperty('state') && config.exposeInput === 'momentary') {
-            const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.GENERIC_SWITCH], []);
-            child.addClusterServer(mbDevice.getDefaultSwitchClusterServer());
-            // Set the state attribute
             const state = inputComponent.getValue('state') as boolean;
-            if (isValidBoolean(state)) child.getClusterServer(SwitchCluster.with(Switch.Feature.MomentarySwitch))?.setCurrentPositionAttribute(state ? 1 : 0);
-            // Add event handler
-            inputComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
-              this.shellyUpdateHandler(mbDevice, device, component, property, value);
-            });
+            if (isValidBoolean(state)) {
+              const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.GENERIC_SWITCH], []);
+              child.addClusterServer(mbDevice.getDefaultSwitchClusterServer());
+              // Add event handler
+              inputComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
+                this.shellyUpdateHandler(mbDevice, device, component, property, value);
+              });
+            }
           } else if (inputComponent && inputComponent?.hasProperty('state') && config.exposeInput === 'latching') {
-            const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.GENERIC_SWITCH], []);
-            child.addClusterServer(mbDevice.getDefaultLatchingSwitchClusterServer());
-            // Set the state attribute
             const state = inputComponent.getValue('state') as boolean;
-            if (isValidBoolean(state)) child.getClusterServer(SwitchCluster.with(Switch.Feature.LatchingSwitch))?.setCurrentPositionAttribute(state ? 1 : 0);
-            // Add event handler
-            inputComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
-              this.shellyUpdateHandler(mbDevice, device, component, property, value);
-            });
+            if (isValidBoolean(state)) {
+              const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.GENERIC_SWITCH], []);
+              child.addClusterServer(mbDevice.getDefaultLatchingSwitchClusterServer());
+              // Add event handler
+              inputComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
+                this.shellyUpdateHandler(mbDevice, device, component, property, value);
+              });
+            }
           } else if (inputComponent && inputComponent?.hasProperty('event') && config.exposeInputEvent !== 'disabled') {
-            const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.GENERIC_SWITCH], []);
-            child.addClusterServer(mbDevice.getDefaultSwitchClusterServer());
-            // Set the current position to 0
-            child.getClusterServer(SwitchCluster.with(Switch.Feature.MomentarySwitch))?.setCurrentPositionAttribute(0);
-            // Add event handler
-            inputComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
-              this.shellyUpdateHandler(mbDevice, device, component, property, value);
-            });
+            // Gen 1 devices
+            const event = inputComponent.getValue('event') as boolean;
+            if (isValidString(event)) {
+              const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.GENERIC_SWITCH], []);
+              child.addClusterServer(mbDevice.getDefaultSwitchClusterServer());
+              // Add event handler
+              inputComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
+                this.shellyUpdateHandler(mbDevice, device, component, property, value);
+              });
+            }
           }
-        } else if (component.name === 'Input' && config.exposeInput === 'disabled') {
-          const inputComponent = device.getComponent(key);
-          if (inputComponent && inputComponent?.hasProperty('event') && config.exposeInputEvent !== 'disabled') {
+          if (
+            component &&
+            component.hasProperty('state') &&
+            component.getValue('state') === null &&
+            component.hasProperty('type') &&
+            component.getValue('type') === 'button' &&
+            config.exposeInputEvent !== 'disabled'
+          ) {
+            // Gen 2/3 devices with Input type=button
             const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.GENERIC_SWITCH], []);
             child.addClusterServer(mbDevice.getDefaultSwitchClusterServer());
-            // Set the current position to 0
-            child.getClusterServer(SwitchCluster.with(Switch.Feature.MomentarySwitch))?.setCurrentPositionAttribute(0);
-            // Add event handler
-            inputComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
-              this.shellyUpdateHandler(mbDevice, device, component, property, value);
+            device.log.info(`****Add device event handler for device ${idn}${device.id}${rs} component ${hk}${component.id}${db}`);
+            component.on('event', (component: string, event: string) => {
+              if (isValidString(component, 7) && isValidString(event, 9, 11) && device.getComponent(component)) {
+                device.log.info(`${db}Shelly event ${hk}${component}${db}:${zb}${event}${db} for device ${idn}${device.id}${rs}${db}`);
+                const endpoint = mbDevice.getChildEndpointByName(component);
+                if (!endpoint) {
+                  device.log.error(`getChildEndpointByName(${component}) for device ${idn}${device.id}${rs} failed`);
+                  return;
+                }
+                if (event === 'single_push') mbDevice.triggerSwitchEvent('Single', device.log, endpoint);
+                if (event === 'double_push') mbDevice.triggerSwitchEvent('Double', device.log, endpoint);
+                if (event === 'long_push') mbDevice.triggerSwitchEvent('Long', device.log, endpoint);
+              }
             });
           }
         } else if (component.name === 'Sensor' && config.exposeSensor !== 'disabled') {
@@ -847,11 +864,13 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       if (!shellyDevice) return;
       mbDevice.getChildEndpoints().forEach(async (childEndpoint) => {
         const label = mbDevice.getEndpointLabel(childEndpoint.number);
+        // Configure the cluster OnOff attribute onOff
         if (label?.startsWith('switch') || label?.startsWith('relay') || label?.startsWith('light') || label?.startsWith('rgb')) {
           const switchComponent = shellyDevice.getComponent(label) as ShellySwitchComponent;
           this.log.info(`Configuring device ${dn}${mbDevice.deviceName}${nf} component ${hk}${label}${nf}:${zb}state ${YELLOW}${switchComponent.getValue('state')}${nf}`);
           if (isValidBoolean(switchComponent.getValue('state'))) childEndpoint.getClusterServer(OnOffCluster)?.setOnOffAttribute(switchComponent.getValue('state') as boolean);
         }
+        // Configure the cluster LevelControl attribute currentLevel
         if (label?.startsWith('light') || label?.startsWith('rgb')) {
           const lightComponent = shellyDevice.getComponent(label) as ShellyLightComponent;
           const level = lightComponent.getValue('brightness') as number;
@@ -861,6 +880,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             childEndpoint.getClusterServer(LevelControlCluster)?.setCurrentLevelAttribute(matterLevel);
           }
         }
+        // Configure the cluster WindowCovering attribute currentPositionLiftPercent100ths
         if (label?.startsWith('cover') || label?.startsWith('roller')) {
           const coverComponent = shellyDevice.getComponent(label) as ShellyCoverComponent;
           const position = coverComponent.hasProperty('current_pos') ? (coverComponent.getValue('current_pos') as number) : undefined;
@@ -872,6 +892,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             mbDevice.setWindowCoveringTargetAsCurrentAndStopped(childEndpoint);
           }
         }
+        /* No need for configuration, the cluster already has the state
         if (label?.startsWith('input')) {
           const inputComponent = shellyDevice.getComponent(label) as ShellyComponent;
           if (inputComponent.hasProperty('state') && isValidBoolean(inputComponent.getValue('state'))) {
@@ -881,6 +902,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               childEndpoint.getClusterServer(Switch.Complete)?.setCurrentPositionAttribute(inputComponent.getValue('state') === true ? 1 : 0);
           }
         }
+        */
       });
     });
   }

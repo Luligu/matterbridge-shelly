@@ -679,6 +679,9 @@ export class ShellyDevice extends EventEmitter {
           );
           this.emit('bthomesensor_event', sensor.addr, this.getBTHomeObjIdText(sensor.sensorId), event.event);
         }
+      } else if (isValidObject(event) && isValidString(event.event) && isValidString(event.component)) {
+        this.log.debug(`Device ${hk}${this.id}${db} has event ${YELLOW}${event.event}${db} from component ${idn}${event.component}${rs}${db}`);
+        this.getComponent(event.component)?.emit('event', event.component, event.event);
       }
     }
 
