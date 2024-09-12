@@ -396,8 +396,6 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               const matterLevel = Math.max(Math.min(Math.round(level / 100) * 255, 255), 0);
               child.getClusterServer(LevelControlCluster)?.setCurrentLevelAttribute(matterLevel);
             }
-            // TODO Set the currentHue and currentSaturation attribute
-            // TODO Set the currentX and currentY attribute
 
             // Add command handlers from Matter
             mbDevice.addCommandHandler('on', async (data) => {
@@ -868,7 +866,10 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         if (label?.startsWith('switch') || label?.startsWith('relay') || label?.startsWith('light') || label?.startsWith('rgb')) {
           const switchComponent = shellyDevice.getComponent(label) as ShellySwitchComponent;
           this.log.info(`Configuring device ${dn}${mbDevice.deviceName}${nf} component ${hk}${label}${nf}:${zb}state ${YELLOW}${switchComponent.getValue('state')}${nf}`);
-          if (isValidBoolean(switchComponent.getValue('state'))) childEndpoint.getClusterServer(OnOffCluster)?.setOnOffAttribute(switchComponent.getValue('state') as boolean);
+          const state = switchComponent.getValue('state');
+          if (isValidBoolean(state)) {
+            mbDevice.setAttribute(OnOffCluster.id, 'onOff', state, shellyDevice.log, childEndpoint);
+          }
         }
         // Configure the cluster LevelControl attribute currentLevel
         if (label?.startsWith('light') || label?.startsWith('rgb')) {
@@ -877,7 +878,35 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           if (isValidNumber(level, 0, 100)) {
             const matterLevel = Math.max(Math.min(Math.round((level / 100) * 255), 255), 0);
             this.log.info(`Configuring device ${dn}${mbDevice.deviceName}${nf} component ${hk}${label}${nf}:${zb}brightness ${YELLOW}${matterLevel}${nf}`);
-            childEndpoint.getClusterServer(LevelControlCluster)?.setCurrentLevelAttribute(matterLevel);
+            mbDevice.setAttribute(LevelControlCluster.id, 'currentLevel', matterLevel, shellyDevice.log, childEndpoint);
+          }
+          if (lightComponent.hasProperty('red') && lightComponent.hasProperty('green') && lightComponent.hasProperty('blue') && shellyDevice.profile !== 'white') {
+            const red = lightComponent.getValue('red') as number;
+            const green = lightComponent.getValue('green') as number;
+            const blue = lightComponent.getValue('blue') as number;
+            if (isValidNumber(red, 0, 255) && isValidNumber(green, 0, 255) && isValidNumber(blue, 0, 255)) {
+              this.log.info(`Configuring device ${dn}${mbDevice.deviceName}${nf} component ${hk}${label}${nf}:${zb}rgb ${YELLOW}${red},${green},${blue}${nf}`);
+              const hsl = rgbColorToHslColor({ r: red, g: green, b: blue });
+              this.log.debug(`ColorRgbToHsl: R:${red} G:${green} B:${blue} => H:${hsl.h} S:${hsl.s} L:${hsl.l}`);
+              const hue = Math.max(Math.min(Math.round((hsl.h / 360) * 254), 254), 0);
+              const saturation = Math.max(Math.min(Math.round((hsl.s / 100) * 254), 254), 0);
+              if (isValidNumber(hue, 0, 254)) mbDevice.setAttribute(ColorControlCluster.id, 'currentHue', hue, shellyDevice.log, childEndpoint);
+              if (isValidNumber(saturation, 0, 254)) mbDevice.setAttribute(ColorControlCluster.id, 'currentSaturation', saturation, shellyDevice.log, childEndpoint);
+              mbDevice.setAttribute(ColorControlCluster.id, 'colorMode', ColorControl.ColorMode.CurrentHueAndCurrentSaturation, shellyDevice.log, childEndpoint);
+            }
+          }
+          if (lightComponent.hasProperty('rgb') && shellyDevice.profile !== 'white') {
+            const rgb = lightComponent.getValue('rgb') as object;
+            if (isValidArray(rgb, 3, 3) && isValidNumber(rgb[0], 0, 255) && isValidNumber(rgb[1], 0, 255) && isValidNumber(rgb[2], 0, 255)) {
+              this.log.info(`Configuring device ${dn}${mbDevice.deviceName}${nf} component ${hk}${label}${nf}:${zb}rgb ${YELLOW}${rgb[0]},${rgb[1]},${rgb[2]}${nf}`);
+              const hsl = rgbColorToHslColor({ r: rgb[0], g: rgb[1], b: rgb[2] });
+              this.log.debug(`ColorRgbToHsl: R:${rgb[0]} G:${rgb[1]} B:${rgb[2]} => H:${hsl.h} S:${hsl.s} L:${hsl.l}`);
+              const hue = Math.max(Math.min(Math.round((hsl.h / 360) * 254), 254), 0);
+              const saturation = Math.max(Math.min(Math.round((hsl.s / 100) * 254), 254), 0);
+              if (isValidNumber(hue, 0, 254)) mbDevice.setAttribute(ColorControlCluster.id, 'currentHue', hue, shellyDevice.log, childEndpoint);
+              if (isValidNumber(saturation, 0, 254)) mbDevice.setAttribute(ColorControlCluster.id, 'currentSaturation', saturation, shellyDevice.log, childEndpoint);
+              mbDevice.setAttribute(ColorControlCluster.id, 'colorMode', ColorControl.ColorMode.CurrentHueAndCurrentSaturation, shellyDevice.log, childEndpoint);
+            }
           }
         }
         // Configure the cluster WindowCovering attribute currentPositionLiftPercent100ths
@@ -1135,7 +1164,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         const hue = Math.max(Math.min(Math.round((hsl.h / 360) * 254), 254), 0);
         const saturation = Math.max(Math.min(Math.round((hsl.s / 100) * 254), 254), 0);
         if (isValidNumber(hue, 0, 254)) matterbridgeDevice.setAttribute(ColorControlCluster.id, 'currentHue', hue, shellyDevice.log, endpoint);
-        if (isValidNumber(hue, 0, 254)) matterbridgeDevice.setAttribute(ColorControlCluster.id, 'currentSaturation', saturation, shellyDevice.log, endpoint);
+        if (isValidNumber(saturation, 0, 254)) matterbridgeDevice.setAttribute(ColorControlCluster.id, 'currentSaturation', saturation, shellyDevice.log, endpoint);
         matterbridgeDevice.setAttribute(ColorControlCluster.id, 'colorMode', ColorControl.ColorMode.CurrentHueAndCurrentSaturation, shellyDevice.log, endpoint);
       }, 200);
     }
