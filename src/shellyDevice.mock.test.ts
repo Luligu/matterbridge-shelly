@@ -900,7 +900,7 @@ describe('Shelly devices test', () => {
       if (device) device.destroy();
     });
 
-    test('Create a gen 2 shellyplusi4 device', async () => {
+    test('Create a gen 2 shellyplusi4 AC device', async () => {
       id = 'shellyplusi4-CC7B5C8AEA2C';
       log.logName = id;
 
@@ -911,7 +911,7 @@ describe('Shelly devices test', () => {
       expect(device.model).toBe('SNSN-0024X');
       expect(device.mac).toBe('CC7B5C8AEA2C');
       expect(device.id).toBe(id);
-      expect(device.firmware).toBe(firmwareGen2);
+      expect(device.firmware).toBe('1.4.2-gc2639da'); // firmwareGen2
       expect(device.auth).toBe(false);
       expect(device.gen).toBe(2);
       expect(device.profile).toBe(undefined);
@@ -933,6 +933,75 @@ describe('Shelly devices test', () => {
       expect(device.getComponent('input:1')?.hasProperty('state')).toBe(true);
       expect(device.getComponent('input:2')?.hasProperty('state')).toBe(true);
       expect(device.getComponent('input:3')?.hasProperty('state')).toBe(true);
+
+      expect(device.getComponent('input:0')?.hasProperty('type')).toBe(true);
+      expect(device.getComponent('input:1')?.hasProperty('type')).toBe(true);
+      expect(device.getComponent('input:2')?.hasProperty('type')).toBe(true);
+      expect(device.getComponent('input:3')?.hasProperty('type')).toBe(true);
+
+      expect(device.getComponent('input:0')?.getValue('type')).toBe('button');
+      expect(device.getComponent('input:1')?.getValue('type')).toBe('button');
+      expect(device.getComponent('input:2')?.getValue('type')).toBe('switch');
+      expect(device.getComponent('input:3')?.getValue('type')).toBe('switch');
+
+      expect(device.getComponent('input:0')?.getValue('state')).toBe(null);
+      expect(device.getComponent('input:1')?.getValue('state')).toBe(null);
+      expect(device.getComponent('input:2')?.getValue('state')).toBe(false);
+      expect(device.getComponent('input:3')?.getValue('state')).toBe(false);
+
+      expect(await device.fetchUpdate()).not.toBeNull();
+
+      if (device) device.destroy();
+    });
+
+    test('Create a gen 2 shellyplusi4 DC device', async () => {
+      id = 'shellyplusi4-D48AFC41B6F4';
+      log.logName = id;
+
+      device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', id + '.json'));
+      expect(device).not.toBeUndefined();
+      if (!device) return;
+      expect(device.host).toBe(path.join('src', 'mock', id + '.json'));
+      expect(device.model).toBe('SNSN-0D24X');
+      expect(device.mac).toBe('D48AFC41B6F4');
+      expect(device.id).toBe(id);
+      expect(device.firmware).toBe('1.4.2-gc2639da'); // firmwareGen2
+      expect(device.auth).toBe(false);
+      expect(device.gen).toBe(2);
+      expect(device.profile).toBe(undefined);
+      expect(device.name).toBe('My Shelly Plus i4DC');
+      expect(device.hasUpdate).toBe(false);
+      expect(device.lastseen).not.toBe(0);
+      expect(device.online).toBe(true);
+      expect(device.cached).toBe(false);
+      expect(device.sleepMode).toBe(false);
+
+      expect(device.components.length).toBe(13);
+      expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Input', 'MQTT', 'Sys', 'Sntp', 'WiFi', 'WS']);
+      expect(device.getComponentIds()).toStrictEqual(['ble', 'cloud', 'input:0', 'input:1', 'input:2', 'input:3', 'mqtt', 'sys', 'sntp', 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws']);
+
+      expect(device.getComponent('sys')?.getValue('temperature')).toBe(undefined);
+      expect(device.getComponent('sys')?.getValue('overtemperature')).toBe(undefined);
+
+      expect(device.getComponent('input:0')?.hasProperty('state')).toBe(true);
+      expect(device.getComponent('input:1')?.hasProperty('state')).toBe(true);
+      expect(device.getComponent('input:2')?.hasProperty('state')).toBe(true);
+      expect(device.getComponent('input:3')?.hasProperty('state')).toBe(true);
+
+      expect(device.getComponent('input:0')?.hasProperty('type')).toBe(true);
+      expect(device.getComponent('input:1')?.hasProperty('type')).toBe(true);
+      expect(device.getComponent('input:2')?.hasProperty('type')).toBe(true);
+      expect(device.getComponent('input:3')?.hasProperty('type')).toBe(true);
+
+      expect(device.getComponent('input:0')?.getValue('type')).toBe('switch');
+      expect(device.getComponent('input:1')?.getValue('type')).toBe('switch');
+      expect(device.getComponent('input:2')?.getValue('type')).toBe('button');
+      expect(device.getComponent('input:3')?.getValue('type')).toBe('button');
+
+      expect(device.getComponent('input:0')?.getValue('state')).toBe(false);
+      expect(device.getComponent('input:1')?.getValue('state')).toBe(false);
+      expect(device.getComponent('input:2')?.getValue('state')).toBe(null);
+      expect(device.getComponent('input:3')?.getValue('state')).toBe(null);
 
       expect(await device.fetchUpdate()).not.toBeNull();
 
