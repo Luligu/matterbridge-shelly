@@ -1,10 +1,10 @@
 {
   "shelly": {
-    "name": "My Shelly i4 PLUS",
-    "id": "shellyplusi4-cc7b5c8aea2c",
-    "mac": "CC7B5C8AEA2C",
+    "name": "My Shelly Plus i4DC",
+    "id": "shellyplusi4-d48afc41b6f4",
+    "mac": "D48AFC41B6F4",
     "slot": 1,
-    "model": "SNSN-0024X",
+    "model": "SNSN-0D24X",
     "gen": 2,
     "fw_id": "20240819-074338/1.4.2-gc2639da",
     "ver": "1.4.2",
@@ -29,23 +29,23 @@
     "input:0": {
       "id": 0,
       "name": null,
-      "type": "button",
-      "enable": true,
+      "type": "switch",
+      "enable": false,
       "invert": false,
       "factory_reset": true
     },
     "input:1": {
       "id": 1,
-      "name": null,
-      "type": "button",
+      "name": "Switch",
+      "type": "switch",
       "enable": true,
       "invert": false,
       "factory_reset": true
     },
     "input:2": {
       "id": 2,
-      "name": null,
-      "type": "switch",
+      "name": "Button",
+      "type": "button",
       "enable": true,
       "invert": false,
       "factory_reset": true
@@ -53,18 +53,18 @@
     "input:3": {
       "id": 3,
       "name": null,
-      "type": "switch",
-      "enable": true,
+      "type": "button",
+      "enable": false,
       "invert": false,
       "factory_reset": true
     },
     "mqtt": {
       "enable": false,
       "server": null,
-      "client_id": "shellyplusi4-cc7b5c8aea2c",
+      "client_id": "shellyplusi4-d48afc41b6f4",
       "user": null,
       "ssl_ca": null,
-      "topic_prefix": "shellyplusi4-cc7b5c8aea2c",
+      "topic_prefix": "shellyplusi4-d48afc41b6f4",
       "rpc_ntf": true,
       "status_ntf": false,
       "use_client_cert": false,
@@ -73,8 +73,8 @@
     },
     "sys": {
       "device": {
-        "name": "My Shelly i4 PLUS",
-        "mac": "CC7B5C8AEA2C",
+        "name": "My Shelly Plus i4DC",
+        "mac": "D48AFC41B6F4",
         "fw_id": "20240819-074338/1.4.2-gc2639da",
         "discoverable": true,
         "eco_mode": false,
@@ -102,11 +102,11 @@
       "sntp": {
         "server": "time.google.com"
       },
-      "cfg_rev": 18
+      "cfg_rev": 19
     },
     "wifi": {
       "ap": {
-        "ssid": "ShellyPlusI4-CC7B5C8AEA2C",
+        "ssid": "ShellyPlusI4-D48AFC41B6F4",
         "is_open": true,
         "enable": false,
         "range_extender": {
@@ -155,30 +155,30 @@
     },
     "input:1": {
       "id": 1,
-      "state": null
+      "state": false
     },
     "input:2": {
       "id": 2,
-      "state": false
+      "state": null
     },
     "input:3": {
       "id": 3,
-      "state": false
+      "state": null
     },
     "mqtt": {
       "connected": false
     },
     "sys": {
-      "mac": "CC7B5C8AEA2C",
+      "mac": "D48AFC41B6F4",
       "restart_required": false,
-      "time": "08:59",
-      "unixtime": 1726124396,
-      "uptime": 177631,
-      "ram_size": 253796,
-      "ram_free": 133688,
+      "time": "11:39",
+      "unixtime": 1726133978,
+      "uptime": 1192,
+      "ram_size": 253836,
+      "ram_free": 134560,
       "fs_size": 393216,
       "fs_free": 110592,
-      "cfg_rev": 18,
+      "cfg_rev": 19,
       "kvs_rev": 0,
       "schedule_rev": 1,
       "webhook_rev": 0,
@@ -186,10 +186,10 @@
       "reset_reason": 1
     },
     "wifi": {
-      "sta_ip": "192.168.1.224",
+      "sta_ip": "192.168.1.161",
       "status": "got ip",
       "ssid": "FibreBox_X6-12A4C7",
-      "rssi": -55
+      "rssi": -64
     },
     "ws": {
       "connected": false
@@ -228,8 +228,8 @@
       "config": {
         "id": 0,
         "name": null,
-        "type": "button",
-        "enable": true,
+        "type": "switch",
+        "enable": false,
         "invert": false,
         "factory_reset": true
       }
@@ -238,12 +238,12 @@
       "key": "input:1",
       "status": {
         "id": 1,
-        "state": null
+        "state": false
       },
       "config": {
         "id": 1,
-        "name": null,
-        "type": "button",
+        "name": "Switch",
+        "type": "switch",
         "enable": true,
         "invert": false,
         "factory_reset": true
@@ -253,12 +253,12 @@
       "key": "input:2",
       "status": {
         "id": 2,
-        "state": false
+        "state": null
       },
       "config": {
         "id": 2,
-        "name": null,
-        "type": "switch",
+        "name": "Button",
+        "type": "button",
         "enable": true,
         "invert": false,
         "factory_reset": true
@@ -268,13 +268,13 @@
       "key": "input:3",
       "status": {
         "id": 3,
-        "state": false
+        "state": null
       },
       "config": {
         "id": 3,
         "name": null,
-        "type": "switch",
-        "enable": true,
+        "type": "button",
+        "enable": false,
         "invert": false,
         "factory_reset": true
       }
@@ -287,10 +287,10 @@
       "config": {
         "enable": false,
         "server": null,
-        "client_id": "shellyplusi4-cc7b5c8aea2c",
+        "client_id": "shellyplusi4-d48afc41b6f4",
         "user": null,
         "ssl_ca": null,
-        "topic_prefix": "shellyplusi4-cc7b5c8aea2c",
+        "topic_prefix": "shellyplusi4-d48afc41b6f4",
         "rpc_ntf": true,
         "status_ntf": false,
         "use_client_cert": false,
@@ -301,16 +301,16 @@
     {
       "key": "sys",
       "status": {
-        "mac": "CC7B5C8AEA2C",
+        "mac": "D48AFC41B6F4",
         "restart_required": false,
-        "time": "08:59",
-        "unixtime": 1726124397,
-        "uptime": 177631,
-        "ram_size": 253772,
-        "ram_free": 131444,
+        "time": "11:39",
+        "unixtime": 1726133978,
+        "uptime": 1193,
+        "ram_size": 253856,
+        "ram_free": 133596,
         "fs_size": 393216,
         "fs_free": 110592,
-        "cfg_rev": 18,
+        "cfg_rev": 19,
         "kvs_rev": 0,
         "schedule_rev": 1,
         "webhook_rev": 0,
@@ -319,8 +319,8 @@
       },
       "config": {
         "device": {
-          "name": "My Shelly i4 PLUS",
-          "mac": "CC7B5C8AEA2C",
+          "name": "My Shelly Plus i4DC",
+          "mac": "D48AFC41B6F4",
           "fw_id": "20240819-074338/1.4.2-gc2639da",
           "discoverable": true,
           "eco_mode": false,
@@ -352,20 +352,20 @@
         "sntp": {
           "server": "time.google.com"
         },
-        "cfg_rev": 18
+        "cfg_rev": 19
       }
     },
     {
       "key": "wifi",
       "status": {
-        "sta_ip": "192.168.1.224",
+        "sta_ip": "192.168.1.161",
         "status": "got ip",
         "ssid": "FibreBox_X6-12A4C7",
-        "rssi": -57
+        "rssi": -61
       },
       "config": {
         "ap": {
-          "ssid": "ShellyPlusI4-CC7B5C8AEA2C",
+          "ssid": "ShellyPlusI4-D48AFC41B6F4",
           "is_open": true,
           "enable": false,
           "range_extender": {

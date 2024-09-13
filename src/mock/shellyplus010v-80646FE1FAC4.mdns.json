@@ -20,7 +20,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": "shellyplusi4-cc7b5c8aea2c._http._tcp.local"
+      "data": "shellyplus010v-80646fe1fac4._http._tcp.local"
     },
     {
       "name": "_shelly._tcp.local",
@@ -28,7 +28,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": "shellyplusi4-cc7b5c8aea2c._shelly._tcp.local"
+      "data": "shellyplus010v-80646fe1fac4._shelly._tcp.local"
     },
     {
       "name": "_services._dns-sd._udp.local",
@@ -50,7 +50,7 @@
   "authorities": [],
   "additionals": [
     {
-      "name": "shellyplusi4-cc7b5c8aea2c._http._tcp.local",
+      "name": "shellyplus010v-80646fe1fac4._http._tcp.local",
       "type": "SRV",
       "ttl": 120,
       "class": "IN",
@@ -59,11 +59,11 @@
         "priority": 0,
         "weight": 0,
         "port": 80,
-        "target": "ShellyPlusI4-CC7B5C8AEA2C.local"
+        "target": "ShellyPlus010V-80646FE1FAC4.local"
       }
     },
     {
-      "name": "shellyplusi4-cc7b5c8aea2c._http._tcp.local",
+      "name": "shellyplus010v-80646fe1fac4._http._tcp.local",
       "type": "TXT",
       "ttl": 120,
       "class": "IN",
@@ -73,15 +73,15 @@
       ]
     },
     {
-      "name": "ShellyPlusI4-CC7B5C8AEA2C.local",
+      "name": "ShellyPlus010V-80646FE1FAC4.local",
       "type": "A",
       "ttl": 120,
       "class": "IN",
       "flush": true,
-      "data": "192.168.1.224"
+      "data": "192.168.1.160"
     },
     {
-      "name": "shellyplusi4-cc7b5c8aea2c._shelly._tcp.local",
+      "name": "shellyplus010v-80646fe1fac4._shelly._tcp.local",
       "type": "SRV",
       "ttl": 120,
       "class": "IN",
@@ -90,28 +90,28 @@
         "priority": 0,
         "weight": 0,
         "port": 80,
-        "target": "ShellyPlusI4-CC7B5C8AEA2C.local"
+        "target": "ShellyPlus010V-80646FE1FAC4.local"
       }
     },
     {
-      "name": "shellyplusi4-cc7b5c8aea2c._shelly._tcp.local",
+      "name": "shellyplus010v-80646fe1fac4._shelly._tcp.local",
       "type": "TXT",
       "ttl": 120,
       "class": "IN",
       "flush": false,
       "data": [
         "gen=2",
-        "app=PlusI4",
+        "app=Plus10V",
         "ver=1.4.2"
       ]
     },
     {
-      "name": "ShellyPlusI4-CC7B5C8AEA2C.local",
+      "name": "ShellyPlus010V-80646FE1FAC4.local",
       "type": "A",
       "ttl": 120,
       "class": "IN",
       "flush": true,
-      "data": "192.168.1.224"
+      "data": "192.168.1.160"
     }
   ]
 }

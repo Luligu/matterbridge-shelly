@@ -8,6 +8,29 @@ If you like this project and find it useful, please consider giving it a star on
 
 - Unless you are using docker (in that case all is already updated when you pull the image), please update Matterbridge to 1.5.4 to work with matterbridge-shelly >= 0.9.5.  This is a one time issue due to the update to matter.js 0.10.0.
 
+## [0.9.8] - 2024-09-13
+
+### Added
+
+- [shelly]: The Input components are not added when they are not enabled in the device web page.
+- [shelly]: Input components configured like Button are now supported as momentary switches if exposeInputEvent=momentary.
+- [shelly]: Configure Light and Rgb components.
+- [shelly]: Extended support for Matter 1.3 electrical measurement clusters (they will soon be released in Home Automation).
+
+### Verified
+
+- [shelly]: Verified shellyplus010v with firmware v. 1.4.2 and added Jest test.
+- [shelly]: Verified shellyplusi4 (DC) with firmware v. 1.4.2 and added Jest test.
+
+### Changed
+
+- [package]: Updated typescript to 5.6.2.
+- [package]: Updated dependencies.
+
+<a href="https://www.buymeacoffee.com/luligugithub">
+  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+</a>
+
 ## [0.9.7] - 2024-09-09
 
 ### Added
