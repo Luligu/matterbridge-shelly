@@ -12,9 +12,10 @@ If you like this project and find it useful, please consider giving it a star on
 
 ### Added
 
-- [shelly]: The Input component is not added when is not enabled in the device web page.
-- [shelly]: Input component configured like Button are now supported as momentary switch if exposeInputEvent=momentary.
+- [shelly]: The Input components are not added when they are not enabled in the device web page.
+- [shelly]: Input components configured like Button are now supported as momentary switches if exposeInputEvent=momentary.
 - [shelly]: Configure Light and Rgb components.
+- [shelly]: Extended support for Matter 1.3 electrical measurements clusters (they will soon be released in Home Automation).
 
 ### Verified
 
