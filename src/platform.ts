@@ -53,6 +53,9 @@ import {
   PowerSourceCluster,
   ElectricalPowerMeasurement,
   ElectricalEnergyMeasurement,
+  Endpoint,
+  ElectricalPowerMeasurementCluster,
+  ElectricalEnergyMeasurementCluster,
 } from 'matterbridge';
 
 import { EveHistory, EveHistoryCluster, MatterHistory } from 'matterbridge/history';
@@ -65,7 +68,7 @@ import path from 'path';
 import { Shelly } from './shelly.js';
 import { DiscoveredDevice } from './mdnsScanner.js';
 import { ShellyDevice } from './shellyDevice.js';
-import { isLightComponent, isSwitchComponent, ShellyCoverComponent, ShellyLightComponent, ShellySwitchComponent } from './shellyComponent.js';
+import { isLightComponent, isSwitchComponent, ShellyComponent, ShellyCoverComponent, ShellyLightComponent, ShellySwitchComponent } from './shellyComponent.js';
 import { ShellyData, ShellyDataType } from './shellyTypes.js';
 
 type ConfigDeviceIp = Record<string, string>;
@@ -368,31 +371,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [deviceType], clusterIds);
             mbDevice.configureColorControlCluster(true, false, false, ColorControl.ColorMode.CurrentHueAndCurrentSaturation, child);
 
-            // Add the electrical EveHistory cluster on the same endpoint
-            if (
-              config.exposePowerMeter === 'evehistory' &&
-              lightComponent.hasProperty('voltage') &&
-              lightComponent.hasProperty('current') &&
-              lightComponent.hasProperty('apower') &&
-              lightComponent.hasProperty('aenergy')
-            ) {
-              child.addClusterServer(
-                MatterHistory.getEveHistoryClusterServer(
-                  lightComponent.getValue('voltage') as number,
-                  lightComponent.getValue('current') as number,
-                  lightComponent.getValue('apower') as number,
-                  ((lightComponent.getValue('aenergy') as ShellyData).total as number) / 1000,
-                ),
-              );
-            }
-            // Add the Matter 1.3 ElectricalPowerMeasurement and ElectricalEnergyMeasurement cluster on the same endpoint
-            if (
-              config.exposePowerMeter === 'matter13' &&
-              (lightComponent.hasProperty('voltage') || lightComponent.hasProperty('current') || lightComponent.hasProperty('apower') || lightComponent.hasProperty('aenergy'))
-            ) {
-              child.addClusterServer(mbDevice.getDefaultElectricalPowerMeasurementClusterServer());
-              child.addClusterServer(mbDevice.getDefaultElectricalEnergyMeasurementClusterServer());
-            }
+            // Add the electrical measurementa cluster on the same endpoint
+            this.addElectricalMeasurements(mbDevice, child, device, lightComponent);
 
             // Set the onOff attribute
             const state = lightComponent.getValue('state');
@@ -468,31 +448,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             if (config.exposeSwitch === 'outlet') deviceType = DeviceTypes.ON_OFF_PLUGIN_UNIT;
             const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [deviceType], [OnOff.Cluster.id]);
 
-            // Add the electrical EveHistory cluster on the same endpoint
-            if (
-              config.exposePowerMeter === 'evehistory' &&
-              switchComponent.hasProperty('voltage') &&
-              switchComponent.hasProperty('current') &&
-              switchComponent.hasProperty('apower') &&
-              switchComponent.hasProperty('aenergy')
-            ) {
-              child.addClusterServer(
-                MatterHistory.getEveHistoryClusterServer(
-                  switchComponent.getValue('voltage') as number,
-                  switchComponent.getValue('current') as number,
-                  switchComponent.getValue('apower') as number,
-                  ((switchComponent.getValue('aenergy') as ShellyData).total as number) / 1000,
-                ),
-              );
-            }
-            // Add the Matter 1.3 ElectricalPowerMeasurement and ElectricalEnergyMeasurement cluster on the same endpoint
-            if (
-              config.exposePowerMeter === 'matter13' &&
-              (switchComponent.hasProperty('voltage') || switchComponent.hasProperty('current') || switchComponent.hasProperty('apower') || switchComponent.hasProperty('aenergy'))
-            ) {
-              child.addClusterServer(mbDevice.getDefaultElectricalPowerMeasurementClusterServer());
-              child.addClusterServer(mbDevice.getDefaultElectricalEnergyMeasurementClusterServer());
-            }
+            // Add the electrical measurementa cluster on the same endpoint
+            this.addElectricalMeasurements(mbDevice, child, device, switchComponent);
 
             // Set the OnOff attribute
             const state = switchComponent.getValue('state');
@@ -516,31 +473,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           if (coverComponent) {
             const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.WINDOW_COVERING], [WindowCovering.Cluster.id]);
 
-            // Add the electrical EveHistory cluster on the same endpoint
-            if (
-              config.exposePowerMeter === 'evehistory' &&
-              coverComponent.hasProperty('voltage') &&
-              coverComponent.hasProperty('current') &&
-              coverComponent.hasProperty('apower') &&
-              coverComponent.hasProperty('aenergy')
-            ) {
-              child.addClusterServer(
-                MatterHistory.getEveHistoryClusterServer(
-                  coverComponent.getValue('voltage') as number,
-                  coverComponent.getValue('current') as number,
-                  coverComponent.getValue('apower') as number,
-                  ((coverComponent.getValue('aenergy') as ShellyData).total as number) / 1000,
-                ),
-              );
-            }
-            // Add the Matter 1.3 ElectricalPowerMeasurement and ElectricalEnergyMeasurement cluster on the same endpoint
-            if (
-              config.exposePowerMeter === 'matter13' &&
-              (coverComponent.hasProperty('voltage') || coverComponent.hasProperty('current') || coverComponent.hasProperty('apower') || coverComponent.hasProperty('aenergy'))
-            ) {
-              child.addClusterServer(mbDevice.getDefaultElectricalPowerMeasurementClusterServer());
-              child.addClusterServer(mbDevice.getDefaultElectricalEnergyMeasurementClusterServer());
-            }
+            // Add the electrical measurementa cluster on the same endpoint
+            this.addElectricalMeasurements(mbDevice, child, device, coverComponent);
 
             // Set the WindowCovering attributes
             /*
@@ -582,51 +516,36 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               // Add the Matter 1.3 electricalSensor device type with the ElectricalPowerMeasurement and ElectricalEnergyMeasurement clusters
               const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [electricalSensor], [ElectricalPowerMeasurement.Cluster.id, ElectricalEnergyMeasurement.Cluster.id]);
 
-              // Set the ElectricalPowerMeasurement attributes
-              const epm = child.getClusterServer(ElectricalPowerMeasurement.Complete);
+              device.log.info(
+                `***Added ElectricalPowerMeasurement and ElectricalEnergyMeasurement clusters to endpoint ${hk}${child.name}${nf} component ${hk}${component.name}:${component.id}${nf}`,
+              );
 
-              const voltage = pmComponent.hasProperty('voltage') ? pmComponent.getValue('voltage') : undefined;
-              if (isValidNumber(voltage, 0)) epm?.setVoltageAttribute(voltage * 1000);
-
-              const current = pmComponent.hasProperty('current') ? pmComponent.getValue('current') : undefined;
-              if (isValidNumber(current, 0)) epm?.setActiveCurrentAttribute(current * 1000);
-
-              const power1 = pmComponent.hasProperty('power') ? pmComponent.getValue('power') : undefined; // Gen 1 devices
-              if (isValidNumber(power1, 0)) epm?.setActivePowerAttribute(power1 * 1000);
-              const power2 = pmComponent.hasProperty('apower') ? pmComponent.getValue('apower') : undefined; // Gen 2 devices
-              if (isValidNumber(power2, 0)) epm?.setActivePowerAttribute(power2 * 1000);
-
-              // Set the ElectricalEnergyMeasurement attributes
-              const eem = child.getClusterServer(ElectricalEnergyMeasurement.Complete);
-
-              const energy1 = pmComponent.hasProperty('total') ? pmComponent.getValue('total') : undefined; // Gen 1 devices in w/h
-              if (isValidNumber(energy1, 0)) eem?.setCumulativeEnergyImportedAttribute({ energy: energy1 * 1000 });
-
-              const energy2 = pmComponent.hasProperty('aenergy') ? pmComponent.getValue('aenergy') : undefined; // Gen 2 devices in w/h
-              if (isValidObject(energy2) && isValidNumber((energy2 as ShellyData).total, 0))
-                eem?.setCumulativeEnergyImportedAttribute({ energy: ((energy2 as ShellyData).total as number) * 1000 });
+              // Update the electrical attributes
+              for (const property of component.properties) {
+                if (!['voltage', 'current', 'power', 'apower', 'act_power', 'total', 'aenergy'].includes(property.key)) continue;
+                /*
+                device.log.info(
+                  `***Property ${property.key} value ${property.value !== null && typeof property.value === 'object' ? debugStringify(property.value as object) : property.value}${rs}`,
+                );
+                */
+                this.shellyUpdateHandler(mbDevice, device, component.id, property.key, property.value);
+              }
             } else if (config.exposePowerMeter === 'evehistory') {
               // Add the powerSource device type with the EveHistory cluster for HA
               ClusterRegistry.register(EveHistory.Complete);
               const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [powerSource], [EveHistory.Cluster.id]);
+              device.log.info(`***Added EveHistory cluster to endpoint ${hk}${child.name}${nf} component ${hk}${component.name}:${component.id}${nf}`);
 
-              // Set the EveHistoryCluster electrical attributes
-              const voltage = pmComponent.hasProperty('voltage') ? pmComponent.getValue('voltage') : undefined;
-              if (isValidNumber(voltage, 0)) child.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy))?.setVoltageAttribute(voltage);
-
-              const current = pmComponent.hasProperty('current') ? pmComponent.getValue('current') : undefined;
-              if (isValidNumber(current, 0)) child.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy))?.setCurrentAttribute(current);
-
-              const power1 = pmComponent.hasProperty('power') ? pmComponent.getValue('power') : undefined; // Gen 1 devices
-              if (isValidNumber(power1, 0)) child.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy))?.setConsumptionAttribute(power1);
-              const power2 = pmComponent.hasProperty('apower') ? pmComponent.getValue('apower') : undefined; // Gen 2 devices
-              if (isValidNumber(power2, 0)) child.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy))?.setConsumptionAttribute(power2);
-
-              const energy1 = pmComponent.hasProperty('total') ? pmComponent.getValue('total') : undefined; // Gen 1 devices in w/h
-              if (isValidNumber(energy1, 0)) child.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy))?.setTotalConsumptionAttribute(energy1 / 1000);
-              const energy2 = pmComponent.hasProperty('aenergy') ? pmComponent.getValue('aenergy') : undefined; // Gen 2 devices in w/h
-              if (isValidObject(energy2) && isValidNumber((energy2 as ShellyData).total, 0))
-                child.getClusterServer(EveHistoryCluster.with(EveHistory.Feature.EveEnergy))?.setTotalConsumptionAttribute(((energy2 as ShellyData).total as number) / 1000);
+              // Update the electrical attributes
+              for (const property of component.properties) {
+                if (!['voltage', 'current', 'power', 'apower', 'act_power', 'total', 'aenergy'].includes(property.key)) continue;
+                /*
+                device.log.info(
+                  `***Property ${property.key} value ${property.value !== null && typeof property.value === 'object' ? debugStringify(property.value as object) : property.value}${rs}`,
+                );
+                */
+                this.shellyUpdateHandler(mbDevice, device, component.id, property.key, property.value);
+              }
             }
             // Add event handler
             pmComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
@@ -690,7 +609,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             // Gen 2/3 devices with Input type=button
             const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.GENERIC_SWITCH], []);
             child.addClusterServer(mbDevice.getDefaultSwitchClusterServer());
-            device.log.info(`****Add device event handler for device ${idn}${device.id}${rs} component ${hk}${component.id}${db}`);
+            device.log.info(`Add device event handler for device ${idn}${device.id}${rs} component ${hk}${component.id}${db} type Button`);
             component.on('event', (component: string, event: string) => {
               if (isValidString(component, 7) && isValidString(event, 9, 11) && device.getComponent(component)) {
                 device.log.info(`${db}Shelly event ${hk}${component}${db}:${zb}${event}${db} for device ${idn}${device.id}${rs}${db}`);
@@ -1000,6 +919,45 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
 
     if (!compareVersions(this.matterbridge.matterbridgeVersion, requiredVersion)) return false;
     return true;
+  }
+
+  private addElectricalMeasurements(device: MatterbridgeDevice, endpoint: Endpoint | undefined, shelly: ShellyDevice, component: ShellyComponent) {
+    if (!endpoint) {
+      // this.log.info(`addElectricalMeasurements: endpoint is undefined`);
+      return;
+    }
+    const updateProperties = () => {
+      for (const property of component.properties) {
+        if (!['voltage', 'current', 'power', 'apower', 'act_power', 'total', 'aenergy'].includes(property.key)) continue;
+        /*
+        shelly.log.info(
+          `***Property ${property.key} value ${property.value !== null && typeof property.value === 'object' ? debugStringify(property.value as object) : property.value}${rs}`,
+        );
+        */
+        this.shellyUpdateHandler(device, shelly, component.id, property.key, property.value);
+      }
+    };
+
+    // Add the electrical EveHistory cluster on the same endpoint
+    if (
+      this.config.exposePowerMeter === 'evehistory' &&
+      (component.hasProperty('voltage') || component.hasProperty('current') || component.hasProperty('apower') || component.hasProperty('aenergy'))
+    ) {
+      shelly.log.info(`***Adding EveHistory cluster to endpoint ${hk}${endpoint.name}${nf} component ${hk}${component.id}${nf}`);
+      endpoint.addClusterServer(MatterHistory.getEveHistoryClusterServer());
+      updateProperties();
+    }
+
+    // Add the Matter 1.3 ElectricalPowerMeasurement and ElectricalEnergyMeasurement cluster on the same endpoint
+    if (
+      this.config.exposePowerMeter === 'matter13' &&
+      (component.hasProperty('voltage') || component.hasProperty('current') || component.hasProperty('apower') || component.hasProperty('aenergy'))
+    ) {
+      shelly.log.info(`***Adding ElectricalPowerMeasurement and ElectricalEnergyMeasurement clusters to endpoint ${hk}${endpoint.name}${nf} component ${hk}${component.id}${nf}`);
+      endpoint.addClusterServer(device.getDefaultElectricalPowerMeasurementClusterServer());
+      endpoint.addClusterServer(device.getDefaultElectricalEnergyMeasurementClusterServer());
+      updateProperties();
+    }
   }
 
   private async saveStoredDevices(): Promise<boolean> {
@@ -1359,9 +1317,14 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       */
     }
     // Update energy from main components (gen 2 devices send power total inside the component not with meter)
-    if (this.config.exposePowerMeter === 'evehistory' && ['Light', 'Relay', 'Switch', 'Cover', 'Roller', 'PowerMeter'].includes(shellyComponent.name)) {
+    if (
+      (this.config.exposePowerMeter === 'evehistory' || this.config.exposePowerMeter === 'matter13') &&
+      ['Light', 'Rgb', 'Relay', 'Switch', 'Cover', 'Roller', 'PowerMeter'].includes(shellyComponent.name)
+    ) {
       if ((property === 'power' || property === 'apower' || property === 'act_power') && isValidNumber(value, 0)) {
-        matterbridgeDevice.setAttribute(EveHistoryCluster.id, 'consumption', value, shellyDevice.log, endpoint);
+        if (this.config.exposePowerMeter === 'evehistory') matterbridgeDevice.setAttribute(EveHistoryCluster.id, 'consumption', value, shellyDevice.log, endpoint);
+        else if (this.config.exposePowerMeter === 'matter13')
+          matterbridgeDevice.setAttribute(ElectricalPowerMeasurementCluster.id, 'activePower', value * 1000, shellyDevice.log, endpoint);
         if (property === 'act_power') return; // Skip the rest for PRO devices
         if (shellyComponent.id.startsWith('emeter')) return; // Skip the rest for em3 devices
         // Calculate current from power and voltage
@@ -1369,32 +1332,44 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         if (isValidNumber(voltage, 10)) {
           let current = value / voltage;
           current = Math.round(current * 10000) / 10000; // round to 4 decimals
-          matterbridgeDevice.setAttribute(EveHistoryCluster.id, 'current', current, shellyDevice.log, endpoint);
+          if (this.config.exposePowerMeter === 'evehistory') matterbridgeDevice.setAttribute(EveHistoryCluster.id, 'current', current, shellyDevice.log, endpoint);
+          else if (this.config.exposePowerMeter === 'matter13')
+            matterbridgeDevice.setAttribute(ElectricalPowerMeasurementCluster.id, 'activeCurrent', current * 1000, shellyDevice.log, endpoint);
         }
       }
       if (property === 'total' && isValidNumber(value, 0)) {
         let energy = value / 1000; // convert to kWh
         energy = Math.round(energy * 10000) / 10000; // round to 4 decimals
-        matterbridgeDevice.setAttribute(EveHistoryCluster.id, 'totalConsumption', energy, shellyDevice.log, endpoint);
+        if (this.config.exposePowerMeter === 'evehistory') matterbridgeDevice.setAttribute(EveHistoryCluster.id, 'totalConsumption', energy, shellyDevice.log, endpoint);
+        else if (this.config.exposePowerMeter === 'matter13')
+          matterbridgeDevice.setAttribute(ElectricalEnergyMeasurementCluster.id, 'cumulativeEnergyImported', { energy: energy * 1000 }, shellyDevice.log, endpoint);
       }
       if (property === 'aenergy' && isValidObject(value) && isValidNumber((value as ShellyData).total, 0)) {
         let energy = ((value as ShellyData).total as number) / 1000; // convert to kWh
         energy = Math.round(energy * 10000) / 10000;
-        matterbridgeDevice.setAttribute(EveHistoryCluster.id, 'totalConsumption', energy, shellyDevice.log, endpoint);
+        if (this.config.exposePowerMeter === 'evehistory') matterbridgeDevice.setAttribute(EveHistoryCluster.id, 'totalConsumption', energy, shellyDevice.log, endpoint);
+        else if (this.config.exposePowerMeter === 'matter13')
+          matterbridgeDevice.setAttribute(ElectricalEnergyMeasurementCluster.id, 'cumulativeEnergyImported', { energy: energy * 1000 }, shellyDevice.log, endpoint);
       }
-      if (property === 'voltage' && isValidNumber(value, 10)) {
-        matterbridgeDevice.setAttribute(EveHistoryCluster.id, 'voltage', value, shellyDevice.log, endpoint);
+      if (property === 'voltage' && isValidNumber(value, 0)) {
+        if (this.config.exposePowerMeter === 'evehistory') matterbridgeDevice.setAttribute(EveHistoryCluster.id, 'voltage', value, shellyDevice.log, endpoint);
+        else if (this.config.exposePowerMeter === 'matter13')
+          matterbridgeDevice.setAttribute(ElectricalPowerMeasurementCluster.id, 'voltage', value * 1000, shellyDevice.log, endpoint);
       }
       if (property === 'current' && isValidNumber(value, 0)) {
-        matterbridgeDevice.setAttribute(EveHistoryCluster.id, 'current', value, shellyDevice.log, endpoint);
+        if (this.config.exposePowerMeter === 'evehistory') matterbridgeDevice.setAttribute(EveHistoryCluster.id, 'current', value, shellyDevice.log, endpoint);
+        else if (this.config.exposePowerMeter === 'matter13')
+          matterbridgeDevice.setAttribute(ElectricalPowerMeasurementCluster.id, 'activeCurrent', value * 1000, shellyDevice.log, endpoint);
         if (shellyComponent.hasProperty('act_power')) return; // Skip the rest for PRO devices
         if (shellyComponent.id.startsWith('emeter')) return; // Skip the rest for em3 devices
         // Calculate power from current and voltage
         const voltage = shellyComponent.hasProperty('voltage') ? (shellyComponent.getValue('voltage') as number) : undefined;
-        if (isValidNumber(voltage, 10)) {
+        if (isValidNumber(voltage, 0)) {
           let power = value * voltage;
           power = Math.round(power * 10000) / 10000;
-          matterbridgeDevice.setAttribute(EveHistoryCluster.id, 'consumption', power, shellyDevice.log, endpoint);
+          if (this.config.exposePowerMeter === 'evehistory') matterbridgeDevice.setAttribute(EveHistoryCluster.id, 'consumption', power, shellyDevice.log, endpoint);
+          else if (this.config.exposePowerMeter === 'matter13')
+            matterbridgeDevice.setAttribute(ElectricalPowerMeasurementCluster.id, 'activePower', power * 1000, shellyDevice.log, endpoint);
         }
       }
     }
