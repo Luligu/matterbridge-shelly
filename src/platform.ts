@@ -978,7 +978,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     this.shelly.setLogLevel(logLevel, this.config.debugMdns as boolean, this.config.debugCoap as boolean, this.config.debugWs as boolean);
   }
 
-  localVerifyMatterbridgeVersion(version: string): boolean {
+  localVerifyMatterbridgeVersion(requiredVersion: string): boolean {
     const compareVersions = (matterbridgeVersion: string, requiredVersion: string): boolean => {
       const stripTag = (v: string) => {
         const parts = v.split('-');
@@ -998,7 +998,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       return true;
     };
 
-    if (!compareVersions(this.matterbridge.matterbridgeVersion, version)) return false;
+    if (!compareVersions(this.matterbridge.matterbridgeVersion, requiredVersion)) return false;
     return true;
   }
 
