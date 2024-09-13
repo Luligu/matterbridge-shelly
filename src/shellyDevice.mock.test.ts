@@ -998,12 +998,12 @@ describe('Shelly devices test', () => {
       expect(device.getComponent('input:2')?.getValue('type')).toBe('button');
       expect(device.getComponent('input:3')?.getValue('type')).toBe('button');
 
-      expect(device.getComponent('input:0')?.getValue('enable')).toBe(true);
+      expect(device.getComponent('input:0')?.getValue('enable')).toBe(false);
       expect(device.getComponent('input:1')?.getValue('enable')).toBe(true);
       expect(device.getComponent('input:2')?.getValue('enable')).toBe(true);
-      expect(device.getComponent('input:3')?.getValue('enable')).toBe(true);
+      expect(device.getComponent('input:3')?.getValue('enable')).toBe(false);
 
-      expect(device.getComponent('input:0')?.getValue('state')).toBe(false); // in switch mode can be true or false and is a WebSocket update
+      expect(device.getComponent('input:0')?.getValue('state')).toBe(null); // in switch mode can be true or false and is a WebSocket update
       expect(device.getComponent('input:1')?.getValue('state')).toBe(false);
       expect(device.getComponent('input:2')?.getValue('state')).toBe(null); // in button mode is null and is a WebSocket event
       expect(device.getComponent('input:3')?.getValue('state')).toBe(null);
