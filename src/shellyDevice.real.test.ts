@@ -255,6 +255,7 @@ describe('Shellies', () => {
   });
 
   describe('test real gen 1 shellydimmer2 119 with auth', () => {
+    if (getMacAddress() !== '30:f6:ef:69:2b:c5') return;
     test('Create a gen 1 shellydimmer2 device and update', async () => {
       const device = await ShellyDevice.create(shelly, log, '192.168.1.219');
       expect(device).not.toBeUndefined();
