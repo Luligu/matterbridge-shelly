@@ -1,16 +1,17 @@
+/* eslint-disable jest/no-conditional-expect */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Shelly } from './shelly.js';
 import { ShellyDevice } from './shellyDevice.js';
 // import { ShellyCoverComponent, ShellySwitchComponent } from './shellyComponent';
 import { AnsiLogger, LogLevel, TimestampFormat } from 'matterbridge/logger';
-import { getMacAddress, waiter } from 'matterbridge/utils';
+import { getMacAddress, wait, waiter } from 'matterbridge/utils';
 import { jest } from '@jest/globals';
-import { isLightComponent, isSwitchComponent, ShellyCoverComponent, ShellySwitchComponent } from './shellyComponent.js';
+import { isCoverComponent, isLightComponent, isSwitchComponent, ShellyCoverComponent, ShellySwitchComponent } from './shellyComponent.js';
 
 describe('Shellies', () => {
   let consoleLogSpy: jest.SpiedFunction<typeof console.log>;
 
-  const log = new AnsiLogger({ logName: 'shellyDeviceTest', logTimestampFormat: TimestampFormat.TIME_MILLIS, logLevel: LogLevel.DEBUG });
+  const log = new AnsiLogger({ logName: 'ShellyDeviceRealTest', logTimestampFormat: TimestampFormat.TIME_MILLIS, logLevel: LogLevel.DEBUG });
   const shelly = new Shelly(log, 'admin', 'tango');
 
   const firmwareGen1 = 'v1.14.0-gcb84623';
@@ -432,6 +433,132 @@ describe('Shellies', () => {
 
       device.destroy();
     }, 60000);
+  });
+
+  describe('test real gen 2 shellyplus2pm 218 with auth', () => {
+    if (getMacAddress() !== '30:f6:ef:69:2b:c5') return;
+
+    test('create a gen 2 shellyplus2pm device and update', async () => {
+      const device = await ShellyDevice.create(shelly, log, '192.168.1.218');
+      expect(device).not.toBeUndefined();
+      if (!device) return;
+      expect(device.gen).toBe(2);
+      expect(device.host).toBe('192.168.1.218');
+      expect(device.model).toBe('SNSW-102P16EU');
+      expect(device.mac).toBe('5443B23D81F8');
+      expect(device.id).toBe('shellyplus2pm-5443B23D81F8');
+      expect(device.firmware).toBe(firmwareGen2);
+      expect(device.auth).toBe(false);
+
+      await device.fetchUpdate();
+
+      await device.saveDevicePayloads('temp');
+
+      device.destroy();
+    }, 60000);
+
+    test('send command to a gen 2 shellyplus2pm device', async () => {
+      const device = await ShellyDevice.create(shelly, log, '192.168.1.218');
+      expect(device).not.toBeUndefined();
+      if (!device) return;
+
+      const cover = device.getComponent('cover:0');
+      expect(cover).not.toBeUndefined();
+
+      if (isCoverComponent(cover)) {
+        cover.Open();
+        await waiter(
+          'Open()',
+          () => {
+            return cover.getValue('state') === 'opening';
+          },
+          false,
+          20000,
+        );
+        await waiter(
+          'Open()',
+          () => {
+            return cover.getValue('state') === 'stopped';
+          },
+          false,
+          20000,
+        );
+        await wait(2000);
+        await device.fetchUpdate();
+        expect(cover.getValue('source')).toMatch(/^(limit_switch|timeout)$/); // 'limit_switch' if not stopped for timeout
+        expect(cover.getValue('state')).toBe('stopped'); // 'open' if not stopped for timeout
+        expect(cover.getValue('last_direction')).toBe('open');
+        expect(cover.getValue('current_pos')).toBe(100);
+
+        cover.Stop();
+        await waiter(
+          'Stop()',
+          () => {
+            return cover.getValue('state') === 'stopped';
+          },
+          false,
+          20000,
+        );
+        await wait(2000);
+        await device.fetchUpdate();
+        expect(cover.getValue('state')).toBe('stopped');
+        expect(cover.getValue('last_direction')).toBe('open');
+        expect(cover.getValue('current_pos')).toBe(100);
+
+        cover.Close();
+        await waiter(
+          'Close()',
+          () => {
+            return cover.getValue('state') === 'closing';
+          },
+          false,
+          20000,
+        );
+        await waiter(
+          'Close()',
+          () => {
+            return cover.getValue('state') === 'stopped';
+          },
+          false,
+          20000,
+        );
+        await wait(2000);
+        await device.fetchUpdate();
+        expect(cover.getValue('source')).toBe('timeout'); // 'limit_switch' if not stopped for timeout
+        expect(cover.getValue('state')).toBe('stopped'); // 'open' if not stopped for timeout
+        expect(cover.getValue('last_direction')).toBe('close');
+        expect(cover.getValue('current_pos')).toBe(0);
+
+        cover.GoToPosition(10);
+        await waiter(
+          'GoToPosition(10)',
+          () => {
+            return cover.getValue('state') === 'opening';
+          },
+          false,
+          20000,
+        );
+        await waiter(
+          'GoToPosition(10)',
+          () => {
+            return cover.getValue('state') === 'stopped';
+          },
+          false,
+          20000,
+        );
+        await wait(2000);
+        await device.fetchUpdate();
+        expect(cover.getValue('source')).toBe('timeout');
+        expect(cover.getValue('state')).toBe('stopped');
+        expect(cover.getValue('last_direction')).toBe('open');
+        expect(cover.getValue('current_pos')).toBe(10);
+
+        // Close for next test
+        cover.Close();
+        await wait(2000);
+      }
+      device.destroy();
+    }, 120000);
   });
 
   describe('test real gen 3 shelly1minig3 221 with auth', () => {
