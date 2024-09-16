@@ -817,7 +817,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         return;
       }
       mbDevice.getChildEndpoints().forEach(async (childEndpoint) => {
-        const label = mbDevice.getEndpointLabel(childEndpoint.number);
+        // const label = mbDevice.getEndpointLabel(childEndpoint.number);
+        const label = childEndpoint.uniqueStorageKey;
         // Configure the cluster OnOff attribute onOff
         if (label?.startsWith('switch') || label?.startsWith('relay') || label?.startsWith('light') || label?.startsWith('rgb')) {
           const switchComponent = shellyDevice.getComponent(label) as ShellySwitchComponent;
