@@ -14,8 +14,13 @@ If you like this project and find it useful, please consider giving it a star on
 
 ### Verified
 
+### Fixed
+
+- [shelly]: Fixed the bug in configure when postfix is used.
+
 ### Changed
 
+- [matterbridge]: Removed Matterbridge deprecated method to get the child endpoints.
 - [package]: Updated dependencies.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
