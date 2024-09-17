@@ -462,6 +462,9 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             mbDevice.addCommandHandler('off', async (data) => {
               this.shellyLightCommandHandler(mbDevice, data.endpoint.number, device, 'Off', false);
             });
+            mbDevice.addCommandHandler('toggle', async (data) => {
+              this.shellyLightCommandHandler(mbDevice, data.endpoint.number, device, 'Toggle', false);
+            });
 
             // Add event handler
             switchComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
@@ -802,12 +805,20 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
   override async onConfigure() {
     this.log.info(`Configuring platform ${idn}${this.config.name}${rs}${nf}`);
     this.bridgedDevices.forEach(async (mbDevice) => {
-      if (!mbDevice.serialNumber) return;
-      this.log.info(`Configuring device ${dn}${mbDevice.deviceName}${nf} shelly ${hk}${mbDevice.serialNumber}${nf}`);
-      const shellyDevice = this.shelly.getDevice(mbDevice.serialNumber);
-      if (!shellyDevice) return;
+      if (!mbDevice.serialNumber) {
+        this.log.error(`Shelly device ${dn}${mbDevice.deviceName}${er} has no serial number`);
+        return;
+      }
+      const serial = isValidString(this.config.postfix, 1, 3) ? mbDevice.serialNumber.replace('-' + this.config.postfix, '') : mbDevice.serialNumber;
+      this.log.info(`Configuring device ${dn}${mbDevice.deviceName}${nf} shelly ${hk}${serial}${nf}`);
+      const shellyDevice = this.shelly.getDevice(serial);
+      if (!shellyDevice) {
+        this.log.error(`Shelly device with serial number ${hk}${serial}${er} not found`);
+        return;
+      }
       mbDevice.getChildEndpoints().forEach(async (childEndpoint) => {
-        const label = mbDevice.getEndpointLabel(childEndpoint.number);
+        // const label = mbDevice.getEndpointLabel(childEndpoint.number);
+        const label = childEndpoint.uniqueStorageKey;
         // Configure the cluster OnOff attribute onOff
         if (label?.startsWith('switch') || label?.startsWith('relay') || label?.startsWith('light') || label?.startsWith('rgb')) {
           const switchComponent = shellyDevice.getComponent(label) as ShellySwitchComponent;
@@ -1026,7 +1037,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       return false;
     }
     // Get the Shelly switch component
-    const componentName = matterbridgeDevice.getEndpointLabel(endpointNumber);
+    // const componentName = matterbridgeDevice.getEndpointLabel(endpointNumber);
+    const componentName = endpoint.uniqueStorageKey;
     if (!componentName) {
       shellyDevice.log.error(`shellyCommandHandler error: componentName not found for shelly device ${dn}${shellyDevice?.id}${er}`);
       return false;
@@ -1081,7 +1093,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       return false;
     }
     // Get the Shelly cover component
-    const componentName = matterbridgeDevice.getEndpointLabel(endpointNumber);
+    // const componentName = matterbridgeDevice.getEndpointLabel(endpointNumber);
+    const componentName = endpoint.uniqueStorageKey;
     if (!componentName) {
       shellyDevice.log.error(`shellyCoverCommandHandler error: endpointName not found for shelly device ${dn}${shellyDevice?.id}${er}`);
       return false;
