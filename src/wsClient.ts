@@ -41,14 +41,14 @@ interface RequestFrame {
   id: number; // Request ID
   src: string; // Source of request
   method: string; // Shelly.GetStatus';
-  params: object; // other stuff
+  params: object; // Other parameters
 }
 
 interface RequestFrameWithAuth {
   id: number; // Request ID
   src: string; // Source of request
   method: string; // Shelly.GetStatus';
-  params: object; // other stuff
+  params: object; // Other parameters
   auth: AuthParams;
 }
 
@@ -163,9 +163,11 @@ export class WsClient extends EventEmitter {
     this.wsDeviceId = wsDeviceId;
     this.wsUrl = `ws://${this.wsHost}/rpc`;
     this.password = password;
-    this.requestId = crypto.randomInt(0, 9999);
+    this.requestId = crypto.randomInt(0, 999999);
     this.requestFrame.id = this.requestId;
+    this.requestFrame.src = 'Matterbridge' + this.requestId;
     this.requestFrameWithAuth.id = this.requestId;
+    this.requestFrameWithAuth.src = 'Matterbridge' + this.requestId;
   }
 
   override emit<K extends keyof WsClientEvent>(eventName: K, ...args: WsClientEvent[K]): boolean {
@@ -298,8 +300,10 @@ export class WsClient extends EventEmitter {
       this.log.debug(`WebSocket connection opened with Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}`);
       this._isConnecting = false;
       this._isConnected = true;
-      if (this.wsClient?.readyState === WebSocket.OPEN) this.wsClient?.send(JSON.stringify(this.requestFrame));
-      else this.log.error(`WebSocket connection not open with Shelly device ${hk}${this.wsDeviceId}${er} host ${zb}${this.wsHost}${er}`);
+      if (this.wsClient?.readyState === WebSocket.OPEN) {
+        this.log.debug(`Sending request to Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}`, this.requestFrame);
+        this.wsClient?.send(JSON.stringify(this.requestFrame));
+      } else this.log.error(`WebSocket connection state ${this.wsClient?.readyState} with Shelly device ${hk}${this.wsDeviceId}${er} host ${zb}${this.wsHost}${er}`);
 
       // Start the ping/pong mechanism
       this.startPingPong();
@@ -326,7 +330,7 @@ export class WsClient extends EventEmitter {
         this.id = ShellyDevice.normalizeId(response.src).id;
 
         // Handle the response error code 401 (auth required)
-        if (response.error && response.error.code === 401 && response.id === this.requestId && response.dst === 'Matterbridge') {
+        if (response.error && response.error.code === 401 && response.id === this.requestId && response.dst === 'Matterbridge' + this.requestId) {
           this.auth = true;
           if (!this.password) {
             this.log.error(`Authentication required for ${response.src} but the password is not set. Exiting...`);
@@ -337,17 +341,18 @@ export class WsClient extends EventEmitter {
           const auth: ResponseErrorMessage = JSON.parse(response.error.message);
           this.log.debug(`Auth requested: ${response.error.message}`);
           this.requestFrameWithAuth.auth = createDigestShellyAuth('admin', this.password, auth.nonce, crypto.randomInt(0, 999999999), auth.realm, auth.nc);
+          this.log.debug(`Sending auth request to Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}`, this.requestFrameWithAuth);
           this.wsClient?.send(JSON.stringify(this.requestFrameWithAuth));
-        } else if (response.result && response.id === this.requestId && response.dst === 'Matterbridge') {
+        } else if (response.result && response.id === this.requestId && response.dst === 'Matterbridge' + this.requestId) {
           this.log.debug(`Received ${CYAN}Shelly.GetStatus${db} response from ${hk}${this.id}${db} host ${zb}${this.wsHost}${db}:${rs}\n`, response.result);
           this.emit('response', response.result);
-        } else if (response.method && (response.method === 'NotifyStatus' || response.method === 'NotifyFullStatus') && response.dst === 'Matterbridge') {
+        } else if (response.method && (response.method === 'NotifyStatus' || response.method === 'NotifyFullStatus') && response.dst === 'Matterbridge' + this.requestId) {
           this.log.debug(`Received ${CYAN}${response.method}${db} from ${hk}${this.id}${db} host ${zb}${this.wsHost}${db}:${rs}\n`, response.params);
           this.emit('update', response.params);
-        } else if (response.method && response.method === 'NotifyEvent' && response.dst === 'Matterbridge') {
+        } else if (response.method && response.method === 'NotifyEvent' && response.dst === 'Matterbridge' + this.requestId) {
           this.log.debug(`Received ${CYAN}${response.method}${db} from ${hk}${this.id}${db} host ${zb}${this.wsHost}${db}:${rs}\n`, response.params.events);
           this.emit('event', response.params.events);
-        } else if (response.error && response.id === this.requestId && response.dst === 'Matterbridge') {
+        } else if (response.error && response.id === this.requestId && response.dst === 'Matterbridge' + this.requestId) {
           this.log.error(`Received ${CYAN}error response${er} from ${hk}${this.id}${er} host ${zb}${this.wsHost}${er}:${rs}\n`, response);
         } else {
           this.log.warn(`Received ${CYAN}unknown response${wr} from ${hk}${this.id}${wr} host ${zb}${this.wsHost}${wr}:${rs}\n`, response);
@@ -409,15 +414,17 @@ export class WsClient extends EventEmitter {
   }
 }
 
-/*
 // Start the WebSocket client with the following command: node dist/wsClient.js startWsClient
 if (process.argv.includes('startWsClient')) {
-  const wsClient1 = new WsClient('192.168.1.217', 'tango');
-  wsClient1.start(true);
+  WsClient.logLevel = LogLevel.DEBUG;
 
-  const wsClient2 = new WsClient('192.168.1.218', 'tango');
-  wsClient2.start(true);
+  const wsClient1 = new WsClient('shellypro1pm-EC6260927F7C', '192.168.1.151', 'tango');
+  wsClient1.start();
 
+  const wsClient2 = new WsClient('shellyprodm1pm-34987A4957C4', '192.168.1.156', 'tango');
+  wsClient2.start();
+
+  /*
   setTimeout(() => {
     wsClient1.sendRequest('Switch.Set', { id: 0, on: true });
   }, 5000);
@@ -433,10 +440,10 @@ if (process.argv.includes('startWsClient')) {
   setTimeout(() => {
     wsClient1.sendRequest('Shelly.ListMethods', {});
   }, 20000);
+  */
 
   process.on('SIGINT', async function () {
     wsClient1.stop();
     wsClient2.stop();
   });
 }
-*/
