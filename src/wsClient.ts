@@ -414,6 +414,7 @@ export class WsClient extends EventEmitter {
   }
 }
 
+/*
 // Start the WebSocket client with the following command: node dist/wsClient.js startWsClient
 if (process.argv.includes('startWsClient')) {
   WsClient.logLevel = LogLevel.DEBUG;
@@ -424,7 +425,6 @@ if (process.argv.includes('startWsClient')) {
   const wsClient2 = new WsClient('shellyprodm1pm-34987A4957C4', '192.168.1.156', 'tango');
   wsClient2.start();
 
-  /*
   setTimeout(() => {
     wsClient1.sendRequest('Switch.Set', { id: 0, on: true });
   }, 5000);
@@ -440,10 +440,10 @@ if (process.argv.includes('startWsClient')) {
   setTimeout(() => {
     wsClient1.sendRequest('Shelly.ListMethods', {});
   }, 20000);
-  */
 
   process.on('SIGINT', async function () {
     wsClient1.stop();
     wsClient2.stop();
   });
 }
+*/
