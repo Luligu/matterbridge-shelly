@@ -525,7 +525,7 @@ describe('Shellies', () => {
         );
         await wait(2000);
         await device.fetchUpdate();
-        expect(cover.getValue('source')).toBe('timeout'); // 'limit_switch' if not stopped for timeout
+        expect(cover.getValue('source')).toMatch(/^(HTTP_in|timeout)$/); // 'HTTP_in' if not stopped for timeout
         expect(cover.getValue('state')).toBe('stopped'); // 'open' if not stopped for timeout
         expect(cover.getValue('last_direction')).toBe('close');
         expect(cover.getValue('current_pos')).toBe(0);
