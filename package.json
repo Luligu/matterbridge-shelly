@@ -73,7 +73,7 @@
     "format:check": "prettier --check \"**/*.{js,jsx,ts,tsx,json,css,md}\"",
     "clean": "rimraf tsconfig.tsbuildinfo ./dist",
     "cleanBuild": "npm run clean && tsc",
-    "deepClean": "rimraf tsconfig.tsbuildinfo package-lock.json ./dist ./node_modules",
+    "deepClean": "rimraf tsconfig.tsbuildinfo package-lock.json npm-shrinkwrap.json ./dist ./node_modules",
     "deepCleanRebuild": "npm run deepClean && npm install && npm run build",
     "prepublishOnly": "npm run lint && npm run cleanBuild && npm shrinkwrap --omit=dev",
     "checkDependencies": "npx npm-check-updates",
