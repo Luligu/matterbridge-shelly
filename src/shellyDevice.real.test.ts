@@ -363,7 +363,7 @@ describe('Shellies', () => {
   describe('test real gen 2 shellyplus1pm 217 with auth', () => {
     if (getMacAddress() !== '30:f6:ef:69:2b:c5') return;
 
-    test('create a gen 2 shellyplus1pm device and update', async () => {
+    test('create a gen 2 shellyplus1pm 217 device and update', async () => {
       const device = await ShellyDevice.create(shelly, log, '192.168.1.217');
       expect(device).not.toBeUndefined();
       if (!device) return;
@@ -382,7 +382,7 @@ describe('Shellies', () => {
       device.destroy();
     }, 60000);
 
-    test('send command to a gen 2 shellyplus1pm device', async () => {
+    test('send command to a gen 2 shellyplus1pm 217 device', async () => {
       const device = await ShellyDevice.create(shelly, log, '192.168.1.217');
       expect(device).not.toBeUndefined();
       if (!device) return;
@@ -439,7 +439,7 @@ describe('Shellies', () => {
   describe('test real gen 2 shellyplus2pm 218 with auth', () => {
     if (getMacAddress() !== '30:f6:ef:69:2b:c5') return;
 
-    test('create a gen 2 shellyplus2pm device and update', async () => {
+    test('create a gen 2 shellyplus2pm 218 cover device and update', async () => {
       const device = await ShellyDevice.create(shelly, log, '192.168.1.218');
       expect(device).not.toBeUndefined();
       if (!device) return;
@@ -458,7 +458,7 @@ describe('Shellies', () => {
       device.destroy();
     }, 60000);
 
-    test('send command to a gen 2 shellyplus2pm device', async () => {
+    test('send command to a gen 2 shellyplus2pm 218 cover device', async () => {
       const device = await ShellyDevice.create(shelly, log, '192.168.1.218');
       expect(device).not.toBeUndefined();
       if (!device) return;
@@ -487,7 +487,7 @@ describe('Shellies', () => {
         await wait(2000);
         await device.fetchUpdate();
         expect(cover.getValue('source')).toMatch(/^(limit_switch|timeout)$/); // 'limit_switch' if not stopped for timeout
-        expect(cover.getValue('state')).toBe('stopped'); // 'open' if not stopped for timeout
+        expect(cover.getValue('state')).toMatch(/^(open|stopped)$/); // 'open' if not stopped for timeout
         expect(cover.getValue('last_direction')).toBe('open');
         expect(cover.getValue('current_pos')).toBe(100);
 
@@ -526,7 +526,7 @@ describe('Shellies', () => {
         await wait(2000);
         await device.fetchUpdate();
         expect(cover.getValue('source')).toMatch(/^(HTTP_in|timeout)$/); // 'HTTP_in' if not stopped for timeout
-        expect(cover.getValue('state')).toBe('stopped'); // 'open' if not stopped for timeout
+        expect(cover.getValue('state')).toMatch(/^(closed|stopped)$/); // 'closed' if not stopped for timeout
         expect(cover.getValue('last_direction')).toBe('close');
         expect(cover.getValue('current_pos')).toBe(0);
 

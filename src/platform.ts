@@ -64,6 +64,7 @@ import { NodeStorage, NodeStorageManager } from 'matterbridge/storage';
 import { hslColorToRgbColor, rgbColorToHslColor, isValidIpv4Address, isValidString, isValidNumber, isValidBoolean, isValidArray, isValidObject, waiter } from 'matterbridge/utils';
 
 import path from 'path';
+import * as fs from 'fs';
 
 import { Shelly } from './shelly.js';
 import { DiscoveredDevice } from './mdnsScanner.js';
@@ -519,8 +520,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               // Add the Matter 1.3 electricalSensor device type with the ElectricalPowerMeasurement and ElectricalEnergyMeasurement clusters
               const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [electricalSensor], [ElectricalPowerMeasurement.Cluster.id, ElectricalEnergyMeasurement.Cluster.id]);
 
-              device.log.info(
-                `***Added ElectricalPowerMeasurement and ElectricalEnergyMeasurement clusters to endpoint ${hk}${child.name}${nf} component ${hk}${component.name}:${component.id}${nf}`,
+              device.log.debug(
+                `Added ElectricalPowerMeasurement and ElectricalEnergyMeasurement clusters to endpoint ${hk}${child.name}${db} component ${hk}${component.name}:${component.id}${db}`,
               );
 
               // Update the electrical attributes
@@ -537,7 +538,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               // Add the powerSource device type with the EveHistory cluster for HA
               ClusterRegistry.register(EveHistory.Complete);
               const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [powerSource], [EveHistory.Cluster.id]);
-              device.log.info(`***Added EveHistory cluster to endpoint ${hk}${child.name}${nf} component ${hk}${component.name}:${component.id}${nf}`);
+              device.log.debug(`Added EveHistory cluster to endpoint ${hk}${child.name}${db} component ${hk}${component.name}:${component.id}${db}`);
 
               // Update the electrical attributes
               for (const property of component.properties) {
@@ -954,7 +955,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       this.config.exposePowerMeter === 'evehistory' &&
       (component.hasProperty('voltage') || component.hasProperty('current') || component.hasProperty('apower') || component.hasProperty('aenergy'))
     ) {
-      shelly.log.info(`***Adding EveHistory cluster to endpoint ${hk}${endpoint.name}${nf} component ${hk}${component.id}${nf}`);
+      shelly.log.debug(`Adding EveHistory cluster to endpoint ${hk}${endpoint.name}${db} component ${hk}${component.id}${db}`);
       endpoint.addClusterServer(MatterHistory.getEveHistoryClusterServer());
       updateProperties();
     }
@@ -964,7 +965,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       this.config.exposePowerMeter === 'matter13' &&
       (component.hasProperty('voltage') || component.hasProperty('current') || component.hasProperty('apower') || component.hasProperty('aenergy'))
     ) {
-      shelly.log.info(`***Adding ElectricalPowerMeasurement and ElectricalEnergyMeasurement clusters to endpoint ${hk}${endpoint.name}${nf} component ${hk}${component.id}${nf}`);
+      shelly.log.debug(`Adding ElectricalPowerMeasurement and ElectricalEnergyMeasurement clusters to endpoint ${hk}${endpoint.name}${db} component ${hk}${component.id}${db}`);
       endpoint.addClusterServer(device.getDefaultElectricalPowerMeasurementClusterServer());
       endpoint.addClusterServer(device.getDefaultElectricalEnergyMeasurementClusterServer());
       updateProperties();
@@ -999,18 +1000,28 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     }
     this.log.info(`Adding shelly device ${hk}${deviceId}${nf} host ${zb}${host}${nf}`);
     const log = new AnsiLogger({ logName: deviceId, logTimestampFormat: TimestampFormat.TIME_MILLIS, logLevel: this.log.logLevel });
-    let device = await ShellyDevice.create(this.shelly, log, host);
-    if (device) {
-      await device.saveDevicePayloads(path.join(this.matterbridge.matterbridgePluginDirectory, 'matterbridge-shelly'));
-    } else {
-      // this.log.warn(`Failed to create Shelly device ${hk}${deviceId}${wr} host ${zb}${host}${wr}`);
-      const fileName = path.join(this.matterbridge.matterbridgePluginDirectory, 'matterbridge-shelly', `${deviceId}.json`);
+    const fileName = path.join(this.matterbridge.matterbridgePluginDirectory, 'matterbridge-shelly', `${deviceId}.json`);
+    let device: ShellyDevice | undefined;
+    if (fs.existsSync(fileName)) {
+      this.log.info(`**Loading from cache Shelly device ${hk}${deviceId}${nf} host ${zb}${host}${nf}`);
       device = await ShellyDevice.create(this.shelly, log, fileName);
-      if (!device) return;
-      this.log.warn(`Loaded from cache Shelly device ${hk}${deviceId}${wr} host ${zb}${host}${wr}`);
-      device.setHost(host);
-      device.cached = true;
-      device.online = false;
+      if (device) {
+        this.log.info(`**Loaded from cache Shelly device ${hk}${deviceId}${nf} host ${zb}${host}${nf}`);
+        device.setHost(host);
+        device.cached = true;
+        device.online = true;
+      }
+    } else {
+      this.log.info(`***Creating Shelly device ${hk}${deviceId}${nf} host ${zb}${host}${nf}`);
+      device = await ShellyDevice.create(this.shelly, log, host);
+      if (device) {
+        this.log.info(`***Created Shelly device ${hk}${deviceId}${nf} host ${zb}${host}${nf}`);
+        await device.saveDevicePayloads(path.join(this.matterbridge.matterbridgePluginDirectory, 'matterbridge-shelly'));
+      }
+    }
+    if (!device) {
+      this.log.error(`****Failed to create Shelly device ${hk}${deviceId}${er} host ${zb}${host}${er}`);
+      return;
     }
     log.logName = device.name ?? device.id;
     await this.shelly.addDevice(device);

@@ -68,6 +68,8 @@ export class ShellyDevice extends EventEmitter {
   online = false;
   gen = 0;
   lastseen = 0;
+  lastFetched = Date.now() - 55 * 60 * 1000; // 55 minutes ago (lowest random value)
+  fetchInterval = 0;
   hasUpdate = false;
   sleepMode = false;
   cached = false;
@@ -874,24 +876,40 @@ export class ShellyDevice extends EventEmitter {
    * @returns {Promise<ShellyData | null>} A Promise that resolves to the updated ShellyData or null if no data is found.
    */
   async fetchUpdate(): Promise<ShellyData | null> {
-    const service = this.gen === 1 ? 'status' : 'Shelly.GetStatus';
-    const status = await ShellyDevice.fetch(this.shelly, this.log, this.host, service);
-    if (!status) {
-      this.log.warn(`Error fetching status for device ${hk}${this.id}${wr} host ${zb}${this.host}${wr}. No data found. The device may be offline.`);
+    this.shellyPayload = await ShellyDevice.fetch(this.shelly, this.log, this.host, 'shelly');
+    if (!this.shellyPayload) {
+      this.log.warn(`Error fetching shelly from device ${hk}${this.id}${wr} host ${zb}${this.host}${wr}. No data found. The device may be offline.`);
       this.online = false;
       this.emit('offline');
       return null;
     }
+    this.settingsPayload = await ShellyDevice.fetch(this.shelly, this.log, this.host, this.gen === 1 ? 'settings' : 'Shelly.GetConfig');
+    if (!this.settingsPayload) {
+      this.log.warn(`Error fetching settings from device ${hk}${this.id}${wr} host ${zb}${this.host}${wr}. No data found. The device may be offline.`);
+      this.online = false;
+      this.emit('offline');
+      return null;
+    }
+    this.statusPayload = await ShellyDevice.fetch(this.shelly, this.log, this.host, this.gen === 1 ? 'status' : 'Shelly.GetStatus');
+    if (!this.statusPayload) {
+      this.log.warn(`Error fetching status from device ${hk}${this.id}${wr} host ${zb}${this.host}${wr}. No data found. The device may be offline.`);
+      this.online = false;
+      this.emit('offline');
+      return null;
+    }
+    if (this.gen !== 1) this.componentsPayload = await ShellyDevice.fetch(this.shelly, this.log, this.host, 'Shelly.GetComponents');
     if (this.cached) {
       this.cached = false;
       // Check if device is a cached device and register it to the CoAP server
       if (this.gen === 1) await this.shelly.coapServer?.registerDevice(this.host, this.id);
     }
-    if (!this.online) this.log.info(`The device ${hk}${this.id}${nf} host ${zb}${this.host}${nf} is online.`);
-    this.online = true;
-    this.emit('online');
-    this.onUpdate(status);
-    return status;
+    if (!this.online) {
+      this.log.info(`The device ${hk}${this.id}${nf} host ${zb}${this.host}${nf} is online.`);
+      this.online = true;
+      this.emit('online');
+    }
+    this.onUpdate(this.statusPayload);
+    return this.statusPayload;
   }
 
   // Gen 1
