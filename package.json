@@ -67,6 +67,8 @@
     "test:mock": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js src/shellyDevice.mock.test.ts --runInBand --coverage",
     "test:real": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js src/shellyDevice.real.test.ts --runInBand --detectOpenHandles --coverage",
     "test:real1": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js src/shellyDevice.realgen1.test.ts --runInBand --detectOpenHandles --verbose --coverage",
+    "test:real2": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js src/shellyDevice.realgen2.test.ts --runInBand --detectOpenHandles --verbose --coverage",
+    "test:real3": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js src/shellyDevice.realgen3.test.ts --runInBand --detectOpenHandles --verbose --coverage",
     "test:shelly": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js src/shelly.test.ts --coverage",
     "lint": "eslint --max-warnings=0 .",
     "lint:fix": "eslint --fix --max-warnings=0 .",

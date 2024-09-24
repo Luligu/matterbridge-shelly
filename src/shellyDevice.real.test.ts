@@ -17,6 +17,7 @@ describe('Shellies', () => {
 
   const firmwareGen1 = 'v1.14.0-gcb84623';
   const firmwareGen2 = '1.4.2-gc2639da';
+  const address = '30:f6:ef:69:2b:c5';
 
   beforeAll(async () => {
     consoleLogSpy = jest.spyOn(console, 'log').mockImplementation((...args: any[]) => {
@@ -267,7 +268,7 @@ describe('Shellies', () => {
 */
 
   describe('test real gen 2 shellyplus1pm 217 with auth', () => {
-    if (getMacAddress() !== '30:f6:ef:69:2b:c5') return;
+    if (getMacAddress() !== address) return;
 
     test('create a gen 2 shellyplus1pm 217 device and update', async () => {
       const device = await ShellyDevice.create(shelly, log, '192.168.1.217');
@@ -281,6 +282,7 @@ describe('Shellies', () => {
       expect(device.model).toBe('SNSW-001P16EU');
       expect(device.mac).toBe('441793D69718');
       expect(device.id).toBe('shellyplus1pm-441793D69718');
+      expect(device.hasUpdate).toBe(false);
       expect(device.firmware).toBe(firmwareGen2);
       expect(device.auth).toBe(false);
 
@@ -312,7 +314,7 @@ describe('Shellies', () => {
   });
 
   describe('test real gen 2 shellyplus2pm 218 with auth', () => {
-    if (getMacAddress() !== '30:f6:ef:69:2b:c5') return;
+    if (getMacAddress() !== address) return;
 
     test('create a gen 2 shellyplus2pm 218 cover device and update', async () => {
       const device = await ShellyDevice.create(shelly, log, '192.168.1.218');
@@ -326,6 +328,7 @@ describe('Shellies', () => {
       expect(device.model).toBe('SNSW-102P16EU');
       expect(device.mac).toBe('5443B23D81F8');
       expect(device.id).toBe('shellyplus2pm-5443B23D81F8');
+      expect(device.hasUpdate).toBe(false);
       expect(device.firmware).toBe(firmwareGen2);
       expect(device.auth).toBe(false);
 
@@ -385,7 +388,7 @@ describe('Shellies', () => {
   });
 
   describe('test real gen 3 shelly1minig3 221 with auth', () => {
-    if (getMacAddress() !== '30:f6:ef:69:2b:c5') return;
+    if (getMacAddress() !== address) return;
 
     test('create a gen 3 shelly1minig3 device and update', async () => {
       const device = await ShellyDevice.create(shelly, log, '192.168.1.221');
@@ -399,6 +402,7 @@ describe('Shellies', () => {
       expect(device.model).toBe('S3SW-001X8EU');
       expect(device.mac).toBe('543204547478');
       expect(device.id).toBe('shelly1minig3-543204547478');
+      expect(device.hasUpdate).toBe(false);
       expect(device.firmware).toBe(firmwareGen2);
       expect(device.auth).toBe(true);
 

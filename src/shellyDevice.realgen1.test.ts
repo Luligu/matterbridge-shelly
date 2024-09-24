@@ -17,6 +17,7 @@ describe('Shellies', () => {
 
   const firmwareGen1 = 'v1.14.0-gcb84623';
   const firmwareGen2 = '1.4.2-gc2639da';
+  const address = '30:f6:ef:69:2b:c5';
 
   beforeAll(async () => {
     consoleLogSpy = jest.spyOn(console, 'log').mockImplementation((...args: any[]) => {
@@ -47,7 +48,7 @@ describe('Shellies', () => {
   });
 
   describe('test real gen 1 shelly1-34945472A643 240', () => {
-    if (getMacAddress() !== '30:f6:ef:69:2b:c5') return;
+    if (getMacAddress() !== address) return;
 
     test('Create a gen 1 shelly1 device and send commands', async () => {
       device = await ShellyDevice.create(shelly, log, '192.168.1.240');
@@ -95,7 +96,8 @@ describe('Shellies', () => {
   });
 
   describe('test real gen 1 shellydimmer2 119 with auth', () => {
-    if (getMacAddress() !== '30:f6:ef:69:2b:c5') return;
+    if (getMacAddress() !== address) return;
+
     test('Create a gen 1 shellydimmer2 device and update', async () => {
       device = await ShellyDevice.create(shelly, log, '192.168.1.219');
       expect(device).not.toBeUndefined();
@@ -151,7 +153,7 @@ describe('Shellies', () => {
   });
 
   describe('test real gen 1 shellybulbduo-34945479CFA4 154', () => {
-    if (getMacAddress() !== '30:f6:ef:69:2b:c5') return;
+    if (getMacAddress() !== address) return;
 
     test('Create a gen 1 shellybulbduo device and send commands', async () => {
       device = await ShellyDevice.create(shelly, log, '192.168.1.154');
@@ -202,7 +204,7 @@ describe('Shellies', () => {
   });
 
   describe('test real gen 1 shellycolorbulb-485519EE12A7 155', () => {
-    if (getMacAddress() !== '30:f6:ef:69:2b:c5') return;
+    if (getMacAddress() !== address) return;
 
     test('Create a gen 1 shellybulbduo device and send commands', async () => {
       device = await ShellyDevice.create(shelly, log, '192.168.1.155');
