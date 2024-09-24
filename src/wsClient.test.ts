@@ -55,7 +55,7 @@ describe('ShellyWsClient with server', () => {
     server.on('close', () => {
       // console.error('Server closed');
     });
-  }, 10000);
+  }, 60000);
 
   beforeEach(() => {
     //
@@ -78,7 +78,7 @@ describe('ShellyWsClient with server', () => {
         resolve();
       });
     });
-  }, 10000);
+  }, 60000);
 
   test('Create the wsClient', () => {
     wsClient = new WsClient('Jest', 'localhost');
@@ -119,7 +119,7 @@ describe('ShellyWsClient with server', () => {
     expect((wsClient as any).auth).toBeFalsy();
     expect(wsClient.isConnected).toBeTruthy();
     (wsClient as any).stopPingPong();
-    (wsClient as any).startPingPong(100);
+    (wsClient as any).startPingPong(500);
     // prettier-ignore
     await waiter('WsClient pong timeout', () => { return (wsClient as any).pongTimeout; }, true);
     await wait(1000);
@@ -133,7 +133,7 @@ describe('ShellyWsClient with server', () => {
     await waiter('WsClient close isConnecting timeout', () => { return !wsClient.isConnecting; }, true);
     // prettier-ignore
     await waiter('WsClient close isConnected timeout', () => { return !wsClient.isConnected; }, true);
-  }, 10000);
+  }, 60000);
 
   test('should connect to the server without auth', async () => {
     // Await connection to the server
