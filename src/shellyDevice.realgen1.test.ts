@@ -47,6 +47,11 @@ describe('Shellies', () => {
     await wait(2000);
   });
 
+  test('Create AnsiLogger and Shelly', () => {
+    expect(log).toBeDefined();
+    expect(shelly).toBeDefined();
+  });
+
   describe('test real gen 1 shelly1-34945472A643 240', () => {
     if (getMacAddress() !== address) return;
 

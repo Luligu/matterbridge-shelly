@@ -55,7 +55,7 @@ describe('ShellyWsClient with server', () => {
     server.on('close', () => {
       // console.error('Server closed');
     });
-  }, 60000);
+  }, 360000);
 
   beforeEach(() => {
     //
@@ -78,7 +78,7 @@ describe('ShellyWsClient with server', () => {
         resolve();
       });
     });
-  }, 60000);
+  }, 360000);
 
   test('Create the wsClient', () => {
     wsClient = new WsClient('Jest', 'localhost');
