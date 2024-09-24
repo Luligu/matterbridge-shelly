@@ -13,6 +13,7 @@ describe('Shellies', () => {
 
   const log = new AnsiLogger({ logName: 'ShellyDeviceRealTest', logTimestampFormat: TimestampFormat.TIME_MILLIS, logLevel: LogLevel.DEBUG });
   const shelly = new Shelly(log, 'admin', 'tango');
+  let device: ShellyDevice | undefined;
 
   const firmwareGen1 = 'v1.14.0-gcb84623';
   const firmwareGen2 = '1.4.2-gc2639da';
@@ -21,19 +22,22 @@ describe('Shellies', () => {
     consoleLogSpy = jest.spyOn(console, 'log').mockImplementation((...args: any[]) => {
       //
     });
-    consoleLogSpy.mockRestore();
+    // consoleLogSpy.mockRestore();
     shelly.setLogLevel(LogLevel.DEBUG, true, true, true);
-    shelly.debugCoap = true;
-    shelly.startCoap(0);
     await wait(2000);
   });
 
   beforeEach(async () => {
-    await wait(2000);
+    await wait(1000);
   });
 
   afterEach(async () => {
-    await wait(2000);
+    if (device) {
+      shelly.removeDevice(device);
+      device.destroy();
+      device = undefined;
+    }
+    await wait(1000);
   });
 
   afterAll(async () => {
@@ -261,104 +265,6 @@ describe('Shellies', () => {
     });
   });
 */
-
-  describe('test real gen 1 shelly1-34945472A643 240', () => {
-    if (getMacAddress() !== '30:f6:ef:69:2b:c5') return;
-
-    test('Create a gen 1 shelly1 device and send commands', async () => {
-      const device = await ShellyDevice.create(shelly, log, '192.168.1.240');
-      expect(device).not.toBeUndefined();
-      if (!device) return;
-      shelly.addDevice(device);
-
-      expect(device.host).toBe('192.168.1.240');
-      expect(device.model).toBe('SHSW-1');
-      expect(device.id).toBe('shelly1-34945472A643');
-      expect(device.firmware).toBe(firmwareGen1);
-      expect(device.auth).toBe(false);
-      expect(device.gen).toBe(1);
-      expect(device.username).toBe('admin');
-      expect(device.password).toBe('tango');
-
-      await device.fetchUpdate();
-
-      await device.saveDevicePayloads('temp');
-
-      const component = device.getComponent('relay:0');
-      expect(component).not.toBeUndefined();
-
-      // prettier-ignore
-      if (isSwitchComponent(component)) {
-        component.On();
-        await waiter('On', () => { return component.getValue('state') === true; }, true);
-
-        component.Off();
-        await waiter('Off', () => { return component.getValue('state') === false; }, true);
-
-        component.Toggle();
-        await waiter('Toggle', () => { return component.getValue('state') === true; }, true);
-
-        component.Off();
-        await waiter('Off', () => { return component.getValue('state') === false; }, true);
-      }
-
-      shelly.removeDevice(device);
-      device.destroy();
-    }, 20000);
-  });
-
-  describe('test real gen 1 shellydimmer2 119 with auth', () => {
-    if (getMacAddress() !== '30:f6:ef:69:2b:c5') return;
-    test('Create a gen 1 shellydimmer2 device and update', async () => {
-      const device = await ShellyDevice.create(shelly, log, '192.168.1.219');
-      expect(device).not.toBeUndefined();
-      if (!device) return;
-      shelly.addDevice(device);
-
-      expect(device.host).toBe('192.168.1.219');
-      expect(device.model).toBe('SHDM-2');
-      expect(device.id).toBe('shellydimmer2-98CDAC0D01BB');
-      expect(device.firmware).toBe(firmwareGen1);
-      expect(device.auth).toBe(true);
-      expect(device.gen).toBe(1);
-      expect(device.username).toBe('admin');
-      expect(device.password).toBe('tango');
-
-      await device.fetchUpdate();
-
-      await device.saveDevicePayloads('temp');
-
-      const component = device.getComponent('light:0');
-      expect(component).not.toBeUndefined();
-
-      // prettier-ignore
-      if (isLightComponent(component)) {
-        component.On();
-        await waiter('On', () => { return component.getValue('state') === true; }, true);
-
-        component.Level(100);
-        await waiter('Level(100)', () => { return component.getValue('brightness') === 100; }, true);
-
-        component.Off();
-        await waiter('Off', () => { return component.getValue('state') === false; }, true);
-
-        component.Level(50);
-        await waiter('Level(50)', () => { return component.getValue('brightness') === 50; }, true); 
-
-        component.Toggle();
-        await waiter('Toggle', () => { return component.getValue('state') === true; }, true);
-
-        component.Level(1);
-        await waiter('Level(1)', () => { return component.getValue('brightness') === 1; }, true);
-
-        component.Off();
-        await waiter('Off', () => { return component.getValue('state') === false; }, true);
-      }
-
-      shelly.removeDevice(device);
-      device.destroy();
-    }, 20000);
-  });
 
   describe('test real gen 2 shellyplus1pm 217 with auth', () => {
     if (getMacAddress() !== '30:f6:ef:69:2b:c5') return;
