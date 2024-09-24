@@ -12,11 +12,11 @@ describe('ShellyWsClient with server', () => {
   const address = '30:f6:ef:69:2b:c5';
 
   beforeAll(async () => {
-    if (getMacAddress() !== address) return;
     // Mock the AnsiLogger.log method
     jest.spyOn(AnsiLogger.prototype, 'log').mockImplementation((level: string, message: string, ...parameters: any[]) => {
       // console.log(`Mocked log: ${level} - ${message}`, ...parameters);
     });
+    if (getMacAddress() !== address) return;
 
     // Create a WebSocket server and await its listening state
     await new Promise<void>((resolve) => {
