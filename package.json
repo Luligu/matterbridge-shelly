@@ -1,6 +1,6 @@
 {
   "name": "matterbridge-shelly",
-  "version": "0.10.0-dev.1",
+  "version": "0.10.0-dev.2",
   "description": "Matterbridge shelly plugin",
   "author": "https://github.com/Luligu",
   "license": "Apache-2.0",
@@ -65,7 +65,7 @@
     "test:shellyProperty": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js src/shellyProperty.test.ts --coverage",
     "test:shellyComponent": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js src/shellyComponent.test.ts --coverage",
     "test:mock": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js src/shellyDevice.mock.test.ts --runInBand --coverage",
-    "test:real": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js src/shellyDevice.real.test.ts --runInBand --coverage",
+    "test:real": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js src/shellyDevice.real.test.ts --runInBand --detectOpenHandles --coverage",
     "test:shelly": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js src/shelly.test.ts --coverage",
     "lint": "eslint --max-warnings=0 .",
     "lint:fix": "eslint --fix --max-warnings=0 .",

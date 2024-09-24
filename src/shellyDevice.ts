@@ -122,6 +122,7 @@ export class ShellyDevice extends EventEmitter {
     if (this.startWsClientTimeout) clearTimeout(this.startWsClientTimeout);
     this.startWsClientTimeout = undefined;
     this.wsClient?.stop();
+    this.wsClient?.removeAllListeners();
 
     this.removeAllListeners();
   }

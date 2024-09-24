@@ -61,7 +61,7 @@ describe('Coap scanner', () => {
   }, 5000);
 
   test('Stop scanner', () => {
-    coapServer?.start();
-    expect(coapServer?.isListening).toBeTruthy();
+    coapServer?.stop();
+    expect(coapServer?.isListening).toBeFalsy();
   }, 5000);
 });

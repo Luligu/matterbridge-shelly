@@ -391,6 +391,26 @@ export class WsClient extends EventEmitter {
       `Stopping ws client for Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db} state ${this.wsClient?.readyState} connencting ${this._isConnecting} connected ${this._isConnected} `,
     );
     this.stopPingPong();
+
+    try {
+      if (this.wsClient?.readyState === WebSocket.OPEN || this.wsClient?.readyState === WebSocket.CONNECTING) {
+        this.wsClient?.close();
+        this.log.debug(`Closed ws client for Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}`);
+      }
+      if (this.wsClient?.readyState !== WebSocket.CLOSED) {
+        this.wsClient?.terminate();
+        this.log.debug(`Terminated ws client for Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}`);
+      }
+    } catch (error) {
+      this.log.debug(`Error stopping ws client for Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}: ${error}`);
+    } finally {
+      this._isConnecting = false;
+      this._isConnected = false;
+      this.wsClient?.removeAllListeners();
+      this.wsClient = undefined;
+      this.log.debug(`Stopped ws client for Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}`);
+    }
+    /*
     if (this._isConnecting) {
       this.stopTimeout = setTimeout(() => {
         this.stopTimeout = undefined;
@@ -407,10 +427,14 @@ export class WsClient extends EventEmitter {
       }, 5000);
       return;
     }
-    if (this._isConnected) this.wsClient?.close();
+    if (this._isConnected) {
+      this.wsClient?.close();
+      this.log.debug(`Closed ws client for Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}`);
+    }
     this._isConnected = false;
     this.wsClient?.removeAllListeners();
     this.log.debug(`Stopped ws client for Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}`);
+    */
   }
 }
 

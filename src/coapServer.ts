@@ -600,8 +600,8 @@ export class CoapServer extends EventEmitter {
     this.log.debug('Stopping CoIoT (coap) server for shelly devices...');
     this.removeAllListeners();
     this._isListening = false;
-    globalAgent.close();
-    if (this.coapServer) this.coapServer.close();
+    globalAgent.close((err?: Error) => this.log.debug(`CoIoT (coap) agent closed${err ? ' with error ' + err.message : ''}.`));
+    if (this.coapServer) this.coapServer.close((err?: Error) => this.log.debug(`CoIoT (coap) server closed${err ? ' with error ' + err.message : ''}.`));
     this.devices.clear();
     this.log.debug('Stopped CoIoT (coap) server for shelly devices.');
   }

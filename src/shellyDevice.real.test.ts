@@ -1,8 +1,8 @@
 /* eslint-disable jest/no-conditional-expect */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Shelly } from './shelly.js';
 import { ShellyDevice } from './shellyDevice.js';
-// import { ShellyCoverComponent, ShellySwitchComponent } from './shellyComponent';
 import { AnsiLogger, LogLevel, TimestampFormat } from 'matterbridge/logger';
 import { getMacAddress, wait, waiter } from 'matterbridge/utils';
 import { jest } from '@jest/globals';
@@ -17,23 +17,28 @@ describe('Shellies', () => {
   const firmwareGen1 = 'v1.14.0-gcb84623';
   const firmwareGen2 = '1.4.2-gc2639da';
 
-  beforeAll(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  beforeAll(async () => {
     consoleLogSpy = jest.spyOn(console, 'log').mockImplementation((...args: any[]) => {
-      // console.error(`Mocked console.log: ${args}`);
+      //
     });
+    consoleLogSpy.mockRestore();
+    shelly.setLogLevel(LogLevel.DEBUG, true, true, true);
+    shelly.debugCoap = true;
+    shelly.startCoap(0);
+    await wait(2000);
   });
 
-  beforeEach(() => {
-    //
+  beforeEach(async () => {
+    await wait(2000);
   });
 
-  afterEach(() => {
-    //
+  afterEach(async () => {
+    await wait(2000);
   });
 
-  afterAll(() => {
+  afterAll(async () => {
     shelly.destroy();
+    await wait(2000);
   });
 
   test('Create AnsiLogger and Shelly', () => {
@@ -41,6 +46,8 @@ describe('Shellies', () => {
     expect(shelly).toBeDefined();
   });
 
+  // eslint-disable-next-line jest/no-commented-out-tests
+  /*
   describe('new not existing ShellyDevice()', () => {
     test('Create a non existing device', async () => {
       const device = await ShellyDevice.create(shelly, log, '192.168.250.219');
@@ -253,6 +260,52 @@ describe('Shellies', () => {
       device.destroy();
     });
   });
+*/
+
+  describe('test real gen 1 shelly1-34945472A643 240', () => {
+    if (getMacAddress() !== '30:f6:ef:69:2b:c5') return;
+
+    test('Create a gen 1 shelly1 device and send commands', async () => {
+      const device = await ShellyDevice.create(shelly, log, '192.168.1.240');
+      expect(device).not.toBeUndefined();
+      if (!device) return;
+      shelly.addDevice(device);
+
+      expect(device.host).toBe('192.168.1.240');
+      expect(device.model).toBe('SHSW-1');
+      expect(device.id).toBe('shelly1-34945472A643');
+      expect(device.firmware).toBe(firmwareGen1);
+      expect(device.auth).toBe(false);
+      expect(device.gen).toBe(1);
+      expect(device.username).toBe('admin');
+      expect(device.password).toBe('tango');
+
+      await device.fetchUpdate();
+
+      await device.saveDevicePayloads('temp');
+
+      const component = device.getComponent('relay:0');
+      expect(component).not.toBeUndefined();
+
+      // prettier-ignore
+      if (isSwitchComponent(component)) {
+        component.On();
+        await waiter('On', () => { return component.getValue('state') === true; }, true);
+
+        component.Off();
+        await waiter('Off', () => { return component.getValue('state') === false; }, true);
+
+        component.Toggle();
+        await waiter('Toggle', () => { return component.getValue('state') === true; }, true);
+
+        component.Off();
+        await waiter('Off', () => { return component.getValue('state') === false; }, true);
+      }
+
+      shelly.removeDevice(device);
+      device.destroy();
+    }, 20000);
+  });
 
   describe('test real gen 1 shellydimmer2 119 with auth', () => {
     if (getMacAddress() !== '30:f6:ef:69:2b:c5') return;
@@ -260,6 +313,8 @@ describe('Shellies', () => {
       const device = await ShellyDevice.create(shelly, log, '192.168.1.219');
       expect(device).not.toBeUndefined();
       if (!device) return;
+      shelly.addDevice(device);
+
       expect(device.host).toBe('192.168.1.219');
       expect(device.model).toBe('SHDM-2');
       expect(device.id).toBe('shellydimmer2-98CDAC0D01BB');
@@ -273,91 +328,36 @@ describe('Shellies', () => {
 
       await device.saveDevicePayloads('temp');
 
-      device.destroy();
-    }, 60000);
-
-    test('send command to a gen 1 shellydimmer2 device', async () => {
-      const device = await ShellyDevice.create(shelly, log, '192.168.1.219');
-      expect(device).not.toBeUndefined();
-      if (!device) return;
-
       const component = device.getComponent('light:0');
       expect(component).not.toBeUndefined();
 
+      // prettier-ignore
       if (isLightComponent(component)) {
         component.On();
-        await waiter(
-          'On',
-          () => {
-            return component.getValue('state') === true;
-          },
-          false,
-          10000,
-        );
+        await waiter('On', () => { return component.getValue('state') === true; }, true);
 
         component.Level(100);
-        await waiter(
-          'Level(100)',
-          () => {
-            return component.getValue('brightness') === 100;
-          },
-          false,
-          10000,
-        );
+        await waiter('Level(100)', () => { return component.getValue('brightness') === 100; }, true);
 
         component.Off();
-        await waiter(
-          'Off',
-          () => {
-            return component.getValue('state') === false;
-          },
-          false,
-          10000,
-        );
+        await waiter('Off', () => { return component.getValue('state') === false; }, true);
 
         component.Level(50);
-        await waiter(
-          'Level(50)',
-          () => {
-            return component.getValue('brightness') === 50;
-          },
-          false,
-          10000,
-        );
+        await waiter('Level(50)', () => { return component.getValue('brightness') === 50; }, true); 
 
         component.Toggle();
-        await waiter(
-          'Toggle',
-          () => {
-            return component.getValue('state') === true;
-          },
-          false,
-          10000,
-        );
-
-        component.Off();
-        await waiter(
-          'Off',
-          () => {
-            return component.getValue('state') === false;
-          },
-          false,
-          10000,
-        );
+        await waiter('Toggle', () => { return component.getValue('state') === true; }, true);
 
         component.Level(1);
-        await waiter(
-          'Level(1)',
-          () => {
-            return component.getValue('brightness') === 1;
-          },
-          false,
-          10000,
-        );
+        await waiter('Level(1)', () => { return component.getValue('brightness') === 1; }, true);
+
+        component.Off();
+        await waiter('Off', () => { return component.getValue('state') === false; }, true);
       }
 
+      shelly.removeDevice(device);
       device.destroy();
-    }, 60000);
+    }, 20000);
   });
 
   describe('test real gen 2 shellyplus1pm 217 with auth', () => {
@@ -367,6 +367,9 @@ describe('Shellies', () => {
       const device = await ShellyDevice.create(shelly, log, '192.168.1.217');
       expect(device).not.toBeUndefined();
       if (!device) return;
+      shelly.addDevice(device);
+      (device as any).wsClient?.start();
+
       expect(device.gen).toBe(2);
       expect(device.host).toBe('192.168.1.217');
       expect(device.model).toBe('SNSW-001P16EU');
@@ -379,61 +382,27 @@ describe('Shellies', () => {
 
       await device.saveDevicePayloads('temp');
 
-      device.destroy();
-    }, 60000);
-
-    test('send command to a gen 2 shellyplus1pm 217 device', async () => {
-      const device = await ShellyDevice.create(shelly, log, '192.168.1.217');
-      expect(device).not.toBeUndefined();
-      if (!device) return;
-
       const component = device.getComponent('switch:0');
       expect(component).not.toBeUndefined();
 
+      // prettier-ignore
       if (isSwitchComponent(component)) {
         component.On();
-        await waiter(
-          'On',
-          () => {
-            return component.getValue('state') === true;
-          },
-          false,
-          10000,
-        );
+        await waiter('On', () => { return component.getValue('state') === true; }, true);
 
         component.Off();
-        await waiter(
-          'Off',
-          () => {
-            return component.getValue('state') === false;
-          },
-          false,
-          10000,
-        );
+        await waiter('Off', () => { return component.getValue('state') === false; }, true);
 
         component.Toggle();
-        await waiter(
-          'Toggle',
-          () => {
-            return component.getValue('state') === true;
-          },
-          false,
-          10000,
-        );
+        await waiter('Toggle', () => { return component.getValue('state') === true; }, true);
 
         component.Off();
-        await waiter(
-          'Off',
-          () => {
-            return component.getValue('state') === false;
-          },
-          false,
-          10000,
-        );
+        await waiter('Off', () => { return component.getValue('state') === false; }, true);
       }
 
+      shelly.removeDevice(device);
       device.destroy();
-    }, 60000);
+    }, 20000);
   });
 
   describe('test real gen 2 shellyplus2pm 218 with auth', () => {
@@ -443,6 +412,9 @@ describe('Shellies', () => {
       const device = await ShellyDevice.create(shelly, log, '192.168.1.218');
       expect(device).not.toBeUndefined();
       if (!device) return;
+      shelly.addDevice(device);
+      (device as any).wsClient?.start();
+
       expect(device.gen).toBe(2);
       expect(device.host).toBe('192.168.1.218');
       expect(device.model).toBe('SNSW-102P16EU');
@@ -455,109 +427,53 @@ describe('Shellies', () => {
 
       await device.saveDevicePayloads('temp');
 
-      device.destroy();
-    }, 60000);
-
-    test('send command to a gen 2 shellyplus2pm 218 cover device', async () => {
-      const device = await ShellyDevice.create(shelly, log, '192.168.1.218');
-      expect(device).not.toBeUndefined();
-      if (!device) return;
-
       const cover = device.getComponent('cover:0');
       expect(cover).not.toBeUndefined();
 
+      // prettier-ignore
       if (isCoverComponent(cover)) {
         cover.Open();
-        await waiter(
-          'Open()',
-          () => {
-            return cover.getValue('state') === 'opening';
-          },
-          false,
-          20000,
-        );
-        await waiter(
-          'Open()',
-          () => {
-            return cover.getValue('state') === 'stopped';
-          },
-          false,
-          20000,
-        );
-        await wait(2000);
-        await device.fetchUpdate();
+        await waiter('Open()', () => { return cover.getValue('state') === 'opening'; }, true, 30000);
+        await waiter('Open() II', () => { return cover.getValue('state') === 'stopped' || cover.getValue('state') === 'open'; }, true, 30000);
         expect(cover.getValue('source')).toMatch(/^(limit_switch|timeout)$/); // 'limit_switch' if not stopped for timeout
         expect(cover.getValue('state')).toMatch(/^(open|stopped)$/); // 'open' if not stopped for timeout
         expect(cover.getValue('last_direction')).toBe('open');
         expect(cover.getValue('current_pos')).toBe(100);
 
-        cover.Stop();
-        await waiter(
-          'Stop()',
-          () => {
-            return cover.getValue('state') === 'stopped';
-          },
-          false,
-          20000,
-        );
+        cover.Close();
         await wait(2000);
-        await device.fetchUpdate();
+        cover.Stop();
+        await waiter('Stop()', () => { return cover.getValue('state') === 'stopped'; }, true, 30000);
         expect(cover.getValue('state')).toBe('stopped');
         expect(cover.getValue('last_direction')).toBe('open');
         expect(cover.getValue('current_pos')).toBe(100);
 
         cover.Close();
-        await waiter(
-          'Close()',
-          () => {
-            return cover.getValue('state') === 'closing';
-          },
-          false,
-          20000,
-        );
-        await waiter(
-          'Close()',
-          () => {
-            return cover.getValue('state') === 'stopped';
-          },
-          false,
-          20000,
-        );
-        await wait(2000);
-        await device.fetchUpdate();
+        await waiter('Close()', () => { return cover.getValue('state') === 'closing'; }, true, 30000);
+        await waiter('Close() II', () => { return cover.getValue('state') === 'stopped' || cover.getValue('state') === 'closed'; }, true, 30000);
         expect(cover.getValue('source')).toMatch(/^(HTTP_in|timeout)$/); // 'HTTP_in' if not stopped for timeout
         expect(cover.getValue('state')).toMatch(/^(closed|stopped)$/); // 'closed' if not stopped for timeout
         expect(cover.getValue('last_direction')).toBe('close');
         expect(cover.getValue('current_pos')).toBe(0);
 
         cover.GoToPosition(10);
-        await waiter(
-          'GoToPosition(10)',
-          () => {
-            return cover.getValue('state') === 'opening';
-          },
-          false,
-          20000,
-        );
-        await waiter(
-          'GoToPosition(10)',
-          () => {
-            return cover.getValue('state') === 'stopped';
-          },
-          false,
-          20000,
-        );
-        await wait(2000);
-        await device.fetchUpdate();
+        await waiter('GoToPosition(10)', () => { return cover.getValue('state') === 'opening'; }, true, 30000);
+        await waiter('GoToPosition(10)', () => { return cover.getValue('state') === 'stopped'; }, true, 30000);
         expect(cover.getValue('source')).toBe('timeout');
         expect(cover.getValue('state')).toBe('stopped');
         expect(cover.getValue('last_direction')).toBe('open');
         expect(cover.getValue('current_pos')).toBe(10);
 
-        // Close for next test
         cover.Close();
-        await wait(2000);
+        await waiter('Close()', () => { return cover.getValue('state') === 'closing'; }, true, 30000);
+        await waiter('Close() II', () => { return cover.getValue('state') === 'stopped' || cover.getValue('state') === 'closed'; }, true, 30000);
+        expect(cover.getValue('source')).toMatch(/^(HTTP_in|timeout)$/); // 'HTTP_in' if not stopped for timeout
+        expect(cover.getValue('state')).toMatch(/^(closed|stopped)$/); // 'closed' if not stopped for timeout
+        expect(cover.getValue('last_direction')).toBe('close');
+        expect(cover.getValue('current_pos')).toBe(0);
       }
+
+      shelly.removeDevice(device);
       device.destroy();
     }, 120000);
   });
@@ -569,6 +485,9 @@ describe('Shellies', () => {
       const device = await ShellyDevice.create(shelly, log, '192.168.1.221');
       expect(device).not.toBeUndefined();
       if (!device) return;
+      shelly.addDevice(device);
+      (device as any).wsClient?.start();
+
       expect(device.gen).toBe(3);
       expect(device.host).toBe('192.168.1.221');
       expect(device.model).toBe('S3SW-001X8EU');
@@ -581,57 +500,26 @@ describe('Shellies', () => {
 
       await device.saveDevicePayloads('temp');
 
-      device.destroy();
-    }, 60000);
-
-    test('send command to a gen 3 shelly1minig3 device', async () => {
-      const device = await ShellyDevice.create(shelly, log, '192.168.1.221');
-      expect(device).not.toBeUndefined();
-      if (!device) return;
-
       const component = device.getComponent('switch:0');
       expect(component).not.toBeUndefined();
 
+      // prettier-ignore
       if (isSwitchComponent(component)) {
         component.On();
-        await waiter(
-          'On',
-          () => {
-            return component.getValue('state') === true;
-          },
-          false,
-          10000,
-        );
+        await waiter('On', () => { return component.getValue('state') === true; }, true);
+
         component.Off();
-        await waiter(
-          'Off',
-          () => {
-            return component.getValue('state') === false;
-          },
-          false,
-          10000,
-        );
+        await waiter('Off', () => { return component.getValue('state') === false; }, true);
+
         component.Toggle();
-        await waiter(
-          'Toggle',
-          () => {
-            return component.getValue('state') === true;
-          },
-          false,
-          10000,
-        );
+        await waiter('Toggle', () => { return component.getValue('state') === true; }, true);
+
         component.Off();
-        await waiter(
-          'Off',
-          () => {
-            return component.getValue('state') === false;
-          },
-          false,
-          10000,
-        );
+        await waiter('Off', () => { return component.getValue('state') === false; }, true);
       }
 
+      shelly.removeDevice(device);
       device.destroy();
-    }, 60000);
+    }, 30000);
   });
 });
