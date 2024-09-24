@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { jest } from '@jest/globals';
-import { wait, waiter } from 'matterbridge/utils';
+import { getMacAddress, wait, waiter } from 'matterbridge/utils';
 import { WsClient } from './wsClient';
 import { WebSocket, WebSocketServer } from 'ws';
 import { AnsiLogger, LogLevel } from 'matterbridge/logger';
@@ -9,8 +9,10 @@ import { AnsiLogger, LogLevel } from 'matterbridge/logger';
 describe('ShellyWsClient with server', () => {
   let wsClient: WsClient;
   let server: WebSocketServer;
+  const address = '30:f6:ef:69:2b:c5';
 
   beforeAll(async () => {
+    if (getMacAddress() !== address) return;
     // Mock the AnsiLogger.log method
     jest.spyOn(AnsiLogger.prototype, 'log').mockImplementation((level: string, message: string, ...parameters: any[]) => {
       // console.log(`Mocked log: ${level} - ${message}`, ...parameters);
@@ -66,6 +68,8 @@ describe('ShellyWsClient with server', () => {
   });
 
   afterAll(async () => {
+    if (getMacAddress() !== address) return;
+
     // Stop the WebSocket client
     wsClient.stop();
 
@@ -92,6 +96,7 @@ describe('ShellyWsClient with server', () => {
   });
 
   test('should connect to the server and start ping pong', async () => {
+    if (getMacAddress() !== address) return;
     // Await connection to the server
     const connectPromise = new Promise<WebSocket>((resolve) => {
       server.once('connection', (ws: WebSocket) => {
@@ -136,6 +141,7 @@ describe('ShellyWsClient with server', () => {
   }, 60000);
 
   test('should connect to the server without auth', async () => {
+    if (getMacAddress() !== address) return;
     // Await connection to the server
     const connectPromise = new Promise<WebSocket>((resolve) => {
       server.once('connection', (ws: WebSocket) => {
@@ -185,6 +191,7 @@ describe('ShellyWsClient with server', () => {
   }, 60000);
 
   test('should connect to the server with auth', async () => {
+    if (getMacAddress() !== address) return;
     // Await connection to the server
     const connectPromise = new Promise<WebSocket>((resolve) => {
       server.once('connection', (ws: WebSocket) => {
