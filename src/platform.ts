@@ -966,6 +966,10 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       (component.hasProperty('voltage') || component.hasProperty('current') || component.hasProperty('apower') || component.hasProperty('aenergy'))
     ) {
       shelly.log.debug(`Adding ElectricalPowerMeasurement and ElectricalEnergyMeasurement clusters to endpoint ${hk}${endpoint.name}${db} component ${hk}${component.id}${db}`);
+      const deviceTypes = endpoint.getDeviceTypes();
+      if (!deviceTypes.includes(electricalSensor)) deviceTypes.push(electricalSensor);
+      endpoint.setDeviceTypes(deviceTypes);
+      endpoint.addClusterServer(device.getDefaultPowerTopologyClusterServer());
       endpoint.addClusterServer(device.getDefaultElectricalPowerMeasurementClusterServer());
       endpoint.addClusterServer(device.getDefaultElectricalEnergyMeasurementClusterServer());
       updateProperties();
