@@ -134,6 +134,15 @@ export class MdnsScanner extends EventEmitter {
       if (debug) this.log.debug(`Mdns response from ${ign} ${rinfo.address} family ${rinfo.family} port ${rinfo.port} ${db}`);
       if (debug) this.log.debug(`--- response.answers ---`);
       for (const a of response.answers) {
+        if (a.type === 'SRV' && (a.name.startsWith('shelly') || a.name.startsWith('Shelly'))) {
+          port = a.data.port;
+        }
+        if (a.type === 'TXT' && (a.name.startsWith('shelly') || a.name.startsWith('Shelly'))) {
+          if (a.data.toString().includes('gen=2')) gen = 2;
+          if (a.data.toString().includes('gen=3')) gen = 3;
+        }
+      }
+      for (const a of response.answers) {
         if (debug && a.type === 'PTR') {
           this.log.debug(`[${idn}${a.type}${rs}${db}] Name: ${CYAN}${a.name}${db} data: ${typeof a.data === 'string' ? a.data : debugStringify(a.data)}`);
         }
@@ -156,13 +165,6 @@ export class MdnsScanner extends EventEmitter {
         if (debug && a.type === 'A' && (a.name.startsWith('shelly') || a.name.startsWith('Shelly'))) {
           this.log.debug(`[${BLUE}${a.type}${db}] Name: ${CYAN}${a.name}${db} data: ${typeof a.data === 'string' ? a.data : debugStringify(a.data)}`);
         }
-        if (a.type === 'SRV' && (a.name.startsWith('shelly') || a.name.startsWith('Shelly'))) {
-          port = a.data.port;
-        }
-        if (a.type === 'TXT' && (a.name.startsWith('shelly') || a.name.startsWith('Shelly'))) {
-          if (a.data.toString().includes('gen=2')) gen = 2;
-          if (a.data.toString().includes('gen=3')) gen = 3;
-        }
         if (a.type === 'A' && (a.name.startsWith('shelly') || a.name.startsWith('Shelly'))) {
           const [name, mac] = a.name.replace('.local', '').split('-');
           const deviceId = name.toLowerCase() + '-' + mac.toUpperCase();
@@ -177,6 +179,15 @@ export class MdnsScanner extends EventEmitter {
         }
       }
       if (debug) this.log.debug(`--- response.additionals ---`);
+      for (const a of response.additionals) {
+        if (a.type === 'SRV' && (a.name.startsWith('shelly') || a.name.startsWith('Shelly'))) {
+          port = a.data.port;
+        }
+        if (a.type === 'TXT' && (a.name.startsWith('shelly') || a.name.startsWith('Shelly'))) {
+          if (a.data.toString().includes('gen=2')) gen = 2;
+          if (a.data.toString().includes('gen=3')) gen = 3;
+        }
+      }
       for (const a of response.additionals) {
         if (debug && a.type === 'PTR') {
           this.log.debug(`[${idn}${a.type}${rs}${db}] Name: ${CYAN}${a.name}${db} data: ${typeof a.data === 'string' ? a.data : debugStringify(a.data)}`);
@@ -196,13 +207,6 @@ export class MdnsScanner extends EventEmitter {
         }
         if (debug && a.type === 'A') {
           this.log.debug(`[${idn}${a.type}${rs}${db}] Name: ${CYAN}${a.name}${db} data: ${typeof a.data === 'string' ? a.data : debugStringify(a.data)}`);
-        }
-        if (a.type === 'SRV' && (a.name.startsWith('shelly') || a.name.startsWith('Shelly'))) {
-          port = a.data.port;
-        }
-        if (a.type === 'TXT' && (a.name.startsWith('shelly') || a.name.startsWith('Shelly'))) {
-          if (a.data.toString().includes('gen=2')) gen = 2;
-          if (a.data.toString().includes('gen=3')) gen = 3;
         }
         if (a.type === 'A' && (a.name.startsWith('shelly') || a.name.startsWith('Shelly'))) {
           const [name, mac] = a.name.replace('.local', '').split('-');
