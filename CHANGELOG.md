@@ -12,6 +12,7 @@ If you like this project and find it useful, please consider giving it a star on
 
 ### Added
 
+- [shelly]: Added support for shellygas with firmware v1.14.0 and added Jest test.
 - [test]: Added Jest test for ShellyWsServer
 - [test]: Added Jest test for ShellyWsClient
 - [test]: Added Jest test for real gen 1 devices

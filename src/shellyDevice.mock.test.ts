@@ -34,7 +34,7 @@ describe('Shelly devices test', () => {
   });
 
   afterAll(() => {
-    //
+    shelly.destroy();
   });
 
   describe('Test gen 1 shellydimmer2', () => {
@@ -471,6 +471,7 @@ describe('Shelly devices test', () => {
 
       if (device) device.destroy();
     });
+
     test('Create a gen 1 shellyflood device', async () => {
       id = 'shellyflood-EC64C9C1DA9A';
       log.logName = id;
@@ -502,6 +503,43 @@ describe('Shelly devices test', () => {
       expect(device.getComponent('battery')?.getValue('level')).toBe(100);
       expect(device.getComponent('battery')?.getValue('voltage')).toBe(3.03);
       expect(device.getComponent('battery')?.getValue('charging')).toBe(undefined);
+
+      expect(device.getComponent('sys')?.getValue('temperature')).toBe(undefined);
+      expect(device.getComponent('sys')?.getValue('overtemperature')).toBe(undefined);
+
+      expect(await device.fetchUpdate()).not.toBeNull();
+
+      if (device) device.destroy();
+    });
+
+    test('Create a gen 1 shellygas device', async () => {
+      id = 'shellygas-7C87CEBCECE4';
+      log.logName = id;
+
+      device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', id + '.json'));
+      expect(device).not.toBeUndefined();
+      if (!device) return;
+      expect(device.host).toBe(path.join('src', 'mock', id + '.json'));
+      expect(device.model).toBe('SHGS-1');
+      expect(device.mac).toBe('7C87CEBCECE4');
+      expect(device.id).toBe(id);
+      expect(device.firmware).toBe(firmwareGen1);
+      expect(device.auth).toBe(false);
+      expect(device.gen).toBe(1);
+      expect(device.profile).toBe(undefined);
+      expect(device.name).toBe('shellygas-7C87CEBCECE4');
+      expect(device.hasUpdate).toBe(false);
+      expect(device.lastseen).not.toBe(0);
+      expect(device.online).toBe(true);
+      expect(device.cached).toBe(false);
+      expect(device.sleepMode).toBe(false);
+
+      expect(device.components.length).toBe(8);
+      expect(device.getComponentNames()).toStrictEqual(['WiFi', 'MQTT', 'CoIoT', 'Sntp', 'Cloud', 'Gas']);
+      expect(device.getComponentIds()).toStrictEqual(['wifi_ap', 'wifi_sta', 'wifi_sta1', 'mqtt', 'coiot', 'sntp', 'cloud', 'gas']);
+
+      expect(device.getComponent('gas')?.getValue('sensor_state')).toBe('normal');
+      expect(device.getComponent('gas')?.getValue('ppm')).toBe(0);
 
       expect(device.getComponent('sys')?.getValue('temperature')).toBe(undefined);
       expect(device.getComponent('sys')?.getValue('overtemperature')).toBe(undefined);

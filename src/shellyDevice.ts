@@ -443,6 +443,7 @@ export class ShellyDevice extends EventEmitter {
         if (key === 'charger') device.addComponent(new ShellyComponent(device, 'battery', 'Battery'));
         if (key === 'lux') device.addComponent(new ShellyComponent(device, 'lux', 'Lux'));
         if (key === 'flood') device.addComponent(new ShellyComponent(device, 'flood', 'Flood'));
+        if (key === 'gas_sensor') device.addComponent(new ShellyComponent(device, 'gas', 'Gas'));
         if (key === 'sensor') {
           device.addComponent(new ShellyComponent(device, 'sensor', 'Sensor'));
           const sensor = statusPayload[key] as ShellyData;
@@ -808,6 +809,12 @@ export class ShellyDevice extends EventEmitter {
         }
         if (key === 'flood') {
           if (typeof data[key] === 'boolean') this.getComponent('flood')?.setValue('flood', data[key]);
+        }
+        if (key === 'gas_sensor') {
+          this.updateComponent('gas', data[key] as ShellyData);
+        }
+        if (key === 'concentration') {
+          this.updateComponent('gas', data[key] as ShellyData);
         }
         if (key === 'tmp') {
           if (data.temperature === undefined && data.overtemperature === undefined) this.updateComponent('temperature', data[key] as ShellyData);

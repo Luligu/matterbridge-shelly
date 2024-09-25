@@ -697,6 +697,16 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               this.shellyUpdateHandler(mbDevice, device, component, property, value);
             });
           }
+        } else if (component.name === 'Gas' && config.exposeGas !== 'disabled') {
+          const gasComponent = device.getComponent(key);
+          if (gasComponent?.hasProperty('sensor_state') && isValidString(gasComponent.getValue('sensor_state'))) {
+            const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.CONTACT_SENSOR], []);
+            child.addClusterServer(mbDevice.getDefaultBooleanStateClusterServer(gasComponent.getValue('sensor_state') !== 'normal'));
+            // Add event handler
+            gasComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
+              this.shellyUpdateHandler(mbDevice, device, component, property, value);
+            });
+          }
         } else if (component.name === 'Lux' && config.exposeLux !== 'disabled') {
           const luxComponent = device.getComponent(key);
           if (luxComponent?.hasProperty('value') && isValidNumber(luxComponent.getValue('value'), 0)) {

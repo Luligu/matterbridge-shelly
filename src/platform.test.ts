@@ -539,7 +539,7 @@ describe('ShellyPlatform', () => {
     expect(mockMatterbridge.removeAllBridgedDevices).not.toHaveBeenCalled();
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, 'Stopped mDNS query service.');
     await wait(1000);
-  }, 60000);
+  });
 
   it('should call onShutdown with reason and unregister', async () => {
     mockConfig.unregisterOnShutdown = true;
@@ -547,7 +547,7 @@ describe('ShellyPlatform', () => {
     expect(mockLog.info).toHaveBeenCalledWith(`Shutting down platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
     expect(mockMatterbridge.removeAllBridgedDevices).toHaveBeenCalled();
     await wait(1000);
-  }, 60000);
+  });
 
   it('should destroy shelly', async () => {
     (shellyPlatform as any).shelly.destroy();
@@ -555,6 +555,6 @@ describe('ShellyPlatform', () => {
     expect((shellyPlatform as any).shelly.coapServer).toBeUndefined();
     expect((shellyPlatform as any).shelly.fetchInterval).toBeUndefined();
     expect((shellyPlatform as any).shelly.coapServerTimeout).toBeUndefined();
-    await wait(1000);
+    await wait(10000);
   }, 60000);
 });
