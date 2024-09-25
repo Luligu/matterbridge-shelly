@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Matterbridge, MatterbridgeDevice, PlatformConfig } from 'matterbridge';
-import { AnsiLogger, db, idn, LogLevel, nf, rs } from 'matterbridge/logger';
+import { AnsiLogger, db, er, hk, idn, LogLevel, nf, rs, zb } from 'matterbridge/logger';
 import { isValidArray, isValidBoolean, isValidNull, isValidNumber, isValidObject, isValidString, isValidUndefined, wait } from 'matterbridge/utils';
 import { jest } from '@jest/globals';
 
@@ -33,11 +33,12 @@ describe('ShellyPlatform', () => {
   beforeAll(() => {
     // Creates the mocks for Matterbridge, AnsiLogger, and PlatformConfig
     mockMatterbridge = {
-      addBridgedDevice: jest.fn(),
-      matterbridgeDirectory: '',
+      matterbridgeDirectory: 'temp',
       matterbridgePluginDirectory: 'temp',
       systemInformation: { ipv4Address: undefined },
       matterbridgeVersion: '1.5.5',
+      addBridgedDevice: jest.fn(),
+      removeBridgedDevice: jest.fn(),
       removeAllBridgedDevices: jest.fn(),
     } as unknown as Matterbridge;
     mockLog = {
@@ -70,8 +71,8 @@ describe('ShellyPlatform', () => {
       'exposePowerMeter': 'matter13',
       'blackList': [],
       'whiteList': [],
-      'enableMdnsDiscover': true,
-      'enableStorageDiscover': true,
+      'enableMdnsDiscover': false,
+      'enableStorageDiscover': false,
       'resetStorageDiscover': false,
       'enableConfigDiscover': false,
       'enableBleDiscover': false,
@@ -245,10 +246,13 @@ describe('ShellyPlatform', () => {
     expect(shellyPlatform.localVerifyMatterbridgeVersion('1.5.3')).toBe(true);
     expect(shellyPlatform.localVerifyMatterbridgeVersion('1.5.4')).toBe(true);
     expect(shellyPlatform.localVerifyMatterbridgeVersion('2.0.0')).toBe(false);
+    mockMatterbridge.matterbridgeVersion = '1.5.5';
   });
 
-  it('should call onStart with reason', async () => {
+  it('should call onStart with reason and start mDNS', async () => {
     expect(shellyPlatform).toBeDefined();
+    shellyPlatform.config.enableMdnsDiscover = true;
+
     await shellyPlatform.onStart('Test reason');
     expect(mockLog.info).toHaveBeenCalledWith(`Starting platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, 'Started mDNS query service for shelly devices.');
@@ -257,6 +261,82 @@ describe('ShellyPlatform', () => {
     expect((shellyPlatform as any).shelly.mdnsScanner.isScanning).toBe(true);
     expect((shellyPlatform as any).shelly.coapServer).toBeDefined();
     expect((shellyPlatform as any).shelly.coapServer.isListening).toBe(false);
+    shellyPlatform.config.enableMdnsDiscover = false;
+    (shellyPlatform as any).shelly.mdnsScanner?.stop();
+    expect((shellyPlatform as any).shelly.mdnsScanner.isScanning).toBe(false);
+  });
+
+  it('should call onStart with reason and reset the storage', async () => {
+    expect(shellyPlatform).toBeDefined();
+    expect((shellyPlatform as any).shelly.mdnsScanner.isScanning).toBe(false);
+    shellyPlatform.config.enableStorageDiscover = false;
+    shellyPlatform.config.enableConfigDiscover = false;
+    shellyPlatform.config.resetStorageDiscover = true;
+    await shellyPlatform.onStart('Test reason');
+    expect(mockLog.info).toHaveBeenCalledWith(`Starting platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
+    expect(mockLog.info).toHaveBeenCalledWith(`Resetting the Shellies storage`);
+    expect(mockLog.info).toHaveBeenCalledWith(`Reset the Shellies storage`);
+    expect((shellyPlatform as any).nodeStorageManager).toBeDefined();
+    expect((shellyPlatform as any).storedDevices.size).toBe(0);
+    shellyPlatform.config.resetStorageDiscover = false;
+  });
+
+  it('should call onStart with reason and load from storageDiscover', async () => {
+    expect(shellyPlatform).toBeDefined();
+    expect((shellyPlatform as any).shelly.mdnsScanner.isScanning).toBe(false);
+
+    shellyPlatform.config.enableStorageDiscover = true;
+    shellyPlatform.config.enableConfigDiscover = false;
+    shellyPlatform.storedDevices.clear();
+    shellyPlatform.storedDevices.set('shellyemg3-84FCE636582C', { id: 'shellyemg3-84FCE636582C', host: 'invalid', port: 80, gen: 1 });
+    shellyPlatform.storedDevices.set('shellyplus-34FCE636582C', { id: 'shellyplus-34FCE636582C', host: '192.168.255.1', port: 80, gen: 2 });
+    expect(await (shellyPlatform as any).saveStoredDevices()).toBeTruthy();
+    expect(mockLog.debug).toHaveBeenCalledWith(`Saving 2 discovered Shelly devices to the storage`);
+    expect((shellyPlatform as any).storedDevices.size).toBe(2);
+
+    await shellyPlatform.onStart('Test reason');
+
+    console.error((shellyPlatform as any).storedDevices);
+
+    expect(mockLog.info).toHaveBeenCalledWith(`Starting platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
+    expect(mockLog.info).toHaveBeenCalledWith(`Loading from storage 2 Shelly devices`);
+    expect(mockLog.error).toHaveBeenCalledWith(
+      `Stored Shelly device id ${hk}shellyemg3-84FCE636582C${er} host ${zb}invalid${er} is not valid. Please enable resetStorageDiscover in plugin config and restart.`,
+    );
+    expect(mockLog.debug).toHaveBeenCalledWith(`Loading from storage Shelly device ${hk}shellyplus-34FCE636582C${db} host ${zb}192.168.255.1${db}`);
+    expect((shellyPlatform as any).nodeStorageManager).toBeDefined();
+    expect(shellyPlatform.storedDevices.size).toBe(2);
+
+    shellyPlatform.storedDevices.clear();
+    expect(await (shellyPlatform as any).saveStoredDevices()).toBeTruthy();
+    expect(shellyPlatform.storedDevices.size).toBe(0);
+
+    shellyPlatform.config.enableStorageDiscover = false;
+  });
+
+  it('should call onStart with reason and load from configDiscover', async () => {
+    expect(shellyPlatform).toBeDefined();
+    expect((shellyPlatform as any).shelly.mdnsScanner.isScanning).toBe(false);
+
+    shellyPlatform.config.enableConfigDiscover = true;
+    shellyPlatform.config.deviceIp = {
+      'shellyemg3-84FCE636582C': 'invalid',
+    };
+    await shellyPlatform.onStart('Test reason');
+    expect(mockLog.info).toHaveBeenCalledWith(`Starting platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
+    expect(mockLog.info).toHaveBeenCalledWith(`Loading from config 1 Shelly devices`);
+    expect(mockLog.error).toHaveBeenCalledWith(
+      `Config Shelly device id ${hk}shellyemg3-84FCE636582C${er} host ${zb}invalid${er} is not valid. Please check the plugin config and restart.`,
+    );
+    expect((shellyPlatform as any).nodeStorageManager).toBeDefined();
+    expect(shellyPlatform.storedDevices.size).toBe(0);
+
+    shellyPlatform.storedDevices.clear();
+    expect(await (shellyPlatform as any).saveStoredDevices()).toBeTruthy();
+    expect((shellyPlatform as any).storedDevices.size).toBe(0);
+
+    shellyPlatform.config.enableConfigDiscover = false;
+    shellyPlatform.config.deviceIp = undefined;
   });
 
   it('should load and save the stored devices', async () => {
@@ -285,7 +365,7 @@ describe('ShellyPlatform', () => {
     await wait(1000);
   }, 60000);
 
-  it('should call onShutdown and unregister', async () => {
+  it('should call onShutdown with reason and unregister', async () => {
     mockConfig.unregisterOnShutdown = true;
     await shellyPlatform.onShutdown('Test reason');
     expect(mockLog.info).toHaveBeenCalledWith(`Shutting down platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);

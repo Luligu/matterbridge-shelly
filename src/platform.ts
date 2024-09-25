@@ -739,10 +739,14 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       forgiveParseErrors: true,
     });
     this.nodeStorage = await this.nodeStorageManager.createStorage('devices');
+
+    // Reset the storage if requested
     if (this.config.resetStorageDiscover === true) {
       this.config.resetStorageDiscover = false;
       this.log.info('Resetting the Shellies storage');
       await this.nodeStorage.clear();
+      this.storedDevices.clear();
+      await this.saveStoredDevices();
       this.log.info('Reset the Shellies storage');
     } else {
       await this.loadStoredDevices();
@@ -770,7 +774,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     }
 
     // add all configured devices
-    if (this.config.enableConfigDiscover === true && this.config.deviceIp !== undefined) {
+    if (this.config.enableConfigDiscover === true && isValidObject(this.config.deviceIp)) {
       this.log.info(`Loading from config ${Object.entries(this.config.deviceIp as ConfigDeviceIp).length} Shelly devices`);
       Object.entries(this.config.deviceIp as ConfigDeviceIp).forEach(async ([id, host]) => {
         id = ShellyDevice.normalizeId(id).id;
