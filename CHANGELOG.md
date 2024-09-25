@@ -22,6 +22,7 @@ If you like this project and find it useful, please consider giving it a star on
 ### Changed
 
 - [shelly]: All devices are loaded from cache to speed up the loading phase in huge networks.
+- [shelly]: Added electricalSensor device type to Switch, Light and Cover components when enabled (will be supported by Home Assistant v. 2024.10).
 - [package]: Updated dependencies.
 
 ### Fixed
