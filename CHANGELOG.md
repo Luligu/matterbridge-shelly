@@ -8,11 +8,13 @@ If you like this project and find it useful, please consider giving it a star on
 
 - Unless you are using docker (in that case all is already updated when you pull the image), please update Matterbridge to 1.5.5 to work with matterbridge-shelly >= 0.9.5.  This is a one time issue due to the update to matter.js 0.10.0.
 
-## [0.10.0] - 2024-09-25
+## [0.10.0] - 2024-09-26
 
 ### Added
 
+- [shelly]: Added component Gas.
 - [shelly]: Added support for shellygas with firmware v1.14.0 and added Jest test.
+- [shelly]: Added component Smoke.
 - [shelly]: Added support for shellyplussmoke with firmware v1.4.2 and added Jest test.
 - [test]: Added Jest test for ShellyWsServer
 - [test]: Added Jest test for ShellyWsClient

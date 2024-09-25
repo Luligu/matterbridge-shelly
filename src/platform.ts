@@ -711,7 +711,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           const smokeComponent = device.getComponent(key);
           if (smokeComponent?.hasProperty('alarm') && isValidBoolean(smokeComponent.getValue('alarm'))) {
             const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.CONTACT_SENSOR], []);
-            child.addClusterServer(mbDevice.getDefaultBooleanStateClusterServer(smokeComponent.getValue('alarm') as boolean));
+            child.addClusterServer(mbDevice.getDefaultBooleanStateClusterServer(!smokeComponent.getValue('alarm') as boolean));
             // Add event handler
             smokeComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
               this.shellyUpdateHandler(mbDevice, device, component, property, value);
@@ -1279,7 +1279,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     }
     // Update for Smoke
     if (shellyComponent.name === 'Smoke' && property === 'alarm' && isValidBoolean(value)) {
-      matterbridgeDevice.setAttribute(BooleanStateCluster.id, 'stateValue', value, shellyDevice.log, endpoint);
+      matterbridgeDevice.setAttribute(BooleanStateCluster.id, 'stateValue', !value, shellyDevice.log, endpoint);
     }
     // Update for Illuminance
     if (shellyComponent.name === 'Lux' && property === 'value' && isValidNumber(value, 0)) {
