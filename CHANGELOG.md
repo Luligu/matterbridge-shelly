@@ -8,6 +8,26 @@ If you like this project and find it useful, please consider giving it a star on
 
 - Unless you are using docker (in that case all is already updated when you pull the image), please update Matterbridge to 1.5.4 to work with matterbridge-shelly >= 0.9.5.  This is a one time issue due to the update to matter.js 0.10.0.
 
+## [0.10.0] - 2024-09-25
+
+### Added
+
+- [test]: Added Jest test for ShellyWsServer
+- [test]: Added Jest test for ShellyWsClient
+- [test]: Added Jest test for real gen 1 devices
+- [test]: Added Jest test for real gen 2 devices
+- [test]: Added Jest test for real gen 3 devices
+- [shelly]: Added a cache validation random interval for all not sleeping devices.
+
+### Changed
+
+- [shelly]: All devices are loaded from cache to speed up the loading phase in huge networks.
+- [package]: Updated dependencies.
+
+<a href="https://www.buymeacoffee.com/luligugithub">
+  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+</a>
+
 ## [0.9.10] - 2024-09-19
 
 ### Changed
