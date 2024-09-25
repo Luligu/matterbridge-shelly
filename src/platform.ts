@@ -701,7 +701,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           const gasComponent = device.getComponent(key);
           if (gasComponent?.hasProperty('sensor_state') && isValidString(gasComponent.getValue('sensor_state'))) {
             const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.CONTACT_SENSOR], []);
-            child.addClusterServer(mbDevice.getDefaultBooleanStateClusterServer(gasComponent.getValue('sensor_state') !== 'normal'));
+            child.addClusterServer(mbDevice.getDefaultBooleanStateClusterServer(gasComponent.getValue('sensor_state') === 'normal'));
             // Add event handler
             gasComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
               this.shellyUpdateHandler(mbDevice, device, component, property, value);
@@ -1262,6 +1262,10 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     // Update for Flood
     if (shellyComponent.name === 'Flood' && property === 'flood' && isValidBoolean(value)) {
       matterbridgeDevice.setAttribute(BooleanStateCluster.id, 'stateValue', !value, shellyDevice.log, endpoint);
+    }
+    // Update for Gas
+    if (shellyComponent.name === 'Gas' && property === 'sensor_state' && isValidString(value)) {
+      matterbridgeDevice.setAttribute(BooleanStateCluster.id, 'stateValue', value === 'normal', shellyDevice.log, endpoint);
     }
     // Update for Illuminance
     if (shellyComponent.name === 'Lux' && property === 'value' && isValidNumber(value, 0)) {

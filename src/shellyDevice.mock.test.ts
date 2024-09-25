@@ -7,6 +7,7 @@ import { ShellyComponent } from './shellyComponent.js';
 import path from 'path';
 import { jest } from '@jest/globals';
 import { ShellyData } from './shellyTypes.js';
+import { wait } from 'matterbridge/utils';
 
 // shellyDevice.ts    |   76.51 |    65.16 |   84.37 |    78.5 | ...5,633-635,638-639,645-656,675-691,705-721,726-736,759-761,794-798,802-804,807,882-885,889-892,896-899,903-905,908-910,965-968,1101-1106
 
@@ -33,8 +34,9 @@ describe('Shelly devices test', () => {
     //
   });
 
-  afterAll(() => {
+  afterAll(async () => {
     shelly.destroy();
+    await wait(2000);
   });
 
   describe('Test gen 1 shellydimmer2', () => {
@@ -539,6 +541,7 @@ describe('Shelly devices test', () => {
       expect(device.getComponentIds()).toStrictEqual(['wifi_ap', 'wifi_sta', 'wifi_sta1', 'mqtt', 'coiot', 'sntp', 'cloud', 'gas']);
 
       expect(device.getComponent('gas')?.getValue('sensor_state')).toBe('normal');
+      expect(device.getComponent('gas')?.getValue('alarm_state')).toBe('none');
       expect(device.getComponent('gas')?.getValue('ppm')).toBe(0);
 
       expect(device.getComponent('sys')?.getValue('temperature')).toBe(undefined);
@@ -1316,6 +1319,45 @@ describe('Shelly devices test', () => {
       expect(device.getComponent('light:0')?.hasProperty('voltage')).toBe(false);
       expect(device.getComponent('light:0')?.hasProperty('current')).toBe(false);
       expect(device.getComponent('light:0')?.hasProperty('aenergy')).toBe(false);
+
+      expect(await device.fetchUpdate()).not.toBeNull();
+
+      if (device) device.destroy();
+    });
+
+    test('Create a gen 2 shellyplussmoke device', async () => {
+      id = 'shellyplussmoke-A0A3B3B8AE48';
+      log.logName = id;
+
+      device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', id + '.json'));
+      expect(device).not.toBeUndefined();
+      if (!device) return;
+      expect(device.host).toBe(path.join('src', 'mock', id + '.json'));
+      expect(device.model).toBe('SNSN-0031Z');
+      expect(device.mac).toBe('A0A3B3B8AE48');
+      expect(device.id).toBe(id);
+      expect(device.firmware).toBe('1.4.2-gc2639da'); // firmwareGen2
+      expect(device.auth).toBe(false);
+      expect(device.gen).toBe(2);
+      expect(device.profile).toBe(undefined);
+      expect(device.name).toBe(id);
+      expect(device.hasUpdate).toBe(false);
+      expect(device.lastseen).not.toBe(0);
+      expect(device.online).toBe(true);
+      expect(device.cached).toBe(false);
+      expect(device.sleepMode).toBe(true);
+
+      expect(device.components.length).toBe(10);
+      expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'MQTT', 'Smoke', 'Sys', 'Sntp', 'WiFi', 'WS']);
+      expect(device.getComponentIds()).toStrictEqual(['ble', 'cloud', 'mqtt', 'smoke:0', 'sys', 'sntp', 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws']);
+
+      expect(device.getComponent('sys')?.getValue('temperature')).toBe(undefined);
+      expect(device.getComponent('sys')?.getValue('overtemperature')).toBe(undefined);
+
+      expect(device.getComponent('smoke:0')?.hasProperty('alarm')).toBe(true);
+      expect(device.getComponent('smoke:0')?.hasProperty('mute')).toBe(true);
+      expect(device.getComponent('smoke:0')?.getValue('alarm')).toBe(false);
+      expect(device.getComponent('smoke:0')?.getValue('mute')).toBe(false);
 
       expect(await device.fetchUpdate()).not.toBeNull();
 

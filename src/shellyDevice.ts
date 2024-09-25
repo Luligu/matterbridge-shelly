@@ -537,6 +537,7 @@ export class ShellyDevice extends EventEmitter {
         if (key.startsWith('em:')) device.addComponent(new ShellyComponent(device, key, 'PowerMeter', settingsPayload[key] as ShellyData));
         if (key.startsWith('temperature:')) device.addComponent(new ShellyComponent(device, key, 'Temperature', settingsPayload[key] as ShellyData));
         if (key.startsWith('humidity:')) device.addComponent(new ShellyComponent(device, key, 'Humidity', settingsPayload[key] as ShellyData));
+        if (key.startsWith('smoke:')) device.addComponent(new ShellyComponent(device, key, 'Smoke', settingsPayload[key] as ShellyData));
       }
     }
 
@@ -864,6 +865,7 @@ export class ShellyDevice extends EventEmitter {
         if (key.startsWith('emdata:')) this.updateComponent(key.replace('emdata:', 'em:'), data[key] as ShellyData);
         if (key.startsWith('temperature:')) this.updateComponent(key, data[key] as ShellyData);
         if (key.startsWith('humidity:')) this.updateComponent(key, data[key] as ShellyData);
+        if (key.startsWith('smoke:')) this.updateComponent(key, data[key] as ShellyData);
       }
       // Update state for active components with output
       for (const key in data) {

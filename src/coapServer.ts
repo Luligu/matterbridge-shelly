@@ -416,6 +416,11 @@ export class CoapServer extends EventEmitter {
             if (s.D === 'inputEventCnt' && b.D.startsWith('sensor'))
               desc.push({ id: s.I, component: b.D.replace('_', ':').replace('sensor', 'input'), property: 'event_cnt', range: s.R }); // SHBTN-2
 
+            // gas_sensor component
+            if (s.D === 'sensorOp' && b.D.startsWith('sensor')) desc.push({ id: s.I, component: 'gas', property: 'sensor_state', range: s.R }); // SHGS-1
+            if (s.D === 'gas' && b.D.startsWith('sensor')) desc.push({ id: s.I, component: 'gas', property: 'alarm_state', range: s.R }); // SHGS-1
+            if (s.D === 'concentration' && b.D.startsWith('sensor')) desc.push({ id: s.I, component: 'gas', property: 'ppm', range: s.R }); // SHGS-1
+
             // battery component
             if (s.D === 'battery' && b.D === 'device') desc.push({ id: s.I, component: 'battery', property: 'level', range: s.R }); // SHBTN-2
             if (s.D === 'charger' && b.D === 'device') desc.push({ id: s.I, component: 'battery', property: 'charging', range: s.R }); // SHBTN-2
