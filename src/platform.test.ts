@@ -1,12 +1,14 @@
-/* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Matterbridge, MatterbridgeDevice, PlatformConfig } from 'matterbridge';
-import { AnsiLogger, db, er, hk, idn, LogLevel, nf, rs, zb } from 'matterbridge/logger';
-import { isValidArray, isValidBoolean, isValidNull, isValidNumber, isValidObject, isValidString, isValidUndefined, wait } from 'matterbridge/utils';
+import { AnsiLogger, db, dn, er, hk, idn, LogLevel, nf, rs, wr, zb } from 'matterbridge/logger';
+import { isValidArray, isValidBoolean, isValidNull, isValidNumber, isValidObject, isValidString, isValidUndefined, wait, waiter } from 'matterbridge/utils';
 import { jest } from '@jest/globals';
 
 import { ShellyPlatform } from './platform';
+import { ShellyDevice } from './shellyDevice';
+import path from 'path';
+import { Shelly } from './shelly';
 
 describe('ShellyPlatform', () => {
   let mockMatterbridge: Matterbridge;
@@ -30,6 +32,35 @@ describe('ShellyPlatform', () => {
     return Promise.resolve();
   });
 
+  const cleanup = () => {
+    shellyPlatform.discoveredDevices.clear();
+    shellyPlatform.storedDevices.clear();
+    (shellyPlatform as any).saveStoredDevices();
+    shellyPlatform.shellyDevices.forEach((device: ShellyDevice) => {
+      // console.error(`Destroying shellyPlatform.shellyDevices device: ${device.id}`);
+      device.destroy();
+      (shellyPlatform as any).shelly.removeDevice(device);
+    });
+    shellyPlatform.shellyDevices.clear();
+    shellyPlatform.bridgedDevices.clear();
+    shellyPlatform.bluBridgedDevices.clear();
+    (shellyPlatform as any).failsafeCount = 0;
+    (shellyPlatform as any).whiteList = [];
+    (shellyPlatform as any).blackList = [];
+
+    const shelly = (shellyPlatform as any).shelly as Shelly;
+    clearInterval((shelly as any).fetchInterval);
+    clearTimeout((shelly as any).coapServerTimeout);
+
+    shelly.devices.forEach((device: ShellyDevice) => {
+      // console.error(`Destroying shelly.devices device: ${device.id}`);
+      device.destroy();
+      (shellyPlatform as any).shelly.removeDevice(device);
+    });
+
+    // shelly.destroy();
+  };
+
   beforeAll(() => {
     // Creates the mocks for Matterbridge, AnsiLogger, and PlatformConfig
     mockMatterbridge = {
@@ -43,22 +74,22 @@ describe('ShellyPlatform', () => {
     } as unknown as Matterbridge;
     mockLog = {
       fatal: jest.fn((message) => {
-        console.log(`Fatal: ${message}`);
+        // console.log(`Fatal: ${message}`);
       }),
       error: jest.fn((message) => {
-        console.log(`Error: ${message}`);
+        // console.log(`Error: ${message}`);
       }),
       warn: jest.fn((message) => {
-        console.log(`Warn: ${message}`);
+        // console.log(`Warn: ${message}`);
       }),
       notice: jest.fn((message) => {
-        console.log(`Notice: ${message}`);
+        // console.log(`Notice: ${message}`);
       }),
       info: jest.fn((message) => {
-        console.log(`Info: ${message}`);
+        // console.log(`Info: ${message}`);
       }),
       debug: jest.fn((message) => {
-        console.log(`Debug: ${message}`);
+        // console.log(`Debug: ${message}`);
       }),
     } as unknown as AnsiLogger;
     mockConfig = {
@@ -112,6 +143,8 @@ describe('ShellyPlatform', () => {
   it('should initialize platform with config name', () => {
     shellyPlatform = new ShellyPlatform(mockMatterbridge, mockLog, mockConfig);
     expect(mockLog.debug).toHaveBeenCalledWith(`Initializing platform: ${idn}${mockConfig.name}${rs}${db}`);
+    clearInterval((shellyPlatform as any).shelly.fetchInterval);
+    clearTimeout((shellyPlatform as any).shelly.coapServerTimeout);
   });
 
   it('should validate number', () => {
@@ -234,6 +267,56 @@ describe('ShellyPlatform', () => {
     expect(isValidUndefined([1, 4, 'string'])).toBe(false);
   });
 
+  it('should return false and log a warning if entity is not in the whitelist', () => {
+    (shellyPlatform as any).whiteList = ['entity1', 'entity2'];
+    (shellyPlatform as any).blackList = [];
+
+    const result = (shellyPlatform as any).validateWhiteBlackList('entity3');
+
+    expect(result).toBe(false);
+    expect(mockLog.warn).toHaveBeenCalledWith(`Skipping ${dn}entity3${wr} because not in whitelist`);
+  });
+
+  it('should return false and log a warning if entity is in the blacklist', () => {
+    (shellyPlatform as any).whiteList = [];
+    (shellyPlatform as any).blackList = ['entity3'];
+
+    const result = (shellyPlatform as any).validateWhiteBlackList('entity3');
+
+    expect(result).toBe(false);
+    expect(mockLog.warn).toHaveBeenCalledWith(`Skipping ${dn}entity3${wr} because in blacklist`);
+  });
+
+  it('should return true if entity is in the whitelist', () => {
+    (shellyPlatform as any).whiteList = ['entity3'];
+    (shellyPlatform as any).blackList = [];
+
+    const result = (shellyPlatform as any).validateWhiteBlackList('entity3');
+
+    expect(result).toBe(true);
+    expect(mockLog.warn).not.toHaveBeenCalled();
+  });
+
+  it('should return true if entity is not in the blacklist and whitelist is empty', () => {
+    (shellyPlatform as any).whiteList = [];
+    (shellyPlatform as any).blackList = [];
+
+    const result = (shellyPlatform as any).validateWhiteBlackList('entity3');
+
+    expect(result).toBe(true);
+    expect(mockLog.warn).not.toHaveBeenCalled();
+  });
+
+  it('should return true if both whitelist and blacklist are empty', () => {
+    (shellyPlatform as any).whiteList = [];
+    (shellyPlatform as any).blackList = [];
+
+    const result = (shellyPlatform as any).validateWhiteBlackList('entity3');
+
+    expect(result).toBe(true);
+    expect(mockLog.warn).not.toHaveBeenCalled();
+  });
+
   it('should validate version', () => {
     mockMatterbridge.matterbridgeVersion = '1.5.4';
     expect(shellyPlatform.localVerifyMatterbridgeVersion('1.5.3')).toBe(true);
@@ -246,6 +329,12 @@ describe('ShellyPlatform', () => {
     expect(shellyPlatform.localVerifyMatterbridgeVersion('1.5.3')).toBe(true);
     expect(shellyPlatform.localVerifyMatterbridgeVersion('1.5.4')).toBe(true);
     expect(shellyPlatform.localVerifyMatterbridgeVersion('2.0.0')).toBe(false);
+    mockMatterbridge.matterbridgeVersion = '1.5.5';
+  });
+
+  it('should throw because of version', () => {
+    mockMatterbridge.matterbridgeVersion = '1.5.4';
+    expect(() => new ShellyPlatform(mockMatterbridge, mockLog, mockConfig)).toThrow();
     mockMatterbridge.matterbridgeVersion = '1.5.5';
   });
 
@@ -264,6 +353,8 @@ describe('ShellyPlatform', () => {
     shellyPlatform.config.enableMdnsDiscover = false;
     (shellyPlatform as any).shelly.mdnsScanner?.stop();
     expect((shellyPlatform as any).shelly.mdnsScanner.isScanning).toBe(false);
+
+    cleanup();
   });
 
   it('should call onStart with reason and reset the storage', async () => {
@@ -279,6 +370,8 @@ describe('ShellyPlatform', () => {
     expect((shellyPlatform as any).nodeStorageManager).toBeDefined();
     expect((shellyPlatform as any).storedDevices.size).toBe(0);
     shellyPlatform.config.resetStorageDiscover = false;
+
+    cleanup();
   });
 
   it('should call onStart with reason and load from storageDiscover', async () => {
@@ -296,8 +389,6 @@ describe('ShellyPlatform', () => {
 
     await shellyPlatform.onStart('Test reason');
 
-    console.error((shellyPlatform as any).storedDevices);
-
     expect(mockLog.info).toHaveBeenCalledWith(`Starting platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
     expect(mockLog.info).toHaveBeenCalledWith(`Loading from storage 2 Shelly devices`);
     expect(mockLog.error).toHaveBeenCalledWith(
@@ -312,6 +403,8 @@ describe('ShellyPlatform', () => {
     expect(shellyPlatform.storedDevices.size).toBe(0);
 
     shellyPlatform.config.enableStorageDiscover = false;
+
+    cleanup();
   });
 
   it('should call onStart with reason and load from configDiscover', async () => {
@@ -321,15 +414,17 @@ describe('ShellyPlatform', () => {
     shellyPlatform.config.enableConfigDiscover = true;
     shellyPlatform.config.deviceIp = {
       'shellyemg3-84FCE636582C': 'invalid',
+      'shellyplus-34FCE636582C': '192.168.255.1',
     };
     await shellyPlatform.onStart('Test reason');
     expect(mockLog.info).toHaveBeenCalledWith(`Starting platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
-    expect(mockLog.info).toHaveBeenCalledWith(`Loading from config 1 Shelly devices`);
+    expect(mockLog.info).toHaveBeenCalledWith(`Loading from config 2 Shelly devices`);
     expect(mockLog.error).toHaveBeenCalledWith(
       `Config Shelly device id ${hk}shellyemg3-84FCE636582C${er} host ${zb}invalid${er} is not valid. Please check the plugin config and restart.`,
     );
+    expect(mockLog.debug).toHaveBeenCalledWith(`Loading from config Shelly device ${hk}shellyplus-34FCE636582C${db} host ${zb}192.168.255.1${db}`);
     expect((shellyPlatform as any).nodeStorageManager).toBeDefined();
-    expect(shellyPlatform.storedDevices.size).toBe(0);
+    expect(shellyPlatform.storedDevices.size).toBe(1);
 
     shellyPlatform.storedDevices.clear();
     expect(await (shellyPlatform as any).saveStoredDevices()).toBeTruthy();
@@ -337,6 +432,64 @@ describe('ShellyPlatform', () => {
 
     shellyPlatform.config.enableConfigDiscover = false;
     shellyPlatform.config.deviceIp = undefined;
+
+    cleanup();
+  });
+
+  it('should call onStart with reason and check failsafeCount', async () => {
+    expect(shellyPlatform).toBeDefined();
+    expect((shellyPlatform as any).shelly.mdnsScanner.isScanning).toBe(false);
+
+    (shellyPlatform as any).failsafeCount = 1;
+    shellyPlatform.shellyDevices.set('shellyemg3-84FCE636582C', { id: 'shellyemg3-84FCE636582C', host: 'invalid', port: 80, gen: 1 } as unknown as ShellyDevice);
+
+    await shellyPlatform.onStart('Test reason');
+    expect(mockLog.info).toHaveBeenCalledWith(`Starting platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
+    expect(mockLog.notice).toHaveBeenCalledWith(`Waiting for the configured number of 1 devices to be loaded.`);
+    (shellyPlatform as any).failsafeCount = 0;
+    shellyPlatform.shellyDevices.clear();
+
+    cleanup();
+  });
+
+  // eslint-disable-next-line jest/no-commented-out-tests
+  /*
+  it('should call onStart with reason and check failsafeCount and throw', async () => {
+    expect(shellyPlatform).toBeDefined();
+    expect((shellyPlatform as any).shelly.mdnsScanner.isScanning).toBe(false);
+
+    (shellyPlatform as any).failsafeCount = 1;
+    shellyPlatform.shellyDevices.clear();
+    shellyPlatform.bluBridgedDevices.clear();
+
+    await expect(shellyPlatform.onStart('Test reason')).rejects.toThrow();
+
+    expect(mockLog.info).toHaveBeenCalledWith(`Starting platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
+    expect(mockLog.notice).toHaveBeenCalledWith(`Waiting for the configured number of 1 devices to be loaded.`);
+
+    cleanup();
+  }, 60000);
+  */
+
+  it('should call onStart with reason and add devices', async () => {
+    expect(shellyPlatform).toBeDefined();
+
+    await shellyPlatform.onStart('Test reason');
+    expect(mockLog.info).toHaveBeenCalledWith(`Starting platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
+
+    const device1 = await ShellyDevice.create((shellyPlatform as any).shelly, (shellyPlatform as any).log, path.join('src', 'mock', 'shelly1-34945472A643.json'));
+    expect(device1).not.toBeUndefined();
+    (shellyPlatform as any).shelly.emit('discovered', { id: 'shelly1-34945472A643', host: '192.168.1.240', port: 80, gen: 1 });
+    device1?.destroy();
+
+    cleanup();
+    expect(await (shellyPlatform as any).saveStoredDevices()).toBeTruthy();
+    expect((shellyPlatform as any).discoveredDevices.size).toBe(0);
+    expect((shellyPlatform as any).storedDevices.size).toBe(0);
+    expect((shellyPlatform as any).shellyDevices.size).toBe(0);
+    expect((shellyPlatform as any).bridgedDevices.size).toBe(0);
+    expect((shellyPlatform as any).bluBridgedDevices.size).toBe(0);
+    expect((shellyPlatform as any).shelly._devices.size).toBe(0);
   });
 
   it('should load and save the stored devices', async () => {
@@ -345,6 +498,29 @@ describe('ShellyPlatform', () => {
     expect(await (shellyPlatform as any).saveStoredDevices()).toBeTruthy();
     const size = (shellyPlatform as any).storedDevices.size;
     expect(size).toBe(originalSize);
+  });
+
+  it('should handle Shelly discovered event', async () => {
+    shellyPlatform.discoveredDevices.clear();
+    shellyPlatform.storedDevices.clear();
+    (shellyPlatform as any).shelly.emit('discovered', { id: 'shelly1-84FCE1234', host: 'invalid', port: 80, gen: 1 });
+    expect(await (shellyPlatform as any).loadStoredDevices()).toBeTruthy();
+    expect((shellyPlatform as any).storedDevices.size).toBe(1);
+  });
+
+  it('should not add already discoverd Shelly', async () => {
+    (shellyPlatform as any).shelly.emit('discovered', { id: 'shelly1-84FCE1234', host: 'invalid', port: 80, gen: 1 });
+    expect(await (shellyPlatform as any).loadStoredDevices()).toBeTruthy();
+    expect((shellyPlatform as any).storedDevices.size).toBe(1);
+    expect(mockLog.info).toHaveBeenCalledWith(`Shelly device ${hk}shelly1-84FCE1234${nf} host ${zb}invalid${nf} already discovered`);
+  });
+
+  it('should not add already discoverd Shelly with different host', async () => {
+    (shellyPlatform as any).shelly.emit('discovered', { id: 'shelly1-84FCE1234', host: 'invalid new host', port: 80, gen: 1 });
+    expect(await (shellyPlatform as any).loadStoredDevices()).toBeTruthy();
+    expect((shellyPlatform as any).storedDevices.size).toBe(1);
+    expect(mockLog.warn).toHaveBeenCalledWith(`Shelly device ${hk}shelly1-84FCE1234${wr} host ${zb}invalid new host${wr} is already discovered with a different host.`);
+    cleanup();
   });
 
   it('should call onConfigure', async () => {
@@ -374,8 +550,11 @@ describe('ShellyPlatform', () => {
   }, 60000);
 
   it('should destroy shelly', async () => {
+    (shellyPlatform as any).shelly.destroy();
     expect((shellyPlatform as any).shelly.mdnsScanner).toBeUndefined();
     expect((shellyPlatform as any).shelly.coapServer).toBeUndefined();
+    expect((shellyPlatform as any).shelly.fetchInterval).toBeUndefined();
+    expect((shellyPlatform as any).shelly.coapServerTimeout).toBeUndefined();
     await wait(1000);
   }, 60000);
 });

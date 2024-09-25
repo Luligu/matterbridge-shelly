@@ -138,7 +138,7 @@ export class Shelly extends EventEmitter {
       }
     });
 
-    // Fetech updates from devices every 5-15 minutes (randomized) and save payloads to disk
+    // Fetch updates from devices every 5-15 minutes (randomized) and save payloads to disk
     this.fetchInterval = setInterval(() => {
       this.devices.forEach((device) => {
         if (device.sleepMode) return;
@@ -180,9 +180,9 @@ export class Shelly extends EventEmitter {
    * This method should be called when the instance is no longer needed to free up resources.
    */
   destroy() {
-    if (this.fetchInterval) clearInterval(this.fetchInterval);
+    clearInterval(this.fetchInterval);
     this.fetchInterval = undefined;
-    if (this.coapServerTimeout) clearTimeout(this.coapServerTimeout);
+    clearTimeout(this.coapServerTimeout);
     this.coapServerTimeout = undefined;
     this.devices.forEach((device) => {
       device.destroy();

@@ -8,6 +8,7 @@ describe('initializePlugin', () => {
   let mockMatterbridge: Matterbridge;
   let mockLog: AnsiLogger;
   let mockConfig: PlatformConfig;
+  let platform: ShellyPlatform;
 
   beforeEach(() => {
     mockMatterbridge = {
@@ -41,7 +42,12 @@ describe('initializePlugin', () => {
   });
 
   it('should return an instance of ShellyPlatform', () => {
-    const platform = initializePlugin(mockMatterbridge, mockLog, mockConfig);
+    platform = initializePlugin(mockMatterbridge, mockLog, mockConfig);
+    expect(platform).toBeInstanceOf(ShellyPlatform);
+  });
+
+  it('should shutdown the instance of ShellyPlatform', async () => {
+    await platform.onShutdown();
     expect(platform).toBeInstanceOf(ShellyPlatform);
   });
 });

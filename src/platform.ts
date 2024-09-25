@@ -791,14 +791,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     // Wait for the failsafe count to be met
     if (this.failsafeCount > 0) {
       this.log.notice(`Waiting for the configured number of ${this.failsafeCount} devices to be loaded.`);
-      const isSafe = await waiter(
-        'failsafeCount',
-        () => this.shellyDevices.size + this.bluBridgedDevices.size >= this.failsafeCount,
-        false,
-        55000,
-        1000,
-        this.config.debug as boolean,
-      );
+      /* prettier-ignore */
+      const isSafe = await waiter('failsafeCount', () => this.shellyDevices.size + this.bluBridgedDevices.size >= this.failsafeCount, false, 55000, 1000, this.config.debug as boolean);
       if (!isSafe) {
         throw new Error(
           `The plugin did not add the configured number of ${this.failsafeCount} devices. Registered ${this.shellyDevices.size + this.bluBridgedDevices.size} devices.`,
@@ -1407,6 +1401,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     }
   }
 
+  /*
   private updater: { component: string | string[]; property: string; typeof: string; min?: number; max?: number; cluster: string; attribute: string }[] = [
     { component: ['Light', 'Switch'], property: 'state', typeof: 'boolean', cluster: 'OnOff', attribute: 'onOff' },
     { component: ['Light', 'Switch'], property: 'brightness', typeof: 'number', min: 0, max: 100, cluster: 'LevelControl', attribute: 'currentLevel' },
@@ -1415,6 +1410,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     { component: ['Light', 'Rgb', 'Rgbw'], property: 'blue', typeof: 'array', min: 0, max: 255, cluster: 'ColorControl', attribute: '' },
     { component: ['Light', 'Rgb', 'Rgbw'], property: 'rgb', typeof: 'array', min: 3, max: 3, cluster: 'ColorControl', attribute: '' },
   ];
+  */
 
   private validateWhiteBlackList(entityName: string) {
     if (this.whiteList.length > 0 && !this.whiteList.find((name) => name === entityName)) {
