@@ -707,6 +707,16 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               this.shellyUpdateHandler(mbDevice, device, component, property, value);
             });
           }
+        } else if (component.name === 'Smoke' && config.exposeSmoke !== 'disabled') {
+          const smokeComponent = device.getComponent(key);
+          if (smokeComponent?.hasProperty('alarm') && isValidBoolean(smokeComponent.getValue('alarm'))) {
+            const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.CONTACT_SENSOR], []);
+            child.addClusterServer(mbDevice.getDefaultBooleanStateClusterServer(smokeComponent.getValue('alarm') as boolean));
+            // Add event handler
+            smokeComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
+              this.shellyUpdateHandler(mbDevice, device, component, property, value);
+            });
+          }
         } else if (component.name === 'Lux' && config.exposeLux !== 'disabled') {
           const luxComponent = device.getComponent(key);
           if (luxComponent?.hasProperty('value') && isValidNumber(luxComponent.getValue('value'), 0)) {
@@ -1266,6 +1276,10 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     // Update for Gas
     if (shellyComponent.name === 'Gas' && property === 'sensor_state' && isValidString(value)) {
       matterbridgeDevice.setAttribute(BooleanStateCluster.id, 'stateValue', value === 'normal', shellyDevice.log, endpoint);
+    }
+    // Update for Smoke
+    if (shellyComponent.name === 'Smoke' && property === 'alarm' && isValidBoolean(value)) {
+      matterbridgeDevice.setAttribute(BooleanStateCluster.id, 'stateValue', value, shellyDevice.log, endpoint);
     }
     // Update for Illuminance
     if (shellyComponent.name === 'Lux' && property === 'value' && isValidNumber(value, 0)) {
