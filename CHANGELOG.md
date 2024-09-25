@@ -6,7 +6,7 @@ If you like this project and find it useful, please consider giving it a star on
 
 ### Breaking Changes
 
-- Unless you are using docker (in that case all is already updated when you pull the image), please update Matterbridge to 1.5.4 to work with matterbridge-shelly >= 0.9.5.  This is a one time issue due to the update to matter.js 0.10.0.
+- Unless you are using docker (in that case all is already updated when you pull the image), please update Matterbridge to 1.5.5 to work with matterbridge-shelly >= 0.9.5.  This is a one time issue due to the update to matter.js 0.10.0.
 
 ## [0.10.0] - 2024-09-25
 
@@ -36,7 +36,7 @@ If you like this project and find it useful, please consider giving it a star on
 
 ### Changed
 
-- [matterbridge]: Refactor wsClient to send different src client id.
+- [ShellyWsClient]: Refactor wsClient to send different src client id.
 - [package]: Updated dependencies.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
