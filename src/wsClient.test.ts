@@ -6,7 +6,7 @@ import { WsClient } from './wsClient';
 import { WebSocket, WebSocketServer } from 'ws';
 import { AnsiLogger, LogLevel } from 'matterbridge/logger';
 
-describe('ShellyWsClient with server', () => {
+describe('ShellyWsClient', () => {
   let wsClient: WsClient;
   let server: WebSocketServer;
   const address = '30:f6:ef:69:2b:c5';

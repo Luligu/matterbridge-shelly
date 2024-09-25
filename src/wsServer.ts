@@ -5,7 +5,7 @@
  * @file src\wsServer.ts
  * @author Luca Liguori
  * @date 2024-08-13
- * @version 1.2.0
+ * @version 1.3.0
  *
  * Copyright 2024, 2025 Luca Liguori.
  *
@@ -28,21 +28,6 @@ import EventEmitter from 'events';
 import { createServer, IncomingMessage, Server } from 'http';
 import { ShellyDevice } from './shellyDevice.js';
 import { ShellyData } from './shellyTypes.js';
-/*
-{
-  src: 'shellyhtg3-3030f9ec8468',
-  dst: 'ws',
-  method: 'NotifyStatus',
-  params: { ts: 1723580582.44, ws: { connected: true } }
-}
-
-{
-  src: 'shellyhtg3-3030f9ec8468',
-  dst: 'ws',
-  method: 'NotifyEvent',
-  params: { ts: 1723580181.2, events: [ [Object] ] }
-}
-*/
 
 interface WsMessage {
   src: string;
@@ -68,6 +53,8 @@ export class WsServer extends EventEmitter {
   public readonly log;
   private httpServer: Server | undefined;
   private wsServer: WebSocket.Server | undefined;
+  private pingPeriod = 30000;
+  private pongPeriod = 30000;
   private _isListening = false;
 
   /**
@@ -140,9 +127,9 @@ export class WsServer extends EventEmitter {
           // Set a timeout to wait for a pong response
           pongTimeout = setTimeout(() => {
             this.log.error(`WebSocketServer pong not received.`);
-          }, 30000);
+          }, this.pongPeriod);
         }
-      }, 30000);
+      }, this.pingPeriod);
 
       // Handle incoming messages from clients
       ws.on('message', (data) => {
@@ -171,14 +158,14 @@ export class WsServer extends EventEmitter {
 
       // Handle pong messages
       ws.on('pong', (data: Buffer) => {
-        this.log.debug('WebSocketServer client received a pong');
+        this.log.debug('WebSocketServer client sent a pong');
         clearTimeout(pongTimeout);
         pongTimeout = undefined;
       });
 
       // Handle ping messages
       ws.on('ping', (data: Buffer) => {
-        this.log.debug('WebSocketServer client received a ping');
+        this.log.debug('WebSocketServer client sent a ping');
         ws.pong();
       });
 
@@ -232,7 +219,7 @@ export class WsServer extends EventEmitter {
       return;
     }
     this.log.debug(`Starting WebSocketServer...`);
-    this.listenForStatusUpdates(port); // Na await to start listening for status updates
+    this.listenForStatusUpdates(port); // No await to start listening for status updates
     this.log.debug(`Started WebSocketServer.`);
   }
 
@@ -253,8 +240,10 @@ export class WsServer extends EventEmitter {
     this._isListening = false;
     this.wsServer?.close();
     this.wsServer?.removeAllListeners();
+    this.wsServer = undefined;
     this.httpServer?.close();
     this.httpServer?.removeAllListeners();
+    this.httpServer = undefined;
     this.log.debug(`Stopped WebSocketServer.`);
   }
 }
