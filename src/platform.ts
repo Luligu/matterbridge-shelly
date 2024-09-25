@@ -1278,14 +1278,14 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       // Gen 1 close sequence: state:close current_pos:80 state:stop
       // Gen 1 stop sequence: state:stop current_pos:80
 
-      // Gen 2 has state:open|opening|close|closing|stopped target_pos:XXX current_pos:XXX ==> open means fully open, close means fully closed
+      // Gen 2 has state:open|opening|closed|closing|stopped target_pos:XXX current_pos:XXX ==> open means fully open, closed means fully closed
       // Gen 2 open sequence: state:open state:opening target_pos:88 current_pos:100 state:open
       // Gen 2 close sequence: state:closing target_pos:88 current_pos:95 state:stopped state:close
       // Gen 2 position sequence: state:closing target_pos:88 current_pos:95 state:stopped state:close
       // Gen 2 stop sequence: state:stop current_pos:80 state:stopped
       // Gen 2 state close or open is the position
       if (property === 'state' && isValidString(value, 4)) {
-        // Gen 1 devices send stop
+        // Gen 1 devices send stop. Gen 2 devices send stopped.
         if ((shellyDevice.gen === 1 && value === 'stop') || (shellyDevice.gen > 1 && value === 'stopped')) {
           const status = WindowCovering.MovementStatus.Stopped;
           matterbridgeDevice.setAttribute(WindowCoveringCluster.id, 'operationalStatus', { global: status, lift: status, tilt: status }, shellyDevice.log, endpoint);
@@ -1299,17 +1299,17 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             matterbridgeDevice.setAttribute(WindowCoveringCluster.id, 'targetPositionLiftPercent100ths', current, shellyDevice.log, endpoint);
           }, 1000);
         }
-        // Gen 1 devices send close
-        if (shellyDevice.gen > 1 && value === 'close') {
-          matterbridgeDevice.setAttribute(WindowCoveringCluster.id, 'targetPositionLiftPercent100ths', 10000, shellyDevice.log, endpoint);
-          matterbridgeDevice.setAttribute(WindowCoveringCluster.id, 'currentPositionLiftPercent100ths', 10000, shellyDevice.log, endpoint);
-          const status = WindowCovering.MovementStatus.Stopped;
-          matterbridgeDevice.setAttribute(WindowCoveringCluster.id, 'operationalStatus', { global: status, lift: status, tilt: status }, shellyDevice.log, endpoint);
-        }
-        // Gen 1 devices send open
+        // Gen 2 devices send open for fully open
         if (shellyDevice.gen > 1 && value === 'open') {
           matterbridgeDevice.setAttribute(WindowCoveringCluster.id, 'targetPositionLiftPercent100ths', 0, shellyDevice.log, endpoint);
           matterbridgeDevice.setAttribute(WindowCoveringCluster.id, 'currentPositionLiftPercent100ths', 0, shellyDevice.log, endpoint);
+          const status = WindowCovering.MovementStatus.Stopped;
+          matterbridgeDevice.setAttribute(WindowCoveringCluster.id, 'operationalStatus', { global: status, lift: status, tilt: status }, shellyDevice.log, endpoint);
+        }
+        // Gen 2 devices send closed for fully closed
+        if (shellyDevice.gen > 1 && value === 'closed') {
+          matterbridgeDevice.setAttribute(WindowCoveringCluster.id, 'targetPositionLiftPercent100ths', 10000, shellyDevice.log, endpoint);
+          matterbridgeDevice.setAttribute(WindowCoveringCluster.id, 'currentPositionLiftPercent100ths', 10000, shellyDevice.log, endpoint);
           const status = WindowCovering.MovementStatus.Stopped;
           matterbridgeDevice.setAttribute(WindowCoveringCluster.id, 'operationalStatus', { global: status, lift: status, tilt: status }, shellyDevice.log, endpoint);
         }

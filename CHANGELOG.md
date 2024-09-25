@@ -24,6 +24,10 @@ If you like this project and find it useful, please consider giving it a star on
 - [shelly]: All devices are loaded from cache to speed up the loading phase in huge networks.
 - [package]: Updated dependencies.
 
+### Fixed
+
+- [covery]: Fixed cover closed for gen 2 devices.
+
 <a href="https://www.buymeacoffee.com/luligugithub">
   <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
 </a>
