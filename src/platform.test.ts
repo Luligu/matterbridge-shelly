@@ -37,7 +37,7 @@ describe('ShellyPlatform', () => {
       matterbridgeDirectory: '',
       matterbridgePluginDirectory: 'temp',
       systemInformation: { ipv4Address: undefined },
-      matterbridgeVersion: '1.5.4',
+      matterbridgeVersion: '1.5.5',
       removeAllBridgedDevices: jest.fn(),
     } as unknown as Matterbridge;
     mockLog = {
