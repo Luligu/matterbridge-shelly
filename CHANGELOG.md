@@ -32,6 +32,7 @@ If you like this project and find it useful, please consider giving it a star on
 ### Fixed
 
 - [covery]: Fixed cover closed for gen 2 devices.
+- [mdns]: Fixed gen discovery.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
   <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
