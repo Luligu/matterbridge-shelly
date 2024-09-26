@@ -6,13 +6,43 @@ If you like this project and find it useful, please consider giving it a star on
 
 ### Breaking Changes
 
-- Unless you are using docker (in that case all is already updated when you pull the image), please update Matterbridge to 1.5.4 to work with matterbridge-shelly >= 0.9.5.  This is a one time issue due to the update to matter.js 0.10.0.
+- Unless you are using docker (in that case all is already updated when you pull the image), please update Matterbridge to 1.5.5 to work with matterbridge-shelly >= 0.9.5.  This is a one time issue due to the update to matter.js 0.10.0.
+
+## [0.10.0] - 2024-09-26
+
+### Added
+
+- [shelly]: Added component Gas.
+- [shelly]: Added support for shellygas with firmware v1.14.0 and added Jest test.
+- [shelly]: Added component Smoke.
+- [shelly]: Added support for shellyplussmoke with firmware v1.4.2 and added Jest test.
+- [test]: Added Jest test for ShellyWsServer
+- [test]: Added Jest test for ShellyWsClient
+- [test]: Added Jest test for real gen 1 devices
+- [test]: Added Jest test for real gen 2 devices
+- [test]: Added Jest test for real gen 3 devices
+- [shelly]: Added a cache validation random interval for all not sleeping devices.
+
+### Changed
+
+- [shelly]: All devices are loaded from cache to speed up the loading phase in huge networks.
+- [shelly]: Added electricalSensor device type to Switch, Light and Cover components when enabled (will be supported by Home Assistant v. 2024.10).
+- [package]: Updated dependencies.
+
+### Fixed
+
+- [covery]: Fixed cover closed for gen 2 devices.
+- [mdns]: Fixed gen discovery.
+
+<a href="https://www.buymeacoffee.com/luligugithub">
+  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+</a>
 
 ## [0.9.10] - 2024-09-19
 
 ### Changed
 
-- [matterbridge]: Refactor wsClient to send different src client id.
+- [ShellyWsClient]: Refactor wsClient to send different src client id.
 - [package]: Updated dependencies.
 
 <a href="https://www.buymeacoffee.com/luligugithub">

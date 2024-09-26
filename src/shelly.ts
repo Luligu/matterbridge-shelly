@@ -23,6 +23,7 @@
 
 import { AnsiLogger, CYAN, MAGENTA, BRIGHT, hk, db, nf, wr, zb, er, LogLevel } from 'matterbridge/logger';
 
+import crypto from 'crypto';
 import EventEmitter from 'events';
 
 import { ShellyDevice } from './shellyDevice.js';
@@ -43,6 +44,7 @@ import { isValidArray, isValidObject } from 'matterbridge/utils';
 export class Shelly extends EventEmitter {
   private readonly _devices = new Map<string, ShellyDevice>();
   private readonly log: AnsiLogger;
+  private fetchInterval?: NodeJS.Timeout;
   private mdnsScanner: MdnsScanner | undefined;
   public coapServer: CoapServer | undefined;
   public wsServer: WsServer | undefined;
@@ -135,6 +137,37 @@ export class Shelly extends EventEmitter {
         }
       }
     });
+
+    // Fetch updates from devices every 5-15 minutes (randomized) and save payloads to disk
+    this.fetchInterval = setInterval(() => {
+      this.devices.forEach((device) => {
+        if (device.sleepMode) return;
+        if (device.fetchInterval === 0) {
+          const minMinutes = 55;
+          const maxMinutes = 65;
+          const randomFactor = crypto.randomBytes(4).readUInt32BE() / 0xffffffff;
+          device.fetchInterval = (minMinutes + randomFactor * (maxMinutes - minMinutes)) * 60 * 1000;
+          const fetchIntervalMinutes = Math.floor(device.fetchInterval / 1000 / 60);
+          const fetchIntervalSeconds = Math.round((device.fetchInterval / 1000) % 60);
+          this.log.debug(
+            `***Device ${hk}${device.id}${db} host ${zb}${device.host}${db} fetch interval ${CYAN}${fetchIntervalMinutes}${db} minutes and ${CYAN}${fetchIntervalSeconds}${db} seconds`,
+          );
+        }
+        if (Date.now() - device.lastFetched > device.fetchInterval) {
+          device.fetchUpdate().then((data) => {
+            device.lastFetched = Date.now();
+            if (data) {
+              const fetchIntervalMinutes = Math.floor(device.fetchInterval / 1000 / 60);
+              const fetchIntervalSeconds = Math.round((device.fetchInterval / 1000) % 60);
+              this.log.debug(
+                `****Fetching data from device ${hk}${device.id}${db} host ${zb}${device.host}${db} (fetch interval ${CYAN}${fetchIntervalMinutes}${db} minutes and ${CYAN}${fetchIntervalSeconds}${db} seconds)`,
+              );
+              device.saveDevicePayloads(this._dataPath);
+            }
+          });
+        }
+      });
+    }, 10 * 1000);
   }
 
   /**
@@ -147,7 +180,9 @@ export class Shelly extends EventEmitter {
    * This method should be called when the instance is no longer needed to free up resources.
    */
   destroy() {
-    if (this.coapServerTimeout) clearTimeout(this.coapServerTimeout);
+    clearInterval(this.fetchInterval);
+    this.fetchInterval = undefined;
+    clearTimeout(this.coapServerTimeout);
     this.coapServerTimeout = undefined;
     this.devices.forEach((device) => {
       device.destroy();

@@ -72,17 +72,25 @@ See the complete guidelines on [Matterbridge](https://github.com/Luligu/matterbr
 
 A shelly device gen. 1 or 2 or 3 or BLU.
 
-For Gen. 1 devices:
+## How to add a device
+
+Verify that enableMdnsDiscover and enableStorageDiscover are selected in the plugin configuration. Restart matterbridge (the mdns discovery is active for the first 10 minutes) and the devices will be discovered.
+
+Follow these guidelines for specific devices.
+
+### Add Gen. 1 devices
 
 - CoIoT: the CoIoT (coap) service must be enabled in the settings of the device and the CoIoT peer must be mcast. If mcast is not working on your network put in the peer field `<matterbridge-ipv4>:5683` (where `<matterbridge-ipv4>` is the ipv4 address of Matterbridge e.g. 192.168.1.100:5683). You can find the matterbridge ipv4Address address in the frontend or in the log. Multicast may not work for all networks due to router or access poit configuration or network topology (I cannot help you on this, just check your router or access point configuration). If CoIoT is not configured correctly you will not receive any update from the device.
 
-For wifi battery-powered devices:
+### Add Gen. 1 battery-powered devices
 
-- Gen. 1: only for the first time, when you want to register them: check that enableMdnsDiscover and enableStorageDiscover are flagged in the plugin configuration. Restart matterbridge (the mdns discovery is active for the first 10 minutes) and awake each device you want to register pressing the device button.
+- only for the first time, when you want to register them: check that enableMdnsDiscover and enableStorageDiscover are flagged in the plugin configuration. Restart matterbridge (the mdns discovery is active for the first 10 minutes) and awake each device you want to register pressing the device button.
 
-- Gen. 2/3: in the device web page go to "Settings", then "Outbound websocket" and enable it, select "TLS no validation" and put in the server field `ws://<matterbridge-ipv4>:8485` (where `<matterbridge-ipv4>` is the ipv4 address of Matterbridge e.g. ws://192.168.1.100:8485). You can find the matterbridge ipv4Address address in the frontend or in the log. Then, only for the first time, when you want to register them: check that enableMdnsDiscover and enableStorageDiscover are flagged in the plugin configuration. Restart matterbridge (the mdns discovery is active for the first 10 minutes) and awake each device you want to register pressing the device button.
+### Add Gen. 2 or 3 battery-powered devices
 
-For BLU devices:
+- in the device web page go to "Settings", then "Outbound websocket" and enable it, select "TLS no validation" and put in the server field `ws://<matterbridge-ipv4>:8485` (where `<matterbridge-ipv4>` is the ipv4 address of Matterbridge e.g. ws://192.168.1.100:8485). You can find the matterbridge ipv4Address address in the frontend or in the log. Then, only for the first time, when you want to register them: check that enableMdnsDiscover and enableStorageDiscover are flagged in the plugin configuration. Restart matterbridge (the mdns discovery is active for the first 10 minutes) and awake each device you want to register pressing the device button.
+
+### Add BLU devices
 
 - BLU devices are supported through a local Shelly device acting as a ble gateway. To enable this feature, choose one or more devices that have the ble component and support the ble gateway (e.g. PRO and gen. 3 devices). In the gateway device web page, enable both "Enable Bluetooth" and "Enable Bluetooth gateway". Then, go to the "Components" section and add your BLU devices in "Bluetooth (BTHome) devices". Give a meaningful name to your device if desired and restart Matterbridge. 
 See the full guide here: https://github.com/Luligu/matterbridge-shelly/blob/dev/BLU.md

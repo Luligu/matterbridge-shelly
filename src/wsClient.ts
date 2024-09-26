@@ -4,7 +4,7 @@
  * @file src\wsClient.ts
  * @author Luca Liguori
  * @date 2024-05-01
- * @version 2.0.0
+ * @version 2.0.1
  *
  * Copyright 2024, 2025 Luca Liguori.
  *
@@ -373,7 +373,7 @@ export class WsClient extends EventEmitter {
    */
   start() {
     this.log.debug(`Starting ws client for Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}`);
-    this.listenForStatusUpdates(); // Na await to start listening for status updates
+    this.listenForStatusUpdates(); // No await to start listening for status updates
     this.log.debug(`Started ws client for Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}`);
   }
 
@@ -391,26 +391,25 @@ export class WsClient extends EventEmitter {
       `Stopping ws client for Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db} state ${this.wsClient?.readyState} connencting ${this._isConnecting} connected ${this._isConnected} `,
     );
     this.stopPingPong();
-    if (this._isConnecting) {
-      this.stopTimeout = setTimeout(() => {
-        this.stopTimeout = undefined;
-        try {
-          if (this._isConnected) this.wsClient?.close();
-          if (this._isConnecting) this.wsClient?.terminate();
-        } catch (error) {
-          this.log.error(`Error stopping ws client for Shelly device ${hk}${this.wsDeviceId}${er} host ${zb}${this.wsHost}${er}: ${error}`);
-        }
-        this._isConnecting = false;
-        this._isConnected = false;
-        this.wsClient?.removeAllListeners();
-        this.log.debug(`Stopped ws client for Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}`);
-      }, 5000);
-      return;
+
+    try {
+      if (this.wsClient?.readyState === WebSocket.OPEN || this.wsClient?.readyState === WebSocket.CONNECTING) {
+        this.wsClient?.close();
+        this.log.debug(`Closed ws client for Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}`);
+      }
+      if (this.wsClient?.readyState !== WebSocket.CLOSED) {
+        this.wsClient?.terminate();
+        this.log.debug(`Terminated ws client for Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}`);
+      }
+    } catch (error) {
+      this.log.debug(`Error stopping ws client for Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}: ${error}`);
+    } finally {
+      this._isConnecting = false;
+      this._isConnected = false;
+      this.wsClient?.removeAllListeners();
+      this.wsClient = undefined;
+      this.log.debug(`Stopped ws client for Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}`);
     }
-    if (this._isConnected) this.wsClient?.close();
-    this._isConnected = false;
-    this.wsClient?.removeAllListeners();
-    this.log.debug(`Stopped ws client for Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}`);
   }
 }
 
@@ -427,19 +426,27 @@ if (process.argv.includes('startWsClient')) {
 
   setTimeout(() => {
     wsClient1.sendRequest('Switch.Set', { id: 0, on: true });
+    wsClient2.sendRequest('Light.Set', { id: 0, on: true });
   }, 5000);
 
   setTimeout(() => {
-    wsClient1.sendRequest('Switch.Set', { id: 0, on: false });
+    wsClient2.sendRequest('Light.Set', { id: 0, on: false });
   }, 10000);
 
   setTimeout(() => {
     wsClient1.sendRequest('Shelly.GetComponents', {});
+    wsClient2.sendRequest('Shelly.GetComponents', {});
   }, 15000);
 
   setTimeout(() => {
     wsClient1.sendRequest('Shelly.ListMethods', {});
+    wsClient2.sendRequest('Shelly.ListMethods', {});
   }, 20000);
+
+  setTimeout(() => {
+    wsClient1.stop();
+    wsClient2.stop();
+  }, 30000);
 
   process.on('SIGINT', async function () {
     wsClient1.stop();
