@@ -66,7 +66,8 @@ sudo chown -R $USER:$USER ./Matterbridge ./.matterbridge
 ## Install matterbridge
 
 ```
-sudo npm install -g matterbridge matterbridge-shelly
+sudo npm install -g matterbridge --omit=dev
+sudo npm install -g matterbridge-shelly --omit=dev
 matterbridge -add matterbridge-shelly
 ```
 
