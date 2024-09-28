@@ -8,6 +8,17 @@ If you like this project and find it useful, please consider giving it a star on
 
 - Unless you are using docker (in that case all is already updated when you pull the image), please update Matterbridge to 1.5.5 to work with matterbridge-shelly >= 0.9.5.  This is a one time issue due to the update to matter.js 0.10.0.
 
+## [0.11.0] - 2024-09-30
+
+### Changed
+
+- [package]: Optimizing for space and speed the package for rock-s0.
+- [package]: Updated dependencies.
+
+<a href="https://www.buymeacoffee.com/luligugithub">
+  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+</a>
+
 ## [0.10.0] - 2024-09-26
 
 ### Added
