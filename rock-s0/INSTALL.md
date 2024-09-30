@@ -51,7 +51,8 @@ sudo systemctl enable smbd nmbd
 
 Copy the file matterbridge to /etc/sudoers.d/matterbridge
 ```
-curl https://raw.githubusercontent.com/Luligu/matterbridge-shelly/dev/rock-s0/sudoers/matterbridge -o /etc/sudoers.d/matterbridge
+sudo curl https://raw.githubusercontent.com/Luligu/matterbridge-shelly/dev/rock-s0/sudoers/matterbridge -o /etc/sudoers.d/matterbridge
+sudo chmod 0440 /etc/sudoers.d/matterbridge
 ```
 
 then check and reload the settings with:
@@ -64,7 +65,7 @@ sudo visudo -c
 # Install node 22.x
 
 ```
-curl -fsSL https://deb.nodesource.com/setup_22.x -o nodesource_setup.sh
+sudo curl -fsSL https://deb.nodesource.com/setup_22.x -o nodesource_setup.sh
 sudo bash nodesource_setup.sh
 sudo apt-get install -y nodejs
 node -v
@@ -105,7 +106,7 @@ matterbridge -add matterbridge-shelly
 
 Copy the systemctl configuration file for Matterbridge
 ```
-curl https://raw.githubusercontent.com/Luligu/matterbridge-shelly/dev/rock-s0/systemd/matterbridge.service -o /etc/systemd/system/matterbridge.service
+sudo curl https://raw.githubusercontent.com/Luligu/matterbridge-shelly/dev/rock-s0/systemd/matterbridge.service -o /etc/systemd/system/matterbridge.service
 ```
 
 then reload the settings with:

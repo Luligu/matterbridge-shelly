@@ -113,6 +113,7 @@ export class MdnsScanner extends EventEmitter {
     if (mdnsInterface && mdnsInterface !== '' && type && (type === 'udp4' || type === 'udp6')) {
       const mdnsOptions: mdns.Options = {};
       mdnsOptions.interface = mdnsInterface;
+      mdnsOptions.bind = mdnsOptions.interface;
       mdnsOptions.type = type;
       mdnsOptions.ip = type === 'udp4' ? '224.0.0.251' : 'ff02::fb';
       mdnsOptions.port = 5353;
@@ -276,14 +277,29 @@ export class MdnsScanner extends EventEmitter {
    */
   logPeripheral() {
     this.log.debug(`Discovered ${this.devices.size} devices:`);
+    // Convert the Map to an array and sort by host
+    const sortedDevices = Array.from(this.devices).sort((a, b) => {
+      const hostA = a[1].toLowerCase();
+      const hostB = b[1].toLowerCase();
+      if (hostA < hostB) return -1;
+      if (hostA > hostB) return 1;
+      return 0;
+    });
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    for (const [name, host] of this.devices) {
+    for (const [name, host] of sortedDevices) {
       this.log.debug(`- host: ${zb}${host}${nf}`);
     }
 
     this.log.info(`Discovered ${this.discoveredDevices.size} shelly devices:`);
+    const sortedDiscoveredDevices = Array.from(this.discoveredDevices).sort((a, b) => {
+      const idA = a[1].id;
+      const idB = b[1].id;
+      if (idA < idB) return -1;
+      if (idA > idB) return 1;
+      return 0;
+    });
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    for (const [name, { id, host, port, gen }] of this.discoveredDevices) {
+    for (const [name, { id, host, port, gen }] of sortedDiscoveredDevices) {
       this.log.info(`- id: ${hk}${name}${nf} host: ${zb}${host}${nf} port: ${zb}${port}${nf} gen: ${CYAN}${gen}${nf}`);
     }
     return this.discoveredDevices.size;
