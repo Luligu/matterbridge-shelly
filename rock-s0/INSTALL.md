@@ -5,18 +5,25 @@ image: rock-s0_debian_bookworm_cli_b6.img
 
 # Update system with rsetup
 
+## Update and upgrade
 ```
 rsetup
 ```
 then System, System Update and confirm.
 
-
+## Set time
 then set the locale time in the radxa setup
 ```
 rsetup 
 ```
 then Localization, Change Timezone.
 
+## Set hostname
+```
+rsetup 
+```
+
+then check /etc/hosts
 
 ```
 sudo nano /etc/hosts
@@ -72,7 +79,7 @@ node -v
 ```
 
 
-# Install cockpit and btop and ungrade
+# Install cockpit and btop and upgrade
 
 ```
 sudo apt update
