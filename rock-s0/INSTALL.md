@@ -1,16 +1,30 @@
-Start from the official Radxa image for rock-s0: rock-s0_debian_bookworm_cli_b6.img.xz
+Start flashing the eMMC with the official Radxa loader and image for rock-s0: 
 
-# Update system
+loader: rk3308_loader_ddr589MHz_uart0_m0_v2.06.136sd.bin
+image: rock-s0_debian_bookworm_cli_b6.img
+
+# Update system with rsetup
+
 ```
-sudo apt update
-sudo apt install cockpit btop -y
-sudo apt upgrade
+rsetup
 ```
+then System, System Update and confirm.
+
 
 then set the locale time in the radxa setup
 ```
 rsetup 
 ```
+then Localization, Change Timezone.
+
+
+```
+sudo nano /etc/hosts
+```
+set the hostname of the device (change rock-s0 with the new hostname)
+
+127.0.0.1 localhost 
+127.0.1.1 rock-s0
 
 
 # Samba without password
@@ -18,20 +32,26 @@ rsetup
 Copy the file smb.conf to /etc/samba/smb.conf
 
 ```
-curl https://raw.githubusercontent.com/Luligu/matterbridge-shelly/dev/rock-s0/samba/smb.conf -o /etc/samba/smb.conf 
+sudo curl https://raw.githubusercontent.com/Luligu/matterbridge-shelly/dev/rock-s0/samba/smb.conf -o /etc/samba/smb.conf 
 ```
+
+change the hostname from rock-s0 to the new hostname
 
 then reload the services
 ```
 sudo systemctl restart smbd nmbd
 ```
 
+if desired make them start at boot
+```
+sudo systemctl enable smbd nmbd
+```
 
 # Sudo without password
 
-Copy the file matterbridge.conf to /etc/sudoers.d/matterbridge.conf
+Copy the file matterbridge to /etc/sudoers.d/matterbridge
 ```
-curl https://raw.githubusercontent.com/Luligu/matterbridge-shelly/dev/rock-s0/sudoers/matterbridge.conf -o /etc/sudoers.d/matterbridge.conf
+curl https://raw.githubusercontent.com/Luligu/matterbridge-shelly/dev/rock-s0/sudoers/matterbridge -o /etc/sudoers.d/matterbridge
 ```
 
 then check and reload the settings with:
@@ -48,6 +68,15 @@ curl -fsSL https://deb.nodesource.com/setup_22.x -o nodesource_setup.sh
 sudo bash nodesource_setup.sh
 sudo apt-get install -y nodejs
 node -v
+```
+
+
+# Install cockpit and btop and ungrade
+
+```
+sudo apt update
+sudo apt install cockpit btop -y
+sudo apt upgrade
 ```
 
 
