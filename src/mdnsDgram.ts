@@ -3,9 +3,6 @@
 import dgram from 'dgram';
 import { AnsiLogger, CYAN, db, debugStringify, er, GREEN, hk, idn, ign, LogLevel, nf, rs, TimestampFormat, wr, YELLOW, zb } from 'node-ansi-logger';
 import os, { NetworkInterfaceInfoIPv4, NetworkInterfaceInfoIPv6 } from 'os';
-import dnsPacket from 'dns-packet';
-
-// https://github.com/mafintosh/dns-packet
 
 class MdnsScanner {
   private readonly log;
@@ -16,9 +13,6 @@ class MdnsScanner {
   private multicastAddressIpv6 = 'ff02::fb';
   private multicastPort = 5353;
   private useIpv4Only: boolean;
-
-  // private multicastAddressIpv4 = '224.0.1.187';
-  // private multicastPort = 5683;
 
   private networkInterfaceAddressIpv4: string | undefined;
   private networkInterfaceAddressIpv6: string | undefined;
@@ -80,7 +74,7 @@ class MdnsScanner {
     // if (this.devices.has(rinfo.address)) return;
     // if (rinfo.address !== '192.168.1.181' && rinfo.address !== '192.168.1.217' && rinfo.address !== '192.168.1.218') return;
     // if (rinfo.address !== '192.168.1.227' && rinfo.address !== '192.168.1.217' && rinfo.address !== '192.168.1.218') return;
-    this.log.info(`Received message from ${ign}${rinfo.address}:${rinfo.port}${rs}`);
+    this.log.info(`Received mDNS message from ${ign}${rinfo.address}${rs}${nf}:${rinfo.port}`);
     this.devices.set(rinfo.address, { address: rinfo.address, port: rinfo.port });
 
     /*
@@ -191,7 +185,7 @@ class MdnsScanner {
       this.parseMdnsResponse(msg, rinfo);
     } catch (error) {
       this.errorDevices.set(rinfo.address, { address: rinfo.address, port: rinfo.port });
-      this.log.error(`Failed to decode mDNS message from ${rinfo.address}:${rinfo.port}: ${error instanceof Error ? error.message : error}`);
+      this.log.error(`Failed to decode mDNS message from ${ign}${rinfo.address}${rs}${er}:${rinfo.port}: ${error instanceof Error ? error.message : error}`);
     }
   };
 
@@ -209,12 +203,12 @@ class MdnsScanner {
   public query(name = '_services._dns-sd._udp.local', type = 'PTR', classId = 1) {
     const queryBuffer = this.buildQuery(name, type, classId);
     this.socketUdp4.send(queryBuffer, 0, queryBuffer.length, this.multicastPort, this.multicastAddressIpv4, (err: Error | null) => {
-      if (err) this.log.error(`MdnsScannererr error sending query on udp4: ${err.message}`);
-      else this.log.info(`Query sent on udp4 with name: ${CYAN}${name}${nf} and type: ${CYAN}${type}${nf} class: ${CYAN}${classId}${nf}`);
+      if (err) this.log.error(`Error sending query on udp4: ${err.message}`);
+      else this.log.info(`Query sent on udp4 with name: ${CYAN}${name}${nf} type: ${CYAN}${type}${nf} class: ${CYAN}${classId}${nf}`);
     });
     this.socketUdp6?.send(queryBuffer, 0, queryBuffer.length, this.multicastPort, this.multicastAddressIpv6, (err: Error | null) => {
-      if (err) this.log.error(`MdnsScannererr error sending query on udp6: ${err.message}`);
-      else this.log.info(`Query sent on udp6 with name: ${CYAN}${name}${nf} and type: ${CYAN}${type}${nf} class: ${CYAN}${classId}${nf}`);
+      if (err) this.log.error(`Error sending query on udp6: ${err.message}`);
+      else this.log.info(`Query sent on udp6 with name: ${CYAN}${name}${nf} type: ${CYAN}${type}${nf} class: ${CYAN}${classId}${nf}`);
     });
   }
 
@@ -356,7 +350,8 @@ class MdnsScanner {
         console.log(
           `${name.startsWith('shelly') ? wr : ''}${name.padEnd(50, ' ')} ${idn}${this.rrTypeToString(type)}${rs}, Class: ${qclass}, TTL: ${ttl}, Data: ${typeof decoded === 'object' ? debugStringify(decoded) : decoded}`,
         );
-        if (name.startsWith('shelly')) this.shellyDevices.set(rinfo.address, { address: rinfo.address, id: name.split('.')[0], gen: 0 });
+        if (name.startsWith('shelly') && this.normalizeShellyId(name.split('.')[0]))
+          this.shellyDevices.set(rinfo.address, { address: rinfo.address, id: this.normalizeShellyId(name.split('.')[0]) ?? name.split('.')[0], gen: 0 });
       }
 
       if (nscount > 0) console.log(`${GREEN}Authority RRs ${nscount}:${rs}`);
@@ -405,7 +400,8 @@ class MdnsScanner {
         console.log(
           `${name.startsWith('shelly') ? wr : ''}${name.padEnd(50, ' ')} ${idn}${this.rrTypeToString(type)}${rs}, Class: ${qclass}, TTL: ${ttl}, Data: ${typeof decoded === 'object' ? debugStringify(decoded) : decoded}`,
         );
-        if (name.startsWith('shelly')) this.shellyDevices.set(rinfo.address, { address: rinfo.address, id: name.split('.')[0], gen: 0 });
+        if (name.startsWith('shelly') && this.normalizeShellyId(name.split('.')[0]))
+          this.shellyDevices.set(rinfo.address, { address: rinfo.address, id: this.normalizeShellyId(name.split('.')[0]) ?? name.split('.')[0], gen: 0 });
       }
 
       if (arcount > 0) console.log(`${GREEN}Additional RRs ${arcount}:${rs}`);
@@ -454,7 +450,8 @@ class MdnsScanner {
         console.log(
           `${name.startsWith('shelly') ? wr : ''}${name.padEnd(50, ' ')} ${idn}${this.rrTypeToString(type)}${rs}, Class: ${qclass}, TTL: ${ttl}, Data: ${typeof decoded === 'object' ? debugStringify(decoded) : decoded}`,
         );
-        if (name.startsWith('shelly')) this.shellyDevices.set(rinfo.address, { address: rinfo.address, id: name.split('.')[0], gen: 0 });
+        if (name.startsWith('shelly') && this.normalizeShellyId(name.split('.')[0]))
+          this.shellyDevices.set(rinfo.address, { address: rinfo.address, id: this.normalizeShellyId(name.split('.')[0]) ?? name.split('.')[0], gen: 0 });
       }
     } catch (error) {
       console.error('Failed to parse mDNS response:', error);
@@ -729,6 +726,24 @@ class MdnsScanner {
       }
     }
   };
+
+  /**
+   * Normalizes a Shelly device ID by converting it to a standard format.
+   * @param {string} shellyId - The Shelly device ID to normalize.
+   * @returns {string | undefined} The normalized Shelly device ID, or undefined if the ID is invalid.
+   * @example
+   * // Normalize a Shelly device ID
+   * const normalizedId = mdnsScanner.normalizeShellyId('ShellyPlug-S-c38345.local');
+   * console.log(normalizedId); // Output: 'shellyplug-s-C38345'
+   */
+  normalizeShellyId(shellyId: string): string | undefined {
+    const parts = shellyId.replace('.local', '').split('-');
+    if (parts.length < 2) return undefined;
+    const mac = parts.pop(); // Extract the MAC address (last part)
+    if (!mac) return undefined;
+    const name = parts.join('-'); // Join the remaining parts to form the device name
+    return name.toLowerCase() + '-' + mac.toUpperCase();
+  }
 }
 
 MdnsScanner.listNetworkInterfaces(); // List available network interfaces
@@ -758,7 +773,15 @@ function logDevices() {
 
   shellyArray.sort(([keyA, deviceA], [keyB, deviceB]) => deviceA.address.localeCompare(deviceB.address));
   // Log the sorted devices
-  console.log(`Found ${shellyArray.length} Shelly devices:`);
+  console.log(`Found ${shellyArray.length} Shelly devices (sorted by host):`);
+
+  shellyArray.forEach(([key, device]) => {
+    console.log(`Shelly id: ${hk}${device.id}${rs} host ${zb}${device.address}${rs} gen: ${YELLOW}${device.gen}${rs}`);
+  });
+
+  shellyArray.sort(([keyA, deviceA], [keyB, deviceB]) => deviceA.id.localeCompare(deviceB.id));
+  // Log the sorted devices
+  console.log(`\nFound ${shellyArray.length} Shelly devices (sorted by id):`);
 
   shellyArray.forEach(([key, device]) => {
     console.log(`Shelly id: ${hk}${device.id}${rs} host ${zb}${device.address}${rs} gen: ${YELLOW}${device.gen}${rs}`);

@@ -4,11 +4,7 @@ All notable changes to this project will be documented in this file.
 
 If you like this project and find it useful, please consider giving it a star on GitHub at https://github.com/Luligu/matterbridge-shelly and sponsoring it.
 
-### Breaking Changes
-
-- Unless you are using docker (in that case all is already updated when you pull the image), please update Matterbridge to 1.5.5 to work with matterbridge-shelly >= 0.9.5.  This is a one time issue due to the update to matter.js 0.10.0.
-
-## [0.11.0] - 2024-09-30
+## [0.11.0] - 2024-10-01
 
 ### Added
 
@@ -17,10 +13,14 @@ If you like this project and find it useful, please consider giving it a star on
 
 ### Changed
 
-- [ShellyDevice]: Refactor normalizeId.
 - [ShellyMdnsScanner]: Refactor Jest test.
-- [package]: Optimizing for space and speed the package for rock-s0.
+- [package]: Optimized the package for space and speed for rock-s0.
 - [package]: Updated dependencies.
+
+### Fixed
+
+- [ShellyMdnsScanner]: Fixed name discovered for shellyplug-s
+- [ShellyDevice]: Fixed normalizeId.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
   <img src="./yellow-button.png" alt="Buy me a coffee" width="120">

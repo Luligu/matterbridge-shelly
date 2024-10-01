@@ -117,7 +117,7 @@ describe('Shellies MdnsScanner test', () => {
       expect(discoveredDeviceListener).toHaveBeenCalledWith({ id: 'shellyswitch25-3494546BBF7E', host: '192.168.1.222', port: 80, gen: 1 });
       expect((mdns as any).discoveredDevices.has('shellyswitch25-3494546BBF7E')).toBeTruthy();
       done();
-    }, 2000);
+    }, 1000);
     (mdns as any).discoveredDevices.clear();
     (mdns as any).scanner.emit('response', gen1_ResponsePacket, gen1_RemoteInfo);
     mdns.stop();
@@ -133,7 +133,7 @@ describe('Shellies MdnsScanner test', () => {
       expect(discoveredDeviceListener).toHaveBeenCalledWith({ id: 'shellyplus2pm-30C92286CB68', host: '192.168.1.228', port: 80, gen: 2 });
       expect((mdns as any).discoveredDevices.has('shellyplus2pm-30C92286CB68')).toBeTruthy();
       done();
-    }, 2000);
+    }, 1000);
     (mdns as any).discoveredDevices.clear();
     (mdns as any).scanner.emit('response', gen2_ResponsePacket, gen2_RemoteInfo);
     mdns.stop();
@@ -149,7 +149,7 @@ describe('Shellies MdnsScanner test', () => {
       expect(discoveredDeviceListener).toHaveBeenCalledWith({ id: 'shellypmminig3-84FCE63957F4', host: '192.168.1.220', port: 80, gen: 3 });
       expect((mdns as any).discoveredDevices.has('shellypmminig3-84FCE63957F4')).toBeTruthy();
       done();
-    }, 2000);
+    }, 1000);
     (mdns as any).discoveredDevices.clear();
     (mdns as any).scanner.emit('response', gen3_ResponsePacket, gen3_RemoteInfo);
     mdns.stop();
@@ -165,12 +165,88 @@ describe('Shellies MdnsScanner test', () => {
       expect(discoveredDeviceListener).toHaveBeenCalledWith({ id: 'shellyplug-s-C38EAB', host: '192.168.68.75', port: 80, gen: 1 });
       expect((mdns as any).discoveredDevices.has('shellyplug-s-C38EAB')).toBeTruthy();
       done();
-    }, 2000);
+    }, 1000);
     (mdns as any).discoveredDevices.clear();
     const data = loadResponse('shellyplug-s-C38EAB');
     expect(data).not.toBeUndefined();
     if (!data) return;
     (mdns as any).scanner.emit('response', data, { address: '192.168.68.75', family: 'IPv4', port: 5353, size: 501 });
+    mdns.stop();
+    expect(mdns.isScanning).toBeFalsy();
+  }, 10000);
+
+  test('Shelly bulbduo', (done) => {
+    discoveredDeviceListener.mockClear();
+    mdns.on('discovered', discoveredDeviceListener);
+    mdns.start(undefined, undefined, undefined, true);
+    expect(mdns.isScanning).toBeTruthy();
+    setTimeout(() => {
+      expect(discoveredDeviceListener).toHaveBeenCalledWith({ id: 'shellybulbduo-34945479CFA4', host: '192.168.1.154', port: 80, gen: 1 });
+      expect((mdns as any).discoveredDevices.has('shellybulbduo-34945479CFA4')).toBeTruthy();
+      done();
+    }, 1000);
+    (mdns as any).discoveredDevices.clear();
+    const data = loadResponse('shellybulbduo-34945479CFA4');
+    expect(data).not.toBeUndefined();
+    if (!data) return;
+    (mdns as any).scanner.emit('response', data, { address: '192.168.1.154', family: 'IPv4', port: 5353, size: 0 });
+    mdns.stop();
+    expect(mdns.isScanning).toBeFalsy();
+  }, 10000);
+
+  test('Shelly shellywalldisplay', (done) => {
+    discoveredDeviceListener.mockClear();
+    mdns.on('discovered', discoveredDeviceListener);
+    mdns.start(undefined, undefined, undefined, true);
+    expect(mdns.isScanning).toBeTruthy();
+    setTimeout(() => {
+      expect(discoveredDeviceListener).toHaveBeenCalledWith({ id: 'shellywalldisplay-000822B39A55', host: '192.168.68.168', port: 80, gen: 2 });
+      expect((mdns as any).discoveredDevices.has('shellywalldisplay-000822B39A55')).toBeTruthy();
+      done();
+    }, 1000);
+    (mdns as any).discoveredDevices.clear();
+    const data = loadResponse('shellywalldisplay-000822B39A55');
+    expect(data).not.toBeUndefined();
+    if (!data) return;
+    (mdns as any).scanner.emit('response', data, { address: '192.168.68.168', family: 'IPv4', port: 5353, size: 0 });
+    mdns.stop();
+    expect(mdns.isScanning).toBeFalsy();
+  }, 10000);
+
+  test('Shelly shellyprodm1pm', (done) => {
+    discoveredDeviceListener.mockClear();
+    mdns.on('discovered', discoveredDeviceListener);
+    mdns.start(undefined, undefined, undefined, true);
+    expect(mdns.isScanning).toBeTruthy();
+    setTimeout(() => {
+      expect(discoveredDeviceListener).toHaveBeenCalledWith({ id: 'shellyprodm1pm-34987A4957C4', host: '192.168.1.156', port: 80, gen: 2 });
+      expect((mdns as any).discoveredDevices.has('shellyprodm1pm-34987A4957C4')).toBeTruthy();
+      done();
+    }, 1000);
+    (mdns as any).discoveredDevices.clear();
+    const data = loadResponse('shellyprodm1pm-34987A4957C4');
+    expect(data).not.toBeUndefined();
+    if (!data) return;
+    (mdns as any).scanner.emit('response', data, { address: '192.168.1.156', family: 'IPv4', port: 5353, size: 0 });
+    mdns.stop();
+    expect(mdns.isScanning).toBeFalsy();
+  }, 10000);
+
+  test('Shelly shellyplugsg3', (done) => {
+    discoveredDeviceListener.mockClear();
+    mdns.on('discovered', discoveredDeviceListener);
+    mdns.start(undefined, undefined, undefined, true);
+    expect(mdns.isScanning).toBeTruthy();
+    setTimeout(() => {
+      expect(discoveredDeviceListener).toHaveBeenCalledWith({ id: 'shellyplugsg3-3030F9ED709C', host: '192.168.68.148', port: 80, gen: 3 });
+      expect((mdns as any).discoveredDevices.has('shellyplugsg3-3030F9ED709C')).toBeTruthy();
+      done();
+    }, 1000);
+    (mdns as any).discoveredDevices.clear();
+    const data = loadResponse('shellyplugsg3-3030F9ED709C');
+    expect(data).not.toBeUndefined();
+    if (!data) return;
+    (mdns as any).scanner.emit('response', data, { address: '192.168.68.148', family: 'IPv4', port: 5353, size: 0 });
     mdns.stop();
     expect(mdns.isScanning).toBeFalsy();
   }, 10000);

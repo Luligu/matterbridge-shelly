@@ -8,10 +8,10 @@
     "ver": "2.2.1",
     "app": "WallDisplay",
     "auth_en": false,
-    "uptime": 1862,
-    "app_uptime": 1576,
+    "uptime": 455,
+    "app_uptime": 313,
     "discoverable": false,
-    "cfg_rev": 14,
+    "cfg_rev": 19,
     "schedule_rev": 0,
     "webhook_rev": 0,
     "platform": "vXD10000M2",
@@ -25,7 +25,7 @@
       }
     },
     "restart_required": false,
-    "unixtime": 1727732026,
+    "unixtime": 1727780702,
     "relay_in_thermostat": false,
     "sensor_in_thermostat": false,
     "awaiting_auth_code": false
@@ -88,20 +88,20 @@
     },
     "ui": {
       "screen_saver": {
-        "enable": false,
+        "enable": true,
         "timeout": 20,
         "priority_element": "CLOCK"
       },
       "lock_type": "none",
       "disable_gestures_when_locked": false,
       "use_F": false,
-      "screen_off_when_idle": false,
+      "screen_off_when_idle": true,
       "brightness": {
         "auto": true,
-        "level": 15,
+        "level": 0,
         "auto_off": {
-          "enable": false,
-          "by_lux": false
+          "enable": true,
+          "by_lux": true
         }
       },
       "relay_state_overlay": {
@@ -110,7 +110,7 @@
       }
     },
     "sys": {
-      "cfg_rev": 14,
+      "cfg_rev": 19,
       "device": {
         "fw_id": "20240831-114811/2.2.1-eb899af6",
         "mac": "000822B39A55",
@@ -159,7 +159,7 @@
       "ssl_ca": "ca.pem"
     },
     "media": {
-      "rev": 0
+      "rev": 1
     }
   },
   "status": {
@@ -172,12 +172,12 @@
     },
     "temperature:0": {
       "id": 0,
-      "tC": 26.7,
-      "tF": 80.1
+      "tC": 28.6,
+      "tF": 83.5
     },
     "humidity:0": {
       "id": 0,
-      "rh": 52.2
+      "rh": 47.9
     },
     "illuminance:0": {
       "id": 0,
@@ -202,10 +202,10 @@
       "ver": "2.2.1",
       "app": "WallDisplay",
       "auth_en": false,
-      "uptime": 1864,
-      "app_uptime": 1578,
+      "uptime": 455,
+      "app_uptime": 313,
       "discoverable": false,
-      "cfg_rev": 14,
+      "cfg_rev": 19,
       "schedule_rev": 0,
       "webhook_rev": 0,
       "platform": "vXD10000M2",
@@ -219,42 +219,33 @@
         }
       },
       "restart_required": false,
-      "unixtime": 1727732028,
+      "unixtime": 1727780702,
       "relay_in_thermostat": false,
       "sensor_in_thermostat": false,
       "awaiting_auth_code": false
     },
     "wifi": {
-      "sta_ip": "192.168.68.151",
+      "sta_ip": "192.168.68.168",
       "status": "got ip",
       "mac": "00:08:22:B3:9A:55",
       "ssid": "Tamer Umniah",
-      "rssi": -39,
+      "rssi": -49,
       "netmask": "255.255.255.0",
       "gw": "192.168.68.1",
       "nameserver": "192.168.1.1"
     },
     "media": {
-      "total_size": 5642991,
-      "total_size_h": "5.382 MB",
+      "total_size": 0,
+      "total_size_h": "0.000 B",
       "item_counts": {
-        "audio": 1,
+        "audio": 0,
         "photo": 0,
         "video": 0
       },
       "playback": {
         "enable": false,
         "buffering": false,
-        "volume": 10,
-        "media_type": "AUDIO",
-        "media_meta": {
-          "title": "Over_the_Horizon.mp3",
-          "artist": "Unknown Artist",
-          "album": "Unknown Album",
-          "duration": 268565,
-          "position": 105807,
-          "thumb": "data:image/webp;base64,"
-        }
+        "volume": 10
       }
     },
     "devicepower:0": {
@@ -303,8 +294,8 @@
       "key": "temperature:0",
       "status": {
         "id": 0,
-        "tC": 26.7,
-        "tF": 80.1
+        "tC": 28.6,
+        "tF": 83.5
       },
       "config": {
         "id": 0,
@@ -317,7 +308,7 @@
       "key": "humidity:0",
       "status": {
         "id": 0,
-        "rh": 52.2
+        "rh": 47.9
       },
       "config": {
         "id": 0,
@@ -381,10 +372,10 @@
         "ver": "2.2.1",
         "app": "WallDisplay",
         "auth_en": false,
-        "uptime": 1865,
-        "app_uptime": 1578,
+        "uptime": 455,
+        "app_uptime": 313,
         "discoverable": false,
-        "cfg_rev": 14,
+        "cfg_rev": 19,
         "schedule_rev": 0,
         "webhook_rev": 0,
         "platform": "vXD10000M2",
@@ -398,13 +389,13 @@
           }
         },
         "restart_required": false,
-        "unixtime": 1727732029,
+        "unixtime": 1727780702,
         "relay_in_thermostat": false,
         "sensor_in_thermostat": false,
         "awaiting_auth_code": false
       },
       "config": {
-        "cfg_rev": 14,
+        "cfg_rev": 19,
         "device": {
           "fw_id": "20240831-114811/2.2.1-eb899af6",
           "mac": "000822B39A55",
@@ -447,11 +438,11 @@
     {
       "key": "wifi",
       "status": {
-        "sta_ip": "192.168.68.151",
+        "sta_ip": "192.168.68.168",
         "status": "got ip",
         "mac": "00:08:22:B3:9A:55",
         "ssid": "Tamer Umniah",
-        "rssi": -39,
+        "rssi": -49,
         "netmask": "255.255.255.0",
         "gw": "192.168.68.1",
         "nameserver": "192.168.1.1"
@@ -473,30 +464,21 @@
     {
       "key": "media",
       "status": {
-        "total_size": 5642991,
-        "total_size_h": "5.382 MB",
+        "total_size": 0,
+        "total_size_h": "0.000 B",
         "item_counts": {
-          "audio": 1,
+          "audio": 0,
           "photo": 0,
           "video": 0
         },
         "playback": {
           "enable": false,
           "buffering": false,
-          "volume": 10,
-          "media_type": "AUDIO",
-          "media_meta": {
-            "title": "Over_the_Horizon.mp3",
-            "artist": "Unknown Artist",
-            "album": "Unknown Album",
-            "duration": 268565,
-            "position": 105807,
-            "thumb": "data:image/webp;base64,"
-          }
+          "volume": 10
         }
       },
       "config": {
-        "rev": 0
+        "rev": 1
       }
     },
     {
