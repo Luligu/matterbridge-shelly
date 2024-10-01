@@ -687,6 +687,17 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               this.shellyUpdateHandler(mbDevice, device, component, property, value);
             });
           }
+        } else if (component.name === 'Illuminance' && config.exposeIlluminance !== 'disabled') {
+          const illuminanceComponent = device.getComponent(key);
+          if (illuminanceComponent?.hasProperty('lux') && isValidNumber(illuminanceComponent.getValue('lux'), 0, 10000)) {
+            const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.LIGHT_SENSOR], []);
+            const matterLux = Math.round(Math.max(Math.min(10000 * Math.log10(illuminanceComponent.getValue('lux') as number), 0xfffe), 0));
+            child.addClusterServer(mbDevice.getDefaultIlluminanceMeasurementClusterServer(matterLux));
+            // Add event handler
+            illuminanceComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
+              this.shellyUpdateHandler(mbDevice, device, component, property, value);
+            });
+          }
         } else if (component.name === 'Flood' && config.exposeFlood !== 'disabled') {
           const floodComponent = device.getComponent(key);
           if (floodComponent?.hasProperty('flood') && isValidBoolean(floodComponent.getValue('flood'))) {
@@ -1281,7 +1292,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     if (shellyComponent.name === 'Smoke' && property === 'alarm' && isValidBoolean(value)) {
       matterbridgeDevice.setAttribute(BooleanStateCluster.id, 'stateValue', !value, shellyDevice.log, endpoint);
     }
-    // Update for Illuminance
+    // Update for Lux
     if (shellyComponent.name === 'Lux' && property === 'value' && isValidNumber(value, 0)) {
       const matterLux = Math.round(Math.max(Math.min(10000 * Math.log10(value), 0xfffe), 0));
       matterbridgeDevice.setAttribute(IlluminanceMeasurementCluster.id, 'measuredValue', matterLux, shellyDevice.log, endpoint);
@@ -1293,6 +1304,11 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     // Update for Humidity when has rh
     if (shellyComponent.name === 'Humidity' && property === 'rh' && isValidNumber(value, 0, 100)) {
       matterbridgeDevice.setAttribute(RelativeHumidityMeasurementCluster.id, 'measuredValue', value * 100, shellyDevice.log, endpoint);
+    }
+    // Update for Illuminance when has lux
+    if (shellyComponent.name === 'Illuminance' && property === 'lux' && isValidNumber(value, 0)) {
+      const matterLux = Math.round(Math.max(Math.min(10000 * Math.log10(value), 0xfffe), 0));
+      matterbridgeDevice.setAttribute(IlluminanceMeasurementCluster.id, 'measuredValue', matterLux, shellyDevice.log, endpoint);
     }
     // Update for vibration
     if (shellyComponent.name === 'Vibration' && property === 'vibration' && isValidBoolean(value)) {

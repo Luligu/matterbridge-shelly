@@ -1056,6 +1056,60 @@ describe('Shelly devices test', () => {
       if (device) device.destroy();
     });
 
+    test('Create a gen 2 shellywalldisplay device', async () => {
+      id = 'shellywalldisplay-000822B39A55';
+      log.logName = id;
+
+      device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', id + '.json'));
+      expect(device).not.toBeUndefined();
+      if (!device) return;
+      expect(device.host).toBe(path.join('src', 'mock', id + '.json'));
+      expect(device.model).toBe('SAWD-0A1XX10EU1');
+      expect(device.mac).toBe('000822B39A55');
+      expect(device.id).toBe(id);
+      expect(device.firmware).toBe('2.2.1-eb899af6');
+      expect(device.auth).toBe(false);
+      expect(device.gen).toBe(2);
+      expect(device.profile).toBe(undefined);
+      expect(device.name).toBe('shellywalldisplay-000822B39A55');
+      expect(device.hasUpdate).toBe(false);
+      expect(device.lastseen).not.toBe(0);
+      expect(device.online).toBe(true);
+      expect(device.cached).toBe(false);
+      expect(device.sleepMode).toBe(false);
+
+      expect(device.components.length).toBe(12);
+      expect(device.getComponentNames()).toStrictEqual(['Ble', 'WiFi', 'Switch', 'Input', 'Temperature', 'Humidity', 'Illuminance', 'Sys', 'Sntp', 'Cloud', 'MQTT', 'WS']);
+      expect(device.getComponentIds()).toStrictEqual([
+        'ble',
+        'wifi_sta',
+        'switch:0',
+        'input:0',
+        'temperature:0',
+        'humidity:0',
+        'illuminance:0',
+        'sys',
+        'sntp',
+        'cloud',
+        'mqtt',
+        'ws',
+      ]);
+
+      expect(device.getComponent('sys')?.getValue('temperature')).toBe(undefined);
+      expect(device.getComponent('sys')?.getValue('overtemperature')).toBe(undefined);
+
+      expect(device.getComponent('input:0')?.hasProperty('state')).toBe(true);
+      expect(device.getComponent('switch:0')?.hasProperty('state')).toBe(true);
+
+      expect(device.getComponent('temperature:0')?.hasProperty('tC')).toBe(true);
+      expect(device.getComponent('humidity:0')?.hasProperty('rh')).toBe(true);
+      expect(device.getComponent('illuminance:0')?.hasProperty('lux')).toBe(true);
+
+      expect(await device.fetchUpdate()).not.toBeNull();
+
+      if (device) device.destroy();
+    });
+
     test('Create a gen 2 shellyplus1 device', async () => {
       id = 'shellyplus1-E465B8F3028C';
       log.logName = id;
