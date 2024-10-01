@@ -133,7 +133,7 @@ export class MdnsScanner extends EventEmitter {
       let gen = 1;
       this.devices.set(rinfo.address, rinfo.address);
       if (debug) this.log.debug(`Mdns response from ${ign} ${rinfo.address} family ${rinfo.family} port ${rinfo.port} ${db}`);
-      if (debug) this.log.debug(`--- response.answers ---`);
+      if (debug) this.log.debug(`--- response.answers[${response.answers.length}] ---`);
       for (const a of response.answers) {
         if (a.type === 'SRV' && (a.name.startsWith('shelly') || a.name.startsWith('Shelly'))) {
           port = a.data.port;
@@ -167,9 +167,10 @@ export class MdnsScanner extends EventEmitter {
           this.log.debug(`[${BLUE}${a.type}${db}] Name: ${CYAN}${a.name}${db} data: ${typeof a.data === 'string' ? a.data : debugStringify(a.data)}`);
         }
         if (a.type === 'A' && (a.name.startsWith('shelly') || a.name.startsWith('Shelly'))) {
-          const [name, mac] = a.name.replace('.local', '').split('-');
-          const deviceId = name.toLowerCase() + '-' + mac.toUpperCase();
-          if (!this.discoveredDevices.has(deviceId)) {
+          // const [name, mac] = a.name.replace('.local', '').split('-');
+          // const deviceId = name.toLowerCase() + '-' + mac.toUpperCase();
+          const deviceId = this.normalizeShellyId(a.name);
+          if (deviceId && !this.discoveredDevices.has(deviceId)) {
             this.log.debug(`MdnsScanner discovered shelly gen: ${CYAN}${gen}${nf} device id: ${hk}${deviceId}${nf} host: ${zb}${a.data}${nf} port: ${zb}${port}${nf}`);
             this.discoveredDevices.set(deviceId, { id: deviceId, host: a.data, port, gen });
             this.emit('discovered', { id: deviceId, host: a.data, port, gen });
@@ -179,7 +180,7 @@ export class MdnsScanner extends EventEmitter {
           }
         }
       }
-      if (debug) this.log.debug(`--- response.additionals ---`);
+      if (debug) this.log.debug(`--- response.additionals[${response.additionals.length}] ---`);
       for (const a of response.additionals) {
         if (a.type === 'SRV' && (a.name.startsWith('shelly') || a.name.startsWith('Shelly'))) {
           port = a.data.port;
@@ -210,9 +211,10 @@ export class MdnsScanner extends EventEmitter {
           this.log.debug(`[${idn}${a.type}${rs}${db}] Name: ${CYAN}${a.name}${db} data: ${typeof a.data === 'string' ? a.data : debugStringify(a.data)}`);
         }
         if (a.type === 'A' && (a.name.startsWith('shelly') || a.name.startsWith('Shelly'))) {
-          const [name, mac] = a.name.replace('.local', '').split('-');
-          const deviceId = name.toLowerCase() + '-' + mac.toUpperCase();
-          if (!this.discoveredDevices.has(deviceId)) {
+          // const [name, mac] = a.name.replace('.local', '').split('-');
+          // const deviceId = name.toLowerCase() + '-' + mac.toUpperCase();
+          const deviceId = this.normalizeShellyId(a.name);
+          if (deviceId && !this.discoveredDevices.has(deviceId)) {
             this.log.debug(`MdnsScanner discovered shelly gen: ${CYAN}${gen}${nf} device id: ${hk}${deviceId}${nf} host: ${zb}${a.data}${nf} port: ${zb}${port}${nf}`);
             this.discoveredDevices.set(deviceId, { id: deviceId, host: a.data, port, gen });
             this.emit('discovered', { id: deviceId, host: a.data, port, gen });
@@ -272,8 +274,26 @@ export class MdnsScanner extends EventEmitter {
   }
 
   /**
-   * Logs information about discovered shelly devices.
-   * @returns The number of discovered devices.
+   * Normalizes a Shelly device ID by converting it to a standard format.
+   * @param {string} shellyId - The Shelly device ID to normalize.
+   * @returns {string | undefined} The normalized Shelly device ID, or undefined if the ID is invalid.
+   * @example
+   * // Normalize a Shelly device ID
+   * const normalizedId = mdnsScanner.normalizeShellyId('ShellyPlug-S-c38345.local');
+   * console.log(normalizedId); // Output: 'shellyplug-s-C38345'
+   */
+  normalizeShellyId(shellyId: string): string | undefined {
+    const parts = shellyId.replace('.local', '').split('-');
+    if (parts.length < 2) return undefined;
+    const mac = parts.pop(); // Extract the MAC address (last part)
+    if (!mac) return undefined;
+    const name = parts.join('-'); // Join the remaining parts to form the device name
+    return name.toLowerCase() + '-' + mac.toUpperCase();
+  }
+
+  /**
+   * Logs information about discovered shelly devices and sort them.
+   * @returns The number of the discovered shelly devices.
    */
   logPeripheral() {
     this.log.debug(`Discovered ${this.devices.size} devices:`);
@@ -291,6 +311,7 @@ export class MdnsScanner extends EventEmitter {
     }
 
     this.log.info(`Discovered ${this.discoveredDevices.size} shelly devices:`);
+    // Convert the Map to an array and sort by id
     const sortedDiscoveredDevices = Array.from(this.discoveredDevices).sort((a, b) => {
       const idA = a[1].id;
       const idB = b[1].id;

@@ -58,7 +58,7 @@
     "test:index": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js index.test.ts --detectOpenHandles --coverage",
     "test:platform": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js platform.test.ts --coverage",
     "test:auth": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js src/auth.test.ts --coverage",
-    "test:mdns": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js src/mdnsScanner.test.ts --coverage",
+    "test:mdns": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js src/mdnsScanner.test.ts --verbose --coverage",
     "test:coap": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js src/coapServer.test.ts --coverage",
     "test:mcast": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js src/mcastServer.test.ts --coverage",
     "test:wsClient": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js src/wsClient.test.ts --verbose --coverage",
