@@ -256,14 +256,12 @@ export class ShellyDevice extends EventEmitter {
    * @returns { type: string; mac: string; id: string } An object containing the normalized type, MAC address, and ID.
    */
   static normalizeId(hostname: string): { type: string; mac: string; id: string } {
-    const match = hostname.match(/^(.*)-([0-9A-F]+)$/i);
-    if (match) {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const [_, type, mac] = match;
-      const id = type.toLowerCase() + '-' + mac.toUpperCase();
-      return { type, mac, id };
-    }
-    return { type: '', mac: '', id: hostname };
+    const parts = hostname.split('-');
+    if (parts.length < 2) return { type: '', mac: '', id: hostname };
+    const mac = parts.pop(); // Extract the MAC address (last part)
+    if (!mac) return { type: '', mac: '', id: hostname };
+    const name = parts.join('-'); // Join the remaining parts to form the device name
+    return { type: name.toLowerCase(), mac: mac.toUpperCase(), id: name.toLowerCase() + '-' + mac.toUpperCase() };
   }
 
   /**

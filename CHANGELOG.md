@@ -17,6 +17,7 @@ If you like this project and find it useful, please consider giving it a star on
 
 ### Changed
 
+- [ShellyDevice]: Refactor normalizeId.
 - [ShellyMdnsScanner]: Refactor Jest test.
 - [package]: Optimizing for space and speed the package for rock-s0.
 - [package]: Updated dependencies.
