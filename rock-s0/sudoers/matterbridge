@@ -1,0 +1,4 @@
+# This allows to execute sudo npm install -g matterbridge without being asked for the password
+
+radxa ALL=(ALL) NOPASSWD: ALL
+rock ALL=(ALL) NOPASSWD: ALL

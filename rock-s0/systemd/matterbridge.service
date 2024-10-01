@@ -1,0 +1,17 @@
+[Unit]
+Description=matterbridge
+After=network-online.target
+
+[Service]
+Type=simple
+ExecStart=matterbridge -service
+WorkingDirectory=/home/rock/Matterbridge
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+RestartSec=10s
+TimeoutStopSec=30s
+User=rock
+
+[Install]
+WantedBy=multi-user.target

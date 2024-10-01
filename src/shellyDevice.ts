@@ -256,14 +256,12 @@ export class ShellyDevice extends EventEmitter {
    * @returns { type: string; mac: string; id: string } An object containing the normalized type, MAC address, and ID.
    */
   static normalizeId(hostname: string): { type: string; mac: string; id: string } {
-    const match = hostname.match(/^(.*)-([0-9A-F]+)$/i);
-    if (match) {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const [_, type, mac] = match;
-      const id = type.toLowerCase() + '-' + mac.toUpperCase();
-      return { type, mac, id };
-    }
-    return { type: '', mac: '', id: hostname };
+    const parts = hostname.split('-');
+    if (parts.length < 2) return { type: '', mac: '', id: hostname };
+    const mac = parts.pop(); // Extract the MAC address (last part)
+    if (!mac) return { type: '', mac: '', id: hostname };
+    const name = parts.join('-'); // Join the remaining parts to form the device name
+    return { type: name.toLowerCase(), mac: mac.toUpperCase(), id: name.toLowerCase() + '-' + mac.toUpperCase() };
   }
 
   /**
@@ -537,6 +535,7 @@ export class ShellyDevice extends EventEmitter {
         if (key.startsWith('em:')) device.addComponent(new ShellyComponent(device, key, 'PowerMeter', settingsPayload[key] as ShellyData));
         if (key.startsWith('temperature:')) device.addComponent(new ShellyComponent(device, key, 'Temperature', settingsPayload[key] as ShellyData));
         if (key.startsWith('humidity:')) device.addComponent(new ShellyComponent(device, key, 'Humidity', settingsPayload[key] as ShellyData));
+        if (key.startsWith('illuminance:')) device.addComponent(new ShellyComponent(device, key, 'Illuminance', settingsPayload[key] as ShellyData));
         if (key.startsWith('smoke:')) device.addComponent(new ShellyComponent(device, key, 'Smoke', settingsPayload[key] as ShellyData));
       }
     }
@@ -865,6 +864,7 @@ export class ShellyDevice extends EventEmitter {
         if (key.startsWith('emdata:')) this.updateComponent(key.replace('emdata:', 'em:'), data[key] as ShellyData);
         if (key.startsWith('temperature:')) this.updateComponent(key, data[key] as ShellyData);
         if (key.startsWith('humidity:')) this.updateComponent(key, data[key] as ShellyData);
+        if (key.startsWith('illuminance:')) this.updateComponent(key, data[key] as ShellyData);
         if (key.startsWith('smoke:')) this.updateComponent(key, data[key] as ShellyData);
       }
       // Update state for active components with output

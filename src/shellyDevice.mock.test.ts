@@ -387,7 +387,7 @@ describe('Shelly devices test', () => {
       expect(device.auth).toBe(false);
       expect(device.gen).toBe(1);
       expect(device.profile).toBe(undefined);
-      expect(device.name).toBe('My Shelly Plug S');
+      expect(device.name).toBe('Washing machine plug');
       expect(device.hasUpdate).toBe(false);
       expect(device.lastseen).not.toBe(0);
       expect(device.online).toBe(true);
@@ -398,7 +398,7 @@ describe('Shelly devices test', () => {
       expect(device.getComponentNames()).toStrictEqual(['WiFi', 'MQTT', 'CoIoT', 'Sntp', 'Cloud', 'Relay', 'PowerMeter', 'Sys']);
       expect(device.getComponentIds()).toStrictEqual(['wifi_ap', 'wifi_sta', 'wifi_sta1', 'mqtt', 'coiot', 'sntp', 'cloud', 'relay:0', 'meter:0', 'sys']);
 
-      expect(device.getComponent('sys')?.getValue('temperature')).toBe(35.32);
+      expect(device.getComponent('sys')?.getValue('temperature')).toBe(31.38);
       expect(device.getComponent('sys')?.getValue('overtemperature')).toBe(false);
 
       expect(await device.fetchUpdate()).not.toBeNull();
@@ -1050,6 +1050,60 @@ describe('Shelly devices test', () => {
       expect(device.getComponent('input:1')?.getValue('state')).toBe(false);
       expect(device.getComponent('input:2')?.getValue('state')).toBe(null); // in button mode is null and is a WebSocket event
       expect(device.getComponent('input:3')?.getValue('state')).toBe(null);
+
+      expect(await device.fetchUpdate()).not.toBeNull();
+
+      if (device) device.destroy();
+    });
+
+    test('Create a gen 2 shellywalldisplay device', async () => {
+      id = 'shellywalldisplay-000822B39A55';
+      log.logName = id;
+
+      device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', id + '.json'));
+      expect(device).not.toBeUndefined();
+      if (!device) return;
+      expect(device.host).toBe(path.join('src', 'mock', id + '.json'));
+      expect(device.model).toBe('SAWD-0A1XX10EU1');
+      expect(device.mac).toBe('000822B39A55');
+      expect(device.id).toBe(id);
+      expect(device.firmware).toBe('2.2.1-eb899af6');
+      expect(device.auth).toBe(false);
+      expect(device.gen).toBe(2);
+      expect(device.profile).toBe(undefined);
+      expect(device.name).toBe('shellywalldisplay-000822B39A55');
+      expect(device.hasUpdate).toBe(false);
+      expect(device.lastseen).not.toBe(0);
+      expect(device.online).toBe(true);
+      expect(device.cached).toBe(false);
+      expect(device.sleepMode).toBe(false);
+
+      expect(device.components.length).toBe(12);
+      expect(device.getComponentNames()).toStrictEqual(['Ble', 'WiFi', 'Switch', 'Input', 'Temperature', 'Humidity', 'Illuminance', 'Sys', 'Sntp', 'Cloud', 'MQTT', 'WS']);
+      expect(device.getComponentIds()).toStrictEqual([
+        'ble',
+        'wifi_sta',
+        'switch:0',
+        'input:0',
+        'temperature:0',
+        'humidity:0',
+        'illuminance:0',
+        'sys',
+        'sntp',
+        'cloud',
+        'mqtt',
+        'ws',
+      ]);
+
+      expect(device.getComponent('sys')?.getValue('temperature')).toBe(undefined);
+      expect(device.getComponent('sys')?.getValue('overtemperature')).toBe(undefined);
+
+      expect(device.getComponent('input:0')?.hasProperty('state')).toBe(true);
+      expect(device.getComponent('switch:0')?.hasProperty('state')).toBe(true);
+
+      expect(device.getComponent('temperature:0')?.hasProperty('tC')).toBe(true);
+      expect(device.getComponent('humidity:0')?.hasProperty('rh')).toBe(true);
+      expect(device.getComponent('illuminance:0')?.hasProperty('lux')).toBe(true);
 
       expect(await device.fetchUpdate()).not.toBeNull();
 
