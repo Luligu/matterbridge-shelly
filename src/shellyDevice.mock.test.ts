@@ -387,7 +387,7 @@ describe('Shelly devices test', () => {
       expect(device.auth).toBe(false);
       expect(device.gen).toBe(1);
       expect(device.profile).toBe(undefined);
-      expect(device.name).toBe('My Shelly Plug S');
+      expect(device.name).toBe('Washing machine plug');
       expect(device.hasUpdate).toBe(false);
       expect(device.lastseen).not.toBe(0);
       expect(device.online).toBe(true);
@@ -398,7 +398,7 @@ describe('Shelly devices test', () => {
       expect(device.getComponentNames()).toStrictEqual(['WiFi', 'MQTT', 'CoIoT', 'Sntp', 'Cloud', 'Relay', 'PowerMeter', 'Sys']);
       expect(device.getComponentIds()).toStrictEqual(['wifi_ap', 'wifi_sta', 'wifi_sta1', 'mqtt', 'coiot', 'sntp', 'cloud', 'relay:0', 'meter:0', 'sys']);
 
-      expect(device.getComponent('sys')?.getValue('temperature')).toBe(35.32);
+      expect(device.getComponent('sys')?.getValue('temperature')).toBe(31.38);
       expect(device.getComponent('sys')?.getValue('overtemperature')).toBe(false);
 
       expect(await device.fetchUpdate()).not.toBeNull();

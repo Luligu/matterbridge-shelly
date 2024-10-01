@@ -1,0 +1,512 @@
+{
+  "shelly": {
+    "id": "ShellyWallDisplay-000822B39A55",
+    "mac": "000822B39A55",
+    "model": "SAWD-0A1XX10EU1",
+    "gen": 2,
+    "fw_id": "20240831-114811/2.2.1-eb899af6",
+    "ver": "2.2.1",
+    "app": "WallDisplay",
+    "auth_en": false,
+    "uptime": 1862,
+    "app_uptime": 1576,
+    "discoverable": false,
+    "cfg_rev": 14,
+    "schedule_rev": 0,
+    "webhook_rev": 0,
+    "platform": "vXD10000M2",
+    "serial": "SAWD89A4F1FEV",
+    "batch_id": "38610",
+    "batch_date": 230928,
+    "available_updates": {
+      "beta": {
+        "version": "2.3.0-beta3",
+        "build_id": "20240926-093308/2.3.0-dd2e06a3-beta3"
+      }
+    },
+    "restart_required": false,
+    "unixtime": 1727732026,
+    "relay_in_thermostat": false,
+    "sensor_in_thermostat": false,
+    "awaiting_auth_code": false
+  },
+  "settings": {
+    "ble": {
+      "enable": true,
+      "rpc": {
+        "enable": true
+      },
+      "observer": {
+        "enable": true
+      }
+    },
+    "wifi": {
+      "sta": {
+        "enable": true,
+        "ssid": "Tamer Umniah",
+        "roam_interval": 900,
+        "is_open": false,
+        "ipv4mode": "dhcp",
+        "ip": "192.168.68.151",
+        "netmask": "255.255.255.0",
+        "gw": "192.168.68.1",
+        "nameserver": "192.168.1.1"
+      }
+    },
+    "switch:0": {
+      "id": 0,
+      "auto_off": false,
+      "auto_on_delay": 0,
+      "initial_state": "off",
+      "in_mode": "follow",
+      "name": null
+    },
+    "input:0": {
+      "id": 0,
+      "type": "switch",
+      "invert": false,
+      "factory_reset": true,
+      "name": null
+    },
+    "temperature:0": {
+      "id": 0,
+      "report_thr_C": 1,
+      "offset_C": 0,
+      "name": null
+    },
+    "humidity:0": {
+      "id": 0,
+      "report_thr": 1,
+      "offset": 0,
+      "name": null
+    },
+    "illuminance:0": {
+      "id": 0,
+      "bright_thr": 200,
+      "dark_thr": 30,
+      "name": null
+    },
+    "ui": {
+      "screen_saver": {
+        "enable": false,
+        "timeout": 20,
+        "priority_element": "CLOCK"
+      },
+      "lock_type": "none",
+      "disable_gestures_when_locked": false,
+      "use_F": false,
+      "screen_off_when_idle": false,
+      "brightness": {
+        "auto": true,
+        "level": 15,
+        "auto_off": {
+          "enable": false,
+          "by_lux": false
+        }
+      },
+      "relay_state_overlay": {
+        "enable": true,
+        "always_visible": false
+      }
+    },
+    "sys": {
+      "cfg_rev": 14,
+      "device": {
+        "fw_id": "20240831-114811/2.2.1-eb899af6",
+        "mac": "000822B39A55",
+        "discoverable": false,
+        "name": null
+      },
+      "location": null,
+      "sntp": {
+        "server": "time.google.com"
+      },
+      "debug": {
+        "websocket": {
+          "enable": false
+        },
+        "mqtt": {
+          "enable": false
+        },
+        "logs": {
+          "Generic": true,
+          "Bluetooth": true,
+          "Cloud": true,
+          "Interface": true,
+          "Media": true,
+          "MQTT": true,
+          "Network": true,
+          "RPC": true,
+          "Thermostat": true,
+          "Screen": true,
+          "UART": true,
+          "Webhooks": true,
+          "WebSocket": true
+        }
+      }
+    },
+    "cloud": {
+      "enable": true,
+      "server": "shelly-23-eu.shelly.cloud:6022/jrpc"
+    },
+    "mqtt": {
+      "enable": false,
+      "client_id": "ShellyWallDisplay-000822B39A55",
+      "topic_prefix": "ShellyWallDisplay-000822B39A55"
+    },
+    "ws": {
+      "enable": false,
+      "ssl_ca": "ca.pem"
+    },
+    "media": {
+      "rev": 0
+    }
+  },
+  "status": {
+    "ble": {},
+    "cloud": {
+      "connected": true
+    },
+    "mqtt": {
+      "connected": false
+    },
+    "temperature:0": {
+      "id": 0,
+      "tC": 26.7,
+      "tF": 80.1
+    },
+    "humidity:0": {
+      "id": 0,
+      "rh": 52.2
+    },
+    "illuminance:0": {
+      "id": 0,
+      "lux": 30,
+      "illumination": "twilight"
+    },
+    "switch:0": {
+      "id": 0,
+      "output": false,
+      "source": "Auto power on (off)"
+    },
+    "input:0": {
+      "id": 0,
+      "state": false
+    },
+    "sys": {
+      "id": "ShellyWallDisplay-000822B39A55",
+      "mac": "000822B39A55",
+      "model": "SAWD-0A1XX10EU1",
+      "gen": 2,
+      "fw_id": "20240831-114811/2.2.1-eb899af6",
+      "ver": "2.2.1",
+      "app": "WallDisplay",
+      "auth_en": false,
+      "uptime": 1864,
+      "app_uptime": 1578,
+      "discoverable": false,
+      "cfg_rev": 14,
+      "schedule_rev": 0,
+      "webhook_rev": 0,
+      "platform": "vXD10000M2",
+      "serial": "SAWD89A4F1FEV",
+      "batch_id": "38610",
+      "batch_date": 230928,
+      "available_updates": {
+        "beta": {
+          "version": "2.3.0-beta3",
+          "build_id": "20240926-093308/2.3.0-dd2e06a3-beta3"
+        }
+      },
+      "restart_required": false,
+      "unixtime": 1727732028,
+      "relay_in_thermostat": false,
+      "sensor_in_thermostat": false,
+      "awaiting_auth_code": false
+    },
+    "wifi": {
+      "sta_ip": "192.168.68.151",
+      "status": "got ip",
+      "mac": "00:08:22:B3:9A:55",
+      "ssid": "Tamer Umniah",
+      "rssi": -39,
+      "netmask": "255.255.255.0",
+      "gw": "192.168.68.1",
+      "nameserver": "192.168.1.1"
+    },
+    "media": {
+      "total_size": 5642991,
+      "total_size_h": "5.382 MB",
+      "item_counts": {
+        "audio": 1,
+        "photo": 0,
+        "video": 0
+      },
+      "playback": {
+        "enable": false,
+        "buffering": false,
+        "volume": 10,
+        "media_type": "AUDIO",
+        "media_meta": {
+          "title": "Over_the_Horizon.mp3",
+          "artist": "Unknown Artist",
+          "album": "Unknown Album",
+          "duration": 268565,
+          "position": 105807,
+          "thumb": "data:image/webp;base64,"
+        }
+      }
+    },
+    "devicepower:0": {
+      "id": 0,
+      "external": {
+        "present": true
+      }
+    }
+  },
+  "components": [
+    {
+      "key": "ble",
+      "status": {},
+      "config": {
+        "enable": true,
+        "rpc": {
+          "enable": true
+        },
+        "observer": {
+          "enable": true
+        }
+      }
+    },
+    {
+      "key": "cloud",
+      "status": {
+        "connected": true
+      },
+      "config": {
+        "enable": true,
+        "server": "shelly-23-eu.shelly.cloud:6022/jrpc"
+      }
+    },
+    {
+      "key": "mqtt",
+      "status": {
+        "connected": false
+      },
+      "config": {
+        "enable": false,
+        "client_id": "ShellyWallDisplay-000822B39A55",
+        "topic_prefix": "ShellyWallDisplay-000822B39A55"
+      }
+    },
+    {
+      "key": "temperature:0",
+      "status": {
+        "id": 0,
+        "tC": 26.7,
+        "tF": 80.1
+      },
+      "config": {
+        "id": 0,
+        "report_thr_C": 1,
+        "offset_C": 0,
+        "name": null
+      }
+    },
+    {
+      "key": "humidity:0",
+      "status": {
+        "id": 0,
+        "rh": 52.2
+      },
+      "config": {
+        "id": 0,
+        "report_thr": 1,
+        "offset": 0,
+        "name": null
+      }
+    },
+    {
+      "key": "illuminance:0",
+      "status": {
+        "id": 0,
+        "lux": 30,
+        "illumination": "twilight"
+      },
+      "config": {
+        "id": 0,
+        "bright_thr": 200,
+        "dark_thr": 30,
+        "name": null
+      }
+    },
+    {
+      "key": "switch:0",
+      "status": {
+        "id": 0,
+        "output": false,
+        "source": "Auto power on (off)"
+      },
+      "config": {
+        "id": 0,
+        "auto_off": false,
+        "auto_on_delay": 0,
+        "initial_state": "off",
+        "in_mode": "follow",
+        "name": null
+      }
+    },
+    {
+      "key": "input:0",
+      "status": {
+        "id": 0,
+        "state": false
+      },
+      "config": {
+        "id": 0,
+        "type": "switch",
+        "invert": false,
+        "factory_reset": true,
+        "name": null
+      }
+    },
+    {
+      "key": "sys",
+      "status": {
+        "id": "ShellyWallDisplay-000822B39A55",
+        "mac": "000822B39A55",
+        "model": "SAWD-0A1XX10EU1",
+        "gen": 2,
+        "fw_id": "20240831-114811/2.2.1-eb899af6",
+        "ver": "2.2.1",
+        "app": "WallDisplay",
+        "auth_en": false,
+        "uptime": 1865,
+        "app_uptime": 1578,
+        "discoverable": false,
+        "cfg_rev": 14,
+        "schedule_rev": 0,
+        "webhook_rev": 0,
+        "platform": "vXD10000M2",
+        "serial": "SAWD89A4F1FEV",
+        "batch_id": "38610",
+        "batch_date": 230928,
+        "available_updates": {
+          "beta": {
+            "version": "2.3.0-beta3",
+            "build_id": "20240926-093308/2.3.0-dd2e06a3-beta3"
+          }
+        },
+        "restart_required": false,
+        "unixtime": 1727732029,
+        "relay_in_thermostat": false,
+        "sensor_in_thermostat": false,
+        "awaiting_auth_code": false
+      },
+      "config": {
+        "cfg_rev": 14,
+        "device": {
+          "fw_id": "20240831-114811/2.2.1-eb899af6",
+          "mac": "000822B39A55",
+          "discoverable": false,
+          "name": null
+        },
+        "location": {
+          "tz": "Asia/Amman",
+          "lat": 31.9555,
+          "lon": 35.9435
+        },
+        "sntp": {
+          "server": "time.google.com"
+        },
+        "debug": {
+          "websocket": {
+            "enable": false
+          },
+          "mqtt": {
+            "enable": false
+          },
+          "logs": {
+            "Generic": true,
+            "Bluetooth": true,
+            "Cloud": true,
+            "Interface": true,
+            "Media": true,
+            "MQTT": true,
+            "Network": true,
+            "RPC": true,
+            "Thermostat": true,
+            "Screen": true,
+            "UART": true,
+            "Webhooks": true,
+            "WebSocket": true
+          }
+        }
+      }
+    },
+    {
+      "key": "wifi",
+      "status": {
+        "sta_ip": "192.168.68.151",
+        "status": "got ip",
+        "mac": "00:08:22:B3:9A:55",
+        "ssid": "Tamer Umniah",
+        "rssi": -39,
+        "netmask": "255.255.255.0",
+        "gw": "192.168.68.1",
+        "nameserver": "192.168.1.1"
+      },
+      "config": {
+        "sta": {
+          "enable": true,
+          "ssid": "Tamer Umniah",
+          "roam_interval": 900,
+          "is_open": false,
+          "ipv4mode": "dhcp",
+          "ip": "192.168.68.151",
+          "netmask": "255.255.255.0",
+          "gw": "192.168.68.1",
+          "nameserver": "192.168.1.1"
+        }
+      }
+    },
+    {
+      "key": "media",
+      "status": {
+        "total_size": 5642991,
+        "total_size_h": "5.382 MB",
+        "item_counts": {
+          "audio": 1,
+          "photo": 0,
+          "video": 0
+        },
+        "playback": {
+          "enable": false,
+          "buffering": false,
+          "volume": 10,
+          "media_type": "AUDIO",
+          "media_meta": {
+            "title": "Over_the_Horizon.mp3",
+            "artist": "Unknown Artist",
+            "album": "Unknown Album",
+            "duration": 268565,
+            "position": 105807,
+            "thumb": "data:image/webp;base64,"
+          }
+        }
+      },
+      "config": {
+        "rev": 0
+      }
+    },
+    {
+      "key": "devicepower:0",
+      "status": {
+        "id": 0,
+        "external": {
+          "present": true
+        }
+      }
+    }
+  ]
+}

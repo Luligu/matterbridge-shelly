@@ -10,6 +10,11 @@ If you like this project and find it useful, please consider giving it a star on
 
 ## [0.11.0] - 2024-09-30
 
+### Added
+
+- [shelly]: Added component Illuminance.
+- [shelly]: Added support for shellywalldisplay with firmware v2.2.1 and added Jest test.
+
 ### Changed
 
 - [ShellyMdnsScanner]: Refactor Jest test.
