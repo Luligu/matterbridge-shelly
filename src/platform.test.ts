@@ -74,22 +74,22 @@ describe('ShellyPlatform', () => {
     } as unknown as Matterbridge;
     mockLog = {
       fatal: jest.fn((message) => {
-        // console.log(`Fatal: ${message}`);
+        console.log(`Fatal: ${message}`);
       }),
       error: jest.fn((message) => {
-        // console.log(`Error: ${message}`);
+        console.log(`Error: ${message}`);
       }),
       warn: jest.fn((message) => {
-        // console.log(`Warn: ${message}`);
+        console.log(`Warn: ${message}`);
       }),
       notice: jest.fn((message) => {
-        // console.log(`Notice: ${message}`);
+        console.log(`Notice: ${message}`);
       }),
       info: jest.fn((message) => {
-        // console.log(`Info: ${message}`);
+        console.log(`Info: ${message}`);
       }),
       debug: jest.fn((message) => {
-        // console.log(`Debug: ${message}`);
+        console.log(`Debug: ${message}`);
       }),
     } as unknown as AnsiLogger;
     mockConfig = {
@@ -319,16 +319,16 @@ describe('ShellyPlatform', () => {
 
   it('should validate version', () => {
     mockMatterbridge.matterbridgeVersion = '1.5.4';
-    expect(shellyPlatform.localVerifyMatterbridgeVersion('1.5.3')).toBe(true);
-    expect(shellyPlatform.localVerifyMatterbridgeVersion('1.5.4')).toBe(true);
-    expect(shellyPlatform.localVerifyMatterbridgeVersion('2.0.0')).toBe(false);
+    expect(shellyPlatform.verifyMatterbridgeVersion('1.5.3')).toBe(true);
+    expect(shellyPlatform.verifyMatterbridgeVersion('1.5.4')).toBe(true);
+    expect(shellyPlatform.verifyMatterbridgeVersion('2.0.0')).toBe(false);
   });
 
   it('should validate version beta', () => {
     mockMatterbridge.matterbridgeVersion = '1.5.4-dev.1';
-    expect(shellyPlatform.localVerifyMatterbridgeVersion('1.5.3')).toBe(true);
-    expect(shellyPlatform.localVerifyMatterbridgeVersion('1.5.4')).toBe(true);
-    expect(shellyPlatform.localVerifyMatterbridgeVersion('2.0.0')).toBe(false);
+    expect(shellyPlatform.verifyMatterbridgeVersion('1.5.3')).toBe(true);
+    expect(shellyPlatform.verifyMatterbridgeVersion('1.5.4')).toBe(true);
+    expect(shellyPlatform.verifyMatterbridgeVersion('2.0.0')).toBe(false);
     mockMatterbridge.matterbridgeVersion = '1.5.5';
   });
 
@@ -365,8 +365,8 @@ describe('ShellyPlatform', () => {
     shellyPlatform.config.resetStorageDiscover = true;
     await shellyPlatform.onStart('Test reason');
     expect(mockLog.info).toHaveBeenCalledWith(`Starting platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
-    expect(mockLog.info).toHaveBeenCalledWith(`Resetting the Shellies storage`);
-    expect(mockLog.info).toHaveBeenCalledWith(`Reset the Shellies storage`);
+    expect(mockLog.info).toHaveBeenCalledWith(`Resetting the Shellies storage...`);
+    expect(mockLog.info).toHaveBeenCalledWith(`Reset of Shellies storage done!`);
     expect((shellyPlatform as any).nodeStorageManager).toBeDefined();
     expect((shellyPlatform as any).storedDevices.size).toBe(0);
     shellyPlatform.config.resetStorageDiscover = false;
@@ -441,13 +441,13 @@ describe('ShellyPlatform', () => {
     expect((shellyPlatform as any).shelly.mdnsScanner.isScanning).toBe(false);
 
     (shellyPlatform as any).failsafeCount = 1;
-    shellyPlatform.shellyDevices.set('shellyemg3-84FCE636582C', { id: 'shellyemg3-84FCE636582C', host: 'invalid', port: 80, gen: 1 } as unknown as ShellyDevice);
+    shellyPlatform.bridgedDevices.set('shellyemg3-84FCE636582C', { id: 'shellyemg3-84FCE636582C', host: 'invalid', port: 80, gen: 1 } as unknown as MatterbridgeDevice);
 
     await shellyPlatform.onStart('Test reason');
     expect(mockLog.info).toHaveBeenCalledWith(`Starting platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
     expect(mockLog.notice).toHaveBeenCalledWith(`Waiting for the configured number of 1 devices to be loaded.`);
     (shellyPlatform as any).failsafeCount = 0;
-    shellyPlatform.shellyDevices.clear();
+    shellyPlatform.bridgedDevices.clear();
 
     cleanup();
   });

@@ -79,7 +79,7 @@ export function createDigestShellyAuth(username: string, password: string, nonce
   return auth;
 }
 
-export function getGen1BodyOptions(params?: Record<string, string | number | boolean>): string {
+export function getGen1BodyOptions(params?: Record<string, string | number | boolean | object>): string {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return new URLSearchParams(params as any).toString();
 }
@@ -100,7 +100,14 @@ options: {
 }
 */
 
-export function getGen2BodyOptions(jsonrpc: string, id: number, src: string, method: string, params?: Record<string, string | number | boolean>, auth?: AuthParams): string {
+export function getGen2BodyOptions(
+  jsonrpc: string,
+  id: number,
+  src: string,
+  method: string,
+  params?: Record<string, string | number | boolean | object>,
+  auth?: AuthParams,
+): string {
   const body: Record<string, string | number | boolean | object | AuthParams> = {};
   body.jsonrpc = '2.0';
   body.id = 10;

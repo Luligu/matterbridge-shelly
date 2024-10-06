@@ -1,0 +1,157 @@
+{
+  "id": 0,
+  "type": "response",
+  "flags": 1024,
+  "flag_qr": true,
+  "opcode": "QUERY",
+  "flag_aa": true,
+  "flag_tc": false,
+  "flag_rd": false,
+  "flag_ra": false,
+  "flag_z": false,
+  "flag_ad": false,
+  "flag_cd": false,
+  "rcode": "NOERROR",
+  "questions": [],
+  "answers": [
+    {
+      "name": "_http._tcp.local",
+      "type": "PTR",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": "shellyplugsg3-5432045ce094._http._tcp.local"
+    },
+    {
+      "name": "_shelly._tcp.local",
+      "type": "PTR",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": "shellyplugsg3-5432045ce094._shelly._tcp.local"
+    },
+    {
+      "name": "_services._dns-sd._udp.local",
+      "type": "PTR",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": "_matterc._udp.local"
+    },
+    {
+      "name": "_services._dns-sd._udp.local",
+      "type": "PTR",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": "_V5264._sub._matterc._udp.local"
+    },
+    {
+      "name": "_services._dns-sd._udp.local",
+      "type": "PTR",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": "_S0._sub._matterc._udp.local"
+    },
+    {
+      "name": "_services._dns-sd._udp.local",
+      "type": "PTR",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": "_L148._sub._matterc._udp.local"
+    },
+    {
+      "name": "_services._dns-sd._udp.local",
+      "type": "PTR",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": "_CM._sub._matterc._udp.local"
+    },
+    {
+      "name": "_services._dns-sd._udp.local",
+      "type": "PTR",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": "_shelly._tcp.local"
+    },
+    {
+      "name": "_services._dns-sd._udp.local",
+      "type": "PTR",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": "_http._tcp.local"
+    }
+  ],
+  "authorities": [],
+  "additionals": [
+    {
+      "name": "shellyplugsg3-5432045ce094._http._tcp.local",
+      "type": "SRV",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": {
+        "priority": 0,
+        "weight": 0,
+        "port": 80,
+        "target": "ShellyPlugSG3-5432045CE094.local"
+      }
+    },
+    {
+      "name": "shellyplugsg3-5432045ce094._http._tcp.local",
+      "type": "TXT",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": [
+        "gen=3"
+      ]
+    },
+    {
+      "name": "ShellyPlugSG3-5432045CE094.local",
+      "type": "A",
+      "ttl": 120,
+      "class": "IN",
+      "flush": true,
+      "data": "192.168.1.165"
+    },
+    {
+      "name": "shellyplugsg3-5432045ce094._shelly._tcp.local",
+      "type": "SRV",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": {
+        "priority": 0,
+        "weight": 0,
+        "port": 80,
+        "target": "ShellyPlugSG3-5432045CE094.local"
+      }
+    },
+    {
+      "name": "shellyplugsg3-5432045ce094._shelly._tcp.local",
+      "type": "TXT",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": [
+        "gen=3",
+        "app=PlugSG3",
+        "ver=1.2.3-matter22"
+      ]
+    },
+    {
+      "name": "ShellyPlugSG3-5432045CE094.local",
+      "type": "A",
+      "ttl": 120,
+      "class": "IN",
+      "flush": true,
+      "data": "192.168.1.165"
+    }
+  ]
+}

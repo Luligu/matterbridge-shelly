@@ -4,12 +4,50 @@ All notable changes to this project will be documented in this file.
 
 If you like this project and find it useful, please consider giving it a star on GitHub at https://github.com/Luligu/matterbridge-shelly and sponsoring it.
 
+## [1.0.0] - 2024-10-06
+
+### Added
+
+- [shelly]: Added support for BLU Wall Switch 4.
+- [shelly]: Added support for BLU RC Button 4.
+- [shelly]: Added support for BLU TRV with firmware v20240926-201942.
+- [shelly]: Added support for shellyblugwg3 (BLU Gateway Gen 3) with firmware v1.4.99 and added Jest test (it exposes "Enable LED" ModeSelect cluster).
+- [shelly]: Added mdns Jest test for shellyblugwg3 (BLU Gateway Gen 3) with firmware v1.4.99.
+- [shelly]: Verified support for shellypro2cover with firmware v1.4.2 and added Jest test. Verified and tested by Tamer.
+- [shelly]: Added mdns Jest test for shellypro2cover with firmware v1.4.2.
+- [shelly]: Verified support for shellyplugsg3 with firmware v1.2.3-plugsg3prod0-gec79607 and added Jest test.
+- [shelly]: Added mdns Jest test for shellyplugsg3 with firmware v1.4.99.
+- [shelly]: Verified support for shelly2pmg3 with firmware v1.4.99-2pmg3prod0-ge3db05c and added Jest test. 
+- [shelly]: Added mdns Jest test for shelly2pmg3 with firmware v1.4.99.
+
+- [config]: Added the "switchList", "lightList" and "outletList" to individually configure how to expose a switch, regardless of the global option.
+- [config]: Added the "inputContactList" to individually configure a device to expose the Input component as contact sensor, regardless of the global option (you can disable the Input component globally and enable it only for single devices).
+- [config]: Added the "inputMomentaryList" to individually configure a device to expose the Input component as momentary switch, regardless of the global option (you can disable the Input component globally and enable it only for single devices).
+- [config]: Added the "inputLatchingList" to individually configure a device to expose the Input component as latching switch, regardless of the global option (you can disable the Input component globally and enable it only for single devices).
+- [config]: Added the "inputEventList" to individually configure a device to expose the Input event component, regardless of the global option (you can disable the Input event component globally and enable it only for single devices).
+- [config]: Removed EveHistory electrical measurements since Home Assistant supports Matter 1.3 electrical measurements from version 2024.10.
+
+- [BLU]: Added sensor data in configuration process (all states and measurements are immediately available on the controller).
+
+### Changed
+
+- [package]: Updated dependencies.
+
+### Fixed
+
+- [ShellyWsClient]: Changed message from warning to debug for unknown response.
+- [shelly BLU]: Fixed bthome discover when one BLU is paired with more then one gateway.
+
+<a href="https://www.buymeacoffee.com/luligugithub">
+  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+</a>
+
 ## [0.11.0] - 2024-10-01
 
 ### Added
 
 - [shelly]: Added component Illuminance.
-- [shelly]: Added support for shellywalldisplay with firmware v2.2.1 and added Jest test.
+- [shelly]: Added support for shellywalldisplay with firmware v2.2.1 and added Jest test. Verified and tested by Tamer.
 
 ### Changed
 
@@ -31,9 +69,9 @@ If you like this project and find it useful, please consider giving it a star on
 ### Added
 
 - [shelly]: Added component Gas.
-- [shelly]: Added support for shellygas with firmware v1.14.0 and added Jest test.
+- [shelly]: Added support for shellygas with firmware v1.14.0 and added Jest test. Verified and tested by Tamer.
 - [shelly]: Added component Smoke.
-- [shelly]: Added support for shellyplussmoke with firmware v1.4.2 and added Jest test.
+- [shelly]: Added support for shellyplussmoke with firmware v1.4.2 and added Jest test. Verified and tested by Tamer.
 - [test]: Added Jest test for ShellyWsServer
 - [test]: Added Jest test for ShellyWsClient
 - [test]: Added Jest test for real gen 1 devices

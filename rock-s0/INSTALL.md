@@ -43,6 +43,9 @@ sudo curl https://raw.githubusercontent.com/Luligu/matterbridge-shelly/dev/rock-
 ```
 
 change the hostname from rock-s0 to the new hostname
+```
+sudo nano /etc/samba/smb.conf
+```
 
 then reload the services
 ```

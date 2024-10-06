@@ -232,21 +232,78 @@ describe('Shellies MdnsScanner test', () => {
     expect(mdns.isScanning).toBeFalsy();
   }, 10000);
 
+  test('Shelly shellypro2cover', (done) => {
+    discoveredDeviceListener.mockClear();
+    mdns.on('discovered', discoveredDeviceListener);
+    mdns.start(undefined, undefined, undefined, true);
+    expect(mdns.isScanning).toBeTruthy();
+    setTimeout(() => {
+      expect(discoveredDeviceListener).toHaveBeenCalledWith({ id: 'shellypro2cover-0CB815FC11B4', host: '192.168.68.104', port: 80, gen: 2 });
+      expect((mdns as any).discoveredDevices.has('shellypro2cover-0CB815FC11B4')).toBeTruthy();
+      done();
+    }, 1000);
+    (mdns as any).discoveredDevices.clear();
+    const data = loadResponse('shellypro2cover-0CB815FC11B4');
+    expect(data).not.toBeUndefined();
+    if (!data) return;
+    (mdns as any).scanner.emit('response', data, { address: '192.168.68.104', family: 'IPv4', port: 5353, size: 0 });
+    mdns.stop();
+    expect(mdns.isScanning).toBeFalsy();
+  }, 10000);
+
   test('Shelly shellyplugsg3', (done) => {
     discoveredDeviceListener.mockClear();
     mdns.on('discovered', discoveredDeviceListener);
     mdns.start(undefined, undefined, undefined, true);
     expect(mdns.isScanning).toBeTruthy();
     setTimeout(() => {
-      expect(discoveredDeviceListener).toHaveBeenCalledWith({ id: 'shellyplugsg3-3030F9ED709C', host: '192.168.68.148', port: 80, gen: 3 });
-      expect((mdns as any).discoveredDevices.has('shellyplugsg3-3030F9ED709C')).toBeTruthy();
+      expect(discoveredDeviceListener).toHaveBeenCalledWith({ id: 'shellyplugsg3-5432045CE094', host: '192.168.1.165', port: 80, gen: 3 });
+      expect((mdns as any).discoveredDevices.has('shellyplugsg3-5432045CE094')).toBeTruthy();
       done();
     }, 1000);
     (mdns as any).discoveredDevices.clear();
-    const data = loadResponse('shellyplugsg3-3030F9ED709C');
+    const data = loadResponse('shellyplugsg3-5432045CE094');
     expect(data).not.toBeUndefined();
     if (!data) return;
-    (mdns as any).scanner.emit('response', data, { address: '192.168.68.148', family: 'IPv4', port: 5353, size: 0 });
+    (mdns as any).scanner.emit('response', data, { address: '192.168.1.165', family: 'IPv4', port: 5353, size: 0 });
+    mdns.stop();
+    expect(mdns.isScanning).toBeFalsy();
+  }, 10000);
+
+  test('Shelly shellyblugwg3', (done) => {
+    discoveredDeviceListener.mockClear();
+    mdns.on('discovered', discoveredDeviceListener);
+    mdns.start(undefined, undefined, undefined, true);
+    expect(mdns.isScanning).toBeTruthy();
+    setTimeout(() => {
+      expect(discoveredDeviceListener).toHaveBeenCalledWith({ id: 'shellyblugwg3-34CDB077BCD4', host: '192.168.1.164', port: 80, gen: 3 });
+      expect((mdns as any).discoveredDevices.has('shellyblugwg3-34CDB077BCD4')).toBeTruthy();
+      done();
+    }, 1000);
+    (mdns as any).discoveredDevices.clear();
+    const data = loadResponse('shellyblugwg3-34CDB077BCD4');
+    expect(data).not.toBeUndefined();
+    if (!data) return;
+    (mdns as any).scanner.emit('response', data, { address: '192.168.1.164', family: 'IPv4', port: 5353, size: 0 });
+    mdns.stop();
+    expect(mdns.isScanning).toBeFalsy();
+  }, 10000);
+
+  test('Shelly shelly2pmg3', (done) => {
+    discoveredDeviceListener.mockClear();
+    mdns.on('discovered', discoveredDeviceListener);
+    mdns.start(undefined, undefined, undefined, true);
+    expect(mdns.isScanning).toBeTruthy();
+    setTimeout(() => {
+      expect(discoveredDeviceListener).toHaveBeenCalledWith({ id: 'shelly2pmg3-34CDB0770C4C', host: '192.168.1.166', port: 80, gen: 3 });
+      expect((mdns as any).discoveredDevices.has('shelly2pmg3-34CDB0770C4C')).toBeTruthy();
+      done();
+    }, 1000);
+    (mdns as any).discoveredDevices.clear();
+    const data = loadResponse('shelly2pmg3-34CDB0770C4C');
+    expect(data).not.toBeUndefined();
+    if (!data) return;
+    (mdns as any).scanner.emit('response', data, { address: '192.168.1.166', family: 'IPv4', port: 5353, size: 0 });
     mdns.stop();
     expect(mdns.isScanning).toBeFalsy();
   }, 10000);
