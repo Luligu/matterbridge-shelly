@@ -74,22 +74,22 @@ describe('ShellyPlatform', () => {
     } as unknown as Matterbridge;
     mockLog = {
       fatal: jest.fn((message) => {
-        console.log(`Fatal: ${message}`);
+        // console.log(`Fatal: ${message}`);
       }),
       error: jest.fn((message) => {
-        console.log(`Error: ${message}`);
+        // console.log(`Error: ${message}`);
       }),
       warn: jest.fn((message) => {
-        console.log(`Warn: ${message}`);
+        // console.log(`Warn: ${message}`);
       }),
       notice: jest.fn((message) => {
-        console.log(`Notice: ${message}`);
+        // console.log(`Notice: ${message}`);
       }),
       info: jest.fn((message) => {
-        console.log(`Info: ${message}`);
+        // console.log(`Info: ${message}`);
       }),
       debug: jest.fn((message) => {
-        console.log(`Debug: ${message}`);
+        // console.log(`Debug: ${message}`);
       }),
     } as unknown as AnsiLogger;
     mockConfig = {
