@@ -582,6 +582,7 @@ export class ShellyDevice extends EventEmitter {
         if (key.startsWith('humidity:')) device.addComponent(new ShellyComponent(device, key, 'Humidity', settingsPayload[key] as ShellyData));
         if (key.startsWith('illuminance:')) device.addComponent(new ShellyComponent(device, key, 'Illuminance', settingsPayload[key] as ShellyData));
         if (key.startsWith('smoke:')) device.addComponent(new ShellyComponent(device, key, 'Smoke', settingsPayload[key] as ShellyData));
+        if (key.startsWith('thermostat:')) device.addComponent(new ShellyComponent(device, key, 'Thermostat', settingsPayload[key] as ShellyData));
       }
 
       // Scan for BTHome devices and components
@@ -935,6 +936,7 @@ export class ShellyDevice extends EventEmitter {
         if (key.startsWith('humidity:')) this.updateComponent(key, data[key] as ShellyData);
         if (key.startsWith('illuminance:')) this.updateComponent(key, data[key] as ShellyData);
         if (key.startsWith('smoke:')) this.updateComponent(key, data[key] as ShellyData);
+        if (key.startsWith('thermostat:')) this.updateComponent(key, data[key] as ShellyData);
       }
       // Update state for active components with output
       for (const key in data) {

@@ -278,12 +278,12 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
                 mbDevice.setAttribute(ThermostatCluster.id, 'systemMode', Thermostat.SystemMode.Heat, mbDevice.log);
                 mbDevice.setAttribute(ThermostatCluster.id, 'controlSequenceOfOperation', Thermostat.ControlSequenceOfOperation.HeatingOnly, mbDevice.log);
                 mbDevice.setAttribute(ThermostatCluster.id, 'thermostatRunningMode', Thermostat.ThermostatRunningMode.Heat, mbDevice.log);
-                mbDevice.setAttribute(ThermostatCluster.id, 'localTemperature', 20 * 100, mbDevice.log);
-                mbDevice.setAttribute(ThermostatCluster.id, 'occupiedHeatingSetpoint', 20 * 100, mbDevice.log);
                 mbDevice.setAttribute(ThermostatCluster.id, 'minHeatSetpointLimit', 4 * 100, mbDevice.log);
                 mbDevice.setAttribute(ThermostatCluster.id, 'maxHeatSetpointLimit', 30 * 100, mbDevice.log);
-                // mbDevice.setAttribute(ThermostatCluster.id, 'absMinHeatSetpointLimit', 4 * 100, mbDevice.log);
-                // mbDevice.setAttribute(ThermostatCluster.id, 'absMaxHeatSetpointLimit', 30 * 100, mbDevice.log);
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                (mbDevice.getClusterServerById(ThermostatCluster.id)?.attributes['absMinHeatSetpointLimit'] as any).value = 400;
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                (mbDevice.getClusterServerById(ThermostatCluster.id)?.attributes['absMaxHeatSetpointLimit'] as any).value = 3000;
                 mbDevice.subscribeAttribute(
                   ThermostatCluster.id,
                   'systemMode',
@@ -303,9 +303,10 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
                   'occupiedHeatingSetpoint',
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   (newValue: any, oldValue: any) => {
-                    mbDevice.log.info(`Thermostat occupiedHeatingSetpoint changed from ${oldValue} to ${newValue}`);
+                    mbDevice.log.info(`Thermostat occupiedHeatingSetpoint changed from ${oldValue / 100} to ${newValue / 100}`);
                     if (device.thermostatSetpointTimeout) clearTimeout(device.thermostatSetpointTimeout);
                     device.thermostatSetpointTimeout = setTimeout(() => {
+                      mbDevice.log.info(`Setting thermostat occupiedHeatingSetpoint to ${newValue / 100}`);
                       ShellyDevice.fetch(this.shelly, mbDevice.log, device.host, 'BluTrv.Call', {
                         id: bthomeDevice.id,
                         method: 'Trv.SetTarget',
@@ -820,6 +821,119 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               this.shellyUpdateHandler(mbDevice, device, component, property, value);
             });
           }
+        } else if (component.name === 'Thermostat' && config.exposeThermostat !== 'disabled') {
+          const thermostatComponent = device.getComponent(key);
+          if (
+            thermostatComponent?.hasProperty('enable') &&
+            thermostatComponent?.hasProperty('type') &&
+            thermostatComponent?.hasProperty('target_C') &&
+            thermostatComponent?.hasProperty('current_C') &&
+            isValidBoolean(thermostatComponent.getValue('enable')) &&
+            isValidString(thermostatComponent.getValue('type')) &&
+            isValidNumber(thermostatComponent.getValue('target_C'), 5, 35) &&
+            isValidNumber(thermostatComponent.getValue('current_C'), 5, 35)
+          ) {
+            const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.THERMOSTAT], []);
+            mbDevice.setAttribute(
+              ThermostatCluster.id,
+              'featureMap',
+              {
+                heating: thermostatComponent.getValue('type') === 'heating',
+                cooling: thermostatComponent.getValue('type') === 'cooling',
+                occupancy: false,
+                scheduleConfiguration: false,
+                setback: false,
+                autoMode: false,
+                localTemperatureNotExposed: false,
+              },
+              mbDevice.log,
+              child,
+            );
+            if (thermostatComponent.getValue('type') === 'heating') {
+              mbDevice.setAttribute(ThermostatCluster.id, 'systemMode', Thermostat.SystemMode.Heat, mbDevice.log, child);
+              mbDevice.setAttribute(ThermostatCluster.id, 'thermostatRunningMode', Thermostat.ThermostatRunningMode.Heat, mbDevice.log, child);
+              mbDevice.setAttribute(ThermostatCluster.id, 'controlSequenceOfOperation', Thermostat.ControlSequenceOfOperation.HeatingOnly, mbDevice.log, child);
+              mbDevice.setAttribute(ThermostatCluster.id, 'occupiedHeatingSetpoint', (thermostatComponent.getValue('target_C') as number) * 100, mbDevice.log, child);
+              mbDevice.setAttribute(ThermostatCluster.id, 'minHeatSetpointLimit', 5 * 100, mbDevice.log, child);
+              mbDevice.setAttribute(ThermostatCluster.id, 'maxHeatSetpointLimit', 35 * 100, mbDevice.log, child);
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (child.getClusterServerById(ThermostatCluster.id)?.attributes['absMinHeatSetpointLimit'] as any).value = 500;
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (child.getClusterServerById(ThermostatCluster.id)?.attributes['absMaxHeatSetpointLimit'] as any).value = 3500;
+            }
+            if (thermostatComponent.getValue('type') === 'cooling') {
+              mbDevice.setAttribute(ThermostatCluster.id, 'systemMode', Thermostat.SystemMode.Cool, mbDevice.log, child);
+              mbDevice.setAttribute(ThermostatCluster.id, 'thermostatRunningMode', Thermostat.ThermostatRunningMode.Cool, mbDevice.log, child);
+              mbDevice.setAttribute(ThermostatCluster.id, 'controlSequenceOfOperation', Thermostat.ControlSequenceOfOperation.CoolingOnly, mbDevice.log, child);
+              mbDevice.setAttribute(ThermostatCluster.id, 'occupiedCoolingSetpoint', (thermostatComponent.getValue('target_C') as number) * 100, mbDevice.log, child);
+              mbDevice.setAttribute(ThermostatCluster.id, 'minCoolSetpointLimit', 5 * 100, mbDevice.log, child);
+              mbDevice.setAttribute(ThermostatCluster.id, 'maxCoolSetpointLimit', 35 * 100, mbDevice.log, child);
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (child.getClusterServerById(ThermostatCluster.id)?.attributes['absMinCoolSetpointLimit'] as any).value = 500;
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (child.getClusterServerById(ThermostatCluster.id)?.attributes['absMaxCoolSetpointLimit'] as any).value = 3500;
+            }
+            if (thermostatComponent.getValue('enable') === false) mbDevice.setAttribute(ThermostatCluster.id, 'systemMode', Thermostat.SystemMode.Off, mbDevice.log, child);
+
+            mbDevice.setAttribute(ThermostatCluster.id, 'localTemperature', (thermostatComponent.getValue('current_C') as number) * 100, mbDevice.log, child);
+            mbDevice.subscribeAttribute(
+              ThermostatCluster.id,
+              'systemMode',
+              (newValue, oldValue) => {
+                mbDevice.log.info(`Thermostat systemMode changed from ${oldValue} to ${newValue}`);
+                if (oldValue !== newValue) {
+                  if (device.thermostatSystemModeTimeout) clearTimeout(device.thermostatSystemModeTimeout);
+                  device.thermostatSystemModeTimeout = setTimeout(() => {
+                    // Thermostat.SystemMode.Heat && newValue === Thermostat.SystemMode.Off
+                    mbDevice.log.info(`Setting thermostat systemMode to ${newValue}`);
+                    if (newValue === Thermostat.SystemMode.Off) {
+                      ShellyDevice.fetch(this.shelly, mbDevice.log, device.host, 'Thermostat.SetConfig', { config: { id: 0, enable: false } });
+                    } else if (newValue === Thermostat.SystemMode.Heat) {
+                      ShellyDevice.fetch(this.shelly, mbDevice.log, device.host, 'Thermostat.SetConfig', { config: { id: 0, enable: true } });
+                    } else if (newValue === Thermostat.SystemMode.Cool) {
+                      ShellyDevice.fetch(this.shelly, mbDevice.log, device.host, 'Thermostat.SetConfig', { config: { id: 0, enable: true } });
+                    }
+                  }, 5000);
+                }
+              },
+              mbDevice.log,
+              child,
+            );
+            mbDevice.subscribeAttribute(
+              ThermostatCluster.id,
+              'occupiedHeatingSetpoint',
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (newValue: any, oldValue: any) => {
+                mbDevice.log.info(`Thermostat occupiedHeatingSetpoint changed from ${oldValue / 100} to ${newValue / 100}`);
+                if (device.thermostatSetpointTimeout) clearTimeout(device.thermostatSetpointTimeout);
+                device.thermostatSetpointTimeout = setTimeout(() => {
+                  mbDevice.log.info(`Setting thermostat occupiedCoolingSetpoint to ${newValue / 100}`);
+                  ShellyDevice.fetch(this.shelly, mbDevice.log, device.host, 'Thermostat.SetConfig', { config: { id: 0, target_C: newValue / 100 } });
+                }, 5000);
+              },
+              mbDevice.log,
+              child,
+            );
+            mbDevice.subscribeAttribute(
+              ThermostatCluster.id,
+              'occupiedCoolingSetpoint',
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (newValue: any, oldValue: any) => {
+                mbDevice.log.info(`Thermostat occupiedCoolingSetpoint changed from ${oldValue / 100} to ${newValue / 100}`);
+                if (device.thermostatSetpointTimeout) clearTimeout(device.thermostatSetpointTimeout);
+                device.thermostatSetpointTimeout = setTimeout(() => {
+                  mbDevice.log.info(`Setting thermostat occupiedCoolingSetpoint to ${newValue / 100}`);
+                  ShellyDevice.fetch(this.shelly, mbDevice.log, device.host, 'Thermostat.SetConfig', { config: { id: 0, target_C: newValue / 100 } });
+                }, 5000);
+              },
+              mbDevice.log,
+              child,
+            );
+            // Add event handler
+            thermostatComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
+              this.shellyUpdateHandler(mbDevice, device, component, property, value);
+            });
+          }
         } else if (component.name === 'Flood' && config.exposeFlood !== 'disabled') {
           const floodComponent = device.getComponent(key);
           if (floodComponent?.hasProperty('flood') && isValidBoolean(floodComponent.getValue('flood'))) {
@@ -1072,6 +1186,20 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             mbDevice.setWindowCoveringTargetAsCurrentAndStopped(childEndpoint);
           }
         }
+        // Configure the cluster Thermostat attribute occupiedHeatingSetpoint occupiedCoolingSetpoint
+        if (label?.startsWith('thermostat')) {
+          const thermostatComponent = shellyDevice.getComponent(label) as ShellyCoverComponent;
+          const target = thermostatComponent.hasProperty('target_C') ? (thermostatComponent.getValue('target_C') as number) : undefined;
+          if (isValidNumber(target, 5, 35)) {
+            if (thermostatComponent.getValue('type') === 'heating') {
+              this.log.info(`Configuring device ${dn}${mbDevice.deviceName}${nf} component ${hk}${label}${nf}:${zb}occupiedHeatingSetpoint ${YELLOW}${target}${nf}`);
+              mbDevice.setAttribute(ThermostatCluster.id, 'occupiedHeatingSetpoint', target * 100, shellyDevice.log, childEndpoint);
+            } else if (thermostatComponent.getValue('type') === 'cooling') {
+              this.log.info(`Configuring device ${dn}${mbDevice.deviceName}${nf} component ${hk}${label}${nf}:${zb}occupiedCoolingSetpoint ${YELLOW}${target}${nf}`);
+              mbDevice.setAttribute(ThermostatCluster.id, 'occupiedCoolingSetpoint', target * 100, shellyDevice.log, childEndpoint);
+            }
+          }
+        }
       });
       if (shellyDevice.bthomeDevices.size > 0) {
         shellyDevice.log.info(`Configuring BLE devices paired to ${hk}${shellyDevice.id}${nf}...`);
@@ -1313,7 +1441,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
   }
 
   private shellyUpdateHandler(matterbridgeDevice: MatterbridgeDevice, shellyDevice: ShellyDevice, component: string, property: string, value: ShellyDataType) {
-    const endpoint = matterbridgeDevice.getChildEndpointWithLabel(component);
+    const endpoint = matterbridgeDevice.getChildEndpointByName(component);
     if (!endpoint) return;
     const shellyComponent = shellyDevice.getComponent(component);
     if (!shellyComponent) return;
@@ -1454,6 +1582,17 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     if (shellyComponent.name === 'Illuminance' && property === 'lux' && isValidNumber(value, 0)) {
       const matterLux = Math.round(Math.max(Math.min(10000 * Math.log10(value), 0xfffe), 0));
       matterbridgeDevice.setAttribute(IlluminanceMeasurementCluster.id, 'measuredValue', matterLux, shellyDevice.log, endpoint);
+    }
+    // Update for Thermostat current_C
+    if (shellyComponent.name === 'Thermostat' && property === 'current_C' && isValidNumber(value, -100, +100)) {
+      matterbridgeDevice.setAttribute(ThermostatCluster.id, 'localTemperature', value * 100, shellyDevice.log, endpoint);
+    }
+    // Update for Thermostat target_C
+    if (shellyComponent.name === 'Thermostat' && property === 'target_C' && isValidNumber(value, -100, +100)) {
+      if (shellyComponent.hasProperty('type') && shellyComponent.getValue('type') === 'heating')
+        matterbridgeDevice.setAttribute(ThermostatCluster.id, 'occupiedHeatingSetpoint', value * 100, shellyDevice.log, endpoint);
+      if (shellyComponent.hasProperty('type') && shellyComponent.getValue('type') === 'cooling')
+        matterbridgeDevice.setAttribute(ThermostatCluster.id, 'occupiedCoolingSetpoint', value * 100, shellyDevice.log, endpoint);
     }
     // Update for vibration
     if (shellyComponent.name === 'Vibration' && property === 'vibration' && isValidBoolean(value)) {

@@ -1,0 +1,261 @@
+{
+  "shelly": {
+    "id": "ShellyWallDisplay-00082261E102",
+    "mac": "00082261E102",
+    "model": "SAWD-0A1XX10EU1",
+    "gen": 2,
+    "fw_id": "20240831-114811/2.2.1-eb899af6",
+    "ver": "2.2.1",
+    "app": "WallDisplay",
+    "auth_en": false,
+    "uptime": 522,
+    "app_uptime": 1728225624,
+    "discoverable": true,
+    "cfg_rev": 13,
+    "schedule_rev": 0,
+    "webhook_rev": 0,
+    "platform": "vXD10000M2",
+    "serial": "SAWD89D0132BU",
+    "batch_id": "3872b",
+    "batch_date": 231211,
+    "available_updates": {
+      "beta": {
+        "version": "2.3.0-beta3",
+        "build_id": "20240926-093308/2.3.0-dd2e06a3-beta3"
+      }
+    },
+    "restart_required": false,
+    "unixtime": 1728225624,
+    "relay_in_thermostat": false,
+    "sensor_in_thermostat": false,
+    "awaiting_auth_code": true
+  },
+  "settings": {
+    "ble": {
+      "enable": true,
+      "rpc": {
+        "enable": true
+      },
+      "observer": {
+        "enable": false
+      }
+    },
+    "wifi": {
+      "sta": {
+        "enable": true,
+        "ipv4mode": "dhcp",
+        "ssid": "FibreBox_X6-12A4C7",
+        "is_open": false,
+        "ip": "192.168.1.97",
+        "netmask": "255.255.255.0",
+        "gw": "192.168.1.1",
+        "nameserver": "208.67.222.222"
+      }
+    },
+    "switch:0": {
+      "id": 0,
+      "auto_off": false,
+      "auto_on_delay": 0,
+      "initial_state": "off",
+      "in_mode": "follow",
+      "name": null
+    },
+    "input:0": {
+      "id": 0,
+      "type": "switch",
+      "invert": false,
+      "factory_reset": true,
+      "name": null
+    },
+    "temperature:0": {
+      "id": 0,
+      "report_thr_C": 1,
+      "offset_C": 0,
+      "name": null
+    },
+    "humidity:0": {
+      "id": 0,
+      "report_thr": 1,
+      "offset": 0,
+      "name": null
+    },
+    "illuminance:0": {
+      "id": 0,
+      "bright_thr": 200,
+      "dark_thr": 30,
+      "name": null
+    },
+    "ui": {
+      "lock_type": "none",
+      "disable_gestures_when_locked": false,
+      "use_F": false,
+      "screen_saver": {
+        "enable": false,
+        "timeout": 20,
+        "priority_element": "CLOCK"
+      },
+      "screen_off_when_idle": true,
+      "brightness": {
+        "auto": true,
+        "level": 0,
+        "auto_off": {
+          "enable": true,
+          "by_lux": false
+        }
+      },
+      "relay_state_overlay": {
+        "enable": true,
+        "always_visible": false
+      }
+    },
+    "sys": {
+      "device": {
+        "name": "Wall Display",
+        "fw_id": "20240831-114811/2.2.1-eb899af6",
+        "mac": "00082261E102",
+        "discoverable": true
+      },
+      "cfg_rev": 13,
+      "location": null,
+      "sntp": {
+        "server": "time.google.com"
+      },
+      "debug": {
+        "websocket": {
+          "enable": false
+        },
+        "mqtt": {
+          "enable": false
+        },
+        "logs": {
+          "Generic": true,
+          "Bluetooth": true,
+          "Cloud": true,
+          "Interface": true,
+          "Media": true,
+          "MQTT": true,
+          "Network": true,
+          "RPC": true,
+          "Thermostat": true,
+          "Screen": true,
+          "UART": true,
+          "Webhooks": true,
+          "WebSocket": true
+        }
+      }
+    },
+    "cloud": {
+      "enable": true,
+      "server": "shelly-103-eu.shelly.cloud:6022/jrpc"
+    },
+    "mqtt": {
+      "enable": false,
+      "client_id": "ShellyWallDisplay-00082261E102",
+      "topic_prefix": "ShellyWallDisplay-00082261E102"
+    },
+    "ws": {
+      "enable": false,
+      "ssl_ca": "ca.pem"
+    },
+    "media": {
+      "rev": 0
+    }
+  },
+  "status": {
+    "ble": {},
+    "cloud": {
+      "connected": true
+    },
+    "mqtt": {
+      "connected": false
+    },
+    "temperature:0": {
+      "id": 0,
+      "tC": 23.3,
+      "tF": 74
+    },
+    "humidity:0": {
+      "id": 0,
+      "rh": 50
+    },
+    "illuminance:0": {
+      "id": 0,
+      "lux": 450,
+      "illumination": "bright"
+    },
+    "switch:0": {
+      "id": 0,
+      "output": false,
+      "source": "Ui"
+    },
+    "input:0": {
+      "id": 0,
+      "state": false
+    },
+    "sys": {
+      "id": "ShellyWallDisplay-00082261E102",
+      "mac": "00082261E102",
+      "model": "SAWD-0A1XX10EU1",
+      "gen": 2,
+      "fw_id": "20240831-114811/2.2.1-eb899af6",
+      "ver": "2.2.1",
+      "app": "WallDisplay",
+      "auth_en": false,
+      "uptime": 522,
+      "app_uptime": 1728225624,
+      "discoverable": true,
+      "cfg_rev": 13,
+      "schedule_rev": 0,
+      "webhook_rev": 0,
+      "platform": "vXD10000M2",
+      "serial": "SAWD89D0132BU",
+      "batch_id": "3872b",
+      "batch_date": 231211,
+      "available_updates": {
+        "beta": {
+          "version": "2.3.0-beta3",
+          "build_id": "20240926-093308/2.3.0-dd2e06a3-beta3"
+        }
+      },
+      "restart_required": false,
+      "unixtime": 1728225624,
+      "relay_in_thermostat": false,
+      "sensor_in_thermostat": false,
+      "awaiting_auth_code": true
+    },
+    "wifi": {
+      "sta_ip": "192.168.1.167",
+      "status": "got ip",
+      "mac": "00:08:22:61:E1:02",
+      "ssid": "FibreBox_X6-12A4C7",
+      "rssi": -53,
+      "netmask": "255.255.255.0",
+      "gw": "192.168.1.1",
+      "nameserver": "208.67.222.222"
+    },
+    "media": {
+      "total_size": 0,
+      "total_size_h": "0.000 B",
+      "item_counts": {
+        "audio": 0,
+        "photo": 0,
+        "video": 0
+      },
+      "playback": {
+        "enable": false,
+        "buffering": false,
+        "volume": 10
+      }
+    },
+    "devicepower:0": {
+      "id": 0,
+      "external": {
+        "present": true
+      }
+    }
+  },
+  "components": [],
+  "cfg_rev": 0,
+  "offset": 0,
+  "total": 0
+}

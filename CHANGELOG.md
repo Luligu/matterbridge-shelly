@@ -19,6 +19,8 @@ If you like this project and find it useful, please consider giving it a star on
 - [shelly]: Added mdns Jest test for shellyplugsg3 with firmware v1.4.99.
 - [shelly]: Verified support for shelly2pmg3 with firmware v1.4.99-2pmg3prod0-ge3db05c and added Jest test.
 - [shelly]: Added mdns Jest test for shelly2pmg3 with firmware v1.4.99.
+- [shelly]: Added component Thermostat.
+- [shelly]: Added support for shellywalldisplay mode thermostat with firmware v2.2.1 and added Jest test.
 
 - [config]: Added the "switchList", "lightList" and "outletList" to individually configure how to expose a switch, regardless of the global option.
 - [config]: Added the "inputContactList" to individually configure a device to expose the Input component as contact sensor, regardless of the global option (you can disable the Input component globally and enable it only for single devices).

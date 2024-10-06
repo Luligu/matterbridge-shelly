@@ -200,15 +200,15 @@ describe('Shellies MdnsScanner test', () => {
     mdns.start(undefined, undefined, undefined, true);
     expect(mdns.isScanning).toBeTruthy();
     setTimeout(() => {
-      expect(discoveredDeviceListener).toHaveBeenCalledWith({ id: 'shellywalldisplay-000822B39A55', host: '192.168.68.168', port: 80, gen: 2 });
-      expect((mdns as any).discoveredDevices.has('shellywalldisplay-000822B39A55')).toBeTruthy();
+      expect(discoveredDeviceListener).toHaveBeenCalledWith({ id: 'shellywalldisplay-00082261E102', host: '192.168.1.167', port: 80, gen: 2 });
+      expect((mdns as any).discoveredDevices.has('shellywalldisplay-00082261E102')).toBeTruthy();
       done();
     }, 1000);
     (mdns as any).discoveredDevices.clear();
-    const data = loadResponse('shellywalldisplay-000822B39A55');
+    const data = loadResponse('shellywalldisplay-00082261E102');
     expect(data).not.toBeUndefined();
     if (!data) return;
-    (mdns as any).scanner.emit('response', data, { address: '192.168.68.168', family: 'IPv4', port: 5353, size: 0 });
+    (mdns as any).scanner.emit('response', data, { address: '192.168.1.167', family: 'IPv4', port: 5353, size: 0 });
     mdns.stop();
     expect(mdns.isScanning).toBeFalsy();
   }, 10000);

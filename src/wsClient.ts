@@ -349,6 +349,14 @@ export class WsClient extends EventEmitter {
         } else if (response.method && (response.method === 'NotifyStatus' || response.method === 'NotifyFullStatus') && response.dst === 'Matterbridge' + this.requestId) {
           this.log.debug(`Received ${CYAN}${response.method}${db} from ${hk}${this.id}${db} host ${zb}${this.wsHost}${db}:${rs}\n`, response.params);
           this.emit('update', response.params);
+        } else if (
+          response.method &&
+          (response.method === 'NotifyStatus' || response.method === 'NotifyFullStatus') &&
+          response.dst === 'user_1' &&
+          this.wsDeviceId.startsWith('shellywalldisplay')
+        ) {
+          this.log.debug(`Received ${CYAN}${response.method}${db} from ${hk}${this.id}${db} host ${zb}${this.wsHost}${db}:${rs}\n`, response.params);
+          this.emit('update', response.params);
         } else if (response.method && response.method === 'NotifyEvent' && response.dst === 'Matterbridge' + this.requestId) {
           this.log.debug(`Received ${CYAN}${response.method}${db} from ${hk}${this.id}${db} host ${zb}${this.wsHost}${db}:${rs}\n`, response.params.events);
           this.emit('event', response.params.events);

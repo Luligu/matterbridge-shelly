@@ -1,0 +1,263 @@
+{
+  "id": 0,
+  "type": "response",
+  "flags": 1024,
+  "flag_qr": true,
+  "opcode": "QUERY",
+  "flag_aa": true,
+  "flag_tc": false,
+  "flag_rd": false,
+  "flag_ra": false,
+  "flag_z": false,
+  "flag_ad": false,
+  "flag_cd": false,
+  "rcode": "NOERROR",
+  "questions": [],
+  "answers": [
+    {
+      "name": "ShellyWallDisplay-00082261E102._shelly._tcp.local",
+      "type": "TXT",
+      "ttl": 4500,
+      "class": "IN",
+      "flush": true,
+      "data": [
+        "app=WallDisplay",
+        "gen=2",
+        "ver=2.2.1",
+        "discoverable=true"
+      ]
+    },
+    {
+      "name": "_services._dns-sd._udp.local",
+      "type": "PTR",
+      "ttl": 4500,
+      "class": "IN",
+      "flush": false,
+      "data": "_shelly._tcp.local"
+    },
+    {
+      "name": "_shelly._tcp.local",
+      "type": "PTR",
+      "ttl": 4500,
+      "class": "IN",
+      "flush": false,
+      "data": "ShellyWallDisplay-00082261E102._shelly._tcp.local"
+    },
+    {
+      "name": "ShellyWallDisplay-00082261E102._http._tcp.local",
+      "type": "TXT",
+      "ttl": 4500,
+      "class": "IN",
+      "flush": true,
+      "data": [
+        "app=WallDisplay",
+        "gen=2",
+        "ver=2.2.1",
+        "discoverable=true"
+      ]
+    },
+    {
+      "name": "_services._dns-sd._udp.local",
+      "type": "PTR",
+      "ttl": 4500,
+      "class": "IN",
+      "flush": false,
+      "data": "_http._tcp.local"
+    },
+    {
+      "name": "_http._tcp.local",
+      "type": "PTR",
+      "ttl": 4500,
+      "class": "IN",
+      "flush": false,
+      "data": "ShellyWallDisplay-00082261E102._http._tcp.local"
+    },
+    {
+      "name": "ShellyWallDisplay-00082261E102._shelly._tcp.local",
+      "type": "SRV",
+      "ttl": 120,
+      "class": "IN",
+      "flush": true,
+      "data": {
+        "priority": 0,
+        "weight": 0,
+        "port": 80,
+        "target": "ShellyWallDisplay-00082261E102.local"
+      }
+    },
+    {
+      "name": "ShellyWallDisplay-00082261E102._http._tcp.local",
+      "type": "SRV",
+      "ttl": 120,
+      "class": "IN",
+      "flush": true,
+      "data": {
+        "priority": 0,
+        "weight": 0,
+        "port": 80,
+        "target": "ShellyWallDisplay-00082261E102.local"
+      }
+    },
+    {
+      "name": "167.1.168.192.in-addr.arpa",
+      "type": "PTR",
+      "ttl": 120,
+      "class": "IN",
+      "flush": true,
+      "data": "ShellyWallDisplay-00082261E102.local"
+    },
+    {
+      "name": "2.0.1.E.1.6.E.F.F.F.2.2.8.0.2.0.0.0.0.0.0.0.0.0.0.0.0.0.0.8.E.F.ip6.arpa",
+      "type": "PTR",
+      "ttl": 120,
+      "class": "IN",
+      "flush": true,
+      "data": "ShellyWallDisplay-00082261E102.local"
+    },
+    {
+      "name": "2.0.1.E.1.6.E.F.F.F.2.2.8.0.2.0.6.4.7.0.9.3.9.4.8.F.B.C.8.7.D.F.ip6.arpa",
+      "type": "PTR",
+      "ttl": 120,
+      "class": "IN",
+      "flush": true,
+      "data": "ShellyWallDisplay-00082261E102.local"
+    },
+    {
+      "name": "A.0.E.1.3.B.9.9.2.0.2.9.C.B.0.2.6.4.7.0.9.3.9.4.8.F.B.C.8.7.D.F.ip6.arpa",
+      "type": "PTR",
+      "ttl": 120,
+      "class": "IN",
+      "flush": true,
+      "data": "ShellyWallDisplay-00082261E102.local"
+    },
+    {
+      "name": "ShellyWallDisplay-00082261E102.local",
+      "type": "A",
+      "ttl": 120,
+      "class": "IN",
+      "flush": true,
+      "data": "192.168.1.167"
+    },
+    {
+      "name": "ShellyWallDisplay-00082261E102.local",
+      "type": "AAAA",
+      "ttl": 120,
+      "class": "IN",
+      "flush": true,
+      "data": "fe80::208:22ff:fe61:e102"
+    },
+    {
+      "name": "ShellyWallDisplay-00082261E102.local",
+      "type": "AAAA",
+      "ttl": 120,
+      "class": "IN",
+      "flush": true,
+      "data": "fd78:cbf8:4939:746:208:22ff:fe61:e102"
+    },
+    {
+      "name": "ShellyWallDisplay-00082261E102.local",
+      "type": "AAAA",
+      "ttl": 120,
+      "class": "IN",
+      "flush": true,
+      "data": "fd78:cbf8:4939:746:20bc:9202:99b3:1e0a"
+    }
+  ],
+  "authorities": [],
+  "additionals": [
+    {
+      "name": "ShellyWallDisplay-00082261E102._shelly._tcp.local",
+      "type": "NSEC",
+      "ttl": 4500,
+      "class": "IN",
+      "flush": true,
+      "data": {
+        "nextDomain": "ShellyWallDisplay-00082261E102._shelly._tcp.local",
+        "rrtypes": [
+          "TXT",
+          "SRV"
+        ]
+      }
+    },
+    {
+      "name": "ShellyWallDisplay-00082261E102._http._tcp.local",
+      "type": "NSEC",
+      "ttl": 4500,
+      "class": "IN",
+      "flush": true,
+      "data": {
+        "nextDomain": "ShellyWallDisplay-00082261E102._http._tcp.local",
+        "rrtypes": [
+          "TXT",
+          "SRV"
+        ]
+      }
+    },
+    {
+      "name": "167.1.168.192.in-addr.arpa",
+      "type": "NSEC",
+      "ttl": 120,
+      "class": "IN",
+      "flush": true,
+      "data": {
+        "nextDomain": "167.1.168.192.in-addr.arpa",
+        "rrtypes": [
+          "PTR"
+        ]
+      }
+    },
+    {
+      "name": "2.0.1.E.1.6.E.F.F.F.2.2.8.0.2.0.0.0.0.0.0.0.0.0.0.0.0.0.0.8.E.F.ip6.arpa",
+      "type": "NSEC",
+      "ttl": 120,
+      "class": "IN",
+      "flush": true,
+      "data": {
+        "nextDomain": "2.0.1.E.1.6.E.F.F.F.2.2.8.0.2.0.0.0.0.0.0.0.0.0.0.0.0.0.0.8.E.F.ip6.arpa",
+        "rrtypes": [
+          "PTR"
+        ]
+      }
+    },
+    {
+      "name": "2.0.1.E.1.6.E.F.F.F.2.2.8.0.2.0.6.4.7.0.9.3.9.4.8.F.B.C.8.7.D.F.ip6.arpa",
+      "type": "NSEC",
+      "ttl": 120,
+      "class": "IN",
+      "flush": true,
+      "data": {
+        "nextDomain": "2.0.1.E.1.6.E.F.F.F.2.2.8.0.2.0.6.4.7.0.9.3.9.4.8.F.B.C.8.7.D.F.ip6.arpa",
+        "rrtypes": [
+          "PTR"
+        ]
+      }
+    },
+    {
+      "name": "A.0.E.1.3.B.9.9.2.0.2.9.C.B.0.2.6.4.7.0.9.3.9.4.8.F.B.C.8.7.D.F.ip6.arpa",
+      "type": "NSEC",
+      "ttl": 120,
+      "class": "IN",
+      "flush": true,
+      "data": {
+        "nextDomain": "A.0.E.1.3.B.9.9.2.0.2.9.C.B.0.2.6.4.7.0.9.3.9.4.8.F.B.C.8.7.D.F.ip6.arpa",
+        "rrtypes": [
+          "PTR"
+        ]
+      }
+    },
+    {
+      "name": "ShellyWallDisplay-00082261E102.local",
+      "type": "NSEC",
+      "ttl": 120,
+      "class": "IN",
+      "flush": true,
+      "data": {
+        "nextDomain": "ShellyWallDisplay-00082261E102.local",
+        "rrtypes": [
+          "A",
+          "AAAA"
+        ]
+      }
+    }
+  ]
+}
