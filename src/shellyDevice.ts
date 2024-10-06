@@ -49,7 +49,7 @@ interface ShellyDeviceEvent {
   online: [];
   offline: [];
   update: [id: string, key: string, value: ShellyDataType];
-  bthomedevice_update: [addr: string, rssi: number, last_updated_ts: number];
+  bthomedevice_update: [addr: string, rssi: number, packet_id: number, last_updated_ts: number];
   bthomesensor_update: [addr: string, sensorName: string, sensorIndex: number, value: ShellyDataType];
   bthomesensor_event: [addr: string, sensorName: string, sensorIndex: number, event: string];
 }
@@ -785,7 +785,7 @@ export class ShellyDevice extends EventEmitter {
           if (isValidNumber(bthomeDevice.rssi, -100, 0) || isValidNumber(bthomeDevice.last_updated_ts, 0)) {
             if (isValidNumber(bthomeDevice.rssi, -100, 0)) device.rssi = bthomeDevice.rssi;
             if (isValidNumber(bthomeDevice.last_updated_ts, 0)) device.last_updated_ts = bthomeDevice.last_updated_ts;
-            this.emit('bthomedevice_update', device.addr, bthomeDevice.rssi, bthomeDevice.last_updated_ts);
+            this.emit('bthomedevice_update', device.addr, bthomeDevice.rssi, bthomeDevice.packet_id, bthomeDevice.last_updated_ts);
             // this.log.debug(`BTHome devices map:${rs}\n`, this.bthomeDevices);
           }
         }

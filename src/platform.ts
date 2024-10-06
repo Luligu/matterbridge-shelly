@@ -206,11 +206,12 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       // Scan the device for paired BLU devices
       if (config.enableBleDiscover === true) {
         if (device.bthomeDevices.size && device.bthomeSensors.size) {
-          this.log.info(`Shelly device ${hk}${device.id}${nf} host ${zb}${device.host}${nf} is a ble gateway. Scanning paired BLU devices...`);
+          this.log.info(`Shelly device ${hk}${device.id}${nf} host ${zb}${device.host}${nf} is a ble gateway. Adding paired BLU devices...`);
           // Register the BLU devices
           for (const [key, bthomeDevice] of device.bthomeDevices) {
             this.log.info(
-              `- ${idn}${bthomeDevice.name}${rs}${nf} address ${CYAN}${bthomeDevice.addr}${nf} ` + `model ${CYAN}${bthomeDevice.model}${nf} (${CYAN}${bthomeDevice.type}${nf})`,
+              `- ${idn}${bthomeDevice.name}${rs}${nf} address ${CYAN}${bthomeDevice.addr}${nf} id ${CYAN}${bthomeDevice.id}${nf} ` +
+                `model ${CYAN}${bthomeDevice.model}${nf} (${CYAN}${bthomeDevice.type}${nf})`,
             );
             let definition: AtLeastOne<DeviceTypeDefinition> | undefined;
             if (bthomeDevice.model === 'Shelly BLU DoorWindow') definition = [bridgedNode, powerSource];
@@ -305,7 +306,11 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
                     mbDevice.log.info(`Thermostat occupiedHeatingSetpoint changed from ${oldValue} to ${newValue}`);
                     if (device.thermostatSetpointTimeout) clearTimeout(device.thermostatSetpointTimeout);
                     device.thermostatSetpointTimeout = setTimeout(() => {
-                      ShellyDevice.fetch(this.shelly, mbDevice.log, device.host, 'BluTrv.Call', { id: 200, method: 'Trv.SetTarget', params: { id: 0, target_C: newValue / 100 } });
+                      ShellyDevice.fetch(this.shelly, mbDevice.log, device.host, 'BluTrv.Call', {
+                        id: bthomeDevice.id,
+                        method: 'Trv.SetTarget',
+                        params: { id: 0, target_C: newValue / 100 },
+                      });
                     }, 5000);
                   },
                   mbDevice.log,
@@ -323,8 +328,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             }
           }
           // BLU observer device updates
-          device.on('bthomedevice_update', (addr: string, rssi: number, last_updated_ts: number) => {
-            if (!isValidString(addr, 11) || !isValidNumber(rssi, -100, 0) || !isValidNumber(last_updated_ts)) return;
+          device.on('bthomedevice_update', (addr: string, rssi: number, packet_id: number, last_updated_ts: number) => {
+            if (!isValidString(addr, 11) || !isValidNumber(rssi, -100, 0) || !isValidNumber(packet_id, 0) || !isValidNumber(last_updated_ts)) return;
             const blu = this.bluBridgedDevices.get(addr);
             const bthomeDevice = device.bthomeDevices.get(addr);
             if (!blu || !bthomeDevice) {
@@ -332,7 +337,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               return;
             }
             blu.log.info(
-              `${idn}BLU${rs}${db} observer device update message for BLU device ${idn}${blu?.deviceName ?? addr}${rs}${db}: rssi ${YELLOW}${rssi}${db} last_updated ${YELLOW}${device.getLocalTimeFromLastUpdated(last_updated_ts)}${db}`,
+              `${idn}BLU${rs}${db} observer device update message for BLU device ${idn}${blu?.deviceName ?? addr}${rs}${db}: rssi ${YELLOW}${rssi}${db} packet_id ${YELLOW}${packet_id}${db} last_updated ${YELLOW}${device.getLocalTimeFromLastUpdated(last_updated_ts)}${db}`,
             );
           });
           // BLU observer sensor updates
