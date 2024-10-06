@@ -11,7 +11,7 @@ If you like this project and find it useful, please consider giving it a star on
 - [shelly]: Added support for BLU Wall Switch 4.
 - [shelly]: Added support for BLU RC Button 4.
 - [shelly]: Added support for BLU TRV with firmware v20240926-201942.
-- [shelly]: Added support for shellyblugwg3 (BLU Gateway Gen 3) with firmware v1.4.99 and added Jest test (it exposes "Enable LED" ModeSelect cluster).
+- [shelly]: Added support for shellyblugwg3 (BLU Gateway Gen 3) with firmware v1.4.99 and added Jest test (it exposes also "Enable LED" with the ModeSelect cluster).
 - [shelly]: Added mdns Jest test for shellyblugwg3 (BLU Gateway Gen 3) with firmware v1.4.99.
 - [shelly]: Verified support for shellypro2cover with firmware v1.4.2 and added Jest test. Verified and tested by Tamer.
 - [shelly]: Added mdns Jest test for shellypro2cover with firmware v1.4.2.
