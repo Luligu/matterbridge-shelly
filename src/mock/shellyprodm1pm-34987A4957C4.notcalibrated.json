@@ -196,19 +196,13 @@
       },
       "aenergy": {
         "total": 0,
-        "by_minute": [
-          0,
-          0,
-          0
-        ],
+        "by_minute": [0, 0, 0],
         "minute_ts": 1725717900
       },
       "apower": 0,
       "current": 0,
       "voltage": 232.8,
-      "flags": [
-        "uncalibrated"
-      ]
+      "flags": ["uncalibrated"]
     },
     "mqtt": {
       "connected": false
@@ -335,19 +329,13 @@
         },
         "aenergy": {
           "total": 0,
-          "by_minute": [
-            0,
-            0,
-            0
-          ],
+          "by_minute": [0, 0, 0],
           "minute_ts": 1725717900
         },
         "apower": 0,
         "current": 0,
         "voltage": 232.9,
-        "flags": [
-          "uncalibrated"
-        ]
+        "flags": ["uncalibrated"]
       },
       "config": {
         "id": 0,

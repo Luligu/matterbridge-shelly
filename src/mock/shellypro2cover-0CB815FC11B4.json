@@ -239,11 +239,7 @@
       "freq": 50,
       "aenergy": {
         "total": 0,
-        "by_minute": [
-          0,
-          0,
-          0
-        ],
+        "by_minute": [0, 0, 0],
         "minute_ts": 1727780760
       },
       "temperature": {
@@ -264,11 +260,7 @@
       "freq": 50,
       "aenergy": {
         "total": 0,
-        "by_minute": [
-          0,
-          0,
-          0
-        ],
+        "by_minute": [0, 0, 0],
         "minute_ts": 1727780760
       },
       "temperature": {
@@ -371,11 +363,7 @@
         "freq": 49.9,
         "aenergy": {
           "total": 0,
-          "by_minute": [
-            0,
-            0,
-            0
-          ],
+          "by_minute": [0, 0, 0],
           "minute_ts": 1727780760
         },
         "temperature": {
@@ -430,11 +418,7 @@
         "freq": 49.9,
         "aenergy": {
           "total": 0,
-          "by_minute": [
-            0,
-            0,
-            0
-          ],
+          "by_minute": [0, 0, 0],
           "minute_ts": 1727780760
         },
         "temperature": {

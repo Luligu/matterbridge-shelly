@@ -205,11 +205,7 @@
         "overpower": 0,
         "is_valid": true,
         "timestamp": 1725621326,
-        "counters": [
-          0,
-          0,
-          0
-        ],
+        "counters": [0, 0, 0],
         "total": 0
       }
     ],

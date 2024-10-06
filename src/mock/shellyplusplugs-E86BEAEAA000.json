@@ -45,19 +45,11 @@
         "colors": {
           "switch:0": {
             "on": {
-              "rgb": [
-                0,
-                100,
-                0
-              ],
+              "rgb": [0, 100, 0],
               "brightness": 100
             },
             "off": {
-              "rgb": [
-                100,
-                0,
-                0
-              ],
+              "rgb": [100, 0, 0],
               "brightness": 100
             }
           },
@@ -179,11 +171,7 @@
       "current": 0,
       "aenergy": {
         "total": 0,
-        "by_minute": [
-          0,
-          0,
-          0
-        ],
+        "by_minute": [0, 0, 0],
         "minute_ts": 1725546180
       },
       "temperature": {
@@ -279,19 +267,11 @@
           "colors": {
             "switch:0": {
               "on": {
-                "rgb": [
-                  0,
-                  100,
-                  0
-                ],
+                "rgb": [0, 100, 0],
                 "brightness": 100
               },
               "off": {
-                "rgb": [
-                  100,
-                  0,
-                  0
-                ],
+                "rgb": [100, 0, 0],
                 "brightness": 100
               }
             },
@@ -323,11 +303,7 @@
         "current": 0,
         "aenergy": {
           "total": 0,
-          "by_minute": [
-            0,
-            0,
-            0
-          ],
+          "by_minute": [0, 0, 0],
           "minute_ts": 1725546180
         },
         "temperature": {

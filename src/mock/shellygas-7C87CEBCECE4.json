@@ -1,165 +1,161 @@
 {
-    "shelly": {
-        "type": "SHGS-1",
-        "mac": "7C87CEBCECE4",
-        "auth": false,
-        "fw": "20230913-114427/v1.14.0-gcb84623",
-        "discoverable": false,
-        "longid": 1,
-        "num_inputs": 0,
-        "num_outputs": 0
+  "shelly": {
+    "type": "SHGS-1",
+    "mac": "7C87CEBCECE4",
+    "auth": false,
+    "fw": "20230913-114427/v1.14.0-gcb84623",
+    "discoverable": false,
+    "longid": 1,
+    "num_inputs": 0,
+    "num_outputs": 0
+  },
+  "settings": {
+    "device": {
+      "type": "SHGS-1",
+      "mac": "7C87CEBCECE4",
+      "hostname": "shellygas-7C87CEBCECE4",
+      "num_inputs": 0,
+      "num_outputs": 0
     },
-    "settings": {
-        "device": {
-            "type": "SHGS-1",
-            "mac": "7C87CEBCECE4",
-            "hostname": "shellygas-7C87CEBCECE4",
-            "num_inputs": 0,
-            "num_outputs": 0
-        },
-        "wifi_ap": {
-            "enabled": false,
-            "ssid": "shellygas-7C87CEBCECE4",
-            "key": ""
-        },
-        "wifi_sta": {
-            "enabled": true,
-            "ssid": "Tamer Umniah",
-            "ipv4_method": "dhcp",
-            "ip": null,
-            "gw": null,
-            "mask": null,
-            "dns": null
-        },
-        "wifi_sta1": {
-            "enabled": false,
-            "ssid": null,
-            "ipv4_method": "dhcp",
-            "ip": null,
-            "gw": null,
-            "mask": null,
-            "dns": null
-        },
-        "ap_roaming": {
-            "enabled": false,
-            "threshold": -70
-        },
-        "mqtt": {
-            "enable": false,
-            "server": "192.168.33.3:1883",
-            "user": "",
-            "id": "shellygas-7C87CEBCECE4",
-            "reconnect_timeout_max": 60,
-            "reconnect_timeout_min": 2,
-            "clean_session": true,
-            "keep_alive": 60,
-            "max_qos": 0,
-            "retain": false,
-            "update_period": 30
-        },
-        "coiot": {
-            "enabled": true,
-            "update_period": 15,
-            "peer": ""
-        },
-        "sntp": {
-            "server": "time.google.com",
-            "enabled": true
-        },
-        "login": {
-            "enabled": false,
-            "unprotected": false,
-            "username": "admin"
-        },
-        "pin_code": "",
-        "name": null,
-        "fw": "20230913-114427/v1.14.0-gcb84623",
-        "pon_wifi_reset": false,
-        "discoverable": false,
-        "build_info": {
-            "build_id": "20230913-114427/v1.14.0-gcb84623",
-            "build_timestamp": "2023-09-13T11:44:27Z",
-            "build_version": "1.0"
-        },
-        "cloud": {
-            "enabled": true,
-            "connected": true
-        },
-        "timezone": null,
-        "lat": null,
-        "lng": null,
-        "tzautodetect": true,
-        "tz_utc_offset": 10800,
-        "tz_dst": false,
-        "tz_dst_auto": true,
-        "time": "18:07",
-        "unixtime": 1727276849,
-        "debug_enable": false,
-        "allow_cross_origin": false,
-        "actions": {
-            "active": false,
-            "names": [
-                "alarm_off_url",
-                "alarm_mild_url",
-                "alarm_heavy_url"
-            ]
-        },
-        "hwinfo": {
-            "hw_revision": "prod-2020-04-09",
-            "batch_id": 1
-        },
-        "set_volume": 11,
-        "eco_mode_enabled": true
+    "wifi_ap": {
+      "enabled": false,
+      "ssid": "shellygas-7C87CEBCECE4",
+      "key": ""
     },
-    "status": {
-        "wifi_sta": {
-            "connected": true,
-            "ssid": "Tamer Umniah",
-            "ip": "192.168.68.165",
-            "rssi": -44
-        },
-        "cloud": {
-            "enabled": true,
-            "connected": true
-        },
-        "mqtt": {
-            "connected": false
-        },
-        "time": "18:07",
-        "unixtime": 1727276849,
-        "serial": 6,
-        "has_update": false,
-        "mac": "7C87CEBCECE4",
-        "cfg_changed_cnt": 1,
-        "actions_stats": {
-            "skipped": 0
-        },
-        "gas_sensor": {
-            "sensor_state": "normal",
-            "self_test_state": "not_completed",
-            "alarm_state": "none"
-        },
-        "concentration": {
-            "ppm": 0,
-            "is_valid": true
-        },
-        "valves": [
-            {
-                "state": "not_connected"
-            }
-        ],
-        "update": {
-            "status": "idle",
-            "has_update": false,
-            "new_version": "20230913-114427/v1.14.0-gcb84623",
-            "old_version": "20230913-114427/v1.14.0-gcb84623",
-            "beta_version": "20231107-165146/v1.14.1-rc1-g0617c15"
-        },
-        "ram_total": 52528,
-        "ram_free": 40500,
-        "fs_size": 233681,
-        "fs_free": 92619,
-        "uptime": 89
+    "wifi_sta": {
+      "enabled": true,
+      "ssid": "Tamer Umniah",
+      "ipv4_method": "dhcp",
+      "ip": null,
+      "gw": null,
+      "mask": null,
+      "dns": null
     },
-    "components": []
+    "wifi_sta1": {
+      "enabled": false,
+      "ssid": null,
+      "ipv4_method": "dhcp",
+      "ip": null,
+      "gw": null,
+      "mask": null,
+      "dns": null
+    },
+    "ap_roaming": {
+      "enabled": false,
+      "threshold": -70
+    },
+    "mqtt": {
+      "enable": false,
+      "server": "192.168.33.3:1883",
+      "user": "",
+      "id": "shellygas-7C87CEBCECE4",
+      "reconnect_timeout_max": 60,
+      "reconnect_timeout_min": 2,
+      "clean_session": true,
+      "keep_alive": 60,
+      "max_qos": 0,
+      "retain": false,
+      "update_period": 30
+    },
+    "coiot": {
+      "enabled": true,
+      "update_period": 15,
+      "peer": ""
+    },
+    "sntp": {
+      "server": "time.google.com",
+      "enabled": true
+    },
+    "login": {
+      "enabled": false,
+      "unprotected": false,
+      "username": "admin"
+    },
+    "pin_code": "",
+    "name": null,
+    "fw": "20230913-114427/v1.14.0-gcb84623",
+    "pon_wifi_reset": false,
+    "discoverable": false,
+    "build_info": {
+      "build_id": "20230913-114427/v1.14.0-gcb84623",
+      "build_timestamp": "2023-09-13T11:44:27Z",
+      "build_version": "1.0"
+    },
+    "cloud": {
+      "enabled": true,
+      "connected": true
+    },
+    "timezone": null,
+    "lat": null,
+    "lng": null,
+    "tzautodetect": true,
+    "tz_utc_offset": 10800,
+    "tz_dst": false,
+    "tz_dst_auto": true,
+    "time": "18:07",
+    "unixtime": 1727276849,
+    "debug_enable": false,
+    "allow_cross_origin": false,
+    "actions": {
+      "active": false,
+      "names": ["alarm_off_url", "alarm_mild_url", "alarm_heavy_url"]
+    },
+    "hwinfo": {
+      "hw_revision": "prod-2020-04-09",
+      "batch_id": 1
+    },
+    "set_volume": 11,
+    "eco_mode_enabled": true
+  },
+  "status": {
+    "wifi_sta": {
+      "connected": true,
+      "ssid": "Tamer Umniah",
+      "ip": "192.168.68.165",
+      "rssi": -44
+    },
+    "cloud": {
+      "enabled": true,
+      "connected": true
+    },
+    "mqtt": {
+      "connected": false
+    },
+    "time": "18:07",
+    "unixtime": 1727276849,
+    "serial": 6,
+    "has_update": false,
+    "mac": "7C87CEBCECE4",
+    "cfg_changed_cnt": 1,
+    "actions_stats": {
+      "skipped": 0
+    },
+    "gas_sensor": {
+      "sensor_state": "normal",
+      "self_test_state": "not_completed",
+      "alarm_state": "none"
+    },
+    "concentration": {
+      "ppm": 0,
+      "is_valid": true
+    },
+    "valves": [
+      {
+        "state": "not_connected"
+      }
+    ],
+    "update": {
+      "status": "idle",
+      "has_update": false,
+      "new_version": "20230913-114427/v1.14.0-gcb84623",
+      "old_version": "20230913-114427/v1.14.0-gcb84623",
+      "beta_version": "20231107-165146/v1.14.1-rc1-g0617c15"
+    },
+    "ram_total": 52528,
+    "ram_free": 40500,
+    "fs_size": 233681,
+    "fs_free": 92619,
+    "uptime": 89
+  },
+  "components": []
 }

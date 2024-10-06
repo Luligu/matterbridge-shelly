@@ -155,11 +155,7 @@
       "current": 0,
       "aenergy": {
         "total": 140,
-        "by_minute": [
-          0,
-          0,
-          0
-        ],
+        "by_minute": [0, 0, 0],
         "minute_ts": 1725544140
       },
       "temperature": {
@@ -263,11 +259,7 @@
         "current": 0,
         "aenergy": {
           "total": 140,
-          "by_minute": [
-            0,
-            0,
-            0
-          ],
+          "by_minute": [0, 0, 0],
           "minute_ts": 1725544140
         },
         "temperature": {

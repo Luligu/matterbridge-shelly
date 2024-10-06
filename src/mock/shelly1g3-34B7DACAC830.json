@@ -141,9 +141,7 @@
   "status": {
     "ble": {},
     "bthome": {
-      "errors": [
-        "bluetooth_disabled"
-      ]
+      "errors": ["bluetooth_disabled"]
     },
     "cloud": {
       "connected": true
@@ -209,9 +207,7 @@
     {
       "key": "bthome",
       "status": {
-        "errors": [
-          "bluetooth_disabled"
-        ]
+        "errors": ["bluetooth_disabled"]
       },
       "config": {}
     },

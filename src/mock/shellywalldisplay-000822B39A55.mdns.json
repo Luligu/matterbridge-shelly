@@ -55,12 +55,7 @@
       "ttl": 4500,
       "class": "IN",
       "flush": true,
-      "data": [
-        "app=WallDisplay",
-        "gen=2",
-        "ver=2.2.1",
-        "discoverable=false"
-      ]
+      "data": ["app=WallDisplay", "gen=2", "ver=2.2.1", "discoverable=false"]
     },
     {
       "name": "ShellyWallDisplay-000822B39A55._http._tcp.local",
@@ -68,12 +63,7 @@
       "ttl": 4500,
       "class": "IN",
       "flush": true,
-      "data": [
-        "app=WallDisplay",
-        "gen=2",
-        "ver=2.2.1",
-        "discoverable=false"
-      ]
+      "data": ["app=WallDisplay", "gen=2", "ver=2.2.1", "discoverable=false"]
     },
     {
       "name": "ShellyWallDisplay-000822B39A55._shelly._tcp.local",
@@ -125,10 +115,7 @@
       "flush": true,
       "data": {
         "nextDomain": "ShellyWallDisplay-000822B39A55._shelly._tcp.local",
-        "rrtypes": [
-          "TXT",
-          "SRV"
-        ]
+        "rrtypes": ["TXT", "SRV"]
       }
     },
     {
@@ -139,10 +126,7 @@
       "flush": true,
       "data": {
         "nextDomain": "ShellyWallDisplay-000822B39A55._http._tcp.local",
-        "rrtypes": [
-          "TXT",
-          "SRV"
-        ]
+        "rrtypes": ["TXT", "SRV"]
       }
     },
     {
@@ -153,10 +137,7 @@
       "flush": true,
       "data": {
         "nextDomain": "ShellyWallDisplay-000822B39A55.local",
-        "rrtypes": [
-          "A",
-          "AAAA"
-        ]
+        "rrtypes": ["A", "AAAA"]
       }
     }
   ]

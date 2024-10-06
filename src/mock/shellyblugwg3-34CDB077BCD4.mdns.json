@@ -68,9 +68,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": [
-        "gen=3"
-      ]
+      "data": ["gen=3"]
     },
     {
       "name": "ShellyBluGwG3-34CDB077BCD4.local",
@@ -99,11 +97,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": [
-        "gen=3",
-        "app=BluGwG3",
-        "ver=1.4.99-blugwg3prod1"
-      ]
+      "data": ["gen=3", "app=BluGwG3", "ver=1.4.99-blugwg3prod1"]
     },
     {
       "name": "ShellyBluGwG3-34CDB077BCD4.local",

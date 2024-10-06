@@ -17,7 +17,7 @@ If you like this project and find it useful, please consider giving it a star on
 - [shelly]: Added mdns Jest test for shellypro2cover with firmware v1.4.2.
 - [shelly]: Verified support for shellyplugsg3 with firmware v1.2.3-plugsg3prod0-gec79607 and added Jest test.
 - [shelly]: Added mdns Jest test for shellyplugsg3 with firmware v1.4.99.
-- [shelly]: Verified support for shelly2pmg3 with firmware v1.4.99-2pmg3prod0-ge3db05c and added Jest test. 
+- [shelly]: Verified support for shelly2pmg3 with firmware v1.4.99-2pmg3prod0-ge3db05c and added Jest test.
 - [shelly]: Added mdns Jest test for shelly2pmg3 with firmware v1.4.99.
 
 - [config]: Added the "switchList", "lightList" and "outletList" to individually configure how to expose a switch, regardless of the global option.
@@ -158,7 +158,6 @@ If you like this project and find it useful, please consider giving it a star on
 - [shelly]: Verified shelly1pmg3 with firmware v. 1.4.2 and added Jest test.
 - [shelly]: Verified shellyi4g3 with firmware v. 1.4.2 and added Jest test.
 
-
 ### Changed
 
 - [package]: Updated dependencies.
@@ -205,7 +204,7 @@ If you like this project and find it useful, please consider giving it a star on
 
 ### Added
 
-- [package]: Added sponsor and refactor README.md 
+- [package]: Added sponsor and refactor README.md
 - [package]: Verified shellyrgbw2 with profile: white
 - [package]: Verified effects of upgrade to matter.js 0.10.0
 

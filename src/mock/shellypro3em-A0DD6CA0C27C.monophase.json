@@ -157,9 +157,7 @@
   "status": {
     "ble": {},
     "bthome": {
-      "errors": [
-        "observer_disabled"
-      ]
+      "errors": ["observer_disabled"]
     },
     "cloud": {
       "connected": false
@@ -265,9 +263,7 @@
     {
       "key": "bthome",
       "status": {
-        "errors": [
-          "observer_disabled"
-        ]
+        "errors": ["observer_disabled"]
       },
       "config": {}
     },
