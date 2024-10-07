@@ -28,6 +28,7 @@ If you like this project and find it useful, please consider giving it a star on
 - [config]: Added the "inputLatchingList" to individually configure a device to expose the Input component as latching switch, regardless of the global option (you can disable the Input component globally and enable it only for single devices).
 - [config]: Added the "inputEventList" to individually configure a device to expose the Input event component, regardless of the global option (you can disable the Input event component globally and enable it only for single devices).
 - [config]: Removed EveHistory electrical measurements since Home Assistant supports Matter 1.3 electrical measurements from version 2024.10.
+- [config]: Added the "nocacheList" to individually configure a device not to be loaded from the cache at restart. The devices "shellywalldisplay" and "shellyblugwg3" are never loaded from the cache even if they are not on the list.
 
 - [BLU]: Added sensor data in configuration process (all states and measurements are immediately available on the controller).
 

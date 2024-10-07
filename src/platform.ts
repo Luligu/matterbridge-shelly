@@ -1300,7 +1300,12 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     const log = new AnsiLogger({ logName: deviceId, logTimestampFormat: TimestampFormat.TIME_MILLIS, logLevel: this.log.logLevel });
     const fileName = path.join(this.matterbridge.matterbridgePluginDirectory, 'matterbridge-shelly', `${deviceId}.json`);
     let device: ShellyDevice | undefined;
-    if (fs.existsSync(fileName)) {
+
+    let loadFromCache = true;
+    if (['shellywalldisplay', 'shellyblugwg3'].includes(ShellyDevice.normalizeId(deviceId).type)) loadFromCache = false;
+    if (isValidArray(this.config.nocacheList, 1) && this.config.nocacheList.includes(deviceId)) loadFromCache = false;
+
+    if (loadFromCache && fs.existsSync(fileName)) {
       this.log.info(`*Loading from cache Shelly device ${hk}${deviceId}${nf} host ${zb}${host}${nf}`);
       device = await ShellyDevice.create(this.shelly, log, fileName);
       if (device) {
