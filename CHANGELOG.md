@@ -6,28 +6,50 @@ If you like this project and find it useful, please consider giving it a star on
 
 ## [1.0.0] - 2024-10-06
 
+There are a lot of new features in this first production release. Please take the the time to read this CHANGELOG and the README.
+
+To allow an easy update to the new version, please after the update, restart, wait at least 15 minutes for all devices to report and save the cache file, open the config from the frontend and confirm it even if you didn't change anything and restart again.
+
 ### Added
 
 - [shelly]: Added support for BLU Wall Switch 4.
+
 - [shelly]: Added support for BLU RC Button 4.
+
 - [shelly]: Added support for BLU TRV with firmware v20240926-201942.
+
 - [shelly]: Added support for shellyblugwg3 (BLU Gateway Gen 3) with firmware v1.4.99 and added Jest test (it exposes also "Enable LED" with the ModeSelect cluster).
+
 - [shelly]: Added mdns Jest test for shellyblugwg3 (BLU Gateway Gen 3) with firmware v1.4.99.
+
 - [shelly]: Verified support for shellypro2cover with firmware v1.4.2 and added Jest test. Verified and tested by Tamer.
+
 - [shelly]: Added mdns Jest test for shellypro2cover with firmware v1.4.2.
+
 - [shelly]: Verified support for shellyplugsg3 with firmware v1.2.3-plugsg3prod0-gec79607 and added Jest test.
+
 - [shelly]: Added mdns Jest test for shellyplugsg3 with firmware v1.4.99.
+
 - [shelly]: Verified support for shelly2pmg3 with firmware v1.4.99-2pmg3prod0-ge3db05c and added Jest test.
+
 - [shelly]: Added mdns Jest test for shelly2pmg3 with firmware v1.4.99.
+
 - [shelly]: Added component Thermostat.
+
 - [shelly]: Added support for shellywalldisplay mode thermostat with firmware v2.2.1 and added Jest test.
 
 - [config]: Added the "switchList", "lightList" and "outletList" to individually configure how to expose a switch, regardless of the global option.
+
 - [config]: Added the "inputContactList" to individually configure a device to expose the Input component as contact sensor, regardless of the global option (you can disable the Input component globally and enable it only for single devices).
+
 - [config]: Added the "inputMomentaryList" to individually configure a device to expose the Input component as momentary switch, regardless of the global option (you can disable the Input component globally and enable it only for single devices).
+
 - [config]: Added the "inputLatchingList" to individually configure a device to expose the Input component as latching switch, regardless of the global option (you can disable the Input component globally and enable it only for single devices).
+
 - [config]: Added the "inputEventList" to individually configure a device to expose the Input event component, regardless of the global option (you can disable the Input event component globally and enable it only for single devices).
+
 - [config]: Removed EveHistory electrical measurements since Home Assistant supports Matter 1.3 electrical measurements from version 2024.10.
+
 - [config]: Added the "nocacheList" to individually configure a device not to be loaded from the cache at restart. The devices "shellywalldisplay" and "shellyblugwg3" are never loaded from the cache even if they are not on the list.
 
 - [BLU]: Added sensor data in configuration process (all states and measurements are immediately available on the controller).
@@ -39,6 +61,7 @@ If you like this project and find it useful, please consider giving it a star on
 ### Fixed
 
 - [ShellyWsClient]: Changed message from warning to debug for unknown response.
+
 - [shelly BLU]: Fixed bthome discover when one BLU is paired with more then one gateway.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
