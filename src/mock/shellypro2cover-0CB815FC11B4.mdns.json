@@ -20,7 +20,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": "shellypro3em-a0dd6ca0c27c._http._tcp.local"
+      "data": "shellypro2cover-0cb815fc11b4._http._tcp.local"
     },
     {
       "name": "_shelly._tcp.local",
@@ -28,7 +28,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": "shellypro3em-a0dd6ca0c27c._shelly._tcp.local"
+      "data": "shellypro2cover-0cb815fc11b4._shelly._tcp.local"
     },
     {
       "name": "_services._dns-sd._udp.local",
@@ -50,7 +50,7 @@
   "authorities": [],
   "additionals": [
     {
-      "name": "shellypro3em-a0dd6ca0c27c._http._tcp.local",
+      "name": "shellypro2cover-0cb815fc11b4._http._tcp.local",
       "type": "SRV",
       "ttl": 120,
       "class": "IN",
@@ -59,11 +59,11 @@
         "priority": 0,
         "weight": 0,
         "port": 80,
-        "target": "ShellyPro3EM-A0DD6CA0C27C.local"
+        "target": "ShellyPro2Cover-0CB815FC11B4.local"
       }
     },
     {
-      "name": "shellypro3em-a0dd6ca0c27c._http._tcp.local",
+      "name": "shellypro2cover-0cb815fc11b4._http._tcp.local",
       "type": "TXT",
       "ttl": 120,
       "class": "IN",
@@ -71,15 +71,15 @@
       "data": ["gen=2"]
     },
     {
-      "name": "ShellyPro3EM-A0DD6CA0C27C.local",
+      "name": "ShellyPro2Cover-0CB815FC11B4.local",
       "type": "A",
       "ttl": 120,
       "class": "IN",
       "flush": true,
-      "data": "192.168.1.80"
+      "data": "192.168.68.104"
     },
     {
-      "name": "shellypro3em-a0dd6ca0c27c._shelly._tcp.local",
+      "name": "shellypro2cover-0cb815fc11b4._shelly._tcp.local",
       "type": "SRV",
       "ttl": 120,
       "class": "IN",
@@ -88,24 +88,24 @@
         "priority": 0,
         "weight": 0,
         "port": 80,
-        "target": "ShellyPro3EM-A0DD6CA0C27C.local"
+        "target": "ShellyPro2Cover-0CB815FC11B4.local"
       }
     },
     {
-      "name": "shellypro3em-a0dd6ca0c27c._shelly._tcp.local",
+      "name": "shellypro2cover-0cb815fc11b4._shelly._tcp.local",
       "type": "TXT",
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": ["gen=2", "app=Pro3EM", "ver=1.4.3"]
+      "data": ["gen=2", "app=Pro4PM", "ver=1.4.2"]
     },
     {
-      "name": "ShellyPro3EM-A0DD6CA0C27C.local",
+      "name": "ShellyPro2Cover-0CB815FC11B4.local",
       "type": "A",
       "ttl": 120,
       "class": "IN",
       "flush": true,
-      "data": "192.168.1.80"
+      "data": "192.168.68.104"
     }
   ]
 }

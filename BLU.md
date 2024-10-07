@@ -20,14 +20,14 @@
 
 ![image](https://github.com/user-attachments/assets/27998b62-00bc-4e61-ac7f-493e4e419faf)
 ![image](https://github.com/user-attachments/assets/458df93b-5a22-4b61-b312-38f6da6ff6e8)
-  
+
 - In the plugin config enable bleDiscover.
 
 ![image](https://github.com/user-attachments/assets/aa004f25-2ae8-4656-b0c1-a0b5155c6902)
 
 - Restart Matterbridge.
 - In the Devices section of the frontend you will see:
-  
+
 ![image](https://github.com/user-attachments/assets/581c8e45-b126-4db2-a043-b5bdb47214aa)
 
 ## How to debug the BLU devices:
@@ -60,5 +60,3 @@ this means that the plugin has found the connected ble device.
 ![image](https://github.com/user-attachments/assets/a01a04f0-2508-41ba-b3b4-46217efca922)
 
 If you don't receive updates, try to pair the BLU devices to another Gen3 or Pro device. Then restart again MatterBridge.
-
-

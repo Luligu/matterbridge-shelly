@@ -98,10 +98,7 @@
     "allow_cross_origin": false,
     "actions": {
       "active": false,
-      "names": [
-        "out_on_url",
-        "out_off_url"
-      ]
+      "names": ["out_on_url", "out_off_url"]
     },
     "hwinfo": {
       "hw_revision": "prod-102020",
@@ -189,11 +186,7 @@
         "power": 1.41,
         "is_valid": true,
         "timestamp": 1725580534,
-        "counters": [
-          1.132,
-          1.107,
-          0
-        ],
+        "counters": [1.132, 1.107, 0],
         "total": 2
       }
     ],

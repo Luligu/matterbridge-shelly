@@ -68,9 +68,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": [
-        "gen=2"
-      ]
+      "data": ["gen=2"]
     },
     {
       "name": "ShellyPlus010V-80646FE1FAC4.local",
@@ -99,11 +97,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": [
-        "gen=2",
-        "app=Plus10V",
-        "ver=1.4.2"
-      ]
+      "data": ["gen=2", "app=Plus10V", "ver=1.4.2"]
     },
     {
       "name": "ShellyPlus010V-80646FE1FAC4.local",

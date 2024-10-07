@@ -55,10 +55,7 @@
         "brightness": 50,
         "active_between": []
       },
-      "range_map": [
-        0,
-        100
-      ],
+      "range_map": [0, 100],
       "button_fade_rate": 3,
       "button_presets": {
         "button_doublepush": {
@@ -284,10 +281,7 @@
           "brightness": 50,
           "active_between": []
         },
-        "range_map": [
-          0,
-          100
-        ],
+        "range_map": [0, 100],
         "button_fade_rate": 3,
         "button_presets": {
           "button_doublepush": {

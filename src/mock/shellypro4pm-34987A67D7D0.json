@@ -221,9 +221,7 @@
   "status": {
     "ble": {},
     "bthome": {
-      "errors": [
-        "bluetooth_disabled"
-      ]
+      "errors": ["bluetooth_disabled"]
     },
     "cloud": {
       "connected": true
@@ -262,20 +260,12 @@
       "pf": 0.64,
       "aenergy": {
         "total": 3800.265,
-        "by_minute": [
-          108.433,
-          108.285,
-          108.078
-        ],
+        "by_minute": [108.433, 108.285, 108.078],
         "minute_ts": 1725565560
       },
       "ret_aenergy": {
         "total": 0,
-        "by_minute": [
-          0,
-          0,
-          0
-        ],
+        "by_minute": [0, 0, 0],
         "minute_ts": 1725565560
       },
       "temperature": {
@@ -294,20 +284,12 @@
       "pf": 0.62,
       "aenergy": {
         "total": 5676.794,
-        "by_minute": [
-          123.384,
-          123.605,
-          123.12
-        ],
+        "by_minute": [123.384, 123.605, 123.12],
         "minute_ts": 1725565560
       },
       "ret_aenergy": {
         "total": 0,
-        "by_minute": [
-          0,
-          0,
-          0
-        ],
+        "by_minute": [0, 0, 0],
         "minute_ts": 1725565560
       },
       "temperature": {
@@ -326,20 +308,12 @@
       "pf": 0.6,
       "aenergy": {
         "total": 2185.363,
-        "by_minute": [
-          72.752,
-          72.974,
-          71.864
-        ],
+        "by_minute": [72.752, 72.974, 71.864],
         "minute_ts": 1725565560
       },
       "ret_aenergy": {
         "total": 0,
-        "by_minute": [
-          0,
-          0,
-          0
-        ],
+        "by_minute": [0, 0, 0],
         "minute_ts": 1725565560
       },
       "temperature": {
@@ -358,20 +332,12 @@
       "pf": 0.15,
       "aenergy": {
         "total": 493.321,
-        "by_minute": [
-          21.357,
-          21.328,
-          21.128
-        ],
+        "by_minute": [21.357, 21.328, 21.128],
         "minute_ts": 1725565560
       },
       "ret_aenergy": {
         "total": 0,
-        "by_minute": [
-          0,
-          0,
-          0
-        ],
+        "by_minute": [0, 0, 0],
         "minute_ts": 1725565560
       },
       "temperature": {
@@ -424,9 +390,7 @@
     {
       "key": "bthome",
       "status": {
-        "errors": [
-          "bluetooth_disabled"
-        ]
+        "errors": ["bluetooth_disabled"]
       },
       "config": {}
     },
@@ -553,20 +517,12 @@
         "pf": 0.64,
         "aenergy": {
           "total": 3800.267,
-          "by_minute": [
-            108.433,
-            108.285,
-            108.078
-          ],
+          "by_minute": [108.433, 108.285, 108.078],
           "minute_ts": 1725565560
         },
         "ret_aenergy": {
           "total": 0,
-          "by_minute": [
-            0,
-            0,
-            0
-          ],
+          "by_minute": [0, 0, 0],
           "minute_ts": 1725565560
         },
         "temperature": {
@@ -603,20 +559,12 @@
         "pf": 0.62,
         "aenergy": {
           "total": 5676.796,
-          "by_minute": [
-            123.384,
-            123.605,
-            123.12
-          ],
+          "by_minute": [123.384, 123.605, 123.12],
           "minute_ts": 1725565560
         },
         "ret_aenergy": {
           "total": 0,
-          "by_minute": [
-            0,
-            0,
-            0
-          ],
+          "by_minute": [0, 0, 0],
           "minute_ts": 1725565560
         },
         "temperature": {

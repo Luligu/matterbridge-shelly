@@ -150,7 +150,7 @@ export class Shelly extends EventEmitter {
           const fetchIntervalMinutes = Math.floor(device.fetchInterval / 1000 / 60);
           const fetchIntervalSeconds = Math.round((device.fetchInterval / 1000) % 60);
           this.log.debug(
-            `***Device ${hk}${device.id}${db} host ${zb}${device.host}${db} fetch interval ${CYAN}${fetchIntervalMinutes}${db} minutes and ${CYAN}${fetchIntervalSeconds}${db} seconds`,
+            `*Device ${hk}${device.id}${db} host ${zb}${device.host}${db} fetch interval ${CYAN}${fetchIntervalMinutes}${db} minutes and ${CYAN}${fetchIntervalSeconds}${db} seconds`,
           );
         }
         if (Date.now() - device.lastFetched > device.fetchInterval) {
@@ -160,7 +160,7 @@ export class Shelly extends EventEmitter {
               const fetchIntervalMinutes = Math.floor(device.fetchInterval / 1000 / 60);
               const fetchIntervalSeconds = Math.round((device.fetchInterval / 1000) % 60);
               this.log.debug(
-                `****Fetching data from device ${hk}${device.id}${db} host ${zb}${device.host}${db} (fetch interval ${CYAN}${fetchIntervalMinutes}${db} minutes and ${CYAN}${fetchIntervalSeconds}${db} seconds)`,
+                `*Fetching data from device ${hk}${device.id}${db} host ${zb}${device.host}${db} (fetch interval ${CYAN}${fetchIntervalMinutes}${db} minutes and ${CYAN}${fetchIntervalSeconds}${db} seconds)`,
               );
               device.saveDevicePayloads(this._dataPath);
             }

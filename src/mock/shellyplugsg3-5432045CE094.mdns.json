@@ -20,7 +20,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": "shellypro3em-a0dd6ca0c27c._http._tcp.local"
+      "data": "shellyplugsg3-5432045ce094._http._tcp.local"
     },
     {
       "name": "_shelly._tcp.local",
@@ -28,7 +28,47 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": "shellypro3em-a0dd6ca0c27c._shelly._tcp.local"
+      "data": "shellyplugsg3-5432045ce094._shelly._tcp.local"
+    },
+    {
+      "name": "_services._dns-sd._udp.local",
+      "type": "PTR",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": "_matterc._udp.local"
+    },
+    {
+      "name": "_services._dns-sd._udp.local",
+      "type": "PTR",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": "_V5264._sub._matterc._udp.local"
+    },
+    {
+      "name": "_services._dns-sd._udp.local",
+      "type": "PTR",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": "_S0._sub._matterc._udp.local"
+    },
+    {
+      "name": "_services._dns-sd._udp.local",
+      "type": "PTR",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": "_L148._sub._matterc._udp.local"
+    },
+    {
+      "name": "_services._dns-sd._udp.local",
+      "type": "PTR",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": "_CM._sub._matterc._udp.local"
     },
     {
       "name": "_services._dns-sd._udp.local",
@@ -50,7 +90,7 @@
   "authorities": [],
   "additionals": [
     {
-      "name": "shellypro3em-a0dd6ca0c27c._http._tcp.local",
+      "name": "shellyplugsg3-5432045ce094._http._tcp.local",
       "type": "SRV",
       "ttl": 120,
       "class": "IN",
@@ -59,27 +99,27 @@
         "priority": 0,
         "weight": 0,
         "port": 80,
-        "target": "ShellyPro3EM-A0DD6CA0C27C.local"
+        "target": "ShellyPlugSG3-5432045CE094.local"
       }
     },
     {
-      "name": "shellypro3em-a0dd6ca0c27c._http._tcp.local",
+      "name": "shellyplugsg3-5432045ce094._http._tcp.local",
       "type": "TXT",
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": ["gen=2"]
+      "data": ["gen=3"]
     },
     {
-      "name": "ShellyPro3EM-A0DD6CA0C27C.local",
+      "name": "ShellyPlugSG3-5432045CE094.local",
       "type": "A",
       "ttl": 120,
       "class": "IN",
       "flush": true,
-      "data": "192.168.1.80"
+      "data": "192.168.1.165"
     },
     {
-      "name": "shellypro3em-a0dd6ca0c27c._shelly._tcp.local",
+      "name": "shellyplugsg3-5432045ce094._shelly._tcp.local",
       "type": "SRV",
       "ttl": 120,
       "class": "IN",
@@ -88,24 +128,24 @@
         "priority": 0,
         "weight": 0,
         "port": 80,
-        "target": "ShellyPro3EM-A0DD6CA0C27C.local"
+        "target": "ShellyPlugSG3-5432045CE094.local"
       }
     },
     {
-      "name": "shellypro3em-a0dd6ca0c27c._shelly._tcp.local",
+      "name": "shellyplugsg3-5432045ce094._shelly._tcp.local",
       "type": "TXT",
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": ["gen=2", "app=Pro3EM", "ver=1.4.3"]
+      "data": ["gen=3", "app=PlugSG3", "ver=1.2.3-matter22"]
     },
     {
-      "name": "ShellyPro3EM-A0DD6CA0C27C.local",
+      "name": "ShellyPlugSG3-5432045CE094.local",
       "type": "A",
       "ttl": 120,
       "class": "IN",
       "flush": true,
-      "data": "192.168.1.80"
+      "data": "192.168.1.165"
     }
   ]
 }

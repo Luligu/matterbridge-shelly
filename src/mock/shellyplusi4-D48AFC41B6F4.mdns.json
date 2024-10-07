@@ -68,9 +68,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": [
-        "gen=2"
-      ]
+      "data": ["gen=2"]
     },
     {
       "name": "ShellyPlusI4-D48AFC41B6F4.local",
@@ -99,11 +97,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": [
-        "gen=2",
-        "app=PlusI4",
-        "ver=1.4.2"
-      ]
+      "data": ["gen=2", "app=PlusI4", "ver=1.4.2"]
     },
     {
       "name": "ShellyPlusI4-D48AFC41B6F4.local",

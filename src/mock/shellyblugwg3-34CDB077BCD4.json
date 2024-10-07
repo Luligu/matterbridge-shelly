@@ -1,78 +1,42 @@
 {
   "shelly": {
-    "name": "My Shelly i4 Gen3",
-    "id": "shellyi4g3-5432045661b4",
-    "mac": "5432045661B4",
-    "slot": 1,
-    "model": "S3SN-0024X",
+    "name": "BLU Gateway Gen3",
+    "id": "shellyblugwg3-34cdb077bcd4",
+    "mac": "34CDB077BCD4",
+    "slot": 0,
+    "model": "S3GW-1DBT001",
     "gen": 3,
-    "fw_id": "20240819-074305/1.4.2-gc2639da",
-    "ver": "1.4.2",
-    "app": "I4G3",
+    "fw_id": "20240926-112057/1.4.99-blugwg3prod1-ga62dce2",
+    "ver": "1.4.99-blugwg3prod1",
+    "app": "BluGwG3",
     "auth_en": false,
     "auth_domain": null
   },
   "settings": {
     "ble": {
-      "enable": false,
+      "enable": true,
+      "observer_scan_window_ms": 61,
+      "observer_scan_interval_ms": 241,
+      "gattc_sv_timeout_ms": 5000,
       "rpc": {
         "enable": true
-      },
-      "observer": {
-        "enable": false
       }
+    },
+    "blugw": {
+      "sys_led_enable": true
     },
     "bthome": {},
     "cloud": {
       "enable": true,
       "server": "shelly-103-eu.shelly.cloud:6022/jrpc"
     },
-    "input:0": {
-      "id": 0,
-      "name": null,
-      "type": "switch",
-      "enable": true,
-      "invert": false,
-      "factory_reset": true
-    },
-    "input:1": {
-      "id": 1,
-      "name": null,
-      "type": "switch",
-      "enable": true,
-      "invert": false,
-      "factory_reset": true
-    },
-    "input:2": {
-      "id": 2,
-      "name": null,
-      "type": "switch",
-      "enable": true,
-      "invert": false,
-      "factory_reset": true
-    },
-    "input:3": {
-      "id": 3,
-      "name": null,
-      "type": "switch",
-      "enable": true,
-      "invert": false,
-      "factory_reset": true
-    },
-    "knx": {
-      "enable": false,
-      "ia": "15.15.255",
-      "routing": {
-        "addr": "224.0.23.12:3671"
-      }
-    },
     "mqtt": {
       "enable": false,
       "server": null,
-      "client_id": "shellyi4g3-5432045661b4",
+      "client_id": "shellyblugwg3-34cdb077bcd4",
       "user": null,
       "ssl_ca": null,
-      "topic_prefix": "shellyi4g3-5432045661b4",
+      "topic_prefix": "shellyblugwg3-34cdb077bcd4",
       "rpc_ntf": true,
       "status_ntf": false,
       "use_client_cert": false,
@@ -81,12 +45,11 @@
     },
     "sys": {
       "device": {
-        "name": "My Shelly i4 Gen3",
-        "mac": "5432045661B4",
-        "fw_id": "20240819-074305/1.4.2-gc2639da",
+        "name": "BLU Gateway Gen3",
+        "mac": "34CDB077BCD4",
+        "fw_id": "20240926-112057/1.4.99-blugwg3prod1-ga62dce2",
         "discoverable": true,
-        "eco_mode": false,
-        "addon_type": null
+        "eco_mode": false
       },
       "location": null,
       "debug": {
@@ -96,6 +59,9 @@
           "enable": false
         },
         "websocket": {
+          "enable": false
+        },
+        "file_log": {
           "enable": false
         },
         "udp": {
@@ -110,11 +76,11 @@
       "sntp": {
         "server": "time.google.com"
       },
-      "cfg_rev": 13
+      "cfg_rev": 40
     },
     "wifi": {
       "ap": {
-        "ssid": "ShellyI4G3-5432045661B4",
+        "ssid": "ShellyBluGwG3-34CDB077BCD4",
         "is_open": true,
         "enable": false,
         "range_extender": {
@@ -154,43 +120,25 @@
   },
   "status": {
     "ble": {},
-    "bthome": {
-      "errors": ["bluetooth_disabled"]
-    },
+    "blugw": {},
+    "bthome": {},
     "cloud": {
       "connected": true
     },
-    "input:0": {
-      "id": 0,
-      "state": false
-    },
-    "input:1": {
-      "id": 1,
-      "state": false
-    },
-    "input:2": {
-      "id": 2,
-      "state": false
-    },
-    "input:3": {
-      "id": 3,
-      "state": false
-    },
-    "knx": {},
     "mqtt": {
       "connected": false
     },
     "sys": {
-      "mac": "5432045661B4",
+      "mac": "34CDB077BCD4",
       "restart_required": false,
-      "time": "23:57",
-      "unixtime": 1725746265,
-      "uptime": 252,
-      "ram_size": 259824,
-      "ram_free": 133164,
+      "time": "17:12",
+      "unixtime": 1727968338,
+      "uptime": 2016,
+      "ram_size": 254368,
+      "ram_free": 80900,
       "fs_size": 1048576,
-      "fs_free": 593920,
-      "cfg_rev": 13,
+      "fs_free": 606208,
+      "cfg_rev": 40,
       "kvs_rev": 0,
       "schedule_rev": 0,
       "webhook_rev": 0,
@@ -198,7 +146,7 @@
       "reset_reason": 3
     },
     "wifi": {
-      "sta_ip": "192.168.1.159",
+      "sta_ip": "192.168.1.164",
       "status": "got ip",
       "ssid": "FibreBox_X6-12A4C7",
       "rssi": -54
@@ -212,21 +160,142 @@
       "key": "ble",
       "status": {},
       "config": {
-        "enable": false,
+        "enable": true,
+        "observer_scan_window_ms": 61,
+        "observer_scan_interval_ms": 241,
+        "gattc_sv_timeout_ms": 5000,
         "rpc": {
           "enable": true
-        },
-        "observer": {
-          "enable": false
         }
       }
     },
     {
-      "key": "bthome",
+      "key": "blugw",
+      "status": {},
+      "config": {
+        "sys_led_enable": true
+      }
+    },
+    {
+      "key": "blutrv:200",
       "status": {
-        "errors": ["bluetooth_disabled"]
+        "id": 200,
+        "rssi": -28,
+        "battery": 100,
+        "packet_id": 225,
+        "last_updated_ts": 1727968324,
+        "paired": true,
+        "rpc": true,
+        "rsv": 49
       },
+      "config": {
+        "id": 200,
+        "addr": "28:68:47:fc:9a:6b",
+        "name": null,
+        "key": null,
+        "trv": "bthomedevice:200",
+        "temp_sensors": [],
+        "dw_sensors": [],
+        "meta": null
+      }
+    },
+    {
+      "key": "bthome",
+      "status": {},
       "config": {}
+    },
+    {
+      "key": "bthomedevice:200",
+      "status": {
+        "id": 200,
+        "rssi": -28,
+        "battery": 100,
+        "packet_id": 225,
+        "last_updated_ts": 1727968324,
+        "paired": true,
+        "rpc": true,
+        "rsv": 49
+      },
+      "config": {
+        "id": 200,
+        "addr": "28:68:47:fc:9a:6b",
+        "name": null,
+        "key": null,
+        "meta": {
+          "ui": {
+            "view": "",
+            "local_name": "TRV",
+            "icon": null
+          }
+        }
+      },
+      "attrs": {
+        "flags": 17,
+        "model_id": 8
+      }
+    },
+    {
+      "key": "bthomesensor:200",
+      "status": {
+        "id": 200,
+        "value": 100,
+        "last_updated_ts": 1727968324
+      },
+      "config": {
+        "id": 200,
+        "addr": "28:68:47:fc:9a:6b",
+        "name": null,
+        "obj_id": 1,
+        "idx": 0,
+        "meta": null
+      }
+    },
+    {
+      "key": "bthomesensor:201",
+      "status": {
+        "id": 201,
+        "last_updated_ts": 1070226352
+      },
+      "config": {
+        "id": 201,
+        "addr": "28:68:47:fc:9a:6b",
+        "name": null,
+        "obj_id": 58,
+        "idx": 0,
+        "meta": null
+      }
+    },
+    {
+      "key": "bthomesensor:202",
+      "status": {
+        "id": 202,
+        "value": 11,
+        "last_updated_ts": 1727968324
+      },
+      "config": {
+        "id": 202,
+        "addr": "28:68:47:fc:9a:6b",
+        "name": null,
+        "obj_id": 69,
+        "idx": 0,
+        "meta": null
+      }
+    },
+    {
+      "key": "bthomesensor:203",
+      "status": {
+        "id": 203,
+        "value": 24,
+        "last_updated_ts": 1727968324
+      },
+      "config": {
+        "id": 203,
+        "addr": "28:68:47:fc:9a:6b",
+        "name": null,
+        "obj_id": 69,
+        "idx": 1,
+        "meta": null
+      }
     },
     {
       "key": "cloud",
@@ -239,77 +308,6 @@
       }
     },
     {
-      "key": "input:0",
-      "status": {
-        "id": 0,
-        "state": false
-      },
-      "config": {
-        "id": 0,
-        "name": null,
-        "type": "switch",
-        "enable": true,
-        "invert": false,
-        "factory_reset": true
-      }
-    },
-    {
-      "key": "input:1",
-      "status": {
-        "id": 1,
-        "state": false
-      },
-      "config": {
-        "id": 1,
-        "name": null,
-        "type": "switch",
-        "enable": true,
-        "invert": false,
-        "factory_reset": true
-      }
-    },
-    {
-      "key": "input:2",
-      "status": {
-        "id": 2,
-        "state": false
-      },
-      "config": {
-        "id": 2,
-        "name": null,
-        "type": "switch",
-        "enable": true,
-        "invert": false,
-        "factory_reset": true
-      }
-    },
-    {
-      "key": "input:3",
-      "status": {
-        "id": 3,
-        "state": false
-      },
-      "config": {
-        "id": 3,
-        "name": null,
-        "type": "switch",
-        "enable": true,
-        "invert": false,
-        "factory_reset": true
-      }
-    },
-    {
-      "key": "knx",
-      "status": {},
-      "config": {
-        "enable": false,
-        "ia": "15.15.255",
-        "routing": {
-          "addr": "224.0.23.12:3671"
-        }
-      }
-    },
-    {
       "key": "mqtt",
       "status": {
         "connected": false
@@ -317,10 +315,10 @@
       "config": {
         "enable": false,
         "server": null,
-        "client_id": "shellyi4g3-5432045661b4",
+        "client_id": "shellyblugwg3-34cdb077bcd4",
         "user": null,
         "ssl_ca": null,
-        "topic_prefix": "shellyi4g3-5432045661b4",
+        "topic_prefix": "shellyblugwg3-34cdb077bcd4",
         "rpc_ntf": true,
         "status_ntf": false,
         "use_client_cert": false,
@@ -331,16 +329,16 @@
     {
       "key": "sys",
       "status": {
-        "mac": "5432045661B4",
+        "mac": "34CDB077BCD4",
         "restart_required": false,
-        "time": "23:57",
-        "unixtime": 1725746266,
-        "uptime": 252,
-        "ram_size": 259816,
-        "ram_free": 131616,
+        "time": "17:12",
+        "unixtime": 1727968338,
+        "uptime": 2017,
+        "ram_size": 254364,
+        "ram_free": 77824,
         "fs_size": 1048576,
-        "fs_free": 593920,
-        "cfg_rev": 13,
+        "fs_free": 606208,
+        "cfg_rev": 40,
         "kvs_rev": 0,
         "schedule_rev": 0,
         "webhook_rev": 0,
@@ -349,12 +347,11 @@
       },
       "config": {
         "device": {
-          "name": "My Shelly i4 Gen3",
-          "mac": "5432045661B4",
-          "fw_id": "20240819-074305/1.4.2-gc2639da",
+          "name": "BLU Gateway Gen3",
+          "mac": "34CDB077BCD4",
+          "fw_id": "20240926-112057/1.4.99-blugwg3prod1-ga62dce2",
           "discoverable": true,
-          "eco_mode": false,
-          "addon_type": null
+          "eco_mode": false
         },
         "location": {
           "tz": "Europe/Monaco",
@@ -370,6 +367,9 @@
           "websocket": {
             "enable": false
           },
+          "file_log": {
+            "enable": false
+          },
           "udp": {
             "addr": null
           }
@@ -382,7 +382,7 @@
         "sntp": {
           "server": "time.google.com"
         },
-        "cfg_rev": 13
+        "cfg_rev": 40
       }
     }
   ]

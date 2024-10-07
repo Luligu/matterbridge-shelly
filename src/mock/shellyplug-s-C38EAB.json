@@ -98,11 +98,7 @@
     "allow_cross_origin": true,
     "actions": {
       "active": false,
-      "names": [
-        "btn_on_url",
-        "out_on_url",
-        "out_off_url"
-      ]
+      "names": ["btn_on_url", "out_on_url", "out_off_url"]
     },
     "hwinfo": {
       "hw_revision": "prod-190516",
@@ -166,11 +162,7 @@
         "overpower": 0,
         "is_valid": true,
         "timestamp": 1727736755,
-        "counters": [
-          0,
-          0,
-          0
-        ],
+        "counters": [0, 0, 0],
         "total": 110962
       }
     ],

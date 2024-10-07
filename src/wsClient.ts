@@ -21,7 +21,7 @@
  * limitations under the License. *
  */
 
-import { AnsiLogger, CYAN, LogLevel, TimestampFormat, db, er, hk, nf, rs, wr, zb } from 'matterbridge/logger';
+import { AnsiLogger, CYAN, LogLevel, TimestampFormat, db, er, hk, nf, rs, zb } from 'matterbridge/logger';
 import WebSocket from 'ws';
 import crypto from 'crypto';
 import EventEmitter from 'events';
@@ -349,13 +349,21 @@ export class WsClient extends EventEmitter {
         } else if (response.method && (response.method === 'NotifyStatus' || response.method === 'NotifyFullStatus') && response.dst === 'Matterbridge' + this.requestId) {
           this.log.debug(`Received ${CYAN}${response.method}${db} from ${hk}${this.id}${db} host ${zb}${this.wsHost}${db}:${rs}\n`, response.params);
           this.emit('update', response.params);
+        } else if (
+          response.method &&
+          (response.method === 'NotifyStatus' || response.method === 'NotifyFullStatus') &&
+          response.dst === 'user_1' &&
+          this.wsDeviceId.startsWith('shellywalldisplay')
+        ) {
+          this.log.debug(`Received ${CYAN}${response.method}${db} from ${hk}${this.id}${db} host ${zb}${this.wsHost}${db}:${rs}\n`, response.params);
+          this.emit('update', response.params);
         } else if (response.method && response.method === 'NotifyEvent' && response.dst === 'Matterbridge' + this.requestId) {
           this.log.debug(`Received ${CYAN}${response.method}${db} from ${hk}${this.id}${db} host ${zb}${this.wsHost}${db}:${rs}\n`, response.params.events);
           this.emit('event', response.params.events);
         } else if (response.error && response.id === this.requestId && response.dst === 'Matterbridge' + this.requestId) {
           this.log.error(`Received ${CYAN}error response${er} from ${hk}${this.id}${er} host ${zb}${this.wsHost}${er}:${rs}\n`, response);
         } else {
-          this.log.warn(`Received ${CYAN}unknown response${wr} from ${hk}${this.id}${wr} host ${zb}${this.wsHost}${wr}:${rs}\n`, response);
+          this.log.debug(`Received ${CYAN}unknown response${db} from ${hk}${this.id}${db} host ${zb}${this.wsHost}${db}:${rs}\n`, response);
         }
       } catch (error) {
         this.log.error(`WebSocket client error parsing message from ${hk}${this.id}${er} host ${zb}${this.wsHost}${er}: ${error instanceof Error ? error.message : error}`);

@@ -68,14 +68,17 @@ export interface BTHomeDeviceComponentStatus {
   battery: number;
   packet_id: number;
   last_updated_ts: number;
+  paired?: boolean;
+  rpc?: boolean;
+  rsv?: number;
 }
 
 // Define the interface for the BTHomeDeviceComponent config object
 export interface BTHomeDeviceComponentConfig {
   id: number;
   addr: string;
-  name: string;
-  key: ShellyDataType;
+  name: null | undefined | string;
+  key: null | undefined | string;
   meta: {
     ui: {
       view: string;
@@ -85,11 +88,18 @@ export interface BTHomeDeviceComponentConfig {
   };
 }
 
+// Define the interface for the BTHomeDeviceComponent config object
+export interface BTHomeDeviceComponentAttrs {
+  flags: number;
+  model_id: number;
+}
+
 // Define the main interface for the BTHomeDeviceComponent
 export interface BTHomeDeviceComponent {
   key: string;
   status: BTHomeDeviceComponentStatus;
   config: BTHomeDeviceComponentConfig;
+  attrs?: BTHomeDeviceComponentAttrs;
 }
 
 // Define the interface for the BTHomeSensorComponent status object
@@ -108,6 +118,8 @@ export interface BTHomeSensorComponentConfig {
   idx: number;
   meta: {
     ui: {
+      view: string;
+      local_name: string;
       icon: ShellyDataType;
     };
   };
@@ -125,6 +137,15 @@ export interface BTHomeComponent {
   key: string;
   status: BTHomeDeviceComponentStatus | BTHomeSensorComponentStatus;
   config: BTHomeDeviceComponentStatus | BTHomeSensorComponentConfig;
+  attrs?: BTHomeDeviceComponentAttrs;
+}
+
+// Define the generic interface for BTHomeDeviceComponent and BTHomeSensorComponent
+export interface BTHomeComponentPayload {
+  components: BTHomeComponent[];
+  cfg_rev: number;
+  offset: number;
+  total: number;
 }
 
 // Define the interface for BTHomeEvent from the BTHomeDevice on WebSocket

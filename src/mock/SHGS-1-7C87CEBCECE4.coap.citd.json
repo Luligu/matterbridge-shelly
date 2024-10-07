@@ -25,10 +25,7 @@
       "I": 3113,
       "T": "S",
       "D": "sensorOp",
-      "R": [
-        "warmup/normal/fault",
-        "unknown"
-      ],
+      "R": ["warmup/normal/fault", "unknown"],
       "L": 1
     },
     {
@@ -42,10 +39,7 @@
       "I": 6108,
       "T": "A",
       "D": "gas",
-      "R": [
-        "none/mild/heavy/test",
-        "unknown"
-      ],
+      "R": ["none/mild/heavy/test", "unknown"],
       "L": 1
     },
     {
@@ -53,20 +47,14 @@
       "T": "C",
       "D": "concentration",
       "U": "ppm",
-      "R": [
-        "U16",
-        "-1"
-      ],
+      "R": ["U16", "-1"],
       "L": 1
     },
     {
       "I": 1105,
       "T": "S",
       "D": "valve",
-      "R": [
-        "closed/opened/not_connected/failure/closing/opening/checking",
-        "unknown"
-      ],
+      "R": ["closed/opened/not_connected/failure/closing/opening/checking", "unknown"],
       "L": 2
     }
   ]

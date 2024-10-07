@@ -65,11 +65,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": true,
-      "data": [
-        "gen=2",
-        "app=PlusSmoke",
-        "ver=1.4.2"
-      ]
+      "data": ["gen=2", "app=PlusSmoke", "ver=1.4.2"]
     },
     {
       "name": "_services._dns-sd._udp.local",
@@ -106,9 +102,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": true,
-      "data": [
-        "gen=2"
-      ]
+      "data": ["gen=2"]
     }
   ],
   "authorities": [],
@@ -121,9 +115,7 @@
       "flush": true,
       "data": {
         "nextDomain": "ShellyPlusSmoke-A0A3B3B8AE48.local",
-        "rrtypes": [
-          "A"
-        ]
+        "rrtypes": ["A"]
       }
     }
   ]

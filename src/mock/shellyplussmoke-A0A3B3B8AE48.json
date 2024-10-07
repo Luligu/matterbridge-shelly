@@ -1,215 +1,215 @@
 {
-    "shelly": {
+  "shelly": {
+    "name": null,
+    "id": "shellyplussmoke-a0a3b3b8ae48",
+    "mac": "A0A3B3B8AE48",
+    "slot": 1,
+    "model": "SNSN-0031Z",
+    "gen": 2,
+    "fw_id": "20240819-074414/1.4.2-gc2639da",
+    "ver": "1.4.2",
+    "app": "PlusSmoke",
+    "auth_en": false,
+    "auth_domain": null
+  },
+  "settings": {
+    "ble": {
+      "enable": false,
+      "rpc": {
+        "enable": true
+      }
+    },
+    "cloud": {
+      "enable": true,
+      "server": "shelly-23-eu.shelly.cloud:6022/jrpc"
+    },
+    "devicepower:0": {},
+    "mqtt": {
+      "enable": false,
+      "server": null,
+      "client_id": "shellyplussmoke-a0a3b3b8ae48",
+      "user": null,
+      "ssl_ca": null,
+      "topic_prefix": "shellyplussmoke-a0a3b3b8ae48",
+      "rpc_ntf": true,
+      "status_ntf": false,
+      "use_client_cert": false,
+      "enable_rpc": true,
+      "enable_control": true
+    },
+    "smoke:0": {
+      "id": 0,
+      "name": null
+    },
+    "sys": {
+      "device": {
         "name": null,
-        "id": "shellyplussmoke-a0a3b3b8ae48",
         "mac": "A0A3B3B8AE48",
-        "slot": 1,
-        "model": "SNSN-0031Z",
-        "gen": 2,
         "fw_id": "20240819-074414/1.4.2-gc2639da",
-        "ver": "1.4.2",
-        "app": "PlusSmoke",
-        "auth_en": false,
-        "auth_domain": null
-    },
-    "settings": {
-        "ble": {
-            "enable": false,
-            "rpc": {
-                "enable": true
-            }
-        },
-        "cloud": {
-            "enable": true,
-            "server": "shelly-23-eu.shelly.cloud:6022/jrpc"
-        },
-        "devicepower:0": {},
+        "discoverable": true
+      },
+      "location": null,
+      "debug": {
+        "level": 2,
+        "file_level": null,
         "mqtt": {
-            "enable": false,
-            "server": null,
-            "client_id": "shellyplussmoke-a0a3b3b8ae48",
-            "user": null,
-            "ssl_ca": null,
-            "topic_prefix": "shellyplussmoke-a0a3b3b8ae48",
-            "rpc_ntf": true,
-            "status_ntf": false,
-            "use_client_cert": false,
-            "enable_rpc": true,
-            "enable_control": true
+          "enable": false
         },
-        "smoke:0": {
-            "id": 0,
-            "name": null
+        "websocket": {
+          "enable": false
         },
-        "sys": {
-            "device": {
-                "name": null,
-                "mac": "A0A3B3B8AE48",
-                "fw_id": "20240819-074414/1.4.2-gc2639da",
-                "discoverable": true
-            },
-            "location": null,
-            "debug": {
-                "level": 2,
-                "file_level": null,
-                "mqtt": {
-                    "enable": false
-                },
-                "websocket": {
-                    "enable": false
-                },
-                "udp": {
-                    "addr": null
-                }
-            },
-            "ui_data": {},
-            "rpc_udp": {
-                "dst_addr": null,
-                "listen_port": null
-            },
-            "sntp": {
-                "server": "time.google.com"
-            },
-            "cfg_rev": 12
-        },
-        "wifi": {
-            "ap": {
-                "ssid": "ShellyPlusSmoke-A0A3B3B8AE48",
-                "is_open": true,
-                "enable": false
-            },
-            "sta": {
-                "ssid": "Tamer Umniah",
-                "is_open": false,
-                "enable": true,
-                "ipv4mode": "dhcp",
-                "ip": null,
-                "netmask": null,
-                "gw": null,
-                "nameserver": null
-            },
-            "sta1": {
-                "ssid": null,
-                "is_open": true,
-                "enable": false,
-                "ipv4mode": "dhcp",
-                "ip": null,
-                "netmask": null,
-                "gw": null,
-                "nameserver": null
-            },
-            "roam": {
-                "rssi_thr": -80,
-                "interval": 60
-            }
-        },
-        "ws": {
-            "enable": true,
-            "server": "ws://192.168.68.156:8123/api/shelly/ws",
-            "ssl_ca": "*"
+        "udp": {
+          "addr": null
         }
+      },
+      "ui_data": {},
+      "rpc_udp": {
+        "dst_addr": null,
+        "listen_port": null
+      },
+      "sntp": {
+        "server": "time.google.com"
+      },
+      "cfg_rev": 12
     },
-    "status": {
-        "ble": {},
-        "cloud": {
-            "connected": true
-        },
-        "devicepower:0": {
-            "id": 0,
-            "battery": {
-                "V": 3,
-                "percent": 100
-            }
-        },
-        "mqtt": {
-            "connected": false
-        },
-        "smoke:0": {
-            "id": 0,
-            "alarm": false,
-            "mute": false
-        },
-        "sys": {
-            "mac": "A0A3B3B8AE48",
-            "restart_required": false,
-            "time": "17:45",
-            "unixtime": 1727275526,
-            "uptime": 5,
-            "ram_size": 254852,
-            "ram_free": 151804,
-            "fs_size": 393216,
-            "fs_free": 172032,
-            "cfg_rev": 12,
-            "kvs_rev": 0,
-            "webhook_rev": 0,
-            "available_updates": {},
-            "wakeup_reason": {
-                "boot": "poweron",
-                "cause": "alarm_test"
-            },
-            "wakeup_period": 86400,
-            "reset_reason": 1
-        },
-        "wifi": {
-            "sta_ip": "192.168.68.164",
-            "status": "got ip",
-            "ssid": "Tamer Umniah",
-            "rssi": -42
-        },
-        "ws": {
-            "connected": true
-        }
+    "wifi": {
+      "ap": {
+        "ssid": "ShellyPlusSmoke-A0A3B3B8AE48",
+        "is_open": true,
+        "enable": false
+      },
+      "sta": {
+        "ssid": "Tamer Umniah",
+        "is_open": false,
+        "enable": true,
+        "ipv4mode": "dhcp",
+        "ip": null,
+        "netmask": null,
+        "gw": null,
+        "nameserver": null
+      },
+      "sta1": {
+        "ssid": null,
+        "is_open": true,
+        "enable": false,
+        "ipv4mode": "dhcp",
+        "ip": null,
+        "netmask": null,
+        "gw": null,
+        "nameserver": null
+      },
+      "roam": {
+        "rssi_thr": -80,
+        "interval": 60
+      }
     },
-    "components": [
-        {
-            "key": "ble",
-            "status": {},
-            "config": {
-                "enable": false,
-                "rpc": {
-                    "enable": true
-                }
-            }
-        },
-        {
-            "key": "cloud",
-            "status": {
-                "connected": true
-            },
-            "config": {
-                "enable": true,
-                "server": "shelly-23-eu.shelly.cloud:6022/jrpc"
-            }
-        },
-        {
-            "key": "devicepower:0",
-            "status": {
-                "id": 0,
-                "battery": {
-                    "V": 3,
-                    "percent": 100
-                }
-            },
-            "config": {}
-        },
-        {
-            "key": "mqtt",
-            "status": {
-                "connected": false
-            },
-            "config": {
-                "enable": false,
-                "server": null,
-                "client_id": "shellyplussmoke-a0a3b3b8ae48",
-                "user": null,
-                "ssl_ca": null,
-                "topic_prefix": "shellyplussmoke-a0a3b3b8ae48",
-                "rpc_ntf": true,
-                "status_ntf": false,
-                "use_client_cert": false,
-                "enable_rpc": true,
-                "enable_control": true
-            }
+    "ws": {
+      "enable": true,
+      "server": "ws://192.168.68.156:8123/api/shelly/ws",
+      "ssl_ca": "*"
+    }
+  },
+  "status": {
+    "ble": {},
+    "cloud": {
+      "connected": true
+    },
+    "devicepower:0": {
+      "id": 0,
+      "battery": {
+        "V": 3,
+        "percent": 100
+      }
+    },
+    "mqtt": {
+      "connected": false
+    },
+    "smoke:0": {
+      "id": 0,
+      "alarm": false,
+      "mute": false
+    },
+    "sys": {
+      "mac": "A0A3B3B8AE48",
+      "restart_required": false,
+      "time": "17:45",
+      "unixtime": 1727275526,
+      "uptime": 5,
+      "ram_size": 254852,
+      "ram_free": 151804,
+      "fs_size": 393216,
+      "fs_free": 172032,
+      "cfg_rev": 12,
+      "kvs_rev": 0,
+      "webhook_rev": 0,
+      "available_updates": {},
+      "wakeup_reason": {
+        "boot": "poweron",
+        "cause": "alarm_test"
+      },
+      "wakeup_period": 86400,
+      "reset_reason": 1
+    },
+    "wifi": {
+      "sta_ip": "192.168.68.164",
+      "status": "got ip",
+      "ssid": "Tamer Umniah",
+      "rssi": -42
+    },
+    "ws": {
+      "connected": true
+    }
+  },
+  "components": [
+    {
+      "key": "ble",
+      "status": {},
+      "config": {
+        "enable": false,
+        "rpc": {
+          "enable": true
         }
-    ]
+      }
+    },
+    {
+      "key": "cloud",
+      "status": {
+        "connected": true
+      },
+      "config": {
+        "enable": true,
+        "server": "shelly-23-eu.shelly.cloud:6022/jrpc"
+      }
+    },
+    {
+      "key": "devicepower:0",
+      "status": {
+        "id": 0,
+        "battery": {
+          "V": 3,
+          "percent": 100
+        }
+      },
+      "config": {}
+    },
+    {
+      "key": "mqtt",
+      "status": {
+        "connected": false
+      },
+      "config": {
+        "enable": false,
+        "server": null,
+        "client_id": "shellyplussmoke-a0a3b3b8ae48",
+        "user": null,
+        "ssl_ca": null,
+        "topic_prefix": "shellyplussmoke-a0a3b3b8ae48",
+        "rpc_ntf": true,
+        "status_ntf": false,
+        "use_client_cert": false,
+        "enable_rpc": true,
+        "enable_control": true
+      }
+    }
+  ]
 }

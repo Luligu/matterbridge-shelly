@@ -1,20 +1,21 @@
 {
   "shelly": {
-    "name": "Plug S G3",
-    "id": "shellyplugsg3-3030f9ed709c",
-    "mac": "3030F9ED709C",
+    "name": "Plug S Gen3",
+    "id": "shellyplugsg3-5432045ce094",
+    "mac": "5432045CE094",
     "slot": 1,
     "model": "S3PL-00112EU",
     "gen": 3,
-    "fw_id": "20240403-113426/1.2.2-plugsg3prod0-gfa89584",
-    "ver": "1.2.2-plugsg3prod0",
+    "fw_id": "20240820-134301/1.2.3-plugsg3prod0-gec79607",
+    "ver": "1.2.3-matter22",
     "app": "PlugSG3",
     "auth_en": false,
-    "auth_domain": null
+    "auth_domain": null,
+    "matter": true
   },
   "settings": {
     "ble": {
-      "enable": true,
+      "enable": false,
       "rpc": {
         "enable": true
       },
@@ -24,15 +25,15 @@
     },
     "cloud": {
       "enable": true,
-      "server": "shelly-api-eu.shelly.cloud:6022/jrpc"
+      "server": "shelly-103-eu.shelly.cloud:6022/jrpc"
     },
     "mqtt": {
       "enable": false,
       "server": null,
-      "client_id": "shellyplugsg3-3030f9ed709c",
+      "client_id": "shellyplugsg3-5432045ce094",
       "user": null,
       "ssl_ca": null,
-      "topic_prefix": "shellyplugsg3-3030f9ed709c",
+      "topic_prefix": "shellyplugsg3-5432045ce094",
       "rpc_ntf": true,
       "status_ntf": false,
       "use_client_cert": false,
@@ -69,15 +70,10 @@
         }
       }
     },
-    "script:1": {
-      "id": 1,
-      "name": "aioshelly_ble_integration",
-      "enable": false
-    },
     "switch:0": {
       "id": 0,
       "name": null,
-      "initial_state": "off",
+      "initial_state": "restore_last",
       "auto_on": false,
       "auto_on_delay": 60,
       "auto_off": false,
@@ -89,9 +85,9 @@
     },
     "sys": {
       "device": {
-        "name": "Plug S G3",
-        "mac": "3030F9ED709C",
-        "fw_id": "20240403-113426/1.2.2-plugsg3prod0-gfa89584",
+        "name": "Plug S Gen3",
+        "mac": "5432045CE094",
+        "fw_id": "20240820-134301/1.2.3-plugsg3prod0-gec79607",
         "discoverable": true,
         "eco_mode": false
       },
@@ -117,11 +113,11 @@
       "sntp": {
         "server": "time.google.com"
       },
-      "cfg_rev": 9
+      "cfg_rev": 11
     },
     "wifi": {
       "ap": {
-        "ssid": "ShellyPlugSG3-3030F9ED709C",
+        "ssid": "ShellyPlugSG3-5432045CE094",
         "is_open": true,
         "enable": false,
         "range_extender": {
@@ -129,7 +125,7 @@
         }
       },
       "sta": {
-        "ssid": "Tamer Umniah",
+        "ssid": "FibreBox_X6-12A4C7",
         "is_open": false,
         "enable": true,
         "ipv4mode": "dhcp",
@@ -168,28 +164,23 @@
       "connected": false
     },
     "plugs_ui": {},
-    "script:1": {
-      "id": 1,
-      "running": false,
-      "mem_free": 25200
-    },
     "switch:0": {
       "id": 0,
-      "source": "HTTP_in",
-      "output": false,
+      "source": "WS_in",
+      "output": true,
       "apower": 0,
-      "voltage": 235.8,
+      "voltage": 238.3,
       "freq": 50,
       "current": 0,
       "aenergy": {
-        "total": 0,
+        "total": 20,
         "by_minute": [0, 0, 0],
-        "minute_ts": 1722955080
+        "minute_ts": 1728199620
       },
       "ret_aenergy": {
         "total": 0,
         "by_minute": [0, 0, 0],
-        "minute_ts": 1722955080
+        "minute_ts": 1728199620
       },
       "temperature": {
         "tC": 45.9,
@@ -197,30 +188,34 @@
       }
     },
     "sys": {
-      "mac": "3030F9ED709C",
+      "mac": "5432045CE094",
       "restart_required": false,
-      "time": "17:38",
-      "unixtime": 1722955104,
-      "uptime": 42780,
-      "ram_size": 254128,
-      "ram_free": 89568,
+      "time": "07:27",
+      "unixtime": 1728199667,
+      "uptime": 751,
+      "ram_size": 220048,
+      "ram_free": 117516,
       "fs_size": 1048576,
       "fs_free": 712704,
-      "cfg_rev": 9,
+      "cfg_rev": 11,
       "kvs_rev": 0,
       "schedule_rev": 0,
       "webhook_rev": 0,
       "available_updates": {},
-      "reset_reason": 1
+      "reset_reason": 3
     },
     "wifi": {
-      "sta_ip": "192.168.68.148",
+      "sta_ip": "192.168.1.165",
       "status": "got ip",
-      "ssid": "Tamer Umniah",
-      "rssi": -20
+      "ssid": "FibreBox_X6-12A4C7",
+      "rssi": -50
     },
     "ws": {
       "connected": false
     }
-  }
+  },
+  "components": [],
+  "cfg_rev": 11,
+  "offset": 0,
+  "total": 0
 }

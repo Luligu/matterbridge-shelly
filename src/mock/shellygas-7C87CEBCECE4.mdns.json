@@ -49,14 +49,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": true,
-      "data": [
-        "id=shellygas-7C87CEBCECE4",
-        "arch=esp8266",
-        "app=gas-sensor",
-        "fw_version=1.0",
-        "fw_id=20230913-114427/v1.14.0-gcb84623",
-        "discoverable=false"
-      ]
+      "data": ["id=shellygas-7C87CEBCECE4", "arch=esp8266", "app=gas-sensor", "fw_version=1.0", "fw_id=20230913-114427/v1.14.0-gcb84623", "discoverable=false"]
     },
     {
       "name": "shellygas-7C87CEBCECE4.local",
@@ -74,9 +67,7 @@
       "flush": true,
       "data": {
         "nextDomain": "shellygas-7C87CEBCECE4.local",
-        "rrtypes": [
-          "A"
-        ]
+        "rrtypes": ["A"]
       }
     }
   ],

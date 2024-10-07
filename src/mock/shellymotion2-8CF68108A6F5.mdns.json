@@ -65,11 +65,7 @@
       "ttl": 3600,
       "class": "IN",
       "flush": true,
-      "data": [
-        "fw_id=20240619-130804/v2.2.4@ee290818",
-        "id=shellymotion2-8CF68108A6F5",
-        "arch=EFM32GG11"
-      ]
+      "data": ["fw_id=20240619-130804/v2.2.4@ee290818", "id=shellymotion2-8CF68108A6F5", "arch=EFM32GG11"]
     }
   ],
   "authorities": [],

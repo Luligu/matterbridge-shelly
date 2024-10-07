@@ -22,7 +22,7 @@ Features:
 - Shelly wifi battery-powered devices with sleep_mode are supported.
 - Shelly BLU devices are supported through local devices configured as ble gateway.
 - Discovered shellies are stored in local storage for quick loading on startup.
-- The components exposed are Light (with brightness and RGB color), Switch, Relay, Roller, Cover, PowerMeter, Temperature, Humidity and Input.
+- The components exposed are Light (with brightness and RGB color), Switch, Relay, Roller, Cover, PowerMeter, Temperature, Humidity, Illuminance, Thermostat and Input.
 - PowerMeters expose the electrical measurements with the EveHistory cluster (displayed only in Home Assistant), waiting for the controllers to upgrade to the Matter 1.3 specs.
 - Shellies are controlled locally, eliminating the need for cloud or MQTT (which can both be disabled).
 - Shelly Gen 1 devices are controlled using the CoIoT protocol (see the note below).
@@ -92,8 +92,8 @@ Follow these guidelines for specific devices.
 
 ### Add BLU devices
 
-- BLU devices are supported through a local Shelly device acting as a ble gateway. To enable this feature, choose one or more devices that have the ble component and support the ble gateway (e.g. PRO and gen. 3 devices). In the gateway device web page, enable both "Enable Bluetooth" and "Enable Bluetooth gateway". Then, go to the "Components" section and add your BLU devices in "Bluetooth (BTHome) devices". Give a meaningful name to your device if desired and restart Matterbridge. 
-See the full guide here: https://github.com/Luligu/matterbridge-shelly/blob/dev/BLU.md
+- BLU devices are supported through a local Shelly device acting as a ble gateway. To enable this feature, choose one or more devices that have the ble component and support the ble gateway (e.g. PRO and gen. 3 devices). In the gateway device web page, enable both "Enable Bluetooth" and "Enable Bluetooth gateway". Then, go to the "Components" section and add your BLU devices in "Bluetooth (BTHome) devices". Give a meaningful name to your device if desired and restart Matterbridge.
+  See the full guide here: https://github.com/Luligu/matterbridge-shelly/blob/dev/BLU.md
 
 ## How to install the plugin
 
@@ -141,18 +141,47 @@ If your devices are password protected put there the password. It must be unique
 ### exposeSwitch
 
 Choose how to expose the shelly switches: as a switch (don't use it with Alexa), light or outlet.
+You can then configure one or more devices to be exposed differently. See the switchList, lightList and outletList.
+
+### switchList
+
+The devices in the list will be exposed as switches, regardless of the main option "exposeSwitch".
+
+### lightList
+
+The devices in the list will be exposed as lights, regardless of the main option "exposeSwitch".
+
+### outletList
+
+The devices in the list will be exposed as outlets, regardless of the main option "exposeSwitch".
 
 ### exposeInput
 
 Choose how to expose the shelly inputs: disabled, contact, momentary or latching switch (default disabled)
 
+### inputContactList
+
+The devices in the list will expose the Input event component as a contact sensor, regardless of the main option (you can disable the Input component globally and enable it only for single devices).
+
+### inputMomentaryList
+
+The devices in the list will expose the Input event component as a momentary switch, regardless of the main option (you can disable the Input component globally and enable it only for single devices).
+
+### inputLatchingList
+
+The devices in the list will expose the Input event component as a latching switch, regardless of the main option (you can disable the Input component globally and enable it only for single devices).
+
 ### exposeInputEvent
 
 Choose how to expose the shelly input events: momentary switch or disabled (default disabled)
 
+### inputEventList
+
+The devices in the list will expose the Input event component as a momentary switch, regardless of the main option (you can disable the Input event component globally and enable it only for single devices).
+
 ### exposePowerMeter
 
-Choose how to expose the shelly power meters: disabled, matter13 (it uses Matter 1.3 electricalSensor device type still not supported by any controller) or evehistory (it uses the Matter EveHistoryCluster that is supported only by Home Assistant)
+Choose how to expose the shelly power meters: disabled, matter13 (it uses Matter 1.3 electricalSensor device type that is supported by only by Home Assistant so far).
 
 ### blackList
 
@@ -161,6 +190,10 @@ If the blackList is defined the devices included in the list will not be exposed
 ### whiteList
 
 If the whiteList is defined only the devices included in the list are exposed to Matter. Use the device id (e.g. shellyplus2pm-5443B23D81F8).
+
+### nocacheList
+
+The devices in the list will not be loaded from the cache. Use the device id (e.g. shellyplus2pm-5443B23D81F8). This is usefull and necessary if you change the the device configuration from the device web ui of from the Shelly app (e.g. changing from color to white or from switch to cover or adding other BLU devices to a ble gateway). In this case put the device id in the list and restart.
 
 ### deviceIp
 
@@ -178,7 +211,7 @@ Should always be enabled to automatically add all the devices previously discove
 
 ### resetStorageDiscover
 
-Reset the storage discovery on the next restart (it will clear the storage of already discovered devices).
+Reset the storage discovery on the next restart (it will clear the storage of already discovered devices and the cache files).
 
 ### enableConfigDiscover
 
@@ -187,6 +220,14 @@ Should be enabled only if the mdns is not working in your network. It adds the d
 ### enableBleDiscover
 
 Should be enabled to discover the shelly BLU devices (it will register the BLU devices paired in each ble gateway, see https://github.com/Luligu/matterbridge-shelly/blob/dev/BLU.md for more informations).
+
+### failsafeCount
+
+Enable the failsafe count of the devices registered. If the plugin registers less devices then the configured number, the plugin will go in error mode. This is to avoid to loose the controller configuration in case of network issues (default 0 = disabled).
+
+### postfix
+
+Add this unique postfix (3 characters max) to each device serial to avoid collision with other instances (you may loose the configuration of the devices in your controller when changing this value or you may need to pair again the controller).
 
 ### debug
 

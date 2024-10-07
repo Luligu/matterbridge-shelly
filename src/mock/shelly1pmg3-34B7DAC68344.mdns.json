@@ -68,9 +68,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": [
-        "gen=3"
-      ]
+      "data": ["gen=3"]
     },
     {
       "name": "Shelly1PMG3-34B7DAC68344.local",
@@ -99,11 +97,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": [
-        "gen=3",
-        "app=S1PMG3",
-        "ver=1.4.2"
-      ]
+      "data": ["gen=3", "app=S1PMG3", "ver=1.4.2"]
     },
     {
       "name": "Shelly1PMG3-34B7DAC68344.local",
