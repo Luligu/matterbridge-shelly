@@ -127,7 +127,7 @@ matterbridge
 
 ## How to use it
 
-You may need to set some config values in the frontend:
+You may need to set some config values in the frontend (wait that the plugin has been configured before changing the config):
 
 ### username
 
@@ -260,10 +260,19 @@ These are the config values:
   "username": "<USERNAME>",
   "password": "<PASSWORD>",
   "exposeSwitch": "switch" | "light" | "outlet"
+  "switchList": []
+  "lightList": []
+  "outletList": []
   "exposeInput": "disabled" | "contact" | "momentary" | "latching"
+  "inputContactList": []
+  "inputMomentaryList": []
+  "inputLatchingList": []
   "exposeInputEvent": "disabled" | "momentary"
+  "inputEventList": []
+  "exposePowerMeter": "disabled" | "matter13"
   "blackList": [],
   "whiteList": [],
+  "nocacheList": [],
   "deviceIp": {
     "<DEVICEID1>": "x.x.x.x",
     "<DEVICEID2>": "x.x.x.x"
@@ -272,6 +281,9 @@ These are the config values:
   "enableStorageDiscover": true,
   "resetStorageDiscover": false
   "enableConfigDiscover": false,
+  "enableBleDiscover": true,
+  "failsafeCount": 0,
+  "postfix": ""
   "debug": false,
   "debugMdns": false,
   "debugCoap": false,
