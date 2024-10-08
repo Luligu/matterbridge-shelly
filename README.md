@@ -127,7 +127,7 @@ matterbridge
 
 ## How to use it
 
-You may need to set some config values in the frontend:
+You may need to set some config values in the frontend (wait that the plugin has been configured before changing the config):
 
 ### username
 
