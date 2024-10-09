@@ -49,6 +49,7 @@ sudo nano /etc/hosts
 set the hostname of the device (change rock-s0 with the new hostname you set before)
 
 127.0.0.1 localhost
+
 127.0.1.1 rock-s0
 
 # Samba without password
@@ -174,6 +175,7 @@ sudo systemctl daemon-reload
 ## QR and manual pairing codes (they are fixed)
 
 qrPairingCode: MT:Y.K90AFN004-JZ59G00
+
 Manual pairing code: 3569-371-2356
 
 ## Enable and start Matterbridge service
