@@ -212,7 +212,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           for (const [key, bthomeDevice] of device.bthomeDevices) {
             this.log.info(
               `- ${idn}${bthomeDevice.name}${rs}${nf} address ${CYAN}${bthomeDevice.addr}${nf} id ${CYAN}${bthomeDevice.id}${nf} ` +
-                `model ${CYAN}${bthomeDevice.model}${nf} (${CYAN}${bthomeDevice.type}${nf})`,
+              `model ${CYAN}${bthomeDevice.model}${nf} (${CYAN}${bthomeDevice.type}${nf})`,
             );
             let definition: AtLeastOne<DeviceTypeDefinition> | undefined;
             if (bthomeDevice.model === 'Shelly BLU DoorWindow') definition = [bridgedNode, powerSource];
@@ -1048,7 +1048,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               }
             });
           }
-        } else if (component.name === 'Ble' && config.exposeBle !== 'disabled') {
+        } /*else if (component.name === 'Ble' && config.exposeBle !== 'disabled') {
           const bleComponent = device.getComponent(key);
           if (bleComponent?.hasProperty('enable') && isValidBoolean(bleComponent.getValue('enable'))) {
             mbDevice.addClusterServer(
@@ -1075,7 +1075,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               }
             });
           }
-        }
+        }*/
       }
       // Check if we have a device to register with Matterbridge
       const endpoints = mbDevice.getChildEndpoints();
@@ -1285,7 +1285,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             if (bthomeSensor.addr !== bthomeDevice.addr) return;
             blu.log.debug(
               `Configuring BLE sensor id ${CYAN}${bthomeSensor.id}${db} key ${CYAN}${bthomeSensor.key}${db} addr ${CYAN}${bthomeSensor.addr}${db} ` +
-                `sensorId ${CYAN}${bthomeSensor.sensorId}-${shellyDevice.getBTHomeObjIdText(bthomeSensor.sensorId)}${db} sensorIdx ${CYAN}${bthomeSensor.sensorIdx}${db} value ${CYAN}${bthomeSensor.value}${db}`,
+              `sensorId ${CYAN}${bthomeSensor.sensorId}-${shellyDevice.getBTHomeObjIdText(bthomeSensor.sensorId)}${db} sensorIdx ${CYAN}${bthomeSensor.sensorIdx}${db} value ${CYAN}${bthomeSensor.value}${db}`,
             );
             shellyDevice.emit('bthomesensor_update', bthomeSensor.addr, shellyDevice.getBTHomeObjIdText(bthomeSensor.sensorId), bthomeSensor.sensorIdx, bthomeSensor.value);
           });
@@ -1531,7 +1531,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     if (!shellyComponent) return;
     shellyDevice.log.info(
       `${db}Shelly message for device ${idn}${shellyDevice.id}${rs}${db} ` +
-        `${hk}${shellyComponent.name}${db}:${hk}${component}${db}:${zb}${property}${db}:${YELLOW}${value !== null && typeof value === 'object' ? debugStringify(value as object) : value}${rs}`,
+      `${hk}${shellyComponent.name}${db}:${hk}${component}${db}:${zb}${property}${db}:${YELLOW}${value !== null && typeof value === 'object' ? debugStringify(value as object) : value}${rs}`,
     );
     // Update state
     if ((isLightComponent(shellyComponent) || isSwitchComponent(shellyComponent)) && property === 'state' && isValidBoolean(value)) {
