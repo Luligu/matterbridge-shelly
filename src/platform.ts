@@ -65,7 +65,7 @@ import {
 } from 'matterbridge';
 
 // import { EveHistory, EveHistoryCluster, MatterHistory } from 'matterbridge/history';
-import { AnsiLogger, BLUE, CYAN, GREEN, LogLevel, TimestampFormat, YELLOW, db, debugStringify, dn, er, hk, idn, nf, or, rs, wr, zb } from 'matterbridge/logger';
+import { AnsiLogger, BLUE, CYAN, GREEN, LogLevel, TimestampFormat, YELLOW, db, debugStringify, dn, er, hk, idn, nf, nt, or, rs, wr, zb } from 'matterbridge/logger';
 import { NodeStorage, NodeStorageManager } from 'matterbridge/storage';
 import { hslColorToRgbColor, rgbColorToHslColor, isValidIpv4Address, isValidString, isValidNumber, isValidBoolean, isValidArray, isValidObject, waiter } from 'matterbridge/utils';
 
@@ -86,6 +86,7 @@ type ShellyDeviceId = string;
 export class ShellyPlatform extends MatterbridgeDynamicPlatform {
   public discoveredDevices = new Map<ShellyDeviceId, DiscoveredDevice>();
   public storedDevices = new Map<ShellyDeviceId, DiscoveredDevice>();
+  public cfgchangeddDevices = new Map<ShellyDeviceId, ShellyDeviceId>();
   public shellyDevices = new Map<ShellyDeviceId, ShellyDevice>();
   public bridgedDevices = new Map<ShellyDeviceId, MatterbridgeDevice>();
   public bluBridgedDevices = new Map<string, MatterbridgeDevice>();
@@ -308,7 +309,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
                     device.thermostatSetpointTimeout = setTimeout(() => {
                       mbDevice.log.info(`Setting thermostat occupiedHeatingSetpoint to ${newValue / 100}`);
                       ShellyDevice.fetch(this.shelly, mbDevice.log, device.host, 'BluTrv.Call', {
-                        id: bthomeDevice.id,
+                        id: bthomeDevice.blutrv_id,
                         method: 'Trv.SetTarget',
                         params: { id: 0, target_C: newValue / 100 },
                       });
@@ -385,9 +386,49 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               blu.setAttribute(BooleanStateCluster.id, 'stateValue', !value, blu.log, child);
             }
           });
-          // BLU observer sensor updates
+
+          // BLU observer sensor events
+          device.on('bthome_event', (event: string) => {
+            if (!isValidString(event)) return;
+            if (event === 'device_discovered') {
+              this.cfgchangeddDevices.set(device.id, device.id);
+              device.log.notice(`Shelly device ${idn}${device.name}${rs}${nt} id ${hk}${device.id}${nt} host ${zb}${device.host}${nt} discovered a new BLU device`);
+            }
+            if (event === 'associations_done') {
+              this.cfgchangeddDevices.set(device.id, device.id);
+              device.log.notice(`Shelly device ${idn}${device.name}${rs}${nt} id ${hk}${device.id}${nt} host ${zb}${device.host}${nt} paired a new BLU device`);
+            }
+          });
+          device.on('bthomedevice_event', (addr: string, event: string) => {
+            if (!isValidString(addr, 11) || !isValidString(event, 6)) return;
+            const blu = this.bluBridgedDevices.get(addr);
+            const bthomeDevice = device.bthomeDevices.get(addr);
+            if (!blu || !bthomeDevice) {
+              this.log.error(`Shelly device ${hk}${device.id}${er} host ${zb}${device.host}${er} sent an unknown BLU device address ${CYAN}${addr}${er}`);
+              return;
+            }
+            blu.log.info(`${idn}BLU${rs}${db} observer device event message for BLU device ${idn}${blu?.deviceName ?? addr}${rs}${db}: event ${YELLOW}${event}${db}`);
+            if (event === 'ota_begin') {
+              this.cfgchangeddDevices.set(device.id, device.id);
+              device.log.notice(`Shelly device ${idn}${device.name}${rs}${nt} id ${hk}${device.id}${nt} host ${zb}${device.host}${nt} is starting OTA`);
+            }
+            if (event === 'ota_progress') {
+              device.log.notice(`Shelly device ${idn}${device.name}${rs}${nt} id ${hk}${device.id}${nt} host ${zb}${device.host}${nt} OTA is progressing`);
+            }
+            if (event === 'ota_success') {
+              this.cfgchangeddDevices.set(device.id, device.id);
+              device.log.notice(`Shelly device ${idn}${device.name}${rs}${nt} id ${hk}${device.id}${nt} host ${zb}${device.host}${nt} finished succesfully OTA`);
+            }
+            // TODO move to Sys
+            /*
+            if (event === 'scheduled_restart') {
+              this.cfgchangeddDevices.set(device.id, device.id);
+              device.log.notice(`Shelly device ${idn}${device.name}${rs}${nt} id ${hk}${device.id}${nt} host ${zb}${device.host}${nt} is restarting`);
+            }
+            */
+          });
           device.on('bthomesensor_event', (addr: string, sensorName: string, sensorIndex: number, event: string) => {
-            if (!isValidString(addr, 11) || !isValidString(sensorName, 6) || !isValidNumber(sensorIndex, 0, 3)) return;
+            if (!isValidString(addr, 11) || !isValidString(sensorName, 6) || !isValidNumber(sensorIndex, 0, 3) || !isValidString(event, 6)) return;
             const blu = this.bluBridgedDevices.get(addr);
             const bthomeDevice = device.bthomeDevices.get(addr);
             if (!blu || !bthomeDevice) {

@@ -102,6 +102,32 @@ export interface BTHomeDeviceComponent {
   attrs?: BTHomeDeviceComponentAttrs;
 }
 
+// Define the interface for the BTHomeDeviceComponent config object
+export interface BTHomeBluTrvComponentConfig {
+  id: number;
+  addr: string;
+  name: null | undefined | string;
+  key: null | undefined | string;
+  meta: {
+    ui: {
+      view: string;
+      local_name: string;
+      icon: ShellyDataType;
+    };
+  };
+  trv: string;
+  temp_sensors: string[];
+  dw_sensors: string[];
+}
+
+// Define the main interface for the BTHomeDeviceComponent
+export interface BTHomeBluTrvComponent {
+  key: string;
+  status: BTHomeDeviceComponentStatus;
+  config: BTHomeBluTrvComponentConfig;
+  attrs?: BTHomeDeviceComponentAttrs;
+}
+
 // Define the interface for the BTHomeSensorComponent status object
 export interface BTHomeSensorComponentStatus {
   id: number;
