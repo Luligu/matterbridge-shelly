@@ -86,7 +86,7 @@ type ShellyDeviceId = string;
 export class ShellyPlatform extends MatterbridgeDynamicPlatform {
   public discoveredDevices = new Map<ShellyDeviceId, DiscoveredDevice>();
   public storedDevices = new Map<ShellyDeviceId, DiscoveredDevice>();
-  public cfgchangeddDevices = new Map<ShellyDeviceId, ShellyDeviceId>();
+  public changedDevices = new Map<ShellyDeviceId, ShellyDeviceId>();
   public shellyDevices = new Map<ShellyDeviceId, ShellyDevice>();
   public bridgedDevices = new Map<ShellyDeviceId, MatterbridgeDevice>();
   public bluBridgedDevices = new Map<string, MatterbridgeDevice>();
@@ -391,11 +391,15 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           device.on('bthome_event', (event: string) => {
             if (!isValidString(event)) return;
             if (event === 'device_discovered') {
-              this.cfgchangeddDevices.set(device.id, device.id);
+              this.changedDevices.set(device.id, device.id);
               device.log.notice(`Shelly device ${idn}${device.name}${rs}${nt} id ${hk}${device.id}${nt} host ${zb}${device.host}${nt} discovered a new BLU device`);
             }
+            if (event === 'discovery_done') {
+              this.changedDevices.set(device.id, device.id);
+              device.log.notice(`Shelly device ${idn}${device.name}${rs}${nt} id ${hk}${device.id}${nt} host ${zb}${device.host}${nt} discovery done`);
+            }
             if (event === 'associations_done') {
-              this.cfgchangeddDevices.set(device.id, device.id);
+              this.changedDevices.set(device.id, device.id);
               device.log.notice(`Shelly device ${idn}${device.name}${rs}${nt} id ${hk}${device.id}${nt} host ${zb}${device.host}${nt} paired a new BLU device`);
             }
           });
@@ -409,14 +413,14 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             }
             blu.log.info(`${idn}BLU${rs}${db} observer device event message for BLU device ${idn}${blu?.deviceName ?? addr}${rs}${db}: event ${YELLOW}${event}${db}`);
             if (event === 'ota_begin') {
-              this.cfgchangeddDevices.set(device.id, device.id);
+              this.changedDevices.set(device.id, device.id);
               device.log.notice(`Shelly device ${idn}${device.name}${rs}${nt} id ${hk}${device.id}${nt} host ${zb}${device.host}${nt} is starting OTA`);
             }
             if (event === 'ota_progress') {
               device.log.notice(`Shelly device ${idn}${device.name}${rs}${nt} id ${hk}${device.id}${nt} host ${zb}${device.host}${nt} OTA is progressing`);
             }
             if (event === 'ota_success') {
-              this.cfgchangeddDevices.set(device.id, device.id);
+              this.changedDevices.set(device.id, device.id);
               device.log.notice(`Shelly device ${idn}${device.name}${rs}${nt} id ${hk}${device.id}${nt} host ${zb}${device.host}${nt} finished succesfully OTA`);
             }
             // TODO move to Sys
@@ -1044,6 +1048,33 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               }
             });
           }
+        } else if (component.name === 'Ble' && config.exposeBle !== 'disabled') {
+          const bleComponent = device.getComponent(key);
+          if (bleComponent?.hasProperty('enable') && isValidBoolean(bleComponent.getValue('enable'))) {
+            mbDevice.addClusterServer(
+              mbDevice.getDefaultModeSelectClusterServer(
+                'Bluetooth',
+                [
+                  { label: 'disabled', mode: 0, semanticTags: [{ mfgCode: VendorId(0xfff1), value: 0 }] },
+                  { label: 'enabled', mode: 1, semanticTags: [{ mfgCode: VendorId(0xfff1), value: 1 }] },
+                ],
+                bleComponent.getValue('enable') ? 1 : 0,
+                bleComponent.getValue('enable') ? 1 : 0,
+              ),
+            );
+            // Add command handlers
+            mbDevice.addCommandHandler('changeToMode', async (data) => {
+              if (isValidObject(data, 4) && isValidNumber(data.request.newMode, 0, 1))
+                await ShellyDevice.fetch(this.shelly, mbDevice.log, device.host, 'Ble.SetConfig', { config: { enable: data.request.newMode === 1 } });
+            });
+            // Add event handler
+            bleComponent.on('event', async (component: string, event: string) => {
+              if (isValidString(component, 3) && isValidString(event, 14) && component === 'ble' && event === 'config_changed') {
+                const ble = await ShellyDevice.fetch(this.shelly, mbDevice.log, device.host, 'Ble.GetConfig');
+                if (isValidObject(ble, 1) && isValidBoolean(ble.enable)) mbDevice.setAttribute(ModeSelectCluster.id, 'currentMode', ble.enable ? 1 : 0, mbDevice.log);
+              }
+            });
+          }
         }
       }
       // Check if we have a device to register with Matterbridge
@@ -1265,6 +1296,13 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
 
   override async onShutdown(reason?: string) {
     this.log.info(`Shutting down platform ${idn}${this.config.name}${rs}${nf}: ${reason ?? ''}`);
+
+    if (!this.nodeStorage) {
+      this.log.error('NodeStorage is not initialized');
+      return;
+    }
+    this.log.info(`Saving ${this.changedDevices.size} changed Shelly devices to the storage`);
+    await this.nodeStorage.set<string[]>('ChangedDevices', Array.from(this.changedDevices.values()));
 
     this.shelly.destroy();
 

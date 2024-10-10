@@ -660,8 +660,8 @@ export class ShellyDevice extends EventEmitter {
         btHomePayload = (await ShellyDevice.fetch(shelly, log, host, 'Shelly.GetComponents', { dynamic_only: true, offset })) as unknown as BTHomeComponentPayload;
         if (btHomePayload && btHomePayload.components) {
           btHomeComponents.push(...btHomePayload.components);
+          offset += btHomePayload.components.length;
         }
-        offset += btHomePayload.components.length;
       } while (btHomePayload && offset < btHomePayload.total);
       componentsPayload = { components: btHomeComponents, cfg_rev: btHomePayload.cfg_rev, offset: 0, total: btHomeComponents.length };
       device.scanBTHomeComponents(btHomeComponents);
