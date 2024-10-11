@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 
 If you like this project and find it useful, please consider giving it a star on GitHub at https://github.com/Luligu/matterbridge-shelly and sponsoring it.
 
+
+## [1.0.1] - 2024-10-10
+
+### Added
+
+- [shelly]: Verified support for shellyblugwg3 (BLU Gateway Gen 3) with new firmware v1.4.99-blugwg3prod2.
+- [shelly]: Verified support for blutrv with new firmware 20241004-125638/main@4b7c4712+.
+- [shelly]: Added support for external sensors of blutrv.
+
+### Fixed
+
+- [BTHome]: Added type checking to BTHome components discovery.
+- [BTHome]: Fixed the case when blutrv ids and bthomedevice ids are different in the shellyblugwg3 config.
+
+<a href="https://www.buymeacoffee.com/luligugithub">
+  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+</a>
+
 ## [1.0.0] - 2024-10-07
 
 There are a lot of new features in this first production release. Please take the the time to read this CHANGELOG and the README.
@@ -18,7 +36,7 @@ To allow an easy update to the new version, please after the update, restart, wa
 
 - [shelly]: Added support for BLU TRV with firmware v20240926-201942.
 
-- [shelly]: Added support for shellyblugwg3 (BLU Gateway Gen 3) with firmware v1.4.99 and added Jest test (it exposes also "Enable LED" with the ModeSelect cluster).
+- [shelly]: Added support for shellyblugwg3 (BLU Gateway Gen 3) with firmware v1.4.99-blugwg3prod1 and added Jest test (it exposes also "Enable LED" with the ModeSelect cluster).
 
 - [shelly]: Added mdns Jest test for shellyblugwg3 (BLU Gateway Gen 3) with firmware v1.4.99.
 

@@ -4,7 +4,7 @@
  * @file src\shellyDevice.ts
  * @author Luca Liguori
  * @date 2024-05-01
- * @version 2.1.0
+ * @version 3.0.0
  *
  * Copyright 2024, 2025 Luca Liguori.
  *
@@ -34,6 +34,7 @@ import { parseDigestAuthenticateHeader, createDigestShellyAuth, createBasicShell
 import { WsClient } from './wsClient.js';
 import { Shelly } from './shelly.js';
 import {
+  BTHomeBluTrvComponent,
   BTHomeComponent,
   BTHomeComponentPayload,
   BTHomeDeviceComponent,
@@ -49,8 +50,10 @@ interface ShellyDeviceEvent {
   online: [];
   offline: [];
   update: [id: string, key: string, value: ShellyDataType];
+  bthome_event: [event: string];
   bthomedevice_update: [addr: string, rssi: number, packet_id: number, last_updated_ts: number];
   bthomesensor_update: [addr: string, sensorName: string, sensorIndex: number, value: ShellyDataType];
+  bthomedevice_event: [addr: string, event: string];
   bthomesensor_event: [addr: string, sensorName: string, sensorIndex: number, event: string];
 }
 
@@ -98,9 +101,10 @@ export class ShellyDevice extends EventEmitter {
   private statusPayload: ShellyData | null = null;
   private settingsPayload: ShellyData | null = null;
   private componentsPayload: ShellyData | null = null;
+  readonly bthomeTrvs = new Map<string, { id: number; key: string; addr: string; bthomedevice: string }>();
   readonly bthomeDevices = new Map<
     string,
-    { id: number; key: string; name: string; addr: string; model: string; type: string; packet_id: number; rssi: number; last_updated_ts: number }
+    { id: number; key: string; name: string; addr: string; model: string; type: string; blutrv_id: number; packet_id: number; rssi: number; last_updated_ts: number }
   >();
   readonly bthomeSensors = new Map<
     string,
@@ -338,63 +342,126 @@ export class ShellyDevice extends EventEmitter {
     return modelsMap[model] || `Unknown Shelly BLU model ${model}`;
   }
 
+  /**
+   * Scans Bluetooth Home components.
+   * It will also set the bthomeTrvs, bthomeDevices, and bthomeSensors maps.
+   *
+   * @param {BTHomeComponent[]} components - The array of Bluetooth Home components to scan.
+   */
   scanBTHomeComponents(components: BTHomeComponent[]) {
-    if (components.length > 0) this.log.debug(`Scanning the device ${hk}${this.id}${db} host ${zb}${this.host}${db} for BTHome devices and sensors...`);
-    for (const component of components as unknown as BTHomeDeviceComponent[]) {
-      if (component.key.startsWith('bthomedevice:')) {
-        // Shelly BLU TRV has model_id 8 in attrs and has not config.meta!
-        if (component.attrs?.model_id === 8) {
-          component.config.meta = { ui: { view: 'regular', local_name: 'TRV', icon: null } };
+    if (components.length > 0) this.log.info(`Scanning the device ${hk}${this.id}${nf} host ${zb}${this.host}${nf} for BTHome devices and sensors...`);
+    try {
+      for (const component of components as unknown as BTHomeBluTrvComponent[]) {
+        if (component.key.startsWith('blutrv:')) {
+          if (!isValidString(component.key, 6) || !isValidObject(component.status, 5) || !isValidObject(component.config, 5)) {
+            this.log.error(`BTHome BLUTrv id ${CYAN}${component.config.id}${er} key ${CYAN}${component.key}${er} address ${CYAN}${component.config.addr}${er} has no valid data!`);
+            return;
+          }
+          this.log.debug(`- BLUTrv device id ${CYAN}${component.config.id}${db} key ${CYAN}${component.key}${db} address ${CYAN}${component.config.addr}${db} `);
+          this.bthomeTrvs.set(component.config.addr, {
+            id: component.config.id,
+            key: component.key,
+            addr: component.config.addr,
+            bthomedevice: component.config.trv,
+          });
         }
-        if (component.config.meta.ui.local_name === undefined || !isValidString(component.config.meta.ui.local_name)) {
-          this.log.error(
-            `BTHome device id ${CYAN}${component.config.id}${er} key ${CYAN}${component.key}${er} address ${CYAN}${component.config.addr}${er} ` +
-              `name ${CYAN}${component.config.name}${er} has no local_name in config.meta.ui!`,
+      }
+      for (const component of components as unknown as BTHomeDeviceComponent[]) {
+        if (component.key.startsWith('bthomedevice:')) {
+          // Shelly BLU gateway doesn't have config.meta.ui.local_name!
+          if (component.attrs?.model_id === 1) {
+            component.config.meta = { ui: { view: 'regular', local_name: 'SBBT-002C', icon: null } };
+          } else if (component.attrs?.model_id === 2) {
+            component.config.meta = { ui: { view: 'regular', local_name: 'SBDW-002C', icon: null } };
+          } else if (component.attrs?.model_id === 3) {
+            component.config.meta = { ui: { view: 'regular', local_name: 'SBHT-003C', icon: null } };
+          } else if (component.attrs?.model_id === 5) {
+            component.config.meta = { ui: { view: 'regular', local_name: 'SBMO-003Z', icon: null } };
+          } else if (component.attrs?.model_id === 6) {
+            component.config.meta = { ui: { view: 'regular', local_name: 'SBBT-004CEU', icon: null } };
+          } else if (component.attrs?.model_id === 7) {
+            component.config.meta = { ui: { view: 'regular', local_name: 'SBBT-004CUS', icon: null } };
+          } else if (component.attrs?.model_id === 8) {
+            component.config.meta = { ui: { view: 'regular', local_name: 'TRV', icon: null } };
+          }
+          if (
+            !isValidString(component.key, 12) ||
+            !isValidObject(component.status, 5) ||
+            !isValidObject(component.config, 5) ||
+            !isValidObject(component.config.meta, 1) ||
+            !isValidObject(component.config.meta.ui, 2) ||
+            !isValidString(component.config.meta.ui.local_name)
+          ) {
+            this.log.error(
+              `BTHome device id ${CYAN}${component.config.id}${er} key ${CYAN}${component.key}${er} address ${CYAN}${component.config.addr}${er} ` +
+                `name ${CYAN}${component.config.name}${er} has no valid data!`,
+            );
+            return;
+          }
+          const blutrv_id = this.bthomeTrvs.get(component.config.addr)?.id ?? 0;
+          this.log.debug(
+            `- BLU device id ${CYAN}${component.config.id}${db} key ${CYAN}${component.key}${db} address ${CYAN}${component.config.addr}${db} ` +
+              `blutrv_id ${CYAN}${blutrv_id}${db} ` +
+              `name ${CYAN}${component.config.name}${db} battery ${CYAN}${component.status.battery}${db} packet_id ${CYAN}${component.status.packet_id}${db} ` +
+              `rssi ${CYAN}${component.status.rssi}${db} last update ${CYAN}${this.getLocalTimeFromLastUpdated(component.status.last_updated_ts)}${db} ` +
+              `model ${CYAN}${component.config.meta.ui.local_name}${db} => ${CYAN}${this.getBTHomeModelText(component.config.meta.ui.local_name)}${db} `,
           );
-          return;
+          this.bthomeDevices.set(component.config.addr, {
+            id: component.config.id,
+            key: component.key,
+            addr: component.config.addr,
+            blutrv_id: blutrv_id,
+            name: component.config.name ?? `${this.getBTHomeModelText(component.config.meta.ui.local_name)} ` + component.config.addr,
+            model: this.getBTHomeModelText(component.config.meta.ui.local_name),
+            type: component.config.meta.ui.local_name,
+            rssi: component.status.rssi,
+            packet_id: component.status.packet_id,
+            last_updated_ts: component.status.last_updated_ts,
+          });
         }
-        this.log.debug(
-          `- BLU device id ${CYAN}${component.config.id}${db} key ${CYAN}${component.key}${db} address ${CYAN}${component.config.addr}${db} ` +
-            `name ${CYAN}${component.config.name}${db} battery ${CYAN}${component.status.battery}${db} packet_id ${CYAN}${component.status.packet_id}${db} ` +
-            `rssi ${CYAN}${component.status.rssi}${db} last update ${CYAN}${this.getLocalTimeFromLastUpdated(component.status.last_updated_ts)}${db} ` +
-            `model ${CYAN}${component.config.meta.ui.local_name}${db} => ${CYAN}${this.getBTHomeModelText(component.config.meta.ui.local_name)}${db} `,
-        );
-        this.bthomeDevices.set(component.config.addr, {
-          id: component.config.id,
-          key: component.key,
-          addr: component.config.addr,
-          name: component.config.name ?? `${this.getBTHomeModelText(component.config.meta.ui.local_name)} ` + component.config.addr,
-          model: this.getBTHomeModelText(component.config.meta.ui.local_name),
-          type: component.config.meta.ui.local_name,
-          rssi: component.status.rssi,
-          packet_id: component.status.packet_id,
-          last_updated_ts: component.status.last_updated_ts,
-        });
       }
-    }
-    for (const component of components as unknown as BTHomeSensorComponent[]) {
-      if (component.key.startsWith('bthomesensor:')) {
-        this.log.debug(
-          `- BLU sensor id ${CYAN}${component.status.id}${db} key ${CYAN}${component.key}${db} address ${CYAN}${component.config.addr}${db} ` +
-            `name ${CYAN}${component.config.name}${db} ` +
-            `obj_id ${CYAN}0x${component.config.obj_id.toString(16).padStart(2, '0')}${db} => ${CYAN}${this.getBTHomeObjIdText(component.config.obj_id)}${db} idx ${CYAN}${component.config.idx}${db} ` +
-            `value ${CYAN}${component.status.value}${db} last update ${CYAN}${this.getLocalTimeFromLastUpdated(component.status.last_updated_ts)}${db} `,
-        );
-        this.bthomeSensors.set(component.key, {
-          id: component.config.id,
-          key: component.key,
-          name: component.config.name ?? this.getBTHomeObjIdText(component.config.obj_id),
-          addr: component.config.addr,
-          sensorId: component.config.obj_id,
-          sensorIdx: component.config.idx,
-          value: component.status.value,
-          last_updated_ts: component.status.last_updated_ts,
-        });
+      for (const component of components as unknown as BTHomeSensorComponent[]) {
+        if (component.key.startsWith('bthomesensor:')) {
+          if (
+            !isValidString(component.key, 12) ||
+            !isValidObject(component.status, 1) ||
+            !isValidObject(component.config, 6) ||
+            !isValidNumber(component.config.obj_id) ||
+            !isValidNumber(component.config.id) ||
+            !isValidString(component.config.addr) ||
+            !isValidNumber(component.config.idx)
+          ) {
+            this.log.error(
+              `BTHome sensor id ${CYAN}${component.config.id}${er} key ${CYAN}${component.key}${er} address ${CYAN}${component.config.addr}${er} ` +
+                `name ${CYAN}${component.config.name}${er} obj_id ${CYAN}${component.config.obj_id}${er} has no valid data!`,
+            );
+            return;
+          }
+          this.log.debug(
+            `- BLU sensor id ${CYAN}${component.status.id}${db} key ${CYAN}${component.key}${db} address ${CYAN}${component.config.addr}${db} ` +
+              `name ${CYAN}${component.config.name}${db} ` +
+              `obj_id ${CYAN}0x${component.config.obj_id.toString(16).padStart(2, '0')}${db} => ${CYAN}${this.getBTHomeObjIdText(component.config.obj_id)}${db} idx ${CYAN}${component.config.idx}${db} ` +
+              `value ${CYAN}${component.status.value}${db} last update ${CYAN}${this.getLocalTimeFromLastUpdated(component.status.last_updated_ts)}${db} `,
+          );
+          this.bthomeSensors.set(component.key, {
+            id: component.config.id,
+            key: component.key,
+            name: component.config.name ?? this.getBTHomeObjIdText(component.config.obj_id),
+            addr: component.config.addr,
+            sensorId: component.config.obj_id,
+            sensorIdx: component.config.idx,
+            value: component.status.value,
+            last_updated_ts: component.status.last_updated_ts,
+          });
+        }
       }
+    } catch (error) {
+      this.log.error(`Error scanning the device ${hk}${this.id}${db} host ${zb}${this.host}${db} for BTHome devices and sensors: ${error}`);
     }
     // if (this.bthomeDevices.size > 0) this.log.debug(`BTHome devices map:${rs}\n`, this.bthomeDevices);
     // if (this.bthomeSensors.size > 0) this.log.debug(`BTHome sensors map:${rs}\n`, this.bthomeSensors);
   }
+
   /**
    * Creates a ShellyDevice instance.
    *
@@ -593,8 +660,8 @@ export class ShellyDevice extends EventEmitter {
         btHomePayload = (await ShellyDevice.fetch(shelly, log, host, 'Shelly.GetComponents', { dynamic_only: true, offset })) as unknown as BTHomeComponentPayload;
         if (btHomePayload && btHomePayload.components) {
           btHomeComponents.push(...btHomePayload.components);
+          offset += btHomePayload.components.length;
         }
-        offset += btHomeComponents.length;
       } while (btHomePayload && offset < btHomePayload.total);
       componentsPayload = { components: btHomeComponents, cfg_rev: btHomePayload.cfg_rev, offset: 0, total: btHomeComponents.length };
       device.scanBTHomeComponents(btHomeComponents);
@@ -734,7 +801,22 @@ export class ShellyDevice extends EventEmitter {
    */
   onEvent(events: ShellyData[]): void {
     for (const event of events) {
-      if (isValidObject(event) && isValidString(event.event) && isValidString(event.component) && event.component.startsWith('bthomesensor:')) {
+      if (isValidObject(event) && isValidString(event.event) && isValidNumber(event.ts) && isValidString(event.component) && event.component === 'bthome') {
+        this.log.debug(`Device ${hk}${this.id}${db} has event ${YELLOW}${event.event}${db} at ${CYAN}${this.getLocalTimeFromLastUpdated(event.ts as number)}${db}`);
+        this.emit('bthome_event', event.event);
+      } else if (isValidObject(event) && isValidString(event.event) && isValidNumber(event.ts) && isValidString(event.component) && event.component.startsWith('bthomedevice:')) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const device = Array.from(this.bthomeDevices).find(([_addr, _device]) => _device.key === event.component)?.[1];
+        if (device) {
+          this.log.debug(
+            `Device ${hk}${this.id}${db} has event ${YELLOW}${event.event}${db} at ${CYAN}${this.getLocalTimeFromLastUpdated(event.ts as number)}${db} ` +
+              `from BTHomeDevice addr ${idn}${device.addr}${rs}${db} name ${CYAN}${device.name}${db} `,
+          );
+          this.emit('bthomedevice_event', device.addr, event.event);
+        } else {
+          this.log.debug(`*Unknown bthomedevice ${event.component} with event: ${debugStringify(event)}${rs}`);
+        }
+      } else if (isValidObject(event) && isValidString(event.event) && isValidNumber(event.ts) && isValidString(event.component) && event.component.startsWith('bthomesensor:')) {
         const sensor = this.bthomeSensors.get(event.component);
         if (sensor) {
           this.log.debug(
@@ -742,16 +824,15 @@ export class ShellyDevice extends EventEmitter {
               `from BTHomeSensor addr ${idn}${sensor.addr}${rs}${db} name ${CYAN}${sensor.name}${db} ` +
               `sensorId ${CYAN}${this.getBTHomeObjIdText(sensor.sensorId)}${db} (${CYAN}${sensor.sensorId}${db}) index ${CYAN}${sensor.sensorIdx}${db}`,
           );
-          // this.log.debug(`- sensor event data:${rs}\n`, event);
           this.emit('bthomesensor_event', sensor.addr, this.getBTHomeObjIdText(sensor.sensorId), sensor.sensorIdx, event.event);
         } else {
-          this.log.debug(`Unknown bthomesensor ${event.component} with event: ${debugStringify(event)}${rs}`);
+          this.log.debug(`*Unknown bthomesensor ${event.component} with event: ${debugStringify(event)}${rs}`);
         }
       } else if (isValidObject(event) && isValidString(event.event) && isValidString(event.component)) {
         this.log.debug(`Device ${hk}${this.id}${db} has event ${YELLOW}${event.event}${db} from component ${idn}${event.component}${rs}${db}`);
         this.getComponent(event.component)?.emit('event', event.component, event.event);
       } else {
-        this.log.debug(`Unknown event:${rs}\n`, event);
+        this.log.debug(`*Unknown event:${rs}\n`, event);
       }
     }
 
@@ -806,6 +887,8 @@ export class ShellyDevice extends EventEmitter {
             this.emit('bthomesensor_update', sensor.addr, this.getBTHomeObjIdText(sensor.sensorId), sensor.sensorIdx, bthomeSensor.value);
             // this.log.debug(`BTHome sensors map:${rs}\n`, this.bthomeSensors);
           }
+        } else {
+          this.log.debug(`*Unknown bthomesensor ${key}`);
         }
       }
     }
