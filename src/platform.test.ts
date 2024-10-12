@@ -9,6 +9,7 @@ import { ShellyPlatform } from './platform';
 import { ShellyDevice } from './shellyDevice';
 import path from 'path';
 import { Shelly } from './shelly';
+import { CYAN } from 'node-ansi-logger';
 
 describe('ShellyPlatform', () => {
   let mockMatterbridge: Matterbridge;
@@ -384,7 +385,7 @@ describe('ShellyPlatform', () => {
     shellyPlatform.storedDevices.set('shellyemg3-84FCE636582C', { id: 'shellyemg3-84FCE636582C', host: 'invalid', port: 80, gen: 1 });
     shellyPlatform.storedDevices.set('shellyplus-34FCE636582C', { id: 'shellyplus-34FCE636582C', host: '192.168.255.1', port: 80, gen: 2 });
     expect(await (shellyPlatform as any).saveStoredDevices()).toBeTruthy();
-    expect(mockLog.debug).toHaveBeenCalledWith(`Saving 2 discovered Shelly devices to the storage`);
+    expect(mockLog.debug).toHaveBeenCalledWith(`Saving ${CYAN}2${db} discovered Shelly devices to the storage`);
     expect((shellyPlatform as any).storedDevices.size).toBe(2);
 
     await shellyPlatform.onStart('Test reason');
