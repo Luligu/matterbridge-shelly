@@ -726,7 +726,7 @@ export class ShellyDevice extends EventEmitter {
       // Check WebSocket client for gen 2 and 3 devices
       if (device.gen === 2 || device.gen === 3) {
         if (!device.sleepMode && device.wsClient?.isConnected === false) {
-          log.notice(`WebSocket client for device ${hk}${device.id}${nt} host ${zb}${device.host}${nt} is not connected. Starting connection...`);
+          log.info(`WebSocket client for device ${hk}${device.id}${nf} host ${zb}${device.host}${nf} is not connected. Starting connection...`);
           device.wsClient?.start();
         }
       }
