@@ -423,13 +423,6 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               this.changedDevices.set(device.id, device.id);
               device.log.notice(`Shelly device ${idn}${device.name}${rs}${nt} id ${hk}${device.id}${nt} host ${zb}${device.host}${nt} finished succesfully OTA`);
             }
-            // TODO move to Sys
-            /*
-            if (event === 'scheduled_restart') {
-              this.cfgchangeddDevices.set(device.id, device.id);
-              device.log.notice(`Shelly device ${idn}${device.name}${rs}${nt} id ${hk}${device.id}${nt} host ${zb}${device.host}${nt} is restarting`);
-            }
-            */
           });
           device.on('bthomesensor_event', (addr: string, sensorName: string, sensorIndex: number, event: string) => {
             if (!isValidString(addr, 11) || !isValidString(sensorName, 6) || !isValidNumber(sensorIndex, 0, 3) || !isValidString(event, 6)) return;
@@ -516,7 +509,15 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
 
       // Scan the device components
       for (const [key, component] of device) {
-        if (component.name === 'Light' || component.name === 'Rgb') {
+        if (component.name === 'Sys') {
+          component.on('event', (component: string, event: string) => {
+            this.log.debug(`Received event ${event} from component ${component}`);
+            if (event === 'scheduled_restart') {
+              this.changedDevices.set(device.id, device.id);
+              device.log.notice(`Shelly device ${idn}${device.name}${rs}${nt} id ${hk}${device.id}${nt} host ${zb}${device.host}${nt} is restarting`);
+            }
+          });
+        } else if (component.name === 'Light' || component.name === 'Rgb') {
           const lightComponent = device.getComponent(key);
           if (isLightComponent(lightComponent)) {
             // Set the device type and clusters based on the light component properties
@@ -538,19 +539,6 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
 
             // Add the electrical measurementa cluster on the same endpoint
             this.addElectricalMeasurements(mbDevice, child, device, lightComponent);
-
-            /*
-            // Set the onOff attribute
-            const state = lightComponent.getValue('state');
-            if (isValidBoolean(state)) child.getClusterServer(OnOffCluster)?.setOnOffAttribute(state);
-
-            // Set the currentLevel attribute
-            const level = lightComponent.getValue('brightness');
-            if (isValidNumber(level, 0, 100)) {
-              const matterLevel = Math.max(Math.min(Math.round(level / 100) * 255, 255), 0);
-              child.getClusterServer(LevelControlCluster)?.setCurrentLevelAttribute(matterLevel);
-            }
-            */
 
             // Add command handlers from Matter
             mbDevice.addCommandHandler('on', async (data) => {
