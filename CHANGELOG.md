@@ -8,7 +8,9 @@ If you like this project and find it useful, please consider giving it a star on
 
 ### Added
 
-- [shelly]: Added scheduled_restart event from Sys to set the devices that will not be loadd from cache at restart.
+- [shelly]: Added scheduled_restart event from Sys to set the devices that will not be loaded from cache at restart.
+- [shelly]: Added component Devicepower.
+- [shellyplussmoke]: Added battery readings (battery level and voltage) to shellyplussmoke and shellyhtg3 (all devices with Devicepower component).
 
 ### Fixed
 
