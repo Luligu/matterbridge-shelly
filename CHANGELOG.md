@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 
 If you like this project and find it useful, please consider giving it a star on GitHub at https://github.com/Luligu/matterbridge-shelly and sponsoring it.
 
+## [1.0.2] - 2024-10-13
+
+### Added
+
+- [shelly]: Added scheduled_restart event from Sys to set the devices that will not be loaded from cache at restart.
+- [shelly]: Added component Devicepower.
+- [shellyplussmoke]: Added battery readings (battery level and voltage) to shellyplussmoke and shellyhtg3 (all devices with Devicepower component).
+
+### Fixed
+
+- [BTHome]: Fixed issue to BTHome components discovery.
+
+<a href="https://www.buymeacoffee.com/luligugithub">
+  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+</a>
 
 ## [1.0.1] - 2024-10-10
 

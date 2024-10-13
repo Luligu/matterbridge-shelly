@@ -650,6 +650,7 @@ export class ShellyDevice extends EventEmitter {
         if (key.startsWith('illuminance:')) device.addComponent(new ShellyComponent(device, key, 'Illuminance', settingsPayload[key] as ShellyData));
         if (key.startsWith('smoke:')) device.addComponent(new ShellyComponent(device, key, 'Smoke', settingsPayload[key] as ShellyData));
         if (key.startsWith('thermostat:')) device.addComponent(new ShellyComponent(device, key, 'Thermostat', settingsPayload[key] as ShellyData));
+        if (key.startsWith('devicepower:')) device.addComponent(new ShellyComponent(device, key, 'Devicepower', settingsPayload[key] as ShellyData));
       }
 
       // Scan for BTHome devices and components
@@ -663,7 +664,7 @@ export class ShellyDevice extends EventEmitter {
           offset += btHomePayload.components.length;
         }
       } while (btHomePayload && offset < btHomePayload.total);
-      componentsPayload = { components: btHomeComponents, cfg_rev: btHomePayload.cfg_rev, offset: 0, total: btHomeComponents.length };
+      componentsPayload = { components: btHomeComponents, cfg_rev: btHomePayload?.cfg_rev | 0, offset: 0, total: btHomeComponents.length };
       device.scanBTHomeComponents(btHomeComponents);
     }
 
@@ -725,7 +726,7 @@ export class ShellyDevice extends EventEmitter {
       // Check WebSocket client for gen 2 and 3 devices
       if (device.gen === 2 || device.gen === 3) {
         if (!device.sleepMode && device.wsClient?.isConnected === false) {
-          log.notice(`WebSocket client for device ${hk}${device.id}${nt} host ${zb}${device.host}${nt} is not connected. Starting connection...`);
+          log.info(`WebSocket client for device ${hk}${device.id}${nf} host ${zb}${device.host}${nf} is not connected. Starting connection...`);
           device.wsClient?.start();
         }
       }
@@ -1020,6 +1021,9 @@ export class ShellyDevice extends EventEmitter {
         if (key.startsWith('illuminance:')) this.updateComponent(key, data[key] as ShellyData);
         if (key.startsWith('smoke:')) this.updateComponent(key, data[key] as ShellyData);
         if (key.startsWith('thermostat:')) this.updateComponent(key, data[key] as ShellyData);
+
+        if (key.startsWith('devicepower:') && !this.hasComponent(key)) this.addComponent(new ShellyComponent(this, key, 'Devicepower'));
+        if (key.startsWith('devicepower:')) this.updateComponent(key, data[key] as ShellyData);
       }
       // Update state for active components with output
       for (const key in data) {

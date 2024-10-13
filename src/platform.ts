@@ -423,13 +423,6 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               this.changedDevices.set(device.id, device.id);
               device.log.notice(`Shelly device ${idn}${device.name}${rs}${nt} id ${hk}${device.id}${nt} host ${zb}${device.host}${nt} finished succesfully OTA`);
             }
-            // TODO move to Sys
-            /*
-            if (event === 'scheduled_restart') {
-              this.cfgchangeddDevices.set(device.id, device.id);
-              device.log.notice(`Shelly device ${idn}${device.name}${rs}${nt} id ${hk}${device.id}${nt} host ${zb}${device.host}${nt} is restarting`);
-            }
-            */
           });
           device.on('bthomesensor_event', (addr: string, sensorName: string, sensorIndex: number, event: string) => {
             if (!isValidString(addr, 11) || !isValidString(sensorName, 6) || !isValidNumber(sensorIndex, 0, 3) || !isValidString(event, 6)) return;
@@ -490,10 +483,28 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           child.addClusterServer(mbDevice.getDefaultPowerSourceReplaceableBatteryClusterServer());
         }
         battery.on('update', (component: string, property: string, value: ShellyDataType) => {
-          this.shellyUpdateHandler(mbDevice, device, component, property, value);
+          this.shellyUpdateHandler(mbDevice, device, component, property, value, 'PowerSource');
         });
       } else {
         child.addClusterServer(mbDevice.getDefaultPowerSourceWiredClusterServer());
+      }
+      const devicepower = device.getComponent('devicepower:0');
+      if (devicepower) {
+        if (devicepower.hasProperty('battery') && isValidObject(devicepower.getValue('battery'), 2)) {
+          const battery = devicepower.getValue('battery') as { V: number; percent: number };
+          if (isValidNumber(battery.V, 0, 12) && isValidNumber(battery.percent, 0, 100)) {
+            child.addClusterServer(
+              mbDevice.getDefaultPowerSourceReplaceableBatteryClusterServer(
+                battery.percent,
+                battery.percent > 20 ? PowerSource.BatChargeLevel.Ok : PowerSource.BatChargeLevel.Critical,
+                battery.V * 1000,
+              ),
+            );
+          }
+        }
+        devicepower.on('update', (component: string, property: string, value: ShellyDataType) => {
+          this.shellyUpdateHandler(mbDevice, device, component, property, value, 'PowerSource');
+        });
       }
 
       // Set the composed name at gui
@@ -516,7 +527,19 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
 
       // Scan the device components
       for (const [key, component] of device) {
-        if (component.name === 'Light' || component.name === 'Rgb') {
+        if (component.name === 'Sys') {
+          component.on('event', (component: string, event: string) => {
+            this.log.debug(`Received event ${event} from component ${component}`);
+            // scheduled_restart is for restart and for reset
+            if (event === 'scheduled_restart') {
+              if (!device.sleepMode) this.changedDevices.set(device.id, device.id);
+              device.log.notice(`Shelly device ${idn}${device.name}${rs}${nt} id ${hk}${device.id}${nt} host ${zb}${device.host}${nt} is restarting`);
+            }
+            if (event === 'sleep') {
+              device.log.notice(`Shelly device ${idn}${device.name}${rs}${nt} id ${hk}${device.id}${nt} host ${zb}${device.host}${nt} is sleeping`);
+            }
+          });
+        } else if (component.name === 'Light' || component.name === 'Rgb') {
           const lightComponent = device.getComponent(key);
           if (isLightComponent(lightComponent)) {
             // Set the device type and clusters based on the light component properties
@@ -538,19 +561,6 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
 
             // Add the electrical measurementa cluster on the same endpoint
             this.addElectricalMeasurements(mbDevice, child, device, lightComponent);
-
-            /*
-            // Set the onOff attribute
-            const state = lightComponent.getValue('state');
-            if (isValidBoolean(state)) child.getClusterServer(OnOffCluster)?.setOnOffAttribute(state);
-
-            // Set the currentLevel attribute
-            const level = lightComponent.getValue('brightness');
-            if (isValidNumber(level, 0, 100)) {
-              const matterLevel = Math.max(Math.min(Math.round(level / 100) * 255, 255), 0);
-              child.getClusterServer(LevelControlCluster)?.setCurrentLevelAttribute(matterLevel);
-            }
-            */
 
             // Add command handlers from Matter
             mbDevice.addCommandHandler('on', async (data) => {
@@ -1133,6 +1143,15 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       await this.loadStoredDevices();
     }
 
+    // load the changed Shelly devices from previous session
+    this.log.info(`Loading changed Shelly devices from the storage...`);
+    const changedDevices = await this.nodeStorage.get<string[]>('ChangedDevices', []);
+    for (const device of changedDevices) {
+      this.log.debug(`Loaded changed device id ${hk}${device}${db} from the storage`);
+      this.changedDevices.set(device, device);
+    }
+    this.log.debug(`Loaded ${CYAN}${this.changedDevices.size}${nf} changed Shelly devices from the storage`);
+
     // start Shelly mDNS device discoverer
     if (this.config.enableMdnsDiscover === true) {
       this.shelly.startMdns(10 * 60 * 1000, this.config.interfaceName as string, 'udp4', this.config.debugMdns as boolean);
@@ -1301,7 +1320,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       this.log.error('NodeStorage is not initialized');
       return;
     }
-    this.log.info(`Saving ${this.changedDevices.size} changed Shelly devices to the storage`);
+    this.log.info(`Saving ${CYAN}${this.changedDevices.size}${nf} changed Shelly devices to the storage`);
     await this.nodeStorage.set<string[]>('ChangedDevices', Array.from(this.changedDevices.values()));
 
     this.shelly.destroy();
@@ -1354,7 +1373,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       this.log.error('NodeStorage is not initialized');
       return false;
     }
-    this.log.debug(`Saving ${this.storedDevices.size} discovered Shelly devices to the storage`);
+    this.log.debug(`Saving ${CYAN}${this.storedDevices.size}${db} discovered Shelly devices to the storage`);
     await this.nodeStorage.set<DiscoveredDevice[]>('DeviceIdentifiers', Array.from(this.storedDevices.values()));
     return true;
   }
@@ -1366,7 +1385,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     }
     const storedDevices = await this.nodeStorage.get<DiscoveredDevice[]>('DeviceIdentifiers', []);
     for (const device of storedDevices) this.storedDevices.set(device.id, device);
-    this.log.debug(`Loaded ${this.storedDevices.size} discovered Shelly devices from the storage`);
+    this.log.debug(`Loaded ${CYAN}${this.storedDevices.size}${db} discovered Shelly devices from the storage`);
     return true;
   }
 
@@ -1383,6 +1402,10 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     let loadFromCache = true;
     if (['shellywalldisplay', 'shellyblugwg3'].includes(ShellyDevice.normalizeId(deviceId).type)) loadFromCache = false;
     if (isValidArray(this.config.nocacheList, 1) && this.config.nocacheList.includes(deviceId)) loadFromCache = false;
+    if (this.changedDevices.has(deviceId)) {
+      this.changedDevices.delete(deviceId);
+      loadFromCache = false;
+    }
 
     if (loadFromCache && fs.existsSync(fileName)) {
       this.log.info(`*Loading from cache Shelly device ${hk}${deviceId}${nf} host ${zb}${host}${nf}`);
@@ -1524,11 +1547,24 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     return true;
   }
 
-  private shellyUpdateHandler(matterbridgeDevice: MatterbridgeDevice, shellyDevice: ShellyDevice, component: string, property: string, value: ShellyDataType) {
-    const endpoint = matterbridgeDevice.getChildEndpointByName(component);
-    if (!endpoint) return;
+  private shellyUpdateHandler(
+    matterbridgeDevice: MatterbridgeDevice,
+    shellyDevice: ShellyDevice,
+    component: string,
+    property: string,
+    value: ShellyDataType,
+    endpointName?: string,
+  ) {
+    const endpoint = matterbridgeDevice.getChildEndpointByName(endpointName ?? component);
+    if (!endpoint) {
+      shellyDevice.log.debug(`shellyUpdateHandler error: endpoint ${component} not found for shelly device ${dn}${shellyDevice?.id}${db}`);
+      return;
+    }
     const shellyComponent = shellyDevice.getComponent(component);
-    if (!shellyComponent) return;
+    if (!shellyComponent) {
+      shellyDevice.log.debug(`shellyUpdateHandler error: component ${component} not found for shelly device ${dn}${shellyDevice?.id}${db}`);
+      return;
+    }
     shellyDevice.log.info(
       `${db}Shelly message for device ${idn}${shellyDevice.id}${rs}${db} ` +
         `${hk}${shellyComponent.name}${db}:${hk}${component}${db}:${zb}${property}${db}:${YELLOW}${value !== null && typeof value === 'object' ? debugStringify(value as object) : value}${rs}`,
@@ -1629,6 +1665,18 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         endpoint,
       );
     }
+    // Update for Devicepower
+    if (shellyComponent.name === 'Devicepower' && property === 'battery' && isValidObject(value, 2)) {
+      const battery = value as { V: number; percent: number };
+      if (isValidNumber(battery.V, 0, 12) && isValidNumber(battery.percent, 0, 100)) {
+        matterbridgeDevice.setAttribute(PowerSourceCluster.id, 'batPercentRemaining', battery.percent * 2, shellyDevice.log, endpoint);
+        if (battery.percent < 10) matterbridgeDevice.setAttribute(PowerSourceCluster.id, 'batChargeLevel', PowerSource.BatChargeLevel.Critical, shellyDevice.log, endpoint);
+        else if (battery.percent < 20) matterbridgeDevice.setAttribute(PowerSourceCluster.id, 'batChargeLevel', PowerSource.BatChargeLevel.Warning, shellyDevice.log, endpoint);
+        else matterbridgeDevice.setAttribute(PowerSourceCluster.id, 'batChargeLevel', PowerSource.BatChargeLevel.Ok, shellyDevice.log, endpoint);
+        matterbridgeDevice.setAttribute(PowerSourceCluster.id, 'batVoltage', battery.V * 1000, shellyDevice.log, endpoint);
+      }
+    }
+
     // Update for Motion
     if (shellyComponent.name === 'Sensor' && property === 'motion' && isValidBoolean(value)) {
       matterbridgeDevice.setAttribute(OccupancySensingCluster.id, 'occupancy', { occupied: value }, shellyDevice.log, endpoint);
