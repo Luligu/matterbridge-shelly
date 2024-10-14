@@ -1,6 +1,6 @@
 {
   "name": "matterbridge-shelly",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Matterbridge shelly plugin",
   "author": "https://github.com/Luligu",
   "license": "Apache-2.0",
@@ -83,8 +83,8 @@
     "deepCleanBuild": "npm run deepClean && npm install && npm link matterbridge && npm run build",
     "checkDependencies": "npx npm-check-updates",
     "updateDependencies": "npx npm-check-updates -u && npm install && npm link matterbridge && npm run build",
-    "prepublishOnly": "npm shrinkwrap",
-    "npmPack": "npm run cleanBuild && npm shrinkwrap && npm pack && npm run deepCleanBuild",
+    "prepublishOnly": "npm pkg delete devDependencies && npm pkg delete scripts && npm install --omit=dev && npm shrinkwrap",
+    "npmPack": "npm run cleanBuild && copy package.json package.log && npm pkg delete devDependencies && npm pkg delete scripts && npm install --omit=dev && npm shrinkwrap && npm pack && copy package.log package.json && npm run deepCleanBuild",
     "matterbridge:add": "matterbridge -add .\\",
     "matterbridge:remove": "matterbridge -remove .\\",
     "matterbridge:enable": "matterbridge -enable .\\",

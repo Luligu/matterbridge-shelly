@@ -8,7 +8,7 @@ If you like this project and find it useful, please consider giving it a star on
 
 ### Added
 
-- [shelly]: Verified support for blutrv with new firmware 20241004-125638/main@4b7c4712+.
+- [shelly]: Verified support for blutrv with new firmware 20241011-050134/v1.0.1@ed260994.
 
 ### Fixed
 
