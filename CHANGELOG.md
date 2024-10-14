@@ -14,6 +14,10 @@ If you like this project and find it useful, please consider giving it a star on
 
 - [BTHome]: Fixed required version of matterbridge to 1.5.9.
 
+### Changed
+
+- [package]: Updated dependencies.
+
 <a href="https://www.buymeacoffee.com/luligugithub">
   <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
 </a>
