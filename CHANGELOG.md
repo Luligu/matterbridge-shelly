@@ -10,12 +10,9 @@ If you like this project and find it useful, please consider giving it a star on
 
 - [shelly]: Verified support for blutrv with new firmware 20241011-050134/v1.0.1@ed260994.
 
-### Fixed
-
-- [BTHome]: Fixed required version of matterbridge to 1.5.9.
-
 ### Changed
 
+- [BTHome]: Changed required version of matterbridge to 1.5.9.
 - [package]: Updated dependencies.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
