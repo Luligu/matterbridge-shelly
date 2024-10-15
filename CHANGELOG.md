@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 
 If you like this project and find it useful, please consider giving it a star on GitHub at https://github.com/Luligu/matterbridge-shelly and sponsoring it.
 
+## [1.0.3] - 2024-10-15
+
+### Added
+
+- [shelly]: Verified support for blutrv with new firmware 20241011-050134/v1.0.1@ed260994.
+
+### Changed
+
+- [BTHome]: Changed required version of matterbridge to 1.5.9.
+- [package]: Updated dependencies.
+
+<a href="https://www.buymeacoffee.com/luligugithub">
+  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+</a>
+
 ## [1.0.2] - 2024-10-13
 
 ### Added

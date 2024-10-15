@@ -110,8 +110,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     super(matterbridge, log, config);
 
     // Verify that Matterbridge is the correct version
-    if (!this.verifyMatterbridgeVersion('1.5.5')) {
-      throw new Error(`The shelly plugin requires Matterbridge version >= "1.5.5". Please update Matterbridge to the latest version in the frontend."`);
+    if (this.verifyMatterbridgeVersion === undefined || typeof this.verifyMatterbridgeVersion !== 'function' || !this.verifyMatterbridgeVersion('1.5.9')) {
+      throw new Error(`The shelly plugin requires Matterbridge version >= "1.5.9". Please update Matterbridge to the latest version in the frontend.`);
     }
 
     if (config.username) this.username = config.username as string;
@@ -156,7 +156,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         if (stored?.host !== discoveredDevice.host) {
           this.log.warn(`Shelly device ${hk}${discoveredDevice.id}${wr} host ${zb}${discoveredDevice.host}${wr} is already discovered with a different host.`);
           this.log.warn(`Set new address for shelly device ${hk}${discoveredDevice.id}${wr} from ${zb}${stored?.host}${wr} to ${zb}${discoveredDevice.host}${wr}`);
-          this.log.warn(`Please restart for the change to take effect.`);
+          this.log.warn(`Please restart matterbridge for the change to take effect.`);
           this.discoveredDevices.set(discoveredDevice.id, discoveredDevice);
           this.storedDevices.set(discoveredDevice.id, discoveredDevice);
           await this.saveStoredDevices();
@@ -534,6 +534,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             if (event === 'scheduled_restart') {
               if (!device.sleepMode) this.changedDevices.set(device.id, device.id);
               device.log.notice(`Shelly device ${idn}${device.name}${rs}${nt} id ${hk}${device.id}${nt} host ${zb}${device.host}${nt} is restarting`);
+              device.log.notice(`If you changed the configuration on shelly device ${idn}${device.name}${rs}${nt}, please restart matterbridge for the change to take effect.`);
             }
             if (event === 'sleep') {
               device.log.notice(`Shelly device ${idn}${device.name}${rs}${nt} id ${hk}${device.id}${nt} host ${zb}${device.host}${nt} is sleeping`);
