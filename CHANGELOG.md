@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 
 If you like this project and find it useful, please consider giving it a star on GitHub at https://github.com/Luligu/matterbridge-shelly and sponsoring it.
 
+## [1.0.4] - 2024-10-17
+
+### Added
+
+- [shelly]: Added support for shellyht (BLU Gateway Gen 3) with firmware v1.14.0-gcb84623 and added Jest test (components: Temperature, Humidity and Battery). Verified and tested by Tamer.
+- [shelly]: Added mdns Jest test for shellyht with firmware v1.14.0-gcb84623.
+
+### Changed
+
+- [package]: Updated dependencies.
+
+<a href="https://www.buymeacoffee.com/luligugithub">
+  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+</a>
+
 ## [1.0.3] - 2024-10-15
 
 ### Added

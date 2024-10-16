@@ -20,12 +20,7 @@
       "ttl": 4500,
       "class": "IN",
       "flush": true,
-      "data": [
-        "app=WallDisplay",
-        "gen=2",
-        "ver=2.2.1",
-        "discoverable=true"
-      ]
+      "data": ["app=WallDisplay", "gen=2", "ver=2.2.1", "discoverable=true"]
     },
     {
       "name": "_services._dns-sd._udp.local",
@@ -49,12 +44,7 @@
       "ttl": 4500,
       "class": "IN",
       "flush": true,
-      "data": [
-        "app=WallDisplay",
-        "gen=2",
-        "ver=2.2.1",
-        "discoverable=true"
-      ]
+      "data": ["app=WallDisplay", "gen=2", "ver=2.2.1", "discoverable=true"]
     },
     {
       "name": "_services._dns-sd._udp.local",
@@ -173,10 +163,7 @@
       "flush": true,
       "data": {
         "nextDomain": "ShellyWallDisplay-00082261E102._shelly._tcp.local",
-        "rrtypes": [
-          "TXT",
-          "SRV"
-        ]
+        "rrtypes": ["TXT", "SRV"]
       }
     },
     {
@@ -187,10 +174,7 @@
       "flush": true,
       "data": {
         "nextDomain": "ShellyWallDisplay-00082261E102._http._tcp.local",
-        "rrtypes": [
-          "TXT",
-          "SRV"
-        ]
+        "rrtypes": ["TXT", "SRV"]
       }
     },
     {
@@ -201,9 +185,7 @@
       "flush": true,
       "data": {
         "nextDomain": "167.1.168.192.in-addr.arpa",
-        "rrtypes": [
-          "PTR"
-        ]
+        "rrtypes": ["PTR"]
       }
     },
     {
@@ -214,9 +196,7 @@
       "flush": true,
       "data": {
         "nextDomain": "2.0.1.E.1.6.E.F.F.F.2.2.8.0.2.0.0.0.0.0.0.0.0.0.0.0.0.0.0.8.E.F.ip6.arpa",
-        "rrtypes": [
-          "PTR"
-        ]
+        "rrtypes": ["PTR"]
       }
     },
     {
@@ -227,9 +207,7 @@
       "flush": true,
       "data": {
         "nextDomain": "2.0.1.E.1.6.E.F.F.F.2.2.8.0.2.0.6.4.7.0.9.3.9.4.8.F.B.C.8.7.D.F.ip6.arpa",
-        "rrtypes": [
-          "PTR"
-        ]
+        "rrtypes": ["PTR"]
       }
     },
     {
@@ -240,9 +218,7 @@
       "flush": true,
       "data": {
         "nextDomain": "A.0.E.1.3.B.9.9.2.0.2.9.C.B.0.2.6.4.7.0.9.3.9.4.8.F.B.C.8.7.D.F.ip6.arpa",
-        "rrtypes": [
-          "PTR"
-        ]
+        "rrtypes": ["PTR"]
       }
     },
     {
@@ -253,10 +229,7 @@
       "flush": true,
       "data": {
         "nextDomain": "ShellyWallDisplay-00082261E102.local",
-        "rrtypes": [
-          "A",
-          "AAAA"
-        ]
+        "rrtypes": ["A", "AAAA"]
       }
     }
   ]

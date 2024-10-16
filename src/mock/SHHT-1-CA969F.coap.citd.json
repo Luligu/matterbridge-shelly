@@ -22,10 +22,7 @@
       "T": "T",
       "D": "extTemp",
       "U": "C",
-      "R": [
-        "-55/125",
-        "999"
-      ],
+      "R": ["-55/125", "999"],
       "L": 1
     },
     {
@@ -33,20 +30,14 @@
       "T": "T",
       "D": "extTemp",
       "U": "F",
-      "R": [
-        "-67/257",
-        "999"
-      ],
+      "R": ["-67/257", "999"],
       "L": 1
     },
     {
       "I": 3103,
       "T": "H",
       "D": "humidity",
-      "R": [
-        "0/100",
-        "999"
-      ],
+      "R": ["0/100", "999"],
       "L": 1
     },
     {
@@ -60,20 +51,14 @@
       "I": 3111,
       "T": "B",
       "D": "battery",
-      "R": [
-        "0/100",
-        "-1"
-      ],
+      "R": ["0/100", "-1"],
       "L": 2
     },
     {
       "I": 9102,
       "T": "EV",
       "D": "wakeupEvent",
-      "R": [
-        "battery/button/periodic/poweron/sensor/alarm",
-        "unknown"
-      ],
+      "R": ["battery/button/periodic/poweron/sensor/alarm", "unknown"],
       "L": 2
     }
   ]

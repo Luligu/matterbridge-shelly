@@ -416,6 +416,11 @@ export class CoapServer extends EventEmitter {
             if (s.D === 'inputEventCnt' && b.D.startsWith('sensor'))
               desc.push({ id: s.I, component: b.D.replace('_', ':').replace('sensor', 'input'), property: 'event_cnt', range: s.R }); // SHBTN-2
 
+            // ht component
+            if (s.D === 'extTemp' && s.U === 'C' && b.D.startsWith('sensor')) desc.push({ id: s.I, component: 'temperature', property: 'tC', range: s.R }); // SHHT-1
+            if (s.D === 'extTemp' && s.U === 'F' && b.D.startsWith('sensor')) desc.push({ id: s.I, component: 'temperature', property: 'tF', range: s.R }); // SHHT-1
+            if (s.D === 'humidity' && b.D.startsWith('sensor')) desc.push({ id: s.I, component: 'humidity', property: 'value', range: s.R }); // SHHT-1
+
             // gas_sensor component
             if (s.D === 'sensorOp' && b.D.startsWith('sensor')) desc.push({ id: s.I, component: 'gas', property: 'sensor_state', range: s.R }); // SHGS-1
             if (s.D === 'gas' && b.D.startsWith('sensor')) desc.push({ id: s.I, component: 'gas', property: 'alarm_state', range: s.R }); // SHGS-1

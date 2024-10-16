@@ -38,6 +38,7 @@ then Localization, Change Timezone.
 ```
 rsetup
 ```
+
 then User Settings, Change Hostname
 
 then check /etc/hosts
@@ -162,6 +163,7 @@ sudo curl https://raw.githubusercontent.com/Luligu/matterbridge-shelly/dev/rock-
 ```
 
 change twice the hostname with the new hostname you set before
+
 ```
 sudo nano /etc/systemd/system/matterbridge.service
 ```

@@ -65,7 +65,7 @@
       "username": "admin"
     },
     "pin_code": "",
-    "name": null,
+    "name": "HT Gen1",
     "fw": "20230913-112531/v1.14.0-gcb84623",
     "pon_wifi_reset": false,
     "discoverable": false,
@@ -91,13 +91,7 @@
     "allow_cross_origin": false,
     "actions": {
       "active": false,
-      "names": [
-        "report_url",
-        "temp_over_url",
-        "temp_under_url",
-        "hum_over_url",
-        "hum_under_url"
-      ]
+      "names": ["report_url", "temp_over_url", "temp_under_url", "hum_over_url", "hum_under_url"]
     },
     "sensors": {
       "temperature_threshold": 1,
@@ -151,9 +145,7 @@
       "value": 100,
       "voltage": 2.96
     },
-    "act_reasons": [
-      "button"
-    ],
+    "act_reasons": ["button"],
     "connect_retries": 0,
     "sensor_error": 0,
     "update": {
