@@ -12,7 +12,7 @@ If you like this project and find it useful, please consider giving it a star on
 
 ### Changed
 
-- [BTHome]: Changed required version of matterbridge to 1.5.9.
+- [plugin]: Changed required version of matterbridge to 1.5.9.
 - [package]: Updated dependencies.
 
 <a href="https://www.buymeacoffee.com/luligugithub">

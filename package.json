@@ -1,6 +1,6 @@
 {
   "name": "matterbridge-shelly",
-  "version": "1.0.3",
+  "version": "1.0.4-dev.1",
   "description": "Matterbridge shelly plugin",
   "author": "https://github.com/Luligu",
   "license": "Apache-2.0",

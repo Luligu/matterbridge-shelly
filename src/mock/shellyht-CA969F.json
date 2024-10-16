@@ -1,0 +1,175 @@
+{
+  "shelly": {
+    "type": "SHHT-1",
+    "mac": "485519CA969F",
+    "auth": false,
+    "fw": "20230913-112531/v1.14.0-gcb84623",
+    "discoverable": false,
+    "sleep_mode": true
+  },
+  "settings": {
+    "device": {
+      "type": "SHHT-1",
+      "mac": "485519CA969F",
+      "hostname": "shellyht-CA969F",
+      "sleep_mode": true
+    },
+    "wifi_ap": {
+      "enabled": false,
+      "ssid": "shellyht-CA969F",
+      "key": ""
+    },
+    "wifi_sta": {
+      "enabled": true,
+      "ssid": "Tamer Umniah",
+      "ipv4_method": "dhcp",
+      "ip": null,
+      "gw": null,
+      "mask": null,
+      "dns": null
+    },
+    "wifi_sta1": {
+      "enabled": false,
+      "ssid": null,
+      "ipv4_method": "dhcp",
+      "ip": null,
+      "gw": null,
+      "mask": null,
+      "dns": null
+    },
+    "mqtt": {
+      "enable": false,
+      "server": "192.168.33.3:1883",
+      "user": "",
+      "id": "shellyht-CA969F",
+      "reconnect_timeout_max": 60,
+      "reconnect_timeout_min": 2,
+      "clean_session": true,
+      "keep_alive": 60,
+      "max_qos": 0,
+      "retain": false,
+      "update_period": 30
+    },
+    "coiot": {
+      "enabled": true,
+      "update_period": 15,
+      "peer": ""
+    },
+    "sntp": {
+      "server": "time.google.com",
+      "enabled": true
+    },
+    "login": {
+      "enabled": false,
+      "unprotected": false,
+      "username": "admin"
+    },
+    "pin_code": "",
+    "name": null,
+    "fw": "20230913-112531/v1.14.0-gcb84623",
+    "pon_wifi_reset": false,
+    "discoverable": false,
+    "build_info": {
+      "build_id": "20230913-112531/v1.14.0-gcb84623",
+      "build_timestamp": "2023-09-13T11:25:31Z",
+      "build_version": "1.0"
+    },
+    "cloud": {
+      "enabled": true,
+      "connected": false
+    },
+    "timezone": null,
+    "lat": null,
+    "lng": null,
+    "tzautodetect": true,
+    "tz_utc_offset": 10800,
+    "tz_dst": false,
+    "tz_dst_auto": true,
+    "time": "",
+    "unixtime": 0,
+    "debug_enable": false,
+    "allow_cross_origin": false,
+    "actions": {
+      "active": false,
+      "names": [
+        "report_url",
+        "temp_over_url",
+        "temp_under_url",
+        "hum_over_url",
+        "hum_under_url"
+      ]
+    },
+    "sensors": {
+      "temperature_threshold": 1,
+      "temperature_unit": "C",
+      "humidity_threshold": 5
+    },
+    "sleep_mode": {
+      "period": 12,
+      "unit": "h"
+    },
+    "external_power": 0,
+    "temperature_offset": 0,
+    "humidity_offset": 0
+  },
+  "status": {
+    "wifi_sta": {
+      "connected": true,
+      "ssid": "Tamer Umniah",
+      "ip": "192.168.68.173",
+      "rssi": -37
+    },
+    "cloud": {
+      "enabled": true,
+      "connected": false
+    },
+    "mqtt": {
+      "connected": false
+    },
+    "time": "",
+    "unixtime": 0,
+    "serial": 1,
+    "has_update": false,
+    "mac": "485519CA969F",
+    "cfg_changed_cnt": 0,
+    "actions_stats": {
+      "skipped": 0
+    },
+    "is_valid": true,
+    "tmp": {
+      "value": 31.5,
+      "units": "C",
+      "tC": 31.5,
+      "tF": 88.7,
+      "is_valid": true
+    },
+    "hum": {
+      "value": 54.5,
+      "is_valid": true
+    },
+    "bat": {
+      "value": 100,
+      "voltage": 2.96
+    },
+    "act_reasons": [
+      "button"
+    ],
+    "connect_retries": 0,
+    "sensor_error": 0,
+    "update": {
+      "status": "unknown",
+      "has_update": false,
+      "new_version": "",
+      "old_version": "20230913-112531/v1.14.0-gcb84623"
+    },
+    "ram_total": 52384,
+    "ram_free": 40704,
+    "fs_size": 233681,
+    "fs_free": 156122,
+    "uptime": 2
+  },
+  "components": [],
+  "cfg_rev": 0,
+  "offset": 0,
+  "total": 0
+}
