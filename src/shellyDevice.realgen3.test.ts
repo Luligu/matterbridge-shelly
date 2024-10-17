@@ -49,8 +49,6 @@ describe('Shellies', () => {
     expect(shelly).toBeDefined();
   });
 
-  // eslint-disable-next-line jest/no-commented-out-tests
-  /*
   test('create a gen 3 shelly1minig3 device and update', async () => {
     if (getMacAddress() !== address) return;
     device = await ShellyDevice.create(shelly, log, '192.168.1.221');
@@ -290,11 +288,10 @@ describe('Shellies', () => {
     shelly.removeDevice(device);
     device.destroy();
   }, 30000);
-  */
 
   test('create a gen 3 shellyblugwg3 device and update', async () => {
     if (getMacAddress() !== address) return;
-    consoleLogSpy.mockRestore();
+    // consoleLogSpy.mockRestore();
 
     device = await ShellyDevice.create(shelly, log, '192.168.1.164');
     expect(device).not.toBeUndefined();
