@@ -1,14 +1,18 @@
 #content {
-  font-family: Arial, sans-serif;
-  padding: 20px;
-}
-
-#status,
-#logs {
-  margin: 10px 0;
+    font-family: Arial, sans-serif;
+    padding: 20px;
 }
 
 button {
-  padding: 5px 10px;
-  margin: 10px 0;
+    padding: 5px 10px;
+    margin: 10px 0;
+}
+
+#status,
+#matterbridge-current,
+#matterbridge-latest,
+#shelly-current,
+#shelly-latest,
+#logs {
+    margin: 10px 0;
 }

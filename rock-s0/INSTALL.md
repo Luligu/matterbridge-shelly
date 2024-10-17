@@ -53,7 +53,7 @@ set the hostname of the device (change rock-s0 with the new hostname you set bef
 
 127.0.1.1 rock-s0
 
-# Samba without password
+# Samba without password (optional)
 
 Copy the file smb.conf to /etc/samba/smb.conf
 
