@@ -1,0 +1,20 @@
+{
+    "tools": {
+        "index": {
+            "label": "Matterbridge",
+            "keywords": [
+                {
+                    "matches": [
+                        "plugin",
+                        "apps",
+                        "addon",
+                        "add-on",
+                        "install",
+                        "extension"
+                    ]
+                }
+            ]
+        }
+    },
+    "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self';"
+}

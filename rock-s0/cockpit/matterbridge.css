@@ -1,0 +1,14 @@
+#content {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+}
+
+#status,
+#logs {
+    margin: 10px 0;
+}
+
+button {
+    padding: 5px 10px;
+    margin: 10px 0;
+}
