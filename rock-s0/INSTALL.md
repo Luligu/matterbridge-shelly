@@ -112,6 +112,10 @@ sudo apt install cockpit btop -y
 sudo apt upgrade
 ```
 
+# Install matterbridge cockpit plugin
+
+copy the four files from cockpit directory to "\usr\share\cockpit\matterbridge"
+
 # Prevent the journal logs to grow
 
 ```
