@@ -497,4 +497,143 @@ describe('Shellies', () => {
       device.destroy();
     }, 20000);
   });
+
+  describe('test real gen 1 shellyswitch25-3494547BF36C 236', () => {
+    if (getMacAddress() !== address) return;
+
+    test('Create a gen 1 shelly1 device and send commands', async () => {
+      device = await ShellyDevice.create(shelly, log, '192.168.1.236');
+      expect(device).not.toBeUndefined();
+      if (!device) return;
+      shelly.addDevice(device);
+
+      expect(device.host).toBe('192.168.1.236');
+      expect(device.mac).toBe('3494547BF36C');
+      expect(device.profile).toBe('switch');
+      expect(device.model).toBe('SHSW-25');
+      expect(device.id).toBe('shellyswitch25-3494547BF36C');
+      expect(device.firmware).toBe(firmwareGen1);
+      expect(device.auth).toBe(false);
+      expect(device.gen).toBe(1);
+      expect(device.hasUpdate).toBe(false);
+      expect(device.username).toBe('admin');
+      expect(device.password).toBe('tango');
+
+      await device.fetchUpdate();
+
+      await device.saveDevicePayloads('temp');
+
+      expect(device.getComponentNames()).toStrictEqual(['WiFi', 'MQTT', 'CoIoT', 'Sntp', 'Cloud', 'Relay', 'PowerMeter', 'Input', 'Sys']);
+      expect(device.getComponentIds()).toStrictEqual([
+        'wifi_ap',
+        'wifi_sta',
+        'wifi_sta1',
+        'mqtt',
+        'coiot',
+        'sntp',
+        'cloud',
+        'relay:0',
+        'relay:1',
+        'meter:0',
+        'meter:1',
+        'input:0',
+        'input:1',
+        'sys',
+      ]);
+
+      const component0 = device.getComponent('relay:0');
+      expect(component0).not.toBeUndefined();
+
+      // prettier-ignore
+      if (isSwitchComponent(component0)) {
+        component0.On();
+        await waiter('On', () => { return component0.getValue('state') === true; }, true);
+
+        component0.Off();
+        await waiter('Off', () => { return component0.getValue('state') === false; }, true);
+
+        component0.Toggle();
+        await waiter('Toggle', () => { return component0.getValue('state') === true; }, true);
+
+        component0.Off();
+        await waiter('Off', () => { return component0.getValue('state') === false; }, true);
+      }
+
+      const component1 = device.getComponent('relay:1');
+      expect(component1).not.toBeUndefined();
+
+      // prettier-ignore
+      if (isSwitchComponent(component1)) {
+        component1.On();
+        await waiter('On', () => { return component1.getValue('state') === true; }, true);
+
+        component1.Off();
+        await waiter('Off', () => { return component1.getValue('state') === false; }, true);
+
+        component1.Toggle();
+        await waiter('Toggle', () => { return component1.getValue('state') === true; }, true);
+
+        component1.Off();
+        await waiter('Off', () => { return component1.getValue('state') === false; }, true);
+      }
+
+      shelly.removeDevice(device);
+      device.destroy();
+    }, 20000);
+  });
+
+  describe('test real gen 1 shellyswitch25-3494546BBF7E 222', () => {
+    if (getMacAddress() !== address) return;
+
+    test('Create a gen 1 shelly1 device and send commands', async () => {
+      device = await ShellyDevice.create(shelly, log, '192.168.1.222');
+      expect(device).not.toBeUndefined();
+      if (!device) return;
+      shelly.addDevice(device);
+
+      expect(device.host).toBe('192.168.1.222');
+      expect(device.mac).toBe('3494546BBF7E');
+      expect(device.profile).toBe('cover');
+      expect(device.model).toBe('SHSW-25');
+      expect(device.id).toBe('shellyswitch25-3494546BBF7E');
+      expect(device.firmware).toBe(firmwareGen1);
+      expect(device.auth).toBe(false);
+      expect(device.gen).toBe(1);
+      expect(device.hasUpdate).toBe(false);
+      expect(device.username).toBe('admin');
+      expect(device.password).toBe('tango');
+
+      await device.fetchUpdate();
+
+      await device.saveDevicePayloads('temp');
+
+      expect(device.getComponentNames()).toStrictEqual(['WiFi', 'MQTT', 'CoIoT', 'Sntp', 'Cloud', 'Roller', 'PowerMeter', 'Input', 'Sys']);
+      expect(device.getComponentIds()).toStrictEqual(['wifi_ap', 'wifi_sta', 'wifi_sta1', 'mqtt', 'coiot', 'sntp', 'cloud', 'roller:0', 'meter:0', 'input:0', 'input:1', 'sys']);
+
+      const component0 = device.getComponent('roller:0');
+      expect(component0).not.toBeUndefined();
+
+      // prettier-ignore
+      if (isCoverComponent(component0)) {
+        component0.Open();
+        await waiter('Open', () => { return component0.getValue('state') === 'stop'; }, true, 30000);
+        await waiter('Open', () => { return component0.getValue('current_pos') === 100; }, true, 30000);
+
+        component0.Close();
+        await waiter('Close', () => { return component0.getValue('state') === 'stop'; }, true, 30000);
+        await waiter('Close', () => { return component0.getValue('current_pos') === 0; }, true, 30000);
+
+        component0.GoToPosition(50);
+        await waiter('GoToPosition(50)', () => { return component0.getValue('state') === 'stop'; }, true, 30000);
+        await waiter('GoToPosition(50)', () => { return component0.getValue('current_pos') === 50; }, true, 30000);
+
+        component0.Open();
+        await waiter('Open', () => { return component0.getValue('state') === 'stop'; }, true, 30000);
+        await waiter('Open', () => { return component0.getValue('current_pos') === 100; }, true, 30000);
+      }
+
+      shelly.removeDevice(device);
+      device.destroy();
+    }, 60000);
+  });
 });
