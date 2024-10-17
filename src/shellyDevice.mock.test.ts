@@ -514,6 +514,51 @@ describe('Shelly devices test', () => {
       if (device) device.destroy();
     });
 
+    test('Create a gen 1 shellyht device', async () => {
+      id = 'shellyht-CA969F';
+      log.logName = id;
+
+      device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', id + '.json'));
+      expect(device).not.toBeUndefined();
+      if (!device) return;
+      expect(device.host).toBe(path.join('src', 'mock', id + '.json'));
+      expect(device.model).toBe('SHHT-1');
+      expect(device.mac).toBe('485519CA969F');
+      expect(device.id).toBe(id);
+      expect(device.firmware).toBe(firmwareGen1);
+      expect(device.auth).toBe(false);
+      expect(device.gen).toBe(1);
+      expect(device.profile).toBe(undefined);
+      expect(device.name).toBe('HT Gen1');
+      expect(device.hasUpdate).toBe(false);
+      expect(device.lastseen).not.toBe(0);
+      expect(device.online).toBe(true);
+      expect(device.cached).toBe(false);
+      expect(device.sleepMode).toBe(true);
+
+      expect(device.components.length).toBe(10);
+      expect(device.getComponentNames()).toStrictEqual(['WiFi', 'MQTT', 'CoIoT', 'Sntp', 'Cloud', 'Temperature', 'Humidity', 'Battery']);
+      expect(device.getComponentIds()).toStrictEqual(['wifi_ap', 'wifi_sta', 'wifi_sta1', 'mqtt', 'coiot', 'sntp', 'cloud', 'temperature', 'humidity', 'battery']);
+
+      expect(device.getComponent('temperature')?.getValue('value')).toBe(31.5);
+      expect(device.getComponent('temperature')?.getValue('units')).toBe('C');
+      expect(device.getComponent('temperature')?.getValue('tC')).toBe(31.5);
+      expect(device.getComponent('temperature')?.getValue('tF')).toBe(88.7);
+      expect(device.getComponent('temperature')?.getValue('is_valid')).toBe(true);
+      expect(device.getComponent('humidity')?.getValue('value')).toBe(54.5);
+      expect(device.getComponent('humidity')?.getValue('is_valid')).toBe(true);
+      expect(device.getComponent('battery')?.getValue('level')).toBe(100);
+      expect(device.getComponent('battery')?.getValue('voltage')).toBe(2.96);
+      expect(device.getComponent('battery')?.getValue('charging')).toBe(undefined);
+
+      expect(device.getComponent('sys')?.getValue('temperature')).toBe(undefined);
+      expect(device.getComponent('sys')?.getValue('overtemperature')).toBe(undefined);
+
+      expect(await device.fetchUpdate()).not.toBeNull();
+
+      if (device) device.destroy();
+    });
+
     test('Create a gen 1 shellygas device', async () => {
       id = 'shellygas-7C87CEBCECE4';
       log.logName = id;

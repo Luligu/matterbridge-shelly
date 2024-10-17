@@ -175,6 +175,25 @@ describe('Shellies MdnsScanner test', () => {
     expect(mdns.isScanning).toBeFalsy();
   }, 10000);
 
+  test('Shelly ht', (done) => {
+    discoveredDeviceListener.mockClear();
+    mdns.on('discovered', discoveredDeviceListener);
+    mdns.start(undefined, undefined, undefined, true);
+    expect(mdns.isScanning).toBeTruthy();
+    setTimeout(() => {
+      expect(discoveredDeviceListener).toHaveBeenCalledWith({ id: 'shellyht-CA969F', host: '192.168.68.173', port: 80, gen: 1 });
+      expect((mdns as any).discoveredDevices.has('shellyht-CA969F')).toBeTruthy();
+      done();
+    }, 1000);
+    (mdns as any).discoveredDevices.clear();
+    const data = loadResponse('shellyht-CA969F');
+    expect(data).not.toBeUndefined();
+    if (!data) return;
+    (mdns as any).scanner.emit('response', data, { address: '192.168.68.173', family: 'IPv4', port: 5353, size: 501 });
+    mdns.stop();
+    expect(mdns.isScanning).toBeFalsy();
+  }, 10000);
+
   test('Shelly bulbduo', (done) => {
     discoveredDeviceListener.mockClear();
     mdns.on('discovered', discoveredDeviceListener);

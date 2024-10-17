@@ -4,7 +4,7 @@ After=network-online.target
 
 [Service]
 Type=simple
-ExecStart=matterbridge -service -passcode 20242025 -discriminator 3840
+ExecStart=matterbridge -service -passcode 20242025 -discriminator 3840 -mdnsinterface end0
 WorkingDirectory=/home/rock/Matterbridge
 StandardOutput=inherit
 StandardError=inherit
@@ -12,6 +12,7 @@ Restart=always
 RestartSec=10s
 TimeoutStopSec=30s
 User=rock
+Group=rock
 
 [Install]
 WantedBy=multi-user.target

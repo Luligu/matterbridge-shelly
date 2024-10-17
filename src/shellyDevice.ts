@@ -21,7 +21,7 @@
  * limitations under the License. *
  */
 
-import { AnsiLogger, LogLevel, BLUE, CYAN, GREEN, GREY, MAGENTA, RESET, db, debugStringify, er, hk, nf, wr, zb, rs, YELLOW, idn, nt } from 'matterbridge/logger';
+import { AnsiLogger, LogLevel, BLUE, CYAN, GREEN, GREY, MAGENTA, RESET, db, debugStringify, er, hk, nf, wr, zb, rs, YELLOW, idn, nt, rk } from 'matterbridge/logger';
 import { getIpv4InterfaceAddress, isValidNumber, isValidObject, isValidString } from 'matterbridge/utils';
 import { EventEmitter } from 'events';
 import fetch, { RequestInit } from 'node-fetch';
@@ -186,16 +186,6 @@ export class ShellyDevice extends EventEmitter {
     if (isCoverComponent(component)) return component as unknown as T;
     return component as T;
   }
-  /*
-  getComponent(id: string): ShellyComponent | ShellyLightComponent | ShellySwitchComponent | ShellyCoverComponent | undefined {
-    const component = this._components.get(id);
-    if (!component) return undefined;
-    else if (component.isSwitchComponent()) return component as ShellySwitchComponent;
-    else if (component.isLightComponent()) return component as ShellyLightComponent;
-    else if (component.isCoverComponent()) return component as ShellyCoverComponent;
-    else return component as ShellyComponent;
-  }
-  */
 
   /**
    * Retrieves an array of component IDs.
@@ -553,6 +543,7 @@ export class ShellyDevice extends EventEmitter {
         if (key === 'tmp' && statusPayload.temperature === undefined && statusPayload.overtemperature === undefined) {
           device.addComponent(new ShellyComponent(device, 'temperature', 'Temperature'));
         }
+        if (key === 'hum') device.addComponent(new ShellyComponent(device, 'humidity', 'Humidity'));
         if (key === 'voltage') device.addComponent(new ShellyComponent(device, 'sys', 'Sys'));
         if (key === 'mode') device.addComponent(new ShellyComponent(device, 'sys', 'Sys'));
         if (key === 'bat') device.addComponent(new ShellyComponent(device, 'battery', 'Battery'));
@@ -830,7 +821,7 @@ export class ShellyDevice extends EventEmitter {
           this.log.debug(`*Unknown bthomesensor ${event.component} with event: ${debugStringify(event)}${rs}`);
         }
       } else if (isValidObject(event) && isValidString(event.event) && isValidString(event.component)) {
-        this.log.debug(`Device ${hk}${this.id}${db} has event ${YELLOW}${event.event}${db} from component ${idn}${event.component}${rs}${db}`);
+        this.log.debug(`Device ${hk}${this.id}${db} has event ${YELLOW}${event.event}${db} from component ${idn}${event.component}${rs}${db}${rk}`);
         this.getComponent(event.component)?.emit('event', event.component, event.event);
       } else {
         this.log.debug(`*Unknown event:${rs}\n`, event);
@@ -972,7 +963,13 @@ export class ShellyDevice extends EventEmitter {
         if (key === 'tmp') {
           if (data.temperature === undefined && data.overtemperature === undefined) this.updateComponent('temperature', data[key] as ShellyData);
           const sensor = data.tmp as ShellyData;
-          if (sensor.is_valid === true && sensor.value !== undefined) this.getComponent('temperature')?.setValue('value', sensor.value);
+          if (sensor.is_valid === true && sensor.units === 'C' && isValidNumber(sensor.tC, -55, 125)) this.getComponent('temperature')?.setValue('value', sensor.tC);
+          if (sensor.is_valid === true && sensor.units === 'F' && isValidNumber(sensor.tF, -67, 257)) this.getComponent('temperature')?.setValue('value', sensor.tF);
+        }
+        if (key === 'hum') {
+          this.updateComponent('humidity', data[key] as ShellyData);
+          const sensor = data.hum as ShellyData;
+          if (sensor.is_valid === true && isValidNumber(sensor.value, 0, 100)) this.getComponent('humidity')?.setValue('value', sensor.value);
         }
         if (key === 'temperature') {
           if (data[key] !== null && data[key] !== undefined && typeof data[key] === 'number') this.getComponent('sys')?.setValue('temperature', data[key]);
@@ -1207,7 +1204,8 @@ export class ShellyDevice extends EventEmitter {
     const controller = new AbortController();
     const fetchTimeout = setTimeout(() => {
       controller.abort();
-    }, 10000);
+      log.debug(`***Aborting fetch device ${host}: service ${service} params ${JSON.stringify(params)}`);
+    }, 20000);
 
     const gen = /^[^A-Z]*$/.test(service) ? 1 : 2;
     const url = gen === 1 ? `http://${host}/${service}` : `http://${host}/rpc`;

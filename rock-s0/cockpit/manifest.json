@@ -1,0 +1,11 @@
+{
+    "name": "matterbridge",
+    "title": "Matterbridge Management",
+    "version": "1.0",
+    "menu": {
+        "index": {
+            "label": "Matterbridge"
+        }
+    },
+    "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self';"
+}

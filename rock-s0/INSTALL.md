@@ -38,6 +38,7 @@ then Localization, Change Timezone.
 ```
 rsetup
 ```
+
 then User Settings, Change Hostname
 
 then check /etc/hosts
@@ -52,7 +53,7 @@ set the hostname of the device (change rock-s0 with the new hostname you set bef
 
 127.0.1.1 rock-s0
 
-# Samba without password
+# Samba without password (optional)
 
 Copy the file smb.conf to /etc/samba/smb.conf
 
@@ -111,6 +112,10 @@ sudo apt install cockpit btop -y
 sudo apt upgrade
 ```
 
+# Install matterbridge cockpit plugin
+
+copy the four files from cockpit directory to "\usr\share\cockpit\matterbridge"
+
 # Prevent the journal logs to grow
 
 ```
@@ -162,6 +167,7 @@ sudo curl https://raw.githubusercontent.com/Luligu/matterbridge-shelly/dev/rock-
 ```
 
 change twice the hostname with the new hostname you set before
+
 ```
 sudo nano /etc/systemd/system/matterbridge.service
 ```
