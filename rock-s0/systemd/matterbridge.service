@@ -12,6 +12,7 @@ Restart=always
 RestartSec=10s
 TimeoutStopSec=30s
 User=rock
+Group=rock
 
 [Install]
 WantedBy=multi-user.target
