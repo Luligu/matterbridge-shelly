@@ -181,7 +181,7 @@ describe('Shellies', () => {
     device.destroy();
   }, 30000);
 
-  test('create a gen 3 shelly1pmminig3 device and update', async () => {
+  test('create a gen 3 shelly2pmg3 device and update', async () => {
     if (getMacAddress() !== address) return;
     device = await ShellyDevice.create(shelly, log, '192.168.1.166');
     expect(device).not.toBeUndefined();
