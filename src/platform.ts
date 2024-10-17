@@ -534,7 +534,19 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             if (event === 'scheduled_restart') {
               if (!device.sleepMode) this.changedDevices.set(device.id, device.id);
               device.log.notice(`Shelly device ${idn}${device.name}${rs}${nt} id ${hk}${device.id}${nt} host ${zb}${device.host}${nt} is restarting`);
-              device.log.notice(`If you changed the configuration on shelly device ${idn}${device.name}${rs}${nt}, please restart matterbridge for the change to take effect.`);
+              device.log.notice(`If the configuration on shelly device ${idn}${device.name}${rs}${nt} has changed, please restart matterbridge for the change to take effect.`);
+            }
+            if (event === 'ota_begin') {
+              if (!device.sleepMode) this.changedDevices.set(device.id, device.id);
+              device.log.notice(`Shelly device ${idn}${device.name}${rs}${nt} id ${hk}${device.id}${nt} host ${zb}${device.host}${nt} is starting OTA`);
+            }
+            if (event === 'ota_progress') {
+              device.log.notice(`Shelly device ${idn}${device.name}${rs}${nt} id ${hk}${device.id}${nt} host ${zb}${device.host}${nt} OTA is progressing`);
+            }
+            if (event === 'ota_success') {
+              if (!device.sleepMode) this.changedDevices.set(device.id, device.id);
+              device.log.notice(`Shelly device ${idn}${device.name}${rs}${nt} id ${hk}${device.id}${nt} host ${zb}${device.host}${nt} finished succesfully OTA`);
+              device.log.notice(`The firmware on shelly device ${idn}${device.name}${rs}${nt} has changed, please restart matterbridge for the change to take effect.`);
             }
             if (event === 'sleep') {
               device.log.notice(`Shelly device ${idn}${device.name}${rs}${nt} id ${hk}${device.id}${nt} host ${zb}${device.host}${nt} is sleeping`);
