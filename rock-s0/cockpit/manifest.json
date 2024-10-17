@@ -1,20 +1,13 @@
 {
-    "tools": {
-        "index": {
-            "label": "Matterbridge",
-            "keywords": [
-                {
-                    "matches": [
-                        "plugin",
-                        "apps",
-                        "addon",
-                        "add-on",
-                        "install",
-                        "extension"
-                    ]
-                }
-            ]
+  "tools": {
+    "index": {
+      "label": "Matterbridge",
+      "keywords": [
+        {
+          "matches": ["plugin", "apps", "addon", "add-on", "install", "extension"]
         }
-    },
-    "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self';"
+      ]
+    }
+  },
+  "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self';"
 }

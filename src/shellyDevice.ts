@@ -186,16 +186,6 @@ export class ShellyDevice extends EventEmitter {
     if (isCoverComponent(component)) return component as unknown as T;
     return component as T;
   }
-  /*
-  getComponent(id: string): ShellyComponent | ShellyLightComponent | ShellySwitchComponent | ShellyCoverComponent | undefined {
-    const component = this._components.get(id);
-    if (!component) return undefined;
-    else if (component.isSwitchComponent()) return component as ShellySwitchComponent;
-    else if (component.isLightComponent()) return component as ShellyLightComponent;
-    else if (component.isCoverComponent()) return component as ShellyCoverComponent;
-    else return component as ShellyComponent;
-  }
-  */
 
   /**
    * Retrieves an array of component IDs.
