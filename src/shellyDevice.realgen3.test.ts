@@ -55,6 +55,7 @@ describe('Shellies', () => {
     expect(device).not.toBeUndefined();
     if (!device) return;
     shelly.addDevice(device);
+    expect((device as any).wsClient).not.toBeUndefined();
     (device as any).wsClient?.start();
 
     expect(device.gen).toBe(3);
@@ -99,6 +100,7 @@ describe('Shellies', () => {
     expect(device).not.toBeUndefined();
     if (!device) return;
     shelly.addDevice(device);
+    expect((device as any).wsClient).not.toBeUndefined();
     (device as any).wsClient?.start();
 
     expect(device.gen).toBe(3);
@@ -143,6 +145,7 @@ describe('Shellies', () => {
     expect(device).not.toBeUndefined();
     if (!device) return;
     shelly.addDevice(device);
+    expect((device as any).wsClient).not.toBeUndefined();
     (device as any).wsClient?.start();
 
     expect(device.gen).toBe(3);
@@ -187,6 +190,7 @@ describe('Shellies', () => {
     expect(device).not.toBeUndefined();
     if (!device) return;
     shelly.addDevice(device);
+    expect((device as any).wsClient).not.toBeUndefined();
     (device as any).wsClient?.start();
 
     expect(device.gen).toBe(3);
@@ -289,6 +293,62 @@ describe('Shellies', () => {
     device.destroy();
   }, 30000);
 
+  test('Create a gen 3 shellyddimmerg3 device and update', async () => {
+    device = await ShellyDevice.create(shelly, log, '192.168.1.242');
+    expect(device).not.toBeUndefined();
+    if (!device) return;
+    shelly.addDevice(device);
+    expect((device as any).wsClient).not.toBeUndefined();
+    (device as any).wsClient?.start();
+
+    expect(device.host).toBe('192.168.1.242');
+    expect(device.mac).toBe('84FCE636832C');
+    expect(device.profile).toBe(undefined);
+    expect(device.model).toBe('S3DM-0A1WW');
+    expect(device.id).toBe('shellyddimmerg3-84FCE636832C');
+    expect(device.firmware).toBe('g55db545'); // firmwareGen2
+    expect(device.auth).toBe(false);
+    expect(device.gen).toBe(3);
+    expect(device.hasUpdate).toBe(false);
+    expect(device.username).toBe('admin');
+    expect(device.password).toBe('tango');
+    expect(device.name).toBe('DALI Dimmer Gen3');
+
+    await device.fetchUpdate();
+
+    await device.saveDevicePayloads('temp');
+
+    const component = device.getComponent('light:0');
+    expect(component).not.toBeUndefined();
+
+    // prettier-ignore
+    if (isLightComponent(component)) {
+      component.On();
+      await waiter('On', () => { return component.getValue('state') === true; }, true);
+
+      component.Level(100);
+      await waiter('Level(100)', () => { return component.getValue('brightness') === 100; }, true);
+
+      component.Off();
+      await waiter('Off', () => { return component.getValue('state') === false; }, true);
+
+      component.Level(50);
+      await waiter('Level(50)', () => { return component.getValue('brightness') === 50; }, true); 
+
+      component.Toggle();
+      await waiter('Toggle', () => { return component.getValue('state') === true; }, true);
+
+      component.Level(1);
+      await waiter('Level(1)', () => { return component.getValue('brightness') === 1; }, true);
+
+      component.Off();
+      await waiter('Off', () => { return component.getValue('state') === false; }, true);
+    }
+
+    shelly.removeDevice(device);
+    device.destroy();
+  }, 20000);
+
   test('create a gen 3 shellyblugwg3 device and update', async () => {
     if (getMacAddress() !== address) return;
     // consoleLogSpy.mockRestore();
@@ -297,6 +357,7 @@ describe('Shellies', () => {
     expect(device).not.toBeUndefined();
     if (!device) return;
     shelly.addDevice(device);
+    expect((device as any).wsClient).not.toBeUndefined();
     (device as any).wsClient?.start();
 
     expect(device.gen).toBe(3);
@@ -407,7 +468,50 @@ describe('Shellies', () => {
     expect(device.bthomeSensors.get('bthomesensor:211')?.sensorId).toBe(63);
     expect(device.bthomeSensors.get('bthomesensor:211')?.sensorIdx).toBe(0);
 
+    // TRV 201
+    expect(device.bthomeSensors.has('bthomesensor:212')).toBe(true);
+    expect(device.bthomeSensors.get('bthomesensor:212')?.addr).toBe('28:db:a7:b5:d1:ca');
+    expect(device.bthomeSensors.get('bthomesensor:212')?.name).toBe('Battery');
+    expect(device.bthomeSensors.get('bthomesensor:212')?.sensorId).toBe(1);
+    expect(device.bthomeSensors.get('bthomesensor:212')?.sensorIdx).toBe(0);
+
+    expect(device.bthomeSensors.has('bthomesensor:213')).toBe(true);
+    expect(device.bthomeSensors.get('bthomesensor:213')?.addr).toBe('28:db:a7:b5:d1:ca');
+    expect(device.bthomeSensors.get('bthomesensor:213')?.name).toBe('Button');
+    expect(device.bthomeSensors.get('bthomesensor:213')?.sensorId).toBe(58);
+    expect(device.bthomeSensors.get('bthomesensor:213')?.sensorIdx).toBe(0);
+
+    expect(device.bthomeSensors.has('bthomesensor:214')).toBe(true);
+    expect(device.bthomeSensors.get('bthomesensor:214')?.addr).toBe('28:db:a7:b5:d1:ca');
+    expect(device.bthomeSensors.get('bthomesensor:214')?.name).toBe('Temperature');
+    expect(device.bthomeSensors.get('bthomesensor:214')?.sensorId).toBe(69);
+    expect(device.bthomeSensors.get('bthomesensor:214')?.sensorIdx).toBe(0);
+
+    expect(device.bthomeSensors.has('bthomesensor:215')).toBe(true);
+    expect(device.bthomeSensors.get('bthomesensor:215')?.addr).toBe('28:db:a7:b5:d1:ca');
+    expect(device.bthomeSensors.get('bthomesensor:215')?.name).toBe('Temperature');
+    expect(device.bthomeSensors.get('bthomesensor:215')?.sensorId).toBe(69);
+    expect(device.bthomeSensors.get('bthomesensor:215')?.sensorIdx).toBe(1);
+
     // BLU HT
+    expect(device.bthomeSensors.has('bthomesensor:216')).toBe(true);
+    expect(device.bthomeSensors.get('bthomesensor:216')?.addr).toBe('7c:c6:b6:bd:7a:9a');
+    expect(device.bthomeSensors.get('bthomesensor:216')?.name).toBe('Battery');
+    expect(device.bthomeSensors.get('bthomesensor:216')?.sensorId).toBe(1);
+    expect(device.bthomeSensors.get('bthomesensor:216')?.sensorIdx).toBe(0);
+
+    expect(device.bthomeSensors.has('bthomesensor:217')).toBe(true);
+    expect(device.bthomeSensors.get('bthomesensor:217')?.addr).toBe('7c:c6:b6:bd:7a:9a');
+    expect(device.bthomeSensors.get('bthomesensor:217')?.name).toBe('Humidity');
+    expect(device.bthomeSensors.get('bthomesensor:217')?.sensorId).toBe(46);
+    expect(device.bthomeSensors.get('bthomesensor:217')?.sensorIdx).toBe(0);
+
+    expect(device.bthomeSensors.has('bthomesensor:218')).toBe(true);
+    expect(device.bthomeSensors.get('bthomesensor:218')?.addr).toBe('7c:c6:b6:bd:7a:9a');
+    expect(device.bthomeSensors.get('bthomesensor:218')?.name).toBe('Button');
+    expect(device.bthomeSensors.get('bthomesensor:218')?.sensorId).toBe(58);
+    expect(device.bthomeSensors.get('bthomesensor:218')?.sensorIdx).toBe(0);
+
     expect(device.bthomeSensors.has('bthomesensor:219')).toBe(true);
     expect(device.bthomeSensors.get('bthomesensor:219')?.addr).toBe('7c:c6:b6:bd:7a:9a');
     expect(device.bthomeSensors.get('bthomesensor:219')?.name).toBe('Temperature');
