@@ -1429,7 +1429,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       device = await ShellyDevice.create(this.shelly, log, host);
       if (device) {
         this.log.info(`*Created Shelly device ${hk}${deviceId}${nf} host ${zb}${host}${nf}`);
-        await device.saveDevicePayloads(path.join(this.matterbridge.matterbridgePluginDirectory, 'matterbridge-shelly'));
+        await device.saveDevicePayloads(this.shelly.dataPath);
       }
     }
     if (!device) {

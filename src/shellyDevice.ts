@@ -49,6 +49,7 @@ import { isCoverComponent, isLightComponent, isSwitchComponent, ShellyComponent 
 interface ShellyDeviceEvent {
   online: [];
   offline: [];
+  awake: [];
   update: [id: string, key: string, value: ShellyDataType];
   bthome_event: [event: string];
   bthomedevice_update: [addr: string, rssi: number, packet_id: number, last_updated_ts: number];
@@ -776,6 +777,20 @@ export class ShellyDevice extends EventEmitter {
         device.onEvent(events);
       });
     }
+
+    device.on('awake', async () => {
+      log.debug(`***Device ${hk}${device.id}${db} host ${zb}${device.host}${db} is awake`);
+      if (device.sleepMode) {
+        try {
+          const awaken = await ShellyDevice.create(shelly, log, host);
+          await awaken?.saveDevicePayloads(shelly.dataPath);
+          awaken?.destroy();
+          log.debug(`***Device ${hk}${device.id}${db} host ${zb}${device.host}${db} updated cache file`);
+        } catch (error) {
+          log.debug(`***Error saving device cache ${hk}${device.id}${db} host ${zb}${device.host}${db}: ${error instanceof Error ? error.message : error}`);
+        }
+      }
+    });
 
     device.shellyPayload = shellyPayload;
     device.statusPayload = statusPayload;

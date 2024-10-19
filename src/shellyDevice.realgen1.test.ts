@@ -23,8 +23,10 @@ describe('Shellies', () => {
       //
     });
     // consoleLogSpy.mockRestore();
+    shelly.dataPath = 'temp';
     shelly.setLogLevel(LogLevel.DEBUG, true, true, true);
     shelly.startCoap(0);
+    shelly.startMdns(0, '192.168.1.189', 'udp4', true);
     await wait(2000);
   });
 

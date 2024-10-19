@@ -8,6 +8,8 @@ If you like this project and find it useful, please consider giving it a star on
 
 ### Added
 
+- [shelly]: Verified support for shellyhtg3 (Shelly H&T Gen 3) with new firmware 1.4.5-gbf870ca.
+- [shelly]: Added event awake to save sleepy device cache file.
 - [shelly]: Added scheduled_restart event from Sys to set the devices that will not be loaded from cache at restart.
 - [shelly]: Added config_changed event from Sys to set the devices that will not be loaded from cache at restart.
 - [shelly]: Added ota_begin, ota_progress and ota_success events from Sys to set the devices that will not be loaded from cache at restart.

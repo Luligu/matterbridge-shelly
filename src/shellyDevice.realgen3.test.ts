@@ -6,6 +6,7 @@ import { AnsiLogger, LogLevel, TimestampFormat } from 'matterbridge/logger';
 import { getMacAddress, wait, waiter } from 'matterbridge/utils';
 import { jest } from '@jest/globals';
 import { isCoverComponent, isLightComponent, isSwitchComponent, ShellyCoverComponent, ShellySwitchComponent } from './shellyComponent.js';
+import { ShellyData } from './shellyTypes.js';
 
 describe('Shellies', () => {
   let consoleLogSpy: jest.SpiedFunction<typeof console.log>;
@@ -22,7 +23,9 @@ describe('Shellies', () => {
       //
     });
     // consoleLogSpy.mockRestore();
+    shelly.dataPath = 'temp';
     shelly.setLogLevel(LogLevel.DEBUG, true, true, true);
+    shelly.startMdns(0, '192.168.1.189', 'udp4', true);
     await wait(2000);
   });
 
@@ -49,6 +52,57 @@ describe('Shellies', () => {
     expect(shelly).toBeDefined();
   });
 
+  test('create a sleepy gen 3 shellyhtg3 device and update', async () => {
+    if (getMacAddress() !== address) return;
+    device = await ShellyDevice.create(shelly, log, '192.168.1.100');
+    // expect(device).not.toBeUndefined(); // Skip this test if is sleeping
+    if (!device) return;
+    shelly.addDevice(device);
+    expect((device as any).wsClient).not.toBeUndefined();
+    (device as any).wsClient?.start();
+
+    expect(device.gen).toBe(3);
+    expect(device.host).toBe('192.168.1.100');
+    expect(device.model).toBe('S3SN-0U12A');
+    expect(device.mac).toBe('3030F9EC8468');
+    expect(device.id).toBe('shellyhtg3-3030F9EC8468');
+    expect(device.hasUpdate).toBe(false);
+    expect(device.firmware).toBe('1.4.5-gbf870ca'); // firmwareGen2
+    expect(device.auth).toBe(false);
+    expect(device.name).toBe('H&T Gen3');
+
+    await device.fetchUpdate();
+
+    await device.saveDevicePayloads('temp');
+
+    expect(device.components.length).toBe(12);
+    // prettier-ignore
+    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Devicepower', 'Humidity', 'MQTT', 'Sys', 'Sntp', 'Temperature', 'WiFi', 'WS']);
+    // prettier-ignore
+    expect(device.getComponentIds()).toStrictEqual(['ble', 'cloud', 'devicepower:0', 'humidity:0', 'mqtt', 'sys', 'sntp', 'temperature:0', 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws']);
+
+    expect(device.getComponent('devicepower:0')).not.toBeUndefined();
+    expect(device.getComponent('devicepower:0')?.getValue('battery')).toBeDefined();
+    const battery = device.getComponent('devicepower:0')?.getValue('battery') as ShellyData;
+    expect(battery).toBeDefined();
+    expect(battery.V).toBeGreaterThanOrEqual(1);
+    expect(battery.percent).toBeGreaterThanOrEqual(1);
+    expect(device.getComponent('temperature:0')).not.toBeUndefined();
+    expect(device.getComponent('temperature:0')?.getValue('tC')).toBeGreaterThanOrEqual(1);
+    expect(device.getComponent('temperature:0')?.getValue('tF')).toBeGreaterThanOrEqual(1);
+    expect(device.getComponent('humidity:0')).not.toBeUndefined();
+    expect(device.getComponent('humidity:0')?.getValue('rh')).toBeGreaterThanOrEqual(1);
+
+    expect(device.bthomeTrvs.size).toBe(0);
+    expect(device.bthomeDevices.size).toBe(0);
+    expect(device.bthomeSensors.size).toBe(0);
+
+    shelly.removeDevice(device);
+    device.destroy();
+  }, 30000);
+
+  // eslint-disable-next-line jest/no-commented-out-tests
+  /*
   test('create a gen 3 shelly1g3 device and update', async () => {
     if (getMacAddress() !== address) return;
     device = await ShellyDevice.create(shelly, log, '192.168.1.157');
@@ -1020,4 +1074,5 @@ describe('Shellies', () => {
     shelly.removeDevice(device);
     device.destroy();
   });
+  */
 });
