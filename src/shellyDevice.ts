@@ -822,7 +822,7 @@ export class ShellyDevice extends EventEmitter {
         }
       } else if (isValidObject(event) && isValidString(event.event) && isValidString(event.component)) {
         this.log.debug(`Device ${hk}${this.id}${db} has event ${YELLOW}${event.event}${db} from component ${idn}${event.component}${rs}${db}${rk}`);
-        this.getComponent(event.component)?.emit('event', event.component, event.event);
+        this.getComponent(event.component)?.emit('event', event.component, event.event, event);
       } else {
         this.log.debug(`*Unknown event:${rs}\n`, event);
       }

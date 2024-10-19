@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 If you like this project and find it useful, please consider giving it a star on GitHub at https://github.com/Luligu/matterbridge-shelly and sponsoring it.
 
+## [1.0.5] - 2024-10-21
+
+### Added
+
+- [shelly]: Added scheduled_restart event from Sys to set the devices that will not be loaded from cache at restart.
+- [shelly]: Added config_changed event from Sys to set the devices that will not be loaded from cache at restart.
+- [shelly]: Added ota_begin, ota_progress and ota_success events from Sys to set the devices that will not be loaded from cache at restart.
+
 ## [1.0.4] - 2024-10-17
 
 ### Added

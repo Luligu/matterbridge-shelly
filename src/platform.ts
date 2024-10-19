@@ -528,12 +528,21 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       // Scan the device components
       for (const [key, component] of device) {
         if (component.name === 'Sys') {
-          component.on('event', (component: string, event: string) => {
+          component.on('event', (component: string, event: string, data: ShellyData) => {
             this.log.debug(`Received event ${event} from component ${component}`);
             // scheduled_restart is for restart and for reset
             if (event === 'scheduled_restart') {
               if (!device.sleepMode) this.changedDevices.set(device.id, device.id);
-              device.log.notice(`Shelly device ${idn}${device.name}${rs}${nt} id ${hk}${device.id}${nt} host ${zb}${device.host}${nt} is restarting`);
+              device.log.notice(
+                `Shelly device ${idn}${device.name}${rs}${nt} id ${hk}${device.id}${nt} host ${zb}${device.host}${nt} is restarting in ${CYAN}${data.time_ms}${nt} ms`,
+              );
+              device.log.notice(`If the configuration on shelly device ${idn}${device.name}${rs}${nt} has changed, please restart matterbridge for the change to take effect.`);
+            }
+            if (event === 'config_changed') {
+              if (!device.sleepMode) this.changedDevices.set(device.id, device.id);
+              device.log.notice(
+                `Shelly device ${idn}${device.name}${rs}${nt} id ${hk}${device.id}${nt} host ${zb}${device.host}${nt} sent config changed rev: ${CYAN}${data.cfg_rev}${nt}`,
+              );
               device.log.notice(`If the configuration on shelly device ${idn}${device.name}${rs}${nt} has changed, please restart matterbridge for the change to take effect.`);
             }
             if (event === 'ota_begin') {
@@ -541,7 +550,9 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               device.log.notice(`Shelly device ${idn}${device.name}${rs}${nt} id ${hk}${device.id}${nt} host ${zb}${device.host}${nt} is starting OTA`);
             }
             if (event === 'ota_progress') {
-              device.log.notice(`Shelly device ${idn}${device.name}${rs}${nt} id ${hk}${device.id}${nt} host ${zb}${device.host}${nt} OTA is progressing`);
+              device.log.notice(
+                `Shelly device ${idn}${device.name}${rs}${nt} id ${hk}${device.id}${nt} host ${zb}${device.host}${nt} OTA is progressing: ${CYAN}${data.progress_percent}${nt}%`,
+              );
             }
             if (event === 'ota_success') {
               if (!device.sleepMode) this.changedDevices.set(device.id, device.id);
@@ -644,12 +655,6 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             // Add the electrical measurementa cluster on the same endpoint
             this.addElectricalMeasurements(mbDevice, child, device, switchComponent);
 
-            /*
-            // Set the OnOff attribute
-            const state = switchComponent.getValue('state');
-            if (isValidBoolean(state)) child.getClusterServer(OnOffCluster)?.setOnOffAttribute(state);
-            */
-
             // Add command handlers
             mbDevice.addCommandHandler('on', async (data) => {
               this.shellyLightCommandHandler(mbDevice, data.endpoint.number, device, 'On', true);
@@ -674,19 +679,6 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             // Add the electrical measurementa cluster on the same endpoint
             this.addElectricalMeasurements(mbDevice, child, device, coverComponent);
 
-            // Set the WindowCovering attributes
-            /*
-            "positioning": true, // Gen 1 devices when positioning control is enabled (even if it is not calibrated)
-            "pos_control": true, // Gen 2 devices
-            "current_pos": 0 // Gen 1 and 2 devices 0-100
-            const position = coverComponent.hasProperty('current_pos') ? coverComponent.getValue('current_pos') : undefined;
-            if (isValidNumber(position, 0, 100)) {
-              const matterPos = 10000 - Math.min(Math.max(Math.round(position * 100), 0), 10000);
-              child.getClusterServer(WindowCovering.Complete)?.setCurrentPositionLiftPercent100thsAttribute(matterPos);
-            }
-            mbDevice.setWindowCoveringTargetAsCurrentAndStopped(child);
-            */
-
             // Add command handlers
             mbDevice.addCommandHandler('upOrOpen', async (data) => {
               this.shellyCoverCommandHandler(mbDevice, data.endpoint.number, device, 'Open', 0);
@@ -709,20 +701,16 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           }
         } else if (component.name === 'PowerMeter' && config.exposePowerMeter !== 'disabled') {
           const pmComponent = device.getComponent(key);
-          if (pmComponent) {
-            if (config.exposePowerMeter === 'matter13') {
-              // Add the Matter 1.3 electricalSensor device type with the ElectricalPowerMeasurement and ElectricalEnergyMeasurement clusters
-              const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [electricalSensor], [ElectricalPowerMeasurement.Cluster.id, ElectricalEnergyMeasurement.Cluster.id]);
-
-              device.log.debug(
-                `Added ElectricalPowerMeasurement and ElectricalEnergyMeasurement clusters to endpoint ${hk}${child.name}${db} component ${hk}${component.name}:${component.id}${db}`,
-              );
-
-              // Update the electrical attributes
-              for (const property of component.properties) {
-                if (!['voltage', 'current', 'power', 'apower', 'act_power', 'total', 'aenergy'].includes(property.key)) continue;
-                this.shellyUpdateHandler(mbDevice, device, component.id, property.key, property.value);
-              }
+          if (pmComponent && config.exposePowerMeter === 'matter13') {
+            // Add the Matter 1.3 electricalSensor device type with the ElectricalPowerMeasurement and ElectricalEnergyMeasurement clusters
+            const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [electricalSensor], [ElectricalPowerMeasurement.Cluster.id, ElectricalEnergyMeasurement.Cluster.id]);
+            device.log.debug(
+              `Added ElectricalPowerMeasurement and ElectricalEnergyMeasurement clusters to endpoint ${hk}${child.name}${db} component ${hk}${component.name}:${component.id}${db}`,
+            );
+            // Update the electrical attributes
+            for (const property of component.properties) {
+              if (!['voltage', 'current', 'power', 'apower', 'act_power', 'total', 'aenergy'].includes(property.key)) continue;
+              this.shellyUpdateHandler(mbDevice, device, component.id, property.key, property.value);
             }
             // Add event handler
             pmComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
@@ -733,7 +721,6 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           const inputComponent = device.getComponent(key);
           // Skip the input component if it is disabled in Gen 2/3 devices
           if (inputComponent && inputComponent?.hasProperty('enable') && inputComponent?.getValue('enable') === false) continue;
-
           if (
             inputComponent &&
             inputComponent?.hasProperty('state') &&
