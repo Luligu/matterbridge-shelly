@@ -73,6 +73,7 @@ describe('Shellies', () => {
       expect(device.hasUpdate).toBe(false);
       expect(device.username).toBe('admin');
       expect(device.password).toBe('tango');
+      expect(device.name).toBe('1 Gen1');
 
       await device.fetchUpdate();
 
@@ -121,6 +122,7 @@ describe('Shellies', () => {
       expect(device.hasUpdate).toBe(false);
       expect(device.username).toBe('admin');
       expect(device.password).toBe('tango');
+      expect(device.name).toBe('1L Gen1');
 
       await device.fetchUpdate();
 
@@ -169,6 +171,7 @@ describe('Shellies', () => {
       expect(device.hasUpdate).toBe(false);
       expect(device.username).toBe('admin');
       expect(device.password).toBe('tango');
+      expect(device.name).toBe('Dimmer2 Gen1');
 
       await device.fetchUpdate();
 
@@ -226,6 +229,7 @@ describe('Shellies', () => {
       expect(device.hasUpdate).toBe(false);
       expect(device.username).toBe('admin');
       expect(device.password).toBe('tango');
+      expect(device.name).toBe('Duo Gen1');
 
       await device.fetchUpdate();
 
@@ -277,6 +281,7 @@ describe('Shellies', () => {
       expect(device.hasUpdate).toBe(false);
       expect(device.username).toBe('admin');
       expect(device.password).toBe('tango');
+      expect(device.name).toBe('Bulb Gen1');
 
       await device.fetchUpdate();
 
@@ -334,6 +339,7 @@ describe('Shellies', () => {
       expect(device.hasUpdate).toBe(false);
       expect(device.username).toBe('admin');
       expect(device.password).toBe('tango');
+      expect(device.name).toBe('RGBW2 Gen1 Color');
 
       await device.fetchUpdate();
 
@@ -362,7 +368,7 @@ describe('Shellies', () => {
         await waiter('Toggle', () => { return component.getValue('state') === true; }, true);
 
         component.Level(60);
-        await waiter('Level(60)', () => { return component.getValue('brightness') === 60; }, true);
+        await waiter('Level(60)', () => { return component.getValue('gain') === 60; }, true);
 
         component.ColorRGB(0, 255, 0);
         await waiter('ColorRGB(0, 255, 0)', () => { return component.getValue('red') === 0 && component.getValue('green') === 255 && component.getValue('blue') === 0; }, true);
@@ -396,6 +402,7 @@ describe('Shellies', () => {
       expect(device.hasUpdate).toBe(false);
       expect(device.username).toBe('admin');
       expect(device.password).toBe('tango');
+      expect(device.name).toBe('RGBW2 Gen1 White');
 
       await device.fetchUpdate();
 
@@ -430,8 +437,8 @@ describe('Shellies', () => {
         component.On();
         await waiter('On', () => { return component.getValue('state') === true; }, true);
 
-        component.Level(40);
-        await waiter('Level(40)', () => { return component.getValue('brightness') === 40; }, true);
+        component.Level(30);
+        await waiter('Level(30)', () => { return component.getValue('brightness') === 30; }, true);
 
         component.Off();
         await waiter('Off', () => { return component.getValue('state') === false; }, true);
@@ -471,6 +478,7 @@ describe('Shellies', () => {
       expect(device.hasUpdate).toBe(false);
       expect(device.username).toBe('admin');
       expect(device.password).toBe('tango');
+      expect(device.name).toBe('3EM Gen1');
 
       await device.fetchUpdate();
 
@@ -502,7 +510,7 @@ describe('Shellies', () => {
   describe('test real gen 1 shellyswitch25-3494547BF36C 236', () => {
     if (getMacAddress() !== address) return;
 
-    test('Create a gen 1 shelly1 device and send commands', async () => {
+    test('Create a gen 1 shellyswitch25 device mode relay and send commands', async () => {
       device = await ShellyDevice.create(shelly, log, '192.168.1.236');
       expect(device).not.toBeUndefined();
       if (!device) return;
@@ -519,6 +527,7 @@ describe('Shellies', () => {
       expect(device.hasUpdate).toBe(false);
       expect(device.username).toBe('admin');
       expect(device.password).toBe('tango');
+      expect(device.name).toBe('2.5 Gen1 Relay');
 
       await device.fetchUpdate();
 
@@ -586,7 +595,7 @@ describe('Shellies', () => {
   describe('test real gen 1 shellyswitch25-3494546BBF7E 222', () => {
     if (getMacAddress() !== address) return;
 
-    test('Create a gen 1 shelly1 device and send commands', async () => {
+    test('Create a gen 1 shellyswitch25 device mode roller and send commands', async () => {
       device = await ShellyDevice.create(shelly, log, '192.168.1.222');
       expect(device).not.toBeUndefined();
       if (!device) return;
@@ -603,6 +612,7 @@ describe('Shellies', () => {
       expect(device.hasUpdate).toBe(false);
       expect(device.username).toBe('admin');
       expect(device.password).toBe('tango');
+      expect(device.name).toBe('2.5 Gen1 Roller');
 
       await device.fetchUpdate();
 

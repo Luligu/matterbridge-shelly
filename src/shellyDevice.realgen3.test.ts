@@ -69,6 +69,8 @@ describe('Shellies', () => {
     expect(device.hasUpdate).toBe(false);
     expect(device.firmware).toBe('1.4.5-gbf870ca'); // firmwareGen2
     expect(device.auth).toBe(false);
+    expect(device.username).toBe('admin');
+    expect(device.password).toBe('tango');
     expect(device.name).toBe('H&T Gen3');
 
     await device.fetchUpdate();
@@ -101,8 +103,6 @@ describe('Shellies', () => {
     device.destroy();
   }, 30000);
 
-  // eslint-disable-next-line jest/no-commented-out-tests
-  /*
   test('create a gen 3 shelly1g3 device and update', async () => {
     if (getMacAddress() !== address) return;
     device = await ShellyDevice.create(shelly, log, '192.168.1.157');
@@ -121,6 +121,8 @@ describe('Shellies', () => {
     expect(device.firmware).toBe(firmwareGen2);
     expect(device.auth).toBe(false);
     expect(device.name).toBe('1 Gen3');
+    expect(device.username).toBe('admin');
+    expect(device.password).toBe('tango');
 
     await device.fetchUpdate();
 
@@ -174,6 +176,8 @@ describe('Shellies', () => {
     expect(device.firmware).toBe(firmwareGen2);
     expect(device.auth).toBe(true);
     expect(device.name).toBe('1mini Gen3');
+    expect(device.username).toBe('admin');
+    expect(device.password).toBe('tango');
 
     await device.fetchUpdate();
 
@@ -227,6 +231,8 @@ describe('Shellies', () => {
     expect(device.firmware).toBe(firmwareGen2);
     expect(device.auth).toBe(false);
     expect(device.name).toBe('1PM Gen3');
+    expect(device.username).toBe('admin');
+    expect(device.password).toBe('tango');
 
     await device.fetchUpdate();
 
@@ -351,6 +357,8 @@ describe('Shellies', () => {
     expect(device.firmware).toBe(firmwareGen2);
     expect(device.auth).toBe(false);
     expect(device.name).toBe('1PMmini Gen3');
+    expect(device.username).toBe('admin');
+    expect(device.password).toBe('tango');
 
     await device.fetchUpdate();
 
@@ -404,6 +412,8 @@ describe('Shellies', () => {
     expect(device.firmware).toBe('1.4.99-2pmg3prod0-ge3db05c'); // firmwareGen2
     expect(device.auth).toBe(false);
     expect(device.name).toBe('2PM Gen3');
+    expect(device.username).toBe('admin');
+    expect(device.password).toBe('tango');
 
     await device.fetchUpdate();
 
@@ -519,6 +529,8 @@ describe('Shellies', () => {
     expect(device.firmware).toBe('1.4.99-blugwg3prod2-g689f175'); // firmwareGen2
     expect(device.auth).toBe(false);
     expect(device.name).toBe('BLU Gateway Gen3');
+    expect(device.username).toBe('admin');
+    expect(device.password).toBe('tango');
 
     await device.fetchUpdate();
 
@@ -696,6 +708,8 @@ describe('Shellies', () => {
     expect(device.username).toBe('admin');
     expect(device.password).toBe('tango');
     expect(device.name).toBe('DALI Dimmer Gen3');
+    expect(device.username).toBe('admin');
+    expect(device.password).toBe('tango');
 
     await device.fetchUpdate();
 
@@ -760,6 +774,8 @@ describe('Shellies', () => {
     expect(device.username).toBe('admin');
     expect(device.password).toBe('tango');
     expect(device.name).toBe('EM Gen3');
+    expect(device.username).toBe('admin');
+    expect(device.password).toBe('tango');
 
     await device.fetchUpdate();
 
@@ -950,6 +966,8 @@ describe('Shellies', () => {
     expect(device.username).toBe('admin');
     expect(device.password).toBe('tango');
     expect(device.name).toBe('i4 Gen3');
+    expect(device.username).toBe('admin');
+    expect(device.password).toBe('tango');
 
     await device.fetchUpdate();
 
@@ -1005,6 +1023,8 @@ describe('Shellies', () => {
     expect(device.firmware).toBe('1.2.3-plugsg3prod0-gec79607'); // firmwareGen2
     expect(device.auth).toBe(false);
     expect(device.name).toBe('Plug S Gen3 Matter');
+    expect(device.username).toBe('admin');
+    expect(device.password).toBe('tango');
 
     await device.fetchUpdate();
 
@@ -1058,6 +1078,8 @@ describe('Shellies', () => {
     expect(device.firmware).toBe(firmwareGen2);
     expect(device.auth).toBe(false);
     expect(device.name).toBe('PMmini Gen3');
+    expect(device.username).toBe('admin');
+    expect(device.password).toBe('tango');
 
     await device.fetchUpdate();
 
@@ -1074,5 +1096,4 @@ describe('Shellies', () => {
     shelly.removeDevice(device);
     device.destroy();
   });
-  */
 });

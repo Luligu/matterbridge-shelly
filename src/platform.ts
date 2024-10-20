@@ -1613,7 +1613,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       matterbridgeDevice.setAttribute(OnOffCluster.id, 'onOff', value, shellyDevice.log, endpoint);
     }
     // Update brightness
-    if (isLightComponent(shellyComponent) && property === 'brightness' && isValidNumber(value, 0, 100)) {
+    if (isLightComponent(shellyComponent) && (property === 'gain' || property === 'brightness') && isValidNumber(value, 0, 100)) {
       matterbridgeDevice.setAttribute(LevelControlCluster.id, 'currentLevel', Math.max(Math.min(Math.round((value / 100) * 255), 255), 0), shellyDevice.log, endpoint);
     }
     // Update color gen 1
