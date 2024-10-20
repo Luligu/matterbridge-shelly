@@ -575,13 +575,16 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             }
             if (
               (lightComponent.hasProperty('red') && lightComponent.hasProperty('green') && lightComponent.hasProperty('blue') && device.profile !== 'white') ||
+              (lightComponent.hasProperty('temp') && device.profile !== 'color') ||
               lightComponent.hasProperty('rgb')
             ) {
               deviceType = DeviceTypes.COLOR_TEMPERATURE_LIGHT;
               clusterIds.push(ColorControl.Cluster.id);
             }
             const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [deviceType], clusterIds);
-            mbDevice.configureColorControlCluster(true, false, false, ColorControl.ColorMode.CurrentHueAndCurrentSaturation, child);
+            if (lightComponent.hasProperty('temp') && device.profile !== 'color')
+              mbDevice.configureColorControlCluster(false, false, true, ColorControl.ColorMode.ColorTemperatureMireds, child);
+            else mbDevice.configureColorControlCluster(true, false, false, ColorControl.ColorMode.CurrentHueAndCurrentSaturation, child);
 
             // Add the electrical measurementa cluster on the same endpoint
             this.addElectricalMeasurements(mbDevice, child, device, lightComponent);
@@ -610,7 +613,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               const level = child.getClusterServer(LevelControlCluster)?.getCurrentLevelAttribute();
               const saturation = child.getClusterServer(ColorControlCluster.with(ColorControl.Feature.HueSaturation))?.getCurrentSaturationAttribute() ?? 0;
               const rgb = hslColorToRgbColor((request.hue / 254) * 360, (saturation / 254) * 100, 50);
-              this.log.warn(`***Sending command moveToHue => ColorRGB(${rgb.r},  ${rgb.g}, ${rgb.b})`);
+              this.log.warn(`Sending command moveToHue => ColorRGB(${rgb.r},  ${rgb.g}, ${rgb.b})`);
               if (device.colorCommandTimeout) clearTimeout(device.colorCommandTimeout);
               device.colorCommandTimeout = setTimeout(() => {
                 this.shellyLightCommandHandler(mbDevice, endpoint.number, device, 'ColorRGB', state, level, { r: rgb.r, g: rgb.g, b: rgb.b });
@@ -622,7 +625,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               const level = child.getClusterServer(LevelControlCluster)?.getCurrentLevelAttribute();
               const hue = child.getClusterServer(ColorControlCluster.with(ColorControl.Feature.HueSaturation))?.getCurrentHueAttribute() ?? 0;
               const rgb = hslColorToRgbColor((hue / 254) * 360, (request.saturation / 254) * 100, 50);
-              this.log.warn(`***Sending command moveToSaturation => ColorRGB(${rgb.r},  ${rgb.g}, ${rgb.b})`);
+              this.log.warn(`Sending command moveToSaturation => ColorRGB(${rgb.r},  ${rgb.g}, ${rgb.b})`);
               if (device.colorCommandTimeout) clearTimeout(device.colorCommandTimeout);
               device.colorCommandTimeout = setTimeout(() => {
                 this.shellyLightCommandHandler(mbDevice, endpoint.number, device, 'ColorRGB', state, level, { r: rgb.r, g: rgb.g, b: rgb.b });
@@ -634,6 +637,13 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               const level = child.getClusterServer(LevelControlCluster)?.getCurrentLevelAttribute();
               const rgb = hslColorToRgbColor((request.hue / 254) * 360, (request.saturation / 254) * 100, 50);
               this.shellyLightCommandHandler(mbDevice, endpoint.number, device, 'ColorRGB', state, level, { r: rgb.r, g: rgb.g, b: rgb.b });
+            });
+
+            mbDevice.addCommandHandler('moveToColorTemperature', async ({ request, attributes, endpoint }) => {
+              attributes.colorMode.setLocal(ColorControl.ColorMode.ColorTemperatureMireds);
+              const state = child.getClusterServer(OnOffCluster)?.getOnOffAttribute();
+              const level = child.getClusterServer(LevelControlCluster)?.getCurrentLevelAttribute();
+              this.shellyLightCommandHandler(mbDevice, endpoint.number, device, 'ColorTemp', state, level, undefined, request.colorTemperatureMireds);
             });
 
             // Add event handler from Shelly
@@ -1259,6 +1269,9 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               mbDevice.setAttribute(ColorControlCluster.id, 'colorMode', ColorControl.ColorMode.CurrentHueAndCurrentSaturation, shellyDevice.log, childEndpoint);
             }
           }
+          if (lightComponent.hasProperty('temp') && shellyDevice.profile !== 'color') {
+            mbDevice.setAttribute(ColorControlCluster.id, 'colorMode', ColorControl.ColorMode.ColorTemperatureMireds, shellyDevice.log, childEndpoint);
+          }
           if (lightComponent.hasProperty('rgb') && shellyDevice.profile !== 'white') {
             const rgb = lightComponent.getValue('rgb') as object;
             if (isValidArray(rgb, 3, 3) && isValidNumber(rgb[0], 0, 255) && isValidNumber(rgb[1], 0, 255) && isValidNumber(rgb[2], 0, 255)) {
@@ -1449,6 +1462,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     state?: boolean,
     level?: number | null,
     color?: { r: number; g: number; b: number },
+    colorTemp?: number,
   ): boolean {
     // Get the matter endpoint
     if (!endpointNumber) {
@@ -1460,7 +1474,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       shellyDevice.log.error(`shellyCommandHandler error: endpoint not found for shelly device ${dn}${shellyDevice?.id}${er}`);
       return false;
     }
-    // Get the Shelly switch component
+    // Get the Shelly component
     const componentName = endpoint.uniqueStorageKey;
     if (!componentName) {
       shellyDevice.log.error(`shellyCommandHandler error: componentName not found for shelly device ${dn}${shellyDevice?.id}${er}`);
@@ -1493,6 +1507,23 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       lightComponent.ColorRGB(color.r, color.g, color.b);
       shellyDevice.log.info(
         `${db}Sent command ${hk}${componentName}${nf}:ColorRGB(${YELLOW}${color.r}${nf}, ${YELLOW}${color.g}${nf}, ${YELLOW}${color.b}${nf})${db} to shelly device ${idn}${shellyDevice?.id}${rs}${db}`,
+      );
+    }
+
+    // Send ColorTemp() command
+    if (command === 'ColorTemp' && isValidNumber(colorTemp, 147, 500)) {
+      const minColorTemp = 147;
+      const maxColorTemp = 500;
+      const minTemp = shellyDevice.model === 'SHBDUO-1' ? 2700 : 3000;
+      const maxTemp = 6500;
+      const temp = Math.max(Math.min(Math.round(((colorTemp - minColorTemp) / (maxColorTemp - minColorTemp)) * (minTemp - maxTemp) + maxTemp), maxTemp), minTemp);
+      const lightComponent = shellyDevice?.getComponent(componentName) as ShellyLightComponent;
+      if (shellyDevice.gen === 1)
+        ShellyDevice.fetch(shellyDevice.shelly, shellyDevice.log, shellyDevice.host, `${lightComponent.id.slice(0, lightComponent.id.indexOf(':'))}/${lightComponent.index}`, {
+          temp,
+        });
+      shellyDevice.log.info(
+        `${db}Sent command ${hk}${componentName}${nf}:ColorTemp(for model ${shellyDevice.model} ${YELLOW}${colorTemp}->${temp}${nf})${db} to shelly device ${idn}${shellyDevice?.id}${rs}${db}`,
       );
     }
     return true;
@@ -1600,6 +1631,21 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         if (isValidNumber(saturation, 0, 254)) matterbridgeDevice.setAttribute(ColorControlCluster.id, 'currentSaturation', saturation, shellyDevice.log, endpoint);
         matterbridgeDevice.setAttribute(ColorControlCluster.id, 'colorMode', ColorControl.ColorMode.CurrentHueAndCurrentSaturation, shellyDevice.log, endpoint);
       }, 200);
+    }
+    // Update colorTemp gen 1
+    if (isLightComponent(shellyComponent) && property === 'temp' && isValidNumber(value, 2700, 6500)) {
+      const minValue = shellyDevice.model === 'SHBDUO-1' ? 2700 : 3000;
+      const maxValue = 6500;
+      const minMatterTemp = 147;
+      const maxMatterTemp = 500;
+      const matterTemp = Math.max(
+        Math.min(Math.round(((value - minValue) / (maxValue - minValue)) * (minMatterTemp - maxMatterTemp) + maxMatterTemp), maxMatterTemp),
+        minMatterTemp,
+      );
+      this.log.debug(`ColorTemp for ${shellyDevice.model}: colorTemperature:${value} => colorTemperatureMireds:${matterTemp}`);
+      matterbridgeDevice.setAttribute(ColorControlCluster.id, 'colorMode', ColorControl.ColorMode.ColorTemperatureMireds, shellyDevice.log, endpoint);
+      matterbridgeDevice.setAttribute(ColorControlCluster.id, 'enhancedColorMode', ColorControl.EnhancedColorMode.ColorTemperatureMireds, shellyDevice.log, endpoint);
+      matterbridgeDevice.setAttribute(ColorControlCluster.id, 'colorTemperatureMireds', matterTemp, shellyDevice.log, endpoint);
     }
     // Update color gen 2/3
     if (

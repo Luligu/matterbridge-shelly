@@ -384,8 +384,8 @@ export class CoapServer extends EventEmitter {
 
             // light component
             if (s.D === 'output') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'state', range: s.R });
-            if (s.D === 'brightness' && deviceType !== 'SHCB-1') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'brightness', range: s.R });
-            if (s.D === 'gain') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'brightness', range: s.R });
+            if (s.D === 'brightness') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'brightness', range: s.R }); // Used by white channels
+            if (s.D === 'gain') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'gain', range: s.R }); // Used by color channels
             if (s.D === 'red') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'red', range: s.R });
             if (s.D === 'green') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'green', range: s.R });
             if (s.D === 'blue') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'blue', range: s.R });

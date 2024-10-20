@@ -1000,7 +1000,7 @@ export class ShellyDevice extends EventEmitter {
           for (const light of data[key] as ShellyData[]) {
             const component = this.getComponent(`${key.slice(0, 5)}:${index++}`);
             if (component && light.ison !== undefined) component.setValue('state', light.ison as boolean);
-            if (component && light.gain !== undefined) component.setValue('brightness', light.gain as number);
+            if (component && light.gain !== undefined) component.setValue('brightness', light.gain as number); // gain is used by clor channels and brightness by white channels
           }
         }
       }
