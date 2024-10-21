@@ -9,11 +9,11 @@ cockpit.transport.wait(function () {
     cockpit
       .spawn(['systemctl', 'is-active', 'matterbridge'])
       .then(function (status) {
-        document.getElementById('status').innerText = `Status: ${status.trim().replace('\n', '')}`;
+        document.getElementById('matterbridge-status').innerText = `Service: ${status.trim().replace('\n', '')}`;
       })
       .catch(function (error) {
         console.error('Error fetching Matterbridge status:', error);
-        document.getElementById('status').innerText = 'Error fetching status.';
+        document.getElementById('matterbridge-status').innerText = 'Error fetching system service status.';
       });
   }
 
@@ -55,7 +55,7 @@ cockpit.transport.wait(function () {
         // Extract the version number using a regular expression
         const versionMatch = status.match(/matterbridge-shelly@(\d+\.\d+\.\d+)/);
         const version = versionMatch ? versionMatch[1] : 'Unknown';
-        document.getElementById('shelly-current').innerText = `Shelly plugin current version: ${version}`;
+        document.getElementById('shelly-current').innerText = `Current version: ${version}`;
       })
       .catch(function (error) {
         console.error('Error fetching Shelly plugin current version:', error);
@@ -69,12 +69,38 @@ cockpit.transport.wait(function () {
       .spawn(['npm', 'show', 'matterbridge-shelly', 'version'])
       // cockpit.spawn(["whoami"])
       .then(function (status) {
-        document.getElementById('shelly-latest').innerText = `Shelly plugin latest version: ${status.trim()}`;
+        document.getElementById('shelly-latest').innerText = `Latest version: ${status.trim()}`;
+        showQR();
       })
       .catch(function (error) {
         console.error('Error fetching Shelly plugin latest version:', error);
         document.getElementById('shelly-latest').innerText = 'Error fetching Shelly plugin latest version.';
       });
+  }
+
+  // Show the QR code
+  function showQR() {
+    const qrText = "https://github.com/Luligu/matterbridge.git";
+
+    // Check if the qrcode element exists
+    const qrCodeElement = document.getElementById("qrcode");
+    if (qrCodeElement) {
+      console.log("Generating QR code...");
+
+      // Generate the QR code and insert it into the #qrcode div
+      new QRCode(qrCodeElement, {
+        text: qrText,
+        width: 128,  // Width of the QR code (you can adjust this)
+        height: 128,  // Height of the QR code (you can adjust this)
+        colorDark: "#000000",  // Dark color of the QR code
+        colorLight: "#ffffff",  // Light color of the QR code (background)
+        correctLevel: QRCode.CorrectLevel.H  // Error correction level
+      });
+
+      console.log("QR code generated successfully!");
+    } else {
+      console.error("QR code element not found!");
+    }
   }
 
   // Fetch logs
@@ -92,11 +118,43 @@ cockpit.transport.wait(function () {
       });
   }
 
-  // Reload the Matterbridge configuration
-  document.getElementById('frontend-button').addEventListener('click', function () {
+  // Open the frontend
+  document.getElementById('frontend-button')?.addEventListener('click', function () {
     const hostname = window.location.hostname;
     const newUrl = `http://${hostname}:8283`;
     window.open(newUrl, '_blank');
+  });
+
+  // Install matterbridge
+  document.getElementById('matterbridge-update')?.addEventListener('click', function () {
+    console.log('Updating matterbridge...');
+    document.getElementById('matterbridge-current').innerText = `Updating...`;
+    cockpit
+      .spawn(['sudo', 'npm', 'install', '-g', 'matterbridge', '--omit=dev'])
+      .then(function (logs) {
+        console.log('Updated matterbridge:', logs);
+        fetchMatterbridgeCurrent();
+      })
+      .catch(function (error) {
+        console.error('Error updating matterbridge:', error);
+        document.getElementById('matterbridge-current').innerText = `Error updating...`;
+      });
+  });
+
+  // Install matterbridge-shelly
+  document.getElementById('shelly-update')?.addEventListener('click', function () {
+    console.log('Updating matterbridge-shelly...');
+    document.getElementById('shelly-current').innerText = `Updating...`;
+    cockpit
+      .spawn(['sudo', 'npm', 'install', '-g', 'matterbridge-shelly', '--omit=dev'])
+      .then(function (logs) {
+        console.log('Updated matterbridge-shelly:', logs);
+        fetchShellyCurrent();
+      })
+      .catch(function (error) {
+        console.error('Error updating matterbridge-shelly:', error);
+        document.getElementById('shelly-current').innerText = `Error updating...`;
+      });
   });
 
   // Initial fetch of status and logs
@@ -105,5 +163,6 @@ cockpit.transport.wait(function () {
   fetchMatterbridgeLatest();
   fetchShellyCurrent();
   fetchShellyLatest();
-  fetchLogs();
+  // fetchLogs();
+
 });

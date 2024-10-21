@@ -3,24 +3,49 @@
 
 <head>
     <meta charset="utf-8" />
-    <title>Matterbridge Management</title>
+    <title>Matterbridge Dashboard</title>
     <link rel="stylesheet" href="matterbridge.css" type="text/css">
     <script type="text/javascript" src="../base1/cockpit.js"></script>
     <script type="text/javascript" src="../manifests.js"></script>
     <script type="text/javascript" src="matterbridge.js"></script>
+    <script type="text/javascript" src="qrcode.js"></script>
 </head>
 
 <body>
     <div id="content">
         <h1>Matterbridge Dashboard</h1>
-        <button id="frontend-button">Open the frontend</button>
-        <div id="status">Loading Matterbridge status...</div>
-        <div id="matterbridge-current">Loading Matterbridge current version...</div>
-        <div id="matterbridge-latest">Loading Matterbridge latest version...</div>
-        <div id="shelly-current">Loading Shelly plugin current version...</div>
-        <div id="shelly-latest">Loading Shelly plugin latest version...</div>
-        <h4>System logs:</h4>
-        <div id="logs">Fetching logs...</div>
+
+        <div class="div-panels">
+            <div class="div-panel" id="maindiv">
+                <div class="div-title">System</div>
+                <div id="matterbridge-status">Loading Matterbridge status...</div>
+                <div id="matterbridge-health">WebSocket:</div>
+                <div id="matterbridge-health">Last seen:</div>
+                <div class="div-button">
+                    <button id="frontend-button">Open the frontend</button>
+                </div>
+            </div>
+            <div class="div-panel" id="qrdiv">
+                <div class="div-title">Pairing QR Code</div>
+                <div class="div-qrcode" id="qrcode"></div>
+            </div>
+            <div class="div-panel" id="matterbridgediv">
+                <div class="div-title">Matterbridge</div>
+                <div id="matterbridge-current">Loading current version...</div>
+                <div id="matterbridge-latest">Loading latest version...</div>
+                <div class="div-button">
+                    <button id="matterbridge-update">Update</button>
+                </div>
+            </div>
+            <div class="div-panel" id="shellydiv">
+                <div class="div-title">Shelly plugin</div>
+                <div id="shelly-current">Loading current version...</div>
+                <div id="shelly-latest">Loading latest version...</div>
+                <div class="div-button">
+                    <button id="shelly-update">Update</button>
+                </div>
+            </div>
+        </div>
     </div>
 </body>
 
