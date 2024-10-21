@@ -14,6 +14,8 @@ If you like this project and find it useful, please consider giving it a star on
 - [shelly]: Added config_changed event from Sys to set the devices that will not be loaded from cache at restart.
 - [shelly]: Added ota_begin, ota_progress and ota_success events from Sys to set the devices that will not be loaded from cache at restart.
 - [shelly]: Added ColorTemp to Shelly Duo and Shelly Bulb in white mode.
+- [cockpit]: Added cockpit dashboard 1.0
+
 
 <a href="https://www.buymeacoffee.com/luligugithub">
   <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
