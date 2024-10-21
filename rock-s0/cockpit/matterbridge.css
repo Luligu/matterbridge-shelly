@@ -1,18 +1,82 @@
-#content {
-    font-family: Arial, sans-serif;
+/* Dark mode */
+body {
+    --main-bg-color: #26292d;
+    --main-text-color: #ffffff;
+    --div-bg-color: #1b1d21;
+    --div-text-color: #e0e0e0;
+    --button-bg-color: #0066cc;
+    --button-text-color: #e0e0e0;
+    background-color: var(--main-bg-color);
+    color: var(--main-text-color);
+}
+
+h1 {
+    font-size: 24px;
+}
+
+.div-panels {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.div-panel {
+    color: var(--div-text-color);
+    background-color: var(--div-bg-color);
+    border-radius: 5px;
+    font-size: 14px;
     padding: 20px;
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-width: 220px;
+}
+
+.div-title {
+    color: var(--div-text-color);
+    font-size: 20px;
+    padding: 10px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.div-button {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.div-qrcode {
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 button {
-    padding: 5px 10px;
+    padding: 6px 16px;
     margin: 10px 0;
+    color: var(--button-text-color);
+    background-color: var(--button-bg-color);
+    border-radius: 3px;
+    font-size: 16px;
+    border: none;
+}
+
+#content {
+    font-family: Arial, sans-serif;
+    padding: 20px;
 }
 
 #status,
 #matterbridge-current,
 #matterbridge-latest,
 #shelly-current,
-#shelly-latest,
-#logs {
+#shelly-latest {
     margin: 10px 0;
 }

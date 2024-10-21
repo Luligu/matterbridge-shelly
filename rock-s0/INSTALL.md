@@ -114,7 +114,9 @@ sudo apt upgrade
 
 # Install matterbridge cockpit plugin
 
-copy the four files from cockpit directory to "\usr\share\cockpit\matterbridge"
+Create the directory "\usr\share\cockpit\matterbridge"
+
+copy all the files from cockpit directory to "\usr\share\cockpit\matterbridge"
 
 # Prevent the journal logs to grow
 

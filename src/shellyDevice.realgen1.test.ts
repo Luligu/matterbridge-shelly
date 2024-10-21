@@ -23,8 +23,10 @@ describe('Shellies', () => {
       //
     });
     // consoleLogSpy.mockRestore();
+    shelly.dataPath = 'temp';
     shelly.setLogLevel(LogLevel.DEBUG, true, true, true);
     shelly.startCoap(0);
+    shelly.startMdns(0, '192.168.1.189', 'udp4', true);
     await wait(2000);
   });
 
@@ -51,36 +53,35 @@ describe('Shellies', () => {
     expect(shelly).toBeDefined();
   });
 
-  describe('test real gen 1 shelly1-34945472A643 240', () => {
+  test('Create a gen 1 shelly1 device and send commands', async () => {
     if (getMacAddress() !== address) return;
+    device = await ShellyDevice.create(shelly, log, '192.168.1.240');
+    expect(device).not.toBeUndefined();
+    if (!device) return;
+    shelly.addDevice(device);
 
-    test('Create a gen 1 shelly1 device and send commands', async () => {
-      device = await ShellyDevice.create(shelly, log, '192.168.1.240');
-      expect(device).not.toBeUndefined();
-      if (!device) return;
-      shelly.addDevice(device);
+    expect(device.host).toBe('192.168.1.240');
+    expect(device.mac).toBe('34945472A643');
+    expect(device.profile).toBe(undefined);
+    expect(device.model).toBe('SHSW-1');
+    expect(device.id).toBe('shelly1-34945472A643');
+    expect(device.firmware).toBe(firmwareGen1);
+    expect(device.auth).toBe(false);
+    expect(device.gen).toBe(1);
+    expect(device.hasUpdate).toBe(false);
+    expect(device.username).toBe('admin');
+    expect(device.password).toBe('tango');
+    expect(device.name).toBe('1 Gen1');
 
-      expect(device.host).toBe('192.168.1.240');
-      expect(device.mac).toBe('34945472A643');
-      expect(device.profile).toBe(undefined);
-      expect(device.model).toBe('SHSW-1');
-      expect(device.id).toBe('shelly1-34945472A643');
-      expect(device.firmware).toBe(firmwareGen1);
-      expect(device.auth).toBe(false);
-      expect(device.gen).toBe(1);
-      expect(device.hasUpdate).toBe(false);
-      expect(device.username).toBe('admin');
-      expect(device.password).toBe('tango');
+    await device.fetchUpdate();
 
-      await device.fetchUpdate();
+    await device.saveDevicePayloads('temp');
 
-      await device.saveDevicePayloads('temp');
+    const component = device.getComponent('relay:0');
+    expect(component).not.toBeUndefined();
 
-      const component = device.getComponent('relay:0');
-      expect(component).not.toBeUndefined();
-
-      // prettier-ignore
-      if (isSwitchComponent(component)) {
+    // prettier-ignore
+    if (isSwitchComponent(component)) {
         component.On();
         await waiter('On', () => { return component.getValue('state') === true; }, true);
 
@@ -94,41 +95,39 @@ describe('Shellies', () => {
         await waiter('Off', () => { return component.getValue('state') === false; }, true);
       }
 
-      shelly.removeDevice(device);
-      device.destroy();
-    }, 20000);
-  });
+    shelly.removeDevice(device);
+    device.destroy();
+  }, 20000);
 
-  describe('test real gen 1 shelly1l-E8DB84AAD781 241', () => {
+  test('Create a gen 1 shelly1l device and send commands', async () => {
     if (getMacAddress() !== address) return;
+    device = await ShellyDevice.create(shelly, log, '192.168.1.241');
+    expect(device).not.toBeUndefined();
+    if (!device) return;
+    shelly.addDevice(device);
 
-    test('Create a gen 1 shelly1 device and send commands', async () => {
-      device = await ShellyDevice.create(shelly, log, '192.168.1.241');
-      expect(device).not.toBeUndefined();
-      if (!device) return;
-      shelly.addDevice(device);
+    expect(device.host).toBe('192.168.1.241');
+    expect(device.mac).toBe('E8DB84AAD781');
+    expect(device.profile).toBe(undefined);
+    expect(device.model).toBe('SHSW-L');
+    expect(device.id).toBe('shelly1l-E8DB84AAD781');
+    expect(device.firmware).toBe(firmwareGen1);
+    expect(device.auth).toBe(false);
+    expect(device.gen).toBe(1);
+    expect(device.hasUpdate).toBe(false);
+    expect(device.username).toBe('admin');
+    expect(device.password).toBe('tango');
+    expect(device.name).toBe('1L Gen1');
 
-      expect(device.host).toBe('192.168.1.241');
-      expect(device.mac).toBe('E8DB84AAD781');
-      expect(device.profile).toBe(undefined);
-      expect(device.model).toBe('SHSW-L');
-      expect(device.id).toBe('shelly1l-E8DB84AAD781');
-      expect(device.firmware).toBe(firmwareGen1);
-      expect(device.auth).toBe(false);
-      expect(device.gen).toBe(1);
-      expect(device.hasUpdate).toBe(false);
-      expect(device.username).toBe('admin');
-      expect(device.password).toBe('tango');
+    await device.fetchUpdate();
 
-      await device.fetchUpdate();
+    await device.saveDevicePayloads('temp');
 
-      await device.saveDevicePayloads('temp');
+    const component = device.getComponent('relay:0');
+    expect(component).not.toBeUndefined();
 
-      const component = device.getComponent('relay:0');
-      expect(component).not.toBeUndefined();
-
-      // prettier-ignore
-      if (isSwitchComponent(component)) {
+    // prettier-ignore
+    if (isSwitchComponent(component)) {
         component.On();
         await waiter('On', () => { return component.getValue('state') === true; }, true);
 
@@ -142,41 +141,39 @@ describe('Shellies', () => {
         await waiter('Off', () => { return component.getValue('state') === false; }, true);
       }
 
-      shelly.removeDevice(device);
-      device.destroy();
-    }, 20000);
-  });
+    shelly.removeDevice(device);
+    device.destroy();
+  }, 20000);
 
-  describe('test real gen 1 shellydimmer2 119 with auth', () => {
+  test('Create a gen 1 shellydimmer2 device and update', async () => {
     if (getMacAddress() !== address) return;
+    device = await ShellyDevice.create(shelly, log, '192.168.1.219');
+    expect(device).not.toBeUndefined();
+    if (!device) return;
+    shelly.addDevice(device);
 
-    test('Create a gen 1 shellydimmer2 device and update', async () => {
-      device = await ShellyDevice.create(shelly, log, '192.168.1.219');
-      expect(device).not.toBeUndefined();
-      if (!device) return;
-      shelly.addDevice(device);
+    expect(device.host).toBe('192.168.1.219');
+    expect(device.mac).toBe('98CDAC0D01BB');
+    expect(device.profile).toBe(undefined);
+    expect(device.model).toBe('SHDM-2');
+    expect(device.id).toBe('shellydimmer2-98CDAC0D01BB');
+    expect(device.firmware).toBe(firmwareGen1);
+    expect(device.auth).toBe(true);
+    expect(device.gen).toBe(1);
+    expect(device.hasUpdate).toBe(false);
+    expect(device.username).toBe('admin');
+    expect(device.password).toBe('tango');
+    expect(device.name).toBe('Dimmer2 Gen1');
 
-      expect(device.host).toBe('192.168.1.219');
-      expect(device.mac).toBe('98CDAC0D01BB');
-      expect(device.profile).toBe(undefined);
-      expect(device.model).toBe('SHDM-2');
-      expect(device.id).toBe('shellydimmer2-98CDAC0D01BB');
-      expect(device.firmware).toBe(firmwareGen1);
-      expect(device.auth).toBe(true);
-      expect(device.gen).toBe(1);
-      expect(device.hasUpdate).toBe(false);
-      expect(device.username).toBe('admin');
-      expect(device.password).toBe('tango');
+    await device.fetchUpdate();
 
-      await device.fetchUpdate();
+    await device.saveDevicePayloads('temp');
 
-      await device.saveDevicePayloads('temp');
+    const component = device.getComponent('light:0');
+    expect(component).not.toBeUndefined();
 
-      const component = device.getComponent('light:0');
-      expect(component).not.toBeUndefined();
-
-      // prettier-ignore
-      if (isLightComponent(component)) {
+    // prettier-ignore
+    if (isLightComponent(component)) {
         component.On();
         await waiter('On', () => { return component.getValue('state') === true; }, true);
 
@@ -199,41 +196,39 @@ describe('Shellies', () => {
         await waiter('Off', () => { return component.getValue('state') === false; }, true);
       }
 
-      shelly.removeDevice(device);
-      device.destroy();
-    }, 20000);
-  });
+    shelly.removeDevice(device);
+    device.destroy();
+  }, 20000);
 
-  describe('test real gen 1 shellybulbduo-34945479CFA4 154', () => {
+  test('Create a gen 1 shellybulbduo device and send commands', async () => {
     if (getMacAddress() !== address) return;
+    device = await ShellyDevice.create(shelly, log, '192.168.1.154');
+    expect(device).not.toBeUndefined();
+    if (!device) return;
+    shelly.addDevice(device);
 
-    test('Create a gen 1 shellybulbduo device and send commands', async () => {
-      device = await ShellyDevice.create(shelly, log, '192.168.1.154');
-      expect(device).not.toBeUndefined();
-      if (!device) return;
-      shelly.addDevice(device);
+    expect(device.host).toBe('192.168.1.154');
+    expect(device.mac).toBe('34945479CFA4');
+    expect(device.profile).toBe(undefined);
+    expect(device.model).toBe('SHBDUO-1');
+    expect(device.id).toBe('shellybulbduo-34945479CFA4');
+    expect(device.firmware).toBe(firmwareGen1);
+    expect(device.auth).toBe(false);
+    expect(device.gen).toBe(1);
+    expect(device.hasUpdate).toBe(false);
+    expect(device.username).toBe('admin');
+    expect(device.password).toBe('tango');
+    expect(device.name).toBe('Duo Gen1');
 
-      expect(device.host).toBe('192.168.1.154');
-      expect(device.mac).toBe('34945479CFA4');
-      expect(device.profile).toBe(undefined);
-      expect(device.model).toBe('SHBDUO-1');
-      expect(device.id).toBe('shellybulbduo-34945479CFA4');
-      expect(device.firmware).toBe(firmwareGen1);
-      expect(device.auth).toBe(false);
-      expect(device.gen).toBe(1);
-      expect(device.hasUpdate).toBe(false);
-      expect(device.username).toBe('admin');
-      expect(device.password).toBe('tango');
+    await device.fetchUpdate();
 
-      await device.fetchUpdate();
+    await device.saveDevicePayloads('temp');
 
-      await device.saveDevicePayloads('temp');
+    const component = device.getComponent('light:0');
+    expect(component).not.toBeUndefined();
 
-      const component = device.getComponent('light:0');
-      expect(component).not.toBeUndefined();
-
-      // prettier-ignore
-      if (isLightComponent(component)) {
+    // prettier-ignore
+    if (isLightComponent(component)) {
         component.On();
         await waiter('On', () => { return component.getValue('state') === true; }, true);
 
@@ -250,41 +245,39 @@ describe('Shellies', () => {
         await waiter('Off 2', () => { return component.getValue('state') === false; }, true);
       }
 
-      shelly.removeDevice(device);
-      device.destroy();
-    }, 30000);
-  });
+    shelly.removeDevice(device);
+    device.destroy();
+  }, 30000);
 
-  describe('test real gen 1 shellycolorbulb-485519EE12A7 155', () => {
+  test('Create a gen 1 shellycolorbulb device and send commands', async () => {
     if (getMacAddress() !== address) return;
+    device = await ShellyDevice.create(shelly, log, '192.168.1.155');
+    expect(device).not.toBeUndefined();
+    if (!device) return;
+    shelly.addDevice(device);
 
-    test('Create a gen 1 shellybulbduo device and send commands', async () => {
-      device = await ShellyDevice.create(shelly, log, '192.168.1.155');
-      expect(device).not.toBeUndefined();
-      if (!device) return;
-      shelly.addDevice(device);
+    expect(device.host).toBe('192.168.1.155');
+    expect(device.mac).toBe('485519EE12A7');
+    expect(device.profile).toBe('color');
+    expect(device.model).toBe('SHCB-1');
+    expect(device.id).toBe('shellycolorbulb-485519EE12A7');
+    expect(device.firmware).toBe(firmwareGen1);
+    expect(device.auth).toBe(false);
+    expect(device.gen).toBe(1);
+    expect(device.hasUpdate).toBe(false);
+    expect(device.username).toBe('admin');
+    expect(device.password).toBe('tango');
+    expect(device.name).toBe('Bulb Gen1');
 
-      expect(device.host).toBe('192.168.1.155');
-      expect(device.mac).toBe('485519EE12A7');
-      expect(device.profile).toBe('color');
-      expect(device.model).toBe('SHCB-1');
-      expect(device.id).toBe('shellycolorbulb-485519EE12A7');
-      expect(device.firmware).toBe(firmwareGen1);
-      expect(device.auth).toBe(false);
-      expect(device.gen).toBe(1);
-      expect(device.hasUpdate).toBe(false);
-      expect(device.username).toBe('admin');
-      expect(device.password).toBe('tango');
+    await device.fetchUpdate();
 
-      await device.fetchUpdate();
+    await device.saveDevicePayloads('temp');
 
-      await device.saveDevicePayloads('temp');
+    const component = device.getComponent('light:0');
+    expect(component).not.toBeUndefined();
 
-      const component = device.getComponent('light:0');
-      expect(component).not.toBeUndefined();
-
-      // prettier-ignore
-      if (isLightComponent(component)) {
+    // prettier-ignore
+    if (isLightComponent(component)) {
         component.On();
         await waiter('On', () => { return component.getValue('state') === true; }, true);
 
@@ -307,43 +300,41 @@ describe('Shellies', () => {
         await waiter('Off 2', () => { return component.getValue('state') === false; }, true);
       }
 
-      shelly.removeDevice(device);
-      device.destroy();
-    }, 30000);
-  });
+    shelly.removeDevice(device);
+    device.destroy();
+  }, 30000);
 
-  describe('test real gen 1 shellyrgbw2-EC64C9D3FFEF mode color 226', () => {
+  test('Create a gen 1 shellyrgbw2 device color mode and send commands', async () => {
     if (getMacAddress() !== address) return;
+    device = await ShellyDevice.create(shelly, log, '192.168.1.226');
+    expect(device).not.toBeUndefined();
+    if (!device) return;
+    shelly.addDevice(device);
 
-    test('Create a gen 1 shellyrgbw2 device and send commands', async () => {
-      device = await ShellyDevice.create(shelly, log, '192.168.1.226');
-      expect(device).not.toBeUndefined();
-      if (!device) return;
-      shelly.addDevice(device);
+    expect(device.host).toBe('192.168.1.226');
+    expect(device.mac).toBe('EC64C9D3FFEF');
+    expect(device.profile).toBe('color');
+    expect(device.model).toBe('SHRGBW2');
+    expect(device.id).toBe('shellyrgbw2-EC64C9D3FFEF');
+    expect(device.firmware).toBe(firmwareGen1);
+    expect(device.auth).toBe(false);
+    expect(device.gen).toBe(1);
+    expect(device.hasUpdate).toBe(false);
+    expect(device.username).toBe('admin');
+    expect(device.password).toBe('tango');
+    expect(device.name).toBe('RGBW2 Gen1 Color');
 
-      expect(device.host).toBe('192.168.1.226');
-      expect(device.mac).toBe('EC64C9D3FFEF');
-      expect(device.profile).toBe('color');
-      expect(device.model).toBe('SHRGBW2');
-      expect(device.id).toBe('shellyrgbw2-EC64C9D3FFEF');
-      expect(device.firmware).toBe(firmwareGen1);
-      expect(device.auth).toBe(false);
-      expect(device.gen).toBe(1);
-      expect(device.hasUpdate).toBe(false);
-      expect(device.username).toBe('admin');
-      expect(device.password).toBe('tango');
+    await device.fetchUpdate();
 
-      await device.fetchUpdate();
+    await device.saveDevicePayloads('temp');
 
-      await device.saveDevicePayloads('temp');
+    expect(device.getComponentNames()).toStrictEqual(['WiFi', 'MQTT', 'CoIoT', 'Sntp', 'Cloud', 'Light', 'Sys', 'PowerMeter', 'Input']);
 
-      expect(device.getComponentNames()).toStrictEqual(['WiFi', 'MQTT', 'CoIoT', 'Sntp', 'Cloud', 'Light', 'Sys', 'PowerMeter', 'Input']);
+    const component = device.getComponent('light:0');
+    expect(component).not.toBeUndefined();
 
-      const component = device.getComponent('light:0');
-      expect(component).not.toBeUndefined();
-
-      // prettier-ignore
-      if (isLightComponent(component)) {
+    // prettier-ignore
+    if (isLightComponent(component)) {
         component.On();
         await waiter('On', () => { return component.getValue('state') === true; }, true);
 
@@ -360,7 +351,7 @@ describe('Shellies', () => {
         await waiter('Toggle', () => { return component.getValue('state') === true; }, true);
 
         component.Level(60);
-        await waiter('Level(60)', () => { return component.getValue('brightness') === 60; }, true);
+        await waiter('Level(60)', () => { return component.getValue('gain') === 60; }, true);
 
         component.ColorRGB(0, 255, 0);
         await waiter('ColorRGB(0, 255, 0)', () => { return component.getValue('red') === 0 && component.getValue('green') === 255 && component.getValue('blue') === 0; }, true);
@@ -369,67 +360,65 @@ describe('Shellies', () => {
         await waiter('Off 2', () => { return component.getValue('state') === false; }, true);
       }
 
-      shelly.removeDevice(device);
-      device.destroy();
-    }, 30000);
-  });
+    shelly.removeDevice(device);
+    device.destroy();
+  }, 30000);
 
-  describe('test real gen 1 shellyrgbw2-EC64C9D199AD mode white 152', () => {
+  test('Create a gen 1 shellyrgbw2 device white mode and send commands', async () => {
     if (getMacAddress() !== address) return;
+    device = await ShellyDevice.create(shelly, log, '192.168.1.152');
+    expect(device).not.toBeUndefined();
+    if (!device) return;
+    shelly.addDevice(device);
 
-    test('Create a gen 1 shellyrgbw2 device and send commands', async () => {
-      device = await ShellyDevice.create(shelly, log, '192.168.1.152');
-      expect(device).not.toBeUndefined();
-      if (!device) return;
-      shelly.addDevice(device);
+    expect(device.host).toBe('192.168.1.152');
+    expect(device.mac).toBe('EC64C9D199AD');
+    expect(device.profile).toBe('white');
+    expect(device.model).toBe('SHRGBW2');
+    expect(device.id).toBe('shellyrgbw2-EC64C9D199AD');
+    expect(device.firmware).toBe(firmwareGen1);
+    expect(device.auth).toBe(false);
+    expect(device.gen).toBe(1);
+    expect(device.hasUpdate).toBe(false);
+    expect(device.username).toBe('admin');
+    expect(device.password).toBe('tango');
+    expect(device.name).toBe('RGBW2 Gen1 White');
 
-      expect(device.host).toBe('192.168.1.152');
-      expect(device.mac).toBe('EC64C9D199AD');
-      expect(device.profile).toBe('white');
-      expect(device.model).toBe('SHRGBW2');
-      expect(device.id).toBe('shellyrgbw2-EC64C9D199AD');
-      expect(device.firmware).toBe(firmwareGen1);
-      expect(device.auth).toBe(false);
-      expect(device.gen).toBe(1);
-      expect(device.hasUpdate).toBe(false);
-      expect(device.username).toBe('admin');
-      expect(device.password).toBe('tango');
+    await device.fetchUpdate();
 
-      await device.fetchUpdate();
+    await device.saveDevicePayloads('temp');
 
-      await device.saveDevicePayloads('temp');
+    expect(device.getComponentNames()).toStrictEqual(['WiFi', 'MQTT', 'CoIoT', 'Sntp', 'Cloud', 'Light', 'Sys', 'PowerMeter', 'Input']);
+    expect(device.getComponentIds()).toStrictEqual([
+      'wifi_ap',
+      'wifi_sta',
+      'wifi_sta1',
+      'mqtt',
+      'coiot',
+      'sntp',
+      'cloud',
+      'light:0',
+      'light:1',
+      'light:2',
+      'light:3',
+      'sys',
+      'meter:0',
+      'meter:1',
+      'meter:2',
+      'meter:3',
+      'input:0',
+    ]);
 
-      expect(device.getComponentNames()).toStrictEqual(['WiFi', 'MQTT', 'CoIoT', 'Sntp', 'Cloud', 'Light', 'Sys', 'PowerMeter', 'Input']);
-      expect(device.getComponentIds()).toStrictEqual([
-        'wifi_ap',
-        'wifi_sta',
-        'wifi_sta1',
-        'mqtt',
-        'coiot',
-        'sntp',
-        'cloud',
-        'light:0',
-        'light:1',
-        'light:2',
-        'light:3',
-        'sys',
-        'meter:0',
-        'meter:1',
-        'meter:2',
-        'meter:3',
-        'input:0',
-      ]);
+    const component = device.getComponent('light:0');
+    expect(component).not.toBeUndefined();
 
-      const component = device.getComponent('light:0');
-      expect(component).not.toBeUndefined();
-
-      // prettier-ignore
-      if (isLightComponent(component)) {
+    // prettier-ignore
+    if (isLightComponent(component)) {
         component.On();
         await waiter('On', () => { return component.getValue('state') === true; }, true);
 
-        component.Level(40);
-        await waiter('Level(40)', () => { return component.getValue('brightness') === 40; }, true);
+        component.Level(30);
+        await waiter('Level(30)', () => { return component.getValue('brightness') === 30; }, true);
 
         component.Off();
         await waiter('Off', () => { return component.getValue('state') === false; }, true);
@@ -444,41 +433,39 @@ describe('Shellies', () => {
         await waiter('Off 2', () => { return component.getValue('state') === false; }, true);
       }
 
-      shelly.removeDevice(device);
-      device.destroy();
-    }, 30000);
-  });
+    shelly.removeDevice(device);
+    device.destroy();
+  }, 30000);
 
-  describe('test real gen 1 shellyem3-485519D732F4 249', () => {
+  test('Create a gen 1 shellyem3 device and send commands', async () => {
     if (getMacAddress() !== address) return;
+    device = await ShellyDevice.create(shelly, log, '192.168.1.249');
+    expect(device).not.toBeUndefined();
+    if (!device) return;
+    shelly.addDevice(device);
 
-    test('Create a gen 1 shellyem3 device and send commands', async () => {
-      device = await ShellyDevice.create(shelly, log, '192.168.1.249');
-      expect(device).not.toBeUndefined();
-      if (!device) return;
-      shelly.addDevice(device);
+    expect(device.host).toBe('192.168.1.249');
+    expect(device.mac).toBe('485519D732F4');
+    expect(device.profile).toBe(undefined);
+    expect(device.model).toBe('SHEM-3');
+    expect(device.id).toBe('shellyem3-485519D732F4');
+    expect(device.firmware).toBe(firmwareGen1);
+    expect(device.auth).toBe(false);
+    expect(device.gen).toBe(1);
+    expect(device.hasUpdate).toBe(false);
+    expect(device.username).toBe('admin');
+    expect(device.password).toBe('tango');
+    expect(device.name).toBe('3EM Gen1');
 
-      expect(device.host).toBe('192.168.1.249');
-      expect(device.mac).toBe('485519D732F4');
-      expect(device.profile).toBe(undefined);
-      expect(device.model).toBe('SHEM-3');
-      expect(device.id).toBe('shellyem3-485519D732F4');
-      expect(device.firmware).toBe(firmwareGen1);
-      expect(device.auth).toBe(false);
-      expect(device.gen).toBe(1);
-      expect(device.hasUpdate).toBe(false);
-      expect(device.username).toBe('admin');
-      expect(device.password).toBe('tango');
+    await device.fetchUpdate();
 
-      await device.fetchUpdate();
+    await device.saveDevicePayloads('temp');
 
-      await device.saveDevicePayloads('temp');
+    const component = device.getComponent('relay:0');
+    expect(component).not.toBeUndefined();
 
-      const component = device.getComponent('relay:0');
-      expect(component).not.toBeUndefined();
-
-      // prettier-ignore
-      if (isSwitchComponent(component)) {
+    // prettier-ignore
+    if (isSwitchComponent(component)) {
         component.On();
         await waiter('On', () => { return component.getValue('state') === true; }, true);
 
@@ -492,59 +479,57 @@ describe('Shellies', () => {
         await waiter('Off', () => { return component.getValue('state') === false; }, true);
       }
 
-      shelly.removeDevice(device);
-      device.destroy();
-    }, 20000);
-  });
+    shelly.removeDevice(device);
+    device.destroy();
+  }, 20000);
 
-  describe('test real gen 1 shellyswitch25-3494547BF36C 236', () => {
+  test('Create a gen 1 shellyswitch25 device mode relay and send commands', async () => {
     if (getMacAddress() !== address) return;
+    device = await ShellyDevice.create(shelly, log, '192.168.1.236');
+    expect(device).not.toBeUndefined();
+    if (!device) return;
+    shelly.addDevice(device);
 
-    test('Create a gen 1 shelly1 device and send commands', async () => {
-      device = await ShellyDevice.create(shelly, log, '192.168.1.236');
-      expect(device).not.toBeUndefined();
-      if (!device) return;
-      shelly.addDevice(device);
+    expect(device.host).toBe('192.168.1.236');
+    expect(device.mac).toBe('3494547BF36C');
+    expect(device.profile).toBe('switch');
+    expect(device.model).toBe('SHSW-25');
+    expect(device.id).toBe('shellyswitch25-3494547BF36C');
+    expect(device.firmware).toBe(firmwareGen1);
+    expect(device.auth).toBe(false);
+    expect(device.gen).toBe(1);
+    expect(device.hasUpdate).toBe(false);
+    expect(device.username).toBe('admin');
+    expect(device.password).toBe('tango');
+    expect(device.name).toBe('2.5 Gen1 Relay');
 
-      expect(device.host).toBe('192.168.1.236');
-      expect(device.mac).toBe('3494547BF36C');
-      expect(device.profile).toBe('switch');
-      expect(device.model).toBe('SHSW-25');
-      expect(device.id).toBe('shellyswitch25-3494547BF36C');
-      expect(device.firmware).toBe(firmwareGen1);
-      expect(device.auth).toBe(false);
-      expect(device.gen).toBe(1);
-      expect(device.hasUpdate).toBe(false);
-      expect(device.username).toBe('admin');
-      expect(device.password).toBe('tango');
+    await device.fetchUpdate();
 
-      await device.fetchUpdate();
+    await device.saveDevicePayloads('temp');
 
-      await device.saveDevicePayloads('temp');
+    expect(device.getComponentNames()).toStrictEqual(['WiFi', 'MQTT', 'CoIoT', 'Sntp', 'Cloud', 'Relay', 'PowerMeter', 'Input', 'Sys']);
+    expect(device.getComponentIds()).toStrictEqual([
+      'wifi_ap',
+      'wifi_sta',
+      'wifi_sta1',
+      'mqtt',
+      'coiot',
+      'sntp',
+      'cloud',
+      'relay:0',
+      'relay:1',
+      'meter:0',
+      'meter:1',
+      'input:0',
+      'input:1',
+      'sys',
+    ]);
 
-      expect(device.getComponentNames()).toStrictEqual(['WiFi', 'MQTT', 'CoIoT', 'Sntp', 'Cloud', 'Relay', 'PowerMeter', 'Input', 'Sys']);
-      expect(device.getComponentIds()).toStrictEqual([
-        'wifi_ap',
-        'wifi_sta',
-        'wifi_sta1',
-        'mqtt',
-        'coiot',
-        'sntp',
-        'cloud',
-        'relay:0',
-        'relay:1',
-        'meter:0',
-        'meter:1',
-        'input:0',
-        'input:1',
-        'sys',
-      ]);
+    const component0 = device.getComponent('relay:0');
+    expect(component0).not.toBeUndefined();
 
-      const component0 = device.getComponent('relay:0');
-      expect(component0).not.toBeUndefined();
-
-      // prettier-ignore
-      if (isSwitchComponent(component0)) {
+    // prettier-ignore
+    if (isSwitchComponent(component0)) {
         component0.On();
         await waiter('On', () => { return component0.getValue('state') === true; }, true);
 
@@ -558,11 +543,11 @@ describe('Shellies', () => {
         await waiter('Off', () => { return component0.getValue('state') === false; }, true);
       }
 
-      const component1 = device.getComponent('relay:1');
-      expect(component1).not.toBeUndefined();
+    const component1 = device.getComponent('relay:1');
+    expect(component1).not.toBeUndefined();
 
-      // prettier-ignore
-      if (isSwitchComponent(component1)) {
+    // prettier-ignore
+    if (isSwitchComponent(component1)) {
         component1.On();
         await waiter('On', () => { return component1.getValue('state') === true; }, true);
 
@@ -576,44 +561,42 @@ describe('Shellies', () => {
         await waiter('Off', () => { return component1.getValue('state') === false; }, true);
       }
 
-      shelly.removeDevice(device);
-      device.destroy();
-    }, 20000);
-  });
+    shelly.removeDevice(device);
+    device.destroy();
+  }, 20000);
 
-  describe('test real gen 1 shellyswitch25-3494546BBF7E 222', () => {
+  test('Create a gen 1 shellyswitch25 device mode roller and send commands', async () => {
     if (getMacAddress() !== address) return;
+    device = await ShellyDevice.create(shelly, log, '192.168.1.222');
+    expect(device).not.toBeUndefined();
+    if (!device) return;
+    shelly.addDevice(device);
 
-    test('Create a gen 1 shelly1 device and send commands', async () => {
-      device = await ShellyDevice.create(shelly, log, '192.168.1.222');
-      expect(device).not.toBeUndefined();
-      if (!device) return;
-      shelly.addDevice(device);
+    expect(device.host).toBe('192.168.1.222');
+    expect(device.mac).toBe('3494546BBF7E');
+    expect(device.profile).toBe('cover');
+    expect(device.model).toBe('SHSW-25');
+    expect(device.id).toBe('shellyswitch25-3494546BBF7E');
+    expect(device.firmware).toBe(firmwareGen1);
+    expect(device.auth).toBe(false);
+    expect(device.gen).toBe(1);
+    expect(device.hasUpdate).toBe(false);
+    expect(device.username).toBe('admin');
+    expect(device.password).toBe('tango');
+    expect(device.name).toBe('2.5 Gen1 Roller');
 
-      expect(device.host).toBe('192.168.1.222');
-      expect(device.mac).toBe('3494546BBF7E');
-      expect(device.profile).toBe('cover');
-      expect(device.model).toBe('SHSW-25');
-      expect(device.id).toBe('shellyswitch25-3494546BBF7E');
-      expect(device.firmware).toBe(firmwareGen1);
-      expect(device.auth).toBe(false);
-      expect(device.gen).toBe(1);
-      expect(device.hasUpdate).toBe(false);
-      expect(device.username).toBe('admin');
-      expect(device.password).toBe('tango');
+    await device.fetchUpdate();
 
-      await device.fetchUpdate();
+    await device.saveDevicePayloads('temp');
 
-      await device.saveDevicePayloads('temp');
+    expect(device.getComponentNames()).toStrictEqual(['WiFi', 'MQTT', 'CoIoT', 'Sntp', 'Cloud', 'Roller', 'PowerMeter', 'Input', 'Sys']);
+    expect(device.getComponentIds()).toStrictEqual(['wifi_ap', 'wifi_sta', 'wifi_sta1', 'mqtt', 'coiot', 'sntp', 'cloud', 'roller:0', 'meter:0', 'input:0', 'input:1', 'sys']);
 
-      expect(device.getComponentNames()).toStrictEqual(['WiFi', 'MQTT', 'CoIoT', 'Sntp', 'Cloud', 'Roller', 'PowerMeter', 'Input', 'Sys']);
-      expect(device.getComponentIds()).toStrictEqual(['wifi_ap', 'wifi_sta', 'wifi_sta1', 'mqtt', 'coiot', 'sntp', 'cloud', 'roller:0', 'meter:0', 'input:0', 'input:1', 'sys']);
+    const component0 = device.getComponent('roller:0');
+    expect(component0).not.toBeUndefined();
 
-      const component0 = device.getComponent('roller:0');
-      expect(component0).not.toBeUndefined();
-
-      // prettier-ignore
-      if (isCoverComponent(component0)) {
+    // prettier-ignore
+    if (isCoverComponent(component0)) {
         component0.Open();
         await waiter('Open', () => { return component0.getValue('state') === 'stop'; }, true, 30000);
         await waiter('Open', () => { return component0.getValue('current_pos') === 100; }, true, 30000);
@@ -631,8 +614,7 @@ describe('Shellies', () => {
         await waiter('Open', () => { return component0.getValue('current_pos') === 100; }, true, 30000);
       }
 
-      shelly.removeDevice(device);
-      device.destroy();
-    }, 60000);
-  });
+    shelly.removeDevice(device);
+    device.destroy();
+  }, 60000);
 });

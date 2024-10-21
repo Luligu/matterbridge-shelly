@@ -49,6 +49,7 @@ import { isCoverComponent, isLightComponent, isSwitchComponent, ShellyComponent 
 interface ShellyDeviceEvent {
   online: [];
   offline: [];
+  awake: [];
   update: [id: string, key: string, value: ShellyDataType];
   bthome_event: [event: string];
   bthomedevice_update: [addr: string, rssi: number, packet_id: number, last_updated_ts: number];
@@ -777,6 +778,20 @@ export class ShellyDevice extends EventEmitter {
       });
     }
 
+    device.on('awake', async () => {
+      log.debug(`***Device ${hk}${device.id}${db} host ${zb}${device.host}${db} is awake`);
+      if (device.sleepMode) {
+        try {
+          const awaken = await ShellyDevice.create(shelly, log, host);
+          await awaken?.saveDevicePayloads(shelly.dataPath);
+          awaken?.destroy();
+          log.debug(`***Device ${hk}${device.id}${db} host ${zb}${device.host}${db} updated cache file`);
+        } catch (error) {
+          log.debug(`***Error saving device cache ${hk}${device.id}${db} host ${zb}${device.host}${db}: ${error instanceof Error ? error.message : error}`);
+        }
+      }
+    });
+
     device.shellyPayload = shellyPayload;
     device.statusPayload = statusPayload;
     device.settingsPayload = settingsPayload;
@@ -822,7 +837,7 @@ export class ShellyDevice extends EventEmitter {
         }
       } else if (isValidObject(event) && isValidString(event.event) && isValidString(event.component)) {
         this.log.debug(`Device ${hk}${this.id}${db} has event ${YELLOW}${event.event}${db} from component ${idn}${event.component}${rs}${db}${rk}`);
-        this.getComponent(event.component)?.emit('event', event.component, event.event);
+        this.getComponent(event.component)?.emit('event', event.component, event.event, event);
       } else {
         this.log.debug(`*Unknown event:${rs}\n`, event);
       }
@@ -984,8 +999,9 @@ export class ShellyDevice extends EventEmitter {
           let index = 0;
           for (const light of data[key] as ShellyData[]) {
             const component = this.getComponent(`${key.slice(0, 5)}:${index++}`);
+            if (!component) this.log.debug(`***Component ${key.slice(0, 5)}:${index} not found`);
             if (component && light.ison !== undefined) component.setValue('state', light.ison as boolean);
-            if (component && light.gain !== undefined) component.setValue('brightness', light.gain as number);
+            if (component && light.gain !== undefined) component.setValue('brightness', light.gain as number); // gain is used by color channels and brightness by white channels
           }
         }
       }
@@ -1070,10 +1086,10 @@ export class ShellyDevice extends EventEmitter {
         btHomePayload = (await ShellyDevice.fetch(this.shelly, this.log, this.host, 'Shelly.GetComponents', { dynamic_only: true, offset })) as unknown as BTHomeComponentPayload;
         if (btHomePayload && btHomePayload.components) {
           btHomeComponents.push(...btHomePayload.components);
+          offset += btHomePayload.components.length;
         }
-        offset += btHomeComponents.length;
       } while (btHomePayload && offset < btHomePayload.total);
-      this.componentsPayload = { components: btHomeComponents, cfg_rev: btHomePayload.cfg_rev, offset: 0, total: btHomeComponents.length };
+      this.componentsPayload = { components: btHomeComponents, cfg_rev: btHomePayload.cfg_rev | 0, offset: 0, total: btHomeComponents.length };
     }
     if (this.cached) {
       this.cached = false;

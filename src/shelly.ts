@@ -79,6 +79,7 @@ export class Shelly extends EventEmitter {
       }
       // this.log.debug(`Received wssupdate from device id ${hk}${shellyId}${db} host ${zb}${device.host}${db}:${rs}\n`, params);
       this.log.debug(`Received wssupdate from device id ${hk}${shellyId}${db} host ${zb}${device.host}${db}`);
+      if (device.sleepMode) device.emit('awake');
       if (!device.online) {
         device.online = true;
         device.emit('online');
@@ -100,6 +101,7 @@ export class Shelly extends EventEmitter {
       }
       // this.log.debug(`Received wssevent from device id ${hk}${shellyId}${db} host ${zb}${device.host}${db}:${rs}\n`, params);
       this.log.debug(`Received wssevent from device id ${hk}${shellyId}${db} host ${zb}${device.host}${db}`);
+      if (device.sleepMode) device.emit('awake');
       if (!device.online) {
         device.online = true;
         device.emit('online');
@@ -209,6 +211,15 @@ export class Shelly extends EventEmitter {
     this._dataPath = path;
     if (this.mdnsScanner) this.mdnsScanner.dataPath = path;
     if (this.coapServer) this.coapServer.dataPath = path;
+  }
+
+  /**
+   * Gets the data path for the Shelly instance.
+   *
+   * @returns {string} The current data path.
+   */
+  get dataPath(): string {
+    return this._dataPath;
   }
 
   /**

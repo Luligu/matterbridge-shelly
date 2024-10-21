@@ -71,6 +71,11 @@ export function isCoverComponent(component: ShellyComponent | undefined): compon
   return ['Cover', 'Roller'].includes(component.name);
 }
 
+interface ShellyComponentEvent {
+  update: [component: string, key: string, data: ShellyDataType];
+  event: [component: string, event: string, data: ShellyData];
+}
+
 /**
  * Rappresents the ShellyComponent class.
  */
@@ -107,20 +112,16 @@ export class ShellyComponent extends EventEmitter {
     // Extend the ShellyComponent class prototype to include the Switch Relay Light methods dynamically
     if (isSwitchComponent(this) || isLightComponent(this)) {
       this.On = function () {
-        // this.setValue('state', true);
         if (device.gen === 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { turn: 'on' });
         if (device.gen !== 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${this.name}.Set`, { id: this.index, on: true });
       };
 
       this.Off = function () {
-        // this.setValue('state', false);
         if (device.gen === 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { turn: 'off' });
         if (device.gen !== 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${this.name}.Set`, { id: this.index, on: false });
       };
 
       this.Toggle = function () {
-        // const currentState = this.getValue('state');
-        // this.setValue('state', !currentState);
         if (device.gen === 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { turn: 'toggle' });
         if (device.gen !== 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${this.name}.Toggle`, { id: this.index });
       };
@@ -131,7 +132,6 @@ export class ShellyComponent extends EventEmitter {
       this.Level = function (level: number) {
         if (!this.hasProperty('brightness')) return;
         const adjustedLevel = Math.min(Math.max(Math.round(level), 0), 100);
-        // this.setValue('brightness', adjustedLevel);
         if (device.gen === 1 && this.hasProperty('brightness'))
           ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { brightness: adjustedLevel });
         if (device.gen === 1 && this.hasProperty('gain'))
@@ -144,9 +144,6 @@ export class ShellyComponent extends EventEmitter {
           red = Math.min(Math.max(Math.round(red), 0), 255);
           green = Math.min(Math.max(Math.round(green), 0), 255);
           blue = Math.min(Math.max(Math.round(blue), 0), 255);
-          // this.setValue('red', red);
-          // this.setValue('green', green);
-          // this.setValue('blue', blue);
           if (device.gen === 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { red, green, blue });
           if (device.gen !== 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${this.name}.Set`, { id: this.index, red, green, blue });
         }
@@ -154,7 +151,6 @@ export class ShellyComponent extends EventEmitter {
           red = Math.min(Math.max(Math.round(red), 0), 255);
           green = Math.min(Math.max(Math.round(green), 0), 255);
           blue = Math.min(Math.max(Math.round(blue), 0), 255);
-          // this.setValue('rgb', [red, green, blue]);
           if (device.gen === 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { red, green, blue });
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           if (device.gen !== 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${this.name}.Set`, { id: this.index, rgb: [red, green, blue] as any });
@@ -165,19 +161,16 @@ export class ShellyComponent extends EventEmitter {
     // Extend the ShellyComponent class prototype to include the Cover methods dynamically
     if (isCoverComponent(this)) {
       this.Open = function () {
-        // this.setValue('state', 'open');
         if (device.gen === 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { go: 'open' });
         if (device.gen !== 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${this.name}.Open`, { id: this.index });
       };
 
       this.Close = function () {
-        // this.setValue('state', 'close');
         if (device.gen === 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { go: 'close' });
         if (device.gen !== 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${this.name}.Close`, { id: this.index });
       };
 
       this.Stop = function () {
-        // this.setValue('state', 'stop');
         if (device.gen === 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { go: 'stop' });
         if (device.gen !== 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${this.name}.Stop`, { id: this.index });
       };
@@ -188,6 +181,14 @@ export class ShellyComponent extends EventEmitter {
         if (device.gen !== 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${this.name}.GoToPosition`, { id: this.index, pos: pos });
       };
     }
+  }
+
+  override emit<K extends keyof ShellyComponentEvent>(eventName: K, ...args: ShellyComponentEvent[K]): boolean {
+    return super.emit(eventName, ...args);
+  }
+
+  override on<K extends keyof ShellyComponentEvent>(eventName: K, listener: (...args: ShellyComponentEvent[K]) => void): this {
+    return super.on(eventName, listener);
   }
 
   /**
