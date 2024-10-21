@@ -244,6 +244,6 @@ describe('Shellies', () => {
       res = await ShellyDevice.fetch(shelly, log, '192.168.1.218', 'relay/0', { 'turn': 'toggle' });
       expect(res).toBeNull();
       device.destroy();
-    });
+    }, 60000);
   });
 });
