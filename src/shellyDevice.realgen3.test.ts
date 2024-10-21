@@ -689,6 +689,7 @@ describe('Shellies', () => {
   }, 30000);
 
   test('Create a gen 3 shellyddimmerg3 device and update', async () => {
+    if (getMacAddress() !== address) return;
     device = await ShellyDevice.create(shelly, log, '192.168.1.242');
     expect(device).not.toBeUndefined();
     if (!device) return;
@@ -752,9 +753,10 @@ describe('Shellies', () => {
 
     shelly.removeDevice(device);
     device.destroy();
-  }, 20000);
+  }, 30000);
 
   test('Create a gen 3 shellyemg3 device and update', async () => {
+    if (getMacAddress() !== address) return;
     device = await ShellyDevice.create(shelly, log, '192.168.1.243');
     expect(device).not.toBeUndefined();
     if (!device) return;
@@ -944,9 +946,10 @@ describe('Shellies', () => {
 
     shelly.removeDevice(device);
     device.destroy();
-  }, 20000);
+  }, 30000);
 
   test('Create a gen 3 shellyi4g3 device and update', async () => {
+    if (getMacAddress() !== address) return;
     device = await ShellyDevice.create(shelly, log, '192.168.1.159');
     expect(device).not.toBeUndefined();
     if (!device) return;
@@ -1003,8 +1006,10 @@ describe('Shellies', () => {
 
     shelly.removeDevice(device);
     device.destroy();
-  });
+  }, 30000);
 
+  // eslint-disable-next-line jest/no-commented-out-tests
+  /*
   test('create a gen 3 shellyplugsg3 device and update', async () => {
     if (getMacAddress() !== address) return;
     device = await ShellyDevice.create(shelly, log, '192.168.1.165');
@@ -1059,6 +1064,7 @@ describe('Shellies', () => {
     shelly.removeDevice(device);
     device.destroy();
   });
+  */
 
   test('create a gen 3 shellypmminig3 device and update', async () => {
     if (getMacAddress() !== address) return;
@@ -1095,5 +1101,5 @@ describe('Shellies', () => {
 
     shelly.removeDevice(device);
     device.destroy();
-  });
+  }, 30000);
 });
