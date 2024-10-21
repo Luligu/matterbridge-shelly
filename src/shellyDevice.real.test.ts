@@ -15,7 +15,7 @@ describe('Shellies', () => {
   let device: ShellyDevice | undefined;
 
   const firmwareGen1 = 'v1.14.0-gcb84623';
-  const firmwareGen2 = '1.4.2-gc2639da';
+  const firmwareGen2 = '1.4.4-g6d2a586';
   const address = '30:f6:ef:69:2b:c5';
 
   beforeAll(async () => {
