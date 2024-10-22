@@ -80,7 +80,7 @@ cockpit.transport.wait(function () {
 
   // Show the QR code
   function showQR() {
-    const qrText = "https://github.com/Luligu/matterbridge.git";
+    const qrText = "MT:Y.K90AFN004-JZ59G00";
 
     // Check if the qrcode element exists
     const qrCodeElement = document.getElementById("qrcode");

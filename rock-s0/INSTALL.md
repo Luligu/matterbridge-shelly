@@ -189,12 +189,12 @@ Manual pairing code: 3569-371-2356
 ## Enable and start Matterbridge service
 
 ```
-sudo systemctl enable matterbridge
-sudo systemctl start matterbridge
+systemctl --user enable matterbridge
+systemctl --user start matterbridge
 ```
 
 ## View the log of Matterbridge in real time (this will show the log correctly formatted with colors)
 
 ```
-sudo journalctl -u matterbridge.service -n 100 -f --output cat
+journalctl --user -u matterbridge.service -n 100 -f --output cat
 ```
