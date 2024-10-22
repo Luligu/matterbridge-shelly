@@ -128,7 +128,7 @@ cockpit.transport.wait(function () {
     console.log('Updating matterbridge...');
     document.getElementById('matterbridge-current').innerText = `Updating...`;
     cockpit
-      .spawn(['sudo', 'npm', 'install', '-g', 'matterbridge', '--omit=dev'])
+      .spawn(['npm', 'install', '-g', 'matterbridge', '--omit=dev'])
       .then(function (logs) {
         console.log('Updated matterbridge:', logs);
         fetchMatterbridgeCurrent();
@@ -144,7 +144,7 @@ cockpit.transport.wait(function () {
     console.log('Updating matterbridge-shelly...');
     document.getElementById('shelly-current').innerText = `Updating...`;
     cockpit
-      .spawn(['sudo', 'npm', 'install', '-g', 'matterbridge-shelly', '--omit=dev'])
+      .spawn(['npm', 'install', '-g', 'matterbridge-shelly', '--omit=dev'])
       .then(function (logs) {
         console.log('Updated matterbridge-shelly:', logs);
         fetchShellyCurrent();
