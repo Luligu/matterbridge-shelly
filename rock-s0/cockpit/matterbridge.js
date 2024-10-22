@@ -37,7 +37,6 @@ cockpit.transport.wait(function () {
   function fetchMatterbridgeLatest() {
     cockpit
       .spawn(['npm', 'show', 'matterbridge', 'version'])
-      // cockpit.spawn(["whoami"])
       .then(function (status) {
         document.getElementById('matterbridge-latest').innerText = `Latest version: ${status.trim()}`;
       })
@@ -67,7 +66,6 @@ cockpit.transport.wait(function () {
   function fetchShellyLatest() {
     cockpit
       .spawn(['npm', 'show', 'matterbridge-shelly', 'version'])
-      // cockpit.spawn(["whoami"])
       .then(function (status) {
         document.getElementById('shelly-latest').innerText = `Latest version: ${status.trim()}`;
         showQR();
