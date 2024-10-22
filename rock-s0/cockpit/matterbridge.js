@@ -7,7 +7,7 @@ cockpit.transport.wait(function () {
   // Fetch and display the Matterbridge status
   function fetchStatus() {
     cockpit
-      .spawn(['systemctl', 'is-active', 'matterbridge'])
+      .spawn(['systemctl', '--user', 'is-active', 'matterbridge'])
       .then(function (status) {
         document.getElementById('matterbridge-status').innerText = `Service: ${status.trim().replace('\n', '')}`;
       })
