@@ -170,3 +170,6 @@ temp
 rock-s0
 CODEOWNERS
 create-release.js
+src\mdnsDgram.ts
+src\mcastServer.ts
+src\mcastServer.test.ts

@@ -52,3 +52,6 @@ matterbridge-shelly
 jest-shelly
 TODO.md
 temp
+src\mdnsDgram.ts
+src\mcastServer.ts
+src\mcastServer.test.ts

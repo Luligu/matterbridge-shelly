@@ -582,7 +582,9 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               clusterIds.push(ColorControl.Cluster.id);
             }
             const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [deviceType], clusterIds);
-            if (lightComponent.hasProperty('temp') && device.profile !== 'color')
+            if (lightComponent.hasProperty('temp') && lightComponent.hasProperty('mode'))
+              mbDevice.configureColorControlCluster(true, false, true, ColorControl.ColorMode.ColorTemperatureMireds, child);
+            else if (lightComponent.hasProperty('temp') && !lightComponent.hasProperty('mode'))
               mbDevice.configureColorControlCluster(false, false, true, ColorControl.ColorMode.ColorTemperatureMireds, child);
             else mbDevice.configureColorControlCluster(true, false, false, ColorControl.ColorMode.CurrentHueAndCurrentSaturation, child);
 
@@ -1518,10 +1520,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       const maxTemp = 6500;
       const temp = Math.max(Math.min(Math.round(((colorTemp - minColorTemp) / (maxColorTemp - minColorTemp)) * (minTemp - maxTemp) + maxTemp), maxTemp), minTemp);
       const lightComponent = shellyDevice?.getComponent(componentName) as ShellyLightComponent;
-      if (shellyDevice.gen === 1)
-        ShellyDevice.fetch(shellyDevice.shelly, shellyDevice.log, shellyDevice.host, `${lightComponent.id.slice(0, lightComponent.id.indexOf(':'))}/${lightComponent.index}`, {
-          temp,
-        });
+      lightComponent.ColorTemp(temp);
       shellyDevice.log.info(
         `${db}Sent command ${hk}${componentName}${nf}:ColorTemp(for model ${shellyDevice.model} ${YELLOW}${colorTemp}->${temp}${nf})${db} to shelly device ${idn}${shellyDevice?.id}${rs}${db}`,
       );
