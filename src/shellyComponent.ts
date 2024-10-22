@@ -26,7 +26,7 @@ import { BLUE, CYAN, GREEN, GREY, YELLOW, db, debugStringify, er } from 'matterb
 import { ShellyData, ShellyDataType } from './shellyTypes.js';
 import { ShellyProperty } from './shellyProperty.js';
 import { ShellyDevice } from './shellyDevice.js';
-import { deepEqual } from 'matterbridge/utils';
+import { deepEqual, isValidNumber } from 'matterbridge/utils';
 import EventEmitter from 'events';
 
 interface LightComponent {
@@ -35,6 +35,7 @@ interface LightComponent {
   Toggle(): void;
   Level(level: number): void;
   ColorRGB(red: number, green: number, blue: number): void;
+  ColorTemp(temperature: number): void;
 }
 
 interface SwitchComponent {
@@ -144,7 +145,10 @@ export class ShellyComponent extends EventEmitter {
           red = Math.min(Math.max(Math.round(red), 0), 255);
           green = Math.min(Math.max(Math.round(green), 0), 255);
           blue = Math.min(Math.max(Math.round(blue), 0), 255);
-          if (device.gen === 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { red, green, blue });
+          if (device.gen === 1 && this.hasProperty('mode'))
+            ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { red, green, blue, mode: 'color' });
+          if (device.gen === 1 && !this.hasProperty('mode'))
+            ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { red, green, blue });
           if (device.gen !== 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${this.name}.Set`, { id: this.index, red, green, blue });
         }
         if (this.hasProperty('rgb') && this.getValue('rgb') !== null && this.getValue('rgb') !== undefined && Array.isArray(this.getValue('rgb'))) {
@@ -154,6 +158,18 @@ export class ShellyComponent extends EventEmitter {
           if (device.gen === 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { red, green, blue });
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           if (device.gen !== 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${this.name}.Set`, { id: this.index, rgb: [red, green, blue] as any });
+        }
+      };
+
+      this.ColorTemp = function (temperature: number) {
+        if (this.hasProperty('temp') && isValidNumber(temperature, 2700, 6500)) {
+          // SHCB-1
+          if (device.gen === 1 && this.hasProperty('mode'))
+            ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { temp: temperature, mode: 'white' });
+          // SHBDUO-1
+          if (device.gen === 1 && !this.hasProperty('mode'))
+            ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { temp: temperature });
+          // if (device.gen !== 1) Not in production yet
         }
       };
     }

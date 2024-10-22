@@ -196,5 +196,5 @@ sudo systemctl start matterbridge
 ## View the log of Matterbridge in real time (this will show the log correctly formatted with colors)
 
 ```
-sudo journalctl -u matterbridge.service -f --output cat
+sudo journalctl -u matterbridge.service -n 100 -f --output cat
 ```

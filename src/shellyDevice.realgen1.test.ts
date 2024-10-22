@@ -22,7 +22,6 @@ describe('Shellies', () => {
     consoleLogSpy = jest.spyOn(console, 'log').mockImplementation((...args: any[]) => {
       //
     });
-    // consoleLogSpy.mockRestore();
     shelly.dataPath = 'temp';
     shelly.setLogLevel(LogLevel.DEBUG, true, true, true);
     shelly.startCoap(0);
@@ -226,6 +225,8 @@ describe('Shellies', () => {
 
     const component = device.getComponent('light:0');
     expect(component).not.toBeUndefined();
+    expect(component?.hasProperty('temp')).toBe(true);
+    expect(component?.hasProperty('mode')).toBe(false);
 
     // prettier-ignore
     if (isLightComponent(component)) {
@@ -234,6 +235,9 @@ describe('Shellies', () => {
 
         component.Level(40);
         await waiter('Level(40)', () => { return component.getValue('brightness') === 40; }, true);
+
+        component.ColorTemp(5000);
+        await waiter('ColorTemp(5000)', () => { return component.getValue('temp') === 5000; }, true);
 
         component.Off();
         await waiter('Off', () => { return component.getValue('state') === false; }, true);
@@ -258,7 +262,7 @@ describe('Shellies', () => {
 
     expect(device.host).toBe('192.168.1.155');
     expect(device.mac).toBe('485519EE12A7');
-    expect(device.profile).toBe('color');
+    expect(['color', 'white']).toContain(device.profile);
     expect(device.model).toBe('SHCB-1');
     expect(device.id).toBe('shellycolorbulb-485519EE12A7');
     expect(device.firmware).toBe(firmwareGen1);
@@ -275,6 +279,8 @@ describe('Shellies', () => {
 
     const component = device.getComponent('light:0');
     expect(component).not.toBeUndefined();
+    expect(component?.hasProperty('temp')).toBe(true);
+    expect(component?.hasProperty('mode')).toBe(true);
 
     // prettier-ignore
     if (isLightComponent(component)) {
@@ -284,8 +290,19 @@ describe('Shellies', () => {
         component.Level(40);
         await waiter('Level(40)', () => { return component.getValue('brightness') === 40; }, true);
 
+        // consoleLogSpy.mockRestore();
+        component.ColorTemp(5000);
+        await waiter('ColorTemp(5000) 1', () => { return component.getValue('temp') === 5000; }, true, 10000, 1000, true);
+        await waiter('ColorTemp(5000) 2', () => { return device?.getComponent('sys')?.getValue('profile') === 'white'; }, true, 10000, 1000, true);
+        // consoleLogSpy = jest.spyOn(console, 'log').mockImplementation((...args: any[]) => { ; });
+
         component.ColorRGB(255, 0, 0);
-        await waiter('ColorRGB(255, 0, 0)', () => { return component.getValue('red') === 255 && component.getValue('green') === 0 && component.getValue('blue') === 0; }, true);
+        await waiter('ColorRGB(255, 0, 0) 1', () => { return component.getValue('red') === 255 && component.getValue('green') === 0 && component.getValue('blue') === 0; }, true);
+        await waiter('ColorRGB(255, 0, 0) 2', () => { return device?.getComponent('sys')?.getValue('profile') === 'color'; }, true, 10000, 1000, true);
+
+        component.ColorTemp(3000);
+        await waiter('ColorTemp(3000) 1', () => { return component.getValue('temp') === 3000; }, true, 10000, 1000, true);
+        await waiter('ColorTemp(3000) 2', () => { return device?.getComponent('sys')?.getValue('profile') === 'white'; }, true, 10000, 1000, true);
 
         component.Off();
         await waiter('Off', () => { return component.getValue('state') === false; }, true);
@@ -294,7 +311,8 @@ describe('Shellies', () => {
         await waiter('Toggle', () => { return component.getValue('state') === true; }, true);
 
         component.ColorRGB(0, 255, 0);
-        await waiter('ColorRGB(0, 255, 0)', () => { return component.getValue('red') === 0 && component.getValue('green') === 255 && component.getValue('blue') === 0; }, true);
+        await waiter('ColorRGB(0, 255, 0) 1', () => { return component.getValue('red') === 0 && component.getValue('green') === 255 && component.getValue('blue') === 0; }, true);
+        await waiter('ColorRGB(0, 255, 0) 2', () => { return device?.getComponent('sys')?.getValue('profile') === 'color'; }, true, 10000, 1000, true);
 
         component.Off();
         await waiter('Off 2', () => { return component.getValue('state') === false; }, true);
@@ -332,6 +350,9 @@ describe('Shellies', () => {
 
     const component = device.getComponent('light:0');
     expect(component).not.toBeUndefined();
+    expect(component?.hasProperty('temp')).toBe(false);
+    expect(component?.hasProperty('mode')).toBe(true);
+    expect(component?.getValue('mode')).toBe('color');
 
     // prettier-ignore
     if (isLightComponent(component)) {
@@ -339,7 +360,7 @@ describe('Shellies', () => {
         await waiter('On', () => { return component.getValue('state') === true; }, true);
 
         component.Level(40);
-        await waiter('Level(40)', () => { return component.getValue('brightness') === 40; }, true);
+        await waiter('Level(40)', () => { return component.getValue('gain') === 40; }, true);
 
         component.ColorRGB(255, 0, 0);
         await waiter('ColorRGB(255, 0, 0)', () => { return component.getValue('red') === 255 && component.getValue('green') === 0 && component.getValue('blue') === 0; }, true);
@@ -411,6 +432,9 @@ describe('Shellies', () => {
 
     const component = device.getComponent('light:0');
     expect(component).not.toBeUndefined();
+    expect(component?.hasProperty('temp')).toBe(false);
+    expect(component?.hasProperty('mode')).toBe(true);
+    expect(component?.getValue('mode')).toBe('white');
 
     // prettier-ignore
     if (isLightComponent(component)) {
@@ -616,5 +640,5 @@ describe('Shellies', () => {
 
     shelly.removeDevice(device);
     device.destroy();
-  }, 60000);
+  }, 120000);
 });
