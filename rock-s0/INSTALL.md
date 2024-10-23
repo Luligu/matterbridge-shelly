@@ -132,7 +132,10 @@ MaxRetentionSec=3days   # Keep logs for a maximum of 3 days.
 MaxFileSec=1day         # Rotate logs daily within the 3-day retention period.
 ForwardToSyslog=no      # Disable forwarding to syslog to prevent duplicate logging.
 SystemMaxUse=100M       # Limit persistent logs in /var/log/journal to 100 MB.
-RuntimeMaxUse=100M      # Limit runtime logs in /run/log/journal to 100 MB.
+RuntimeMaxUse=10M       # Limit volatile logs in memory to 10 MB.
+RuntimeMaxFileSize=5M   # Limit the size of individual volatile log files.
+Storage=persistent      # Ensure logs are written to disk, not memory.
+SyncIntervalSec=30s     # Sync logs to disk every 30 seconds.
 ```
 
 save it and run
@@ -189,12 +192,12 @@ Manual pairing code: 3569-371-2356
 ## Enable and start Matterbridge service
 
 ```
-sudo systemctl enable matterbridge
-sudo systemctl start matterbridge
+systemctl --user enable matterbridge
+systemctl --user start matterbridge
 ```
 
 ## View the log of Matterbridge in real time (this will show the log correctly formatted with colors)
 
 ```
-sudo journalctl -u matterbridge.service -n 100 -f --output cat
+journalctl --user -u matterbridge.service -n 100 -f --output cat
 ```

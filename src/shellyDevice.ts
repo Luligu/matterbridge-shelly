@@ -1089,7 +1089,7 @@ export class ShellyDevice extends EventEmitter {
           offset += btHomePayload.components.length;
         }
       } while (btHomePayload && offset < btHomePayload.total);
-      this.componentsPayload = { components: btHomeComponents, cfg_rev: btHomePayload.cfg_rev | 0, offset: 0, total: btHomeComponents.length };
+      this.componentsPayload = { components: btHomeComponents, cfg_rev: btHomePayload?.cfg_rev | 0, offset: 0, total: btHomeComponents.length };
     }
     if (this.cached) {
       this.cached = false;

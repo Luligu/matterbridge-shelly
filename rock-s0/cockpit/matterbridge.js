@@ -7,7 +7,7 @@ cockpit.transport.wait(function () {
   // Fetch and display the Matterbridge status
   function fetchStatus() {
     cockpit
-      .spawn(['systemctl', 'is-active', 'matterbridge'])
+      .spawn(['systemctl', '--user', 'is-active', 'matterbridge'])
       .then(function (status) {
         document.getElementById('matterbridge-status').innerText = `Service: ${status.trim().replace('\n', '')}`;
       })
@@ -37,7 +37,6 @@ cockpit.transport.wait(function () {
   function fetchMatterbridgeLatest() {
     cockpit
       .spawn(['npm', 'show', 'matterbridge', 'version'])
-      // cockpit.spawn(["whoami"])
       .then(function (status) {
         document.getElementById('matterbridge-latest').innerText = `Latest version: ${status.trim()}`;
       })
@@ -67,7 +66,6 @@ cockpit.transport.wait(function () {
   function fetchShellyLatest() {
     cockpit
       .spawn(['npm', 'show', 'matterbridge-shelly', 'version'])
-      // cockpit.spawn(["whoami"])
       .then(function (status) {
         document.getElementById('shelly-latest').innerText = `Latest version: ${status.trim()}`;
         showQR();
@@ -80,7 +78,7 @@ cockpit.transport.wait(function () {
 
   // Show the QR code
   function showQR() {
-    const qrText = "https://github.com/Luligu/matterbridge.git";
+    const qrText = "MT:Y.K90AFN004-JZ59G00";
 
     // Check if the qrcode element exists
     const qrCodeElement = document.getElementById("qrcode");
@@ -130,7 +128,7 @@ cockpit.transport.wait(function () {
     console.log('Updating matterbridge...');
     document.getElementById('matterbridge-current').innerText = `Updating...`;
     cockpit
-      .spawn(['sudo', 'npm', 'install', '-g', 'matterbridge', '--omit=dev'])
+      .spawn(['npm', 'install', '-g', 'matterbridge', '--omit=dev'])
       .then(function (logs) {
         console.log('Updated matterbridge:', logs);
         fetchMatterbridgeCurrent();
@@ -146,7 +144,7 @@ cockpit.transport.wait(function () {
     console.log('Updating matterbridge-shelly...');
     document.getElementById('shelly-current').innerText = `Updating...`;
     cockpit
-      .spawn(['sudo', 'npm', 'install', '-g', 'matterbridge-shelly', '--omit=dev'])
+      .spawn(['npm', 'install', '-g', 'matterbridge-shelly', '--omit=dev'])
       .then(function (logs) {
         console.log('Updated matterbridge-shelly:', logs);
         fetchShellyCurrent();
