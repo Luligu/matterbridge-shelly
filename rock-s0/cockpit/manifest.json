@@ -7,5 +7,5 @@
             "label": "Matterbridge"
         }
     },
-    "content-security-policy": "default-src 'self'; script-src 'self'; connect-src 'self' wss://localhost:8283  wss://shelly:8283; style-src 'self';"
+    "content-security-policy": "default-src 'self'; script-src 'self'; connect-src 'self' ws://matterbridge:8283 wss://matterbridge:8283; style-src 'self';"
 }

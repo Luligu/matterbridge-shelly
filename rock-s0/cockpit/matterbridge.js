@@ -1,15 +1,45 @@
+/**
+ * This file contains the function Matterbridge Dashboard for Cockpit.
+ *
+ * @file matterbridge.js
+ * @author Luca Liguori
+ * @date 2024-10-16
+ * @version 1.0.1
+ *
+ * Copyright 2024, 2025, 2026 Luca Liguori.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License. *
+ */
+
 /* eslint-disable no-control-regex */
 /* eslint-disable no-console */
+
 // Wait for Cockpit to fully initialize
 cockpit.transport.wait(function () {
   console.log('Matterbridge Cockpit extension loaded');
 
-  var lastSeen = 0;
-  var restart = false;
-  var matterbridgeCurrent = '';
-  var matterbridgeLatest = '';
-  var shellyCurrent = '';
-  var shellyLatest = '';
+  const WS_ID_LOG = 0;
+  const WS_ID_PING = 1;
+  const WS_ID_SETTINGS = 2;
+  const WS_ID_PLUGINS = 3;
+  const WS_ID_DEVICES = 4;
+
+  let lastSeen = Date.now();
+  let restart = false;
+  let matterbridgeCurrent = '';
+  let matterbridgeLatest = '';
+  let shellyCurrent = '';
+  let shellyLatest = '';
 
   // Fetch and display the Matterbridge status
   function fetchStatus() {
@@ -21,7 +51,7 @@ cockpit.transport.wait(function () {
       })
       .catch(function (error) {
         console.error('Error fetching Matterbridge status:', error);
-        document.getElementById('matterbridge-status').innerText = 'Error fetching system service status.';
+        document.getElementById('matterbridge-status').innerText = 'Service: error';
       });
   }
 
@@ -123,12 +153,19 @@ cockpit.transport.wait(function () {
 
   // Function to connect to Matterbridge WebSocket API
   function connectToWebSocket() {
+    const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
     const hostname = window.location.hostname;
-    const ws = new WebSocket(`wss://shelly:8283`);
+    console.log(`Connecting to Matterbridge WebSocket API at ${protocol}://${hostname}:8283 ...`);
+    const ws = new WebSocket(`${protocol}://${hostname}:8283`);
 
     setInterval(() => {
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ id: WS_ID_PING, src: 'MatterbridgeCockpit', dst: 'Matterbridge', method: 'ping', params: {} }));
+        // console.log('Sent ping to Matterbridge');
+      }
+
       const elapsedSeconds = Math.round((Date.now() - lastSeen) / 1000);
-      console.log(`Elapsed seconds: ${elapsedSeconds}`);
+      // console.log(`Elapsed seconds: ${elapsedSeconds}`);
       if (elapsedSeconds < 10)
         document.getElementById('matterbridge-lastseen').innerText = `Last seen: now`;
       else if (elapsedSeconds < 60)
@@ -141,29 +178,75 @@ cockpit.transport.wait(function () {
       console.log('Connected to Matterbridge WebSocket API');
       document.getElementById('matterbridge-websocket').innerText = `Websocket: connected`;
       document.getElementById('matterbridge-lastseen').innerText = `Last seen: now`;
+      ws.send(JSON.stringify({ id: WS_ID_PING, src: 'MatterbridgeCockpit', dst: 'Matterbridge', method: 'ping', params: {} }));
+      ws.send(JSON.stringify({ id: WS_ID_SETTINGS, src: 'MatterbridgeCockpit', dst: 'Matterbridge', method: '/api/settings', params: {} }));
+      ws.send(JSON.stringify({ id: WS_ID_PLUGINS, src: 'MatterbridgeCockpit', dst: 'Matterbridge', method: '/api/plugins', params: {} }));
+      ws.send(JSON.stringify({ id: WS_ID_DEVICES, src: 'MatterbridgeCockpit', dst: 'Matterbridge', method: '/api/devices', params: {} }));
     };
 
     ws.onmessage = function (event) {
-      const message = event.data;
-      console.log('Received message:'/*, message*/);
-      lastSeen = Date.now();
+      try {
+        const message = JSON.parse(event.data);
+        // console.log('Received message', message);
+        if (message.id === undefined || message.src !== 'Matterbridge') return;
+        if (message.id === WS_ID_LOG) {
+          // console.log('Received log message');
+        } else if (message.error) {
+          console.error('Received error response:', message.error);
+        } else if (message.id === WS_ID_PING) {
+          // console.log('Received response to ping:', message.response);
+        } else if (message.id === WS_ID_SETTINGS) {
+          console.log('Received settings:', message.response);
+        }
+        else if (message.id === WS_ID_PLUGINS) {
+          console.log(`Received ${message.response.length} plugins:`, message.response);
+        }
+        else if (message.id === WS_ID_DEVICES) {
+          console.log(`Received ${message.response.length} devices:`, message.response);
+          populateDeviceTable(message.response);
+        }
+        lastSeen = Date.now();
+      }
+      catch (error) {
+        console.error('Error parsing JSON:', error);
+      }
     };
 
     ws.onerror = function (error) {
       console.error('WebSocket error:', error);
       document.getElementById('matterbridge-websocket').innerText = `Websocket: error`;
+      document.getElementById('matterbridge-status').innerText = 'Service: unknown';
     };
 
     ws.onclose = function () {
       console.log('WebSocket connection closed');
       document.getElementById('matterbridge-websocket').innerText = `Websocket: connection closed`;
+      document.getElementById('matterbridge-status').innerText = 'Service: unknown';
     };
+  }
+
+  // Function to populate the device information table
+  function populateDeviceTable(devices) {
+    console.log('Loading devices...');
+    const tbody = document.querySelector('.div-devices table tbody');
+    devices.forEach(device => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+          <td>${device.pluginName}</td>
+          <td>${device.type}</td>
+          <td>${device.endpoint}</td>
+          <td>${device.name}</td>
+          <td>${device.serial}</td>
+          <td>${device.cluster}</td>
+      `;
+      tbody.appendChild(row);
+    });
   }
 
   // Fetch logs
   function fetchLogs() {
     cockpit
-      .spawn(['journalctl', '-u', 'matterbridge', '--no-pager', '-n', '20', '-o', 'cat'])
+      .spawn(['journalctl', '-u', 'matterbridge', '--no-pager', '-n', '100', '-o', 'cat'])
       .then(function (logs) {
         // const filteredLogs = logs.split('\n').filter(line => !line.includes('matterbridge.service')).join('\n');
         logs = logs.replace(/\x1B\[[0-9;]*[m|s|u|K]/g, '');
@@ -175,20 +258,29 @@ cockpit.transport.wait(function () {
       });
   }
 
-  // Open the frontend
+  // Fetch all data
+  fetchStatus();
+  fetchMatterbridgeCurrent();
+  fetchMatterbridgeLatest();
+  fetchShellyCurrent();
+  fetchShellyLatest();
+  // fetchLogs();
+
+  // Add listener to open the frontend
   document.getElementById('frontend-button')?.addEventListener('click', function () {
-    console.log('Opening matterbridge frontend...');
+    const protocol = window.location.protocol;
     const hostname = window.location.hostname;
-    const newUrl = `https://${hostname}:8283`;
-    window.open(newUrl, '_blank');
+    const frontendUrl = `${protocol}//${hostname}:8283`;
+    console.log(`Opening matterbridge frontend ${frontendUrl} ...`);
+    window.open(frontendUrl, '_blank');
   });
 
-  // Install matterbridge
+  // Add listener to install matterbridge
   document.getElementById('matterbridge-update')?.addEventListener('click', function () {
     console.log('Updating matterbridge...');
     document.getElementById('matterbridge-current').innerText = `Updating...`;
     cockpit
-      .spawn(['npm', 'install', '-g', 'matterbridge', '--omit=dev'])
+      .spawn(['npm', 'install', '-g', 'matterbridge', '--omit=dev', '--omit=optional', '--no-fund', '--no-audit'])
       .then(function (logs) {
         console.log('Updated matterbridge:', logs);
         fetchMatterbridgeCurrent();
@@ -201,12 +293,12 @@ cockpit.transport.wait(function () {
       });
   });
 
-  // Install matterbridge-shelly
+  // Add listener to install matterbridge-shelly
   document.getElementById('shelly-update')?.addEventListener('click', function () {
     console.log('Updating matterbridge-shelly...');
     document.getElementById('shelly-current').innerText = `Updating...`;
     cockpit
-      .spawn(['npm', 'install', '-g', 'matterbridge-shelly', '--omit=dev'])
+      .spawn(['npm', 'install', '-g', 'matterbridge-shelly', '--omit=dev', '--omit=optional', '--no-fund', '--no-audit'])
       .then(function (logs) {
         console.log('Updated matterbridge-shelly:', logs);
         fetchShellyCurrent();
@@ -218,13 +310,4 @@ cockpit.transport.wait(function () {
         document.getElementById('shelly-current').innerText = `Error updating...`;
       });
   });
-
-  // Initial fetch of status and logs
-  fetchStatus();
-  fetchMatterbridgeCurrent();
-  fetchMatterbridgeLatest();
-  fetchShellyCurrent();
-  fetchShellyLatest();
-  // fetchLogs();
-
 });

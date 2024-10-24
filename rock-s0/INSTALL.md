@@ -5,15 +5,25 @@ loader: rk3308_loader_ddr589MHz_uart0_m0_v2.06.136sd.bin
 image: rock-s0_debian_bookworm_cli_b6.img
 
 ```
-lligu@ubuntu:~/Radxa$ rkdeveloptool ld
-DevNo=1 Vid=0x2207,Pid=0x330e,LocationID=202    Maskrom
-lligu@ubuntu:~/Radxa$ sudo rkdeveloptool db rk3308_loader_ddr589MHz_uart0_m0_v2.06.136sd.bin
-Downloading bootloader succeeded.
-lligu@ubuntu:~/Radxa$ sudo rkdeveloptool wl 0 rock-s0_debian_bookworm_cli_b6.img
-Write LBA from file (100%)
-lligu@ubuntu:~/Radxa$ sudo rkdeveloptool rd
-Reset Device OK.
+rkdeveloptool ld
 ```
+DevNo=1 Vid=0x2207,Pid=0x330e,LocationID=202    Maskrom
+
+```
+sudo rkdeveloptool db rk3308_loader_ddr589MHz_uart0_m0_v2.06.136sd.bin
+```
+Downloading bootloader succeeded.
+
+```
+sudo rkdeveloptool wl 0 rock-s0_debian_bookworm_cli_b6.img
+```
+Write LBA from file (100%)
+
+```
+sudo rkdeveloptool rd
+```
+Reset Device OK.
+
 
 # Update system with rsetup
 

@@ -4,8 +4,10 @@ body {
     --main-text-color: #ffffff;
     --div-bg-color: #1b1d21;
     --div-text-color: #e0e0e0;
+    --div-shadow-color: #34373d;
     --button-bg-color: #0066cc;
     --button-text-color: #e0e0e0;
+    --header-color: #1fa7f8;
     background-color: var(--main-bg-color);
     color: var(--main-text-color);
 }
@@ -21,10 +23,44 @@ h1 {
     justify-content: space-between;
 }
 
+.div-devices {
+    color: var(--div-text-color);
+    background-color: var(--div-bg-color);
+    border-radius: 5px;
+    box-shadow: 0 4px 8px var(--div-shadow-color);
+    font-size: 14px;
+    padding: 20px;
+    margin-top: 20px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.div-devices table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.div-devices th {
+    padding: 10px;
+    text-align: left;
+    color: var(--header-color);
+}
+
+.div-devices td {
+    padding: 10px;
+    text-align: left;
+}
+
+.div-devices tr {
+    border-bottom: 1px solid var(--main-bg-color);
+}
+
 .div-panel {
     color: var(--div-text-color);
     background-color: var(--div-bg-color);
     border-radius: 5px;
+    box-shadow: 0 4px 8px var(--div-shadow-color);
     font-size: 14px;
     padding: 20px;
     margin-top: 10px;
