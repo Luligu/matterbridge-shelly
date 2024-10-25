@@ -18,32 +18,26 @@
         <div class="div-panels">
             <div class="div-panel" id="maindiv">
                 <div class="div-title">System</div>
-                <div id="matterbridge-status">Loading Matterbridge status...</div>
-                <div id="matterbridge-websocket">WebSocket:</div>
-                <div id="matterbridge-lastseen">Last seen:</div>
-                <div class="div-button">
-                    <button id="frontend-button">Open the frontend</button>
-                </div>
+                <div class="div-item" id="matterbridge-status">Loading Matterbridge status...</div>
+                <div class="div-item" id="matterbridge-websocket">WebSocket:</div>
+                <div class="div-item" id="matterbridge-lastseen">Last seen:</div>
+                <div class="div-bottom"><button id="frontend-button">Open the frontend</button></div>
             </div>
             <div class="div-panel" id="qrdiv">
-                <div class="div-title">Pairing QR Code</div>
-                <div class="div-qrcode" id="qrcode"></div>
+                <div class="div-title" id="qrtitle">Pairing QR Code</div>
+                <div class="div-qrcode" id="qrcode">Loading QR Code...</div>
             </div>
             <div class="div-panel" id="matterbridgediv">
                 <div class="div-title">Matterbridge</div>
-                <div id="matterbridge-current">Loading current version...</div>
-                <div id="matterbridge-latest">Loading latest version...</div>
-                <div class="div-button">
-                    <button id="matterbridge-update">Update</button>
-                </div>
+                <div class="div-item" id="matterbridge-current">Loading current version...</div>
+                <div class="div-item" id="matterbridge-latest">Loading latest version...</div>
+                <div class="div-bottom"><button id="matterbridge-update">Update</button></div>
             </div>
             <div class="div-panel" id="shellydiv">
                 <div class="div-title">Shelly plugin</div>
-                <div id="shelly-current">Loading current version...</div>
-                <div id="shelly-latest">Loading latest version...</div>
-                <div class="div-button">
-                    <button id="shelly-update">Update</button>
-                </div>
+                <div class="div-item" id="shelly-current">Loading current version...</div>
+                <div class="div-item" id="shelly-latest">Loading latest version...</div>
+                <div class="div-bottom"><button id="shelly-update">Update</button></div>
             </div>
         </div>
         <div class="div-devices">
