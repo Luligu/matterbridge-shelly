@@ -70,7 +70,7 @@ export class ShellyDevice extends EventEmitter {
   readonly log: AnsiLogger;
   readonly username: string | undefined;
   readonly password: string | undefined;
-  profile: 'switch' | 'cover' | 'rgb' | 'rgbw' | 'color' | 'white' | undefined = undefined;
+  profile: 'switch' | 'cover' | 'rgb' | 'rgbw' | 'color' | 'white' | 'light' | undefined = undefined;
   host: string;
   id = '';
   model = '';
@@ -483,7 +483,7 @@ export class ShellyDevice extends EventEmitter {
     if (shellyPayload.mode === 'roller') device.profile = 'cover';
     if (shellyPayload.mode === 'color') device.profile = 'color';
     if (shellyPayload.mode === 'white') device.profile = 'white';
-    if (shellyPayload.profile !== undefined) device.profile = shellyPayload.profile as 'switch' | 'cover' | 'rgb' | 'rgbw' | 'color' | 'white' | undefined;
+    if (shellyPayload.profile !== undefined) device.profile = shellyPayload.profile as 'switch' | 'cover' | 'rgb' | 'rgbw' | 'color' | 'white' | 'light' | undefined;
 
     // Gen 1 Shelly device
     if (!shellyPayload.gen) {
