@@ -13,10 +13,12 @@ body {
     color: var(--main-text-color);
 }
 
+/* Main title */
 h1 {
     font-size: 24px;
 }
 
+/* First div with panels */
 .div-panels {
     gap: 20px;
     display: flex;
@@ -25,6 +27,7 @@ h1 {
     justify-content: space-between;
 }
 
+/* Second div with devices */
 .div-devices {
     color: var(--div-text-color);
     background-color: var(--div-bg-color);
@@ -58,6 +61,7 @@ h1 {
     border-bottom: 1px solid var(--table-border-color);
 }
 
+/* Single panel div */
 .div-panel {
     color: var(--div-text-color);
     background-color: var(--div-bg-color);
@@ -71,7 +75,7 @@ h1 {
     min-width: 220px;
 }
 
-.div-title {
+.div-panel-title {
     color: var(--div-text-color);
     font-size: 20px;
     padding: 10px;
@@ -80,11 +84,11 @@ h1 {
     align-items: center;
 }
 
-.div-item {
+.div-panel-item {
     margin: 10px 0;
 }
 
-.div-qrcode {
+.div-panel-qrcode {
     margin: 10px 0;
     display: flex;
     flex-direction: column;
@@ -94,7 +98,16 @@ h1 {
     max-height: 250px;
 }
 
-.div-fabrics {
+.div-panel-bottom {
+    margin-top: auto;
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Single fabric div */
+.fabric {
     padding: 0px;
     display: flex;
     flex-direction: column;
@@ -110,17 +123,14 @@ h1 {
     padding: 5px;
 }
 
-.fabric {
+.fabric-vendor {
     margin: 0px;
     padding: 5px;
 }
 
-.div-bottom {
-    margin-top: auto;
-    padding: 10px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+.fabric-label {
+    margin: 0px;
+    padding: 5px;
 }
 
 button {

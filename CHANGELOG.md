@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 If you like this project and find it useful, please consider giving it a star on GitHub at https://github.com/Luligu/matterbridge-shelly and sponsoring it.
 
+## [1.0.9] - 2024-10-25
+
+### Changed
+
+- [log]: Changed level for CoIoT configuration messages from notice to warn.
+- [package]: Updated dependencies.
+
+<a href="https://www.buymeacoffee.com/luligugithub">
+  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+</a>
+
 ## [1.0.8] - 2024-10-23
 
 ### Fixed

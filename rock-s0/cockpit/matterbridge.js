@@ -155,11 +155,11 @@ cockpit.transport.wait(function () {
     document.getElementById("qrcode").innerText = '';
     fabrics.forEach(fabric => {
       const fabricElement = document.createElement('div');
-      fabricElement.className = 'div-fabrics';
+      fabricElement.className = 'fabric';
       fabricElement.innerHTML = `
         <p class="fabric-id">Fabric ${fabric.fabricIndex}</p>
-        <p class="fabric">Vendor: ${fabric.rootVendorId} ${fabric.rootVendorName}</p>
-        ${fabric.label ? `<p class="fabric">Label: ${fabric.label}</p>` : ''}
+        <p class="fabric-vendor">Vendor: ${fabric.rootVendorId} ${fabric.rootVendorName}</p>
+        ${fabric.label ? `<p class="fabric-label">Label: ${fabric.label}</p>` : ''}
       `;
       document.getElementById("qrcode").appendChild(fabricElement);
     });
