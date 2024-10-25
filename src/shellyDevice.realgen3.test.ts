@@ -526,7 +526,7 @@ describe('Shellies', () => {
     expect(device.mac).toBe('34CDB077BCD4');
     expect(device.id).toBe('shellyblugwg3-34CDB077BCD4');
     expect(device.hasUpdate).toBe(false);
-    expect(device.firmware).toBe('1.4.99-blugwg3prod2-g689f175'); // firmwareGen2
+    expect(device.firmware).toBe('1.4.99-blugwg3prod4-g110402b'); // firmwareGen2
     expect(device.auth).toBe(false);
     expect(device.name).toBe('BLU Gateway Gen3');
     expect(device.username).toBe('admin');

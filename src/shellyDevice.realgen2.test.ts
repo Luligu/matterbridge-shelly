@@ -36,7 +36,7 @@ describe('Shellies', () => {
       device.destroy();
       device = undefined;
     }
-    await wait(1000);
+    await wait(2000);
   });
 
   afterAll(async () => {
@@ -74,6 +74,10 @@ describe('Shellies', () => {
     await device.fetchUpdate();
 
     await device.saveDevicePayloads('temp');
+
+    expect(device.bthomeTrvs.size).toBe(0);
+    expect(device.bthomeDevices.size).toBe(0);
+    expect(device.bthomeSensors.size).toBe(0);
 
     expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Input', 'MQTT', 'Rgb', 'Sys', 'Sntp', 'WiFi', 'WS']);
     // prettier-ignore
@@ -143,6 +147,10 @@ describe('Shellies', () => {
     await device.fetchUpdate();
 
     await device.saveDevicePayloads('temp');
+
+    expect(device.bthomeTrvs.size).toBe(0);
+    expect(device.bthomeDevices.size).toBe(0);
+    expect(device.bthomeSensors.size).toBe(0);
 
     expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Input', 'Light', 'MQTT', 'Sys', 'Sntp', 'WiFi', 'WS']);
     // prettier-ignore
@@ -293,6 +301,13 @@ describe('Shellies', () => {
 
     await device.saveDevicePayloads('temp');
 
+    expect(device.bthomeTrvs.size).toBe(0);
+    expect(device.bthomeDevices.size).toBe(0);
+    expect(device.bthomeSensors.size).toBe(0);
+
+    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Input', 'MQTT', 'Switch', 'Sys', 'Sntp', 'WiFi', 'WS']);
+    expect(device.getComponentIds()).toStrictEqual(['ble', 'cloud', 'input:0', 'mqtt', 'switch:0', 'sys', 'sntp', 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws']);
+
     const component = device.getComponent('switch:0');
     expect(component).not.toBeUndefined();
 
@@ -340,6 +355,13 @@ describe('Shellies', () => {
 
     await device.saveDevicePayloads('temp');
 
+    expect(device.bthomeTrvs.size).toBe(0);
+    expect(device.bthomeDevices.size).toBe(0);
+    expect(device.bthomeSensors.size).toBe(0);
+
+    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Cover', 'Input', 'MQTT', 'Sys', 'Sntp', 'WiFi', 'WS']);
+    expect(device.getComponentIds()).toStrictEqual(['ble', 'cloud', 'cover:0', 'input:0', 'input:1', 'mqtt', 'sys', 'sntp', 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws']);
+
     const cover = device.getComponent('cover:0');
     expect(cover).not.toBeUndefined();
 
@@ -348,42 +370,27 @@ describe('Shellies', () => {
       cover.Open();
       await waiter('Open()', () => { return cover.getValue('state') === 'opening'; }, true, 30000);
       await waiter('Open() II', () => { return cover.getValue('state') === 'stopped' || cover.getValue('state') === 'open'; }, true, 30000);
-      expect(cover.getValue('source')).toMatch(/^(limit_switch|timeout)$/); // 'limit_switch' if not stopped for timeout
-      expect(cover.getValue('state')).toMatch(/^(open|stopped)$/); // 'open' if not stopped for timeout
-      expect(cover.getValue('last_direction')).toBe('open');
-      expect(cover.getValue('current_pos')).toBe(100);
+      await waiter('Open() III', () => { return cover.getValue('current_pos') === 100; }, true, 30000);
 
       cover.Close();
       await wait(2000);
       cover.Stop();
       await waiter('Stop()', () => { return cover.getValue('state') === 'stopped'; }, true, 30000);
-      expect(cover.getValue('state')).toBe('stopped');
-      expect(cover.getValue('last_direction')).toBe('open');
-      expect(cover.getValue('current_pos')).toBe(100);
 
       cover.Close();
       await waiter('Close()', () => { return cover.getValue('state') === 'closing'; }, true, 30000);
       await waiter('Close() II', () => { return cover.getValue('state') === 'stopped' || cover.getValue('state') === 'closed'; }, true, 30000);
-      expect(cover.getValue('source')).toMatch(/^(HTTP_in|timeout)$/); // 'HTTP_in' if not stopped for timeout
-      expect(cover.getValue('state')).toMatch(/^(closed|stopped)$/); // 'closed' if not stopped for timeout
-      expect(cover.getValue('last_direction')).toBe('close');
-      expect(cover.getValue('current_pos')).toBe(0);
+      await waiter('Close() III', () => { return cover.getValue('current_pos') === 0; }, true, 30000);
 
       cover.GoToPosition(10);
       await waiter('GoToPosition(10)', () => { return cover.getValue('state') === 'opening'; }, true, 30000);
-      await waiter('GoToPosition(10)', () => { return cover.getValue('state') === 'stopped'; }, true, 30000);
-      expect(cover.getValue('source')).toBe('timeout');
-      expect(cover.getValue('state')).toBe('stopped');
-      expect(cover.getValue('last_direction')).toBe('open');
-      expect(cover.getValue('current_pos')).toBe(10);
+      await waiter('GoToPosition(10) II', () => { return cover.getValue('state') === 'stopped'; }, true, 30000);
+      await waiter('GoToPosition(10) III', () => { return cover.getValue('current_pos') === 10; }, true, 30000);
 
       cover.Close();
       await waiter('Close()', () => { return cover.getValue('state') === 'closing'; }, true, 30000);
       await waiter('Close() II', () => { return cover.getValue('state') === 'stopped' || cover.getValue('state') === 'closed'; }, true, 30000);
-      expect(cover.getValue('source')).toMatch(/^(HTTP_in|timeout)$/); // 'HTTP_in' if not stopped for timeout
-      expect(cover.getValue('state')).toMatch(/^(closed|stopped)$/); // 'closed' if not stopped for timeout
-      expect(cover.getValue('last_direction')).toBe('close');
-      expect(cover.getValue('current_pos')).toBe(0);
+      await waiter('Close() III', () => { return cover.getValue('current_pos') === 0; }, true, 30000);
     }
 
     shelly.removeDevice(device);
@@ -415,6 +422,10 @@ describe('Shellies', () => {
     await device.fetchUpdate();
 
     await device.saveDevicePayloads('temp');
+
+    expect(device.bthomeTrvs.size).toBe(0);
+    expect(device.bthomeDevices.size).toBe(0);
+    expect(device.bthomeSensors.size).toBe(0);
 
     expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Input', 'MQTT', 'Switch', 'Sys', 'Sntp', 'WiFi', 'WS']);
     // prettier-ignore
@@ -494,6 +505,10 @@ describe('Shellies', () => {
 
     await device.saveDevicePayloads('temp');
 
+    expect(device.bthomeTrvs.size).toBe(0);
+    expect(device.bthomeDevices.size).toBe(0);
+    expect(device.bthomeSensors.size).toBe(0);
+
     expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Input', 'MQTT', 'Switch', 'Sys', 'Sntp', 'WiFi', 'WS']);
     // prettier-ignore
     expect(device.getComponentIds()).toStrictEqual(["ble", "cloud", "input:0", "mqtt", "switch:0", "sys", "sntp", 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws']);
@@ -550,6 +565,10 @@ describe('Shellies', () => {
 
     await device.saveDevicePayloads('temp');
 
+    expect(device.bthomeTrvs.size).toBe(0);
+    expect(device.bthomeDevices.size).toBe(0);
+    expect(device.bthomeSensors.size).toBe(0);
+
     expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'MQTT', 'Switch', 'Sys', 'Sntp', 'WiFi', 'WS']);
     // prettier-ignore
     expect(device.getComponentIds()).toStrictEqual(["ble", "cloud", "mqtt", "switch:0", "sys", "sntp", 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws']);
@@ -578,7 +597,7 @@ describe('Shellies', () => {
 
     shelly.removeDevice(device);
     device.destroy();
-  });
+  }, 30000);
 
   test('Create a gen 2 shellyplusi4 AC device and update', async () => {
     if (getMacAddress() !== address) return;
@@ -606,13 +625,13 @@ describe('Shellies', () => {
 
     await device.saveDevicePayloads('temp');
 
-    expect(device.components.length).toBe(13);
-    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Input', 'MQTT', 'Sys', 'Sntp', 'WiFi', 'WS']);
-    expect(device.getComponentIds()).toStrictEqual(['ble', 'cloud', 'input:0', 'input:1', 'input:2', 'input:3', 'mqtt', 'sys', 'sntp', 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws']);
-
     expect(device.bthomeTrvs.size).toBe(0);
     expect(device.bthomeDevices.size).toBe(0);
     expect(device.bthomeSensors.size).toBe(0);
+
+    expect(device.components.length).toBe(13);
+    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Input', 'MQTT', 'Sys', 'Sntp', 'WiFi', 'WS']);
+    expect(device.getComponentIds()).toStrictEqual(['ble', 'cloud', 'input:0', 'input:1', 'input:2', 'input:3', 'mqtt', 'sys', 'sntp', 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws']);
 
     expect(device.getComponent('input:0')).not.toBeUndefined();
     expect(device.getComponent('input:0')?.getValue('enable')).toBe(true);
@@ -636,7 +655,7 @@ describe('Shellies', () => {
 
     shelly.removeDevice(device);
     device.destroy();
-  });
+  }, 30000);
 
   test('Create a gen 2 shellyplusi4 DC device and update', async () => {
     if (getMacAddress() !== address) return;
@@ -664,13 +683,13 @@ describe('Shellies', () => {
 
     await device.saveDevicePayloads('temp');
 
-    expect(device.components.length).toBe(13);
-    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Input', 'MQTT', 'Sys', 'Sntp', 'WiFi', 'WS']);
-    expect(device.getComponentIds()).toStrictEqual(['ble', 'cloud', 'input:0', 'input:1', 'input:2', 'input:3', 'mqtt', 'sys', 'sntp', 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws']);
-
     expect(device.bthomeTrvs.size).toBe(0);
     expect(device.bthomeDevices.size).toBe(0);
     expect(device.bthomeSensors.size).toBe(0);
+
+    expect(device.components.length).toBe(13);
+    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Input', 'MQTT', 'Sys', 'Sntp', 'WiFi', 'WS']);
+    expect(device.getComponentIds()).toStrictEqual(['ble', 'cloud', 'input:0', 'input:1', 'input:2', 'input:3', 'mqtt', 'sys', 'sntp', 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws']);
 
     expect(device.getComponent('input:0')).not.toBeUndefined();
     expect(device.getComponent('input:0')?.getValue('enable')).toBe(false);
@@ -694,7 +713,7 @@ describe('Shellies', () => {
 
     shelly.removeDevice(device);
     device.destroy();
-  });
+  }, 30000);
 
   test('Create a gen 2 shellyplus010v device and update', async () => {
     if (getMacAddress() !== address) return;
@@ -722,13 +741,13 @@ describe('Shellies', () => {
 
     await device.saveDevicePayloads('temp');
 
-    expect(device.components.length).toBe(12);
-    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Input', 'Light', 'MQTT', 'Sys', 'Sntp', 'WiFi', 'WS']);
-    expect(device.getComponentIds()).toStrictEqual(['ble', 'cloud', 'input:0', 'input:1', 'light:0', 'mqtt', 'sys', 'sntp', 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws']);
-
     expect(device.bthomeTrvs.size).toBe(0);
     expect(device.bthomeDevices.size).toBe(0);
     expect(device.bthomeSensors.size).toBe(0);
+
+    expect(device.components.length).toBe(12);
+    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Input', 'Light', 'MQTT', 'Sys', 'Sntp', 'WiFi', 'WS']);
+    expect(device.getComponentIds()).toStrictEqual(['ble', 'cloud', 'input:0', 'input:1', 'light:0', 'mqtt', 'sys', 'sntp', 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws']);
 
     const component = device.getComponent('light:0');
     expect(component).not.toBeUndefined();

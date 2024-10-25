@@ -405,17 +405,8 @@ export class WsClient extends EventEmitter {
         this.wsClient.close();
         this.log.debug(`Closed ws client for Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}`);
       } else if (this.wsClient.readyState === WebSocket.CONNECTING || this.wsClient?.readyState === WebSocket.CLOSING) {
-        const terminateTimeout = setTimeout(() => {
-          if (this.wsClient?.readyState === WebSocket.CONNECTING) this.wsClient?.terminate();
-          if (this.wsClient?.readyState === WebSocket.CLOSING) this.wsClient?.terminate();
-          this.wsClient?.removeAllListeners();
-          this.wsClient = undefined;
-          this.log.debug(`Terminated ws client for Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}`);
-          // console.error(`Terminated ws client for Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}`);
-        }, 500);
-        terminateTimeout.unref();
-        // console.error(`Closing ws client still connecting or closing for Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}`);
-        this.log.debug(`Closing ws client still connecting or closing for Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}`);
+        this.wsClient.terminate();
+        this.log.debug(`Terminated ws client for Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}`);
       } else if (this.wsClient.readyState === WebSocket.CLOSED) {
         this.log.debug(`Ws client already closed for Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}`);
       }
@@ -424,10 +415,8 @@ export class WsClient extends EventEmitter {
     } finally {
       this._isConnecting = false;
       this._isConnected = false;
-      if (this.wsClient.readyState === WebSocket.CLOSED) {
-        this.wsClient.removeAllListeners();
-        this.wsClient = undefined;
-      }
+      this.wsClient.removeAllListeners();
+      this.wsClient = undefined;
       this.log.debug(`Stopped ws client for Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}`);
     }
   }
