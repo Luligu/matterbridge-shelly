@@ -7,6 +7,7 @@ import { isCoverComponent, isLightComponent, isSwitchComponent, ShellyCoverCompo
 import { AnsiLogger, LogLevel, TimestampFormat } from 'matterbridge/logger';
 import { getMacAddress, wait, waiter } from 'matterbridge/utils';
 import { jest } from '@jest/globals';
+import * as dns from 'dns';
 
 describe('Shellies', () => {
   let consoleLogSpy: jest.SpiedFunction<typeof console.log>;
@@ -17,6 +18,15 @@ describe('Shellies', () => {
 
   const firmwareGen1 = 'v1.14.0-gcb84623';
   const address = '30:f6:ef:69:2b:c5';
+
+  async function resolveHostname(hostname: string): Promise<string | null> {
+    try {
+      const addresses = await dns.promises.lookup(hostname);
+      return addresses.address;
+    } catch (error) {
+      return null;
+    }
+  }
 
   beforeAll(async () => {
     consoleLogSpy = jest.spyOn(console, 'log').mockImplementation((...args: any[]) => {
@@ -51,6 +61,54 @@ describe('Shellies', () => {
     expect(log).toBeDefined();
     expect(shelly).toBeDefined();
   });
+
+  test('Create with resolve a gen 1 shelly1 device and send commands', async () => {
+    if (getMacAddress() !== address) return;
+    const hostname = (await resolveHostname('shelly1-34945472A643.local')) ?? '192.168.1.240';
+    consoleLogSpy.mockRestore();
+    device = await ShellyDevice.create(shelly, log, hostname);
+    expect(device).not.toBeUndefined();
+    if (!device) return;
+    shelly.addDevice(device);
+
+    expect(device.host).toBe(hostname);
+    expect(device.mac).toBe('34945472A643');
+    expect(device.profile).toBe(undefined);
+    expect(device.model).toBe('SHSW-1');
+    expect(device.id).toBe('shelly1-34945472A643');
+    expect(device.firmware).toBe(firmwareGen1);
+    expect(device.auth).toBe(false);
+    expect(device.gen).toBe(1);
+    expect(device.hasUpdate).toBe(false);
+    expect(device.username).toBe('admin');
+    expect(device.password).toBe('tango');
+    expect(device.name).toBe('1 Gen1');
+
+    await device.fetchUpdate();
+
+    await device.saveDevicePayloads('temp');
+
+    const component = device.getComponent('relay:0');
+    expect(component).not.toBeUndefined();
+
+    // prettier-ignore
+    if (isSwitchComponent(component)) {
+        component.On();
+        await waiter('On', () => { return component.getValue('state') === true; }, true);
+
+        component.Off();
+        await waiter('Off', () => { return component.getValue('state') === false; }, true);
+
+        component.Toggle();
+        await waiter('Toggle', () => { return component.getValue('state') === true; }, true);
+
+        component.Off();
+        await waiter('Off', () => { return component.getValue('state') === false; }, true);
+      }
+
+    shelly.removeDevice(device);
+    device.destroy();
+  }, 20000);
 
   test('Create a gen 1 shelly1 device and send commands', async () => {
     if (getMacAddress() !== address) return;
