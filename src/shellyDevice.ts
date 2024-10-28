@@ -1282,6 +1282,7 @@ export class ShellyDevice extends EventEmitter {
           `Response error fetching shelly gen ${gen} host ${host} service ${service}${params ? ' with ' + JSON.stringify(params) : ''} url ${url}:` +
             ` ${response.status} (${response.statusText})`,
         );
+        clearTimeout(fetchTimeout);
         return null;
       }
       const data = await response.json();
@@ -1292,6 +1293,7 @@ export class ShellyDevice extends EventEmitter {
       log.debug(
         `Error fetching shelly gen ${gen} host ${host} service ${service}${params ? ' with ' + JSON.stringify(params) : ''} url ${url} error: ${error instanceof Error ? error.message : error}`,
       );
+      clearTimeout(fetchTimeout);
       return null;
     }
   }
