@@ -159,6 +159,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           this.log.warn(`Please restart matterbridge for the change to take effect.`);
           this.discoveredDevices.set(discoveredDevice.id, discoveredDevice);
           this.storedDevices.set(discoveredDevice.id, discoveredDevice);
+          this.changedDevices.set(discoveredDevice.id, discoveredDevice.id);
           await this.saveStoredDevices();
           return;
         } else {
@@ -308,6 +309,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
                     if (device.thermostatSetpointTimeout) clearTimeout(device.thermostatSetpointTimeout);
                     device.thermostatSetpointTimeout = setTimeout(() => {
                       mbDevice.log.info(`Setting thermostat occupiedHeatingSetpoint to ${newValue / 100}`);
+                      // http://192.168.1.164/rpc/BluTrv.Call?id=201&method=Trv.SetTarget&params={id:0,target_C:19}
                       ShellyDevice.fetch(this.shelly, mbDevice.log, device.host, 'BluTrv.Call', {
                         id: bthomeDevice.blutrv_id,
                         method: 'Trv.SetTarget',
