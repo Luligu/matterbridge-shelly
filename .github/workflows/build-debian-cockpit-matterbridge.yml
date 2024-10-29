@@ -38,7 +38,7 @@ jobs:
         with:
           name: cockpit-matterbridge.deb
           path: cockpit-matterbridge.deb
-          if-no-files-found: fail
+          if-no-files-found: error
           retention-days: 1
           compression-level: 0
           overwrite: true
