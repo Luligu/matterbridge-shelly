@@ -34,7 +34,7 @@ jobs:
         run: dpkg-deb --build package cockpit-matterbridge.deb
 
       - name: Upload Debian package
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: cockpit-matterbridge.deb
           path: cockpit-matterbridge.deb
