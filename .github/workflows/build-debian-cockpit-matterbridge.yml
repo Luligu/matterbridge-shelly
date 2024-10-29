@@ -39,23 +39,13 @@ jobs:
           name: cockpit-matterbridge.deb
           path: cockpit-matterbridge.deb
 
-      - name: Create GitHub Release
-        id: create_release
-        uses: actions/create-release@v1
+      - name: Publish Debian package to GitHub Packages
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: v1.0.2
-          release_name: Release v1.0.2
-          draft: false
-          prerelease: false
-
-      - name: Upload Debian package to GitHub Release
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./cockpit-matterbridge.deb
-          asset_name: cockpit-matterbridge.deb
-          asset_content_type: application/octet-stream
+        run: |
+          # Use curl to upload the .deb file as a GitHub Package
+          curl -u ${{ github.repository_owner }}:${{ secrets.GITHUB_TOKEN }} \
+            -X PUT \
+            -H "Content-Type: application/octet-stream" \
+            --data-binary @cockpit-matterbridge.deb \
+            "https://uploads.github.com/repos/${{ github.repository }}/releases/assets?name=cockpit-matterbridge.deb&label=cockpit-matterbridge"
