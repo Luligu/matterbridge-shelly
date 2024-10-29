@@ -122,13 +122,14 @@ sudo apt install cockpit btop -y
 sudo apt upgrade
 ```
 
-# Install matterbridge cockpit plugin
+# Install matterbridge cockpit plugin manually
 
 Create the directory "\usr\share\cockpit\matterbridge"
 
 copy all the files from cockpit directory to "\usr\share\cockpit\matterbridge"
 
-With Debian package
+
+# Install matterbridge cockpit plugin manually with the Debian package
 
 ```
 sudo curl https://raw.githubusercontent.com/Luligu/matterbridge-shelly/dev/rock-s0/cockpit-matterbridge.deb -o cockpit-matterbridge.deb
