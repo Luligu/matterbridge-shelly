@@ -68,7 +68,7 @@ describe('ShellyPlatform', () => {
       matterbridgeDirectory: 'temp',
       matterbridgePluginDirectory: 'temp',
       systemInformation: { ipv4Address: undefined },
-      matterbridgeVersion: '1.5.9',
+      matterbridgeVersion: '1.6.0',
       addBridgedDevice: jest.fn(),
       removeBridgedDevice: jest.fn(),
       removeAllBridgedDevices: jest.fn(),
