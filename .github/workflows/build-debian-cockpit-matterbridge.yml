@@ -12,9 +12,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install dpkg-deb
-        run: sudo apt-get update && sudo apt-get install -y dpkg-deb
-
       - name: Set up Debian package structure
         run: |
           # Create the directory structure
