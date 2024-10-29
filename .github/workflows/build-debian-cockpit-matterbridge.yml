@@ -37,5 +37,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: cockpit-matterbridge.deb
-          path: ./rock-s0/cockpit-matterbridge.deb
-
+          path: cockpit-matterbridge.deb
+          if-no-files-found: fail
+          retention-days: 1
+          compression-level: 0
+          overwrite: true
