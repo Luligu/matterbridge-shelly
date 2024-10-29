@@ -129,7 +129,7 @@ Create the directory "\usr\share\cockpit\matterbridge"
 copy all the files from cockpit directory to "\usr\share\cockpit\matterbridge"
 
 
-# Install matterbridge cockpit plugin manually with the Debian package
+# Install matterbridge cockpit plugin with the Debian package
 
 ```
 sudo curl https://raw.githubusercontent.com/Luligu/matterbridge-shelly/dev/rock-s0/cockpit-matterbridge.deb -o cockpit-matterbridge.deb
