@@ -37,15 +37,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: cockpit-matterbridge.deb
-          path: cockpit-matterbridge.deb
+          path: ./rock-s0/cockpit-matterbridge.deb
 
-      - name: Publish Debian package to GitHub Packages
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          # Use curl to upload the .deb file as a GitHub Package
-          curl -u ${{ github.repository_owner }}:${{ secrets.GITHUB_TOKEN }} \
-            -X PUT \
-            -H "Content-Type: application/octet-stream" \
-            --data-binary @cockpit-matterbridge.deb \
-            "https://uploads.github.com/repos/${{ github.repository }}/releases/assets?name=cockpit-matterbridge.deb&label=cockpit-matterbridge"
