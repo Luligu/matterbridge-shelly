@@ -3,10 +3,9 @@
 import { Shelly } from './shelly.js';
 import { ShellyDevice } from './shellyDevice.js';
 import { isCoverComponent, isLightComponent, isSwitchComponent, ShellyCoverComponent, ShellySwitchComponent } from './shellyComponent.js';
-import { resolveHostname } from './platform.js';
 
 import { AnsiLogger, LogLevel, TimestampFormat } from 'matterbridge/logger';
-import { getMacAddress, wait, waiter } from 'matterbridge/utils';
+import { getMacAddress, wait, waiter, resolveHostname } from 'matterbridge/utils';
 import { jest } from '@jest/globals';
 
 describe('Shellies', () => {

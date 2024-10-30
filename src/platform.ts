@@ -71,7 +71,6 @@ import { hslColorToRgbColor, rgbColorToHslColor, isValidIpv4Address, isValidStri
 
 import path from 'path';
 import * as fs from 'fs';
-import * as dns from 'dns';
 
 import { Shelly } from './shelly.js';
 import { DiscoveredDevice } from './mdnsScanner.js';
@@ -170,6 +169,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           return;
         }
       }
+      /*
       this.log.debug(`Looking up shelly device ${hk}${discoveredDevice.id}${db} host ${zb}${discoveredDevice.host}${db}`);
       const lookupIp = await resolveHostname(discoveredDevice.id);
       if (!lookupIp) {
@@ -180,6 +180,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         discoveredDevice.host = lookupIp;
         this.changedDevices.set(discoveredDevice.id, discoveredDevice.id);
       }
+      */
       this.discoveredDevices.set(discoveredDevice.id, discoveredDevice);
       this.storedDevices.set(discoveredDevice.id, discoveredDevice);
       await this.saveStoredDevices();
@@ -1941,15 +1942,5 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       return false;
     }
     return true;
-  }
-}
-
-export async function resolveHostname(hostname: string): Promise<string | null> {
-  try {
-    const addresses = await dns.promises.lookup(hostname.toLowerCase() + '.local', { family: 4 });
-    return addresses.address;
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  } catch (error) {
-    return null;
   }
 }
