@@ -1950,7 +1950,6 @@ export async function resolveHostname(hostname: string): Promise<string | null> 
     return addresses.address;
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
-    // console.error(`Failed to resolve hostname ${hostname}:`, error);
     return null;
   }
 }

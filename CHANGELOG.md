@@ -4,7 +4,11 @@ All notable changes to this project will be documented in this file.
 
 If you like this project and find it useful, please consider giving it a star on GitHub at https://github.com/Luligu/matterbridge-shelly and sponsoring it.
 
-## [1.0.9] - 2024-10-25
+## [1.0.9] - 2024-11-01
+
+### Added
+
+- [shelly]: Added a check on changed device IP address when loading from storage or from config.
 
 ### Changed
 

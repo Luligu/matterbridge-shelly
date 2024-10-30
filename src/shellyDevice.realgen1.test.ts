@@ -55,8 +55,7 @@ describe('Shellies', () => {
 
   test('Create with resolve a gen 1 shelly1 device and send commands', async () => {
     if (getMacAddress() !== address) return;
-    const hostname = (await resolveHostname('shelly1-34945472A643.local')) ?? '192.168.1.240';
-    consoleLogSpy.mockRestore();
+    const hostname = (await resolveHostname('shelly1-34945472A643')) ?? '192.168.1.240';
     device = await ShellyDevice.create(shelly, log, hostname);
     expect(device).not.toBeUndefined();
     if (!device) return;
@@ -656,7 +655,7 @@ describe('Shellies', () => {
     expect(device.hasUpdate).toBe(false);
     expect(device.username).toBe('admin');
     expect(device.password).toBe('tango');
-    expect(device.name).toBe('2.5 Gen1 Roller');
+    expect(device.name).toBe('2.5 Gen1 Cover');
 
     await device.fetchUpdate();
 
