@@ -3,11 +3,11 @@
 import { Shelly } from './shelly.js';
 import { ShellyDevice } from './shellyDevice.js';
 import { isCoverComponent, isLightComponent, isSwitchComponent, ShellyCoverComponent, ShellySwitchComponent } from './shellyComponent.js';
+import { resolveHostname } from './platform.js';
 
 import { AnsiLogger, LogLevel, TimestampFormat } from 'matterbridge/logger';
 import { getMacAddress, wait, waiter } from 'matterbridge/utils';
 import { jest } from '@jest/globals';
-import * as dns from 'dns';
 
 describe('Shellies', () => {
   let consoleLogSpy: jest.SpiedFunction<typeof console.log>;
@@ -18,15 +18,6 @@ describe('Shellies', () => {
 
   const firmwareGen1 = 'v1.14.0-gcb84623';
   const address = '30:f6:ef:69:2b:c5';
-
-  async function resolveHostname(hostname: string): Promise<string | null> {
-    try {
-      const addresses = await dns.promises.lookup(hostname);
-      return addresses.address;
-    } catch (error) {
-      return null;
-    }
-  }
 
   beforeAll(async () => {
     consoleLogSpy = jest.spyOn(console, 'log').mockImplementation((...args: any[]) => {

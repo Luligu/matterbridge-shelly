@@ -71,6 +71,7 @@ import { hslColorToRgbColor, rgbColorToHslColor, isValidIpv4Address, isValidStri
 
 import path from 'path';
 import * as fs from 'fs';
+import * as dns from 'dns';
 
 import { Shelly } from './shelly.js';
 import { DiscoveredDevice } from './mdnsScanner.js';
@@ -291,7 +292,13 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
                 mbDevice.subscribeAttribute(
                   ThermostatCluster.id,
                   'systemMode',
-                  (newValue, oldValue) => {
+                  (newValue: number, oldValue: number) => {
+                    if (
+                      !isValidNumber(newValue, Thermostat.SystemMode.Off, Thermostat.SystemMode.Heat) ||
+                      !isValidNumber(oldValue, Thermostat.SystemMode.Off, Thermostat.SystemMode.Heat) ||
+                      newValue === oldValue
+                    )
+                      return;
                     mbDevice.log.info(`Thermostat systemMode changed from ${oldValue} to ${newValue}`);
                     if (oldValue === Thermostat.SystemMode.Heat && newValue === Thermostat.SystemMode.Off) {
                       if (device.thermostatSystemModeTimeout) clearTimeout(device.thermostatSystemModeTimeout);
@@ -307,6 +314,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
                   'occupiedHeatingSetpoint',
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   (newValue: any, oldValue: any) => {
+                    if (!isValidNumber(newValue) || !isValidNumber(oldValue) || newValue === oldValue) return;
                     mbDevice.log.info(`Thermostat occupiedHeatingSetpoint changed from ${oldValue / 100} to ${newValue / 100}`);
                     if (device.thermostatSetpointTimeout) clearTimeout(device.thermostatSetpointTimeout);
                     device.thermostatSetpointTimeout = setTimeout(() => {
@@ -1923,5 +1931,15 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       return false;
     }
     return true;
+  }
+}
+
+export async function resolveHostname(hostname: string): Promise<string | null> {
+  try {
+    const addresses = await dns.promises.lookup(hostname);
+    return addresses.address;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (error) {
+    return null;
   }
 }
