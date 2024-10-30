@@ -152,12 +152,12 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     this.shelly.debugMdns = this.config.debugMdns as boolean;
     this.shelly.debugCoap = this.config.debugCoap as boolean;
 
-    // handle Shelly discovered event
+    // handle Shelly discovered event (called from mDNS scanner, storage or config devices)
     this.shelly.on('discovered', async (discoveredDevice: DiscoveredDevice) => {
       if (this.discoveredDevices.has(discoveredDevice.id)) {
         const stored = this.storedDevices.get(discoveredDevice.id);
         if (stored?.host !== discoveredDevice.host) {
-          this.log.warn(`Shelly device ${hk}${discoveredDevice.id}${wr} host ${zb}${discoveredDevice.host}${wr} is already discovered with a different host.`);
+          this.log.warn(`Shelly device ${hk}${discoveredDevice.id}${wr} host ${zb}${discoveredDevice.host}${wr} has been discovered with a different host.`);
           this.log.warn(`Set new address for shelly device ${hk}${discoveredDevice.id}${wr} from ${zb}${stored?.host}${wr} to ${zb}${discoveredDevice.host}${wr}`);
           this.log.warn(`Please restart matterbridge for the change to take effect.`);
           this.discoveredDevices.set(discoveredDevice.id, discoveredDevice);
@@ -169,6 +169,16 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           this.log.info(`Shelly device ${hk}${discoveredDevice.id}${nf} host ${zb}${discoveredDevice.host}${nf} already discovered`);
           return;
         }
+      }
+      this.log.debug(`Looking up shelly device ${hk}${discoveredDevice.id}${db} host ${zb}${discoveredDevice.host}${db}`);
+      const lookupIp = await resolveHostname(discoveredDevice.id);
+      if (!lookupIp) {
+        this.log.debug(`Lookup shelly device ${hk}${discoveredDevice.id}${db} host ${zb}${discoveredDevice.host}${db} not resolved`);
+      }
+      if (lookupIp && lookupIp !== discoveredDevice.host) {
+        this.log.warn(`Shelly device ${hk}${discoveredDevice.id}${wr} host ${zb}${discoveredDevice.host}${wr} resolved to new host ${zb}${lookupIp}${wr}`);
+        discoveredDevice.host = lookupIp;
+        this.changedDevices.set(discoveredDevice.id, discoveredDevice.id);
       }
       this.discoveredDevices.set(discoveredDevice.id, discoveredDevice);
       this.storedDevices.set(discoveredDevice.id, discoveredDevice);
@@ -1149,7 +1159,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     });
     this.nodeStorage = await this.nodeStorageManager.createStorage('devices');
 
-    // Reset the storage if requested
+    // Reset the storage if requested or load the stored devices
     if (this.config.resetStorageDiscover === true) {
       this.config.resetStorageDiscover = false;
 
@@ -1184,7 +1194,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     }
     this.log.debug(`Loaded ${CYAN}${this.changedDevices.size}${nf} changed Shelly devices from the storage`);
 
-    // start Shelly mDNS device discoverer
+    // start Shelly mDNS device discoverer if enabled and stop it after 10 minutes
     if (this.config.enableMdnsDiscover === true) {
       this.shelly.startMdns(10 * 60 * 1000, this.config.interfaceName as string, 'udp4', this.config.debugMdns as boolean);
     }
@@ -1936,10 +1946,11 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
 
 export async function resolveHostname(hostname: string): Promise<string | null> {
   try {
-    const addresses = await dns.promises.lookup(hostname);
+    const addresses = await dns.promises.lookup(hostname.toLowerCase() + '.local', { family: 4 });
     return addresses.address;
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
+    // console.error(`Failed to resolve hostname ${hostname}:`, error);
     return null;
   }
 }
