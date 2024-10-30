@@ -13,6 +13,7 @@ If you like this project and find it useful, please consider giving it a star on
 ### Changed
 
 - [log]: Changed level for CoIoT configuration messages from notice to warn.
+- [package]: Requires matterbridge 1.6.0.
 - [package]: Updated dependencies.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
