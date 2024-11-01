@@ -68,7 +68,9 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": ["gen=2"]
+      "data": [
+        "gen=2"
+      ]
     },
     {
       "name": "ShellyProEM50-A0DD6CA09158.local",
@@ -76,7 +78,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": true,
-      "data": "192.168.1.250"
+      "data": "192.168.1.81"
     },
     {
       "name": "shellyproem50-a0dd6ca09158._shelly._tcp.local",
@@ -97,7 +99,11 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": ["gen=2", "app=ProEM", "ver=1.4.0"]
+      "data": [
+        "gen=2",
+        "app=ProEM",
+        "ver=1.4.4"
+      ]
     },
     {
       "name": "ShellyProEM50-A0DD6CA09158.local",
@@ -105,7 +111,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": true,
-      "data": "192.168.1.250"
+      "data": "192.168.1.81"
     }
   ]
 }

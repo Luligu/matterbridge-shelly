@@ -31,8 +31,8 @@
       "dns": null
     },
     "wifi_sta1": {
-      "enabled": false,
-      "ssid": null,
+      "enabled": true,
+      "ssid": "wifiAlbatros",
       "ipv4_method": "dhcp",
       "ip": null,
       "gw": null,
@@ -71,7 +71,7 @@
       "username": "admin"
     },
     "pin_code": "",
-    "name": "My Shelly DUO",
+    "name": "Duo Gen1",
     "fw": "20230913-111821/v1.14.0-gcb84623",
     "pon_wifi_reset": false,
     "discoverable": false,
@@ -88,16 +88,19 @@
     "lat": null,
     "lng": null,
     "tzautodetect": true,
-    "tz_utc_offset": 7200,
+    "tz_utc_offset": 3600,
     "tz_dst": false,
     "tz_dst_auto": true,
-    "time": "23:32",
-    "unixtime": 1725571960,
+    "time": "14:41",
+    "unixtime": 1730468505,
     "debug_enable": false,
     "allow_cross_origin": false,
     "actions": {
       "active": false,
-      "names": ["out_on_url", "out_off_url"]
+      "names": [
+        "out_on_url",
+        "out_off_url"
+      ]
     },
     "hwinfo": {
       "hw_revision": "prod-102020",
@@ -109,11 +112,11 @@
       {
         "name": null,
         "ison": false,
-        "brightness": 34,
-        "white": 50,
-        "temp": 4750,
+        "brightness": 40,
+        "white": 60,
+        "temp": 5000,
         "transition": 1000,
-        "default_state": "last",
+        "default_state": "off",
         "auto_on": 0,
         "auto_off": 0,
         "schedule": false,
@@ -139,7 +142,7 @@
       "connected": true,
       "ssid": "FibreBox_X6-12A4C7",
       "ip": "192.168.1.154",
-      "rssi": -56
+      "rssi": -57
     },
     "cloud": {
       "enabled": true,
@@ -148,12 +151,12 @@
     "mqtt": {
       "connected": false
     },
-    "time": "23:32",
-    "unixtime": 1725571959,
-    "serial": 30,
+    "time": "14:41",
+    "unixtime": 1730468505,
+    "serial": 3674,
     "has_update": false,
     "mac": "34945479CFA4",
-    "cfg_changed_cnt": 1,
+    "cfg_changed_cnt": 0,
     "actions_stats": {
       "skipped": 0
     },
@@ -165,9 +168,9 @@
         "timer_started": 0,
         "timer_duration": 0,
         "timer_remaining": 0,
-        "brightness": 34,
-        "white": 50,
-        "temp": 4750,
+        "brightness": 40,
+        "white": 60,
+        "temp": 5000,
         "transition": 0
       }
     ],
@@ -175,9 +178,13 @@
       {
         "power": 0,
         "is_valid": true,
-        "timestamp": 1725579159,
-        "counters": [0, 0, 0],
-        "total": 24
+        "timestamp": 1730472105,
+        "counters": [
+          0,
+          0,
+          0
+        ],
+        "total": 3669
       }
     ],
     "update": {
@@ -188,10 +195,13 @@
       "beta_version": "20231107-162700/v1.14.1-rc1-g0617c15"
     },
     "ram_total": 52128,
-    "ram_free": 39592,
+    "ram_free": 40192,
     "fs_size": 233681,
     "fs_free": 163401,
-    "uptime": 1222
+    "uptime": 165689
   },
-  "components": []
+  "components": [],
+  "cfg_rev": 0,
+  "offset": 0,
+  "total": 0
 }

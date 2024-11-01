@@ -29,6 +29,22 @@
       "class": "IN",
       "flush": false,
       "data": "shelly1minig3-543204547478._shelly._tcp.local"
+    },
+    {
+      "name": "_services._dns-sd._udp.local",
+      "type": "PTR",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": "_shelly._tcp.local"
+    },
+    {
+      "name": "_services._dns-sd._udp.local",
+      "type": "PTR",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": "_http._tcp.local"
     }
   ],
   "authorities": [],
@@ -52,7 +68,9 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": ["gen=3"]
+      "data": [
+        "gen=3"
+      ]
     },
     {
       "name": "Shelly1MiniG3-543204547478.local",
@@ -81,7 +99,11 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": ["gen=3", "app=Mini1G3", "ver=1.4.0"]
+      "data": [
+        "gen=3",
+        "app=Mini1G3",
+        "ver=1.4.4"
+      ]
     },
     {
       "name": "Shelly1MiniG3-543204547478.local",

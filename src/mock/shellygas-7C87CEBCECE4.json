@@ -25,11 +25,11 @@
     "wifi_sta": {
       "enabled": true,
       "ssid": "Tamer Umniah",
-      "ipv4_method": "dhcp",
-      "ip": null,
-      "gw": null,
-      "mask": null,
-      "dns": null
+      "ipv4_method": "static",
+      "ip": "192.168.68.25",
+      "gw": "192.168.68.1",
+      "mask": "255.255.255.0",
+      "dns": "192.168.1.1"
     },
     "wifi_sta1": {
       "enabled": false,
@@ -41,7 +41,7 @@
       "dns": null
     },
     "ap_roaming": {
-      "enabled": false,
+      "enabled": true,
       "threshold": -70
     },
     "mqtt": {
@@ -72,7 +72,7 @@
       "username": "admin"
     },
     "pin_code": "",
-    "name": null,
+    "name": "Gas Gen1",
     "fw": "20230913-114427/v1.14.0-gcb84623",
     "pon_wifi_reset": false,
     "discoverable": false,
@@ -92,13 +92,17 @@
     "tz_utc_offset": 10800,
     "tz_dst": false,
     "tz_dst_auto": true,
-    "time": "18:07",
-    "unixtime": 1727276849,
+    "time": "16:34",
+    "unixtime": 1729863286,
     "debug_enable": false,
     "allow_cross_origin": false,
     "actions": {
       "active": false,
-      "names": ["alarm_off_url", "alarm_mild_url", "alarm_heavy_url"]
+      "names": [
+        "alarm_off_url",
+        "alarm_mild_url",
+        "alarm_heavy_url"
+      ]
     },
     "hwinfo": {
       "hw_revision": "prod-2020-04-09",
@@ -111,8 +115,8 @@
     "wifi_sta": {
       "connected": true,
       "ssid": "Tamer Umniah",
-      "ip": "192.168.68.165",
-      "rssi": -44
+      "ip": "192.168.68.25",
+      "rssi": -56
     },
     "cloud": {
       "enabled": true,
@@ -121,12 +125,12 @@
     "mqtt": {
       "connected": false
     },
-    "time": "18:07",
-    "unixtime": 1727276849,
-    "serial": 6,
+    "time": "16:34",
+    "unixtime": 1729863286,
+    "serial": 30,
     "has_update": false,
     "mac": "7C87CEBCECE4",
-    "cfg_changed_cnt": 1,
+    "cfg_changed_cnt": 0,
     "actions_stats": {
       "skipped": 0
     },
@@ -152,10 +156,13 @@
       "beta_version": "20231107-165146/v1.14.1-rc1-g0617c15"
     },
     "ram_total": 52528,
-    "ram_free": 40500,
+    "ram_free": 40652,
     "fs_size": 233681,
     "fs_free": 92619,
-    "uptime": 89
+    "uptime": 30616
   },
-  "components": []
+  "components": [],
+  "cfg_rev": 0,
+  "offset": 0,
+  "total": 0
 }

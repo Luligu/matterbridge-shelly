@@ -34,8 +34,8 @@
       "dns": null
     },
     "wifi_sta1": {
-      "enabled": false,
-      "ssid": null,
+      "enabled": true,
+      "ssid": "wifiAlbatros",
       "ipv4_method": "dhcp",
       "ip": null,
       "gw": null,
@@ -62,7 +62,7 @@
     "coiot": {
       "enabled": true,
       "update_period": 15,
-      "peer": ""
+      "peer": "192.168.1.189:5683"
     },
     "sntp": {
       "server": "time.google.com",
@@ -74,7 +74,7 @@
       "username": "admin"
     },
     "pin_code": "",
-    "name": "My Shelly 1L",
+    "name": "1L Gen1",
     "fw": "20230913-112054/v1.14.0-gcb84623",
     "factory_reset_from_switch": true,
     "pon_wifi_reset": false,
@@ -88,12 +88,15 @@
       "enabled": true,
       "connected": true
     },
+    "timezone": null,
+    "lat": null,
+    "lng": null,
     "tzautodetect": true,
-    "tz_utc_offset": 7200,
+    "tz_utc_offset": 3600,
     "tz_dst": false,
     "tz_dst_auto": true,
-    "time": "22:20",
-    "unixtime": 1722543642,
+    "time": "14:14",
+    "unixtime": 1730466873,
     "led_status_disable": false,
     "debug_enable": false,
     "allow_cross_origin": false,
@@ -123,7 +126,7 @@
       {
         "name": null,
         "appliance_type": "General",
-        "ison": false,
+        "ison": true,
         "has_timer": false,
         "default_state": "switch1",
         "btn1_type": "toggle",
@@ -144,7 +147,7 @@
       "connected": true,
       "ssid": "FibreBox_X6-12A4C7",
       "ip": "192.168.1.241",
-      "rssi": -51
+      "rssi": -63
     },
     "cloud": {
       "enabled": true,
@@ -153,18 +156,18 @@
     "mqtt": {
       "connected": false
     },
-    "time": "22:20",
-    "unixtime": 1722543642,
-    "serial": 15,
+    "time": "14:14",
+    "unixtime": 1730466873,
+    "serial": 31,
     "has_update": false,
     "mac": "E8DB84AAD781",
-    "cfg_changed_cnt": 1,
+    "cfg_changed_cnt": 0,
     "actions_stats": {
       "skipped": 0
     },
     "relays": [
       {
-        "ison": false,
+        "ison": true,
         "has_timer": false,
         "timer_started": 0,
         "timer_duration": 0,
@@ -176,8 +179,12 @@
       {
         "power": 0,
         "is_valid": false,
-        "timestamp": 1722550842,
-        "counters": [0, 0, 0],
+        "timestamp": 1730470473,
+        "counters": [
+          0,
+          0,
+          0
+        ],
         "total": 0
       }
     ],
@@ -193,11 +200,11 @@
         "event_cnt": 0
       }
     ],
-    "temperature": 51.97,
+    "temperature": 80.27,
     "overtemperature": false,
     "tmp": {
-      "tC": 51.97,
-      "tF": 125.55,
+      "tC": 80.27,
+      "tF": 176.48,
       "is_valid": true
     },
     "update": {
@@ -208,9 +215,13 @@
       "beta_version": "20231107-163031/v1.14.1-rc1-g0617c15"
     },
     "ram_total": 51912,
-    "ram_free": 39640,
+    "ram_free": 39808,
     "fs_size": 233681,
     "fs_free": 164405,
-    "uptime": 4004
-  }
+    "uptime": 164093
+  },
+  "components": [],
+  "cfg_rev": 0,
+  "offset": 0,
+  "total": 0
 }

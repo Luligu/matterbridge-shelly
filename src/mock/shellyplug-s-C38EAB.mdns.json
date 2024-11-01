@@ -49,7 +49,14 @@
       "ttl": 120,
       "class": "IN",
       "flush": true,
-      "data": ["id=shellyplug-s-C38EAB", "arch=esp8266", "app=shelly-plug-s", "fw_version=1.0", "fw_id=20230913-113421/v1.14.0-gcb84623", "discoverable=false"]
+      "data": [
+        "id=shellyplug-s-C38EAB",
+        "arch=esp8266",
+        "app=shelly-plug-s",
+        "fw_version=1.0",
+        "fw_id=20230913-113421/v1.14.0-gcb84623",
+        "discoverable=false"
+      ]
     },
     {
       "name": "shellyplug-s-C38EAB.local",
@@ -67,7 +74,9 @@
       "flush": true,
       "data": {
         "nextDomain": "shellyplug-s-C38EAB.local",
-        "rrtypes": ["A"]
+        "rrtypes": [
+          "A"
+        ]
       }
     }
   ],
