@@ -336,7 +336,7 @@ describe('ShellyPlatform', () => {
   it('should throw because of version', () => {
     mockMatterbridge.matterbridgeVersion = '1.5.4';
     expect(() => new ShellyPlatform(mockMatterbridge, mockLog, mockConfig)).toThrow();
-    mockMatterbridge.matterbridgeVersion = '1.5.9';
+    mockMatterbridge.matterbridgeVersion = '1.6.0';
   });
 
   it('should call onStart with reason and start mDNS', async () => {
@@ -520,7 +520,7 @@ describe('ShellyPlatform', () => {
     (shellyPlatform as any).shelly.emit('discovered', { id: 'shelly1-84FCE1234', host: 'invalid new host', port: 80, gen: 1 });
     expect(await (shellyPlatform as any).loadStoredDevices()).toBeTruthy();
     expect((shellyPlatform as any).storedDevices.size).toBe(1);
-    expect(mockLog.warn).toHaveBeenCalledWith(`Shelly device ${hk}shelly1-84FCE1234${wr} host ${zb}invalid new host${wr} is already discovered with a different host.`);
+    expect(mockLog.warn).toHaveBeenCalledWith(`Shelly device ${hk}shelly1-84FCE1234${wr} host ${zb}invalid new host${wr} has been discovered with a different host.`);
     cleanup();
   });
 

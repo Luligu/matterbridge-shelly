@@ -219,3 +219,10 @@ systemctl --user start matterbridge
 ```
 journalctl --user -u matterbridge.service -n 1000 -f --output cat
 ```
+
+## View the log of Matterbridge for a range of time (this will show the log correctly formatted with colors)
+
+```
+journalctl --user --no-pager -u matterbridge.service --since "2024-10-31 08:00:00" --until "2024-10-31 12:00:00 --output cat"
+```
+

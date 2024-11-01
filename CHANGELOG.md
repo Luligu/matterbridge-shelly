@@ -8,13 +8,17 @@ If you like this project and find it useful, please consider giving it a star on
 
 ### Added
 
-- [shelly]: Added a check on changed device IP address when loading from storage or from config.
+- [shelly]: Added change of device IP address without restart when mDns detect new IP.
 
 ### Changed
 
 - [log]: Changed level for CoIoT configuration messages from notice to warn.
 - [package]: Requires matterbridge 1.6.0.
 - [package]: Updated dependencies.
+
+### Fixed
+
+- [BTHome]: Fixed log level for BLU devices.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
   <img src="./yellow-button.png" alt="Buy me a coffee" width="120">

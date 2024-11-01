@@ -93,8 +93,7 @@ export class ShellyDevice extends EventEmitter {
   thermostatSetpointTimeout?: NodeJS.Timeout;
   private lastseenInterval?: NodeJS.Timeout;
   private startWsClientTimeout?: NodeJS.Timeout;
-
-  private wsClient: WsClient | undefined;
+  wsClient: WsClient | undefined;
 
   private readonly _components = new Map<string, ShellyComponent>();
 

@@ -158,32 +158,26 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         if (stored?.host !== discoveredDevice.host) {
           this.log.warn(`Shelly device ${hk}${discoveredDevice.id}${wr} host ${zb}${discoveredDevice.host}${wr} has been discovered with a different host.`);
           this.log.warn(`Set new address for shelly device ${hk}${discoveredDevice.id}${wr} from ${zb}${stored?.host}${wr} to ${zb}${discoveredDevice.host}${wr}`);
-          this.log.warn(`Please restart matterbridge for the change to take effect.`);
           this.discoveredDevices.set(discoveredDevice.id, discoveredDevice);
           this.storedDevices.set(discoveredDevice.id, discoveredDevice);
           this.changedDevices.set(discoveredDevice.id, discoveredDevice.id);
           await this.saveStoredDevices();
+          if (this.shellyDevices.has(discoveredDevice.id)) {
+            const device = this.shellyDevices.get(discoveredDevice.id) as ShellyDevice;
+            device.host = discoveredDevice.host;
+            device.wsClient?.stop(); // It will be restarted by the ShellyDevice interval if gen > 1
+            device.log.warn(`Shelly device ${hk}${discoveredDevice.id}${wr} host ${zb}${discoveredDevice.host}${wr} updated`);
+          } else this.log.warn(`Please restart matterbridge for the change to take effect.`);
           return;
         } else {
           this.log.info(`Shelly device ${hk}${discoveredDevice.id}${nf} host ${zb}${discoveredDevice.host}${nf} already discovered`);
           return;
         }
+      } else {
+        this.discoveredDevices.set(discoveredDevice.id, discoveredDevice);
+        this.storedDevices.set(discoveredDevice.id, discoveredDevice);
+        await this.saveStoredDevices();
       }
-      /*
-      this.log.debug(`Looking up shelly device ${hk}${discoveredDevice.id}${db} host ${zb}${discoveredDevice.host}${db}`);
-      const lookupIp = await resolveHostname(discoveredDevice.id);
-      if (!lookupIp) {
-        this.log.debug(`Lookup shelly device ${hk}${discoveredDevice.id}${db} host ${zb}${discoveredDevice.host}${db} not resolved`);
-      }
-      if (lookupIp && lookupIp !== discoveredDevice.host) {
-        this.log.warn(`Shelly device ${hk}${discoveredDevice.id}${wr} host ${zb}${discoveredDevice.host}${wr} resolved to new host ${zb}${lookupIp}${wr}`);
-        discoveredDevice.host = lookupIp;
-        this.changedDevices.set(discoveredDevice.id, discoveredDevice.id);
-      }
-      */
-      this.discoveredDevices.set(discoveredDevice.id, discoveredDevice);
-      this.storedDevices.set(discoveredDevice.id, discoveredDevice);
-      await this.saveStoredDevices();
       if (this.validateWhiteBlackList(discoveredDevice.id)) {
         await this.addDevice(discoveredDevice.id, discoveredDevice.host);
       }
@@ -1379,6 +1373,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       `Changing logger level for platform ${idn}${this.config.name}${rs}${db} to ${logLevel} with debugMdns ${this.config.debugMdns} and debugCoap ${this.config.debugCoap}`,
     );
     this.shelly.setLogLevel(logLevel, this.config.debugMdns as boolean, this.config.debugCoap as boolean, this.config.debugWs as boolean);
+    this.bluBridgedDevices.forEach((bluDevice) => (bluDevice.log.logLevel = logLevel));
   }
 
   private addElectricalMeasurements(device: MatterbridgeDevice, endpoint: Endpoint | undefined, shelly: ShellyDevice, component: ShellyComponent) {
