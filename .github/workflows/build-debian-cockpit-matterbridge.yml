@@ -23,7 +23,7 @@ jobs:
             
           # Set up the control file with package metadata
           echo 'Package: cockpit-matterbridge' > package/DEBIAN/control
-          echo 'Version: 1.0.2' >> package/DEBIAN/control
+          echo 'Version: 1.0.3' >> package/DEBIAN/control
           echo 'Section: admin' >> package/DEBIAN/control
           echo 'Priority: optional' >> package/DEBIAN/control
           echo 'Architecture: all' >> package/DEBIAN/control

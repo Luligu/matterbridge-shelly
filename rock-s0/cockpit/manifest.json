@@ -1,7 +1,7 @@
 {
     "name": "matterbridge",
     "title": "Matterbridge Management",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "menu": {
         "index": {
             "label": "Matterbridge"

@@ -381,6 +381,7 @@ export class CoapServer extends EventEmitter {
             if (s.D === 'deviceTemp' && s.U !== 'F' && b.D === 'device') desc.push({ id: s.I, component: 'sys', property: 'temperature', range: s.R }); // SHSW-25
             if (s.D === 'overtemp' && b.D === 'device') desc.push({ id: s.I, component: 'sys', property: 'overtemperature', range: s.R }); // SHSW-25
             if (s.D === 'voltage' && b.D === 'device') desc.push({ id: s.I, component: 'sys', property: 'voltage', range: s.R }); // SHSW-25
+            if (s.D === 'cfgChanged' && b.D === 'device') desc.push({ id: s.I, component: 'sys', property: 'cfg_rev', range: s.R });
 
             // light component
             if (s.D === 'output') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'state', range: s.R });
