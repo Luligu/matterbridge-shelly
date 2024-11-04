@@ -319,7 +319,7 @@ describe('Shelly devices test', () => {
       const device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shellybutton1-485519F31EA3.json'));
       expect(device).not.toBeUndefined();
       if (!device) return;
-      expect(device.components.length).toBe(9);
+      expect(device.components.length).toBe(10);
 
       const coiot = device.getComponent('coiot');
       expect(coiot).not.toBeUndefined();
@@ -347,8 +347,8 @@ describe('Shelly devices test', () => {
       const device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shellybutton1-485519F31EA3.json'));
       expect(device).not.toBeUndefined();
       if (!device) return;
-      expect(device.logDevice()).toBe(9);
-      expect(device.components.length).toBe(9);
+      expect(device.logDevice()).toBe(10);
+      expect(device.components.length).toBe(10);
 
       const input = device.getComponent('input:0');
       // consoleLogSpy.mockRestore();
@@ -428,9 +428,9 @@ describe('Shelly devices test', () => {
       expect(device.cached).toBe(false);
       expect(device.sleepMode).toBe(false);
 
-      expect(device.components.length).toBe(10);
-      expect(device.getComponentNames()).toStrictEqual(['WiFi', 'MQTT', 'CoIoT', 'Sntp', 'Cloud', 'Relay', 'PowerMeter', 'Input']);
-      expect(device.getComponentIds()).toStrictEqual(['wifi_ap', 'wifi_sta', 'wifi_sta1', 'mqtt', 'coiot', 'sntp', 'cloud', 'relay:0', 'meter:0', 'input:0']);
+      expect(device.components.length).toBe(11);
+      expect(device.getComponentNames()).toStrictEqual(['WiFi', 'MQTT', 'CoIoT', 'Sntp', 'Cloud', 'Relay', 'PowerMeter', 'Input', 'Sys']);
+      expect(device.getComponentIds()).toStrictEqual(['wifi_ap', 'wifi_sta', 'wifi_sta1', 'mqtt', 'coiot', 'sntp', 'cloud', 'relay:0', 'meter:0', 'input:0', 'sys']);
 
       expect(device.getComponent('sys')?.getValue('temperature')).toBe(undefined);
       expect(device.getComponent('sys')?.getValue('overtemperature')).toBe(undefined);
@@ -496,9 +496,9 @@ describe('Shelly devices test', () => {
       expect(device.cached).toBe(false);
       expect(device.sleepMode).toBe(true);
 
-      expect(device.components.length).toBe(10);
-      expect(device.getComponentNames()).toStrictEqual(['WiFi', 'MQTT', 'CoIoT', 'Sntp', 'Cloud', 'Flood', 'Temperature', 'Battery']);
-      expect(device.getComponentIds()).toStrictEqual(['wifi_ap', 'wifi_sta', 'wifi_sta1', 'mqtt', 'coiot', 'sntp', 'cloud', 'flood', 'temperature', 'battery']);
+      expect(device.components.length).toBe(11);
+      expect(device.getComponentNames()).toStrictEqual(['WiFi', 'MQTT', 'CoIoT', 'Sntp', 'Cloud', 'Flood', 'Temperature', 'Battery', 'Sys']);
+      expect(device.getComponentIds()).toStrictEqual(['wifi_ap', 'wifi_sta', 'wifi_sta1', 'mqtt', 'coiot', 'sntp', 'cloud', 'flood', 'temperature', 'battery', 'sys']);
 
       expect(device.getComponent('flood')?.getValue('flood')).toBe(false);
       expect(device.getComponent('temperature')?.getValue('value')).toBe(22);
@@ -536,8 +536,8 @@ describe('Shelly devices test', () => {
       expect(device.cached).toBe(false);
       expect(device.sleepMode).toBe(true);
 
-      expect(device.components.length).toBe(13);
-      expect(device.getComponentNames()).toStrictEqual(['WiFi', 'MQTT', 'CoIoT', 'Sntp', 'Cloud', 'Temperature', 'Lux', 'Vibration', 'Sensor', 'Contact', 'Battery']);
+      expect(device.components.length).toBe(14);
+      expect(device.getComponentNames()).toStrictEqual(['WiFi', 'MQTT', 'CoIoT', 'Sntp', 'Cloud', 'Temperature', 'Lux', 'Vibration', 'Sensor', 'Contact', 'Battery', 'Sys']);
       expect(device.getComponentIds()).toStrictEqual([
         'wifi_ap',
         'wifi_sta',
@@ -552,6 +552,7 @@ describe('Shelly devices test', () => {
         'sensor',
         'contact',
         'battery',
+        'sys',
       ]);
 
       expect(device.getComponent('sensor')?.getValue('state')).toBe('close');
@@ -594,9 +595,9 @@ describe('Shelly devices test', () => {
       expect(device.cached).toBe(false);
       expect(device.sleepMode).toBe(true);
 
-      expect(device.components.length).toBe(10);
-      expect(device.getComponentNames()).toStrictEqual(['WiFi', 'MQTT', 'CoIoT', 'Sntp', 'Cloud', 'Temperature', 'Humidity', 'Battery']);
-      expect(device.getComponentIds()).toStrictEqual(['wifi_ap', 'wifi_sta', 'wifi_sta1', 'mqtt', 'coiot', 'sntp', 'cloud', 'temperature', 'humidity', 'battery']);
+      expect(device.components.length).toBe(11);
+      expect(device.getComponentNames()).toStrictEqual(['WiFi', 'MQTT', 'CoIoT', 'Sntp', 'Cloud', 'Temperature', 'Humidity', 'Battery', 'Sys']);
+      expect(device.getComponentIds()).toStrictEqual(['wifi_ap', 'wifi_sta', 'wifi_sta1', 'mqtt', 'coiot', 'sntp', 'cloud', 'temperature', 'humidity', 'battery', 'sys']);
 
       expect(device.getComponent('temperature')?.getValue('value')).toBe(23);
       expect(device.getComponent('temperature')?.getValue('units')).toBe('C');
@@ -639,9 +640,9 @@ describe('Shelly devices test', () => {
       expect(device.cached).toBe(false);
       expect(device.sleepMode).toBe(false);
 
-      expect(device.components.length).toBe(8);
-      expect(device.getComponentNames()).toStrictEqual(['WiFi', 'MQTT', 'CoIoT', 'Sntp', 'Cloud', 'Gas']);
-      expect(device.getComponentIds()).toStrictEqual(['wifi_ap', 'wifi_sta', 'wifi_sta1', 'mqtt', 'coiot', 'sntp', 'cloud', 'gas']);
+      expect(device.components.length).toBe(9);
+      expect(device.getComponentNames()).toStrictEqual(['WiFi', 'MQTT', 'CoIoT', 'Sntp', 'Cloud', 'Gas', 'Sys']);
+      expect(device.getComponentIds()).toStrictEqual(['wifi_ap', 'wifi_sta', 'wifi_sta1', 'mqtt', 'coiot', 'sntp', 'cloud', 'gas', 'sys']);
 
       expect(device.getComponent('gas')?.getValue('sensor_state')).toBe('normal');
       expect(device.getComponent('gas')?.getValue('alarm_state')).toBe('none');
@@ -818,9 +819,9 @@ describe('Shelly devices test', () => {
       expect(device.cached).toBe(false);
       expect(device.sleepMode).toBe(false);
 
-      expect(device.components.length).toBe(11);
-      expect(device.getComponentNames()).toStrictEqual(['WiFi', 'MQTT', 'CoIoT', 'Sntp', 'Cloud', 'Relay', 'PowerMeter']);
-      expect(device.getComponentIds()).toStrictEqual(['wifi_ap', 'wifi_sta', 'wifi_sta1', 'mqtt', 'coiot', 'sntp', 'cloud', 'relay:0', 'emeter:0', 'emeter:1', 'emeter:2']);
+      expect(device.components.length).toBe(12);
+      expect(device.getComponentNames()).toStrictEqual(['WiFi', 'MQTT', 'CoIoT', 'Sntp', 'Cloud', 'Relay', 'PowerMeter', 'Sys']);
+      expect(device.getComponentIds()).toStrictEqual(['wifi_ap', 'wifi_sta', 'wifi_sta1', 'mqtt', 'coiot', 'sntp', 'cloud', 'relay:0', 'emeter:0', 'emeter:1', 'emeter:2', 'sys']);
 
       expect(device.getComponent('sys')?.getValue('temperature')).toBe(undefined);
       expect(device.getComponent('sys')?.getValue('overtemperature')).toBe(undefined);
@@ -871,9 +872,9 @@ describe('Shelly devices test', () => {
       expect(device.cached).toBe(false);
       expect(device.sleepMode).toBe(false);
 
-      expect(device.components.length).toBe(9);
-      expect(device.getComponentNames()).toStrictEqual(['WiFi', 'MQTT', 'CoIoT', 'Sntp', 'Cloud', 'Light', 'PowerMeter']);
-      expect(device.getComponentIds()).toStrictEqual(['wifi_ap', 'wifi_sta', 'wifi_sta1', 'mqtt', 'coiot', 'sntp', 'cloud', 'light:0', 'meter:0']);
+      expect(device.components.length).toBe(10);
+      expect(device.getComponentNames()).toStrictEqual(['WiFi', 'MQTT', 'CoIoT', 'Sntp', 'Cloud', 'Light', 'PowerMeter', 'Sys']);
+      expect(device.getComponentIds()).toStrictEqual(['wifi_ap', 'wifi_sta', 'wifi_sta1', 'mqtt', 'coiot', 'sntp', 'cloud', 'light:0', 'meter:0', 'sys']);
 
       expect(device.getComponent('sys')?.getValue('temperature')).toBe(undefined);
       expect(device.getComponent('sys')?.getValue('overtemperature')).toBe(undefined);
