@@ -908,7 +908,7 @@ describe('Shelly devices test', () => {
       expect(device.auth).toBe(false);
       expect(device.gen).toBe(1);
       expect(device.profile).toBe('color');
-      expect(device.name).toBe('My Shelly DUO RGBW');
+      expect(device.name).toBe('Bulb Gen1');
       expect(device.hasUpdate).toBe(false);
       expect(device.lastseen).not.toBe(0);
       expect(device.online).toBe(true);
@@ -953,7 +953,7 @@ describe('Shelly devices test', () => {
       expect(device.auth).toBe(false);
       expect(device.gen).toBe(1);
       expect(device.profile).toBe('white');
-      expect(device.name).toBe('My Shelly DUO RGBW');
+      expect(device.name).toBe('Bulb Gen1');
       expect(device.hasUpdate).toBe(false);
       expect(device.lastseen).not.toBe(0);
       expect(device.online).toBe(true);
