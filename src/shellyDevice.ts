@@ -499,6 +499,7 @@ export class ShellyDevice extends EventEmitter {
       device.name = settingsPayload.name ? (settingsPayload.name as string) : device.id;
       device.gen = 1;
       device.hasUpdate = statusPayload.has_update as boolean;
+      device.addComponent(new ShellyComponent(device, 'sys', 'Sys')); // Always present since we process now cfgChanged
       for (const key in settingsPayload) {
         if (key === 'wifi_ap') device.addComponent(new ShellyComponent(device, key, 'WiFi', settingsPayload[key] as ShellyData));
         if (key === 'wifi_sta') device.addComponent(new ShellyComponent(device, key, 'WiFi', settingsPayload[key] as ShellyData));
@@ -538,14 +539,14 @@ export class ShellyDevice extends EventEmitter {
         }
       }
       for (const key in statusPayload) {
-        if (key === 'temperature') device.addComponent(new ShellyComponent(device, 'sys', 'Sys'));
-        if (key === 'overtemperature') device.addComponent(new ShellyComponent(device, 'sys', 'Sys'));
+        // if (key === 'temperature') device.addComponent(new ShellyComponent(device, 'sys', 'Sys'));
+        // if (key === 'overtemperature') device.addComponent(new ShellyComponent(device, 'sys', 'Sys'));
         if (key === 'tmp' && statusPayload.temperature === undefined && statusPayload.overtemperature === undefined) {
           device.addComponent(new ShellyComponent(device, 'temperature', 'Temperature'));
         }
         if (key === 'hum') device.addComponent(new ShellyComponent(device, 'humidity', 'Humidity'));
-        if (key === 'voltage') device.addComponent(new ShellyComponent(device, 'sys', 'Sys'));
-        if (key === 'mode') device.addComponent(new ShellyComponent(device, 'sys', 'Sys'));
+        // if (key === 'voltage') device.addComponent(new ShellyComponent(device, 'sys', 'Sys'));
+        // if (key === 'mode') device.addComponent(new ShellyComponent(device, 'sys', 'Sys'));
         if (key === 'bat') device.addComponent(new ShellyComponent(device, 'battery', 'Battery'));
         if (key === 'charger') device.addComponent(new ShellyComponent(device, 'battery', 'Battery'));
         if (key === 'lux') device.addComponent(new ShellyComponent(device, 'lux', 'Lux'));
