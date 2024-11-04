@@ -38,7 +38,9 @@ cockpit.transport.wait(function () {
   const WS_ID_SETTINGS = 11;
   const WS_ID_PLUGINS = 12;
   const WS_ID_DEVICES = 13;
+  const WS_ID_INSTALL = 14;
 
+  let ws;
   let lastSeen = Date.now();
   let restart = false;
 
@@ -95,7 +97,7 @@ cockpit.transport.wait(function () {
     const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
     const hostname = window.location.hostname;
     console.log(`Connecting to Matterbridge WebSocket API at ${protocol}://${hostname}:8283 ...`);
-    const ws = new WebSocket(`${protocol}://${hostname}:8283`);
+    ws = new WebSocket(`${protocol}://${hostname}:8283`);
 
     setInterval(() => {
       if (ws.readyState === WebSocket.OPEN) {
@@ -136,6 +138,8 @@ cockpit.transport.wait(function () {
           ws.send(JSON.stringify({ id: WS_ID_DEVICES, src: 'MatterbridgeCockpit', dst: 'Matterbridge', method: '/api/devices', params: {} }));
         } else if (message.id === WS_ID_RESTART_REQUIRED && message.method === 'restart_required') {
           console.log('Received restart required message');
+          document.getElementById('restart-button').style.display = 'block';
+          restart = true;
         } else if (message.error) {
           console.error('Received error response:', message.error);
         } else if (message.id === WS_ID_PING) {
@@ -189,6 +193,24 @@ cockpit.transport.wait(function () {
           });
           console.log('Loaded devices successfully!');
         }
+        else if (message.id === WS_ID_INSTALL) {
+          if (message.response) {
+            console.log(`Received install response:`, message);
+            if (document.getElementById('shelly-current').innerText === `Updating...`)
+              document.getElementById('shelly-current').innerText = `Updated`;
+            else if (document.getElementById('matterbridge-current').innerText === `Updating...`)
+              document.getElementById('matterbridge-current').innerText = `Updated`;
+            document.getElementById('restart-button').style.display = 'block';
+            restart = true;
+          }
+          if (message.error) {
+            console.error(`Received install error:`, message);
+            if (document.getElementById('shelly-current').innerText === `Updating...`)
+              document.getElementById('shelly-current').innerText = `Error updating`;
+            else if (document.getElementById('matterbridge-current').innerText === `Updating...`)
+              document.getElementById('matterbridge-current').innerText = `Error updating`;
+          }
+        }
         lastSeen = Date.now();
       }
       catch (error) {
@@ -223,8 +245,18 @@ cockpit.transport.wait(function () {
   }
 
   function initialize() {
-    // Fetch service status and connect to the WebSocket and fetch all data
+    // Fetch service status, connect to the WebSocket and fetch all data from WebSocket
     fetchStatus();
+
+    console.log('Initializing Matterbridge Cockpit extension...', document.getElementById('restart-button').style.display);
+    document.getElementById('restart-button').style.display = 'none';
+
+    // Add listener to restart matterbridge
+    document.getElementById('restart-button').addEventListener('click', function () {
+      console.log(`Restarting matterbridge ...`);
+      document.getElementById('restart-button').style.display = 'none';
+      ws?.send(JSON.stringify({ id: WS_ID_INSTALL, src: 'MatterbridgeCockpit', dst: 'Matterbridge', method: '/api/shutdown', params: {} }));
+    });
 
     // Add listener to open the frontend
     document.getElementById('frontend-button').addEventListener('click', function () {
@@ -239,37 +271,16 @@ cockpit.transport.wait(function () {
     document.getElementById('matterbridge-update').addEventListener('click', function () {
       console.log('Updating matterbridge...');
       document.getElementById('matterbridge-current').innerText = `Updating...`;
-      cockpit
-        .spawn(['npm', 'install', '-g', 'matterbridge', '--omit=dev', '--omit=optional', '--no-fund', '--no-audit'])
-        .then(function (logs) {
-          console.log('Updated matterbridge:', logs);
-          // fetchMatterbridgeCurrent();
-          restart = true;
-          document.getElementById('matterbridge-update').style.display = 'none';
-        })
-        .catch(function (error) {
-          console.error('Error updating matterbridge:', error);
-          document.getElementById('matterbridge-current').innerText = `Error updating...`;
-        });
+      document.getElementById('matterbridge-update').style.display = 'none';
+      ws?.send(JSON.stringify({ id: WS_ID_INSTALL, src: 'MatterbridgeCockpit', dst: 'Matterbridge', method: '/api/install', params: { packageName: 'matterbridge' } }));
     });
 
     // Add listener to install matterbridge-shelly
     document.getElementById('shelly-update').addEventListener('click', function () {
       console.log('Updating matterbridge-shelly...');
       document.getElementById('shelly-current').innerText = `Updating...`;
-      cockpit
-        .spawn(['npm', 'install', '-g', 'matterbridge-shelly', '--omit=dev', '--omit=optional', '--no-fund', '--no-audit'])
-        .then(function (logs) {
-          console.log('Updated matterbridge-shelly:', logs);
-          // fetchShellyCurrent();
-          restart = true;
-          document.getElementById('shelly-update').style.display = 'none';
-        })
-        .catch(function (error) {
-          console.error('Error updating matterbridge-shelly:', error);
-          document.getElementById('shelly-current').innerText = `Error updating...`;
-        });
+      document.getElementById('shelly-update').style.display = 'none';
+      ws?.send(JSON.stringify({ id: WS_ID_INSTALL, src: 'MatterbridgeCockpit', dst: 'Matterbridge', method: '/api/install', params: { packageName: 'matterbridge-shelly' } }));
     });
   }
-
 });

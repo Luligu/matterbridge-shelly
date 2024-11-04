@@ -18,6 +18,23 @@ h1 {
     font-size: 24px;
 }
 
+/* Header div */
+.div-header {
+    gap: 20px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+/* Header buttons div */
+.div-header-buttons {
+    gap: 20px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
 /* First div with panels */
 .div-panels {
     gap: 20px;
