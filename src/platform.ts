@@ -125,7 +125,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     this.failsafeCount = (config.failsafeCount as number) ?? 0;
     if (!isValidNumber(this.failsafeCount, 0)) this.failsafeCount = 0;
 
-    log.debug(`Initializing platform: ${idn}${this.config.name}${rs}${db}`);
+    log.debug(`Initializing platform: ${idn}${config.name}${rs}${db} v.${CYAN}${config.version}`);
     log.debug(`- username: ${CYAN}${config.username}`);
     log.debug(`- password: ${CYAN}${config.password}`);
     log.debug(`- exposeSwitch: ${CYAN}${config.exposeSwitch}`);
