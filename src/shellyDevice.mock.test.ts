@@ -440,6 +440,46 @@ describe('Shelly devices test', () => {
       if (device) device.destroy();
     });
 
+    test('Create a gen 1 shelly1 device with add-on', async () => {
+      id = 'shelly1-34945472A643';
+      log.logName = id;
+
+      device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', id + '.addon.json'));
+      expect(device).not.toBeUndefined();
+      if (!device) return;
+      expect(device.host).toBe(path.join('src', 'mock', id + '.addon.json'));
+      expect(device.model).toBe('SHSW-1');
+      expect(device.mac).toBe('34945472A643');
+      expect(device.id).toBe(id);
+      expect(device.firmware).toBe(firmwareGen1);
+      expect(device.auth).toBe(false);
+      expect(device.gen).toBe(1);
+      expect(device.profile).toBe(undefined);
+      expect(device.name).toBe('1 Gen1 Addon');
+      expect(device.hasUpdate).toBe(false);
+      expect(device.lastseen).not.toBe(0);
+      expect(device.online).toBe(true);
+      expect(device.cached).toBe(false);
+      expect(device.sleepMode).toBe(false);
+
+      expect(device.components.length).toBe(13);
+      expect(device.getComponentNames()).toStrictEqual(['WiFi', 'MQTT', 'CoIoT', 'Sntp', 'Cloud', 'Relay', 'PowerMeter', 'Input', 'Temperature', 'Humidity', 'Sys']);
+      // prettier-ignore
+      expect(device.getComponentIds()).toStrictEqual(['wifi_ap', 'wifi_sta', 'wifi_sta1', 'mqtt', 'coiot', 'sntp', 'cloud', 'relay:0', 'meter:0', 'input:0', 'temperature', 'humidity', 'sys']);
+
+      expect(device.getComponent('sys')?.getValue('temperature')).toBe(undefined);
+      expect(device.getComponent('sys')?.getValue('overtemperature')).toBe(undefined);
+
+      expect(device.getComponent('temperature')?.getValue('0')).toBeDefined();
+      expect(device.getComponent('humidity')?.getValue('0')).toBeDefined();
+      expect(device.getComponent('temperature')?.getValue('value')).toBe(21.5);
+      expect(device.getComponent('humidity')?.getValue('value')).toBe(53.9);
+
+      expect(await device.fetchUpdate()).not.toBeNull();
+
+      if (device) device.destroy();
+    });
+
     test('Create a gen 1 shelly1l device', async () => {
       id = 'shelly1l-E8DB84AAD781';
       log.logName = id;

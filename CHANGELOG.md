@@ -4,10 +4,11 @@ All notable changes to this project will be documented in this file.
 
 If you like this project and find it useful, please consider giving it a star on GitHub at https://github.com/Luligu/matterbridge-shelly and sponsoring it.
 
-## [1.0.9] - 2024-11-05
+## [1.0.9] - 2024-11-06
 
 ### Added
 
+- [shelly1]: Added support (beta) for external temperature and humidity addon (thanks IvoGruber).
 - [shelly]: Added change of device IP address without restart when mDns detect new IP.
 - [CoIoT]: Added cfgChanged event.
 

@@ -538,6 +538,8 @@ export class ShellyDevice extends EventEmitter {
         }
       }
       for (const key in statusPayload) {
+        if (key === 'ext_temperature' && isValidObject(statusPayload[key], 1)) device.addComponent(new ShellyComponent(device, 'temperature', 'Temperature'));
+        if (key === 'ext_humidity' && isValidObject(statusPayload[key], 1)) device.addComponent(new ShellyComponent(device, 'humidity', 'Humidity'));
         if (key === 'temperature') device.addComponent(new ShellyComponent(device, 'sys', 'Sys'));
         if (key === 'overtemperature') device.addComponent(new ShellyComponent(device, 'sys', 'Sys'));
         if (key === 'tmp' && statusPayload.temperature === undefined && statusPayload.overtemperature === undefined) {
@@ -975,6 +977,18 @@ export class ShellyDevice extends EventEmitter {
         }
         if (key === 'concentration') {
           this.updateComponent('gas', data[key] as ShellyData);
+        }
+        if (key === 'ext_temperature' && isValidObject(data[key], 1)) {
+          this.updateComponent('temperature', data[key] as ShellyData);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const sensor = (data[key] as any)['0'] as ShellyData;
+          if (sensor && isValidNumber(sensor.tC, -55, 125)) this.getComponent('temperature')?.setValue('value', sensor.tC);
+        }
+        if (key === 'ext_humidity' && isValidObject(data[key], 1)) {
+          this.updateComponent('humidity', data[key] as ShellyData);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const sensor = (data[key] as any)['0'] as ShellyData;
+          if (sensor && isValidNumber(sensor.hum, 0, 100)) this.getComponent('humidity')?.setValue('value', sensor.hum);
         }
         if (key === 'tmp') {
           if (data.temperature === undefined && data.overtemperature === undefined) this.updateComponent('temperature', data[key] as ShellyData);
