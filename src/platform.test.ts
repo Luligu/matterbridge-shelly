@@ -455,7 +455,7 @@ describe('ShellyPlatform', () => {
   });
 
   // eslint-disable-next-line jest/no-commented-out-tests
-  /*
+  /* too too long 55 secs
   it('should call onStart with reason and check failsafeCount and throw', async () => {
     expect(shellyPlatform).toBeDefined();
     expect((shellyPlatform as any).shelly.mdnsScanner.isScanning).toBe(false);
