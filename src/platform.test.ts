@@ -96,6 +96,7 @@ describe('ShellyPlatform', () => {
     mockConfig = {
       'name': 'matterbridge-shelly',
       'type': 'DynamicPlatform',
+      'version': '1.0.0',
       'username': 'admin',
       'password': 'tango',
       'exposeSwitch': 'outlet',
@@ -141,9 +142,9 @@ describe('ShellyPlatform', () => {
     //
   });
 
-  it('should initialize platform with config name', () => {
+  it('should initialize platform with config name and version', () => {
     shellyPlatform = new ShellyPlatform(mockMatterbridge, mockLog, mockConfig);
-    expect(mockLog.debug).toHaveBeenCalledWith(`Initializing platform: ${idn}${mockConfig.name}${rs}${db}`);
+    expect(mockLog.debug).toHaveBeenCalledWith(`Initializing platform: ${idn}${mockConfig.name}${rs}${db} v.${CYAN}${mockConfig.version}`);
     clearInterval((shellyPlatform as any).shelly.fetchInterval);
     clearTimeout((shellyPlatform as any).shelly.coapServerTimeout);
   });
