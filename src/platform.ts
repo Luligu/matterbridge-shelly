@@ -240,7 +240,11 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               }
             });
             if (definition) {
-              const mbDevice = new MatterbridgeDevice(definition, undefined, config.debug as boolean);
+              const mbDevice = new MatterbridgeDevice(
+                definition,
+                matterbridge.edge ? { uniqueStorageKey: bthomeDevice.addr.replaceAll(':', '') } : undefined,
+                config.debug as boolean,
+              );
               mbDevice.createDefaultBridgedDeviceBasicInformationClusterServer(
                 bthomeDevice.name,
                 bthomeDevice.addr + (this.postfix ? '-' + this.postfix : ''),
@@ -476,7 +480,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       }
 
       // Create a new Matterbridge device
-      const mbDevice = new MatterbridgeDevice(bridgedNode, undefined, config.debug as boolean);
+      const mbDevice = new MatterbridgeDevice(bridgedNode, matterbridge.edge ? { uniqueStorageKey: device.id } : undefined, config.debug as boolean);
       mbDevice.createDefaultBridgedDeviceBasicInformationClusterServer(
         device.name,
         device.id + (this.postfix ? '-' + this.postfix : ''),
