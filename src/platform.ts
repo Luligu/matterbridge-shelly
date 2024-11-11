@@ -550,8 +550,11 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             // Shelly Gen 1 devices cfg_rev
             if (property === 'cfg_rev') {
               if (!device.sleepMode) this.changedDevices.set(device.id, device.id);
-              device.log.notice(`Shelly device ${idn}${device.name}${rs}${nt} id ${hk}${device.id}${nt} host ${zb}${device.host}${nt} sent config changed: ${CYAN}${value}${nt}`);
-              device.log.notice(`If the configuration on shelly device ${idn}${device.name}${rs}${nt} has changed, please restart matterbridge for the change to take effect.`);
+              if (!device.id.startsWith('shellyblugwg3')) {
+                // Special case for BLU Gateway Gen 3 TRV that sends cfg_rev when the temperature is changed
+                device.log.notice(`Shelly device ${idn}${device.name}${rs}${nt} id ${hk}${device.id}${nt} host ${zb}${device.host}${nt} sent config changed: ${CYAN}${value}${nt}`);
+                device.log.notice(`If the configuration on shelly device ${idn}${device.name}${rs}${nt} has changed, please restart matterbridge for the change to take effect.`);
+              }
             }
           });
           // Add event handler from Shelly

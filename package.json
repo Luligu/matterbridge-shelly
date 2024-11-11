@@ -1,6 +1,6 @@
 {
   "name": "matterbridge-shelly",
-  "version": "1.0.9-dev.6",
+  "version": "1.0.9",
   "description": "Matterbridge shelly plugin",
   "author": "https://github.com/Luligu",
   "license": "Apache-2.0",
@@ -125,6 +125,6 @@
     "rimraf": "^6.0.1",
     "ts-jest": "29.2.5",
     "typescript": "5.6.3",
-    "typescript-eslint": "8.13.0"
+    "typescript-eslint": "8.14.0"
   }
 }
