@@ -91,14 +91,18 @@
     "tz_utc_offset": 10800,
     "tz_dst": false,
     "tz_dst_auto": true,
-    "time": "22:52",
-    "unixtime": 1727725955,
+    "time": "17:52",
+    "unixtime": 1730472747,
     "led_status_disable": false,
     "debug_enable": false,
     "allow_cross_origin": true,
     "actions": {
       "active": false,
-      "names": ["btn_on_url", "out_on_url", "out_off_url"]
+      "names": [
+        "btn_on_url",
+        "out_on_url",
+        "out_off_url"
+      ]
     },
     "hwinfo": {
       "hw_revision": "prod-190516",
@@ -127,7 +131,7 @@
       "connected": true,
       "ssid": "Tamer Umniah",
       "ip": "192.168.68.75",
-      "rssi": -61
+      "rssi": -57
     },
     "cloud": {
       "enabled": true,
@@ -136,9 +140,9 @@
     "mqtt": {
       "connected": false
     },
-    "time": "22:52",
-    "unixtime": 1727725955,
-    "serial": 16001,
+    "time": "17:52",
+    "unixtime": 1730472747,
+    "serial": 22185,
     "has_update": false,
     "mac": "E868E7C38EAB",
     "cfg_changed_cnt": 0,
@@ -161,16 +165,20 @@
         "power": 0,
         "overpower": 0,
         "is_valid": true,
-        "timestamp": 1727736755,
-        "counters": [0, 0, 0],
-        "total": 110962
+        "timestamp": 1730483547,
+        "counters": [
+          0,
+          0,
+          0
+        ],
+        "total": 176010
       }
     ],
-    "temperature": 31.38,
+    "temperature": 27.14,
     "overtemperature": false,
     "tmp": {
-      "tC": 31.38,
-      "tF": 88.48,
+      "tC": 27.14,
+      "tF": 80.85,
       "is_valid": true
     },
     "update": {
@@ -181,10 +189,13 @@
       "beta_version": "20231107-164219/v1.14.1-rc1-g0617c15"
     },
     "ram_total": 52056,
-    "ram_free": 39980,
+    "ram_free": 39796,
     "fs_size": 233681,
     "fs_free": 166664,
-    "uptime": 643836
+    "uptime": 894188
   },
-  "components": []
+  "components": [],
+  "cfg_rev": 0,
+  "offset": 0,
+  "total": 0
 }

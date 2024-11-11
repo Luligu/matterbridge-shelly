@@ -41,7 +41,22 @@
       "ttl": 120,
       "class": "IN",
       "flush": true,
-      "data": ["id=shelly1-34945472A643", "arch=esp8266", "app=switch1", "fw_version=1.0", "fw_id=20230913-112003/v1.14.0-gcb84623", "discoverable=false", "discoverable=false"]
+      "data": [
+        "id=shelly1-34945472A643",
+        "arch=esp8266",
+        "app=switch1",
+        "fw_version=1.0",
+        "fw_id=20230913-112003/v1.14.0-gcb84623",
+        "discoverable=false"
+      ]
+    },
+    {
+      "name": "_services._dns-sd._udp.local",
+      "type": "PTR",
+      "ttl": 4500,
+      "class": "IN",
+      "flush": false,
+      "data": "_http._tcp.local"
     },
     {
       "name": "shelly1-34945472A643.local",
@@ -59,7 +74,9 @@
       "flush": true,
       "data": {
         "nextDomain": "shelly1-34945472A643.local",
-        "rrtypes": ["A"]
+        "rrtypes": [
+          "A"
+        ]
       }
     }
   ],

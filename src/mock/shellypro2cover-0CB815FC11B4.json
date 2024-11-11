@@ -1,13 +1,13 @@
 {
   "shelly": {
-    "name": null,
+    "name": "Pro Dual Cover",
     "id": "shellypro2cover-0cb815fc11b4",
     "mac": "0CB815FC11B4",
-    "slot": 1,
+    "slot": 0,
     "model": "SPSH-002PE16EU",
     "gen": 2,
-    "fw_id": "20240819-074544/1.4.2-gc2639da",
-    "ver": "1.4.2",
+    "fw_id": "20241011-114451/1.4.4-g6d2a586",
+    "ver": "1.4.4",
     "app": "Pro4PM",
     "auth_en": false,
     "auth_domain": null
@@ -29,7 +29,7 @@
     },
     "cover:0": {
       "id": 0,
-      "name": null,
+      "name": "Pro2cover 1st",
       "motor": {
         "idle_power_thr": 2,
         "idle_confirm_period": 0.25
@@ -60,7 +60,7 @@
     },
     "cover:1": {
       "id": 1,
-      "name": null,
+      "name": "Pro2cover 2nd",
       "motor": {
         "idle_power_thr": 2,
         "idle_confirm_period": 0.25
@@ -147,9 +147,9 @@
     },
     "sys": {
       "device": {
-        "name": null,
+        "name": "2Cover Pro",
         "mac": "0CB815FC11B4",
-        "fw_id": "20240819-074544/1.4.2-gc2639da",
+        "fw_id": "20241011-114451/1.4.4-g6d2a586",
         "discoverable": true,
         "eco_mode": false
       },
@@ -168,7 +168,7 @@
         }
       },
       "ui_data": {
-        "cover": ""
+        "cover1": ""
       },
       "rpc_udp": {
         "dst_addr": null,
@@ -177,7 +177,7 @@
       "sntp": {
         "server": "time.google.com"
       },
-      "cfg_rev": 18
+      "cfg_rev": 30
     },
     "ui": {
       "idle_brightness": 30
@@ -195,11 +195,11 @@
         "ssid": "Tamer Umniah",
         "is_open": false,
         "enable": true,
-        "ipv4mode": "dhcp",
-        "ip": null,
-        "netmask": null,
-        "gw": null,
-        "nameserver": null
+        "ipv4mode": "static",
+        "ip": "192.168.68.39",
+        "netmask": "255.255.255.0",
+        "gw": "192.168.68.1",
+        "nameserver": "192.168.1.1"
       },
       "sta1": {
         "ssid": null,
@@ -230,45 +230,53 @@
     },
     "cover:0": {
       "id": 0,
-      "source": "timeout",
-      "state": "open",
+      "source": "init",
+      "state": "stopped",
       "apower": 0,
-      "voltage": 237.4,
+      "voltage": 243.3,
       "current": 0,
       "pf": 0,
-      "freq": 50,
+      "freq": 50.1,
       "aenergy": {
         "total": 0,
-        "by_minute": [0, 0, 0],
-        "minute_ts": 1727780760
+        "by_minute": [
+          0,
+          0,
+          0
+        ],
+        "minute_ts": 1729631640
       },
       "temperature": {
-        "tC": 48.4,
-        "tF": 119
+        "tC": 49.5,
+        "tF": 121.1
       },
       "pos_control": false,
-      "last_direction": "open"
+      "last_direction": "close"
     },
     "cover:1": {
       "id": 1,
       "source": "init",
       "state": "stopped",
       "apower": 0,
-      "voltage": 237.3,
+      "voltage": 243.3,
       "current": 0,
       "pf": 0,
       "freq": 50,
       "aenergy": {
         "total": 0,
-        "by_minute": [0, 0, 0],
-        "minute_ts": 1727780760
+        "by_minute": [
+          0,
+          0,
+          0
+        ],
+        "minute_ts": 1729631640
       },
       "temperature": {
-        "tC": 48.4,
-        "tF": 119
+        "tC": 49.5,
+        "tF": 121.1
       },
       "pos_control": false,
-      "last_direction": null
+      "last_direction": "close"
     },
     "eth": {
       "ip": null
@@ -296,14 +304,14 @@
     "sys": {
       "mac": "0CB815FC11B4",
       "restart_required": false,
-      "time": "14:06",
-      "unixtime": 1727780771,
-      "uptime": 46480,
-      "ram_size": 262500,
-      "ram_free": 75292,
+      "time": "00:14",
+      "unixtime": 1729631690,
+      "uptime": 53135,
+      "ram_size": 262552,
+      "ram_free": 74660,
       "fs_size": 524288,
-      "fs_free": 188416,
-      "cfg_rev": 18,
+      "fs_free": 184320,
+      "cfg_rev": 30,
       "kvs_rev": 0,
       "schedule_rev": 0,
       "webhook_rev": 0,
@@ -312,167 +320,17 @@
     },
     "ui": {},
     "wifi": {
-      "sta_ip": "192.168.68.104",
+      "sta_ip": "192.168.68.39",
       "status": "got ip",
       "ssid": "Tamer Umniah",
-      "rssi": -39
+      "rssi": -52
     },
     "ws": {
       "connected": false
     }
   },
-  "components": [
-    {
-      "key": "ble",
-      "status": {},
-      "config": {
-        "enable": true,
-        "rpc": {
-          "enable": true
-        },
-        "observer": {
-          "enable": true
-        }
-      }
-    },
-    {
-      "key": "bthome",
-      "status": {},
-      "config": {}
-    },
-    {
-      "key": "cloud",
-      "status": {
-        "connected": true
-      },
-      "config": {
-        "enable": true,
-        "server": "shelly-23-eu.shelly.cloud:6022/jrpc"
-      }
-    },
-    {
-      "key": "cover:0",
-      "status": {
-        "id": 0,
-        "source": "timeout",
-        "state": "open",
-        "apower": 0,
-        "voltage": 237.4,
-        "current": 0,
-        "pf": 0,
-        "freq": 49.9,
-        "aenergy": {
-          "total": 0,
-          "by_minute": [0, 0, 0],
-          "minute_ts": 1727780760
-        },
-        "temperature": {
-          "tC": 48.6,
-          "tF": 119.4
-        },
-        "pos_control": false,
-        "last_direction": "open"
-      },
-      "config": {
-        "id": 0,
-        "name": null,
-        "motor": {
-          "idle_power_thr": 2,
-          "idle_confirm_period": 0.25
-        },
-        "maxtime_open": 25,
-        "maxtime_close": 20,
-        "initial_state": "stopped",
-        "invert_directions": false,
-        "in_mode": "dual",
-        "swap_inputs": false,
-        "safety_switch": {
-          "enable": false,
-          "direction": "both",
-          "action": "stop",
-          "allowed_move": null
-        },
-        "power_limit": 4480,
-        "voltage_limit": 280,
-        "undervoltage_limit": 0,
-        "current_limit": 16,
-        "obstruction_detection": {
-          "enable": false,
-          "direction": "both",
-          "action": "stop",
-          "power_thr": 1000,
-          "holdoff": 1
-        }
-      }
-    },
-    {
-      "key": "cover:1",
-      "status": {
-        "id": 1,
-        "source": "init",
-        "state": "stopped",
-        "apower": 0,
-        "voltage": 237.3,
-        "current": 0,
-        "pf": 0,
-        "freq": 49.9,
-        "aenergy": {
-          "total": 0,
-          "by_minute": [0, 0, 0],
-          "minute_ts": 1727780760
-        },
-        "temperature": {
-          "tC": 48.6,
-          "tF": 119.4
-        },
-        "pos_control": false,
-        "last_direction": null
-      },
-      "config": {
-        "id": 1,
-        "name": null,
-        "motor": {
-          "idle_power_thr": 2,
-          "idle_confirm_period": 0.25
-        },
-        "maxtime_open": 25,
-        "maxtime_close": 20,
-        "initial_state": "stopped",
-        "invert_directions": false,
-        "in_mode": "dual",
-        "swap_inputs": false,
-        "safety_switch": {
-          "enable": false,
-          "direction": "both",
-          "action": "stop",
-          "allowed_move": null
-        },
-        "power_limit": 4480,
-        "voltage_limit": 280,
-        "undervoltage_limit": 0,
-        "current_limit": 16,
-        "obstruction_detection": {
-          "enable": false,
-          "direction": "both",
-          "action": "stop",
-          "power_thr": 1000,
-          "holdoff": 1
-        }
-      }
-    },
-    {
-      "key": "eth",
-      "status": {
-        "ip": null
-      },
-      "config": {
-        "enable": true,
-        "ipv4mode": "dhcp",
-        "ip": null,
-        "netmask": null,
-        "gw": null,
-        "nameserver": null
-      }
-    }
-  ]
+  "components": [],
+  "cfg_rev": 30,
+  "offset": 0,
+  "total": 0
 }

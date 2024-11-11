@@ -110,8 +110,10 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     super(matterbridge, log, config);
 
     // Verify that Matterbridge is the correct version
-    if (this.verifyMatterbridgeVersion === undefined || typeof this.verifyMatterbridgeVersion !== 'function' || !this.verifyMatterbridgeVersion('1.5.9')) {
-      throw new Error(`The shelly plugin requires Matterbridge version >= "1.5.9". Please update Matterbridge to the latest version in the frontend.`);
+    if (this.verifyMatterbridgeVersion === undefined || typeof this.verifyMatterbridgeVersion !== 'function' || !this.verifyMatterbridgeVersion('1.6.0')) {
+      throw new Error(
+        `This plugin requires Matterbridge version >= "1.6.0". Please update Matterbridge from ${this.matterbridge.matterbridgeVersion} to the latest version in the frontend."`,
+      );
     }
 
     if (config.username) this.username = config.username as string;
@@ -123,7 +125,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     this.failsafeCount = (config.failsafeCount as number) ?? 0;
     if (!isValidNumber(this.failsafeCount, 0)) this.failsafeCount = 0;
 
-    log.debug(`Initializing platform: ${idn}${this.config.name}${rs}${db}`);
+    log.debug(`Initializing platform: ${idn}${config.name}${rs}${db} v.${CYAN}${config.version}`);
     log.debug(`- username: ${CYAN}${config.username}`);
     log.debug(`- password: ${CYAN}${config.password}`);
     log.debug(`- exposeSwitch: ${CYAN}${config.exposeSwitch}`);
@@ -149,26 +151,33 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     this.shelly.debugMdns = this.config.debugMdns as boolean;
     this.shelly.debugCoap = this.config.debugCoap as boolean;
 
-    // handle Shelly discovered event
+    // handle Shelly discovered event (called from mDNS scanner, storage or config devices)
     this.shelly.on('discovered', async (discoveredDevice: DiscoveredDevice) => {
       if (this.discoveredDevices.has(discoveredDevice.id)) {
         const stored = this.storedDevices.get(discoveredDevice.id);
         if (stored?.host !== discoveredDevice.host) {
-          this.log.warn(`Shelly device ${hk}${discoveredDevice.id}${wr} host ${zb}${discoveredDevice.host}${wr} is already discovered with a different host.`);
+          this.log.warn(`Shelly device ${hk}${discoveredDevice.id}${wr} host ${zb}${discoveredDevice.host}${wr} has been discovered with a different host.`);
           this.log.warn(`Set new address for shelly device ${hk}${discoveredDevice.id}${wr} from ${zb}${stored?.host}${wr} to ${zb}${discoveredDevice.host}${wr}`);
-          this.log.warn(`Please restart matterbridge for the change to take effect.`);
           this.discoveredDevices.set(discoveredDevice.id, discoveredDevice);
           this.storedDevices.set(discoveredDevice.id, discoveredDevice);
+          this.changedDevices.set(discoveredDevice.id, discoveredDevice.id);
           await this.saveStoredDevices();
+          if (this.shellyDevices.has(discoveredDevice.id)) {
+            const device = this.shellyDevices.get(discoveredDevice.id) as ShellyDevice;
+            device.host = discoveredDevice.host;
+            device.wsClient?.stop(); // It will be restarted by the ShellyDevice interval if gen > 1
+            device.log.warn(`Shelly device ${hk}${discoveredDevice.id}${wr} host ${zb}${discoveredDevice.host}${wr} updated`);
+          } else this.log.warn(`Please restart matterbridge for the change to take effect.`);
           return;
         } else {
           this.log.info(`Shelly device ${hk}${discoveredDevice.id}${nf} host ${zb}${discoveredDevice.host}${nf} already discovered`);
           return;
         }
+      } else {
+        this.discoveredDevices.set(discoveredDevice.id, discoveredDevice);
+        this.storedDevices.set(discoveredDevice.id, discoveredDevice);
+        await this.saveStoredDevices();
       }
-      this.discoveredDevices.set(discoveredDevice.id, discoveredDevice);
-      this.storedDevices.set(discoveredDevice.id, discoveredDevice);
-      await this.saveStoredDevices();
       if (this.validateWhiteBlackList(discoveredDevice.id)) {
         await this.addDevice(discoveredDevice.id, discoveredDevice.host);
       }
@@ -288,7 +297,13 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
                 mbDevice.subscribeAttribute(
                   ThermostatCluster.id,
                   'systemMode',
-                  (newValue, oldValue) => {
+                  (newValue: number, oldValue: number) => {
+                    if (
+                      !isValidNumber(newValue, Thermostat.SystemMode.Off, Thermostat.SystemMode.Heat) ||
+                      !isValidNumber(oldValue, Thermostat.SystemMode.Off, Thermostat.SystemMode.Heat) ||
+                      newValue === oldValue
+                    )
+                      return;
                     mbDevice.log.info(`Thermostat systemMode changed from ${oldValue} to ${newValue}`);
                     if (oldValue === Thermostat.SystemMode.Heat && newValue === Thermostat.SystemMode.Off) {
                       if (device.thermostatSystemModeTimeout) clearTimeout(device.thermostatSystemModeTimeout);
@@ -304,10 +319,12 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
                   'occupiedHeatingSetpoint',
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   (newValue: any, oldValue: any) => {
+                    if (!isValidNumber(newValue) || !isValidNumber(oldValue) || newValue === oldValue) return;
                     mbDevice.log.info(`Thermostat occupiedHeatingSetpoint changed from ${oldValue / 100} to ${newValue / 100}`);
                     if (device.thermostatSetpointTimeout) clearTimeout(device.thermostatSetpointTimeout);
                     device.thermostatSetpointTimeout = setTimeout(() => {
                       mbDevice.log.info(`Setting thermostat occupiedHeatingSetpoint to ${newValue / 100}`);
+                      // http://192.168.1.164/rpc/BluTrv.Call?id=201&method=Trv.SetTarget&params={id:0,target_C:19}
                       ShellyDevice.fetch(this.shelly, mbDevice.log, device.host, 'BluTrv.Call', {
                         id: bthomeDevice.blutrv_id,
                         method: 'Trv.SetTarget',
@@ -528,6 +545,19 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       // Scan the device components
       for (const [key, component] of device) {
         if (component.name === 'Sys') {
+          // Add update handler from Shelly
+          component.on('update', (component: string, property: string, value: ShellyDataType) => {
+            // Shelly Gen 1 devices cfg_rev
+            if (property === 'cfg_rev') {
+              if (!device.sleepMode) this.changedDevices.set(device.id, device.id);
+              if (!device.id.startsWith('shellyblugwg3')) {
+                // Special case for BLU Gateway Gen 3 TRV that sends cfg_rev when the temperature is changed
+                device.log.notice(`Shelly device ${idn}${device.name}${rs}${nt} id ${hk}${device.id}${nt} host ${zb}${device.host}${nt} sent config changed: ${CYAN}${value}${nt}`);
+                device.log.notice(`If the configuration on shelly device ${idn}${device.name}${rs}${nt} has changed, please restart matterbridge for the change to take effect.`);
+              }
+            }
+          });
+          // Add event handler from Shelly
           component.on('event', (component: string, event: string, data: ShellyData) => {
             this.log.debug(`Received event ${event} from component ${component}`);
             // scheduled_restart is for restart and for reset
@@ -1137,7 +1167,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     });
     this.nodeStorage = await this.nodeStorageManager.createStorage('devices');
 
-    // Reset the storage if requested
+    // Reset the storage if requested or load the stored devices
     if (this.config.resetStorageDiscover === true) {
       this.config.resetStorageDiscover = false;
 
@@ -1172,7 +1202,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     }
     this.log.debug(`Loaded ${CYAN}${this.changedDevices.size}${nf} changed Shelly devices from the storage`);
 
-    // start Shelly mDNS device discoverer
+    // start Shelly mDNS device discoverer if enabled and stop it after 10 minutes
     if (this.config.enableMdnsDiscover === true) {
       this.shelly.startMdns(10 * 60 * 1000, this.config.interfaceName as string, 'udp4', this.config.debugMdns as boolean);
     }
@@ -1356,6 +1386,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       `Changing logger level for platform ${idn}${this.config.name}${rs}${db} to ${logLevel} with debugMdns ${this.config.debugMdns} and debugCoap ${this.config.debugCoap}`,
     );
     this.shelly.setLogLevel(logLevel, this.config.debugMdns as boolean, this.config.debugCoap as boolean, this.config.debugWs as boolean);
+    this.bluBridgedDevices.forEach((bluDevice) => (bluDevice.log.logLevel = logLevel));
   }
 
   private addElectricalMeasurements(device: MatterbridgeDevice, endpoint: Endpoint | undefined, shelly: ShellyDevice, component: ShellyComponent) {

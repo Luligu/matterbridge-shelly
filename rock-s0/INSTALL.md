@@ -5,15 +5,25 @@ loader: rk3308_loader_ddr589MHz_uart0_m0_v2.06.136sd.bin
 image: rock-s0_debian_bookworm_cli_b6.img
 
 ```
-lligu@ubuntu:~/Radxa$ rkdeveloptool ld
-DevNo=1 Vid=0x2207,Pid=0x330e,LocationID=202    Maskrom
-lligu@ubuntu:~/Radxa$ sudo rkdeveloptool db rk3308_loader_ddr589MHz_uart0_m0_v2.06.136sd.bin
-Downloading bootloader succeeded.
-lligu@ubuntu:~/Radxa$ sudo rkdeveloptool wl 0 rock-s0_debian_bookworm_cli_b6.img
-Write LBA from file (100%)
-lligu@ubuntu:~/Radxa$ sudo rkdeveloptool rd
-Reset Device OK.
+rkdeveloptool ld
 ```
+DevNo=1 Vid=0x2207,Pid=0x330e,LocationID=202    Maskrom
+
+```
+sudo rkdeveloptool db rk3308_loader_ddr589MHz_uart0_m0_v2.06.136sd.bin
+```
+Downloading bootloader succeeded.
+
+```
+sudo rkdeveloptool wl 0 rock-s0_debian_bookworm_cli_b6.img
+```
+Write LBA from file (100%)
+
+```
+sudo rkdeveloptool rd
+```
+Reset Device OK.
+
 
 # Update system with rsetup
 
@@ -112,11 +122,19 @@ sudo apt install cockpit btop -y
 sudo apt upgrade
 ```
 
-# Install matterbridge cockpit plugin
+# Install matterbridge cockpit plugin manually
 
 Create the directory "\usr\share\cockpit\matterbridge"
 
 copy all the files from cockpit directory to "\usr\share\cockpit\matterbridge"
+
+
+# Install matterbridge cockpit plugin with the Debian package
+
+```
+sudo curl https://raw.githubusercontent.com/Luligu/matterbridge-shelly/dev/rock-s0/cockpit-matterbridge.deb -o cockpit-matterbridge.deb
+sudo dpkg -i cockpit-matterbridge.deb
+```
 
 # Prevent the journal logs to grow
 
@@ -135,7 +153,7 @@ SystemMaxUse=100M       # Limit persistent logs in /var/log/journal to 100 MB.
 RuntimeMaxUse=10M       # Limit volatile logs in memory to 10 MB.
 RuntimeMaxFileSize=5M   # Limit the size of individual volatile log files.
 Storage=persistent      # Ensure logs are written to disk, not memory.
-SyncIntervalSec=30s     # Sync logs to disk every 30 seconds.
+SyncIntervalSec=60s     # Sync logs to disk every 60 seconds.
 ```
 
 save it and run
@@ -192,12 +210,19 @@ Manual pairing code: 3569-371-2356
 ## Enable and start Matterbridge service
 
 ```
-systemctl --user enable matterbridge
-systemctl --user start matterbridge
+sudo systemctl enable matterbridge
+sudo systemctl start matterbridge
 ```
 
 ## View the log of Matterbridge in real time (this will show the log correctly formatted with colors)
 
 ```
-journalctl --user -u matterbridge.service -n 100 -f --output cat
+sudo journalctl -u matterbridge.service -n 1000 -f --output cat
 ```
+
+## View the log of Matterbridge for a range of time (this will show the log correctly formatted with colors)
+
+```
+sudo journalctl --no-pager -u matterbridge.service --since "2024-10-31 08:00:00" --until "2024-10-31 12:00:00 --output cat"
+```
+

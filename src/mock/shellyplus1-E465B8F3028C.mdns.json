@@ -15,56 +15,46 @@
   "questions": [],
   "answers": [
     {
-      "name": "ShellyPlus1-E465B8F3028C.local",
-      "type": "A",
-      "ttl": 0,
-      "class": "IN",
-      "flush": true,
-      "data": "192.168.1.237"
-    },
-    {
-      "name": "_shelly._tcp.local",
-      "type": "PTR",
-      "ttl": 0,
-      "class": "IN",
-      "flush": false,
-      "data": "shellyplus1-e465b8f3028c._shelly._tcp.local"
-    },
-    {
-      "name": "shellyplus1-e465b8f3028c._shelly._tcp.local",
-      "type": "SRV",
-      "ttl": 0,
-      "class": "IN",
-      "flush": true,
-      "data": {
-        "priority": 0,
-        "weight": 0,
-        "port": 80,
-        "target": "ShellyPlus1-E465B8F3028C.local"
-      }
-    },
-    {
-      "name": "shellyplus1-e465b8f3028c._shelly._tcp.local",
-      "type": "TXT",
-      "ttl": 0,
-      "class": "IN",
-      "flush": true,
-      "data": ["gen=2", "app=Plus1", "ver=1.4.0"]
-    },
-    {
       "name": "_http._tcp.local",
       "type": "PTR",
-      "ttl": 0,
+      "ttl": 120,
       "class": "IN",
       "flush": false,
       "data": "shellyplus1-e465b8f3028c._http._tcp.local"
     },
     {
+      "name": "_shelly._tcp.local",
+      "type": "PTR",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": "shellyplus1-e465b8f3028c._shelly._tcp.local"
+    },
+    {
+      "name": "_services._dns-sd._udp.local",
+      "type": "PTR",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": "_shelly._tcp.local"
+    },
+    {
+      "name": "_services._dns-sd._udp.local",
+      "type": "PTR",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": "_http._tcp.local"
+    }
+  ],
+  "authorities": [],
+  "additionals": [
+    {
       "name": "shellyplus1-e465b8f3028c._http._tcp.local",
       "type": "SRV",
-      "ttl": 0,
+      "ttl": 120,
       "class": "IN",
-      "flush": true,
+      "flush": false,
       "data": {
         "priority": 0,
         "weight": 0,
@@ -75,24 +65,53 @@
     {
       "name": "shellyplus1-e465b8f3028c._http._tcp.local",
       "type": "TXT",
-      "ttl": 0,
+      "ttl": 120,
       "class": "IN",
-      "flush": true,
-      "data": ["gen=2"]
-    }
-  ],
-  "authorities": [],
-  "additionals": [
+      "flush": false,
+      "data": [
+        "gen=2"
+      ]
+    },
     {
       "name": "ShellyPlus1-E465B8F3028C.local",
-      "type": "NSEC",
-      "ttl": 1,
+      "type": "A",
+      "ttl": 120,
       "class": "IN",
       "flush": true,
+      "data": "192.168.1.237"
+    },
+    {
+      "name": "shellyplus1-e465b8f3028c._shelly._tcp.local",
+      "type": "SRV",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
       "data": {
-        "nextDomain": "ShellyPlus1-E465B8F3028C.local",
-        "rrtypes": []
+        "priority": 0,
+        "weight": 0,
+        "port": 80,
+        "target": "ShellyPlus1-E465B8F3028C.local"
       }
+    },
+    {
+      "name": "shellyplus1-e465b8f3028c._shelly._tcp.local",
+      "type": "TXT",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": [
+        "gen=2",
+        "app=Plus1",
+        "ver=1.4.4"
+      ]
+    },
+    {
+      "name": "ShellyPlus1-E465B8F3028C.local",
+      "type": "A",
+      "ttl": 120,
+      "class": "IN",
+      "flush": true,
+      "data": "192.168.1.237"
     }
   ]
 }

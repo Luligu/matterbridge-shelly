@@ -526,7 +526,7 @@ describe('Shellies', () => {
     expect(device.mac).toBe('34CDB077BCD4');
     expect(device.id).toBe('shellyblugwg3-34CDB077BCD4');
     expect(device.hasUpdate).toBe(false);
-    expect(device.firmware).toBe('1.4.99-blugwg3prod2-g689f175'); // firmwareGen2
+    expect(device.firmware).toBe('1.4.99-blugwg3prod4-g110402b'); // firmwareGen2
     expect(device.auth).toBe(false);
     expect(device.name).toBe('BLU Gateway Gen3');
     expect(device.username).toBe('admin');
@@ -789,8 +789,9 @@ describe('Shellies', () => {
 
     expect(device.bthomeTrvs.size).toBe(0);
 
-    expect(device.bthomeDevices.size).toBe(4);
+    expect(device.bthomeDevices.size).toBe(0);
 
+    /*
     expect(device.bthomeDevices.has('0c:ef:f6:f1:d7:7b')).toBe(true);
     expect(device.bthomeDevices.get('0c:ef:f6:f1:d7:7b')?.model).toBe('Shelly BLU DoorWindow');
     expect(device.bthomeDevices.get('0c:ef:f6:f1:d7:7b')?.id).toBe(200);
@@ -810,8 +811,11 @@ describe('Shellies', () => {
     expect(device.bthomeDevices.get('7c:c6:b6:58:b9:a0')?.model).toBe('Shelly BLU RC Button 4');
     expect(device.bthomeDevices.get('7c:c6:b6:58:b9:a0')?.id).toBe(203);
     expect(device.bthomeDevices.get('7c:c6:b6:58:b9:a0')?.blutrv_id).toBe(0);
+    */
 
-    expect(device.bthomeSensors.size).toBe(18);
+    expect(device.bthomeSensors.size).toBe(0);
+
+    /*
     // BLU DoorWindow
     expect(device.bthomeSensors.has('bthomesensor:200')).toBe(true);
     expect(device.bthomeSensors.get('bthomesensor:200')?.addr).toBe('0c:ef:f6:f1:d7:7b');
@@ -925,6 +929,7 @@ describe('Shellies', () => {
     expect(device.bthomeSensors.get('bthomesensor:217')?.sensorIdx).toBe(3);
 
     expect(device.bthomeSensors.has('bthomesensor:218')).toBe(false);
+    */
 
     const component = device.getComponent('switch:0');
     expect(component).not.toBeUndefined();

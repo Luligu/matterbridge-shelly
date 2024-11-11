@@ -1,13 +1,13 @@
 {
   "shelly": {
-    "name": "Shelly ProEM1",
+    "name": "Breaker box PRO-EM50 I",
     "id": "shellyproem50-a0dd6ca09158",
     "mac": "A0DD6CA09158",
-    "slot": 1,
+    "slot": 0,
     "model": "SPEM-002CEBEU50",
     "gen": 2,
-    "fw_id": "20240726-114513/1.4.0-gb2aeadb",
-    "ver": "1.4.0",
+    "fw_id": "20241011-114451/1.4.4-g6d2a586",
+    "ver": "1.4.4",
     "app": "ProEM",
     "auth_en": false,
     "auth_domain": null
@@ -16,7 +16,7 @@
     "ble": {
       "enable": false,
       "rpc": {
-        "enable": true
+        "enable": false
       },
       "observer": {
         "enable": false
@@ -24,7 +24,7 @@
     },
     "bthome": {},
     "cloud": {
-      "enable": true,
+      "enable": false,
       "server": "shelly-103-eu.shelly.cloud:6022/jrpc"
     },
     "em1:0": {
@@ -42,7 +42,7 @@
     "em1data:0": {},
     "em1data:1": {},
     "eth": {
-      "enable": true,
+      "enable": false,
       "ipv4mode": "dhcp",
       "ip": null,
       "netmask": null,
@@ -76,11 +76,11 @@
     },
     "sys": {
       "device": {
-        "name": "Shelly ProEM1",
+        "name": "Breaker box PRO-EM50 I",
         "mac": "A0DD6CA09158",
-        "fw_id": "20240726-114513/1.4.0-gb2aeadb",
+        "fw_id": "20241011-114451/1.4.4-g6d2a586",
         "discoverable": true,
-        "eco_mode": false,
+        "eco_mode": true,
         "addon_type": null,
         "sys_btn_toggle": true
       },
@@ -106,7 +106,7 @@
       "sntp": {
         "server": "time.google.com"
       },
-      "cfg_rev": 14
+      "cfg_rev": 23
     },
     "wifi": {
       "ap": {
@@ -151,25 +151,27 @@
   "status": {
     "ble": {},
     "bthome": {
-      "errors": ["bluetooth_disabled"]
+      "errors": [
+        "bluetooth_disabled"
+      ]
     },
     "cloud": {
-      "connected": true
+      "connected": false
     },
     "em1:0": {
       "id": 0,
-      "current": 5.072,
-      "voltage": 238.2,
-      "act_power": 833.8,
-      "aprt_power": 1210.5,
-      "pf": 0.76,
+      "current": 2.595,
+      "voltage": 237.1,
+      "act_power": 353.1,
+      "aprt_power": 616.2,
+      "pf": 0.7,
       "freq": 50,
       "calibration": "factory"
     },
     "em1:1": {
       "id": 1,
       "current": 0.02,
-      "voltage": 238.2,
+      "voltage": 237.1,
       "act_power": 0,
       "aprt_power": 4.8,
       "pf": 0,
@@ -178,7 +180,7 @@
     },
     "em1data:0": {
       "id": 0,
-      "total_act_energy": 149.03,
+      "total_act_energy": 1306525.13,
       "total_act_ret_energy": 0
     },
     "em1data:1": {
@@ -198,39 +200,39 @@
       "source": "init",
       "output": false,
       "temperature": {
-        "tC": 45.6,
-        "tF": 114
+        "tC": 35,
+        "tF": 95
       }
     },
     "sys": {
       "mac": "A0DD6CA09158",
       "restart_required": false,
-      "time": "12:05",
-      "unixtime": 1723111550,
-      "uptime": 1008,
-      "ram_size": 249724,
-      "ram_free": 107052,
+      "time": "16:35",
+      "unixtime": 1730475302,
+      "uptime": 319198,
+      "ram_size": 249732,
+      "ram_free": 119840,
       "fs_size": 524288,
-      "fs_free": 192512,
-      "cfg_rev": 14,
+      "fs_free": 188416,
+      "cfg_rev": 23,
       "kvs_rev": 0,
-      "schedule_rev": 0,
+      "schedule_rev": 1,
       "webhook_rev": 0,
-      "available_updates": {
-        "beta": {
-          "version": "1.4.2-beta1"
-        }
-      },
+      "available_updates": {},
       "reset_reason": 3
     },
     "wifi": {
-      "sta_ip": "192.168.1.250",
+      "sta_ip": "192.168.1.81",
       "status": "got ip",
       "ssid": "FibreBox_X6-12A4C7",
-      "rssi": -52
+      "rssi": -58
     },
     "ws": {
       "connected": false
     }
-  }
+  },
+  "components": [],
+  "cfg_rev": 23,
+  "offset": 0,
+  "total": 0
 }

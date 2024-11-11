@@ -70,7 +70,7 @@ export class ShellyDevice extends EventEmitter {
   readonly log: AnsiLogger;
   readonly username: string | undefined;
   readonly password: string | undefined;
-  profile: 'switch' | 'cover' | 'rgb' | 'rgbw' | 'color' | 'white' | undefined = undefined;
+  profile: 'switch' | 'cover' | 'rgb' | 'rgbw' | 'color' | 'white' | 'light' | undefined = undefined;
   host: string;
   id = '';
   model = '';
@@ -93,8 +93,7 @@ export class ShellyDevice extends EventEmitter {
   thermostatSetpointTimeout?: NodeJS.Timeout;
   private lastseenInterval?: NodeJS.Timeout;
   private startWsClientTimeout?: NodeJS.Timeout;
-
-  private wsClient: WsClient | undefined;
+  wsClient: WsClient | undefined;
 
   private readonly _components = new Map<string, ShellyComponent>();
 
@@ -483,7 +482,7 @@ export class ShellyDevice extends EventEmitter {
     if (shellyPayload.mode === 'roller') device.profile = 'cover';
     if (shellyPayload.mode === 'color') device.profile = 'color';
     if (shellyPayload.mode === 'white') device.profile = 'white';
-    if (shellyPayload.profile !== undefined) device.profile = shellyPayload.profile as 'switch' | 'cover' | 'rgb' | 'rgbw' | 'color' | 'white' | undefined;
+    if (shellyPayload.profile !== undefined) device.profile = shellyPayload.profile as 'switch' | 'cover' | 'rgb' | 'rgbw' | 'color' | 'white' | 'light' | undefined;
 
     // Gen 1 Shelly device
     if (!shellyPayload.gen) {
@@ -539,6 +538,8 @@ export class ShellyDevice extends EventEmitter {
         }
       }
       for (const key in statusPayload) {
+        if (key === 'ext_temperature' && isValidObject(statusPayload[key], 1)) device.addComponent(new ShellyComponent(device, 'temperature', 'Temperature'));
+        if (key === 'ext_humidity' && isValidObject(statusPayload[key], 1)) device.addComponent(new ShellyComponent(device, 'humidity', 'Humidity'));
         if (key === 'temperature') device.addComponent(new ShellyComponent(device, 'sys', 'Sys'));
         if (key === 'overtemperature') device.addComponent(new ShellyComponent(device, 'sys', 'Sys'));
         if (key === 'tmp' && statusPayload.temperature === undefined && statusPayload.overtemperature === undefined) {
@@ -584,6 +585,7 @@ export class ShellyDevice extends EventEmitter {
           }
         }
       }
+      device.addComponent(new ShellyComponent(device, 'sys', 'Sys')); // Always present since we process now cfgChanged
     }
 
     // Gen 2 Shelly device
@@ -667,12 +669,13 @@ export class ShellyDevice extends EventEmitter {
       const CoIoT = device.getComponent('coiot');
       if (CoIoT) {
         if ((CoIoT.getValue('enabled') as boolean) === false)
-          log.notice(`CoIoT is not enabled for device ${device.name} id ${device.id}. Enable it in the settings to receive updates from the device.`);
+          log.warn(`The CoIoT service is not enabled for device ${device.name} id ${device.id}. Enable it in the settings to receive updates from the device.`);
         // When peer is mcast we get "" as value
         if ((CoIoT.getValue('peer') as string) !== '') {
           const peer = CoIoT.getValue('peer') as string;
           const ipv4 = getIpv4InterfaceAddress() + ':5683';
-          if (peer !== ipv4) log.notice(`CoIoT peer for device ${device.name} id ${device.id} is not mcast or ${ipv4}. Set it in the settings to receive updates from the device.`);
+          if (peer !== ipv4)
+            log.warn(`The CoIoT peer for device ${device.name} id ${device.id} is not mcast or ${ipv4}. Set it in the settings to receive updates from the device.`);
         }
       } else {
         log.error(`CoIoT service not found for device ${device.name} id ${device.id}.`);
@@ -974,6 +977,18 @@ export class ShellyDevice extends EventEmitter {
         }
         if (key === 'concentration') {
           this.updateComponent('gas', data[key] as ShellyData);
+        }
+        if (key === 'ext_temperature' && isValidObject(data[key], 1)) {
+          this.updateComponent('temperature', data[key] as ShellyData);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const sensor = (data[key] as any)['0'] as ShellyData;
+          if (sensor && isValidNumber(sensor.tC, -55, 125)) this.getComponent('temperature')?.setValue('value', sensor.tC);
+        }
+        if (key === 'ext_humidity' && isValidObject(data[key], 1)) {
+          this.updateComponent('humidity', data[key] as ShellyData);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const sensor = (data[key] as any)['0'] as ShellyData;
+          if (sensor && isValidNumber(sensor.hum, 0, 100)) this.getComponent('humidity')?.setValue('value', sensor.hum);
         }
         if (key === 'tmp') {
           if (data.temperature === undefined && data.overtemperature === undefined) this.updateComponent('temperature', data[key] as ShellyData);
@@ -1281,6 +1296,7 @@ export class ShellyDevice extends EventEmitter {
           `Response error fetching shelly gen ${gen} host ${host} service ${service}${params ? ' with ' + JSON.stringify(params) : ''} url ${url}:` +
             ` ${response.status} (${response.statusText})`,
         );
+        clearTimeout(fetchTimeout);
         return null;
       }
       const data = await response.json();
@@ -1291,6 +1307,7 @@ export class ShellyDevice extends EventEmitter {
       log.debug(
         `Error fetching shelly gen ${gen} host ${host} service ${service}${params ? ' with ' + JSON.stringify(params) : ''} url ${url} error: ${error instanceof Error ? error.message : error}`,
       );
+      clearTimeout(fetchTimeout);
       return null;
     }
   }

@@ -1,13 +1,13 @@
 {
   "shelly": {
-    "name": "My Shelly PM mini gen3",
+    "name": "PMmini Gen3",
     "id": "shellypmminig3-84fce63957f4",
     "mac": "84FCE63957F4",
     "slot": 1,
     "model": "S3PM-001PCEU16",
     "gen": 3,
-    "fw_id": "20240726-114522/1.4.0-gb2aeadb",
-    "ver": "1.4.0",
+    "fw_id": "20241011-114503/1.4.4-g6d2a586",
+    "ver": "1.4.4",
     "app": "MiniPMG3",
     "auth_en": false,
     "auth_domain": null
@@ -42,14 +42,14 @@
     },
     "pm1:0": {
       "id": 0,
-      "name": null,
+      "name": "PMmini Gen3",
       "reverse": false
     },
     "sys": {
       "device": {
-        "name": "My Shelly PM mini gen3",
+        "name": "PMmini Gen3",
         "mac": "84FCE63957F4",
-        "fw_id": "20240726-114522/1.4.0-gb2aeadb",
+        "fw_id": "20241011-114503/1.4.4-g6d2a586",
         "discoverable": true,
         "eco_mode": false
       },
@@ -75,7 +75,7 @@
       "sntp": {
         "server": "time.google.com"
       },
-      "cfg_rev": 17
+      "cfg_rev": 20
     },
     "wifi": {
       "ap": {
@@ -97,9 +97,9 @@
         "nameserver": null
       },
       "sta1": {
-        "ssid": null,
-        "is_open": true,
-        "enable": false,
+        "ssid": "wifiAlbatros",
+        "is_open": false,
+        "enable": true,
         "ipv4mode": "dhcp",
         "ip": null,
         "netmask": null,
@@ -120,7 +120,9 @@
   "status": {
     "ble": {},
     "bthome": {
-      "errors": ["bluetooth_disabled"]
+      "errors": [
+        "bluetooth_disabled"
+      ]
     },
     "cloud": {
       "connected": true
@@ -130,225 +132,58 @@
     },
     "pm1:0": {
       "id": 0,
-      "voltage": 234.5,
-      "current": 0.057,
-      "apower": 5.3,
+      "voltage": 238.5,
+      "current": 0.049,
+      "apower": 4.6,
       "freq": 50.1,
       "aenergy": {
-        "total": 6589.82,
-        "by_minute": [0, 213.298, 0],
-        "minute_ts": 1723268700
+        "total": 16352.511,
+        "by_minute": [
+          213.298,
+          0,
+          0
+        ],
+        "minute_ts": 1730474940
       },
       "ret_aenergy": {
         "total": 0,
-        "by_minute": [0, 0, 0],
-        "minute_ts": 1723268700
+        "by_minute": [
+          0,
+          0,
+          0
+        ],
+        "minute_ts": 1730474940
       }
     },
     "sys": {
       "mac": "84FCE63957F4",
       "restart_required": false,
-      "time": "07:45",
-      "unixtime": 1723268705,
-      "uptime": 295505,
-      "ram_size": 260552,
-      "ram_free": 133884,
+      "time": "16:29",
+      "unixtime": 1730474981,
+      "uptime": 172158,
+      "ram_size": 260576,
+      "ram_free": 131524,
       "fs_size": 1048576,
       "fs_free": 614400,
-      "cfg_rev": 17,
+      "cfg_rev": 20,
       "kvs_rev": 0,
       "schedule_rev": 3,
       "webhook_rev": 0,
-      "available_updates": {
-        "beta": {
-          "version": "1.4.2-beta1"
-        }
-      },
+      "available_updates": {},
       "reset_reason": 1
     },
     "wifi": {
       "sta_ip": "192.168.1.220",
       "status": "got ip",
       "ssid": "FibreBox_X6-12A4C7",
-      "rssi": -54
+      "rssi": -64
     },
     "ws": {
       "connected": false
     }
   },
-  "components": [
-    {
-      "key": "ble",
-      "status": {},
-      "config": {
-        "enable": false,
-        "rpc": {
-          "enable": true
-        },
-        "observer": {
-          "enable": false
-        }
-      }
-    },
-    {
-      "key": "bthome",
-      "status": {
-        "errors": ["bluetooth_disabled"]
-      },
-      "config": {}
-    },
-    {
-      "key": "cloud",
-      "status": {
-        "connected": true
-      },
-      "config": {
-        "enable": true,
-        "server": "shelly-103-eu.shelly.cloud:6022/jrpc"
-      }
-    },
-    {
-      "key": "mqtt",
-      "status": {
-        "connected": false
-      },
-      "config": {
-        "enable": false,
-        "server": null,
-        "client_id": "shellypmminig3-84fce63957f4",
-        "user": null,
-        "ssl_ca": null,
-        "topic_prefix": "shellypmminig3-84fce63957f4",
-        "rpc_ntf": true,
-        "status_ntf": false,
-        "use_client_cert": false,
-        "enable_rpc": true,
-        "enable_control": true
-      }
-    },
-    {
-      "key": "pm1:0",
-      "status": {
-        "id": 0,
-        "voltage": 234.5,
-        "current": 0.057,
-        "apower": 5.3,
-        "freq": 50.1,
-        "aenergy": {
-          "total": 6589.82,
-          "by_minute": [0, 213.298, 0],
-          "minute_ts": 1723268700
-        },
-        "ret_aenergy": {
-          "total": 0,
-          "by_minute": [0, 0, 0],
-          "minute_ts": 1723268700
-        }
-      },
-      "config": {
-        "id": 0,
-        "name": null,
-        "reverse": false
-      }
-    },
-    {
-      "key": "sys",
-      "status": {
-        "mac": "84FCE63957F4",
-        "restart_required": false,
-        "time": "07:45",
-        "unixtime": 1723268705,
-        "uptime": 295506,
-        "ram_size": 260572,
-        "ram_free": 133696,
-        "fs_size": 1048576,
-        "fs_free": 614400,
-        "cfg_rev": 17,
-        "kvs_rev": 0,
-        "schedule_rev": 3,
-        "webhook_rev": 0,
-        "available_updates": {
-          "beta": {
-            "version": "1.4.2-beta1"
-          }
-        },
-        "reset_reason": 1
-      },
-      "config": {
-        "device": {
-          "name": "My Shelly PM mini gen3",
-          "mac": "84FCE63957F4",
-          "fw_id": "20240726-114522/1.4.0-gb2aeadb",
-          "discoverable": true,
-          "eco_mode": false
-        },
-        "location": null,
-        "debug": {
-          "level": 2,
-          "file_level": null,
-          "mqtt": {
-            "enable": false
-          },
-          "websocket": {
-            "enable": false
-          },
-          "udp": {
-            "addr": null
-          }
-        },
-        "ui_data": {},
-        "rpc_udp": {
-          "dst_addr": null,
-          "listen_port": null
-        },
-        "sntp": {
-          "server": "time.google.com"
-        },
-        "cfg_rev": 17
-      }
-    },
-    {
-      "key": "wifi",
-      "status": {
-        "sta_ip": "192.168.1.220",
-        "status": "got ip",
-        "ssid": "FibreBox_X6-12A4C7",
-        "rssi": -53
-      },
-      "config": {
-        "ap": {
-          "ssid": "ShellyPMMiniG3-84FCE63957F4",
-          "is_open": true,
-          "enable": false,
-          "range_extender": {
-            "enable": false
-          }
-        },
-        "sta": {
-          "ssid": "FibreBox_X6-12A4C7",
-          "is_open": false,
-          "enable": true,
-          "ipv4mode": "dhcp",
-          "ip": null,
-          "netmask": null,
-          "gw": null,
-          "nameserver": null
-        },
-        "sta1": {
-          "ssid": null,
-          "is_open": true,
-          "enable": false,
-          "ipv4mode": "dhcp",
-          "ip": null,
-          "netmask": null,
-          "gw": null,
-          "nameserver": null
-        },
-        "roam": {
-          "rssi_thr": -80,
-          "interval": 60
-        }
-      }
-    }
-  ]
+  "components": [],
+  "cfg_rev": 20,
+  "offset": 0,
+  "total": 0
 }

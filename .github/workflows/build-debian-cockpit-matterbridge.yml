@@ -1,0 +1,44 @@
+name: Build Debian Cockpit Matterbridge Package
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Debian package structure
+        run: |
+          # Create the directory structure
+          mkdir -p package/usr/share/cockpit/matterbridge
+          mkdir -p package/DEBIAN
+          
+          # Copy plugin files from rock-s0/cockpit to the correct directory
+          cp -r rock-s0/cockpit/* package/usr/share/cockpit/matterbridge
+            
+          # Set up the control file with package metadata
+          echo 'Package: cockpit-matterbridge' > package/DEBIAN/control
+          echo 'Version: 1.0.3' >> package/DEBIAN/control
+          echo 'Section: admin' >> package/DEBIAN/control
+          echo 'Priority: optional' >> package/DEBIAN/control
+          echo 'Architecture: all' >> package/DEBIAN/control
+          echo 'Maintainer: Luligu target.epithet-0h@icloud.com' >> package/DEBIAN/control
+          echo 'Description: Matterbridge Cockpit Dashboard' >> package/DEBIAN/control
+
+      - name: Build Debian package
+        run: dpkg-deb --build package cockpit-matterbridge.deb
+
+      - name: Upload Debian package
+        uses: actions/upload-artifact@v4
+        with:
+          name: cockpit-matterbridge.deb
+          path: cockpit-matterbridge.deb
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
+          overwrite: true

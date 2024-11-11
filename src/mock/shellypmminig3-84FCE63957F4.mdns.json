@@ -68,7 +68,9 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": ["gen=3"]
+      "data": [
+        "gen=3"
+      ]
     },
     {
       "name": "ShellyPMMiniG3-84FCE63957F4.local",
@@ -97,7 +99,11 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": ["gen=3", "app=MiniPMG3", "ver=1.4.0"]
+      "data": [
+        "gen=3",
+        "app=MiniPMG3",
+        "ver=1.4.4"
+      ]
     },
     {
       "name": "ShellyPMMiniG3-84FCE63957F4.local",

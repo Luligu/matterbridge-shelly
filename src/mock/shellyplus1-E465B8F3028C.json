@@ -1,13 +1,13 @@
 {
   "shelly": {
-    "name": "My Shelly 1 PLUS",
+    "name": "1 Plus",
     "id": "shellyplus1-e465b8f3028c",
     "mac": "E465B8F3028C",
-    "slot": 1,
+    "slot": 0,
     "model": "SNSW-001X16EU",
     "gen": 2,
-    "fw_id": "20240726-114504/1.4.0-gb2aeadb",
-    "ver": "1.4.0",
+    "fw_id": "20241011-114452/1.4.4-g6d2a586",
+    "ver": "1.4.4",
     "app": "Plus1",
     "auth_en": false,
     "auth_domain": null
@@ -16,7 +16,7 @@
     "ble": {
       "enable": false,
       "rpc": {
-        "enable": true
+        "enable": false
       },
       "observer": {
         "enable": false
@@ -59,11 +59,11 @@
     },
     "sys": {
       "device": {
-        "name": "My Shelly 1 PLUS",
+        "name": "1 Plus",
         "mac": "E465B8F3028C",
-        "fw_id": "20240726-114504/1.4.0-gb2aeadb",
+        "fw_id": "20241011-114452/1.4.4-g6d2a586",
         "discoverable": true,
-        "eco_mode": false,
+        "eco_mode": true,
         "addon_type": null
       },
       "location": null,
@@ -88,7 +88,7 @@
       "sntp": {
         "server": "time.google.com"
       },
-      "cfg_rev": 14
+      "cfg_rev": 22
     },
     "wifi": {
       "ap": {
@@ -110,9 +110,9 @@
         "nameserver": null
       },
       "sta1": {
-        "ssid": null,
-        "is_open": true,
-        "enable": false,
+        "ssid": "wifiAlbatros",
+        "is_open": false,
+        "enable": true,
         "ipv4mode": "dhcp",
         "ip": null,
         "netmask": null,
@@ -145,23 +145,23 @@
     "switch:0": {
       "id": 0,
       "source": "HTTP_in",
-      "output": true,
+      "output": false,
       "temperature": {
-        "tC": 63.3,
-        "tF": 145.9
+        "tC": 44.8,
+        "tF": 112.7
       }
     },
     "sys": {
       "mac": "E465B8F3028C",
       "restart_required": false,
-      "time": "16:20",
-      "unixtime": 1722522023,
-      "uptime": 16097,
-      "ram_size": 253840,
-      "ram_free": 133560,
+      "time": "15:38",
+      "unixtime": 1730471899,
+      "uptime": 169404,
+      "ram_size": 253764,
+      "ram_free": 133024,
       "fs_size": 393216,
       "fs_free": 106496,
-      "cfg_rev": 14,
+      "cfg_rev": 22,
       "kvs_rev": 0,
       "schedule_rev": 9,
       "webhook_rev": 0,
@@ -172,10 +172,14 @@
       "sta_ip": "192.168.1.237",
       "status": "got ip",
       "ssid": "FibreBox_X6-12A4C7",
-      "rssi": -64
+      "rssi": -70
     },
     "ws": {
       "connected": false
     }
-  }
+  },
+  "components": [],
+  "cfg_rev": 22,
+  "offset": 0,
+  "total": 0
 }
