@@ -63,7 +63,6 @@ import {
   VendorId,
   ModeSelectCluster,
   EndpointOptions,
-  MatterbridgeEndpoint,
 } from 'matterbridge';
 
 // import { EveHistory, EveHistoryCluster, MatterHistory } from 'matterbridge/history';
@@ -108,11 +107,15 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
   private postfix;
   private failsafeCount;
 
-  createMutableDevice(definition: DeviceTypeDefinition | AtLeastOne<DeviceTypeDefinition>, options: EndpointOptions = {}, debug = false): MatterbridgeDevice {
-    let device: MatterbridgeDevice | MatterbridgeEndpoint;
-    if ('edge' in this.matterbridge && this.matterbridge.edge === true) device = new MatterbridgeEndpoint(definition, options, debug);
-    else device = new MatterbridgeDevice(definition, options, debug);
-    return device as unknown as MatterbridgeDevice;
+  async createMutableDevice(definition: DeviceTypeDefinition | AtLeastOne<DeviceTypeDefinition>, options: EndpointOptions = {}, debug = false): Promise<MatterbridgeDevice> {
+    let device: MatterbridgeDevice;
+    const matterbridge = await import('matterbridge');
+    if ('edge' in this.matterbridge && this.matterbridge.edge === true && 'MatterbridgeEndpoint' in matterbridge) {
+      // Dynamically resolve the MatterbridgeEndpoint class from the imported module and instantiate it without throwing a TypeScript error for old versions of Matterbridge
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      device = new (matterbridge as any).MatterbridgeEndpoint(definition, options, debug) as MatterbridgeDevice;
+    } else device = new MatterbridgeDevice(definition, options, debug);
+    return device;
   }
 
   constructor(matterbridge: Matterbridge, log: AnsiLogger, config: PlatformConfig) {
@@ -249,7 +252,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               }
             });
             if (definition) {
-              const mbDevice = this.createMutableDevice(definition, undefined, config.debug as boolean);
+              const mbDevice = await this.createMutableDevice(definition, undefined, config.debug as boolean);
               mbDevice.createDefaultBridgedDeviceBasicInformationClusterServer(
                 bthomeDevice.name,
                 bthomeDevice.addr + (this.postfix ? '-' + this.postfix : ''),
@@ -485,7 +488,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       }
 
       // Create a new Matterbridge device
-      const mbDevice = this.createMutableDevice(bridgedNode, undefined, config.debug as boolean);
+      const mbDevice = await this.createMutableDevice(bridgedNode, undefined, config.debug as boolean);
       mbDevice.createDefaultBridgedDeviceBasicInformationClusterServer(
         device.name,
         device.id + (this.postfix ? '-' + this.postfix : ''),
