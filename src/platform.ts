@@ -62,6 +62,8 @@ import {
   Switch,
   VendorId,
   ModeSelectCluster,
+  EndpointOptions,
+  MatterbridgeEndpoint,
 } from 'matterbridge';
 
 // import { EveHistory, EveHistoryCluster, MatterHistory } from 'matterbridge/history';
@@ -106,6 +108,13 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
   private postfix;
   private failsafeCount;
 
+  createMutableDevice(definition: DeviceTypeDefinition | AtLeastOne<DeviceTypeDefinition>, options: EndpointOptions = {}, debug = false): MatterbridgeDevice {
+    let device: MatterbridgeDevice | MatterbridgeEndpoint;
+    if ('edge' in this.matterbridge && this.matterbridge.edge === true) device = new MatterbridgeEndpoint(definition, options, debug);
+    else device = new MatterbridgeDevice(definition, options, debug);
+    return device as unknown as MatterbridgeDevice;
+  }
+
   constructor(matterbridge: Matterbridge, log: AnsiLogger, config: PlatformConfig) {
     super(matterbridge, log, config);
 
@@ -126,8 +135,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     if (!isValidNumber(this.failsafeCount, 0)) this.failsafeCount = 0;
 
     log.debug(`Initializing platform: ${idn}${config.name}${rs}${db} v.${CYAN}${config.version}`);
-    log.debug(`- username: ${CYAN}${config.username}`);
-    log.debug(`- password: ${CYAN}${config.password}`);
+    log.debug(`- username: ${CYAN}${config.username ? '********' : 'undefined'}`);
+    log.debug(`- password: ${CYAN}${config.password ? '********' : 'undefined'}`);
     log.debug(`- exposeSwitch: ${CYAN}${config.exposeSwitch}`);
     log.debug(`- exposeInput: ${CYAN}${config.exposeInput}`);
     log.debug(`- exposePowerMeter: ${CYAN}${config.exposePowerMeter}`);
@@ -240,7 +249,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               }
             });
             if (definition) {
-              const mbDevice = new MatterbridgeDevice(definition, undefined, config.debug as boolean);
+              const mbDevice = this.createMutableDevice(definition, undefined, config.debug as boolean);
               mbDevice.createDefaultBridgedDeviceBasicInformationClusterServer(
                 bthomeDevice.name,
                 bthomeDevice.addr + (this.postfix ? '-' + this.postfix : ''),
@@ -476,7 +485,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       }
 
       // Create a new Matterbridge device
-      const mbDevice = new MatterbridgeDevice(bridgedNode, undefined, config.debug as boolean);
+      const mbDevice = this.createMutableDevice(bridgedNode, undefined, config.debug as boolean);
       mbDevice.createDefaultBridgedDeviceBasicInformationClusterServer(
         device.name,
         device.id + (this.postfix ? '-' + this.postfix : ''),
@@ -762,10 +771,10 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         } else if (component.name === 'Input') {
           const inputComponent = device.getComponent(key);
           // Skip the input component if it is disabled in Gen 2/3 devices
-          if (inputComponent && inputComponent?.hasProperty('enable') && inputComponent?.getValue('enable') === false) continue;
+          if (inputComponent && inputComponent.hasProperty('enable') && inputComponent.getValue('enable') === false) continue;
           if (
             inputComponent &&
-            inputComponent?.hasProperty('state') &&
+            inputComponent.hasProperty('state') &&
             (config.exposeInput === 'contact' || (config.exposeInput === 'disabled' && config.inputContactList && (config.inputContactList as string[]).includes(device.id)))
           ) {
             const state = inputComponent.getValue('state') as boolean;
@@ -1007,8 +1016,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             mbDevice.subscribeAttribute(
               ThermostatCluster.id,
               'occupiedHeatingSetpoint',
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              (newValue: any, oldValue: any) => {
+              (newValue: number, oldValue: number) => {
                 mbDevice.log.info(`Thermostat occupiedHeatingSetpoint changed from ${oldValue / 100} to ${newValue / 100}`);
                 if (device.thermostatSetpointTimeout) clearTimeout(device.thermostatSetpointTimeout);
                 device.thermostatSetpointTimeout = setTimeout(() => {
@@ -1022,8 +1030,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             mbDevice.subscribeAttribute(
               ThermostatCluster.id,
               'occupiedCoolingSetpoint',
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              (newValue: any, oldValue: any) => {
+              (newValue: number, oldValue: number) => {
                 mbDevice.log.info(`Thermostat occupiedCoolingSetpoint changed from ${oldValue / 100} to ${newValue / 100}`);
                 if (device.thermostatSetpointTimeout) clearTimeout(device.thermostatSetpointTimeout);
                 device.thermostatSetpointTimeout = setTimeout(() => {

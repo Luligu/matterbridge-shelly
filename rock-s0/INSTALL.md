@@ -118,9 +118,15 @@ npm -v
 
 ```
 sudo apt update
-sudo apt install cockpit btop -y
+sudo apt install cockpit btop samba nano -y
 sudo apt upgrade
 ```
+
+# Install cockpit-files
+ssh matterbridge@matterbridge
+sudo mkdir -p /usr/share/cockpit/cockpit-files
+scp -r "C:\Users\lligu\GitHub\matterbridge-shelly\rock-s0\cockpit-files" matterbridge@matterbridge:/usr/share/cockpit
+sudo apt install -t bookworm-backports cockpit
 
 # Install matterbridge cockpit plugin manually
 
@@ -133,7 +139,12 @@ copy all the files from cockpit directory to "\usr\share\cockpit\matterbridge"
 
 ```
 sudo curl https://raw.githubusercontent.com/Luligu/matterbridge-shelly/dev/rock-s0/cockpit-matterbridge.deb -o cockpit-matterbridge.deb
-sudo dpkg -i cockpit-matterbridge.deb
+```
+
+# Clear the journal
+
+```
+sudo journalctl --vacuum-size=0 --vacuum-time=1s
 ```
 
 # Prevent the journal logs to grow
