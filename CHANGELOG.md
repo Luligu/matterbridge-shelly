@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 If you like this project and find it useful, please consider giving it a star on GitHub at https://github.com/Luligu/matterbridge-shelly and sponsoring it.
 
-## [1.0.10] - 2024-11-18
+## [1.0.10] - 2024-11-20
 
 ### Added
 
@@ -12,6 +12,7 @@ If you like this project and find it useful, please consider giving it a star on
 
 ### Changed
 
+- [BTHome]: Update scanBTHomeComponents to the new BLU firmware 1.0.20 (model identification change from v1.0.18).
 - [log]: Show username and password with **** in logs.
 - [package]: Updated dependencies.
 
