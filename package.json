@@ -112,7 +112,7 @@
     "@types/eslint__js": "8.42.3",
     "@types/jest": "29.5.14",
     "@types/multicast-dns": "7.2.4",
-    "@types/node": "22.9.0",
+    "@types/node": "22.9.1",
     "@types/ws": "8.5.13",
     "eslint": "9.15.0",
     "eslint-config-prettier": "9.1.0",
