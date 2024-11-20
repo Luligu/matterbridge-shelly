@@ -1,13 +1,13 @@
 {
   "shelly": {
-    "name": "My Shelly 1 Gen3",
+    "name": "1 Gen3",
     "id": "shelly1g3-34b7dacac830",
     "mac": "34B7DACAC830",
-    "slot": 1,
+    "slot": 0,
     "model": "S3SW-001X16EU",
     "gen": 3,
-    "fw_id": "20240819-074630/1.4.2-gc2639da",
-    "ver": "1.4.2",
+    "fw_id": "20241011-114449/1.4.4-g6d2a586",
+    "ver": "1.4.4",
     "app": "S1G3",
     "auth_en": false,
     "auth_domain": null
@@ -57,7 +57,7 @@
     },
     "switch:0": {
       "id": 0,
-      "name": null,
+      "name": "1 Gen3",
       "in_mode": "follow",
       "initial_state": "match_input",
       "auto_on": false,
@@ -67,9 +67,9 @@
     },
     "sys": {
       "device": {
-        "name": "My Shelly 1 Gen3",
+        "name": "1 Gen3",
         "mac": "34B7DACAC830",
-        "fw_id": "20240819-074630/1.4.2-gc2639da",
+        "fw_id": "20241011-114449/1.4.4-g6d2a586",
         "discoverable": true,
         "eco_mode": false,
         "addon_type": null
@@ -96,7 +96,7 @@
       "sntp": {
         "server": "time.google.com"
       },
-      "cfg_rev": 14
+      "cfg_rev": 18
     },
     "wifi": {
       "ap": {
@@ -118,9 +118,9 @@
         "nameserver": null
       },
       "sta1": {
-        "ssid": null,
-        "is_open": true,
-        "enable": false,
+        "ssid": "wifiAlbatros",
+        "is_open": false,
+        "enable": true,
         "ipv4mode": "dhcp",
         "ip": null,
         "netmask": null,
@@ -141,7 +141,9 @@
   "status": {
     "ble": {},
     "bthome": {
-      "errors": ["bluetooth_disabled"]
+      "errors": [
+        "bluetooth_disabled"
+      ]
     },
     "cloud": {
       "connected": true
@@ -156,237 +158,42 @@
     },
     "switch:0": {
       "id": 0,
-      "source": "WS_in",
+      "source": "init",
       "output": false,
       "temperature": {
-        "tC": 45.5,
-        "tF": 113.9
+        "tC": 51.9,
+        "tF": 125.4
       }
     },
     "sys": {
       "mac": "34B7DACAC830",
       "restart_required": false,
-      "time": "23:21",
-      "unixtime": 1725744078,
-      "uptime": 194,
-      "ram_size": 259336,
-      "ram_free": 134980,
+      "time": "16:51",
+      "unixtime": 1732117867,
+      "uptime": 1199,
+      "ram_size": 259180,
+      "ram_free": 131496,
       "fs_size": 1048576,
-      "fs_free": 589824,
-      "cfg_rev": 14,
+      "fs_free": 585728,
+      "cfg_rev": 18,
       "kvs_rev": 0,
-      "schedule_rev": 0,
+      "schedule_rev": 1,
       "webhook_rev": 0,
       "available_updates": {},
-      "reset_reason": 3
+      "reset_reason": 1
     },
     "wifi": {
       "sta_ip": "192.168.1.157",
       "status": "got ip",
       "ssid": "FibreBox_X6-12A4C7",
-      "rssi": -61
+      "rssi": -51
     },
     "ws": {
       "connected": false
     }
   },
-  "components": [
-    {
-      "key": "ble",
-      "status": {},
-      "config": {
-        "enable": false,
-        "rpc": {
-          "enable": true
-        },
-        "observer": {
-          "enable": false
-        }
-      }
-    },
-    {
-      "key": "bthome",
-      "status": {
-        "errors": ["bluetooth_disabled"]
-      },
-      "config": {}
-    },
-    {
-      "key": "cloud",
-      "status": {
-        "connected": true
-      },
-      "config": {
-        "enable": true,
-        "server": "shelly-103-eu.shelly.cloud:6022/jrpc"
-      }
-    },
-    {
-      "key": "input:0",
-      "status": {
-        "id": 0,
-        "state": false
-      },
-      "config": {
-        "id": 0,
-        "name": null,
-        "type": "switch",
-        "enable": true,
-        "invert": false,
-        "factory_reset": true
-      }
-    },
-    {
-      "key": "knx",
-      "status": {},
-      "config": {
-        "enable": false,
-        "ia": "15.15.255",
-        "routing": {
-          "addr": "224.0.23.12:3671"
-        }
-      }
-    },
-    {
-      "key": "mqtt",
-      "status": {
-        "connected": false
-      },
-      "config": {
-        "enable": false,
-        "server": null,
-        "client_id": "shelly1g3-34b7dacac830",
-        "user": null,
-        "ssl_ca": null,
-        "topic_prefix": "shelly1g3-34b7dacac830",
-        "rpc_ntf": true,
-        "status_ntf": false,
-        "use_client_cert": false,
-        "enable_rpc": true,
-        "enable_control": true
-      }
-    },
-    {
-      "key": "switch:0",
-      "status": {
-        "id": 0,
-        "source": "WS_in",
-        "output": false,
-        "temperature": {
-          "tC": 45.5,
-          "tF": 113.9
-        }
-      },
-      "config": {
-        "id": 0,
-        "name": null,
-        "in_mode": "follow",
-        "initial_state": "match_input",
-        "auto_on": false,
-        "auto_on_delay": 60,
-        "auto_off": false,
-        "auto_off_delay": 60
-      }
-    },
-    {
-      "key": "sys",
-      "status": {
-        "mac": "34B7DACAC830",
-        "restart_required": false,
-        "time": "23:21",
-        "unixtime": 1725744079,
-        "uptime": 194,
-        "ram_size": 259328,
-        "ram_free": 133180,
-        "fs_size": 1048576,
-        "fs_free": 589824,
-        "cfg_rev": 14,
-        "kvs_rev": 0,
-        "schedule_rev": 0,
-        "webhook_rev": 0,
-        "available_updates": {},
-        "reset_reason": 3
-      },
-      "config": {
-        "device": {
-          "name": "My Shelly 1 Gen3",
-          "mac": "34B7DACAC830",
-          "fw_id": "20240819-074630/1.4.2-gc2639da",
-          "discoverable": true,
-          "eco_mode": false,
-          "addon_type": null
-        },
-        "location": {
-          "tz": "Europe/Monaco",
-          "lat": 43.7314,
-          "lon": 7.419
-        },
-        "debug": {
-          "level": 2,
-          "file_level": null,
-          "mqtt": {
-            "enable": false
-          },
-          "websocket": {
-            "enable": false
-          },
-          "udp": {
-            "addr": null
-          }
-        },
-        "ui_data": {},
-        "rpc_udp": {
-          "dst_addr": null,
-          "listen_port": null
-        },
-        "sntp": {
-          "server": "time.google.com"
-        },
-        "cfg_rev": 14
-      }
-    },
-    {
-      "key": "wifi",
-      "status": {
-        "sta_ip": "192.168.1.157",
-        "status": "got ip",
-        "ssid": "FibreBox_X6-12A4C7",
-        "rssi": -61
-      },
-      "config": {
-        "ap": {
-          "ssid": "Shelly1G3-34B7DACAC830",
-          "is_open": true,
-          "enable": false,
-          "range_extender": {
-            "enable": false
-          }
-        },
-        "sta": {
-          "ssid": "FibreBox_X6-12A4C7",
-          "is_open": false,
-          "enable": true,
-          "ipv4mode": "dhcp",
-          "ip": null,
-          "netmask": null,
-          "gw": null,
-          "nameserver": null
-        },
-        "sta1": {
-          "ssid": null,
-          "is_open": true,
-          "enable": false,
-          "ipv4mode": "dhcp",
-          "ip": null,
-          "netmask": null,
-          "gw": null,
-          "nameserver": null
-        },
-        "roam": {
-          "rssi_thr": -80,
-          "interval": 60
-        }
-      }
-    }
-  ]
+  "components": [],
+  "cfg_rev": 18,
+  "offset": 0,
+  "total": 0
 }

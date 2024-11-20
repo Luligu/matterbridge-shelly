@@ -1,6 +1,6 @@
 {
   "shelly": {
-    "name": "My Shelly EM Gen3",
+    "name": "EM Gen3",
     "id": "shellyemg3-84fce636582c",
     "mac": "84FCE636582C",
     "slot": 0,
@@ -14,12 +14,12 @@
   },
   "settings": {
     "ble": {
-      "enable": false,
+      "enable": true,
       "rpc": {
-        "enable": false
+        "enable": true
       },
       "observer": {
-        "enable": false
+        "enable": true
       }
     },
     "bthome": {},
@@ -65,11 +65,11 @@
     },
     "sys": {
       "device": {
-        "name": "My Shelly EM Gen3",
+        "name": "EM Gen3",
         "mac": "84FCE636582C",
         "fw_id": "20240724-112312/g1216eb0",
         "discoverable": true,
-        "eco_mode": false,
+        "eco_mode": true,
         "addon_type": null
       },
       "location": null,
@@ -97,7 +97,7 @@
       "sntp": {
         "server": "time.google.com"
       },
-      "cfg_rev": 15
+      "cfg_rev": 69
     },
     "wifi": {
       "ap": {
@@ -119,8 +119,8 @@
         "nameserver": null
       },
       "sta1": {
-        "ssid": null,
-        "is_open": true,
+        "ssid": "wifiAlbatros",
+        "is_open": false,
         "enable": false,
         "ipv4mode": "dhcp",
         "ip": null,
@@ -141,16 +141,14 @@
   },
   "status": {
     "ble": {},
-    "bthome": {
-      "errors": ["bluetooth_disabled"]
-    },
+    "bthome": {},
     "cloud": {
       "connected": true
     },
     "em1:0": {
       "id": 0,
       "current": 0.02,
-      "voltage": 237.3,
+      "voltage": 237.5,
       "act_power": 0,
       "aprt_power": 4.8,
       "pf": 0,
@@ -159,17 +157,17 @@
     },
     "em1:1": {
       "id": 1,
-      "current": 0.02,
-      "voltage": 237.3,
+      "current": 0.021,
+      "voltage": 237.5,
       "act_power": 0,
-      "aprt_power": 4.8,
+      "aprt_power": 4.9,
       "pf": 0,
       "freq": 50,
       "calibration": "factory"
     },
     "em1data:0": {
       "id": 0,
-      "total_act_energy": 0,
+      "total_act_energy": 0.01,
       "total_act_ret_energy": 0
     },
     "em1data:1": {
@@ -185,35 +183,39 @@
       "source": "init",
       "output": false,
       "temperature": {
-        "tC": 56.2,
-        "tF": 133.2
+        "tC": 52.9,
+        "tF": 127.3
       }
     },
     "sys": {
       "mac": "84FCE636582C",
       "restart_required": false,
-      "time": "23:13",
-      "unixtime": 1722978832,
-      "uptime": 9711,
-      "ram_size": 253168,
-      "ram_free": 122824,
+      "time": "17:24",
+      "unixtime": 1732119845,
+      "uptime": 17,
+      "ram_size": 252664,
+      "ram_free": 76236,
       "fs_size": 786432,
-      "fs_free": 331776,
-      "cfg_rev": 15,
+      "fs_free": 323584,
+      "cfg_rev": 69,
       "kvs_rev": 0,
       "schedule_rev": 0,
       "webhook_rev": 0,
       "available_updates": {},
-      "reset_reason": 1
+      "reset_reason": 3
     },
     "wifi": {
       "sta_ip": "192.168.1.243",
       "status": "got ip",
       "ssid": "FibreBox_X6-12A4C7",
-      "rssi": -52
+      "rssi": -60
     },
     "ws": {
       "connected": false
     }
-  }
+  },
+  "components": [],
+  "cfg_rev": 69,
+  "offset": 0,
+  "total": 0
 }

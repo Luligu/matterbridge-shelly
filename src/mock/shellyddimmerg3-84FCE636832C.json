@@ -1,6 +1,6 @@
 {
   "shelly": {
-    "name": "My Shelly DALI Dimmer Gen3",
+    "name": "DALI Dimmer Gen3",
     "id": "shellyddimmerg3-84fce636832c",
     "mac": "84FCE636832C",
     "slot": 0,
@@ -14,12 +14,12 @@
   },
   "settings": {
     "ble": {
-      "enable": false,
+      "enable": true,
       "rpc": {
         "enable": true
       },
       "observer": {
-        "enable": false
+        "enable": true
       }
     },
     "bthome": {},
@@ -88,7 +88,7 @@
     },
     "sys": {
       "device": {
-        "name": "My Shelly DALI Dimmer Gen3",
+        "name": "DALI Dimmer Gen3",
         "mac": "84FCE636832C",
         "fw_id": "20240719-122242/g55db545",
         "discoverable": true
@@ -118,7 +118,7 @@
       "sntp": {
         "server": "time.google.com"
       },
-      "cfg_rev": 11
+      "cfg_rev": 13
     },
     "wifi": {
       "ap": {
@@ -140,9 +140,9 @@
         "nameserver": null
       },
       "sta1": {
-        "ssid": null,
-        "is_open": true,
-        "enable": false,
+        "ssid": "wifiAlbatros",
+        "is_open": false,
+        "enable": true,
         "ipv4mode": "dhcp",
         "ip": null,
         "netmask": null,
@@ -162,9 +162,7 @@
   },
   "status": {
     "ble": {},
-    "bthome": {
-      "errors": ["bluetooth_disabled"]
-    },
+    "bthome": {},
     "cloud": {
       "connected": true
     },
@@ -182,12 +180,12 @@
     "knx": {},
     "light:0": {
       "id": 0,
-      "source": "HTTP_in",
-      "output": true,
-      "brightness": 100,
+      "source": "init",
+      "output": false,
+      "brightness": 1,
       "temperature": {
-        "tC": 56.4,
-        "tF": 133.6
+        "tC": 71.2,
+        "tF": 160.2
       }
     },
     "mqtt": {
@@ -196,28 +194,32 @@
     "sys": {
       "mac": "84FCE636832C",
       "restart_required": false,
-      "time": "08:10",
-      "unixtime": 1722579044,
-      "uptime": 2137,
-      "ram_size": 257176,
-      "ram_free": 128904,
+      "time": "16:52",
+      "unixtime": 1732117957,
+      "uptime": 1337,
+      "ram_size": 256516,
+      "ram_free": 78204,
       "fs_size": 1048576,
-      "fs_free": 577536,
-      "cfg_rev": 11,
+      "fs_free": 573440,
+      "cfg_rev": 13,
       "kvs_rev": 0,
       "schedule_rev": 1,
       "webhook_rev": 0,
       "available_updates": {},
-      "reset_reason": 3
+      "reset_reason": 1
     },
     "wifi": {
       "sta_ip": "192.168.1.242",
       "status": "got ip",
       "ssid": "FibreBox_X6-12A4C7",
-      "rssi": -51
+      "rssi": -62
     },
     "ws": {
       "connected": false
     }
-  }
+  },
+  "components": [],
+  "cfg_rev": 13,
+  "offset": 0,
+  "total": 0
 }
