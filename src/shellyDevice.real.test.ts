@@ -16,7 +16,7 @@ describe('Shellies', () => {
 
   const firmwareGen1 = 'v1.14.0-gcb84623';
   const firmwareGen2 = '1.4.4-g6d2a586';
-  const address = '30:f6:ef:69:2b:c5';
+  const address = 'c4:cb:76:b3:cd:1f';
 
   beforeAll(async () => {
     consoleLogSpy = jest.spyOn(console, 'log').mockImplementation((...args: any[]) => {

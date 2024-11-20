@@ -28,10 +28,10 @@
       "ttl": 4500,
       "class": "IN",
       "flush": false,
-      "data": "shellyswitch25-3494546BBF7E._http._tcp.local"
+      "data": "shellyswitch25-3494547BF36C._http._tcp.local"
     },
     {
-      "name": "shellyswitch25-3494546BBF7E._http._tcp.local",
+      "name": "shellyswitch25-3494547BF36C._http._tcp.local",
       "type": "SRV",
       "ttl": 120,
       "class": "IN",
@@ -40,17 +40,17 @@
         "priority": 0,
         "weight": 0,
         "port": 80,
-        "target": "shellyswitch25-3494546BBF7E.local"
+        "target": "shellyswitch25-3494547BF36C.local"
       }
     },
     {
-      "name": "shellyswitch25-3494546BBF7E._http._tcp.local",
+      "name": "shellyswitch25-3494547BF36C._http._tcp.local",
       "type": "TXT",
       "ttl": 120,
       "class": "IN",
       "flush": true,
       "data": [
-        "id=shellyswitch25-3494546BBF7E",
+        "id=shellyswitch25-3494547BF36C",
         "arch=esp8266",
         "app=switch25",
         "fw_version=1.0",
@@ -59,21 +59,21 @@
       ]
     },
     {
-      "name": "shellyswitch25-3494546BBF7E.local",
+      "name": "shellyswitch25-3494547BF36C.local",
       "type": "A",
       "ttl": 120,
       "class": "IN",
       "flush": true,
-      "data": "192.168.1.222"
+      "data": "192.168.1.236"
     },
     {
-      "name": "shellyswitch25-3494546BBF7E.local",
+      "name": "shellyswitch25-3494547BF36C.local",
       "type": "NSEC",
       "ttl": 120,
       "class": "IN",
       "flush": true,
       "data": {
-        "nextDomain": "shellyswitch25-3494546BBF7E.local",
+        "nextDomain": "shellyswitch25-3494547BF36C.local",
         "rrtypes": [
           "A"
         ]
