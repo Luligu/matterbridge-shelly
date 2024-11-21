@@ -6,8 +6,8 @@
     "slot": 0,
     "model": "S3GW-1DBT001",
     "gen": 3,
-    "fw_id": "20240926-112057/1.4.99-blugwg3prod1-ga62dce2",
-    "ver": "1.4.99-blugwg3prod1",
+    "fw_id": "20241021-140344/1.4.99-blugwg3prod4-g110402b",
+    "ver": "1.4.99-blugwg3prod4",
     "app": "BluGwG3",
     "auth_en": false,
     "auth_domain": null
@@ -15,9 +15,6 @@
   "settings": {
     "ble": {
       "enable": true,
-      "observer_scan_window_ms": 61,
-      "observer_scan_interval_ms": 241,
-      "gattc_sv_timeout_ms": 5000,
       "rpc": {
         "enable": true
       }
@@ -47,7 +44,7 @@
       "device": {
         "name": "BLU Gateway Gen3",
         "mac": "34CDB077BCD4",
-        "fw_id": "20240926-112057/1.4.99-blugwg3prod1-ga62dce2",
+        "fw_id": "20241021-140344/1.4.99-blugwg3prod4-g110402b",
         "discoverable": true,
         "eco_mode": false
       },
@@ -74,9 +71,9 @@
         "listen_port": null
       },
       "sntp": {
-        "server": "time.google.com"
+        "server": "time.cloudflare.com"
       },
-      "cfg_rev": 40
+      "cfg_rev": 2336
     },
     "wifi": {
       "ap": {
@@ -98,9 +95,9 @@
         "nameserver": null
       },
       "sta1": {
-        "ssid": null,
-        "is_open": true,
-        "enable": false,
+        "ssid": "wifiAlbatros",
+        "is_open": false,
+        "enable": true,
         "ipv4mode": "dhcp",
         "ip": null,
         "netmask": null,
@@ -131,16 +128,17 @@
     "sys": {
       "mac": "34CDB077BCD4",
       "restart_required": false,
-      "time": "17:12",
-      "unixtime": 1727968338,
-      "uptime": 2016,
-      "ram_size": 254368,
-      "ram_free": 80900,
+      "time": "16:51",
+      "unixtime": 1732117918,
+      "uptime": 20388,
+      "ram_size": 253732,
+      "ram_free": 67588,
+      "ram_min_free": 34164,
       "fs_size": 1048576,
-      "fs_free": 606208,
-      "cfg_rev": 40,
+      "fs_free": 569344,
+      "cfg_rev": 2336,
       "kvs_rev": 0,
-      "schedule_rev": 0,
+      "schedule_rev": 1,
       "webhook_rev": 0,
       "available_updates": {},
       "reset_reason": 3
@@ -149,7 +147,7 @@
       "sta_ip": "192.168.1.164",
       "status": "got ip",
       "ssid": "FibreBox_X6-12A4C7",
-      "rssi": -54
+      "rssi": -41
     },
     "ws": {
       "connected": false
@@ -157,74 +155,79 @@
   },
   "components": [
     {
-      "key": "ble",
-      "status": {},
-      "config": {
-        "enable": true,
-        "observer_scan_window_ms": 61,
-        "observer_scan_interval_ms": 241,
-        "gattc_sv_timeout_ms": 5000,
-        "rpc": {
-          "enable": true
-        }
-      }
-    },
-    {
-      "key": "blugw",
-      "status": {},
-      "config": {
-        "sys_led_enable": true
-      }
-    },
-    {
       "key": "blutrv:200",
       "status": {
         "id": 200,
-        "rssi": -28,
+        "rssi": -47,
         "battery": 100,
-        "packet_id": 225,
-        "last_updated_ts": 1727968324,
+        "packet_id": 186,
+        "last_updated_ts": 1732117911,
         "paired": true,
         "rpc": true,
-        "rsv": 49
+        "rsv": 51
       },
       "config": {
         "id": 200,
         "addr": "28:68:47:fc:9a:6b",
-        "name": null,
+        "name": "BluTrv 200",
         "key": null,
         "trv": "bthomedevice:200",
-        "temp_sensors": [],
-        "dw_sensors": [],
-        "meta": null
+        "temp_sensors": [
+          "bthomesensor:207"
+        ],
+        "dw_sensors": [
+          "bthomesensor:210"
+        ],
+        "meta": {}
       }
     },
     {
-      "key": "bthome",
-      "status": {},
-      "config": {}
+      "key": "blutrv:201",
+      "status": {
+        "id": 201,
+        "rssi": -49,
+        "battery": 100,
+        "packet_id": 79,
+        "last_updated_ts": 1732117916,
+        "paired": true,
+        "rpc": true,
+        "rsv": 20
+      },
+      "config": {
+        "id": 201,
+        "addr": "28:db:a7:b5:d1:ca",
+        "name": "BluTrv 201",
+        "key": null,
+        "trv": "bthomedevice:203",
+        "temp_sensors": [
+          "bthomesensor:219"
+        ],
+        "dw_sensors": [
+          "bthomesensor:210"
+        ],
+        "meta": {}
+      }
     },
     {
       "key": "bthomedevice:200",
       "status": {
         "id": 200,
-        "rssi": -28,
+        "rssi": -47,
         "battery": 100,
-        "packet_id": 225,
-        "last_updated_ts": 1727968324,
+        "packet_id": 186,
+        "last_updated_ts": 1732117911,
         "paired": true,
         "rpc": true,
-        "rsv": 49
+        "rsv": 51
       },
       "config": {
         "id": 200,
         "addr": "28:68:47:fc:9a:6b",
-        "name": null,
+        "name": "BluTrv 200",
         "key": null,
         "meta": {
           "ui": {
-            "view": "",
-            "local_name": "TRV",
+            "view": "regular",
             "icon": null
           }
         }
@@ -235,11 +238,112 @@
       }
     },
     {
+      "key": "bthomedevice:201",
+      "status": {
+        "id": 201,
+        "rssi": -65,
+        "battery": 100,
+        "packet_id": 103,
+        "last_updated_ts": 1732117913,
+        "paired": true,
+        "rpc": false,
+        "rsv": -1
+      },
+      "config": {
+        "id": 201,
+        "addr": "7c:c6:b6:65:2d:87",
+        "name": null,
+        "key": null,
+        "meta": null
+      },
+      "attrs": {
+        "flags": 17,
+        "model_id": 3
+      }
+    },
+    {
+      "key": "bthomedevice:202",
+      "status": {
+        "id": 202,
+        "rssi": -59,
+        "battery": 100,
+        "packet_id": 34,
+        "last_updated_ts": 1732116452,
+        "paired": true,
+        "rpc": false,
+        "rsv": -1
+      },
+      "config": {
+        "id": 202,
+        "addr": "0c:ef:f6:f1:d7:7b",
+        "name": null,
+        "key": null,
+        "meta": null
+      },
+      "attrs": {
+        "flags": 17,
+        "model_id": 2
+      }
+    },
+    {
+      "key": "bthomedevice:203",
+      "status": {
+        "id": 203,
+        "rssi": -49,
+        "battery": 100,
+        "packet_id": 79,
+        "last_updated_ts": 1732117916,
+        "paired": true,
+        "rpc": true,
+        "rsv": 20
+      },
+      "config": {
+        "id": 203,
+        "addr": "28:db:a7:b5:d1:ca",
+        "name": "BluTrv 201",
+        "key": null,
+        "meta": {
+          "ui": {
+            "view": "regular",
+            "icon": null
+          }
+        }
+      },
+      "attrs": {
+        "flags": 17,
+        "model_id": 8
+      }
+    },
+    {
+      "key": "bthomedevice:204",
+      "status": {
+        "id": 204,
+        "rssi": -57,
+        "battery": 100,
+        "packet_id": 95,
+        "last_updated_ts": 1732117909,
+        "paired": true,
+        "rpc": false,
+        "rsv": -1
+      },
+      "config": {
+        "id": 204,
+        "addr": "7c:c6:b6:bd:7a:9a",
+        "name": null,
+        "key": null,
+        "meta": null
+      },
+      "attrs": {
+        "flags": 17,
+        "model_id": 3
+      }
+    },
+    {
       "key": "bthomesensor:200",
       "status": {
         "id": 200,
         "value": 100,
-        "last_updated_ts": 1727968324
+        "last_updated_ts": 1732117911
       },
       "config": {
         "id": 200,
@@ -254,7 +358,7 @@
       "key": "bthomesensor:201",
       "status": {
         "id": 201,
-        "last_updated_ts": 1070226352
+        "last_updated_ts": 1070226336
       },
       "config": {
         "id": 201,
@@ -269,8 +373,8 @@
       "key": "bthomesensor:202",
       "status": {
         "id": 202,
-        "value": 11,
-        "last_updated_ts": 1727968324
+        "value": 18,
+        "last_updated_ts": 1732117911
       },
       "config": {
         "id": 202,
@@ -285,8 +389,8 @@
       "key": "bthomesensor:203",
       "status": {
         "id": 203,
-        "value": 24,
-        "last_updated_ts": 1727968324
+        "value": 22.7,
+        "last_updated_ts": 1732117911
       },
       "config": {
         "id": 203,
@@ -298,92 +402,260 @@
       }
     },
     {
-      "key": "cloud",
+      "key": "bthomesensor:204",
       "status": {
-        "connected": true
+        "id": 204,
+        "value": 100,
+        "last_updated_ts": 1732117913
       },
       "config": {
-        "enable": true,
-        "server": "shelly-103-eu.shelly.cloud:6022/jrpc"
+        "id": 204,
+        "addr": "7c:c6:b6:65:2d:87",
+        "name": null,
+        "obj_id": 1,
+        "idx": 0,
+        "meta": null
       }
     },
     {
-      "key": "mqtt",
+      "key": "bthomesensor:205",
       "status": {
-        "connected": false
+        "id": 205,
+        "value": 27,
+        "last_updated_ts": 1732117913
       },
       "config": {
-        "enable": false,
-        "server": null,
-        "client_id": "shellyblugwg3-34cdb077bcd4",
-        "user": null,
-        "ssl_ca": null,
-        "topic_prefix": "shellyblugwg3-34cdb077bcd4",
-        "rpc_ntf": true,
-        "status_ntf": false,
-        "use_client_cert": false,
-        "enable_rpc": true,
-        "enable_control": true
+        "id": 205,
+        "addr": "7c:c6:b6:65:2d:87",
+        "name": null,
+        "obj_id": 46,
+        "idx": 0,
+        "meta": null
       }
     },
     {
-      "key": "sys",
+      "key": "bthomesensor:206",
       "status": {
-        "mac": "34CDB077BCD4",
-        "restart_required": false,
-        "time": "17:12",
-        "unixtime": 1727968338,
-        "uptime": 2017,
-        "ram_size": 254364,
-        "ram_free": 77824,
-        "fs_size": 1048576,
-        "fs_free": 606208,
-        "cfg_rev": 40,
-        "kvs_rev": 0,
-        "schedule_rev": 0,
-        "webhook_rev": 0,
-        "available_updates": {},
-        "reset_reason": 3
+        "id": 206,
+        "last_updated_ts": 4
       },
       "config": {
-        "device": {
-          "name": "BLU Gateway Gen3",
-          "mac": "34CDB077BCD4",
-          "fw_id": "20240926-112057/1.4.99-blugwg3prod1-ga62dce2",
-          "discoverable": true,
-          "eco_mode": false
-        },
-        "location": {
-          "tz": "Europe/Monaco",
-          "lat": 43.7314,
-          "lon": 7.419
-        },
-        "debug": {
-          "level": 2,
-          "file_level": null,
-          "mqtt": {
-            "enable": false
-          },
-          "websocket": {
-            "enable": false
-          },
-          "file_log": {
-            "enable": false
-          },
-          "udp": {
-            "addr": null
-          }
-        },
-        "ui_data": {},
-        "rpc_udp": {
-          "dst_addr": null,
-          "listen_port": null
-        },
-        "sntp": {
-          "server": "time.google.com"
-        },
-        "cfg_rev": 40
+        "id": 206,
+        "addr": "7c:c6:b6:65:2d:87",
+        "name": null,
+        "obj_id": 58,
+        "idx": 0,
+        "meta": null
+      }
+    },
+    {
+      "key": "bthomesensor:207",
+      "status": {
+        "id": 207,
+        "value": 22.6,
+        "last_updated_ts": 1732117913
+      },
+      "config": {
+        "id": 207,
+        "addr": "7c:c6:b6:65:2d:87",
+        "name": null,
+        "obj_id": 69,
+        "idx": 0,
+        "meta": null
+      }
+    },
+    {
+      "key": "bthomesensor:208",
+      "status": {
+        "id": 208,
+        "value": 100,
+        "last_updated_ts": 1732116452
+      },
+      "config": {
+        "id": 208,
+        "addr": "0c:ef:f6:f1:d7:7b",
+        "name": null,
+        "obj_id": 1,
+        "idx": 0,
+        "meta": null
+      }
+    },
+    {
+      "key": "bthomesensor:209",
+      "status": {
+        "id": 209,
+        "value": 37,
+        "last_updated_ts": 1732116452
+      },
+      "config": {
+        "id": 209,
+        "addr": "0c:ef:f6:f1:d7:7b",
+        "name": null,
+        "obj_id": 5,
+        "idx": 0,
+        "meta": null
+      }
+    },
+    {
+      "key": "bthomesensor:210",
+      "status": {
+        "id": 210,
+        "value": false,
+        "last_updated_ts": 1732116452
+      },
+      "config": {
+        "id": 210,
+        "addr": "0c:ef:f6:f1:d7:7b",
+        "name": null,
+        "obj_id": 45,
+        "idx": 0,
+        "meta": null
+      }
+    },
+    {
+      "key": "bthomesensor:211",
+      "status": {
+        "id": 211,
+        "value": 0,
+        "last_updated_ts": 1732116452
+      },
+      "config": {
+        "id": 211,
+        "addr": "0c:ef:f6:f1:d7:7b",
+        "name": null,
+        "obj_id": 63,
+        "idx": 0,
+        "meta": null
+      }
+    },
+    {
+      "key": "bthomesensor:212",
+      "status": {
+        "id": 212,
+        "value": 100,
+        "last_updated_ts": 1732117916
+      },
+      "config": {
+        "id": 212,
+        "addr": "28:db:a7:b5:d1:ca",
+        "name": null,
+        "obj_id": 1,
+        "idx": 0,
+        "meta": null
+      }
+    },
+    {
+      "key": "bthomesensor:213",
+      "status": {
+        "id": 213,
+        "last_updated_ts": 1070226336
+      },
+      "config": {
+        "id": 213,
+        "addr": "28:db:a7:b5:d1:ca",
+        "name": null,
+        "obj_id": 58,
+        "idx": 0,
+        "meta": null
+      }
+    },
+    {
+      "key": "bthomesensor:214",
+      "status": {
+        "id": 214,
+        "value": 21,
+        "last_updated_ts": 1732117916
+      },
+      "config": {
+        "id": 214,
+        "addr": "28:db:a7:b5:d1:ca",
+        "name": null,
+        "obj_id": 69,
+        "idx": 0,
+        "meta": null
+      }
+    },
+    {
+      "key": "bthomesensor:215",
+      "status": {
+        "id": 215,
+        "value": 22.5,
+        "last_updated_ts": 1732117916
+      },
+      "config": {
+        "id": 215,
+        "addr": "28:db:a7:b5:d1:ca",
+        "name": null,
+        "obj_id": 69,
+        "idx": 1,
+        "meta": null
+      }
+    },
+    {
+      "key": "bthomesensor:216",
+      "status": {
+        "id": 216,
+        "value": 100,
+        "last_updated_ts": 1732117909
+      },
+      "config": {
+        "id": 216,
+        "addr": "7c:c6:b6:bd:7a:9a",
+        "name": null,
+        "obj_id": 1,
+        "idx": 0,
+        "meta": null
+      }
+    },
+    {
+      "key": "bthomesensor:217",
+      "status": {
+        "id": 217,
+        "value": 26,
+        "last_updated_ts": 1732117909
+      },
+      "config": {
+        "id": 217,
+        "addr": "7c:c6:b6:bd:7a:9a",
+        "name": null,
+        "obj_id": 46,
+        "idx": 0,
+        "meta": null
+      }
+    },
+    {
+      "key": "bthomesensor:218",
+      "status": {
+        "id": 218,
+        "last_updated_ts": 1070226336
+      },
+      "config": {
+        "id": 218,
+        "addr": "7c:c6:b6:bd:7a:9a",
+        "name": null,
+        "obj_id": 58,
+        "idx": 0,
+        "meta": null
+      }
+    },
+    {
+      "key": "bthomesensor:219",
+      "status": {
+        "id": 219,
+        "value": 22.7,
+        "last_updated_ts": 1732117909
+      },
+      "config": {
+        "id": 219,
+        "addr": "7c:c6:b6:bd:7a:9a",
+        "name": null,
+        "obj_id": 69,
+        "idx": 0,
+        "meta": null
       }
     }
-  ]
+  ],
+  "cfg_rev": 2336,
+  "offset": 0,
+  "total": 27
 }

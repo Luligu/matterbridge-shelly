@@ -1,7 +1,7 @@
 {
   "shelly": {
     "type": "SHSW-25",
-    "mac": "3494546BBF7E",
+    "mac": "3494547BF36C",
     "auth": false,
     "fw": "20230913-112234/v1.14.0-gcb84623",
     "discoverable": false,
@@ -14,8 +14,8 @@
   "settings": {
     "device": {
       "type": "SHSW-25",
-      "mac": "3494546BBF7E",
-      "hostname": "shellyswitch25-3494546BBF7E",
+      "mac": "3494547BF36C",
+      "hostname": "shellyswitch25-3494547BF36C",
       "num_outputs": 2,
       "num_meters": 2,
       "num_rollers": 1,
@@ -23,7 +23,7 @@
     },
     "wifi_ap": {
       "enabled": false,
-      "ssid": "shellyswitch25-3494546BBF7E",
+      "ssid": "shellyswitch25-3494547BF36C",
       "key": ""
     },
     "wifi_sta": {
@@ -36,8 +36,8 @@
       "dns": null
     },
     "wifi_sta1": {
-      "enabled": false,
-      "ssid": null,
+      "enabled": true,
+      "ssid": "wifiAlbatros",
       "ipv4_method": "dhcp",
       "ip": null,
       "gw": null,
@@ -45,14 +45,14 @@
       "dns": null
     },
     "ap_roaming": {
-      "enabled": true,
+      "enabled": false,
       "threshold": -70
     },
     "mqtt": {
       "enable": false,
       "server": "192.168.33.3:1883",
       "user": "",
-      "id": "shellyswitch25-3494546BBF7E",
+      "id": "shellyswitch25-3494547BF36C",
       "reconnect_timeout_max": 60,
       "reconnect_timeout_min": 2,
       "clean_session": true,
@@ -64,7 +64,7 @@
     "coiot": {
       "enabled": true,
       "update_period": 15,
-      "peer": "192.168.1.189:5683"
+      "peer": "192.168.1.20:5683"
     },
     "sntp": {
       "server": "time.google.com",
@@ -76,7 +76,7 @@
       "username": "admin"
     },
     "pin_code": "",
-    "name": "My Shelly 2.5",
+    "name": "2.5 Gen1 Relay",
     "fw": "20230913-112234/v1.14.0-gcb84623",
     "factory_reset_from_switch": true,
     "pon_wifi_reset": false,
@@ -88,14 +88,17 @@
     },
     "cloud": {
       "enabled": true,
-      "connected": false
+      "connected": true
     },
+    "timezone": null,
+    "lat": null,
+    "lng": null,
     "tzautodetect": true,
-    "tz_utc_offset": 7200,
+    "tz_utc_offset": 3600,
     "tz_dst": false,
     "tz_dst_auto": true,
-    "time": "18:29",
-    "unixtime": 1718987375,
+    "time": "16:32",
+    "unixtime": 1732116720,
     "led_status_disable": false,
     "debug_enable": false,
     "allow_cross_origin": false,
@@ -132,8 +135,8 @@
         "appliance_type": "General",
         "ison": false,
         "has_timer": false,
-        "default_state": "last",
-        "btn_type": "momentary",
+        "default_state": "switch",
+        "btn_type": "toggle",
         "btn_reverse": 0,
         "auto_on": 0,
         "auto_off": 0,
@@ -146,8 +149,8 @@
         "appliance_type": "General",
         "ison": false,
         "has_timer": false,
-        "default_state": "last",
-        "btn_type": "momentary",
+        "default_state": "switch",
+        "btn_type": "toggle",
         "btn_reverse": 0,
         "auto_on": 0,
         "auto_off": 0,
@@ -165,7 +168,7 @@
         "swap": false,
         "swap_inputs": false,
         "input_mode": "openclose",
-        "button_type": "toggle",
+        "button_type": "momentary",
         "btn_reverse": 0,
         "state": "stop",
         "power": 0,
@@ -210,21 +213,21 @@
     "wifi_sta": {
       "connected": true,
       "ssid": "FibreBox_X6-12A4C7",
-      "ip": "192.168.1.222",
-      "rssi": -51
+      "ip": "192.168.1.236",
+      "rssi": -62
     },
     "cloud": {
       "enabled": true,
-      "connected": false
+      "connected": true
     },
     "mqtt": {
       "connected": false
     },
-    "time": "18:29",
-    "unixtime": 1718987375,
-    "serial": 2,
+    "time": "16:32",
+    "unixtime": 1732116720,
+    "serial": 4,
     "has_update": false,
-    "mac": "3494546BBF7E",
+    "mac": "3494547BF36C",
     "cfg_changed_cnt": 0,
     "actions_stats": {
       "skipped": 0
@@ -258,16 +261,24 @@
         "power": 0,
         "overpower": 0,
         "is_valid": true,
-        "timestamp": 1718994575,
-        "counters": [0, 0, 0],
+        "timestamp": 1732120320,
+        "counters": [
+          0,
+          0,
+          0
+        ],
         "total": 0
       },
       {
         "power": 0,
         "overpower": 0,
         "is_valid": true,
-        "timestamp": 1718994575,
-        "counters": [0, 0, 0],
+        "timestamp": 1732120320,
+        "counters": [
+          0,
+          0,
+          0
+        ],
         "total": 0
       }
     ],
@@ -283,25 +294,30 @@
         "event_cnt": 0
       }
     ],
-    "temperature": 56.18,
+    "temperature": 56.07,
     "overtemperature": false,
     "tmp": {
-      "tC": 56.18,
-      "tF": 133.12,
+      "tC": 56.07,
+      "tF": 132.93,
       "is_valid": true
     },
     "temperature_status": "Normal",
     "update": {
-      "status": "unknown",
+      "status": "idle",
       "has_update": false,
-      "new_version": "",
-      "old_version": "20230913-112234/v1.14.0-gcb84623"
+      "new_version": "20230913-112234/v1.14.0-gcb84623",
+      "old_version": "20230913-112234/v1.14.0-gcb84623",
+      "beta_version": "20231107-163214/v1.14.1-rc1-g0617c15"
     },
     "ram_total": 50720,
-    "ram_free": 37864,
+    "ram_free": 37416,
     "fs_size": 233681,
-    "fs_free": 146082,
-    "voltage": 240.93,
-    "uptime": 26
-  }
+    "fs_free": 146333,
+    "voltage": 239.3,
+    "uptime": 104
+  },
+  "components": [],
+  "cfg_rev": 0,
+  "offset": 0,
+  "total": 0
 }

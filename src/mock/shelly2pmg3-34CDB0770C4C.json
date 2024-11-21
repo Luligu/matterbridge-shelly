@@ -1,16 +1,17 @@
 {
   "shelly": {
-    "name": "1mini Gen3",
-    "id": "shelly1minig3-543204547478",
-    "mac": "543204547478",
-    "slot": 0,
-    "model": "S3SW-001X8EU",
+    "name": "2PM Gen3",
+    "id": "shelly2pmg3-34cdb0770c4c",
+    "mac": "34CDB0770C4C",
+    "slot": 1,
+    "model": "S3SW-002P16EU",
     "gen": 3,
-    "fw_id": "20241011-114456/1.4.4-g6d2a586",
-    "ver": "1.4.4",
-    "app": "Mini1G3",
-    "auth_en": true,
-    "auth_domain": "shelly1minig3-543204547478"
+    "fw_id": "20240731-123728/1.4.99-2pmg3prod0-ge3db05c",
+    "ver": "1.4.99-2pmg3prod0",
+    "app": "S2PMG3",
+    "auth_en": false,
+    "auth_domain": null,
+    "profile": "switch"
   },
   "settings": {
     "ble": {
@@ -30,7 +31,15 @@
     "input:0": {
       "id": 0,
       "name": null,
-      "type": "button",
+      "type": "switch",
+      "enable": true,
+      "invert": false,
+      "factory_reset": true
+    },
+    "input:1": {
+      "id": 1,
+      "name": null,
+      "type": "switch",
       "enable": true,
       "invert": false,
       "factory_reset": true
@@ -45,10 +54,10 @@
     "mqtt": {
       "enable": false,
       "server": null,
-      "client_id": "shelly1minig3-543204547478",
+      "client_id": "shelly2pmg3-34cdb0770c4c",
       "user": null,
       "ssl_ca": null,
-      "topic_prefix": "shelly1minig3-543204547478",
+      "topic_prefix": "shelly2pmg3-34cdb0770c4c",
       "rpc_ntf": true,
       "status_ntf": false,
       "use_client_cert": false,
@@ -57,21 +66,43 @@
     },
     "switch:0": {
       "id": 0,
-      "name": "1mini Gen3",
-      "in_mode": "momentary",
+      "name": null,
+      "in_mode": "follow",
       "initial_state": "restore_last",
       "auto_on": false,
       "auto_on_delay": 60,
       "auto_off": false,
-      "auto_off_delay": 60
+      "auto_off_delay": 60,
+      "power_limit": 2800,
+      "voltage_limit": 280,
+      "undervoltage_limit": 0,
+      "autorecover_voltage_errors": false,
+      "current_limit": 10
+    },
+    "switch:1": {
+      "id": 1,
+      "name": null,
+      "in_mode": "follow",
+      "initial_state": "match_input",
+      "auto_on": false,
+      "auto_on_delay": 60,
+      "auto_off": false,
+      "auto_off_delay": 60,
+      "power_limit": 2800,
+      "voltage_limit": 280,
+      "undervoltage_limit": 0,
+      "autorecover_voltage_errors": false,
+      "current_limit": 10
     },
     "sys": {
       "device": {
-        "name": "1mini Gen3",
-        "mac": "543204547478",
-        "fw_id": "20241011-114456/1.4.4-g6d2a586",
+        "name": "2PM Gen3",
+        "mac": "34CDB0770C4C",
+        "fw_id": "20240731-123728/1.4.99-2pmg3prod0-ge3db05c",
         "discoverable": true,
-        "eco_mode": false
+        "eco_mode": true,
+        "profile": "switch",
+        "addon_type": null
       },
       "location": null,
       "debug": {
@@ -95,11 +126,11 @@
       "sntp": {
         "server": "time.google.com"
       },
-      "cfg_rev": 52
+      "cfg_rev": 44
     },
     "wifi": {
       "ap": {
-        "ssid": "Shelly1MiniG3-543204547478",
+        "ssid": "Shelly2PMG3-34CDB0770C4C",
         "is_open": true,
         "enable": false,
         "range_extender": {
@@ -145,7 +176,11 @@
     },
     "input:0": {
       "id": 0,
-      "state": null
+      "state": false
+    },
+    "input:1": {
+      "id": 1,
+      "state": false
     },
     "knx": {},
     "mqtt": {
@@ -155,33 +190,88 @@
       "id": 0,
       "source": "init",
       "output": false,
+      "apower": 0,
+      "voltage": 235.4,
+      "freq": 50,
+      "current": 0,
+      "pf": 0,
+      "aenergy": {
+        "total": 145,
+        "by_minute": [
+          0,
+          0,
+          0
+        ],
+        "minute_ts": 1732119960
+      },
+      "ret_aenergy": {
+        "total": 0,
+        "by_minute": [
+          0,
+          0,
+          0
+        ],
+        "minute_ts": 1732119960
+      },
       "temperature": {
-        "tC": 63,
-        "tF": 145.4
+        "tC": 38.4,
+        "tF": 101.1
+      }
+    },
+    "switch:1": {
+      "id": 1,
+      "source": "init",
+      "output": false,
+      "apower": 0,
+      "voltage": 235.5,
+      "freq": 50,
+      "current": 0,
+      "pf": 0,
+      "aenergy": {
+        "total": 140,
+        "by_minute": [
+          0,
+          0,
+          0
+        ],
+        "minute_ts": 1732119960
+      },
+      "ret_aenergy": {
+        "total": 0,
+        "by_minute": [
+          0,
+          0,
+          0
+        ],
+        "minute_ts": 1732119960
+      },
+      "temperature": {
+        "tC": 38.4,
+        "tF": 101.1
       }
     },
     "sys": {
-      "mac": "543204547478",
+      "mac": "34CDB0770C4C",
       "restart_required": false,
-      "time": "16:56",
-      "unixtime": 1732118218,
-      "uptime": 1568,
-      "ram_size": 259252,
-      "ram_free": 81056,
+      "time": "17:26",
+      "unixtime": 1732119975,
+      "uptime": 3342,
+      "ram_size": 255060,
+      "ram_free": 62288,
       "fs_size": 1048576,
-      "fs_free": 585728,
-      "cfg_rev": 52,
-      "kvs_rev": 8,
-      "schedule_rev": 1,
-      "webhook_rev": 0,
+      "fs_free": 561152,
+      "cfg_rev": 44,
+      "kvs_rev": 0,
+      "schedule_rev": 3,
+      "webhook_rev": 2,
       "available_updates": {},
       "reset_reason": 1
     },
     "wifi": {
-      "sta_ip": "192.168.1.221",
+      "sta_ip": "192.168.1.166",
       "status": "got ip",
       "ssid": "FibreBox_X6-12A4C7",
-      "rssi": -65
+      "rssi": -58
     },
     "ws": {
       "connected": false
@@ -199,13 +289,14 @@
       },
       "config": {
         "id": 200,
-        "addr": "0c:ef:f6:f1:d7:7b",
+        "addr": "7c:c6:b6:58:b9:a0",
         "name": null,
         "key": null,
         "meta": {
           "ui": {
             "view": "regular",
-            "local_name": "SBDW-2Cd77b"
+            "local_name": "SBBT-USb9a0",
+            "icon": null
           }
         }
       }
@@ -221,13 +312,13 @@
       },
       "config": {
         "id": 201,
-        "addr": "38:39:8f:8b:d2:29",
+        "addr": "0c:ef:f6:01:8d:b8",
         "name": null,
         "key": null,
         "meta": {
           "ui": {
             "view": "regular",
-            "local_name": "SBBT-2Cd229",
+            "local_name": "SBBT-EU8db8",
             "icon": null
           }
         }
@@ -237,20 +328,20 @@
       "key": "bthomedevice:202",
       "status": {
         "id": 202,
-        "rssi": -60,
+        "rssi": -55,
         "battery": 100,
-        "packet_id": 108,
-        "last_updated_ts": 1732118213
+        "packet_id": 35,
+        "last_updated_ts": 1732118253
       },
       "config": {
         "id": 202,
-        "addr": "7c:c6:b6:65:2d:87",
+        "addr": "0c:ef:f6:f1:d7:7b",
         "name": null,
         "key": null,
         "meta": {
           "ui": {
             "view": "regular",
-            "local_name": "SBHT-3C2d87",
+            "local_name": "SBDW-002C",
             "icon": null
           }
         }
@@ -288,7 +379,7 @@
       },
       "config": {
         "id": 200,
-        "addr": "0c:ef:f6:f1:d7:7b",
+        "addr": "7c:c6:b6:58:b9:a0",
         "name": null,
         "obj_id": 1,
         "idx": 0,
@@ -299,14 +390,13 @@
       "key": "bthomesensor:201",
       "status": {
         "id": 201,
-        "value": null,
-        "last_updated_ts": 0
+        "last_updated_ts": 1070224832
       },
       "config": {
         "id": 201,
-        "addr": "0c:ef:f6:f1:d7:7b",
+        "addr": "7c:c6:b6:58:b9:a0",
         "name": null,
-        "obj_id": 5,
+        "obj_id": 58,
         "idx": 0,
         "meta": null
       }
@@ -315,15 +405,14 @@
       "key": "bthomesensor:202",
       "status": {
         "id": 202,
-        "value": null,
-        "last_updated_ts": 0
+        "last_updated_ts": 1070224832
       },
       "config": {
         "id": 202,
-        "addr": "0c:ef:f6:f1:d7:7b",
+        "addr": "7c:c6:b6:58:b9:a0",
         "name": null,
-        "obj_id": 45,
-        "idx": 0,
+        "obj_id": 58,
+        "idx": 1,
         "meta": null
       }
     },
@@ -331,15 +420,14 @@
       "key": "bthomesensor:203",
       "status": {
         "id": 203,
-        "value": null,
-        "last_updated_ts": 0
+        "last_updated_ts": 1070224832
       },
       "config": {
         "id": 203,
-        "addr": "0c:ef:f6:f1:d7:7b",
+        "addr": "7c:c6:b6:58:b9:a0",
         "name": null,
-        "obj_id": 63,
-        "idx": 0,
+        "obj_id": 58,
+        "idx": 2,
         "meta": null
       }
     },
@@ -347,15 +435,14 @@
       "key": "bthomesensor:204",
       "status": {
         "id": 204,
-        "value": null,
-        "last_updated_ts": 0
+        "last_updated_ts": 1070224832
       },
       "config": {
         "id": 204,
-        "addr": "38:39:8f:8b:d2:29",
+        "addr": "7c:c6:b6:58:b9:a0",
         "name": null,
-        "obj_id": 1,
-        "idx": 0,
+        "obj_id": 58,
+        "idx": 3,
         "meta": null
       }
     },
@@ -363,13 +450,14 @@
       "key": "bthomesensor:205",
       "status": {
         "id": 205,
-        "last_updated_ts": 1070221648
+        "value": null,
+        "last_updated_ts": 0
       },
       "config": {
         "id": 205,
-        "addr": "38:39:8f:8b:d2:29",
+        "addr": "0c:ef:f6:01:8d:b8",
         "name": null,
-        "obj_id": 58,
+        "obj_id": 1,
         "idx": 0,
         "meta": null
       }
@@ -378,14 +466,13 @@
       "key": "bthomesensor:206",
       "status": {
         "id": 206,
-        "value": 100,
-        "last_updated_ts": 1732118213
+        "last_updated_ts": 1070224832
       },
       "config": {
         "id": 206,
-        "addr": "7c:c6:b6:65:2d:87",
+        "addr": "0c:ef:f6:01:8d:b8",
         "name": null,
-        "obj_id": 1,
+        "obj_id": 58,
         "idx": 0,
         "meta": null
       }
@@ -394,15 +481,14 @@
       "key": "bthomesensor:207",
       "status": {
         "id": 207,
-        "value": 26,
-        "last_updated_ts": 1732118213
+        "last_updated_ts": 1070224832
       },
       "config": {
         "id": 207,
-        "addr": "7c:c6:b6:65:2d:87",
+        "addr": "0c:ef:f6:01:8d:b8",
         "name": null,
-        "obj_id": 46,
-        "idx": 0,
+        "obj_id": 58,
+        "idx": 1,
         "meta": null
       }
     },
@@ -410,14 +496,14 @@
       "key": "bthomesensor:208",
       "status": {
         "id": 208,
-        "last_updated_ts": 1070221648
+        "last_updated_ts": 1070224832
       },
       "config": {
         "id": 208,
-        "addr": "7c:c6:b6:65:2d:87",
+        "addr": "0c:ef:f6:01:8d:b8",
         "name": null,
         "obj_id": 58,
-        "idx": 0,
+        "idx": 2,
         "meta": null
       }
     },
@@ -425,15 +511,14 @@
       "key": "bthomesensor:209",
       "status": {
         "id": 209,
-        "value": 22.6,
-        "last_updated_ts": 1732118213
+        "last_updated_ts": 1070224832
       },
       "config": {
         "id": 209,
-        "addr": "7c:c6:b6:65:2d:87",
+        "addr": "0c:ef:f6:01:8d:b8",
         "name": null,
-        "obj_id": 69,
-        "idx": 0,
+        "obj_id": 58,
+        "idx": 3,
         "meta": null
       }
     },
@@ -441,12 +526,12 @@
       "key": "bthomesensor:210",
       "status": {
         "id": 210,
-        "value": null,
-        "last_updated_ts": 0
+        "value": 100,
+        "last_updated_ts": 1732118253
       },
       "config": {
         "id": 210,
-        "addr": "0c:ae:5f:5a:0b:fa",
+        "addr": "0c:ef:f6:f1:d7:7b",
         "name": null,
         "obj_id": 1,
         "idx": 0,
@@ -457,14 +542,14 @@
       "key": "bthomesensor:211",
       "status": {
         "id": 211,
-        "value": null,
-        "last_updated_ts": 0
+        "value": 37,
+        "last_updated_ts": 1732118253
       },
       "config": {
         "id": 211,
-        "addr": "0c:ae:5f:5a:0b:fa",
+        "addr": "0c:ef:f6:f1:d7:7b",
         "name": null,
-        "obj_id": 33,
+        "obj_id": 5,
         "idx": 0,
         "meta": null
       }
@@ -473,10 +558,74 @@
       "key": "bthomesensor:212",
       "status": {
         "id": 212,
-        "last_updated_ts": 1070221648
+        "value": false,
+        "last_updated_ts": 1732118253
       },
       "config": {
         "id": 212,
+        "addr": "0c:ef:f6:f1:d7:7b",
+        "name": null,
+        "obj_id": 45,
+        "idx": 0,
+        "meta": null
+      }
+    },
+    {
+      "key": "bthomesensor:213",
+      "status": {
+        "id": 213,
+        "value": 0,
+        "last_updated_ts": 1732118253
+      },
+      "config": {
+        "id": 213,
+        "addr": "0c:ef:f6:f1:d7:7b",
+        "name": null,
+        "obj_id": 63,
+        "idx": 0,
+        "meta": null
+      }
+    },
+    {
+      "key": "bthomesensor:214",
+      "status": {
+        "id": 214,
+        "value": null,
+        "last_updated_ts": 0
+      },
+      "config": {
+        "id": 214,
+        "addr": "0c:ae:5f:5a:0b:fa",
+        "name": null,
+        "obj_id": 1,
+        "idx": 0,
+        "meta": null
+      }
+    },
+    {
+      "key": "bthomesensor:215",
+      "status": {
+        "id": 215,
+        "value": null,
+        "last_updated_ts": 0
+      },
+      "config": {
+        "id": 215,
+        "addr": "0c:ae:5f:5a:0b:fa",
+        "name": null,
+        "obj_id": 33,
+        "idx": 0,
+        "meta": null
+      }
+    },
+    {
+      "key": "bthomesensor:216",
+      "status": {
+        "id": 216,
+        "last_updated_ts": 1070224832
+      },
+      "config": {
+        "id": 216,
         "addr": "0c:ae:5f:5a:0b:fa",
         "name": null,
         "obj_id": 58,
@@ -485,7 +634,7 @@
       }
     }
   ],
-  "cfg_rev": 52,
+  "cfg_rev": 44,
   "offset": 0,
-  "total": 17
+  "total": 21
 }

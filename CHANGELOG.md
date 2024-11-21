@@ -2,7 +2,29 @@
 
 All notable changes to this project will be documented in this file.
 
-If you like this project and find it useful, please consider giving it a star on GitHub at https://github.com/Luligu/matterbridge-shelly and sponsoring it.
+If you like this project and find it useful, please consider giving it a star on GitHub at https://github.com/Luligu/matterbridge-shelly and sponsoring it here https://www.buymeacoffee.com/luligugithub.
+
+You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his invaluable contribution to this project.
+
+## [1.0.10] - 2024-11-21
+
+### Added
+
+- [edge]: Preliminary updates to support Matterbridge edge (matter.js new API).
+- [Jest]: Refactor Jest real tests for Gen3 devices
+- [Jest]: Refactor Jest mock tests for Gen3 devices
+- [Jest]: Added Jest mock tests for shellyswitch25 switch and cover mode
+
+### Changed
+
+- [ShellyCommandHandler]: Refactor shellyCommandHandlers.
+- [BTHome]: Update scanBTHomeComponents to the new BLU firmware 1.0.20 (model identification changes from v1.0.18).
+- [log]: Show username and password with **** in logs.
+- [package]: Updated dependencies.
+
+<a href="https://www.buymeacoffee.com/luligugithub">
+  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+</a>
 
 ## [1.0.9] - 2024-11-11
 

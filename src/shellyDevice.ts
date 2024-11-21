@@ -327,6 +327,15 @@ export class ShellyDevice extends EventEmitter {
       'SBBT-004CUS': 'Shelly BLU RC Button 4',
       'TRV': 'Shelly BLU Trv',
     };
+    /*
+    From: https://shelly-api-docs.shelly.cloud/docs-ble/common
+    The shortened device name in advertising packet will be modified starting from FW v1.0.18 and will contain 4 digits of the mac address at the end:
+    SBBT-USxxxx, SBBT-EUxxxx
+    */
+    if (model.startsWith('SBBT-2C')) return modelsMap['SBBT-002C'];
+    if (model.startsWith('SBDW-2C')) return modelsMap['SBDW-002C'];
+    if (model.startsWith('SBHT-3C')) return modelsMap['SBHT-003C'];
+    if (model.startsWith('SBMO-3Z')) return modelsMap['SBMO-003Z'];
     if (model.startsWith('SBBT-EU')) return modelsMap['SBBT-004CEU'];
     if (model.startsWith('SBBT-US')) return modelsMap['SBBT-004CUS'];
     return modelsMap[model] || `Unknown Shelly BLU model ${model}`;
