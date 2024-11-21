@@ -57,13 +57,13 @@ I would like to express my appreciation to [Tamer Salah](https://github.com/tamm
 Follow these steps to install or update Matterbridge if it is not already installed and up to date:
 
 ```
-npm install -g matterbridge
+npm install -g matterbridge --omit=dev
 ```
 
 on Linux you may need the necessary permissions:
 
 ```
-sudo npm install -g matterbridge
+sudo npm install -g matterbridge --omit=dev
 ```
 
 See the complete guidelines on [Matterbridge](https://github.com/Luligu/matterbridge/blob/main/README.md) for more information.
@@ -107,7 +107,7 @@ On windows:
 
 ```
 cd $HOME\Matterbridge
-npm install -g matterbridge-shelly
+npm install -g matterbridge-shelly --omit=dev
 matterbridge -add matterbridge-shelly
 ```
 
@@ -115,7 +115,7 @@ On linux:
 
 ```
 cd ~/Matterbridge
-sudo npm install -g matterbridge-shelly
+sudo npm install -g matterbridge-shelly --omit=dev
 matterbridge -add matterbridge-shelly
 ```
 
