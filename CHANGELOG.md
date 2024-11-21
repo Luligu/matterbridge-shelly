@@ -4,11 +4,16 @@ All notable changes to this project will be documented in this file.
 
 If you like this project and find it useful, please consider giving it a star on GitHub at https://github.com/Luligu/matterbridge-shelly and sponsoring it.
 
-## [1.0.10] - 2024-11-20
+You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his invaluable contribution to this project.
+
+## [1.0.10] - 2024-11-21
 
 ### Added
 
 - [edge]: Preliminary updates to support Matterbridge edge (matter.js new API).
+- [Jest]: Refactor Jest real tests for Gen3 devices
+- [Jest]: Refactor Jest mock tests for Gen3 devices
+- [Jest]: Added Jest mock tests for shellyswitch25 switch and cover mode
 
 ### Changed
 
