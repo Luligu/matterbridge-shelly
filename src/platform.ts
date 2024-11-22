@@ -260,30 +260,35 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
                 'Shelly',
                 bthomeDevice.model,
               );
-              mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer();
-              mbDevice.addRequiredClusterServers(mbDevice);
-              mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer(); // TODO remove when fixed in Matterbridge
               if (bthomeDevice.model === 'Shelly BLU DoorWindow') {
+                mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer();
                 mbDevice.addFixedLabel('composed', 'Sensor');
                 mbDevice.addChildDeviceTypeWithClusterServer('Contact', [DeviceTypes.CONTACT_SENSOR]);
                 mbDevice.addChildDeviceTypeWithClusterServer('Illuminance', [DeviceTypes.LIGHT_SENSOR]);
               } else if (bthomeDevice.model === 'Shelly BLU Motion') {
+                mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer();
                 mbDevice.addFixedLabel('composed', 'Sensor');
                 mbDevice.addChildDeviceTypeWithClusterServer('Motion', [DeviceTypes.OCCUPANCY_SENSOR]);
                 mbDevice.addChildDeviceTypeWithClusterServer('Illuminance', [DeviceTypes.LIGHT_SENSOR]);
                 mbDevice.addChildDeviceTypeWithClusterServer('Button', [DeviceTypes.GENERIC_SWITCH]);
+              } else if (bthomeDevice.model === 'Shelly BLU Button1') {
+                mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer();
+                mbDevice.createDefaultSwitchClusterServer();
               } else if (bthomeDevice.model === 'Shelly BLU HT') {
+                mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer();
                 mbDevice.addFixedLabel('composed', 'Sensor');
                 mbDevice.addChildDeviceTypeWithClusterServer('Temperature', [DeviceTypes.TEMPERATURE_SENSOR]);
                 mbDevice.addChildDeviceTypeWithClusterServer('Humidity', [DeviceTypes.HUMIDITY_SENSOR]);
                 mbDevice.addChildDeviceTypeWithClusterServer('Button', [DeviceTypes.GENERIC_SWITCH]);
               } else if (bthomeDevice.model === 'Shelly BLU RC Button 4') {
+                mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer();
                 mbDevice.addFixedLabel('composed', 'Input');
                 mbDevice.addChildDeviceTypeWithClusterServer('Button0', [DeviceTypes.GENERIC_SWITCH], [Switch.Cluster.id]);
                 mbDevice.addChildDeviceTypeWithClusterServer('Button1', [DeviceTypes.GENERIC_SWITCH], [Switch.Cluster.id]);
                 mbDevice.addChildDeviceTypeWithClusterServer('Button2', [DeviceTypes.GENERIC_SWITCH], [Switch.Cluster.id]);
                 mbDevice.addChildDeviceTypeWithClusterServer('Button3', [DeviceTypes.GENERIC_SWITCH], [Switch.Cluster.id]);
               } else if (bthomeDevice.model === 'Shelly BLU Wall Switch 4') {
+                mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer();
                 mbDevice.addFixedLabel('composed', 'Input');
                 mbDevice.addChildDeviceTypeWithClusterServer('Button0', [DeviceTypes.GENERIC_SWITCH], [Switch.Cluster.id]);
                 mbDevice.addChildDeviceTypeWithClusterServer('Button1', [DeviceTypes.GENERIC_SWITCH], [Switch.Cluster.id]);
@@ -291,6 +296,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
                 mbDevice.addChildDeviceTypeWithClusterServer('Button3', [DeviceTypes.GENERIC_SWITCH], [Switch.Cluster.id]);
               } else if (bthomeDevice.model === 'Shelly BLU Trv') {
                 mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer(100, PowerSource.BatChargeLevel.Ok, 3000, 'Type AA', 2);
+                mbDevice.createDefaultThermostatClusterServer();
+                // TODO: Move in createDefaultThermostatClusterServer() when Matterbridge 1.6.2 is released
                 mbDevice.setAttribute(
                   ThermostatCluster.id,
                   'featureMap',
@@ -346,13 +353,14 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
                   mbDevice.log,
                 );
               }
+              mbDevice.addRequiredClusterServers(mbDevice);
               try {
                 await this.registerDevice(mbDevice);
                 this.bluBridgedDevices.set(key, mbDevice);
                 mbDevice.log.logName = `${bthomeDevice.name}`;
               } catch (error) {
                 this.log.error(
-                  `Shelly device ${hk}${device.id}${er} host ${zb}${device.host}${er} failed to register BLU device ${idn}${bthomeDevice.name}${er}: ${error instanceof Error ? error.message : error}`,
+                  `Shelly device ${hk}${device.id}${er} host ${zb}${device.host}${er} failed to register BLU device ${idn}${bthomeDevice.name}${rs}${er}: ${error instanceof Error ? error.message : error}`,
                 );
               }
             }
@@ -502,26 +510,24 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         this.log.info(`Identify command received for endpoint ${endpoint.number} request ${debugStringify(request)}`);
       });
 
-      const child = mbDevice.addChildDeviceTypeWithClusterServer('PowerSource', [powerSource], [PowerSource.Cluster.id]);
-      const battery = device.getComponent('battery');
-      if (battery) {
-        if (battery.hasProperty('charging')) {
-          child.addClusterServer(mbDevice.getDefaultPowerSourceRechargeableBatteryClusterServer());
+      // Set the powerSource cluster
+      const childPowerSource = mbDevice.addChildDeviceTypeWithClusterServer('PowerSource', [powerSource], [PowerSource.Cluster.id]);
+      const batteryComponent = device.getComponent('battery');
+      const devicepowerComponent = device.getComponent('devicepower:0');
+      if (batteryComponent) {
+        if (batteryComponent.hasProperty('charging')) {
+          childPowerSource.addClusterServer(mbDevice.getDefaultPowerSourceRechargeableBatteryClusterServer());
         } else {
-          child.addClusterServer(mbDevice.getDefaultPowerSourceReplaceableBatteryClusterServer());
+          childPowerSource.addClusterServer(mbDevice.getDefaultPowerSourceReplaceableBatteryClusterServer());
         }
-        battery.on('update', (component: string, property: string, value: ShellyDataType) => {
+        batteryComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
           this.shellyUpdateHandler(mbDevice, device, component, property, value, 'PowerSource');
         });
-      } else {
-        child.addClusterServer(mbDevice.getDefaultPowerSourceWiredClusterServer());
-      }
-      const devicepower = device.getComponent('devicepower:0');
-      if (devicepower) {
-        if (devicepower.hasProperty('battery') && isValidObject(devicepower.getValue('battery'), 2)) {
-          const battery = devicepower.getValue('battery') as { V: number; percent: number };
+      } else if (devicepowerComponent) {
+        if (devicepowerComponent.hasProperty('battery') && isValidObject(devicepowerComponent.getValue('battery'), 2)) {
+          const battery = devicepowerComponent.getValue('battery') as { V: number; percent: number };
           if (isValidNumber(battery.V, 0, 12) && isValidNumber(battery.percent, 0, 100)) {
-            child.addClusterServer(
+            childPowerSource.addClusterServer(
               mbDevice.getDefaultPowerSourceReplaceableBatteryClusterServer(
                 battery.percent,
                 battery.percent > 20 ? PowerSource.BatChargeLevel.Ok : PowerSource.BatChargeLevel.Critical,
@@ -530,10 +536,13 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             );
           }
         }
-        devicepower.on('update', (component: string, property: string, value: ShellyDataType) => {
+        devicepowerComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
           this.shellyUpdateHandler(mbDevice, device, component, property, value, 'PowerSource');
         });
+      } else {
+        childPowerSource.addClusterServer(mbDevice.getDefaultPowerSourceWiredClusterServer());
       }
+      mbDevice.addRequiredClusterServers(childPowerSource);
 
       // Set the composed name at gui
       const names = device.getComponentNames();
