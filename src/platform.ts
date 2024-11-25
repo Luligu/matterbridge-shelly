@@ -1273,6 +1273,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
   }
 
   override async onConfigure() {
+    // const clusterMap = new Map<ClusterId, string>();
     this.log.info(`Configuring platform ${idn}${this.config.name}${rs}${nf}`);
     this.bridgedDevices.forEach(async (mbDevice) => {
       if (!mbDevice.serialNumber) {
@@ -1286,7 +1287,19 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         this.log.error(`Shelly device with serial number ${hk}${serial}${er} not found`);
         return;
       }
+      /*
+      mbDevice.getAllClusterServers().forEach((clusterServer) => {
+        clusterMap.set(clusterServer.id, clusterServer.name);
+        console.log(`Device ${mbDevice.deviceName} cluster:`, clusterServer.id, clusterServer.name);
+      });
+      */
       mbDevice.getChildEndpoints().forEach(async (childEndpoint) => {
+        /*
+        childEndpoint.getAllClusterServers().forEach((clusterServer) => {
+          clusterMap.set(clusterServer.id, clusterServer.name);
+          console.log(`Device ${mbDevice.deviceName} child ${childEndpoint.uniqueStorageKey} cluster:`, clusterServer.id, clusterServer.name);
+        });
+        */
         const label = childEndpoint.uniqueStorageKey;
         // Configure the cluster OnOff attribute onOff
         if (label?.startsWith('switch') || label?.startsWith('relay') || label?.startsWith('light') || label?.startsWith('rgb')) {
@@ -1385,6 +1398,26 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         });
       }
     });
+
+    /*
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (this.matterbridge as any).commissioningServer
+      ?.getRootEndpoint()
+      .getAllClusterServers()
+      .forEach((clusterServer: ClusterServerObj) => {
+        clusterMap.set(clusterServer.id, clusterServer.name);
+        console.log(`CommissioningServer cluster:`, clusterServer.id, clusterServer.name);
+      });
+
+    // Write the clusterMap to clusterMap.txt
+    const clusterMapFilePath = path.join(this.matterbridge.matterbridgeDirectory, 'clusterMap.txt');
+    const clusterMapContent = Array.from(clusterMap.entries())
+      .map(([key, value]) => `Cluster ID 0x${key.toString(16)} name ${value}`)
+      .join('\n');
+
+    fs.writeFileSync(clusterMapFilePath, clusterMapContent, 'utf8');
+    this.log.info(`ClusterMap written to ${clusterMapFilePath}`);
+    */
   }
 
   override async onShutdown(reason?: string) {
