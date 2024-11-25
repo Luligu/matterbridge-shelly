@@ -1,6 +1,25 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Matterbridge, MatterbridgeDevice, PlatformConfig } from 'matterbridge';
+import {
+  BridgedDeviceBasicInformationCluster,
+  DescriptorCluster,
+  ElectricalEnergyMeasurement,
+  ElectricalPowerMeasurement,
+  ElectricalPowerMeasurementCluster,
+  FixedLabelCluster,
+  GroupsCluster,
+  Identify,
+  IdentifyCluster,
+  Matterbridge,
+  MatterbridgeDevice,
+  OnOffCluster,
+  PlatformConfig,
+  PowerSourceCluster,
+  PowerTopology,
+  PowerTopologyCluster,
+  Switch,
+  SwitchCluster,
+} from 'matterbridge';
 import { AnsiLogger, db, dn, er, hk, idn, LogLevel, nf, rs, wr, zb } from 'matterbridge/logger';
 import { isValidArray, isValidBoolean, isValidNull, isValidNumber, isValidObject, isValidString, isValidUndefined, wait, waiter } from 'matterbridge/utils';
 import { jest } from '@jest/globals';
@@ -75,22 +94,22 @@ describe('ShellyPlatform', () => {
     } as unknown as Matterbridge;
     mockLog = {
       fatal: jest.fn((message) => {
-        // console.log(`Fatal: ${message}`);
+        console.log(`Fatal: ${message}`);
       }),
       error: jest.fn((message) => {
-        // console.log(`Error: ${message}`);
+        console.log(`Error: ${message}`);
       }),
       warn: jest.fn((message) => {
-        // console.log(`Warn: ${message}`);
+        console.log(`Warn: ${message}`);
       }),
       notice: jest.fn((message) => {
-        // console.log(`Notice: ${message}`);
+        console.log(`Notice: ${message}`);
       }),
       info: jest.fn((message) => {
-        // console.log(`Info: ${message}`);
+        console.log(`Info: ${message}`);
       }),
       debug: jest.fn((message) => {
-        // console.log(`Debug: ${message}`);
+        console.log(`Debug: ${message}`);
       }),
     } as unknown as AnsiLogger;
     mockConfig = {
@@ -108,7 +127,7 @@ describe('ShellyPlatform', () => {
       'enableStorageDiscover': false,
       'resetStorageDiscover': false,
       'enableConfigDiscover': false,
-      'enableBleDiscover': false,
+      'enableBleDiscover': true,
       'deviceIp': {},
       'debug': false,
       'unregisterOnShutdown': false,
@@ -116,7 +135,7 @@ describe('ShellyPlatform', () => {
 
     // Spy on and mock the AnsiLogger.log method
     loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log').mockImplementation((level: string, message: string, ...parameters: any[]) => {
-      // console.log(`Mocked log: ${level} - ${message}`, ...parameters);
+      console.log(`Mocked log: ${level} - ${message}`, ...parameters);
     });
 
     // Spy on and mock console.log
@@ -473,16 +492,16 @@ describe('ShellyPlatform', () => {
   }, 60000);
   */
 
-  it('should call onStart with reason and add devices', async () => {
+  it('should call onStart with reason and add discovered devices', async () => {
     expect(shellyPlatform).toBeDefined();
 
     await shellyPlatform.onStart('Test reason');
     expect(mockLog.info).toHaveBeenCalledWith(`Starting platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
 
-    const device1 = await ShellyDevice.create((shellyPlatform as any).shelly, (shellyPlatform as any).log, path.join('src', 'mock', 'shelly1-34945472A643.json'));
-    expect(device1).not.toBeUndefined();
-    (shellyPlatform as any).shelly.emit('discovered', { id: 'shelly1-34945472A643', host: '192.168.1.240', port: 80, gen: 1 });
-    device1?.destroy();
+    (shellyPlatform as any).shelly.emit('discovered', { id: 'shelly1l-E8DB84AAD781', host: '192.168.1.241', port: 80, gen: 1 });
+    await wait(1000);
+    expect((shellyPlatform as any).discoveredDevices.size).toBe(1);
+    expect((shellyPlatform as any).shellyDevices.size).toBe(1);
 
     cleanup();
     expect(await (shellyPlatform as any).saveStoredDevices()).toBeTruthy();
@@ -492,6 +511,70 @@ describe('ShellyPlatform', () => {
     expect((shellyPlatform as any).bridgedDevices.size).toBe(0);
     expect((shellyPlatform as any).bluBridgedDevices.size).toBe(0);
     expect((shellyPlatform as any).shelly._devices.size).toBe(0);
+  });
+
+  it('should call onStart with reason and add shelly1', async () => {
+    expect(shellyPlatform).toBeDefined();
+
+    await shellyPlatform.onStart('Test reason');
+    expect(mockLog.info).toHaveBeenCalledWith(`Starting platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
+
+    const shelly1 = await ShellyDevice.create((shellyPlatform as any).shelly, (shellyPlatform as any).log, path.join('src', 'mock', 'shelly1-34945472A643.json'));
+    expect(shelly1).not.toBeUndefined();
+    if (!shelly1) return;
+
+    // consoleLogSpy.mockRestore();
+    await (shellyPlatform as any).shelly.addDevice(shelly1);
+    shellyPlatform.shellyDevices.set(shelly1.id, shelly1);
+    await wait(1000);
+    expect(mockLog.info).toHaveBeenCalledWith(`Shelly added ${idn}${shelly1.name}${rs} device id ${hk}${shelly1.id}${rs}${nf} host ${zb}${shelly1.host}${nf}`);
+    expect(shellyPlatform.discoveredDevices.size).toBe(0);
+    expect(shellyPlatform.storedDevices.size).toBe(0);
+    expect(shellyPlatform.shellyDevices.size).toBe(1);
+    expect(shellyPlatform.bridgedDevices.size).toBe(1);
+    expect(shellyPlatform.bridgedDevices.has('shelly1-34945472A643')).toBe(true);
+
+    const device = shellyPlatform.bridgedDevices.get('shelly1-34945472A643');
+    expect(device).toBeDefined();
+    if (!device) return;
+
+    expect(device.getAllClusterServers()).toHaveLength(3);
+    expect(device.getClusterServer(DescriptorCluster)).toBeDefined();
+    expect(device.getClusterServer(BridgedDeviceBasicInformationCluster)).toBeDefined();
+    expect(device.getClusterServer(FixedLabelCluster)).toBeDefined();
+    expect(device.getChildEndpoints()).toHaveLength(4);
+    expect(device.getChildEndpointByName('PowerSource')).toBeDefined();
+    expect(device.getChildEndpointByName('PowerSource')?.getAllClusterServers()).toHaveLength(2);
+    expect(device.getChildEndpointByName('PowerSource')?.hasClusterServer(DescriptorCluster)).toBeTruthy();
+    expect(device.getChildEndpointByName('PowerSource')?.hasClusterServer(PowerSourceCluster)).toBeTruthy();
+    expect(device.getChildEndpointByName('relay:0')).toBeDefined();
+    expect(device.getChildEndpointByName('relay:0')?.getAllClusterServers()).toHaveLength(4);
+    expect(device.getChildEndpointByName('relay:0')?.hasClusterServer(DescriptorCluster)).toBeTruthy();
+    expect(device.getChildEndpointByName('relay:0')?.hasClusterServer(IdentifyCluster)).toBeTruthy();
+    expect(device.getChildEndpointByName('relay:0')?.hasClusterServer(GroupsCluster)).toBeTruthy();
+    expect(device.getChildEndpointByName('relay:0')?.hasClusterServer(OnOffCluster)).toBeTruthy();
+    expect(device.getChildEndpointByName('meter:0')).toBeDefined();
+    expect(device.getChildEndpointByName('meter:0')?.getAllClusterServers()).toHaveLength(4);
+    expect(device.getChildEndpointByName('meter:0')?.hasClusterServer(DescriptorCluster)).toBeTruthy();
+    expect(device.getChildEndpointByName('meter:0')?.hasClusterServer(PowerTopology.Complete)).toBeTruthy();
+    expect(device.getChildEndpointByName('meter:0')?.hasClusterServer(ElectricalPowerMeasurement.Complete)).toBeTruthy();
+    expect(device.getChildEndpointByName('meter:0')?.hasClusterServer(ElectricalEnergyMeasurement.Complete)).toBeTruthy();
+    expect(device.getChildEndpointByName('input:0')).toBeDefined();
+    expect(device.getChildEndpointByName('input:0')?.getAllClusterServers()).toHaveLength(3);
+    expect(device.getChildEndpointByName('input:0')?.hasClusterServer(DescriptorCluster)).toBeTruthy();
+    expect(device.getChildEndpointByName('input:0')?.hasClusterServer(IdentifyCluster)).toBeTruthy();
+    expect(device.getChildEndpointByName('input:0')?.hasClusterServer(Switch.Complete)).toBeTruthy();
+
+    cleanup();
+    expect(await (shellyPlatform as any).saveStoredDevices()).toBeTruthy();
+    expect(shellyPlatform.discoveredDevices.size).toBe(0);
+    expect(shellyPlatform.storedDevices.size).toBe(0);
+    expect(shellyPlatform.shellyDevices.size).toBe(0);
+    expect(shellyPlatform.bridgedDevices.size).toBe(0);
+    expect(shellyPlatform.bluBridgedDevices.size).toBe(0);
+    expect((shellyPlatform as any).shelly._devices.size).toBe(0);
+
+    shelly1?.destroy();
   });
 
   it('should load and save the stored devices', async () => {
