@@ -10,6 +10,9 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 
 ### Added
 
+- [Jest]: Jest coverage 100% on shellyProperty
+- [Jest]: Jest coverage 100% on shellyComponent
+
 ### Changed
 
 - [package]: Updated dependencies.
