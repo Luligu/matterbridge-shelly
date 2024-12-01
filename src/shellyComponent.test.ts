@@ -12,6 +12,7 @@ import path from 'path';
 describe('ShellyComponent', () => {
   let consoleLogSpy: jest.SpiedFunction<typeof console.log>;
   let loggerLogSpy: jest.SpiedFunction<(level: LogLevel, message: string, ...parameters: any[]) => void>;
+  let fetchSpy: jest.SpiedFunction<typeof ShellyDevice.fetch>;
 
   const log = new AnsiLogger({ logName: 'shellyComponentTest', logTimestampFormat: TimestampFormat.TIME_MILLIS });
   const shelly = new Shelly(log);
@@ -30,6 +31,14 @@ describe('ShellyComponent', () => {
     loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log').mockImplementation((level: string, message: string, ...parameters: any[]) => {
       // console.error(`Mocked log: ${level} - ${message}`, ...parameters);
     });
+    /*
+    fetchSpy = jest
+      .spyOn(ShellyDevice, 'fetch')
+      .mockImplementation((shelly: Shelly, log: AnsiLogger, host: string, service: string, params?: Record<string, string | number | boolean | object>) => {
+        // console.error(`Mocked log: ${level} - ${message}`, ...parameters);
+        return Promise.resolve({});
+      });
+    */
 
     const mockDevice = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shellydimmer2-98CDAC0D01BB.json'));
     const mockDevice2 = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shellyplus1pm-441793D69718.json'));
@@ -44,6 +53,10 @@ describe('ShellyComponent', () => {
     id = 'testId';
     name = 'testName';
     data = { key1: 'value', key2: 123, key3: true };
+    // mockFetch.mockClear();
+    consoleLogSpy.mockClear();
+    loggerLogSpy.mockClear();
+    // fetchSpy.mockClear();
   });
 
   afterEach(() => {
@@ -120,8 +133,10 @@ describe('ShellyComponent', () => {
     (component as ShellyLightComponent).Level(50);
     (component as ShellyLightComponent).ColorRGB(128, 128, 128);
     (component as ShellyLightComponent).ColorTemp(300);
+
     expect(mockFetch).toHaveBeenCalled();
     expect(mockFetch).toHaveBeenCalledTimes(3);
+    mockFetch.mockClear();
     mockFetch.mockRestore();
   });
 
@@ -148,8 +163,10 @@ describe('ShellyComponent', () => {
     (component as ShellyLightComponent).Level(50);
     (component as ShellyLightComponent).ColorRGB(128, 128, 128);
     (component as ShellyLightComponent).ColorTemp(5000);
+
     expect(mockFetch).toHaveBeenCalled();
-    expect(mockFetch).toHaveBeenCalledTimes(3);
+    expect(mockFetch).toHaveBeenCalledTimes(5);
+    mockFetch.mockClear();
     mockFetch.mockRestore();
   });
 
@@ -176,8 +193,10 @@ describe('ShellyComponent', () => {
     (component as ShellyLightComponent).Level(50);
     (component as ShellyLightComponent).ColorRGB(128, 128, 128);
     (component as ShellyLightComponent).ColorTemp(5000);
+
     expect(mockFetch).toHaveBeenCalled();
-    expect(mockFetch).toHaveBeenCalledTimes(3);
+    expect(mockFetch).toHaveBeenCalledTimes(5);
+    mockFetch.mockClear();
     mockFetch.mockRestore();
   });
 
@@ -202,8 +221,10 @@ describe('ShellyComponent', () => {
     (component as ShellyLightComponent).Off();
     (component as ShellyLightComponent).Toggle();
     (component as ShellyLightComponent).Level(50);
+
     expect(mockFetch).toHaveBeenCalled();
     expect(mockFetch).toHaveBeenCalledTimes(4);
+    mockFetch.mockClear();
     mockFetch.mockRestore();
   });
 
@@ -227,8 +248,10 @@ describe('ShellyComponent', () => {
     (component as ShellySwitchComponent).On();
     (component as ShellySwitchComponent).Off();
     (component as ShellySwitchComponent).Toggle();
+
     expect(mockFetch).toHaveBeenCalled();
     expect(mockFetch).toHaveBeenCalledTimes(3);
+    mockFetch.mockClear();
     mockFetch.mockRestore();
   });
 
@@ -274,15 +297,15 @@ describe('ShellyComponent', () => {
     (component as ShellyCoverComponent).Close();
     (component as ShellyCoverComponent).Stop();
     (component as ShellyCoverComponent).GoToPosition(50);
+
     expect(mockFetch).toHaveBeenCalled();
     expect(mockFetch).toHaveBeenCalledTimes(4);
-
+    mockFetch.mockClear();
     mockFetch.mockRestore();
   });
 
   it('should construct properly with cover type component gen 2', () => {
     const mockFetch = jest.spyOn(ShellyDevice, 'fetch').mockResolvedValue({});
-
     const data = { key1: 'value', key2: 123, key3: true };
     const component = new ShellyComponent(device2, 'cover:1', 'Cover', data);
     expect(component.id).toBe('cover:1');
@@ -306,9 +329,10 @@ describe('ShellyComponent', () => {
     (component as ShellyCoverComponent).Close();
     (component as ShellyCoverComponent).Stop();
     (component as ShellyCoverComponent).GoToPosition(50);
+
     expect(mockFetch).toHaveBeenCalled();
     expect(mockFetch).toHaveBeenCalledTimes(4);
-
+    mockFetch.mockClear();
     mockFetch.mockRestore();
   });
 
