@@ -26,7 +26,7 @@ import { BLUE, CYAN, GREEN, GREY, YELLOW, db, debugStringify, er } from 'matterb
 import { ShellyData, ShellyDataType } from './shellyTypes.js';
 import { ShellyProperty } from './shellyProperty.js';
 import { ShellyDevice } from './shellyDevice.js';
-import { deepEqual, isValidNumber } from 'matterbridge/utils';
+import { deepEqual, isValidArray, isValidNumber, isValidObject } from 'matterbridge/utils';
 import EventEmitter from 'events';
 
 interface LightComponent {
@@ -151,13 +151,12 @@ export class ShellyComponent extends EventEmitter {
             ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { red, green, blue });
           if (device.gen !== 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${this.name}.Set`, { id: this.index, red, green, blue });
         }
-        if (this.hasProperty('rgb') && this.getValue('rgb') !== null && this.getValue('rgb') !== undefined && Array.isArray(this.getValue('rgb'))) {
+        if (this.hasProperty('rgb') && isValidArray(this.getValue('rgb'), 3, 3)) {
           red = Math.min(Math.max(Math.round(red), 0), 255);
           green = Math.min(Math.max(Math.round(green), 0), 255);
           blue = Math.min(Math.max(Math.round(blue), 0), 255);
           if (device.gen === 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { red, green, blue });
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          if (device.gen !== 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${this.name}.Set`, { id: this.index, rgb: [red, green, blue] as any });
+          if (device.gen !== 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${this.name}.Set`, { id: this.index, rgb: [red, green, blue] });
         }
       };
 
@@ -253,7 +252,7 @@ export class ShellyComponent extends EventEmitter {
     if (property) {
       if (!deepEqual(property.value, value)) {
         this.device.log.debug(
-          `*${CYAN}${this.id}:${key}${GREY} updated from ${property.value !== null && typeof property.value === 'object' ? debugStringify(property.value) : property.value}${GREY} to ${YELLOW}${value !== null && typeof value === 'object' ? debugStringify(value) : value}${GREY} in component ${GREEN}${this.id}${GREY} (${BLUE}${this.name}${GREY})`,
+          `*${CYAN}${this.id}:${key}${GREY} updated from ${isValidObject(property.value) ? debugStringify(property.value) : property.value}${GREY} to ${YELLOW}${isValidObject(value) ? debugStringify(value) : value}${GREY} in component ${GREEN}${this.id}${GREY} (${BLUE}${this.name}${GREY})`,
         );
         this.device.emit('update', this.id, key, value);
         this.emit('update', this.id, key, value);
