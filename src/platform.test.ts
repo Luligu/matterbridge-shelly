@@ -1,6 +1,8 @@
+/* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
+  BindingCluster,
   BridgedDeviceBasicInformationCluster,
   DescriptorCluster,
   ElectricalEnergyMeasurement,
@@ -548,8 +550,9 @@ describe('ShellyPlatform', () => {
     expect(device.getChildEndpointByName('PowerSource')?.hasClusterServer(DescriptorCluster)).toBeTruthy();
     expect(device.getChildEndpointByName('PowerSource')?.hasClusterServer(PowerSourceCluster)).toBeTruthy();
     expect(device.getChildEndpointByName('relay:0')).toBeDefined();
-    expect(device.getChildEndpointByName('relay:0')?.getAllClusterServers()).toHaveLength(4);
+    expect(device.getChildEndpointByName('relay:0')?.getAllClusterServers()).toHaveLength(5);
     expect(device.getChildEndpointByName('relay:0')?.hasClusterServer(DescriptorCluster)).toBeTruthy();
+    expect(device.getChildEndpointByName('relay:0')?.hasClusterServer(BindingCluster)).toBeTruthy();
     expect(device.getChildEndpointByName('relay:0')?.hasClusterServer(IdentifyCluster)).toBeTruthy();
     expect(device.getChildEndpointByName('relay:0')?.hasClusterServer(GroupsCluster)).toBeTruthy();
     expect(device.getChildEndpointByName('relay:0')?.hasClusterServer(OnOffCluster)).toBeTruthy();
@@ -560,8 +563,9 @@ describe('ShellyPlatform', () => {
     expect(device.getChildEndpointByName('meter:0')?.hasClusterServer(ElectricalPowerMeasurement.Complete)).toBeTruthy();
     expect(device.getChildEndpointByName('meter:0')?.hasClusterServer(ElectricalEnergyMeasurement.Complete)).toBeTruthy();
     expect(device.getChildEndpointByName('input:0')).toBeDefined();
-    expect(device.getChildEndpointByName('input:0')?.getAllClusterServers()).toHaveLength(3);
+    expect(device.getChildEndpointByName('input:0')?.getAllClusterServers()).toHaveLength(4);
     expect(device.getChildEndpointByName('input:0')?.hasClusterServer(DescriptorCluster)).toBeTruthy();
+    expect(device.getChildEndpointByName('input:0')?.hasClusterServer(BindingCluster)).toBeTruthy();
     expect(device.getChildEndpointByName('input:0')?.hasClusterServer(IdentifyCluster)).toBeTruthy();
     expect(device.getChildEndpointByName('input:0')?.hasClusterServer(Switch.Complete)).toBeTruthy();
 

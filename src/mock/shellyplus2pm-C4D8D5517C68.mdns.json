@@ -68,9 +68,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": [
-        "gen=2"
-      ]
+      "data": ["gen=2"]
     },
     {
       "name": "ShellyPlus2PM-C4D8D5517C68.local",
@@ -99,11 +97,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": [
-        "gen=2",
-        "app=Plus2PM",
-        "ver=1.4.4"
-      ]
+      "data": ["gen=2", "app=Plus2PM", "ver=1.4.4"]
     },
     {
       "name": "ShellyPlus2PM-C4D8D5517C68.local",

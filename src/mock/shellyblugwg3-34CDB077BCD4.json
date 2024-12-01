@@ -172,12 +172,8 @@
         "name": "BluTrv 200",
         "key": null,
         "trv": "bthomedevice:200",
-        "temp_sensors": [
-          "bthomesensor:207"
-        ],
-        "dw_sensors": [
-          "bthomesensor:210"
-        ],
+        "temp_sensors": ["bthomesensor:207"],
+        "dw_sensors": ["bthomesensor:210"],
         "meta": {}
       }
     },
@@ -199,12 +195,8 @@
         "name": "BluTrv 201",
         "key": null,
         "trv": "bthomedevice:203",
-        "temp_sensors": [
-          "bthomesensor:219"
-        ],
-        "dw_sensors": [
-          "bthomesensor:210"
-        ],
+        "temp_sensors": ["bthomesensor:219"],
+        "dw_sensors": ["bthomesensor:210"],
         "meta": {}
       }
     },

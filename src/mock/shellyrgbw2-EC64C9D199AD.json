@@ -316,11 +316,7 @@
         "is_valid": "true",
         "overpower": false,
         "timestamp": 1730472205,
-        "counters": [
-          0,
-          0,
-          0
-        ],
+        "counters": [0, 0, 0],
         "total": 3760
       },
       {
@@ -328,11 +324,7 @@
         "is_valid": "true",
         "overpower": false,
         "timestamp": 1730472205,
-        "counters": [
-          0,
-          0,
-          0
-        ],
+        "counters": [0, 0, 0],
         "total": 0
       },
       {
@@ -340,11 +332,7 @@
         "is_valid": "true",
         "overpower": false,
         "timestamp": 1730472205,
-        "counters": [
-          0,
-          0,
-          0
-        ],
+        "counters": [0, 0, 0],
         "total": 0
       },
       {
@@ -352,11 +340,7 @@
         "is_valid": "true",
         "overpower": false,
         "timestamp": 1730472205,
-        "counters": [
-          0,
-          0,
-          0
-        ],
+        "counters": [0, 0, 0],
         "total": 0
       }
     ],

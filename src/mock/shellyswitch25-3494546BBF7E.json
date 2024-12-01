@@ -253,11 +253,7 @@
         "overpower": 0,
         "is_valid": true,
         "timestamp": 1732120009,
-        "counters": [
-          0,
-          0,
-          0
-        ],
+        "counters": [0, 0, 0],
         "total": 2
       },
       {
@@ -265,11 +261,7 @@
         "overpower": 0,
         "is_valid": true,
         "timestamp": 1732120009,
-        "counters": [
-          0,
-          0,
-          0
-        ],
+        "counters": [0, 0, 0],
         "total": 2
       }
     ],

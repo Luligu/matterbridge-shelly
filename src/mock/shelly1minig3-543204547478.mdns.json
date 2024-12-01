@@ -44,9 +44,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": [
-        "gen=3"
-      ]
+      "data": ["gen=3"]
     },
     {
       "name": "Shelly1MiniG3-543204547478.local",

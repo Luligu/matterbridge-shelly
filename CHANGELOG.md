@@ -6,10 +6,9 @@ If you like this project and find it useful, please consider giving it a star on
 
 You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his invaluable contribution to this project.
 
-## [1.0.11] - 2024-11-XX
+## [1.0.11] - 2024-12-XX
 
 ### Added
-
 
 ### Changed
 
@@ -32,7 +31,7 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 
 - [ShellyCommandHandler]: Refactor shellyCommandHandlers.
 - [BTHome]: Update scanBTHomeComponents to the new BLU firmware 1.0.20 (model identification changes from v1.0.18).
-- [log]: Show username and password with **** in logs.
+- [log]: Show username and password with \*\*\*\* in logs.
 - [package]: Updated dependencies.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
@@ -112,7 +111,6 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 - [shelly]: Added ota_begin, ota_progress and ota_success events from Sys to set the devices that will not be loaded from cache at restart.
 - [shelly]: Added ColorTemp to Shelly Duo and Shelly Bulb in white mode.
 - [cockpit]: Added cockpit dashboard 1.0
-
 
 <a href="https://www.buymeacoffee.com/luligugithub">
   <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
