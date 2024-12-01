@@ -2061,21 +2061,21 @@ describe('Shelly devices test', () => {
     });
 
     test('Create a gen 3 shelly2pmg3 device mode switch', async () => {
-      id = 'shelly2pmg3-34CDB0770C4C';
+      id = 'shelly2pmg3-8CBFEA9DE29C';
       log.logName = id;
 
-      device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', id + '.switch.json'));
+      device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', id + '.json'));
       expect(device).not.toBeUndefined();
       if (!device) return;
-      expect(device.host).toBe(path.join('src', 'mock', id + '.switch.json'));
+      expect(device.host).toBe(path.join('src', 'mock', id + '.json'));
       expect(device.model).toBe('S3SW-002P16EU');
-      expect(device.mac).toBe('34CDB0770C4C');
+      expect(device.mac).toBe('8CBFEA9DE29C');
       expect(device.id).toBe(id);
       expect(device.firmware).toBe('1.4.99-2pmg3prod0-ge3db05c'); // firmwareGen2
       expect(device.auth).toBe(false);
       expect(device.gen).toBe(3);
       expect(device.profile).toBe('switch');
-      expect(device.name).toBe('2PM Gen3');
+      expect(device.name).toBe('2PM Gen3 Switch');
       expect(device.hasUpdate).toBe(false);
       expect(device.lastseen).not.toBe(0);
       expect(device.online).toBe(true);
@@ -2133,10 +2133,10 @@ describe('Shelly devices test', () => {
       id = 'shelly2pmg3-34CDB0770C4C';
       log.logName = id;
 
-      device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', id + '.cover.json'));
+      device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', id + '.json'));
       expect(device).not.toBeUndefined();
       if (!device) return;
-      expect(device.host).toBe(path.join('src', 'mock', id + '.cover.json'));
+      expect(device.host).toBe(path.join('src', 'mock', id + '.json'));
       expect(device.model).toBe('S3SW-002P16EU');
       expect(device.mac).toBe('34CDB0770C4C');
       expect(device.id).toBe(id);
@@ -2144,7 +2144,7 @@ describe('Shelly devices test', () => {
       expect(device.auth).toBe(false);
       expect(device.gen).toBe(3);
       expect(device.profile).toBe('cover');
-      expect(device.name).toBe('2PM Gen3');
+      expect(device.name).toBe('2PM Gen3 Cover');
       expect(device.hasUpdate).toBe(false);
       expect(device.lastseen).not.toBe(0);
       expect(device.online).toBe(true);
@@ -2169,8 +2169,8 @@ describe('Shelly devices test', () => {
       expect((device.getComponent('cover:0')?.getValue('aenergy') as ShellyData).total).toBeGreaterThanOrEqual(0);
 
       expect(device.bthomeTrvs.size).toBe(0);
-      expect(device.bthomeDevices.size).toBe(0);
-      expect(device.bthomeSensors.size).toBe(0);
+      expect(device.bthomeDevices.size).toBe(4);
+      expect(device.bthomeSensors.size).toBe(18);
 
       expect(await device.fetchUpdate()).not.toBeNull();
 

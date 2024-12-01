@@ -4,6 +4,7 @@
 import {
   BindingCluster,
   BridgedDeviceBasicInformationCluster,
+  ClusterServerObj,
   DescriptorCluster,
   ElectricalEnergyMeasurement,
   ElectricalPowerMeasurement,
@@ -22,17 +23,30 @@ import {
   Switch,
   SwitchCluster,
 } from 'matterbridge';
-import { AnsiLogger, db, dn, er, hk, idn, LogLevel, nf, rs, wr, zb } from 'matterbridge/logger';
+import { AnsiLogger, db, dn, er, hk, idn, LogLevel, nf, rs, wr, zb, CYAN } from 'matterbridge/logger';
 import { getMacAddress, isValidArray, isValidBoolean, isValidNull, isValidNumber, isValidObject, isValidString, isValidUndefined, wait, waiter } from 'matterbridge/utils';
 import { jest } from '@jest/globals';
 
+import { Shelly } from './shelly';
 import { ShellyPlatform } from './platform';
 import { ShellyDevice } from './shellyDevice';
 import path from 'path';
-import { Shelly } from './shelly';
-import { CYAN } from 'node-ansi-logger';
 
 const address = 'c4:cb:76:b3:cd:1f';
+
+async function invokeCommands(cluster: ClusterServerObj, data?: Record<string, boolean | number | bigint | string | object | null | undefined>): Promise<void> {
+  const commands = (cluster as any).commands as object;
+  for (const [key, value] of Object.entries(commands)) {
+    if (typeof value.handler === 'function') await value.handler(data ?? {});
+  }
+}
+
+async function invokeCommand(cluster: ClusterServerObj, command: string, data?: Record<string, boolean | number | bigint | string | object | null | undefined>): Promise<void> {
+  const commands = (cluster as any).commands as object;
+  for (const [key, value] of Object.entries(commands)) {
+    if (key === command && typeof value.handler === 'function') await value.handler(data ?? {});
+  }
+}
 
 describe('ShellyPlatform', () => {
   let mockMatterbridge: Matterbridge;
@@ -570,6 +584,11 @@ describe('ShellyPlatform', () => {
     expect(device.getChildEndpointByName('input:0')?.hasClusterServer(BindingCluster)).toBeTruthy();
     expect(device.getChildEndpointByName('input:0')?.hasClusterServer(IdentifyCluster)).toBeTruthy();
     expect(device.getChildEndpointByName('input:0')?.hasClusterServer(Switch.Complete)).toBeTruthy();
+
+    const onOff = device.getChildEndpointByName('relay:0')?.getClusterServer(OnOffCluster);
+    expect(onOff).toBeDefined();
+    if (!onOff) return;
+    invokeCommands(onOff as unknown as ClusterServerObj, { endpoint: { number: 100 } });
 
     cleanup();
     expect(await (shellyPlatform as any).saveStoredDevices()).toBeTruthy();

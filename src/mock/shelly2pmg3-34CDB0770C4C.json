@@ -1,6 +1,6 @@
 {
   "shelly": {
-    "name": "2PM Gen3",
+    "name": "2PM Gen3 Cover",
     "id": "shelly2pmg3-34cdb0770c4c",
     "mac": "34CDB0770C4C",
     "slot": 1,
@@ -11,7 +11,7 @@
     "app": "S2PMG3",
     "auth_en": false,
     "auth_domain": null,
-    "profile": "switch"
+    "profile": "cover"
   },
   "settings": {
     "ble": {
@@ -27,6 +27,45 @@
     "cloud": {
       "enable": true,
       "server": "shelly-103-eu.shelly.cloud:6022/jrpc"
+    },
+    "cover:0": {
+      "id": 0,
+      "name": null,
+      "motor": {
+        "idle_power_thr": 2,
+        "idle_confirm_period": 0.25
+      },
+      "maxtime_open": 20,
+      "maxtime_close": 20,
+      "initial_state": "stopped",
+      "invert_directions": false,
+      "in_mode": "dual",
+      "swap_inputs": false,
+      "safety_switch": {
+        "enable": false,
+        "direction": "both",
+        "action": "stop",
+        "allowed_move": null
+      },
+      "power_limit": 2800,
+      "voltage_limit": 280,
+      "undervoltage_limit": 0,
+      "current_limit": 10,
+      "obstruction_detection": {
+        "enable": false,
+        "direction": "both",
+        "action": "stop",
+        "power_thr": 8,
+        "holdoff": 1
+      },
+      "slat": {
+        "enable": false,
+        "open_time": 1.5,
+        "close_time": 1.5,
+        "step": 20,
+        "retain_pos": false,
+        "precise_ctl": false
+      }
     },
     "input:0": {
       "id": 0,
@@ -64,44 +103,14 @@
       "enable_rpc": true,
       "enable_control": true
     },
-    "switch:0": {
-      "id": 0,
-      "name": null,
-      "in_mode": "follow",
-      "initial_state": "restore_last",
-      "auto_on": false,
-      "auto_on_delay": 60,
-      "auto_off": false,
-      "auto_off_delay": 60,
-      "power_limit": 2800,
-      "voltage_limit": 280,
-      "undervoltage_limit": 0,
-      "autorecover_voltage_errors": false,
-      "current_limit": 10
-    },
-    "switch:1": {
-      "id": 1,
-      "name": null,
-      "in_mode": "follow",
-      "initial_state": "match_input",
-      "auto_on": false,
-      "auto_on_delay": 60,
-      "auto_off": false,
-      "auto_off_delay": 60,
-      "power_limit": 2800,
-      "voltage_limit": 280,
-      "undervoltage_limit": 0,
-      "autorecover_voltage_errors": false,
-      "current_limit": 10
-    },
     "sys": {
       "device": {
-        "name": "2PM Gen3",
+        "name": "2PM Gen3 Cover",
         "mac": "34CDB0770C4C",
         "fw_id": "20240731-123728/1.4.99-2pmg3prod0-ge3db05c",
         "discoverable": true,
         "eco_mode": true,
-        "profile": "switch",
+        "profile": "cover",
         "addon_type": null
       },
       "location": null,
@@ -118,7 +127,9 @@
           "addr": null
         }
       },
-      "ui_data": {},
+      "ui_data": {
+        "cover": "50"
+      },
       "rpc_udp": {
         "dst_addr": null,
         "listen_port": null
@@ -126,7 +137,7 @@
       "sntp": {
         "server": "time.google.com"
       },
-      "cfg_rev": 44
+      "cfg_rev": 49
     },
     "wifi": {
       "ap": {
@@ -174,6 +185,32 @@
     "cloud": {
       "connected": true
     },
+    "cover:0": {
+      "id": 0,
+      "source": "timeout",
+      "state": "stopped",
+      "apower": 0,
+      "voltage": 235.3,
+      "current": 0,
+      "pf": 0,
+      "freq": 50,
+      "aenergy": {
+        "total": 0.293,
+        "by_minute": [
+          7.169,
+          33.918,
+          41.687
+        ],
+        "minute_ts": 1733068860
+      },
+      "temperature": {
+        "tC": 40.9,
+        "tF": 105.6
+      },
+      "pos_control": true,
+      "last_direction": "close",
+      "current_pos": 0
+    },
     "input:0": {
       "id": 0,
       "state": false
@@ -186,76 +223,28 @@
     "mqtt": {
       "connected": false
     },
-    "switch:0": {
-      "id": 0,
-      "source": "init",
-      "output": false,
-      "apower": 0,
-      "voltage": 235.4,
-      "freq": 50,
-      "current": 0,
-      "pf": 0,
-      "aenergy": {
-        "total": 145,
-        "by_minute": [0, 0, 0],
-        "minute_ts": 1732119960
-      },
-      "ret_aenergy": {
-        "total": 0,
-        "by_minute": [0, 0, 0],
-        "minute_ts": 1732119960
-      },
-      "temperature": {
-        "tC": 38.4,
-        "tF": 101.1
-      }
-    },
-    "switch:1": {
-      "id": 1,
-      "source": "init",
-      "output": false,
-      "apower": 0,
-      "voltage": 235.5,
-      "freq": 50,
-      "current": 0,
-      "pf": 0,
-      "aenergy": {
-        "total": 140,
-        "by_minute": [0, 0, 0],
-        "minute_ts": 1732119960
-      },
-      "ret_aenergy": {
-        "total": 0,
-        "by_minute": [0, 0, 0],
-        "minute_ts": 1732119960
-      },
-      "temperature": {
-        "tC": 38.4,
-        "tF": 101.1
-      }
-    },
     "sys": {
       "mac": "34CDB0770C4C",
       "restart_required": false,
-      "time": "17:26",
-      "unixtime": 1732119975,
-      "uptime": 3342,
-      "ram_size": 255060,
-      "ram_free": 62288,
+      "time": "17:01",
+      "unixtime": 1733068893,
+      "uptime": 513,
+      "ram_size": 255152,
+      "ram_free": 63444,
       "fs_size": 1048576,
-      "fs_free": 561152,
-      "cfg_rev": 44,
+      "fs_free": 565248,
+      "cfg_rev": 49,
       "kvs_rev": 0,
-      "schedule_rev": 3,
-      "webhook_rev": 2,
+      "schedule_rev": 4,
+      "webhook_rev": 3,
       "available_updates": {},
-      "reset_reason": 1
+      "reset_reason": 3
     },
     "wifi": {
       "sta_ip": "192.168.1.166",
       "status": "got ip",
       "ssid": "FibreBox_X6-12A4C7",
-      "rssi": -58
+      "rssi": -61
     },
     "ws": {
       "connected": false
@@ -289,10 +278,10 @@
       "key": "bthomedevice:201",
       "status": {
         "id": 201,
-        "rssi": null,
-        "battery": null,
-        "packet_id": null,
-        "last_updated_ts": 0
+        "rssi": -61,
+        "battery": 100,
+        "packet_id": 123,
+        "last_updated_ts": 1733068444
       },
       "config": {
         "id": 201,
@@ -312,10 +301,10 @@
       "key": "bthomedevice:202",
       "status": {
         "id": 202,
-        "rssi": -55,
+        "rssi": -54,
         "battery": 100,
-        "packet_id": 35,
-        "last_updated_ts": 1732118253
+        "packet_id": 101,
+        "last_updated_ts": 1733068661
       },
       "config": {
         "id": 202,
@@ -335,10 +324,10 @@
       "key": "bthomedevice:203",
       "status": {
         "id": 203,
-        "rssi": null,
-        "battery": null,
-        "packet_id": null,
-        "last_updated_ts": 0
+        "rssi": -52,
+        "battery": 100,
+        "packet_id": 181,
+        "last_updated_ts": 1733068609
       },
       "config": {
         "id": 203,
@@ -434,8 +423,8 @@
       "key": "bthomesensor:205",
       "status": {
         "id": 205,
-        "value": null,
-        "last_updated_ts": 0
+        "value": 100,
+        "last_updated_ts": 1733068444
       },
       "config": {
         "id": 205,
@@ -450,7 +439,7 @@
       "key": "bthomesensor:206",
       "status": {
         "id": 206,
-        "last_updated_ts": 1070224832
+        "last_updated_ts": 3
       },
       "config": {
         "id": 206,
@@ -465,7 +454,7 @@
       "key": "bthomesensor:207",
       "status": {
         "id": 207,
-        "last_updated_ts": 1070224832
+        "last_updated_ts": 3
       },
       "config": {
         "id": 207,
@@ -480,7 +469,7 @@
       "key": "bthomesensor:208",
       "status": {
         "id": 208,
-        "last_updated_ts": 1070224832
+        "last_updated_ts": 3
       },
       "config": {
         "id": 208,
@@ -495,7 +484,7 @@
       "key": "bthomesensor:209",
       "status": {
         "id": 209,
-        "last_updated_ts": 1070224832
+        "last_updated_ts": 3
       },
       "config": {
         "id": 209,
@@ -511,7 +500,7 @@
       "status": {
         "id": 210,
         "value": 100,
-        "last_updated_ts": 1732118253
+        "last_updated_ts": 1733068661
       },
       "config": {
         "id": 210,
@@ -526,8 +515,8 @@
       "key": "bthomesensor:211",
       "status": {
         "id": 211,
-        "value": 37,
-        "last_updated_ts": 1732118253
+        "value": 13,
+        "last_updated_ts": 1733068661
       },
       "config": {
         "id": 211,
@@ -543,7 +532,7 @@
       "status": {
         "id": 212,
         "value": false,
-        "last_updated_ts": 1732118253
+        "last_updated_ts": 1733068661
       },
       "config": {
         "id": 212,
@@ -559,7 +548,7 @@
       "status": {
         "id": 213,
         "value": 0,
-        "last_updated_ts": 1732118253
+        "last_updated_ts": 1733068661
       },
       "config": {
         "id": 213,
@@ -574,8 +563,8 @@
       "key": "bthomesensor:214",
       "status": {
         "id": 214,
-        "value": null,
-        "last_updated_ts": 0
+        "value": 100,
+        "last_updated_ts": 1733068609
       },
       "config": {
         "id": 214,
@@ -590,8 +579,8 @@
       "key": "bthomesensor:215",
       "status": {
         "id": 215,
-        "value": null,
-        "last_updated_ts": 0
+        "value": false,
+        "last_updated_ts": 1733068609
       },
       "config": {
         "id": 215,
@@ -616,9 +605,25 @@
         "idx": 0,
         "meta": null
       }
+    },
+    {
+      "key": "bthomesensor:217",
+      "status": {
+        "id": 217,
+        "value": 6,
+        "last_updated_ts": 1733068609
+      },
+      "config": {
+        "id": 217,
+        "addr": "0c:ae:5f:5a:0b:fa",
+        "name": null,
+        "obj_id": 5,
+        "idx": 0,
+        "meta": null
+      }
     }
   ],
-  "cfg_rev": 44,
+  "cfg_rev": 49,
   "offset": 0,
-  "total": 21
+  "total": 22
 }

@@ -708,13 +708,13 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
 
             // Add command handlers
             mbDevice.addCommandHandler('on', async (data) => {
-              this.shellySwitchCommandHandler(mbDevice, data.endpoint.number, device, 'On');
+              this.shellySwitchCommandHandler(mbDevice, data.endpoint?.number, device, 'On');
             });
             mbDevice.addCommandHandler('off', async (data) => {
-              this.shellySwitchCommandHandler(mbDevice, data.endpoint.number, device, 'Off');
+              this.shellySwitchCommandHandler(mbDevice, data.endpoint?.number, device, 'Off');
             });
             mbDevice.addCommandHandler('toggle', async (data) => {
-              this.shellySwitchCommandHandler(mbDevice, data.endpoint.number, device, 'Toggle');
+              this.shellySwitchCommandHandler(mbDevice, data.endpoint?.number, device, 'Toggle');
             });
             if ('edge' in this.matterbridge && this.matterbridge.edge === true) {
               // eslint-disable-next-line @typescript-eslint/no-explicit-any

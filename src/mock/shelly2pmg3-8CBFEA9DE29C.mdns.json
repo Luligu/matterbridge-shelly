@@ -15,18 +15,18 @@
   "questions": [],
   "answers": [
     {
-      "name": "_http._tcp.local",
+      "name": "_shelly._tcp.local",
       "type": "PTR",
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": "shelly2pmg3-34cdb0770c4c._http._tcp.local"
+      "data": "shelly2pmg3-8cbfea9de29c._shelly._tcp.local"
     }
   ],
   "authorities": [],
   "additionals": [
     {
-      "name": "shelly2pmg3-34cdb0770c4c._http._tcp.local",
+      "name": "shelly2pmg3-8cbfea9de29c._shelly._tcp.local",
       "type": "SRV",
       "ttl": 120,
       "class": "IN",
@@ -35,26 +35,28 @@
         "priority": 0,
         "weight": 0,
         "port": 80,
-        "target": "Shelly2PMG3-34CDB0770C4C.local"
+        "target": "Shelly2PMG3-8CBFEA9DE29C.local"
       }
     },
     {
-      "name": "shelly2pmg3-34cdb0770c4c._http._tcp.local",
+      "name": "shelly2pmg3-8cbfea9de29c._shelly._tcp.local",
       "type": "TXT",
       "ttl": 120,
       "class": "IN",
       "flush": false,
       "data": [
-        "gen=3"
+        "gen=3",
+        "app=S2PMG3",
+        "ver=1.4.99-2pmg3prod0"
       ]
     },
     {
-      "name": "Shelly2PMG3-34CDB0770C4C.local",
+      "name": "Shelly2PMG3-8CBFEA9DE29C.local",
       "type": "A",
       "ttl": 120,
       "class": "IN",
       "flush": true,
-      "data": "192.168.1.166"
+      "data": "192.168.1.172"
     }
   ]
 }

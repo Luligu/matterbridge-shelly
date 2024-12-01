@@ -12,6 +12,8 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 
 - [Jest]: Jest coverage 100% on shellyProperty
 - [Jest]: Jest coverage 100% on shellyComponent
+- [shelly]: Verified support for shelly2pmg3 (Shelly 2PM Gen 3) mode cover with firmware 1.4.99-2pmg3prod0-ge3db05c.
+- [Jest]: Jest test on shelly2pmg3 mode cover (mock and real)
 
 ### Changed
 
