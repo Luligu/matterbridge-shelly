@@ -4,7 +4,7 @@ import { AnsiLogger, LogLevel, TimestampFormat } from 'matterbridge/logger';
 import { isCoverComponent, isLightComponent, isSwitchComponent, ShellyComponent, ShellyCoverComponent, ShellyLightComponent, ShellySwitchComponent } from './shellyComponent';
 import { ShellyDevice } from './shellyDevice';
 import { ShellyProperty } from './shellyProperty';
-import { ShellyData } from './shellyTypes';
+import { ShellyData, ShellyDataType } from './shellyTypes';
 import { Shelly } from './shelly';
 import { jest } from '@jest/globals';
 import path from 'path';
@@ -92,6 +92,15 @@ describe('ShellyComponent', () => {
     const mockFetch = jest.spyOn(ShellyDevice, 'fetch').mockResolvedValue({});
     const data = { key1: 'value', key2: 123, key3: true };
     const component = new ShellyComponent(device, 'light:0', 'Light', data);
+
+    component.on('update', (component: string, key: string, data: ShellyDataType) => {
+      // console.log(`Component: ${component}, Key: ${key}, Data: ${data}`);
+    });
+
+    component.on('event', (component: string, key: string, data: ShellyDataType) => {
+      // console.log(`Component: ${component}, Key: ${key}, Data: ${data}`);
+    });
+
     expect(component.id).toBe('light:0');
     expect(component.index).toBe(0);
     expect(component.name).toBe('Light');
