@@ -4,7 +4,7 @@ import { ShellyDataType } from './shellyTypes';
 import { ShellyDevice } from './shellyDevice';
 
 describe('ShellyProperty', () => {
-  let device: ShellyDevice;
+  const device: ShellyDevice = {} as ShellyDevice;
   let component: ShellyComponent;
   let key: string;
   let value: ShellyDataType;

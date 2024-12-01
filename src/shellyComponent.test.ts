@@ -109,6 +109,64 @@ describe('ShellyComponent', () => {
     (component as ShellyLightComponent).Off();
     (component as ShellyLightComponent).Toggle();
     (component as ShellyLightComponent).Level(50);
+    (component as ShellyLightComponent).ColorRGB(128, 128, 128);
+    (component as ShellyLightComponent).ColorTemp(300);
+    expect(mockFetch).toHaveBeenCalled();
+    expect(mockFetch).toHaveBeenCalledTimes(3);
+    mockFetch.mockRestore();
+  });
+
+  it('should construct properly with light type component and color temp', () => {
+    const mockFetch = jest.spyOn(ShellyDevice, 'fetch').mockResolvedValue({});
+    const data = { key1: 'value', key2: 123, key3: true, red: 128, green: 128, blue: 128, temp: 300 };
+    const component = new ShellyComponent(device, 'light:0', 'Light', data);
+    expect(component.id).toBe('light:0');
+    expect(component.index).toBe(0);
+    expect(component.name).toBe('Light');
+    expect(component.properties).toHaveLength(7);
+    expect((component as ShellyLightComponent).On).not.toBeUndefined();
+    expect((component as ShellyLightComponent).Off).not.toBeUndefined();
+    expect((component as ShellyLightComponent).Toggle).not.toBeUndefined();
+    expect((component as ShellyLightComponent).Level).not.toBeUndefined();
+
+    expect(isSwitchComponent(component)).toBeFalsy();
+    expect(isLightComponent(component)).toBeTruthy();
+    expect(isCoverComponent(component)).toBeFalsy();
+
+    (component as ShellyLightComponent).On();
+    (component as ShellyLightComponent).Off();
+    (component as ShellyLightComponent).Toggle();
+    (component as ShellyLightComponent).Level(50);
+    (component as ShellyLightComponent).ColorRGB(128, 128, 128);
+    (component as ShellyLightComponent).ColorTemp(5000);
+    expect(mockFetch).toHaveBeenCalled();
+    expect(mockFetch).toHaveBeenCalledTimes(3);
+    mockFetch.mockRestore();
+  });
+
+  it('should construct properly with light type component and color temp with mode', () => {
+    const mockFetch = jest.spyOn(ShellyDevice, 'fetch').mockResolvedValue({});
+    const data = { key1: 'value', key2: 123, key3: true, red: 128, green: 128, blue: 128, temp: 300, mode: 'temp' };
+    const component = new ShellyComponent(device, 'light:0', 'Light', data);
+    expect(component.id).toBe('light:0');
+    expect(component.index).toBe(0);
+    expect(component.name).toBe('Light');
+    expect(component.properties).toHaveLength(8);
+    expect((component as ShellyLightComponent).On).not.toBeUndefined();
+    expect((component as ShellyLightComponent).Off).not.toBeUndefined();
+    expect((component as ShellyLightComponent).Toggle).not.toBeUndefined();
+    expect((component as ShellyLightComponent).Level).not.toBeUndefined();
+
+    expect(isSwitchComponent(component)).toBeFalsy();
+    expect(isLightComponent(component)).toBeTruthy();
+    expect(isCoverComponent(component)).toBeFalsy();
+
+    (component as ShellyLightComponent).On();
+    (component as ShellyLightComponent).Off();
+    (component as ShellyLightComponent).Toggle();
+    (component as ShellyLightComponent).Level(50);
+    (component as ShellyLightComponent).ColorRGB(128, 128, 128);
+    (component as ShellyLightComponent).ColorTemp(5000);
     expect(mockFetch).toHaveBeenCalled();
     expect(mockFetch).toHaveBeenCalledTimes(3);
     mockFetch.mockRestore();
