@@ -26,11 +26,11 @@ describe('ShellyComponent', () => {
   let data: ShellyData;
 
   const handleUpdate = jest.fn<(component: string, key: string, data: ShellyDataType) => void>().mockImplementation((component, key, data) => {
-    console.error(`handleUpdate: component ${component} key ${key} data ${data}`);
+    // console.error(`handleUpdate: component ${component} key ${key} data ${data}`);
   });
 
   const handleEvent = jest.fn<(component: string, key: string, data: ShellyDataType) => void>().mockImplementation((component, key, data) => {
-    console.error(`handleEvent: component ${component} key ${key} data ${data}`);
+    // console.error(`handleEvent: component ${component} key ${key} data ${data}`);
   });
 
   beforeAll(async () => {
