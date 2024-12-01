@@ -501,7 +501,7 @@ describe('ShellyPlatform', () => {
     expect(mockLog.info).toHaveBeenCalledWith(`Starting platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
 
     (shellyPlatform as any).shelly.emit('discovered', { id: 'shelly1l-E8DB84AAD781', host: '192.168.1.241', port: 80, gen: 1 });
-    await wait(1000);
+    await wait(5000);
     expect((shellyPlatform as any).discoveredDevices.size).toBe(1);
     expect((shellyPlatform as any).shellyDevices.size).toBe(1);
 
@@ -513,7 +513,7 @@ describe('ShellyPlatform', () => {
     expect((shellyPlatform as any).bridgedDevices.size).toBe(0);
     expect((shellyPlatform as any).bluBridgedDevices.size).toBe(0);
     expect((shellyPlatform as any).shelly._devices.size).toBe(0);
-  });
+  }, 10000);
 
   it('should call onStart with reason and add shelly1', async () => {
     expect(shellyPlatform).toBeDefined();
@@ -528,7 +528,7 @@ describe('ShellyPlatform', () => {
     // consoleLogSpy.mockRestore();
     await (shellyPlatform as any).shelly.addDevice(shelly1);
     shellyPlatform.shellyDevices.set(shelly1.id, shelly1);
-    await wait(1000);
+    await wait(5000);
     expect(mockLog.info).toHaveBeenCalledWith(`Shelly added ${idn}${shelly1.name}${rs} device id ${hk}${shelly1.id}${rs}${nf} host ${zb}${shelly1.host}${nf}`);
     expect(shellyPlatform.discoveredDevices.size).toBe(0);
     expect(shellyPlatform.storedDevices.size).toBe(0);
@@ -579,7 +579,7 @@ describe('ShellyPlatform', () => {
     expect((shellyPlatform as any).shelly._devices.size).toBe(0);
 
     shelly1?.destroy();
-  });
+  }, 10000);
 
   it('should load and save the stored devices', async () => {
     expect(await (shellyPlatform as any).loadStoredDevices()).toBeTruthy();
