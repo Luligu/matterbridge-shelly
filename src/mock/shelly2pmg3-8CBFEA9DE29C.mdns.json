@@ -44,11 +44,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": [
-        "gen=3",
-        "app=S2PMG3",
-        "ver=1.4.99-2pmg3prod0"
-      ]
+      "data": ["gen=3", "app=S2PMG3", "ver=1.4.99-2pmg3prod0"]
     },
     {
       "name": "Shelly2PMG3-8CBFEA9DE29C.local",

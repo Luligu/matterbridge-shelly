@@ -19034,10 +19034,9 @@ label.pf-v5-c-input-group__text {
   display: grid;
   grid-template-areas: 'pane-header . pane-header-c' 'pane-tools . pane-tools-c' 'pane-status . pane-status-c' 'pane-menu controls pane-menu-c';
   grid-template-rows: repeat(3, auto) auto;
-  grid-template-columns: minmax(
-      var(--pf-v5-c-dual-list-selector--GridTemplateColumns--pane--MinMax--min),
-      var(--pf-v5-c-dual-list-selector--GridTemplateColumns--pane--MinMax--max)
-    ) min-content minmax(var(--pf-v5-c-dual-list-selector--GridTemplateColumns--pane--MinMax--min), var(--pf-v5-c-dual-list-selector--GridTemplateColumns--pane--MinMax--max));
+  grid-template-columns:
+    minmax(var(--pf-v5-c-dual-list-selector--GridTemplateColumns--pane--MinMax--min), var(--pf-v5-c-dual-list-selector--GridTemplateColumns--pane--MinMax--max))
+    min-content minmax(var(--pf-v5-c-dual-list-selector--GridTemplateColumns--pane--MinMax--min), var(--pf-v5-c-dual-list-selector--GridTemplateColumns--pane--MinMax--max));
 }
 .pf-v5-c-dual-list-selector__pane {
   display: contents;

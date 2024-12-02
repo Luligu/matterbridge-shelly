@@ -196,11 +196,7 @@
       "freq": 50,
       "aenergy": {
         "total": 0.293,
-        "by_minute": [
-          7.169,
-          33.918,
-          41.687
-        ],
+        "by_minute": [7.169, 33.918, 41.687],
         "minute_ts": 1733068860
       },
       "temperature": {
