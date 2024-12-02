@@ -62,6 +62,26 @@ describe('Shellies', () => {
     }, 300000);
   });
 
+  describe('create real gen 1 shellydimmer2 219 with auth', () => {
+    if (getMacAddress() !== address) return;
+
+    test('create a gen 2 device and update', async () => {
+      device = await ShellyDevice.create(shelly, log, '192.168.1.219');
+      expect(device).toBeDefined();
+      if (!device) return;
+      expect(device.gen).toBe(1);
+      expect(device.host).toBe('192.168.1.219');
+      expect(device.model).toBe('SHDM-2');
+      expect(device.id).toBe('shellydimmer2-98CDAC0D01BB');
+      expect(device.firmware).toBe(firmwareGen1);
+      expect(device.auth).toBe(true);
+
+      await device.fetchUpdate();
+
+      device.destroy();
+    });
+  });
+
   describe('create real gen 2 shellyplus1pm 217', () => {
     if (getMacAddress() !== address) return;
 
@@ -200,12 +220,12 @@ describe('Shellies', () => {
       expect(device).not.toBeUndefined();
       if (!device) return;
       expect(device).not.toBeUndefined();
-      expect(device?.gen).toBe(2);
-      expect(device?.host).toBe('192.168.1.218');
-      expect(device?.model).toBe('SNSW-102P16EU');
-      expect(device?.id).toBe('shellyplus2pm-5443B23D81F8');
-      expect(device?.firmware).toBe(firmwareGen2);
-      expect(device?.auth).toBe(false);
+      expect(device.gen).toBe(2);
+      expect(device.host).toBe('192.168.1.218');
+      expect(device.model).toBe('SNSW-102P16EU');
+      expect(device.id).toBe('shellyplus2pm-5443B23D81F8');
+      expect(device.firmware).toBe(firmwareGen2);
+      expect(device.auth).toBe(true);
 
       await device.fetchUpdate();
 

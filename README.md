@@ -31,7 +31,7 @@ Features:
 - If the device has a firmware update available, a message is displayed.
 - If the device's CoIoT protocol is not correctly configured, a message is displayed.
 - If the device cover/roller component is not calibrated, a message is displayed.
-- If a device changes its ip address on the network, a message is displayed and the new address is stored. You just need to restart Matterbridge.
+- If a device changes its ip address on the network, a message is displayed and the new address is stored.
 - A 10-minute timer checks if the device has reported within that time frame, and fetch un update.
 
 If you like this project and find it useful, please consider giving it a star on GitHub at https://github.com/Luligu/matterbridge-shelly and sponsoring it.
