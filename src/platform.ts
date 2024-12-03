@@ -60,6 +60,7 @@ import {
   ModeSelectCluster,
   EndpointOptions,
   thermostatDevice,
+  modeSelect,
 } from 'matterbridge';
 
 // import { EveHistory, EveHistoryCluster, MatterHistory } from 'matterbridge/history';
@@ -1064,6 +1065,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         } else if (component.name === 'Blugw' && config.exposeBlugw !== 'disabled') {
           const blugwComponent = device.getComponent(key);
           if (blugwComponent?.hasProperty('sys_led_enable') && isValidBoolean(blugwComponent.getValue('sys_led_enable'))) {
+            mbDevice.addDeviceType(modeSelect);
             mbDevice.addClusterServer(
               mbDevice.getDefaultModeSelectClusterServer(
                 'System LED',
