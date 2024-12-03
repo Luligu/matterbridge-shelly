@@ -20,6 +20,7 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 
 - [package]: Requires matterbridge 1.6.5.
 - [package]: Updated dependencies.
+- [platform]: The ShellyPlatform class has grown too much: moved the shellySwitchCommandHandler, shellyLightCommandHandler, shellyCoverCommandHandler and shellyUpdateHandler methods to separate files.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
   <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
