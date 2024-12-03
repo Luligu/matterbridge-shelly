@@ -243,7 +243,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             else if (bthomeDevice.model === 'Shelly BLU HT') definition = [bridgedNode, powerSource];
             else if (bthomeDevice.model === 'Shelly BLU RC Button 4') definition = [bridgedNode, powerSource];
             else if (bthomeDevice.model === 'Shelly BLU Wall Switch 4') definition = [bridgedNode, powerSource];
-            else if (bthomeDevice.model === 'Shelly BLU Trv') definition = [DeviceTypes.THERMOSTAT, bridgedNode, powerSource];
+            else if (bthomeDevice.model === 'Shelly BLU Trv') definition = [thermostatDevice, bridgedNode, powerSource];
             else this.log.error(`Shelly device ${hk}${device.id}${er} host ${zb}${device.host}${er} has an unknown BLU device model ${CYAN}${bthomeDevice.model}${nf}`);
             // Check if the BLU device is already registered
             this.bluBridgedDevices.forEach((blu) => {
@@ -297,8 +297,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
                 mbDevice.addChildDeviceTypeWithClusterServer('Button3', [DeviceTypes.GENERIC_SWITCH], [Switch.Cluster.id]);
               } else if (bthomeDevice.model === 'Shelly BLU Trv') {
                 mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer(100, PowerSource.BatChargeLevel.Ok, 3000, 'Type AA', 2);
-                mbDevice.createDefaultThermostatClusterServer();
-                // TODO: Move in createDefaultThermostatClusterServer() when Matterbridge 1.6.2 is released
+                mbDevice.createDefaultHeatingThermostatClusterServer(undefined, undefined, 4, 30);
+                /*
                 mbDevice.setAttribute(
                   ThermostatCluster.id,
                   'featureMap',
@@ -314,22 +314,23 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
                 (mbDevice.getClusterServerById(ThermostatCluster.id)?.attributes['absMinHeatSetpointLimit'] as any).value = 4 * 100;
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 (mbDevice.getClusterServerById(ThermostatCluster.id)?.attributes['absMaxHeatSetpointLimit'] as any).value = 30 * 100;
+                */
                 mbDevice.subscribeAttribute(
                   ThermostatCluster.id,
                   'systemMode',
                   (newValue: number, oldValue: number) => {
                     if (
-                      !isValidNumber(newValue, Thermostat.SystemMode.Off, Thermostat.SystemMode.Heat) ||
-                      !isValidNumber(oldValue, Thermostat.SystemMode.Off, Thermostat.SystemMode.Heat) ||
-                      newValue === oldValue
-                    )
-                      return;
-                    mbDevice.log.info(`Thermostat systemMode changed from ${oldValue} to ${newValue}`);
-                    if (oldValue === Thermostat.SystemMode.Heat && newValue === Thermostat.SystemMode.Off) {
-                      if (device.thermostatSystemModeTimeout) clearTimeout(device.thermostatSystemModeTimeout);
-                      device.thermostatSystemModeTimeout = setTimeout(() => {
-                        mbDevice.setAttribute(ThermostatCluster.id, 'systemMode', Thermostat.SystemMode.Heat, mbDevice.log);
-                      }, 5000);
+                      isValidNumber(newValue, Thermostat.SystemMode.Off, Thermostat.SystemMode.Heat) &&
+                      isValidNumber(oldValue, Thermostat.SystemMode.Off, Thermostat.SystemMode.Heat) &&
+                      newValue !== oldValue
+                    ) {
+                      mbDevice.log.info(`Thermostat systemMode changed from ${oldValue} to ${newValue}`);
+                      if (oldValue === Thermostat.SystemMode.Heat && newValue === Thermostat.SystemMode.Off) {
+                        if (device.thermostatSystemModeTimeout) clearTimeout(device.thermostatSystemModeTimeout);
+                        device.thermostatSystemModeTimeout = setTimeout(() => {
+                          mbDevice.setAttribute(ThermostatCluster.id, 'systemMode', Thermostat.SystemMode.Heat, mbDevice.log);
+                        }, 5000);
+                      }
                     }
                   },
                   mbDevice.log,
@@ -338,18 +339,19 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
                   ThermostatCluster.id,
                   'occupiedHeatingSetpoint',
                   (newValue: number, oldValue: number) => {
-                    if (!isValidNumber(newValue) || !isValidNumber(oldValue) || newValue === oldValue) return;
-                    mbDevice.log.info(`Thermostat occupiedHeatingSetpoint changed from ${oldValue / 100} to ${newValue / 100}`);
-                    if (device.thermostatSetpointTimeout) clearTimeout(device.thermostatSetpointTimeout);
-                    device.thermostatSetpointTimeout = setTimeout(() => {
-                      mbDevice.log.info(`Setting thermostat occupiedHeatingSetpoint to ${newValue / 100}`);
-                      // http://192.168.1.164/rpc/BluTrv.Call?id=201&method=Trv.SetTarget&params={id:0,target_C:19}
-                      ShellyDevice.fetch(this.shelly, mbDevice.log, device.host, 'BluTrv.Call', {
-                        id: bthomeDevice.blutrv_id,
-                        method: 'Trv.SetTarget',
-                        params: { id: 0, target_C: newValue / 100 },
-                      });
-                    }, 5000);
+                    if (isValidNumber(newValue, 4 * 100, 30 * 100) && isValidNumber(oldValue, 4 * 100, 30 * 100) && newValue !== oldValue) {
+                      mbDevice.log.info(`Thermostat occupiedHeatingSetpoint changed from ${oldValue / 100} to ${newValue / 100}`);
+                      if (device.thermostatSetpointTimeout) clearTimeout(device.thermostatSetpointTimeout);
+                      device.thermostatSetpointTimeout = setTimeout(() => {
+                        mbDevice.log.info(`Setting thermostat occupiedHeatingSetpoint to ${newValue / 100}`);
+                        // http://192.168.1.164/rpc/BluTrv.Call?id=201&method=Trv.SetTarget&params={id:0,target_C:19}
+                        ShellyDevice.fetch(this.shelly, mbDevice.log, device.host, 'BluTrv.Call', {
+                          id: bthomeDevice.blutrv_id,
+                          method: 'Trv.SetTarget',
+                          params: { id: 0, target_C: newValue / 100 },
+                        });
+                      }, 5000);
+                    }
                   },
                   mbDevice.log,
                 );
@@ -973,12 +975,14 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
                 ThermostatCluster.id,
                 'occupiedHeatingSetpoint',
                 (newValue: number, oldValue: number) => {
-                  mbDevice.log.info(`Thermostat occupiedHeatingSetpoint changed from ${oldValue / 100} to ${newValue / 100}`);
-                  if (device.thermostatSetpointTimeout) clearTimeout(device.thermostatSetpointTimeout);
-                  device.thermostatSetpointTimeout = setTimeout(() => {
-                    mbDevice.log.info(`Setting thermostat occupiedCoolingSetpoint to ${newValue / 100}`);
-                    ShellyDevice.fetch(this.shelly, mbDevice.log, device.host, 'Thermostat.SetConfig', { config: { id: 0, target_C: newValue / 100 } });
-                  }, 5000);
+                  if (isValidNumber(newValue, 5 * 100, 35 * 100) && isValidNumber(oldValue, 5 * 100, 35 * 100) && newValue !== oldValue) {
+                    mbDevice.log.info(`Thermostat occupiedHeatingSetpoint changed from ${oldValue / 100} to ${newValue / 100}`);
+                    if (device.thermostatSetpointTimeout) clearTimeout(device.thermostatSetpointTimeout);
+                    device.thermostatSetpointTimeout = setTimeout(() => {
+                      mbDevice.log.info(`Setting thermostat occupiedCoolingSetpoint to ${newValue / 100}`);
+                      ShellyDevice.fetch(this.shelly, mbDevice.log, device.host, 'Thermostat.SetConfig', { config: { id: 0, target_C: newValue / 100 } });
+                    }, 5000);
+                  }
                 },
                 mbDevice.log,
               );
@@ -992,12 +996,14 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
                 ThermostatCluster.id,
                 'occupiedCoolingSetpoint',
                 (newValue: number, oldValue: number) => {
-                  mbDevice.log.info(`Thermostat occupiedCoolingSetpoint changed from ${oldValue / 100} to ${newValue / 100}`);
-                  if (device.thermostatSetpointTimeout) clearTimeout(device.thermostatSetpointTimeout);
-                  device.thermostatSetpointTimeout = setTimeout(() => {
-                    mbDevice.log.info(`Setting thermostat occupiedCoolingSetpoint to ${newValue / 100}`);
-                    ShellyDevice.fetch(this.shelly, mbDevice.log, device.host, 'Thermostat.SetConfig', { config: { id: 0, target_C: newValue / 100 } });
-                  }, 5000);
+                  if (isValidNumber(newValue, 5 * 100, 35 * 100) && isValidNumber(oldValue, 5 * 100, 35 * 100) && newValue !== oldValue) {
+                    mbDevice.log.info(`Thermostat occupiedCoolingSetpoint changed from ${oldValue / 100} to ${newValue / 100}`);
+                    if (device.thermostatSetpointTimeout) clearTimeout(device.thermostatSetpointTimeout);
+                    device.thermostatSetpointTimeout = setTimeout(() => {
+                      mbDevice.log.info(`Setting thermostat occupiedCoolingSetpoint to ${newValue / 100}`);
+                      ShellyDevice.fetch(this.shelly, mbDevice.log, device.host, 'Thermostat.SetConfig', { config: { id: 0, target_C: newValue / 100 } });
+                    }, 5000);
+                  }
                 },
                 mbDevice.log,
               );
