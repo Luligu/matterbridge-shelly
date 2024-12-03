@@ -1065,36 +1065,43 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         } else if (component.name === 'Blugw' && config.exposeBlugw !== 'disabled') {
           const blugwComponent = device.getComponent(key);
           if (blugwComponent?.hasProperty('sys_led_enable') && isValidBoolean(blugwComponent.getValue('sys_led_enable'))) {
-            mbDevice.addDeviceType(modeSelect);
-            mbDevice.addClusterServer(
+            const child = mbDevice.addChildDeviceType(key, [modeSelect]);
+            child.addClusterServer(
               mbDevice.getDefaultModeSelectClusterServer(
                 'System LED',
                 [
-                  { label: 'disabled', mode: 0, semanticTags: [{ mfgCode: VendorId(0xfff1), value: 0 }] },
                   { label: 'enabled', mode: 1, semanticTags: [{ mfgCode: VendorId(0xfff1), value: 1 }] },
+                  { label: 'disabled', mode: 2, semanticTags: [{ mfgCode: VendorId(0xfff1), value: 2 }] },
                 ],
-                blugwComponent.getValue('sys_led_enable') ? 1 : 0,
-                blugwComponent.getValue('sys_led_enable') ? 1 : 0,
+                blugwComponent.getValue('sys_led_enable') ? 1 : 2,
+                blugwComponent.getValue('sys_led_enable') ? 1 : 2,
               ),
             );
             // Add command handlers
             mbDevice.addCommandHandler('changeToMode', async (data) => {
-              if (isValidObject(data, 4) && isValidNumber(data.request.newMode, 0, 1))
-                await ShellyDevice.fetch(this.shelly, mbDevice.log, device.host, 'Blugw.SetConfig', { config: { sys_led_enable: data.request.newMode === 1 } });
+              this.log.debug(`***changeToMode: request ${JSON.stringify(data.request)} endpoint ${data.endpoint.name}:0x${data.endpoint.number?.toString(16)}`);
+              if (isValidObject(data) && isValidNumber(data.endpoint?.number) && isValidNumber(data.request?.newMode, 1, 2)) {
+                const componentName = mbDevice.getChildEndpoint(data.endpoint.number)?.uniqueStorageKey;
+                mbDevice.setAttribute(ModeSelectCluster.id, 'currentMode', data.request.newMode, mbDevice.log, data.endpoint);
+                if (componentName === 'blugw')
+                  await ShellyDevice.fetch(this.shelly, mbDevice.log, device.host, 'Blugw.SetConfig', { config: { sys_led_enable: data.request.newMode === 1 } });
+              }
             });
             // Add event handler
             blugwComponent.on('event', async (component: string, event: string) => {
               if (isValidString(component, 5) && isValidString(event, 14) && component === 'blugw' && event === 'config_changed') {
                 const blugw = await ShellyDevice.fetch(this.shelly, mbDevice.log, device.host, 'Blugw.GetConfig');
+                const endpoint = mbDevice.getChildEndpointByName('blugw');
                 if (isValidObject(blugw, 1) && isValidBoolean(blugw.sys_led_enable))
-                  mbDevice.setAttribute(ModeSelectCluster.id, 'currentMode', blugw.sys_led_enable ? 1 : 0, mbDevice.log);
+                  mbDevice.setAttribute(ModeSelectCluster.id, 'currentMode', blugw.sys_led_enable ? 1 : 0, mbDevice.log, endpoint);
               }
             });
           }
         } /* else if (component.name === 'Ble' && config.exposeBle !== 'disabled') {
           const bleComponent = device.getComponent(key);
           if (bleComponent?.hasProperty('enable') && isValidBoolean(bleComponent.getValue('enable'))) {
-            mbDevice.addClusterServer(
+            const child = mbDevice.addChildDeviceType(key, [modeSelect]);
+            child.addClusterServer(
               mbDevice.getDefaultModeSelectClusterServer(
                 'Bluetooth',
                 [
@@ -1107,14 +1114,18 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             );
             // Add command handlers
             mbDevice.addCommandHandler('changeToMode', async (data) => {
-              if (isValidObject(data, 4) && isValidNumber(data.request.newMode, 0, 1))
-                await ShellyDevice.fetch(this.shelly, mbDevice.log, device.host, 'Ble.SetConfig', { config: { enable: data.request.newMode === 1 } });
+              if (isValidObject(data, 4) && isValidNumber(data.request?.newMode, 0, 1) && isValidNumber(data.endpoint?.number)) {
+                const endpoint = mbDevice.getChildEndpoint(data.endpoint.number);
+                const componentName = endpoint?.uniqueStorageKey;
+                if (componentName === 'ble') await ShellyDevice.fetch(this.shelly, mbDevice.log, device.host, 'Ble.SetConfig', { config: { enable: data.request.newMode === 1 } });
+              }
             });
             // Add event handler
             bleComponent.on('event', async (component: string, event: string) => {
               if (isValidString(component, 3) && isValidString(event, 14) && component === 'ble' && event === 'config_changed') {
                 const ble = await ShellyDevice.fetch(this.shelly, mbDevice.log, device.host, 'Ble.GetConfig');
-                if (isValidObject(ble, 1) && isValidBoolean(ble.enable)) mbDevice.setAttribute(ModeSelectCluster.id, 'currentMode', ble.enable ? 1 : 0, mbDevice.log);
+                const endpoint = mbDevice.getChildEndpointByName('ble');
+                if (isValidObject(ble, 1) && isValidBoolean(ble.enable)) mbDevice.setAttribute(ModeSelectCluster.id, 'currentMode', ble.enable ? 1 : 0, mbDevice.log, endpoint);
               }
             });
           }
