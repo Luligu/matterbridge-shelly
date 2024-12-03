@@ -79,6 +79,7 @@ import { DiscoveredDevice } from './mdnsScanner.js';
 import { ShellyDevice } from './shellyDevice.js';
 import { isLightComponent, isSwitchComponent, ShellyComponent, ShellyCoverComponent, ShellyLightComponent, ShellySwitchComponent } from './shellyComponent.js';
 import { ShellyData, ShellyDataType } from './shellyTypes.js';
+import { shellySwitchCommandHandler } from './platformCommandHadlers.js';
 
 type ConfigDeviceIp = Record<string, string>;
 
@@ -298,23 +299,6 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               } else if (bthomeDevice.model === 'Shelly BLU Trv') {
                 mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer(100, PowerSource.BatChargeLevel.Ok, 3000, 'Type AA', 2);
                 mbDevice.createDefaultHeatingThermostatClusterServer(undefined, undefined, 4, 30);
-                /*
-                mbDevice.setAttribute(
-                  ThermostatCluster.id,
-                  'featureMap',
-                  { heating: true, cooling: false, occupancy: false, scheduleConfiguration: false, setback: false, autoMode: false, localTemperatureNotExposed: false },
-                  mbDevice.log,
-                );
-                mbDevice.setAttribute(ThermostatCluster.id, 'systemMode', Thermostat.SystemMode.Heat, mbDevice.log);
-                mbDevice.setAttribute(ThermostatCluster.id, 'controlSequenceOfOperation', Thermostat.ControlSequenceOfOperation.HeatingOnly, mbDevice.log);
-                mbDevice.setAttribute(ThermostatCluster.id, 'thermostatRunningMode', Thermostat.ThermostatRunningMode.Heat, mbDevice.log);
-                mbDevice.setAttribute(ThermostatCluster.id, 'minHeatSetpointLimit', 4 * 100, mbDevice.log);
-                mbDevice.setAttribute(ThermostatCluster.id, 'maxHeatSetpointLimit', 30 * 100, mbDevice.log);
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                (mbDevice.getClusterServerById(ThermostatCluster.id)?.attributes['absMinHeatSetpointLimit'] as any).value = 4 * 100;
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                (mbDevice.getClusterServerById(ThermostatCluster.id)?.attributes['absMaxHeatSetpointLimit'] as any).value = 30 * 100;
-                */
                 mbDevice.subscribeAttribute(
                   ThermostatCluster.id,
                   'systemMode',
@@ -711,26 +695,23 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
 
             // Add command handlers
             mbDevice.addCommandHandler('on', async (data) => {
-              this.shellySwitchCommandHandler(mbDevice, data.endpoint?.number, device, 'On');
+              shellySwitchCommandHandler(mbDevice, data.endpoint?.number, device, 'On');
             });
             mbDevice.addCommandHandler('off', async (data) => {
-              this.shellySwitchCommandHandler(mbDevice, data.endpoint?.number, device, 'Off');
+              shellySwitchCommandHandler(mbDevice, data.endpoint?.number, device, 'Off');
             });
             mbDevice.addCommandHandler('toggle', async (data) => {
-              this.shellySwitchCommandHandler(mbDevice, data.endpoint?.number, device, 'Toggle');
+              shellySwitchCommandHandler(mbDevice, data.endpoint?.number, device, 'Toggle');
             });
-            if ('edge' in this.matterbridge && this.matterbridge.edge === true) {
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              (child as any).addCommandHandler('on', async () => {
-                this.shellySwitchCommandHandler(mbDevice, child.number, device, 'On');
+            if (this.matterbridge.edge) {
+              child.addCommandHandler('on', async () => {
+                shellySwitchCommandHandler(mbDevice, child.number, device, 'On');
               });
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              (child as any).addCommandHandler('off', async () => {
-                this.shellySwitchCommandHandler(mbDevice, child.number, device, 'Off');
+              child.addCommandHandler('off', async () => {
+                shellySwitchCommandHandler(mbDevice, child.number, device, 'Off');
               });
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              (child as any).addCommandHandler('toggle', async () => {
-                this.shellySwitchCommandHandler(mbDevice, child.number, device, 'Toggle');
+              child.addCommandHandler('toggle', async () => {
+                shellySwitchCommandHandler(mbDevice, child.number, device, 'Toggle');
               });
             }
 
@@ -1016,7 +997,11 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               'systemMode',
               (newValue: number, oldValue: number) => {
                 mbDevice.log.info(`Thermostat systemMode changed from ${oldValue} to ${newValue}`);
-                if (oldValue !== newValue) {
+                if (
+                  isValidNumber(newValue, Thermostat.SystemMode.Off, Thermostat.SystemMode.Heat) &&
+                  isValidNumber(oldValue, Thermostat.SystemMode.Off, Thermostat.SystemMode.Heat) &&
+                  oldValue !== newValue
+                ) {
                   if (device.thermostatSystemModeTimeout) clearTimeout(device.thermostatSystemModeTimeout);
                   device.thermostatSystemModeTimeout = setTimeout(() => {
                     // Thermostat.SystemMode.Heat && newValue === Thermostat.SystemMode.Off
