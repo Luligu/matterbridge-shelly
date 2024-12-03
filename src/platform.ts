@@ -296,6 +296,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
                 mbDevice.addChildDeviceTypeWithClusterServer('Button3', [DeviceTypes.GENERIC_SWITCH], [Switch.Cluster.id]);
               } else if (bthomeDevice.model === 'Shelly BLU Trv') {
                 mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer(100, PowerSource.BatChargeLevel.Ok, 3000, 'Type AA', 2);
+                mbDevice.createDefaultIdentifyClusterServer();
                 mbDevice.createDefaultHeatingThermostatClusterServer(undefined, undefined, 4, 30);
                 mbDevice.subscribeAttribute(
                   ThermostatCluster.id,
