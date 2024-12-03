@@ -21,12 +21,12 @@
  * limitations under the License. *
  */
 
-import { EndpointNumber, MatterbridgeDevice } from 'matterbridge';
+import { EndpointNumber, MatterbridgeDevice, WindowCovering, WindowCoveringCluster } from 'matterbridge';
 import { db, dn, er, hk, idn, nf, rs, YELLOW } from 'matterbridge/logger';
 import { isValidNumber, isValidObject } from 'matterbridge/utils';
 
 import { ShellyDevice } from './shellyDevice.js';
-import { ShellyLightComponent, ShellySwitchComponent } from './shellyComponent.js';
+import { ShellyCoverComponent, ShellyLightComponent, ShellySwitchComponent } from './shellyComponent.js';
 
 export function shellySwitchCommandHandler(
   matterbridgeDevice: MatterbridgeDevice,
@@ -134,6 +134,63 @@ export function shellyLightCommandHandler(
     shellyDevice.log.info(
       `${db}Sent command ${hk}${componentName}${nf}:ColorTemp(for model ${shellyDevice.model} ${YELLOW}${colorTemp}->${temp}${nf})${db} to shelly device ${idn}${shellyDevice?.id}${rs}${db}`,
     );
+  }
+  return true;
+}
+
+export function shellyCoverCommandHandler(
+  matterbridgeDevice: MatterbridgeDevice,
+  endpointNumber: EndpointNumber | undefined,
+  shellyDevice: ShellyDevice,
+  command: string,
+  pos?: number,
+): boolean {
+  // Get the matter endpoint
+  if (!endpointNumber) {
+    shellyDevice.log.error(`shellyCoverCommandHandler error: endpointNumber undefined for shelly device ${dn}${shellyDevice?.id}${er}`);
+    return false;
+  }
+  const endpoint = matterbridgeDevice.getChildEndpoint(endpointNumber);
+  if (!endpoint) {
+    shellyDevice.log.error(`shellyCoverCommandHandler error: endpoint not found for shelly device ${dn}${shellyDevice?.id}${er}`);
+    return false;
+  }
+  // Get the Shelly cover component
+  const componentName = endpoint.uniqueStorageKey;
+  if (!componentName) {
+    shellyDevice.log.error(`shellyCoverCommandHandler error: componentName not found for endpoint ${endpointNumber} on shelly device ${dn}${shellyDevice?.id}${er}`);
+    return false;
+  }
+  const coverComponent = shellyDevice?.getComponent(componentName) as ShellyCoverComponent;
+  if (!coverComponent) {
+    shellyDevice.log.error(`shellyCoverCommandHandler error: component ${componentName} not found for shelly device ${dn}${shellyDevice?.id}${er}`);
+    return false;
+  }
+  // Matter uses 10000 = fully closed   0 = fully opened
+  // Shelly uses 0 = fully closed   100 = fully opened
+  const coverCluster = endpoint.getClusterServer(
+    WindowCoveringCluster.with(WindowCovering.Feature.Lift, WindowCovering.Feature.PositionAwareLift /* , WindowCovering.Feature.AbsolutePosition*/),
+  );
+  if (!coverCluster) {
+    shellyDevice.log.error('shellyCoverCommandHandler error: cluster WindowCoveringCluster not found');
+    return false;
+  }
+  if (command === 'Stop') {
+    shellyDevice.log.info(`${db}Sent command ${hk}${componentName}${nf}:${command}()${db} to shelly device ${idn}${shellyDevice?.id}${rs}${db}`);
+    coverComponent.Stop();
+  } else if (command === 'Open') {
+    matterbridgeDevice.setAttribute(WindowCoveringCluster.id, 'targetPositionLiftPercent100ths', 0, shellyDevice.log, endpoint);
+    shellyDevice.log.info(`${db}Sent command ${hk}${componentName}${nf}:${command}()${db} to shelly device ${idn}${shellyDevice?.id}${rs}${db}`);
+    coverComponent.Open();
+  } else if (command === 'Close') {
+    matterbridgeDevice.setAttribute(WindowCoveringCluster.id, 'targetPositionLiftPercent100ths', 10000, shellyDevice.log, endpoint);
+    shellyDevice.log.info(`${db}Sent command ${hk}${componentName}${nf}:${command}()${db} to shelly device ${idn}${shellyDevice?.id}${rs}${db}`);
+    coverComponent.Close();
+  } else if (command === 'GoToPosition' && isValidNumber(pos, 0, 10000)) {
+    matterbridgeDevice.setAttribute(WindowCoveringCluster.id, 'targetPositionLiftPercent100ths', pos, shellyDevice.log, endpoint);
+    const shellyPos = 100 - Math.max(Math.min(Math.round(pos / 100), 100), 0);
+    shellyDevice.log.info(`${db}Sent command ${hk}${componentName}${nf}:${command}(${shellyPos})${db} to shelly device ${idn}${shellyDevice?.id}${rs}${db}`);
+    coverComponent.GoToPosition(shellyPos);
   }
   return true;
 }

@@ -79,7 +79,7 @@ import { DiscoveredDevice } from './mdnsScanner.js';
 import { ShellyDevice } from './shellyDevice.js';
 import { isLightComponent, isSwitchComponent, ShellyComponent, ShellyCoverComponent, ShellyLightComponent, ShellySwitchComponent } from './shellyComponent.js';
 import { ShellyData, ShellyDataType } from './shellyTypes.js';
-import { shellyLightCommandHandler, shellySwitchCommandHandler } from './platformCommandHadlers.js';
+import { shellyCoverCommandHandler, shellyLightCommandHandler, shellySwitchCommandHandler } from './platformCommandHadlers.js';
 
 type ConfigDeviceIp = Record<string, string>;
 
@@ -730,18 +730,18 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
 
             // Add command handlers
             mbDevice.addCommandHandler('upOrOpen', async (data) => {
-              this.shellyCoverCommandHandler(mbDevice, data.endpoint.number, device, 'Open', 0);
+              shellyCoverCommandHandler(mbDevice, data.endpoint.number, device, 'Open', 0);
             });
             mbDevice.addCommandHandler('downOrClose', async (data) => {
-              this.shellyCoverCommandHandler(mbDevice, data.endpoint.number, device, 'Close', 10000);
+              shellyCoverCommandHandler(mbDevice, data.endpoint.number, device, 'Close', 10000);
             });
             mbDevice.addCommandHandler('stopMotion', async (data) => {
-              this.shellyCoverCommandHandler(mbDevice, data.endpoint.number, device, 'Stop');
+              shellyCoverCommandHandler(mbDevice, data.endpoint.number, device, 'Stop');
             });
             mbDevice.addCommandHandler('goToLiftPercentage', async (data) => {
-              if (data.request.liftPercent100thsValue === 0) this.shellyCoverCommandHandler(mbDevice, data.endpoint.number, device, 'Open', 0);
-              else if (data.request.liftPercent100thsValue === 10000) this.shellyCoverCommandHandler(mbDevice, data.endpoint.number, device, 'Close', 10000);
-              else this.shellyCoverCommandHandler(mbDevice, data.endpoint.number, device, 'GoToPosition', data.request.liftPercent100thsValue);
+              if (data.request.liftPercent100thsValue === 0) shellyCoverCommandHandler(mbDevice, data.endpoint.number, device, 'Open', 0);
+              else if (data.request.liftPercent100thsValue === 10000) shellyCoverCommandHandler(mbDevice, data.endpoint.number, device, 'Close', 10000);
+              else shellyCoverCommandHandler(mbDevice, data.endpoint.number, device, 'GoToPosition', data.request.liftPercent100thsValue);
             });
             // Add event handler
             coverComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
