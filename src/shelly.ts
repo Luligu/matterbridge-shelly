@@ -120,30 +120,30 @@ export class Shelly extends EventEmitter {
     });
 
     this.coapServer.on('update', async (host: string, component: string, property: string, value: string | number | boolean) => {
-      const shellyDevice = this.getDeviceByHost(host);
-      if (shellyDevice) {
-        shellyDevice.log.debug(
-          `CoIoT update from device id ${hk}${shellyDevice.id}${db} host ${zb}${host}${db} component ${CYAN}${component}${db} property ${CYAN}${property}${db} value ${CYAN}${value}${db}`,
+      const device = this.getDeviceByHost(host);
+      if (device) {
+        device.log.debug(
+          `CoIoT update from device id ${hk}${device.id}${db} host ${zb}${host}${db} component ${CYAN}${component}${db} property ${CYAN}${property}${db} value ${CYAN}${value}${db}`,
         );
-        if (!shellyDevice.hasComponent(component)) this.log.error(`Device ${hk}${shellyDevice.id}${er} host ${zb}${host}${er} does not have component ${CYAN}${component}${nf}`);
-        shellyDevice.getComponent(component)?.setValue(property, value);
-        shellyDevice.lastseen = Date.now();
-        if (!shellyDevice.online) {
-          shellyDevice.online = true;
-          shellyDevice.emit('online');
-          this.log.debug(`Device ${hk}${shellyDevice.id}${db} host ${zb}${host}${db} received a CoIoT message: setting online to true`);
+        if (!device.hasComponent(component)) this.log.error(`Device ${hk}${device.id}${er} host ${zb}${host}${er} does not have component ${CYAN}${component}${nf}`);
+        device.getComponent(component)?.setValue(property, value);
+        device.lastseen = Date.now();
+        if (device.sleepMode) device.emit('awake');
+        if (!device.online) {
+          device.online = true;
+          device.emit('online');
+          this.log.debug(`Device ${hk}${device.id}${db} host ${zb}${host}${db} received a CoIoT message: setting online to true`);
         }
-        if (shellyDevice.cached) {
-          shellyDevice.cached = false;
-          this.log.debug(`Device ${hk}${shellyDevice.id}${db} host ${zb}${host}${db} received a CoIoT message: setting cached to false`);
+        if (device.cached) {
+          device.cached = false;
+          this.log.debug(`Device ${hk}${device.id}${db} host ${zb}${host}${db} received a CoIoT message: setting cached to false`);
         }
       }
     });
 
-    // Fetch updates from devices every 5-15 minutes (randomized) and save payloads to disk
+    // Fetch updates from devices every 55-65 minutes (randomized) and save payloads to disk
     this.fetchInterval = setInterval(() => {
       this.devices.forEach((device) => {
-        if (device.sleepMode) return;
         if (device.fetchInterval === 0) {
           const minMinutes = 55;
           const maxMinutes = 65;
@@ -155,6 +155,7 @@ export class Shelly extends EventEmitter {
             `*Device ${hk}${device.id}${db} host ${zb}${device.host}${db} fetch interval ${CYAN}${fetchIntervalMinutes}${db} minutes and ${CYAN}${fetchIntervalSeconds}${db} seconds`,
           );
         }
+        if (device.sleepMode) return;
         if (Date.now() - device.lastFetched > device.fetchInterval) {
           device.fetchUpdate().then((data) => {
             device.lastFetched = Date.now();

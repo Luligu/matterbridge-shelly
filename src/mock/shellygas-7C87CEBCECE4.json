@@ -98,11 +98,7 @@
     "allow_cross_origin": false,
     "actions": {
       "active": false,
-      "names": [
-        "alarm_off_url",
-        "alarm_mild_url",
-        "alarm_heavy_url"
-      ]
+      "names": ["alarm_off_url", "alarm_mild_url", "alarm_heavy_url"]
     },
     "hwinfo": {
       "hw_revision": "prod-2020-04-09",

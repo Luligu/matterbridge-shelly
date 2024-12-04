@@ -91,13 +91,7 @@
     "allow_cross_origin": false,
     "actions": {
       "active": false,
-      "names": [
-        "report_url",
-        "temp_over_url",
-        "temp_under_url",
-        "hum_over_url",
-        "hum_under_url"
-      ]
+      "names": ["report_url", "temp_over_url", "temp_under_url", "hum_over_url", "hum_under_url"]
     },
     "sensors": {
       "temperature_threshold": 1,
@@ -151,9 +145,7 @@
       "value": 100,
       "voltage": 2.99
     },
-    "act_reasons": [
-      "button"
-    ],
+    "act_reasons": ["button"],
     "connect_retries": 0,
     "sensor_error": 0,
     "update": {

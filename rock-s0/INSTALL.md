@@ -7,23 +7,26 @@ image: rock-s0_debian_bookworm_cli_b6.img
 ```
 rkdeveloptool ld
 ```
-DevNo=1 Vid=0x2207,Pid=0x330e,LocationID=202    Maskrom
+
+DevNo=1 Vid=0x2207,Pid=0x330e,LocationID=202 Maskrom
 
 ```
 sudo rkdeveloptool db rk3308_loader_ddr589MHz_uart0_m0_v2.06.136sd.bin
 ```
+
 Downloading bootloader succeeded.
 
 ```
 sudo rkdeveloptool wl 0 rock-s0_debian_bookworm_cli_b6.img
 ```
+
 Write LBA from file (100%)
 
 ```
 sudo rkdeveloptool rd
 ```
-Reset Device OK.
 
+Reset Device OK.
 
 # Update system with rsetup
 
@@ -123,6 +126,7 @@ sudo apt upgrade
 ```
 
 # Install cockpit-files
+
 ssh matterbridge@matterbridge
 sudo mkdir -p /usr/share/cockpit/cockpit-files
 scp -r "C:\Users\lligu\GitHub\matterbridge-shelly\rock-s0\cockpit-files" matterbridge@matterbridge:/usr/share/cockpit
@@ -133,7 +137,6 @@ sudo apt install -t bookworm-backports cockpit
 Create the directory "\usr\share\cockpit\matterbridge"
 
 copy all the files from cockpit directory to "\usr\share\cockpit\matterbridge"
-
 
 # Install matterbridge cockpit plugin with the Debian package
 
@@ -236,4 +239,3 @@ sudo journalctl -u matterbridge.service -n 1000 -f --output cat
 ```
 sudo journalctl --no-pager -u matterbridge.service --since "2024-10-31 08:00:00" --until "2024-10-31 12:00:00 --output cat"
 ```
-

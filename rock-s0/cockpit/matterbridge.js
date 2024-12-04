@@ -61,25 +61,25 @@ cockpit.transport.wait(function () {
   // Show the QR code
   function showQR(qrText) {
     console.log(`Generating QR code for ${qrText}...`);
-    document.getElementById("qrtitle").innerText = 'Pairing QR Code';
-    document.getElementById("qrcode").innerText = '';
-    new QRCode(document.getElementById("qrcode"), {
+    document.getElementById('qrtitle').innerText = 'Pairing QR Code';
+    document.getElementById('qrcode').innerText = '';
+    new QRCode(document.getElementById('qrcode'), {
       text: qrText,
       width: 128,
       height: 128,
-      colorDark: "#000000",
-      colorLight: "#ffffff",
-      correctLevel: QRCode.CorrectLevel.H
+      colorDark: '#000000',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.H,
     });
-    console.log("QR code generated successfully!");
+    console.log('QR code generated successfully!');
   }
 
   // Show the paired fabrics instead of the QR code
   function showFabrics(fabrics) {
     console.log(`Generating ${fabrics.length} fabrics...`);
-    document.getElementById("qrtitle").innerText = 'Paired fabrics';
-    document.getElementById("qrcode").innerText = '';
-    fabrics.forEach(fabric => {
+    document.getElementById('qrtitle').innerText = 'Paired fabrics';
+    document.getElementById('qrcode').innerText = '';
+    fabrics.forEach((fabric) => {
       const fabricElement = document.createElement('div');
       fabricElement.className = 'fabric';
       fabricElement.innerHTML = `
@@ -87,9 +87,9 @@ cockpit.transport.wait(function () {
         <p class="fabric-vendor">Vendor: ${fabric.rootVendorId} ${fabric.rootVendorName}</p>
         ${fabric.label ? `<p class="fabric-label">Label: ${fabric.label}</p>` : ''}
       `;
-      document.getElementById("qrcode").appendChild(fabricElement);
+      document.getElementById('qrcode').appendChild(fabricElement);
     });
-    console.log("Fabrics generated successfully!");
+    console.log('Fabrics generated successfully!');
   }
 
   // Function to connect to Matterbridge WebSocket API
@@ -106,12 +106,9 @@ cockpit.transport.wait(function () {
       }
       const elapsedSeconds = Math.round((Date.now() - lastSeen) / 1000);
       // console.log(`Elapsed seconds: ${elapsedSeconds}`);
-      if (elapsedSeconds < 10)
-        document.getElementById('matterbridge-lastseen').innerText = `Last seen: now`;
-      else if (elapsedSeconds < 60)
-        document.getElementById('matterbridge-lastseen').innerText = `Last seen: ${elapsedSeconds} seconds ago`;
-      else
-        document.getElementById('matterbridge-lastseen').innerText = `Last seen: ${Math.round(elapsedSeconds / 60)} minute(s) ago`;
+      if (elapsedSeconds < 10) document.getElementById('matterbridge-lastseen').innerText = `Last seen: now`;
+      else if (elapsedSeconds < 60) document.getElementById('matterbridge-lastseen').innerText = `Last seen: ${elapsedSeconds} seconds ago`;
+      else document.getElementById('matterbridge-lastseen').innerText = `Last seen: ${Math.round(elapsedSeconds / 60)} minute(s) ago`;
     }, 10000);
 
     ws.onopen = function () {
@@ -154,32 +151,26 @@ cockpit.transport.wait(function () {
           if (message.response.matterbridgeInformation.matterbridgeVersion === message.response.matterbridgeInformation.matterbridgeLatestVersion) {
             document.getElementById('matterbridge-update').style.display = 'none';
           }
-          if (message.response.matterbridgeInformation.matterbridgeQrPairingCode)
-            showQR(message.response.matterbridgeInformation.matterbridgeQrPairingCode);
-          else if (message.response.matterbridgeInformation.matterbridgeFabricInformations)
-            showFabrics(message.response.matterbridgeInformation.matterbridgeFabricInformations);
-        }
-        else if (message.id === WS_ID_PLUGINS) {
+          if (message.response.matterbridgeInformation.matterbridgeQrPairingCode) showQR(message.response.matterbridgeInformation.matterbridgeQrPairingCode);
+          else if (message.response.matterbridgeInformation.matterbridgeFabricInformations) showFabrics(message.response.matterbridgeInformation.matterbridgeFabricInformations);
+        } else if (message.id === WS_ID_PLUGINS) {
           console.log(`Received ${message.response.length} plugins:`, message.response);
-          message.response.forEach(plugin => {
+          message.response.forEach((plugin) => {
             if (plugin.name === 'matterbridge-shelly') {
-              if (plugin.version)
-                document.getElementById('shelly-current').innerText = `Current version: ${plugin.version}`;
-              if (plugin.latestVersion)
-                document.getElementById('shelly-latest').innerText = `Latest version: ${plugin.latestVersion}`;
+              if (plugin.version) document.getElementById('shelly-current').innerText = `Current version: ${plugin.version}`;
+              if (plugin.latestVersion) document.getElementById('shelly-latest').innerText = `Latest version: ${plugin.latestVersion}`;
               if (plugin.version === plugin.latestVersion) {
                 document.getElementById('shelly-update').style.display = 'none';
               }
             }
           });
-        }
-        else if (message.id === WS_ID_DEVICES) {
+        } else if (message.id === WS_ID_DEVICES) {
           console.log(`Received ${message.response.length} devices:`, message.response);
           // populateDeviceTable(message.response);
           console.log('Loading devices...');
           const tbody = document.querySelector('.div-devices table tbody');
           tbody.innerHTML = '';
-          message.response.forEach(device => {
+          message.response.forEach((device) => {
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>${device.pluginName}</td>
@@ -192,28 +183,22 @@ cockpit.transport.wait(function () {
             tbody.appendChild(row);
           });
           console.log('Loaded devices successfully!');
-        }
-        else if (message.id === WS_ID_INSTALL) {
+        } else if (message.id === WS_ID_INSTALL) {
           if (message.response) {
             console.log(`Received install response:`, message);
-            if (document.getElementById('shelly-current').innerText === `Updating...`)
-              document.getElementById('shelly-current').innerText = `Updated`;
-            else if (document.getElementById('matterbridge-current').innerText === `Updating...`)
-              document.getElementById('matterbridge-current').innerText = `Updated`;
+            if (document.getElementById('shelly-current').innerText === `Updating...`) document.getElementById('shelly-current').innerText = `Updated`;
+            else if (document.getElementById('matterbridge-current').innerText === `Updating...`) document.getElementById('matterbridge-current').innerText = `Updated`;
             document.getElementById('restart-button').style.display = 'block';
             restart = true;
           }
           if (message.error) {
             console.error(`Received install error:`, message);
-            if (document.getElementById('shelly-current').innerText === `Updating...`)
-              document.getElementById('shelly-current').innerText = `Error updating`;
-            else if (document.getElementById('matterbridge-current').innerText === `Updating...`)
-              document.getElementById('matterbridge-current').innerText = `Error updating`;
+            if (document.getElementById('shelly-current').innerText === `Updating...`) document.getElementById('shelly-current').innerText = `Error updating`;
+            else if (document.getElementById('matterbridge-current').innerText === `Updating...`) document.getElementById('matterbridge-current').innerText = `Error updating`;
           }
         }
         lastSeen = Date.now();
-      }
-      catch (error) {
+      } catch (error) {
         console.error('Error parsing JSON:', error);
       }
     };
@@ -240,8 +225,8 @@ cockpit.transport.wait(function () {
       console.log('onreadystatechange:', document.readyState);
       if (document.readyState === 'complete') {
         initialize();
-      };
-    }
+      }
+    };
   }
 
   function initialize() {

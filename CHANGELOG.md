@@ -6,6 +6,29 @@ If you like this project and find it useful, please consider giving it a star on
 
 You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his invaluable contribution to this project.
 
+## [1.0.11] - 2024-12-04
+
+### Added
+
+- [Jest]: Jest coverage 100% on shellyProperty
+- [Jest]: Jest coverage 100% on shellyComponent
+- [shelly]: Verified support for shelly2pmg3 (Shelly 2PM Gen 3) mode cover with firmware 1.4.99-2pmg3prod0-ge3db05c.
+- [shelly]: The cache file is saved for all sleepy devices when they wake up.
+- [Jest]: Jest test on shelly2pmg3 mode cover (mock and real)
+
+### Changed
+
+- [package]: Requires matterbridge 1.6.5.
+- [package]: Updated dependencies.
+- [platform]: The ShellyPlatform class has grown too much: moved the shellySwitchCommandHandler, shellyLightCommandHandler, shellyCoverCommandHandler and shellyUpdateHandler methods to separate files.
+- [platform]: Refactor Matter Thermostat component for WallDisplay
+- [platform]: Refactor Matter Thermostat component for BLU Trv
+- [levelControl]: Fix max level to 254.
+
+<a href="https://www.buymeacoffee.com/luligugithub">
+  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+</a>
+
 ## [1.0.10] - 2024-11-21
 
 ### Added
@@ -19,7 +42,7 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 
 - [ShellyCommandHandler]: Refactor shellyCommandHandlers.
 - [BTHome]: Update scanBTHomeComponents to the new BLU firmware 1.0.20 (model identification changes from v1.0.18).
-- [log]: Show username and password with **** in logs.
+- [log]: Show username and password with \*\*\*\* in logs.
 - [package]: Updated dependencies.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
@@ -99,7 +122,6 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 - [shelly]: Added ota_begin, ota_progress and ota_success events from Sys to set the devices that will not be loaded from cache at restart.
 - [shelly]: Added ColorTemp to Shelly Duo and Shelly Bulb in white mode.
 - [cockpit]: Added cockpit dashboard 1.0
-
 
 <a href="https://www.buymeacoffee.com/luligugithub">
   <img src="./yellow-button.png" alt="Buy me a coffee" width="120">

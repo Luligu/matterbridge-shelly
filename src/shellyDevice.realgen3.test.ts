@@ -1,3 +1,4 @@
+/* eslint-disable jest/no-commented-out-tests */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Shelly } from './shelly.js';
@@ -492,7 +493,7 @@ describe('Shellies', () => {
     device.destroy();
   }, 30000);
 
-  test('create a gen 3 shelly2pmg3 device and update', async () => {
+  test('create a gen 3 shelly2pmg3 mode cover device and update', async () => {
     if (getMacAddress() !== address) return;
     device = await ShellyDevice.create(shelly, log, '192.168.1.166');
     expect(device).not.toBeUndefined();
@@ -509,7 +510,8 @@ describe('Shellies', () => {
     expect(device.hasUpdate).toBe(false);
     expect(device.firmware).toBe('1.4.99-2pmg3prod0-ge3db05c'); // firmwareGen2
     expect(device.auth).toBe(false);
-    expect(device.name).toBe('2PM Gen3');
+    expect(device.name).toBe('2PM Gen3 Cover');
+    expect(device.profile).toBe('cover');
     expect(device.username).toBe('admin');
     expect(device.password).toBe('tango');
 
@@ -517,9 +519,9 @@ describe('Shellies', () => {
 
     await device.saveDevicePayloads('temp');
 
-    expect(device.components.length).toBe(13);
-    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Input', 'MQTT', 'Switch', 'Sys', 'Sntp', 'WiFi', 'WS']);
-    expect(device.getComponentIds()).toStrictEqual(['ble', 'cloud', 'input:0', 'input:1', 'mqtt', 'switch:0', 'switch:1', 'sys', 'sntp', 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws']);
+    expect(device.components.length).toBe(12);
+    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Cover', 'Input', 'MQTT', 'Sys', 'Sntp', 'WiFi', 'WS']);
+    expect(device.getComponentIds()).toStrictEqual(['ble', 'cloud', 'cover:0', 'input:0', 'input:1', 'mqtt', 'sys', 'sntp', 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws']);
 
     expect(device.bthomeTrvs.size).toBe(0);
 
@@ -647,6 +649,95 @@ describe('Shellies', () => {
     expect(device.bthomeSensors.get('bthomesensor:217')?.sensorId).toBe(5);
     expect(device.bthomeSensors.get('bthomesensor:217')?.sensorIdx).toBe(0);
 
+    const cover = device.getComponent('cover:0');
+    expect(cover).not.toBeUndefined();
+    if (!cover) return;
+    expect(cover?.getValue('voltage')).toBeGreaterThan(200);
+    expect(cover?.hasProperty('apower')).toBe(true);
+    expect(cover?.hasProperty('current')).toBe(true);
+    expect(cover?.hasProperty('aenergy')).toBe(true);
+    expect(cover?.hasProperty('freq')).toBe(true);
+
+    expect(cover?.getValue('current_pos')).toBe(0);
+
+    // prettier-ignore
+    if (isCoverComponent(cover)) {
+      cover.Open();
+      await waiter('Open()', () => { return (cover.getValue('state') === 'opening') }, true, 30000);
+      await waiter('Open() II', () => { return (cover.getValue('state') === 'stopped') }, true, 30000);
+      // await waiter('Open() III', () => { return (cover.getValue('current_pos') === 100) }, true, 30000);
+
+      cover.Close();
+      await waiter('Close() AI', () => { return (cover.getValue('state') === 'closing') }, true, 30000);
+      
+      cover.Stop();
+      // console.error(`Stop() I state ${cover.getValue('state')} pos ${cover.getValue('current_pos')}`);
+      await waiter('Stop() I', () => { return (cover.getValue('state') === 'stopped') }, true, 30000);
+      // console.error(`Stop() II state ${cover.getValue('state')} pos ${cover.getValue('current_pos')}`);
+      // await waiter('Stop() II', () => { return (cover.getValue('current_pos') !== 100) }, true, 30000);
+
+      cover.Close();
+      // console.error(`Close() AI state ${cover.getValue('state')} pos ${cover.getValue('current_pos')}`);
+      await waiter('Close() AI', () => { return (cover.getValue('state') === 'closing') }, true, 30000);
+      // console.error(`Close() AII state ${cover.getValue('state')} pos ${cover.getValue('current_pos')}`);
+      await waiter('Close() AII', () => { return (cover.getValue('state') === 'stopped') }, true, 30000);
+      // console.error(`Close() AIII state ${cover.getValue('state')} pos ${cover.getValue('current_pos')}`);
+      await waiter('Close() AIII', () => { return (cover.getValue('current_pos') === 0) }, true, 30000);
+
+      cover.GoToPosition(10);
+      // console.error(`GoToPosition(10) state ${cover.getValue('state')} pos ${cover.getValue('current_pos')}`);
+      // await waiter('GoToPosition(10)', () => { return cover.getValue('state') === 'opening'; }, true, 30000);
+      // console.error(`GoToPosition(10) I state ${cover.getValue('state')} pos ${cover.getValue('current_pos')}`);
+      // await waiter('GoToPosition(10) II', () => { return cover.getValue('state') === 'stopped'; }, true, 30000);
+      // console.error(`GoToPosition(10) II state ${cover.getValue('state')} pos ${cover.getValue('current_pos')}`);
+      await waiter('GoToPosition(10) III', () => { return (cover.getValue('current_pos') === 10) }, true, 30000);
+
+      cover.Close();
+      // await waiter('Close() BI', () => { return cover.getValue('state') === 'closing'; }, true, 30000);
+      // await waiter('Close() BII', () => { return cover.getValue('current_pos') === 0 || (cover.getValue('state') === 'stopped' || cover.getValue('state') === 'closed'); }, true, 30000);
+      await waiter('Close() BIII', () => { return (cover.getValue('current_pos') === 0) }, true, 30000);
+    }
+
+    expect(cover?.getValue('current_pos')).toBe(0);
+
+    shelly.removeDevice(device);
+    device.destroy();
+  }, 120000);
+
+  test('create a gen 3 shelly2pmg3 mode switch device and update', async () => {
+    if (getMacAddress() !== address) return;
+    device = await ShellyDevice.create(shelly, log, '192.168.1.172');
+    expect(device).not.toBeUndefined();
+    if (!device) return;
+    shelly.addDevice(device);
+    expect((device as any).wsClient).not.toBeUndefined();
+    (device as any).wsClient?.start();
+
+    expect(device.gen).toBe(3);
+    expect(device.host).toBe('192.168.1.172');
+    expect(device.model).toBe('S3SW-002P16EU');
+    expect(device.mac).toBe('8CBFEA9DE29C');
+    expect(device.id).toBe('shelly2pmg3-8CBFEA9DE29C');
+    expect(device.hasUpdate).toBe(false);
+    expect(device.firmware).toBe('1.4.99-2pmg3prod0-ge3db05c'); // firmwareGen2
+    expect(device.auth).toBe(false);
+    expect(device.name).toBe('2PM Gen3 Switch');
+    expect(device.profile).toBe('switch');
+    expect(device.username).toBe('admin');
+    expect(device.password).toBe('tango');
+
+    await device.fetchUpdate();
+
+    await device.saveDevicePayloads('temp');
+
+    expect(device.components.length).toBe(13);
+    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Input', 'MQTT', 'Switch', 'Sys', 'Sntp', 'WiFi', 'WS']);
+    expect(device.getComponentIds()).toStrictEqual(['ble', 'cloud', 'input:0', 'input:1', 'mqtt', 'switch:0', 'switch:1', 'sys', 'sntp', 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws']);
+
+    expect(device.bthomeTrvs.size).toBe(0);
+    expect(device.bthomeDevices.size).toBe(0);
+    expect(device.bthomeSensors.size).toBe(0);
+
     const component = device.getComponent('switch:0');
     expect(component).not.toBeUndefined();
     expect(component?.getValue('voltage')).toBeGreaterThan(200);
@@ -699,7 +790,6 @@ describe('Shellies', () => {
 
   test('create a gen 3 shellyblugwg3 device and update', async () => {
     if (getMacAddress() !== address) return;
-    // consoleLogSpy.mockRestore();
 
     device = await ShellyDevice.create(shelly, log, '192.168.1.164');
     expect(device).not.toBeUndefined();
@@ -979,145 +1069,7 @@ describe('Shellies', () => {
 
     expect(device.bthomeDevices.size).toBe(0);
 
-    /*
-    expect(device.bthomeDevices.has('0c:ef:f6:f1:d7:7b')).toBe(true);
-    expect(device.bthomeDevices.get('0c:ef:f6:f1:d7:7b')?.model).toBe('Shelly BLU DoorWindow');
-    expect(device.bthomeDevices.get('0c:ef:f6:f1:d7:7b')?.id).toBe(200);
-    expect(device.bthomeDevices.get('0c:ef:f6:f1:d7:7b')?.blutrv_id).toBe(0);
-
-    expect(device.bthomeDevices.has('0c:ae:5f:5a:0b:fa')).toBe(true);
-    expect(device.bthomeDevices.get('0c:ae:5f:5a:0b:fa')?.model).toBe('Shelly BLU Motion');
-    expect(device.bthomeDevices.get('0c:ae:5f:5a:0b:fa')?.id).toBe(201);
-    expect(device.bthomeDevices.get('0c:ae:5f:5a:0b:fa')?.blutrv_id).toBe(0);
-
-    expect(device.bthomeDevices.has('0c:ef:f6:01:8d:b8')).toBe(true);
-    expect(device.bthomeDevices.get('0c:ef:f6:01:8d:b8')?.model).toBe('Shelly BLU Wall Switch 4');
-    expect(device.bthomeDevices.get('0c:ef:f6:01:8d:b8')?.id).toBe(202);
-    expect(device.bthomeDevices.get('0c:ef:f6:01:8d:b8')?.blutrv_id).toBe(0);
-
-    expect(device.bthomeDevices.has('7c:c6:b6:58:b9:a0')).toBe(true);
-    expect(device.bthomeDevices.get('7c:c6:b6:58:b9:a0')?.model).toBe('Shelly BLU RC Button 4');
-    expect(device.bthomeDevices.get('7c:c6:b6:58:b9:a0')?.id).toBe(203);
-    expect(device.bthomeDevices.get('7c:c6:b6:58:b9:a0')?.blutrv_id).toBe(0);
-    */
-
     expect(device.bthomeSensors.size).toBe(0);
-
-    /*
-    // BLU DoorWindow
-    expect(device.bthomeSensors.has('bthomesensor:200')).toBe(true);
-    expect(device.bthomeSensors.get('bthomesensor:200')?.addr).toBe('0c:ef:f6:f1:d7:7b');
-    expect(device.bthomeSensors.get('bthomesensor:200')?.name).toBe('Battery');
-    expect(device.bthomeSensors.get('bthomesensor:200')?.sensorId).toBe(1);
-    expect(device.bthomeSensors.get('bthomesensor:200')?.sensorIdx).toBe(0);
-
-    expect(device.bthomeSensors.has('bthomesensor:201')).toBe(true);
-    expect(device.bthomeSensors.get('bthomesensor:201')?.addr).toBe('0c:ef:f6:f1:d7:7b');
-    expect(device.bthomeSensors.get('bthomesensor:201')?.name).toBe('Illuminance');
-    expect(device.bthomeSensors.get('bthomesensor:201')?.sensorId).toBe(5);
-    expect(device.bthomeSensors.get('bthomesensor:201')?.sensorIdx).toBe(0);
-
-    expect(device.bthomeSensors.has('bthomesensor:202')).toBe(true);
-    expect(device.bthomeSensors.get('bthomesensor:202')?.addr).toBe('0c:ef:f6:f1:d7:7b');
-    expect(device.bthomeSensors.get('bthomesensor:202')?.name).toBe('Contact');
-    expect(device.bthomeSensors.get('bthomesensor:202')?.sensorId).toBe(45);
-    expect(device.bthomeSensors.get('bthomesensor:202')?.sensorIdx).toBe(0);
-
-    expect(device.bthomeSensors.has('bthomesensor:203')).toBe(true);
-    expect(device.bthomeSensors.get('bthomesensor:203')?.addr).toBe('0c:ef:f6:f1:d7:7b');
-    expect(device.bthomeSensors.get('bthomesensor:203')?.name).toBe('Rotation');
-    expect(device.bthomeSensors.get('bthomesensor:203')?.sensorId).toBe(63);
-    expect(device.bthomeSensors.get('bthomesensor:203')?.sensorIdx).toBe(0);
-
-    // BLU Motion
-    expect(device.bthomeSensors.has('bthomesensor:204')).toBe(true);
-    expect(device.bthomeSensors.get('bthomesensor:204')?.addr).toBe('0c:ae:5f:5a:0b:fa');
-    expect(device.bthomeSensors.get('bthomesensor:204')?.name).toBe('Battery');
-    expect(device.bthomeSensors.get('bthomesensor:204')?.sensorId).toBe(1);
-    expect(device.bthomeSensors.get('bthomesensor:204')?.sensorIdx).toBe(0);
-
-    expect(device.bthomeSensors.has('bthomesensor:205')).toBe(true);
-    expect(device.bthomeSensors.get('bthomesensor:205')?.addr).toBe('0c:ae:5f:5a:0b:fa');
-    expect(device.bthomeSensors.get('bthomesensor:205')?.name).toBe('Illuminance');
-    expect(device.bthomeSensors.get('bthomesensor:205')?.sensorId).toBe(5);
-    expect(device.bthomeSensors.get('bthomesensor:205')?.sensorIdx).toBe(0);
-
-    expect(device.bthomeSensors.has('bthomesensor:206')).toBe(true);
-    expect(device.bthomeSensors.get('bthomesensor:206')?.addr).toBe('0c:ae:5f:5a:0b:fa');
-    expect(device.bthomeSensors.get('bthomesensor:206')?.name).toBe('Motion');
-    expect(device.bthomeSensors.get('bthomesensor:206')?.sensorId).toBe(33);
-    expect(device.bthomeSensors.get('bthomesensor:206')?.sensorIdx).toBe(0);
-
-    expect(device.bthomeSensors.has('bthomesensor:207')).toBe(true);
-    expect(device.bthomeSensors.get('bthomesensor:207')?.addr).toBe('0c:ae:5f:5a:0b:fa');
-    expect(device.bthomeSensors.get('bthomesensor:207')?.name).toBe('Button');
-    expect(device.bthomeSensors.get('bthomesensor:207')?.sensorId).toBe(58);
-    expect(device.bthomeSensors.get('bthomesensor:207')?.sensorIdx).toBe(0);
-
-    // BLU RC Wall Switch 4
-    expect(device.bthomeSensors.has('bthomesensor:208')).toBe(true);
-    expect(device.bthomeSensors.get('bthomesensor:208')?.addr).toBe('0c:ef:f6:01:8d:b8');
-    expect(device.bthomeSensors.get('bthomesensor:208')?.name).toBe('Battery');
-    expect(device.bthomeSensors.get('bthomesensor:208')?.sensorId).toBe(1);
-    expect(device.bthomeSensors.get('bthomesensor:208')?.sensorIdx).toBe(0);
-
-    expect(device.bthomeSensors.has('bthomesensor:209')).toBe(true);
-    expect(device.bthomeSensors.get('bthomesensor:209')?.addr).toBe('0c:ef:f6:01:8d:b8');
-    expect(device.bthomeSensors.get('bthomesensor:209')?.name).toBe('Button');
-    expect(device.bthomeSensors.get('bthomesensor:209')?.sensorId).toBe(58);
-    expect(device.bthomeSensors.get('bthomesensor:209')?.sensorIdx).toBe(0);
-
-    expect(device.bthomeSensors.has('bthomesensor:210')).toBe(true);
-    expect(device.bthomeSensors.get('bthomesensor:210')?.addr).toBe('0c:ef:f6:01:8d:b8');
-    expect(device.bthomeSensors.get('bthomesensor:210')?.name).toBe('Button');
-    expect(device.bthomeSensors.get('bthomesensor:210')?.sensorId).toBe(58);
-    expect(device.bthomeSensors.get('bthomesensor:210')?.sensorIdx).toBe(1);
-
-    expect(device.bthomeSensors.has('bthomesensor:211')).toBe(true);
-    expect(device.bthomeSensors.get('bthomesensor:211')?.addr).toBe('0c:ef:f6:01:8d:b8');
-    expect(device.bthomeSensors.get('bthomesensor:211')?.name).toBe('Button');
-    expect(device.bthomeSensors.get('bthomesensor:211')?.sensorId).toBe(58);
-    expect(device.bthomeSensors.get('bthomesensor:211')?.sensorIdx).toBe(2);
-
-    expect(device.bthomeSensors.has('bthomesensor:212')).toBe(true);
-    expect(device.bthomeSensors.get('bthomesensor:212')?.addr).toBe('0c:ef:f6:01:8d:b8');
-    expect(device.bthomeSensors.get('bthomesensor:212')?.name).toBe('Button');
-    expect(device.bthomeSensors.get('bthomesensor:212')?.sensorId).toBe(58);
-    expect(device.bthomeSensors.get('bthomesensor:212')?.sensorIdx).toBe(3);
-
-    // BLU RC Button 4
-    expect(device.bthomeSensors.has('bthomesensor:213')).toBe(true);
-    expect(device.bthomeSensors.get('bthomesensor:213')?.addr).toBe('7c:c6:b6:58:b9:a0');
-    expect(device.bthomeSensors.get('bthomesensor:213')?.name).toBe('Battery');
-    expect(device.bthomeSensors.get('bthomesensor:213')?.sensorId).toBe(1);
-    expect(device.bthomeSensors.get('bthomesensor:213')?.sensorIdx).toBe(0);
-
-    expect(device.bthomeSensors.has('bthomesensor:214')).toBe(true);
-    expect(device.bthomeSensors.get('bthomesensor:214')?.addr).toBe('7c:c6:b6:58:b9:a0');
-    expect(device.bthomeSensors.get('bthomesensor:214')?.name).toBe('Button');
-    expect(device.bthomeSensors.get('bthomesensor:214')?.sensorId).toBe(58);
-    expect(device.bthomeSensors.get('bthomesensor:214')?.sensorIdx).toBe(0);
-
-    expect(device.bthomeSensors.has('bthomesensor:215')).toBe(true);
-    expect(device.bthomeSensors.get('bthomesensor:215')?.addr).toBe('7c:c6:b6:58:b9:a0');
-    expect(device.bthomeSensors.get('bthomesensor:215')?.name).toBe('Button');
-    expect(device.bthomeSensors.get('bthomesensor:215')?.sensorId).toBe(58);
-    expect(device.bthomeSensors.get('bthomesensor:215')?.sensorIdx).toBe(1);
-
-    expect(device.bthomeSensors.has('bthomesensor:216')).toBe(true);
-    expect(device.bthomeSensors.get('bthomesensor:216')?.addr).toBe('7c:c6:b6:58:b9:a0');
-    expect(device.bthomeSensors.get('bthomesensor:216')?.name).toBe('Button');
-    expect(device.bthomeSensors.get('bthomesensor:216')?.sensorId).toBe(58);
-    expect(device.bthomeSensors.get('bthomesensor:216')?.sensorIdx).toBe(2);
-
-    expect(device.bthomeSensors.has('bthomesensor:217')).toBe(true);
-    expect(device.bthomeSensors.get('bthomesensor:217')?.addr).toBe('7c:c6:b6:58:b9:a0');
-    expect(device.bthomeSensors.get('bthomesensor:217')?.name).toBe('Button');
-    expect(device.bthomeSensors.get('bthomesensor:217')?.sensorId).toBe(58);
-    expect(device.bthomeSensors.get('bthomesensor:217')?.sensorIdx).toBe(3);
-
-    expect(device.bthomeSensors.has('bthomesensor:218')).toBe(false);
-    */
 
     const component = device.getComponent('switch:0');
     expect(component).not.toBeUndefined();
@@ -1201,7 +1153,6 @@ describe('Shellies', () => {
     device.destroy();
   }, 30000);
 
-  // eslint-disable-next-line jest/no-commented-out-tests
   /*
   test('create a gen 3 shellyplugsg3 device and update', async () => {
     if (getMacAddress() !== address) return;

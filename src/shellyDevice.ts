@@ -163,6 +163,14 @@ export class ShellyDevice extends EventEmitter {
   }
 
   /**
+   * Sets the log level for the device.
+   * @param {LogLevel} logLevel - The log level to set.
+   */
+  setLogLevel(logLevel: LogLevel) {
+    this.log.logLevel = logLevel;
+  }
+
+  /**
    * Checks if the device has a component with the specified ID.
    *
    * @param {string} id - The ID of the component to check.
@@ -231,9 +239,10 @@ export class ShellyDevice extends EventEmitter {
         component.setValue(prop, data[prop]);
       }
       return component;
-    } else this.log.error(`****Component ${id} not found in device ${GREEN}${this.id}${er} (${BLUE}${this.name}${er})`);
-
-    return undefined;
+    } else {
+      this.log.error(`Component ${id} not found in device ${GREEN}${this.id}${er} (${BLUE}${this.name}${er})`);
+      return undefined;
+    }
   }
 
   /**
@@ -253,15 +262,6 @@ export class ShellyDevice extends EventEmitter {
     for (const [key, component] of this._components.entries()) {
       yield [key, component];
     }
-  }
-
-  /**
-   * Sets the log level for the device.
-   * @param {LogLevel} logLevel - The log level to set.
-   */
-  setLogLevel(logLevel: LogLevel) {
-    this.log.logLevel = logLevel;
-    // if (this.wsClient) this.wsClient.log.logLevel = logLevel;
   }
 
   /**
@@ -476,7 +476,7 @@ export class ShellyDevice extends EventEmitter {
     let componentsPayload: ShellyData | null = null;
 
     if (!shellyPayload) {
-      log.debug(`****Error creating device at host ${zb}${host}${db}. No shelly data found.`);
+      log.debug(`Error creating device at host ${zb}${host}${db}. No shelly data found.`);
       return undefined;
     }
     const device = new ShellyDevice(shelly, log, host);
@@ -498,7 +498,7 @@ export class ShellyDevice extends EventEmitter {
       statusPayload = await ShellyDevice.fetch(shelly, log, host, 'status');
       settingsPayload = await ShellyDevice.fetch(shelly, log, host, 'settings');
       if (!statusPayload || !settingsPayload) {
-        log.debug(`****Error creating device gen 1 from host ${zb}${host}${db}. No data found.`);
+        log.debug(`Error creating device gen 1 from host ${zb}${host}${db}. No data found.`);
         return undefined;
       }
       device.model = shellyPayload.type as string;
@@ -602,7 +602,7 @@ export class ShellyDevice extends EventEmitter {
       statusPayload = await ShellyDevice.fetch(shelly, log, host, 'Shelly.GetStatus');
       settingsPayload = await ShellyDevice.fetch(shelly, log, host, 'Shelly.GetConfig');
       if (!statusPayload || !settingsPayload) {
-        log.debug(`****Error creating device gen 2 from host ${zb}${host}${db}. No data found.`);
+        log.debug(`Error creating device gen 2+ from host ${zb}${host}${db}. No data found.`);
         return undefined;
       }
       // Set sleep mode for gen 2 and 3 devices
@@ -790,16 +790,18 @@ export class ShellyDevice extends EventEmitter {
       });
     }
 
+    // Emitted when a sleepy device wakes up by WsServer and CoapServer. We update the cache file.
     device.on('awake', async () => {
-      log.debug(`***Device ${hk}${device.id}${db} host ${zb}${device.host}${db} is awake`);
-      if (device.sleepMode) {
+      log.debug(`Device ${hk}${device.id}${db} host ${zb}${device.host}${db} is awake (cached: ${device.cached}).`);
+      if (device.sleepMode && (device.cached || Date.now() - device.lastFetched > device.fetchInterval)) {
         try {
-          const awaken = await ShellyDevice.create(shelly, log, host);
+          device.lastFetched = Date.now();
+          const awaken = await ShellyDevice.create(shelly, log, device.host);
           await awaken?.saveDevicePayloads(shelly.dataPath);
           awaken?.destroy();
-          log.debug(`***Device ${hk}${device.id}${db} host ${zb}${device.host}${db} updated cache file`);
+          log.info(`Updated cache file for sleepy device ${hk}${device.id}${db} host ${zb}${device.host}${db}`);
         } catch (error) {
-          log.debug(`***Error saving device cache ${hk}${device.id}${db} host ${zb}${device.host}${db}: ${error instanceof Error ? error.message : error}`);
+          log.debug(`Error saving device cache ${hk}${device.id}${db} host ${zb}${device.host}${db}: ${error instanceof Error ? error.message : error}`);
         }
       }
     });
@@ -812,7 +814,7 @@ export class ShellyDevice extends EventEmitter {
   }
 
   /**
-   * Event handler from device WsClient.
+   * Events handler from both WsClient (shellyDevice) and WsServer (shelly).
    *
    * @param {BTHomeEvent[]} events - The data to update the device with.
    *
@@ -859,7 +861,7 @@ export class ShellyDevice extends EventEmitter {
   }
 
   /**
-   * Updates the device with the provided data.
+   * Updates handler from both WsClient (shellyDevice) and WsServer (shelly).
    *
    * @param {ShellyData} data - The data to update the device with.
    *

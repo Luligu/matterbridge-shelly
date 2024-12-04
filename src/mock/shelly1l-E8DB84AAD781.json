@@ -180,11 +180,7 @@
         "power": 0,
         "is_valid": false,
         "timestamp": 1730470473,
-        "counters": [
-          0,
-          0,
-          0
-        ],
+        "counters": [0, 0, 0],
         "total": 0
       }
     ],

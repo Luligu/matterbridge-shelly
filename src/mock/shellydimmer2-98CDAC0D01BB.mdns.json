@@ -41,14 +41,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": true,
-      "data": [
-        "id=shellydimmer2-98CDAC0D01BB",
-        "arch=esp8266",
-        "app=dimmer-l51",
-        "fw_version=1.0",
-        "fw_id=20230913-114008/v1.14.0-gcb84623",
-        "discoverable=false"
-      ]
+      "data": ["id=shellydimmer2-98CDAC0D01BB", "arch=esp8266", "app=dimmer-l51", "fw_version=1.0", "fw_id=20230913-114008/v1.14.0-gcb84623", "discoverable=false"]
     },
     {
       "name": "_services._dns-sd._udp.local",
@@ -74,9 +67,7 @@
       "flush": true,
       "data": {
         "nextDomain": "shellydimmer2-98CDAC0D01BB.local",
-        "rrtypes": [
-          "A"
-        ]
+        "rrtypes": ["A"]
       }
     }
   ],
