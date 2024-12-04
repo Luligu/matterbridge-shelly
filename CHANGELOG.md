@@ -6,7 +6,7 @@ If you like this project and find it useful, please consider giving it a star on
 
 You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his invaluable contribution to this project.
 
-## [1.0.11] - 2024-12-XX
+## [1.0.11] - 2024-12-04
 
 ### Added
 
@@ -23,6 +23,7 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 - [platform]: The ShellyPlatform class has grown too much: moved the shellySwitchCommandHandler, shellyLightCommandHandler, shellyCoverCommandHandler and shellyUpdateHandler methods to separate files.
 - [platform]: Refactor Matter Thermostat component for WallDisplay
 - [platform]: Refactor Matter Thermostat component for BLU Trv
+- [levelControl]: Fix max level to 254.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
   <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
