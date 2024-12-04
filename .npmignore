@@ -173,3 +173,4 @@ create-release.js
 mdnsDgram.ts
 mcastServer.ts
 mcastServer.test.ts
+tsconfig.production.json
