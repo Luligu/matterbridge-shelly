@@ -497,7 +497,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       });
 
       // Set the powerSource cluster
-      const childPowerSource = mbDevice.addChildDeviceTypeWithClusterServer('PowerSource', [powerSource], [PowerSource.Cluster.id]);
+      const childPowerSource = mbDevice.addChildDeviceType('PowerSource', [powerSource]);
       const batteryComponent = device.getComponent('battery');
       const devicepowerComponent = device.getComponent('devicepower:0');
       if (batteryComponent) {
