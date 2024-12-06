@@ -482,6 +482,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
 
       // Create a new Matterbridge device
       const mbDevice = await this.createMutableDevice(bridgedNode, { uniqueStorageKey: device.name }, config.debug as boolean);
+      mbDevice.log.logName = device.name;
       mbDevice.createDefaultBridgedDeviceBasicInformationClusterServer(
         device.name,
         device.id + (this.postfix ? '-' + this.postfix : ''),
@@ -619,6 +620,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             }
             // const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [deviceType], clusterIds, undefined, config.debug as boolean);
             const child = mbDevice.addChildDeviceType(key, [deviceType], undefined, config.debug as boolean);
+            child.log.logName = `${device.name} ${key}`;
             child.addClusterServerFromList(child, clusterIds);
             if (lightComponent.hasProperty('temp') && lightComponent.hasProperty('mode')) {
               // mbDevice.configureColorControlCluster(true, false, true, ColorControl.ColorMode.ColorTemperatureMireds, child);
@@ -696,6 +698,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             if (config.lightList && (config.lightList as string[]).includes(device.id)) deviceType = onOffLight;
             if (config.outletList && (config.outletList as string[]).includes(device.id)) deviceType = onOffOutlet;
             const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [deviceType], [OnOff.Cluster.id], undefined, config.debug as boolean);
+            child.log.logName = `${device.name} ${key}`;
 
             // Add the electrical measurementa cluster on the same endpoint
             this.addElectricalMeasurements(mbDevice, child, device, switchComponent);
@@ -731,6 +734,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           const coverComponent = device.getComponent(key);
           if (coverComponent) {
             const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.WINDOW_COVERING], [WindowCovering.Cluster.id], undefined, config.debug as boolean);
+            child.log.logName = `${device.name} ${key}`;
 
             // Add the electrical measurementa cluster on the same endpoint
             this.addElectricalMeasurements(mbDevice, child, device, coverComponent);
@@ -766,6 +770,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               undefined,
               config.debug as boolean,
             );
+            child.log.logName = `${device.name} ${key}`;
             device.log.debug(
               `Added ElectricalPowerMeasurement and ElectricalEnergyMeasurement clusters to endpoint ${hk}${child.name}${db} component ${hk}${component.name}:${component.id}${db}`,
             );
@@ -791,6 +796,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             const state = inputComponent.getValue('state') as boolean;
             if (isValidBoolean(state)) {
               const child = mbDevice.addChildDeviceType(key, [DeviceTypes.CONTACT_SENSOR], undefined, config.debug as boolean);
+              child.log.logName = `${device.name} ${key}`;
               // Set the state attribute
               child.addClusterServer(mbDevice.getDefaultBooleanStateClusterServer(state));
               child.addRequiredClusterServers(child);
@@ -807,6 +813,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             const state = inputComponent.getValue('state') as boolean;
             if (isValidBoolean(state)) {
               const child = mbDevice.addChildDeviceType(key, [DeviceTypes.GENERIC_SWITCH], undefined, config.debug as boolean);
+              child.log.logName = `${device.name} ${key}`;
               child.addClusterServer(mbDevice.getDefaultSwitchClusterServer());
               child.addRequiredClusterServers(child);
               // Add event handler
@@ -822,6 +829,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             const state = inputComponent.getValue('state') as boolean;
             if (isValidBoolean(state)) {
               const child = mbDevice.addChildDeviceType(key, [DeviceTypes.GENERIC_SWITCH], undefined, config.debug as boolean);
+              child.log.logName = `${device.name} ${key}`;
               child.addClusterServer(mbDevice.getDefaultLatchingSwitchClusterServer());
               child.addRequiredClusterServers(child);
               // Add event handler
@@ -838,6 +846,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             const event = inputComponent.getValue('event') as boolean;
             if (isValidString(event)) {
               const child = mbDevice.addChildDeviceType(key, [DeviceTypes.GENERIC_SWITCH], undefined, config.debug as boolean);
+              child.log.logName = `${device.name} ${key}`;
               child.addClusterServer(mbDevice.getDefaultSwitchClusterServer());
               child.addRequiredClusterServers(child);
               // Add event handler
@@ -856,6 +865,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           ) {
             // Gen 2/3 devices with Input type=button
             const child = mbDevice.addChildDeviceType(key, [DeviceTypes.GENERIC_SWITCH], undefined, config.debug as boolean);
+            child.log.logName = `${device.name} ${key}`;
             child.addClusterServer(mbDevice.getDefaultSwitchClusterServer());
             child.addRequiredClusterServers(child);
             device.log.info(`Add device event handler for device ${idn}${device.id}${rs} component ${hk}${component.id}${db} type Button`);
@@ -877,6 +887,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           const sensorComponent = device.getComponent(key);
           if (sensorComponent?.hasProperty('contact_open') && config.exposeContact !== 'disabled') {
             const child = mbDevice.addChildDeviceType(key, [DeviceTypes.CONTACT_SENSOR], undefined, config.debug as boolean);
+            child.log.logName = `${device.name} ${key}`;
             child.addClusterServer(mbDevice.getDefaultBooleanStateClusterServer(sensorComponent.getValue('contact_open') === false));
             child.addRequiredClusterServers(child);
             // Add event handler
@@ -897,6 +908,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           const vibrationComponent = device.getComponent(key);
           if (vibrationComponent?.hasProperty('vibration') && isValidBoolean(vibrationComponent.getValue('vibration'))) {
             const child = mbDevice.addChildDeviceType(key, [DeviceTypes.GENERIC_SWITCH], undefined, config.debug as boolean);
+            child.log.logName = `${device.name} ${key}`;
             child.addClusterServer(mbDevice.getDefaultSwitchClusterServer());
             child.addRequiredClusterServers(child);
             // Add event handler
@@ -908,6 +920,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           const tempComponent = device.getComponent(key);
           if (tempComponent?.hasProperty('value') && isValidNumber(tempComponent.getValue('value'))) {
             const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.TEMPERATURE_SENSOR], [], undefined, config.debug as boolean);
+            child.log.logName = `${device.name} ${key}`;
             const matterTemp = Math.min(Math.max(Math.round((tempComponent.getValue('value') as number) * 100), -10000), 10000);
             child.addClusterServer(mbDevice.getDefaultTemperatureMeasurementClusterServer(matterTemp));
             // Add event handler
@@ -918,6 +931,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.TEMPERATURE_SENSOR], [], undefined, config.debug as boolean);
             const matterTemp = Math.min(Math.max(Math.round((tempComponent.getValue('tC') as number) * 100), -10000), 10000);
             child.addClusterServer(mbDevice.getDefaultTemperatureMeasurementClusterServer(matterTemp));
+            child.log.logName = `${device.name} ${key}`;
             // Add event handler
             tempComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
               shellyUpdateHandler(this, mbDevice, device, component, property, value);
@@ -927,6 +941,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           const humidityComponent = device.getComponent(key);
           if (humidityComponent?.hasProperty('value') && isValidNumber(humidityComponent.getValue('value'), 0, 100)) {
             const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.HUMIDITY_SENSOR], [], undefined, config.debug as boolean);
+            child.log.logName = `${device.name} ${key}`;
             const matterHumidity = Math.min(Math.max(Math.round((humidityComponent.getValue('value') as number) * 100), 0), 10000);
             child.addClusterServer(mbDevice.getDefaultRelativeHumidityMeasurementClusterServer(matterHumidity));
             // Add event handler
@@ -936,6 +951,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           }
           if (humidityComponent?.hasProperty('rh') && isValidNumber(humidityComponent.getValue('rh'), 0, 100)) {
             const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.HUMIDITY_SENSOR], [], undefined, config.debug as boolean);
+            child.log.logName = `${device.name} ${key}`;
             const matterHumidity = Math.min(Math.max(Math.round((humidityComponent.getValue('rh') as number) * 100), 0), 10000);
             child.addClusterServer(mbDevice.getDefaultRelativeHumidityMeasurementClusterServer(matterHumidity));
             // Add event handler
@@ -947,6 +963,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           const illuminanceComponent = device.getComponent(key);
           if (illuminanceComponent?.hasProperty('lux') && isValidNumber(illuminanceComponent.getValue('lux'), 0, 10000)) {
             const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.LIGHT_SENSOR], [], undefined, config.debug as boolean);
+            child.log.logName = `${device.name} ${key}`;
             const matterLux = Math.round(Math.max(Math.min(10000 * Math.log10(illuminanceComponent.getValue('lux') as number), 0xfffe), 0));
             child.addClusterServer(mbDevice.getDefaultIlluminanceMeasurementClusterServer(matterLux));
             // Add event handler
@@ -969,6 +986,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             let child: MatterbridgeDevice;
             if (thermostatComponent.getValue('type') === 'heating') {
               child = mbDevice.addChildDeviceType(key, [thermostatDevice], undefined, config.debug as boolean);
+              child.log.logName = `${device.name} ${key}`;
               child.createDefaultIdentifyClusterServer();
               child.addClusterServer(
                 child.getDefaultHeatingThermostatClusterServer(thermostatComponent.getValue('current_C') as number, thermostatComponent.getValue('target_C') as number, 5, 35),
@@ -990,6 +1008,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               );
             } else if (thermostatComponent.getValue('type') === 'cooling') {
               child = mbDevice.addChildDeviceType(key, [thermostatDevice], undefined, config.debug as boolean);
+              child.log.logName = `${device.name} ${key}`;
               child.createDefaultIdentifyClusterServer();
               child.addClusterServer(
                 child.getDefaultCoolingThermostatClusterServer(thermostatComponent.getValue('current_C') as number, thermostatComponent.getValue('target_C') as number, 5, 35),
@@ -1048,6 +1067,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           const floodComponent = device.getComponent(key);
           if (floodComponent?.hasProperty('flood') && isValidBoolean(floodComponent.getValue('flood'))) {
             const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.CONTACT_SENSOR], [], undefined, config.debug as boolean);
+            child.log.logName = `${device.name} ${key}`;
             child.addClusterServer(mbDevice.getDefaultBooleanStateClusterServer(!(floodComponent.getValue('flood') as boolean)));
             // Add event handler
             floodComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
@@ -1058,6 +1078,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           const gasComponent = device.getComponent(key);
           if (gasComponent?.hasProperty('sensor_state') && isValidString(gasComponent.getValue('alarm_state'))) {
             const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.CONTACT_SENSOR], [], undefined, config.debug as boolean);
+            child.log.logName = `${device.name} ${key}`;
             child.addClusterServer(mbDevice.getDefaultBooleanStateClusterServer(gasComponent.getValue('alarm_state') === 'none'));
             // Add event handler
             gasComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
@@ -1068,6 +1089,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           const smokeComponent = device.getComponent(key);
           if (smokeComponent?.hasProperty('alarm') && isValidBoolean(smokeComponent.getValue('alarm'))) {
             const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.CONTACT_SENSOR], [], undefined, config.debug as boolean);
+            child.log.logName = `${device.name} ${key}`;
             child.addClusterServer(mbDevice.getDefaultBooleanStateClusterServer(!smokeComponent.getValue('alarm') as boolean));
             // Add event handler
             smokeComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
@@ -1078,6 +1100,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           const luxComponent = device.getComponent(key);
           if (luxComponent?.hasProperty('value') && isValidNumber(luxComponent.getValue('value'), 0)) {
             const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [DeviceTypes.LIGHT_SENSOR], [], undefined, config.debug as boolean);
+            child.log.logName = `${device.name} ${key}`;
             const matterLux = Math.round(Math.max(Math.min(10000 * Math.log10(luxComponent.getValue('value') as number), 0xfffe), 0));
             child.addClusterServer(mbDevice.getDefaultIlluminanceMeasurementClusterServer(matterLux));
             // Add event handler
@@ -1089,6 +1112,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           const blugwComponent = device.getComponent(key);
           if (blugwComponent?.hasProperty('sys_led_enable') && isValidBoolean(blugwComponent.getValue('sys_led_enable'))) {
             const child = mbDevice.addChildDeviceType(key, [modeSelect], undefined, config.debug as boolean);
+            child.log.logName = `${device.name} ${key}`;
             child.addClusterServer(
               mbDevice.getDefaultModeSelectClusterServer(
                 'System LED',
