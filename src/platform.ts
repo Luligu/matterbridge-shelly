@@ -615,14 +615,22 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               lightComponent.hasProperty('rgb')
             ) {
               deviceType = DeviceTypes.COLOR_TEMPERATURE_LIGHT;
-              clusterIds.push(ColorControl.Cluster.id);
+              // clusterIds.push(ColorControl.Cluster.id);
             }
-            const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [deviceType], clusterIds, undefined, config.debug as boolean);
-            if (lightComponent.hasProperty('temp') && lightComponent.hasProperty('mode'))
-              mbDevice.configureColorControlCluster(true, false, true, ColorControl.ColorMode.ColorTemperatureMireds, child);
-            else if (lightComponent.hasProperty('temp') && !lightComponent.hasProperty('mode'))
-              mbDevice.configureColorControlCluster(false, false, true, ColorControl.ColorMode.ColorTemperatureMireds, child);
-            else mbDevice.configureColorControlCluster(true, false, false, ColorControl.ColorMode.CurrentHueAndCurrentSaturation, child);
+            // const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [deviceType], clusterIds, undefined, config.debug as boolean);
+            const child = mbDevice.addChildDeviceType(key, [deviceType], undefined, config.debug as boolean);
+            child.addClusterServerFromList(child, clusterIds);
+            if (lightComponent.hasProperty('temp') && lightComponent.hasProperty('mode')) {
+              // mbDevice.configureColorControlCluster(true, false, true, ColorControl.ColorMode.ColorTemperatureMireds, child);
+              child.createDefaultColorControlClusterServer();
+            } else if (lightComponent.hasProperty('temp') && !lightComponent.hasProperty('mode')) {
+              // mbDevice.configureColorControlCluster(false, false, true, ColorControl.ColorMode.ColorTemperatureMireds, child);
+              child.createCtColorControlClusterServer();
+            } else if (deviceType === DeviceTypes.COLOR_TEMPERATURE_LIGHT) {
+              // mbDevice.configureColorControlCluster(true, false, false, ColorControl.ColorMode.CurrentHueAndCurrentSaturation, child);
+              child.createHsColorControlClusterServer();
+            }
+            child.addRequiredClusterServers(child);
 
             // Add the electrical measurementa cluster on the same endpoint
             this.addElectricalMeasurements(mbDevice, child, device, lightComponent);
