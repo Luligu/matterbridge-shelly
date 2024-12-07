@@ -563,6 +563,10 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
 
       // Scan the device components
       for (const [key, component] of device) {
+        // Validate the component against the component black list
+        if (!this._validateEntityBlackList(device.id, component.name)) continue;
+        if (!this._validateEntityBlackList(device.id, key)) continue;
+
         if (component.name === 'Sys') {
           // Add update handler from Shelly
           component.on('update', (component: string, property: string, value: ShellyDataType) => {
@@ -1543,19 +1547,19 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     }
 
     if (loadFromCache && fs.existsSync(fileName)) {
-      this.log.info(`*Loading from cache Shelly device ${hk}${deviceId}${nf} host ${zb}${host}${nf}`);
+      this.log.info(`Loading from cache Shelly device ${hk}${deviceId}${nf} host ${zb}${host}${nf}`);
       device = await ShellyDevice.create(this.shelly, log, fileName);
       if (device) {
-        this.log.info(`*Loaded from cache Shelly device ${hk}${deviceId}${nf} host ${zb}${host}${nf}`);
+        this.log.info(`Loaded from cache Shelly device ${hk}${deviceId}${nf} host ${zb}${host}${nf}`);
         device.setHost(host);
         device.cached = true;
         device.online = true;
       }
     } else {
-      this.log.info(`*Creating Shelly device ${hk}${deviceId}${nf} host ${zb}${host}${nf}`);
+      this.log.info(`Creating Shelly device ${hk}${deviceId}${nf} host ${zb}${host}${nf}`);
       device = await ShellyDevice.create(this.shelly, log, host);
       if (device) {
-        this.log.info(`*Created Shelly device ${hk}${deviceId}${nf} host ${zb}${host}${nf}`);
+        this.log.info(`Created Shelly device ${hk}${deviceId}${nf} host ${zb}${host}${nf}`);
         await device.saveDevicePayloads(this.shelly.dataPath);
       }
     }

@@ -24,7 +24,11 @@
     "exposeSwitch": {
       "description": "Choose how to expose the shelly switches: as a switch (don't use it for Alexa), light or outlet",
       "type": "string",
-      "enum": ["switch", "light", "outlet"],
+      "enum": [
+        "switch",
+        "light",
+        "outlet"
+      ],
       "default": "outlet"
     },
     "switchList": {
@@ -51,7 +55,12 @@
     "exposeInput": {
       "description": "Choose how to expose the shelly inputs: disabled, contact, momentary or latching switch (you may need to pair again the controller when changed)",
       "type": "string",
-      "enum": ["disabled", "contact", "momentary", "latching"],
+      "enum": [
+        "disabled",
+        "contact",
+        "momentary",
+        "latching"
+      ],
       "default": "disabled"
     },
     "inputContactList": {
@@ -78,7 +87,10 @@
     "exposeInputEvent": {
       "description": "Choose weather to expose the shelly input events: momentary or disabled (you may need to pair again the controller when changed)",
       "type": "string",
-      "enum": ["momentary", "disabled"],
+      "enum": [
+        "momentary",
+        "disabled"
+      ],
       "default": "disabled"
     },
     "inputEventList": {
@@ -91,21 +103,41 @@
     "exposePowerMeter": {
       "description": "Choose how to expose the shelly power meters: disabled, matter13 (will use Matter 1.3 electricalSensor)",
       "type": "string",
-      "enum": ["disabled", "matter13"],
+      "enum": [
+        "disabled",
+        "matter13"
+      ],
       "default": "disabled"
     },
     "blackList": {
-      "description": "The devices in the list will not be exposed. Use the device id (e.g. shellyplus2pm-5443B23D81F8)",
+      "description": "The devices in the list will not be exposed. Use the device id (e.g. shellyplus2pm-5443B23D81F8) or BLU name (i.e. Shelly BLU HT 7c:c6:b6:65:2d:87)",
       "type": "array",
       "items": {
         "type": "string"
       }
     },
     "whiteList": {
-      "description": "Only the devices in the list will be exposed. Use the device id (e.g. shellyplus2pm-5443B23D81F8)",
+      "description": "Only the devices in the list will be exposed. Use the device id (e.g. shellyplus2pm-5443B23D81F8) or BLU name (i.e. Shelly BLU HT 7c:c6:b6:65:2d:87). If you add a BLU device in the white list, you need to put also his BLU gateway on the list.",
       "type": "array",
       "items": {
         "type": "string"
+      }
+    },
+    "entityBlackList": {
+      "description": "The components in the list will not be exposed for all devices. Use the component name (i.e. Temperature)",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "deviceEntityBlackList": {
+      "description": "List of components not to be exposed for a single device. Enter in the first field the name of the device id (e.g. shellyplus2pm-5443B23D81F8) and in the second field add all the component names (i.e. Temperature) or component ids (i.e. temperature:0) you want to exclude for that device.",
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
       }
     },
     "nocacheList": {

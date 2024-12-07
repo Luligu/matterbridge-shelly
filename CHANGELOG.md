@@ -6,6 +6,22 @@ If you like this project and find it useful, please consider giving it a star on
 
 You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his invaluable contribution to this project.
 
+## [1.0.12] - 2024-12-09
+
+### Added
+
+- [BLU]: Add validate against white and black list for BLU devices. If you put a shelly BLU in the white list, you need to put also his BLU gateway on the white list.
+- [BLU]: Add global and single device component black list. You can now exclude a shelly component globally or on a device base.
+
+### Changed
+
+- [colorControl]: Refactor configuration of the cluster.
+- [package]: Updated dependencies.
+
+<a href="https://www.buymeacoffee.com/luligugithub">
+  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+</a>
+
 ## [1.0.11] - 2024-12-04
 
 ### Added
