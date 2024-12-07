@@ -47,7 +47,6 @@ import {
   PowerSourceCluster,
   ElectricalPowerMeasurement,
   ElectricalEnergyMeasurement,
-  Endpoint,
   onOffLight,
   onOffOutlet,
   ThermostatCluster,
@@ -790,11 +789,6 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             device.log.debug(
               `Added ElectricalPowerMeasurement and ElectricalEnergyMeasurement clusters to endpoint ${hk}${child.name}${db} component ${hk}${component.name}:${component.id}${db}`,
             );
-            // Update the electrical attributes
-            for (const property of component.properties) {
-              if (!['voltage', 'current', 'power', 'apower', 'act_power', 'total', 'aenergy'].includes(property.key)) continue;
-              shellyUpdateHandler(this, mbDevice, device, component.id, property.key, property.value);
-            }
             // Add event handler
             pmComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
               shellyUpdateHandler(this, mbDevice, device, component, property, value);
@@ -1419,6 +1413,16 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             }
           }
         }
+        // Update the electrical attributes
+        if (childEndpoint.getDeviceTypes().includes(electricalSensor)) {
+          const component = shellyDevice.getComponent(label);
+          if (!component) return;
+          this.log.info(`Configuring device ${dn}${mbDevice.deviceName}${nf} electrical component ${hk}${label}${nf}`);
+          for (const property of component.properties) {
+            if (!['voltage', 'current', 'power', 'apower', 'act_power', 'total', 'aenergy'].includes(property.key)) continue;
+            shellyUpdateHandler(this, mbDevice, shellyDevice, component.id, property.key, property.value);
+          }
+        }
       }
       if (shellyDevice.bthomeDevices.size > 0) {
         shellyDevice.log.info(`Configuring BLE devices paired to ${hk}${shellyDevice.id}${nf}...`);
@@ -1484,19 +1488,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     this.bluBridgedDevices.forEach((bluDevice) => (bluDevice.log.logLevel = logLevel));
   }
 
-  private addElectricalMeasurements(device: MatterbridgeDevice, endpoint: Endpoint | undefined, shelly: ShellyDevice, component: ShellyComponent) {
-    if (!endpoint) {
-      // this.log.info(`addElectricalMeasurements: endpoint is undefined`);
-      return;
-    }
-    const updateProperties = () => {
-      for (const property of component.properties) {
-        if (!['voltage', 'current', 'power', 'apower', 'act_power', 'total', 'aenergy'].includes(property.key)) continue;
-        shellyUpdateHandler(this, device, shelly, component.id, property.key, property.value);
-      }
-    };
-
-    // Add the Matter 1.3 ElectricalPowerMeasurement and ElectricalEnergyMeasurement cluster on the same endpoint
+  private addElectricalMeasurements(device: MatterbridgeDevice, endpoint: MatterbridgeDevice, shelly: ShellyDevice, component: ShellyComponent) {
+    // Add the Matter 1.3 electricalSensor device type and the PowerTopology, ElectricalPowerMeasurement and ElectricalEnergyMeasurement clusters on the same endpoint
     if (
       this.config.exposePowerMeter === 'matter13' &&
       (component.hasProperty('voltage') || component.hasProperty('current') || component.hasProperty('apower') || component.hasProperty('aenergy'))
@@ -1508,7 +1501,6 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       endpoint.addClusterServer(device.getDefaultPowerTopologyClusterServer());
       endpoint.addClusterServer(device.getDefaultElectricalPowerMeasurementClusterServer());
       endpoint.addClusterServer(device.getDefaultElectricalEnergyMeasurementClusterServer());
-      updateProperties();
     }
   }
 
@@ -1575,18 +1567,6 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     log.logName = device.name ?? device.id;
     await this.shelly.addDevice(device);
     this.shellyDevices.set(device.id, device);
-  }
-
-  private validateWhiteBlackList(entityName: string) {
-    if (this.whiteList.length > 0 && !this.whiteList.find((name) => name === entityName)) {
-      this.log.warn(`Skipping ${dn}${entityName}${wr} because not in whitelist`);
-      return false;
-    }
-    if (this.blackList.length > 0 && this.blackList.find((name) => name === entityName)) {
-      this.log.warn(`Skipping ${dn}${entityName}${wr} because in blacklist`);
-      return false;
-    }
-    return true;
   }
 
   // TODO: remove when matterbridge 1.6.6 is released and required
