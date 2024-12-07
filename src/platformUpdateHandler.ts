@@ -41,7 +41,7 @@ import {
   WindowCovering,
   WindowCoveringCluster,
 } from 'matterbridge';
-import { db, debugStringify, dn, hk, idn, or, rs, YELLOW, zb } from 'matterbridge/logger';
+import { db, debugStringify, dn, er, hk, idn, or, rs, YELLOW, zb } from 'matterbridge/logger';
 import { isValidArray, isValidBoolean, isValidNumber, isValidObject, isValidString, rgbColorToHslColor } from 'matterbridge/utils';
 
 import { ShellyDevice } from './shellyDevice.js';
@@ -276,10 +276,10 @@ export function shellyUpdateHandler(
         const status = WindowCovering.MovementStatus.Stopped;
         matterbridgeDevice.setAttribute(WindowCoveringCluster.id, 'operationalStatus', { global: status, lift: status, tilt: status }, shellyDevice.log, endpoint);
         setTimeout(() => {
-          shellyDevice.log.info(`Setting target position to current position on endpoint ${or}${endpoint.name}:${endpoint.number}${db}`);
+          shellyDevice.log.debug(`Setting target position to current position on endpoint ${or}${endpoint.name}:${endpoint.number}${db}`);
           const current = matterbridgeDevice.getAttribute(WindowCoveringCluster.id, 'currentPositionLiftPercent100ths', shellyDevice.log, endpoint);
           if (!isValidNumber(current, 0, 10000)) {
-            matterbridgeDevice.log.error(`Error: current position not found on endpoint ${or}${endpoint.name}:${endpoint.number}${db} ${hk}WindowCovering${db}`);
+            matterbridgeDevice.log.error(`Error: current position not found on endpoint ${or}${endpoint.name}:${endpoint.number}${er}`);
             return;
           }
           matterbridgeDevice.setAttribute(WindowCoveringCluster.id, 'targetPositionLiftPercent100ths', current, shellyDevice.log, endpoint);
