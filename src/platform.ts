@@ -61,12 +61,26 @@ import {
   EndpointOptions,
   thermostatDevice,
   modeSelect,
+  MatterbridgeEndpoint,
+  Groups,
+  Identify,
 } from 'matterbridge';
 
 // import { EveHistory, EveHistoryCluster, MatterHistory } from 'matterbridge/history';
 import { AnsiLogger, BLUE, CYAN, GREEN, LogLevel, TimestampFormat, YELLOW, db, debugStringify, dn, er, hk, idn, nf, nt, rs, wr, zb } from 'matterbridge/logger';
 import { NodeStorage, NodeStorageManager } from 'matterbridge/storage';
-import { hslColorToRgbColor, rgbColorToHslColor, isValidIpv4Address, isValidString, isValidNumber, isValidBoolean, isValidArray, isValidObject, waiter } from 'matterbridge/utils';
+import {
+  hslColorToRgbColor,
+  rgbColorToHslColor,
+  isValidIpv4Address,
+  isValidString,
+  isValidNumber,
+  isValidBoolean,
+  isValidArray,
+  isValidObject,
+  waiter,
+  xyColorToRgbColor,
+} from 'matterbridge/utils';
 
 import path from 'path';
 import * as fs from 'fs';
@@ -109,11 +123,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
 
   async createMutableDevice(definition: DeviceTypeDefinition | AtLeastOne<DeviceTypeDefinition>, options: EndpointOptions = {}, debug = false): Promise<MatterbridgeDevice> {
     let device: MatterbridgeDevice;
-    const matterbridge = await import('matterbridge');
-    if ('edge' in this.matterbridge && this.matterbridge.edge === true && 'MatterbridgeEndpoint' in matterbridge) {
-      // Dynamically resolve the MatterbridgeEndpoint class from the imported module and instantiate it without throwing a TypeScript error for old versions of Matterbridge
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      device = new (matterbridge as any).MatterbridgeEndpoint(definition, options, debug) as MatterbridgeDevice;
+    if (this.matterbridge.edge === true) {
+      device = new MatterbridgeEndpoint(definition, options, debug) as unknown as MatterbridgeDevice;
     } else device = new MatterbridgeDevice(definition, undefined, debug);
     return device;
   }
@@ -605,7 +616,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           if (isLightComponent(lightComponent)) {
             // Set the device type and clusters based on the light component properties
             let deviceType = DeviceTypes.ON_OFF_LIGHT;
-            const clusterIds: ClusterId[] = [OnOff.Cluster.id];
+            const clusterIds: ClusterId[] = [Identify.Cluster.id, Groups.Cluster.id, OnOff.Cluster.id];
             if (lightComponent.hasProperty('brightness')) {
               deviceType = DeviceTypes.DIMMABLE_LIGHT;
               clusterIds.push(LevelControl.Cluster.id);
@@ -616,23 +627,18 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               lightComponent.hasProperty('rgb')
             ) {
               deviceType = DeviceTypes.COLOR_TEMPERATURE_LIGHT;
-              // clusterIds.push(ColorControl.Cluster.id);
             }
-            // const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [deviceType], clusterIds, undefined, config.debug as boolean);
             const child = mbDevice.addChildDeviceType(key, [deviceType], undefined, config.debug as boolean);
             child.log.logName = `${device.name} ${key}`;
-            child.addClusterServerFromList(child, clusterIds);
-            if (lightComponent.hasProperty('temp') && lightComponent.hasProperty('mode')) {
-              // mbDevice.configureColorControlCluster(true, false, true, ColorControl.ColorMode.ColorTemperatureMireds, child);
-              child.createDefaultColorControlClusterServer();
-            } else if (lightComponent.hasProperty('temp') && !lightComponent.hasProperty('mode')) {
-              // mbDevice.configureColorControlCluster(false, false, true, ColorControl.ColorMode.ColorTemperatureMireds, child);
-              child.createCtColorControlClusterServer();
-            } else if (deviceType === DeviceTypes.COLOR_TEMPERATURE_LIGHT) {
-              // mbDevice.configureColorControlCluster(true, false, false, ColorControl.ColorMode.CurrentHueAndCurrentSaturation, child);
-              child.createHsColorControlClusterServer();
+            mbDevice.addClusterServerFromList(child, clusterIds);
+            if (deviceType.code === DeviceTypes.COLOR_TEMPERATURE_LIGHT.code) {
+              mbDevice.log.info(`***Adding color control cluster to ${key}`);
+              if (lightComponent.hasProperty('temp') && lightComponent.hasProperty('mode')) child.addClusterServer(mbDevice.getXyColorControlClusterServer());
+              else if (lightComponent.hasProperty('temp') && !lightComponent.hasProperty('mode')) child.addClusterServer(mbDevice.getCtColorControlClusterServer());
+              else child.addClusterServer(mbDevice.getHsColorControlClusterServer());
+            } else {
+              mbDevice.log.info(`***Without color control cluster to ${key}`);
             }
-            child.addRequiredClusterServers(child);
 
             // Add the electrical measurementa cluster on the same endpoint
             this.addElectricalMeasurements(mbDevice, child, device, lightComponent);
@@ -676,6 +682,11 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             mbDevice.addCommandHandler('moveToHueAndSaturation', async ({ request, attributes, endpoint }) => {
               attributes.colorMode.setLocal(ColorControl.ColorMode.CurrentHueAndCurrentSaturation);
               const rgb = hslColorToRgbColor((request.hue / 254) * 360, (request.saturation / 254) * 100, 50);
+              shellyLightCommandHandler(mbDevice, endpoint.number, device, 'ColorRGB', undefined, undefined, { r: rgb.r, g: rgb.g, b: rgb.b });
+            });
+            mbDevice.addCommandHandler('moveToColor', async ({ request, attributes, endpoint }) => {
+              attributes.colorMode.setLocal(ColorControl.ColorMode.CurrentXAndCurrentY);
+              const rgb = xyColorToRgbColor(request.colorX / 65536, request.colorY / 65536);
               shellyLightCommandHandler(mbDevice, endpoint.number, device, 'ColorRGB', undefined, undefined, { r: rgb.r, g: rgb.g, b: rgb.b });
             });
             mbDevice.addCommandHandler('moveToColorTemperature', async ({ request, attributes, endpoint }) => {
