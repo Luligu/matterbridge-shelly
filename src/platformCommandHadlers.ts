@@ -22,11 +22,19 @@
  */
 
 import { EndpointNumber, MatterbridgeDevice, WindowCovering, WindowCoveringCluster } from 'matterbridge';
-import { db, dn, er, hk, idn, nf, rs, YELLOW } from 'matterbridge/logger';
+import { db, debugStringify, dn, er, hk, idn, nf, or, rs, YELLOW } from 'matterbridge/logger';
 import { isValidNumber, isValidObject } from 'matterbridge/utils';
 
 import { ShellyDevice } from './shellyDevice.js';
-import { ShellyCoverComponent, ShellyLightComponent, ShellySwitchComponent } from './shellyComponent.js';
+import { ShellyComponent, ShellyCoverComponent, ShellyLightComponent, ShellySwitchComponent } from './shellyComponent.js';
+
+type PrimitiveValues = boolean | number | bigint | string | object | null | undefined;
+
+export function shellyIdentifyCommandHandler(endpoint: MatterbridgeDevice, component: ShellyComponent, request: Record<string, PrimitiveValues>): void {
+  endpoint.log.info(
+    `Identify command received for endpoint ${or}${endpoint.name}${nf}:${or}${endpoint.number}${nf} component ${hk}${component.name}${nf}:${hk}${component.id}${nf} request ${debugStringify(request)}`,
+  );
+}
 
 export function shellySwitchCommandHandler(
   matterbridgeDevice: MatterbridgeDevice,

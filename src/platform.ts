@@ -62,7 +62,7 @@ import {
 } from 'matterbridge';
 
 // import { EveHistory, EveHistoryCluster, MatterHistory } from 'matterbridge/history';
-import { AnsiLogger, BLUE, CYAN, GREEN, LogLevel, TimestampFormat, YELLOW, db, debugStringify, dn, er, hk, idn, nf, nt, or, rs, wr, zb } from 'matterbridge/logger';
+import { AnsiLogger, BLUE, CYAN, GREEN, LogLevel, TimestampFormat, YELLOW, db, dn, er, hk, idn, nf, nt, rs, wr, zb } from 'matterbridge/logger';
 import { NodeStorage, NodeStorageManager } from 'matterbridge/storage';
 import {
   hslColorToRgbColor,
@@ -85,7 +85,7 @@ import { DiscoveredDevice } from './mdnsScanner.js';
 import { ShellyDevice } from './shellyDevice.js';
 import { isLightComponent, ShellyComponent, ShellyCoverComponent, ShellyLightComponent, ShellySwitchComponent } from './shellyComponent.js';
 import { ShellyData, ShellyDataType } from './shellyTypes.js';
-import { shellyCoverCommandHandler, shellyLightCommandHandler, shellySwitchCommandHandler } from './platformCommandHadlers.js';
+import { shellyCoverCommandHandler, shellyIdentifyCommandHandler, shellyLightCommandHandler, shellySwitchCommandHandler } from './platformCommandHadlers.js';
 import { shellyUpdateHandler } from './platformUpdateHandler.js';
 
 type ConfigDeviceIp = Record<string, string>;
@@ -363,9 +363,10 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             if (!isValidString(addr, 11) || !isValidNumber(rssi, -100, 0) || !isValidNumber(packet_id, 0) || !isValidNumber(last_updated_ts)) return;
             const blu = this.bluBridgedDevices.get(addr);
             const bthomeDevice = device.bthomeDevices.get(addr);
+            if (bthomeDevice && !this._validateDeviceWhiteBlackList(bthomeDevice.name)) return;
             if (!blu || !bthomeDevice) {
               this.log.error(`Shelly device ${hk}${device.id}${er} host ${zb}${device.host}${er} sent an unknown BLU device address ${CYAN}${addr}${er}`);
-              return;
+              return; // Shelly device shelly2pmg3-34CDB0770C4C host 192.168.1.166 sent an unknown BLU device address 0c:ef:f6:f1:d7:7b
             }
             blu.log.info(
               `${idn}BLU${rs}${db} observer device update message for BLU device ${idn}${blu?.deviceName ?? addr}${rs}${db}: rssi ${YELLOW}${rssi}${db} packet_id ${YELLOW}${packet_id}${db} last_updated ${YELLOW}${device.getLocalTimeFromLastUpdated(last_updated_ts)}${db}`,
@@ -376,6 +377,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             if (!isValidString(addr, 11) || !isValidString(sensorName, 6) || !isValidNumber(sensorIndex, 0, 3)) return;
             const blu = this.bluBridgedDevices.get(addr);
             const bthomeDevice = device.bthomeDevices.get(addr);
+            if (bthomeDevice && !this._validateDeviceWhiteBlackList(bthomeDevice.name)) return;
             if (!blu || !bthomeDevice) {
               this.log.error(`Shelly device ${hk}${device.id}${er} host ${zb}${device.host}${er} sent an unknown BLU device address ${CYAN}${addr}${er}`);
               return;
@@ -436,6 +438,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             if (!isValidString(addr, 11) || !isValidString(event, 6)) return;
             const blu = this.bluBridgedDevices.get(addr);
             const bthomeDevice = device.bthomeDevices.get(addr);
+            if (bthomeDevice && !this._validateDeviceWhiteBlackList(bthomeDevice.name)) return;
             if (!blu || !bthomeDevice) {
               this.log.error(`Shelly device ${hk}${device.id}${er} host ${zb}${device.host}${er} sent an unknown BLU device address ${CYAN}${addr}${er}`);
               return;
@@ -457,6 +460,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             if (!isValidString(addr, 11) || !isValidString(sensorName, 6) || !isValidNumber(sensorIndex, 0, 3) || !isValidString(event, 6)) return;
             const blu = this.bluBridgedDevices.get(addr);
             const bthomeDevice = device.bthomeDevices.get(addr);
+            if (bthomeDevice && !this._validateDeviceWhiteBlackList(bthomeDevice.name)) return;
             if (!blu || !bthomeDevice) {
               this.log.error(`Shelly device ${hk}${device.id}${er} host ${zb}${device.host}${er} sent an unknown BLU device address ${CYAN}${addr}${er}`);
               return;
@@ -644,7 +648,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
 
             // Add command handlers from Matter
             child.addCommandHandler('identify', async ({ request }) => {
-              child.log.info(`Identify command received for endpoint ${or}${child.name}${nf}:${or}${child.number}${nf} request ${debugStringify(request)}`);
+              shellyIdentifyCommandHandler(child, component, request);
             });
             child.addCommandHandler('on', async () => {
               shellyLightCommandHandler(mbDevice, child.number, device, 'On', true);
@@ -721,7 +725,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
 
             // Add command handlers
             child.addCommandHandler('identify', async ({ request }) => {
-              child.log.info(`Identify command received for endpoint ${or}${child.name}${nf}:${or}${child.number}${nf} request ${debugStringify(request)}`);
+              shellyIdentifyCommandHandler(child, component, request);
             });
             child.addCommandHandler('on', async () => {
               shellySwitchCommandHandler(mbDevice, child.number, device, 'On');
@@ -751,7 +755,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
 
             // Add command handlers
             child.addCommandHandler('identify', async ({ request }) => {
-              child.log.info(`Identify command received for endpoint ${or}${child.name}${nf}:${or}${child.number}${nf} request ${debugStringify(request)}`);
+              shellyIdentifyCommandHandler(child, component, request);
             });
             child.addCommandHandler('upOrOpen', async () => {
               shellyCoverCommandHandler(mbDevice, child.number, device, 'Open', 0);
@@ -1073,7 +1077,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             );
             // Add command handlers
             child.addCommandHandler('identify', async ({ request }) => {
-              child.log.info(`Identify command received for endpoint ${or}${child.name}${nf}:${or}${child.number}${nf} request ${debugStringify(request)}`);
+              shellyIdentifyCommandHandler(child, component, request);
             });
             // Add event handler
             thermostatComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
