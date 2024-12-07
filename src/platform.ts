@@ -171,6 +171,12 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
 
     // handle Shelly discovered event (called from mDNS scanner, storage or config devices)
     this.shelly.on('discovered', async (discoveredDevice: DiscoveredDevice) => {
+      if (discoveredDevice.port === 9000) {
+        this.log.warn(
+          `Shelly device ${hk}${discoveredDevice.id}${wr} host ${zb}${discoveredDevice.host}${wr} has been discovered on port ${discoveredDevice.port}. Unofficial Shelly firmware are not supported.`,
+        );
+        return;
+      }
       if (this.discoveredDevices.has(discoveredDevice.id)) {
         const stored = this.storedDevices.get(discoveredDevice.id);
         if (stored?.host !== discoveredDevice.host) {
