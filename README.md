@@ -191,6 +191,14 @@ If the blackList is defined the devices included in the list will not be exposed
 
 If the whiteList is defined only the devices included in the list are exposed to Matter. Use the device id (e.g. shellyplus2pm-5443B23D81F8).
 
+### entityBlackList
+
+The components in the list will not be exposed for all devices. Use the component name (i.e. Temperature).
+
+### deviceEntityBlackList
+      
+List of components not to be exposed for a single device. Enter in the first field the name of the device id (e.g. shellyplus2pm-5443B23D81F8) and in the second field add all the component names (i.e. Temperature) or component ids (i.e. temperature:0) you want to exclude for that device.
+
 ### nocacheList
 
 The devices in the list will not be loaded from the cache. Use the device id (e.g. shellyplus2pm-5443B23D81F8). This is usefull and necessary if you change the the device configuration from the device web ui of from the Shelly app (e.g. changing from color to white or from switch to cover or adding other BLU devices to a ble gateway). In this case put the device id in the list and restart.
