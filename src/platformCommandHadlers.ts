@@ -30,93 +30,59 @@ import { ShellyComponent, ShellyCoverComponent, ShellyLightComponent, ShellySwit
 
 type PrimitiveValues = boolean | number | bigint | string | object | null | undefined;
 
+/**
+ * Handles the identify command for a Shelly device.
+ *
+ * @param {MatterbridgeDevice} endpoint - The Matterbridge device endpoint.
+ * @param {ShellyComponent} component - The Shelly component.
+ * @param {Record<string, PrimitiveValues>} request - The request payload.
+ */
 export function shellyIdentifyCommandHandler(endpoint: MatterbridgeDevice, component: ShellyComponent, request: Record<string, PrimitiveValues>): void {
   endpoint.log.info(
     `Identify command received for endpoint ${or}${endpoint.name}${nf}:${or}${endpoint.number}${nf} component ${hk}${component.name}${nf}:${hk}${component.id}${nf} request ${debugStringify(request)}`,
   );
 }
 
-export function shellySwitchCommandHandler(
-  matterbridgeDevice: MatterbridgeDevice,
-  endpointNumber: EndpointNumber | undefined,
-  shellyDevice: ShellyDevice,
-  command: string,
-): boolean {
-  // Get the matter endpoint
-  if (!endpointNumber) {
-    shellyDevice.log.error(`shellyCommandHandler error: endpointNumber undefined for shelly device ${dn}${shellyDevice?.id}${er}`);
-    return false;
-  }
-  const endpoint = matterbridgeDevice.getChildEndpoint(endpointNumber);
-  if (!endpoint) {
-    shellyDevice.log.error(`shellyCommandHandler error: endpoint not found for shelly device ${dn}${shellyDevice?.id}${er}`);
-    return false;
-  }
-  // Get the Shelly component
-  const componentName = endpoint.uniqueStorageKey;
-  if (!componentName) {
-    shellyDevice.log.error(`shellyCommandHandler error: componentName not found for endpoint ${endpointNumber} on shelly device ${dn}${shellyDevice?.id}${er}`);
-    return false;
-  }
-  const switchComponent = shellyDevice.getComponent(componentName) as ShellySwitchComponent;
-  if (!switchComponent) {
-    shellyDevice.log.error(`shellyCommandHandler error: component ${componentName} not found for shelly device ${dn}${shellyDevice?.id}${er}`);
-    return false;
-  }
-
-  // Send On() Off() Toggle() command
+/**
+ * Handles switch commands (On, Off, Toggle) for a Shelly switch component.
+ *
+ * @param {MatterbridgeDevice} endpoint - The Matterbridge device endpoint.
+ * @param {ShellySwitchComponent} switchComponent - The Shelly switch component.
+ * @param {string} command - The command to execute (On, Off, Toggle).
+ */
+export function shellySwitchCommandHandler(endpoint: MatterbridgeDevice, switchComponent: ShellySwitchComponent, command: string): void {
   if (command === 'On') switchComponent.On();
   else if (command === 'Off') switchComponent.Off();
   else if (command === 'Toggle') switchComponent.Toggle();
-  if (command === 'On' || command === 'Off' || command === 'Toggle')
-    shellyDevice.log.info(`${db}Sent command ${hk}${componentName}${nf}:${command}()${db} to shelly device ${idn}${shellyDevice?.id}${rs}${db}`);
-  return true;
+  endpoint.log.info(
+    `${db}Sent command ${hk}${switchComponent.name}${db}:${hk}${switchComponent.id}${db}:${hk}${command}()${db} to shelly device ${idn}${switchComponent.device.id}${rs}${db}`,
+  );
 }
 
 export function shellyLightCommandHandler(
-  matterbridgeDevice: MatterbridgeDevice,
-  endpointNumber: EndpointNumber | undefined,
-  shellyDevice: ShellyDevice,
+  endpoint: MatterbridgeDevice,
+  lightComponent: ShellyLightComponent,
   command: string,
-  state?: boolean,
   level?: number | null,
   color?: { r: number; g: number; b: number },
   colorTemp?: number,
 ): boolean {
-  // Get the matter endpoint
-  if (!endpointNumber) {
-    shellyDevice.log.error(`shellyCommandHandler error: endpointNumber undefined for shelly device ${dn}${shellyDevice?.id}${er}`);
-    return false;
-  }
-  const endpoint = matterbridgeDevice.getChildEndpoint(endpointNumber);
-  if (!endpoint) {
-    shellyDevice.log.error(`shellyCommandHandler error: endpoint not found for shelly device ${dn}${shellyDevice?.id}${er}`);
-    return false;
-  }
-  // Get the Shelly component
-  const componentName = endpoint.uniqueStorageKey;
-  if (!componentName) {
-    shellyDevice.log.error(`shellyCommandHandler error: componentName not found for endpoint ${endpointNumber} on shelly device ${dn}${shellyDevice?.id}${er}`);
-    return false;
-  }
-  const lightComponent = shellyDevice?.getComponent(componentName) as ShellyLightComponent;
-  if (!lightComponent) {
-    shellyDevice.log.error(`shellyCommandHandler error: component ${componentName} not found for shelly device ${dn}${shellyDevice?.id}${er}`);
-    return false;
-  }
-
   // Send On() Off() Toggle() command
   if (command === 'On') lightComponent.On();
   else if (command === 'Off') lightComponent.Off();
   else if (command === 'Toggle') lightComponent.Toggle();
   if (command === 'On' || command === 'Off' || command === 'Toggle')
-    shellyDevice.log.info(`${db}Sent command ${hk}${componentName}${nf}:${command}()${db} to shelly device ${idn}${shellyDevice?.id}${rs}${db}`);
+    endpoint.log.info(
+      `${db}Sent command ${hk}${lightComponent.name}${db}:${hk}${lightComponent.id}${db}:${hk}${command}()${db} to shelly device ${idn}${lightComponent.device.id}${rs}${db}`,
+    );
 
   // Send Level() command
   if (command === 'Level' && isValidNumber(level, 0, 254)) {
     const shellyLevel = Math.max(Math.min(Math.round((level / 254) * 100), 100), 1);
     lightComponent.Level(shellyLevel);
-    shellyDevice.log.info(`${db}Sent command ${hk}${componentName}${nf}:Level(${YELLOW}${shellyLevel}${nf})${db} to shelly device ${idn}${shellyDevice?.id}${rs}${db}`);
+    endpoint.log.info(
+      `${db}Sent command ${hk}${lightComponent.name}${db}:${hk}${lightComponent.id}${db}:${hk}Level(${YELLOW}${shellyLevel}${hk})${db} to shelly device ${idn}${lightComponent.device.id}${rs}${db}`,
+    );
   }
 
   // Send ColorRGB() command
@@ -125,8 +91,8 @@ export function shellyLightCommandHandler(
     color.g = Math.max(Math.min(color.g, 255), 0);
     color.b = Math.max(Math.min(color.b, 255), 0);
     lightComponent.ColorRGB(color.r, color.g, color.b);
-    shellyDevice.log.info(
-      `${db}Sent command ${hk}${componentName}${nf}:ColorRGB(${YELLOW}${color.r}${nf}, ${YELLOW}${color.g}${nf}, ${YELLOW}${color.b}${nf})${db} to shelly device ${idn}${shellyDevice?.id}${rs}${db}`,
+    endpoint.log.info(
+      `${db}Sent command ${hk}${lightComponent.name}${db}:${hk}${lightComponent.id}${db}:${hk}ColorRGB(${YELLOW}${color.r}${hk}, ${YELLOW}${color.g}${hk}, ${YELLOW}${color.b}${hk})${db} to shelly device ${idn}${lightComponent.device.id}${rs}${db}`,
     );
   }
 
@@ -134,13 +100,12 @@ export function shellyLightCommandHandler(
   if (command === 'ColorTemp' && isValidNumber(colorTemp, 147, 500)) {
     const minColorTemp = 147;
     const maxColorTemp = 500;
-    const minTemp = shellyDevice.model === 'SHBDUO-1' ? 2700 : 3000;
+    const minTemp = lightComponent.device.model === 'SHBDUO-1' ? 2700 : 3000;
     const maxTemp = 6500;
     const temp = Math.max(Math.min(Math.round(((colorTemp - minColorTemp) / (maxColorTemp - minColorTemp)) * (minTemp - maxTemp) + maxTemp), maxTemp), minTemp);
-    const lightComponent = shellyDevice?.getComponent(componentName) as ShellyLightComponent;
     lightComponent.ColorTemp(temp);
-    shellyDevice.log.info(
-      `${db}Sent command ${hk}${componentName}${nf}:ColorTemp(for model ${shellyDevice.model} ${YELLOW}${colorTemp}->${temp}${nf})${db} to shelly device ${idn}${shellyDevice?.id}${rs}${db}`,
+    endpoint.log.info(
+      `${db}Sent command ${hk}${lightComponent.name}${db}:${hk}${lightComponent.id}${db}:${hk}ColorTemp(for model ${lightComponent.device.model} ${YELLOW}${colorTemp}${hk}->${YELLOW}${temp}${hk})${db} to shelly device ${idn}${lightComponent.device.id}${rs}${db}`,
     );
   }
   return true;

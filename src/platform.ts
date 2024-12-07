@@ -83,7 +83,7 @@ import * as fs from 'fs';
 import { Shelly } from './shelly.js';
 import { DiscoveredDevice } from './mdnsScanner.js';
 import { ShellyDevice } from './shellyDevice.js';
-import { isLightComponent, ShellyComponent, ShellyCoverComponent, ShellyLightComponent, ShellySwitchComponent } from './shellyComponent.js';
+import { isLightComponent, isSwitchComponent, ShellyComponent, ShellyCoverComponent, ShellyLightComponent, ShellySwitchComponent } from './shellyComponent.js';
 import { ShellyData, ShellyDataType } from './shellyTypes.js';
 import { shellyCoverCommandHandler, shellyIdentifyCommandHandler, shellyLightCommandHandler, shellySwitchCommandHandler } from './platformCommandHadlers.js';
 import { shellyUpdateHandler } from './platformUpdateHandler.js';
@@ -611,137 +611,129 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               device.log.notice(`Shelly device ${idn}${device.name}${rs}${nt} id ${hk}${device.id}${nt} host ${zb}${device.host}${nt} is sleeping`);
             }
           });
-        } else if (component.name === 'Light' || component.name === 'Rgb') {
-          const lightComponent = device.getComponent(key);
-          if (isLightComponent(lightComponent)) {
-            // Set the device type and clusters based on the light component properties
-            let deviceType = DeviceTypes.ON_OFF_LIGHT;
-            // const clusterIds: ClusterId[] = [Identify.Cluster.id, Groups.Cluster.id, OnOff.Cluster.id];
-            if (lightComponent.hasProperty('brightness')) {
-              deviceType = DeviceTypes.DIMMABLE_LIGHT;
-              // clusterIds.push(LevelControl.Cluster.id);
-            }
-            if (
-              (lightComponent.hasProperty('red') && lightComponent.hasProperty('green') && lightComponent.hasProperty('blue') && device.profile !== 'white') ||
-              (lightComponent.hasProperty('temp') && device.profile !== 'color') ||
-              lightComponent.hasProperty('rgb')
-            ) {
-              deviceType = DeviceTypes.COLOR_TEMPERATURE_LIGHT;
-            }
-            const child = mbDevice.addChildDeviceType(key, [deviceType], undefined, config.debug as boolean);
-            child.log.logName = `${device.name} ${key}`;
-            child.createDefaultIdentifyClusterServer();
-            child.createDefaultGroupsClusterServer();
-            child.createDefaultOnOffClusterServer();
-            if (deviceType.code === DeviceTypes.DIMMABLE_LIGHT.code || deviceType.code === DeviceTypes.COLOR_TEMPERATURE_LIGHT.code) child.createDefaultLevelControlClusterServer();
-            if (deviceType.code === DeviceTypes.COLOR_TEMPERATURE_LIGHT.code) {
-              // mbDevice.log.debug(`***Adding color control cluster to ${key}`);
-              if (lightComponent.hasProperty('temp') && lightComponent.hasProperty('mode')) child.addClusterServer(child.getDefaultColorControlClusterServer());
-              else if (lightComponent.hasProperty('temp') && !lightComponent.hasProperty('mode')) child.addClusterServer(child.getCtColorControlClusterServer());
-              else child.addClusterServer(child.getHsColorControlClusterServer());
-            } else {
-              // mbDevice.log.debug(`***Without color control cluster to ${key}`);
-            }
-
-            // Add the electrical measurementa cluster on the same endpoint
-            this.addElectricalMeasurements(mbDevice, child, device, lightComponent);
-
-            // Add command handlers from Matter
-            child.addCommandHandler('identify', async ({ request }) => {
-              shellyIdentifyCommandHandler(child, component, request);
-            });
-            child.addCommandHandler('on', async () => {
-              shellyLightCommandHandler(mbDevice, child.number, device, 'On', true);
-            });
-            child.addCommandHandler('off', async () => {
-              shellyLightCommandHandler(mbDevice, child.number, device, 'Off', false);
-            });
-            child.addCommandHandler('toggle', async () => {
-              shellyLightCommandHandler(mbDevice, child.number, device, 'Toggle', false);
-            });
-            child.addCommandHandler('moveToLevel', async ({ request }) => {
-              shellyLightCommandHandler(mbDevice, child.number, device, 'Level', undefined, request.level);
-            });
-            child.addCommandHandler('moveToLevelWithOnOff', async ({ request }) => {
-              shellyLightCommandHandler(mbDevice, child.number, device, 'Level', undefined, request.level);
-            });
-            child.addCommandHandler('moveToHue', async ({ request }) => {
-              child.setAttribute(ColorControlCluster.id, 'colorMode', ColorControl.ColorMode.CurrentHueAndCurrentSaturation, child.log);
-              const saturation = child.getAttribute(ColorControlCluster.id, 'currentSaturation', child.log);
-              const rgb = hslColorToRgbColor((request.hue / 254) * 360, (saturation / 254) * 100, 50);
-              mbDevice.log.debug(`Sending command moveToHue => ColorRGB(${rgb.r},  ${rgb.g}, ${rgb.b})`);
-              if (device.colorCommandTimeout) clearTimeout(device.colorCommandTimeout);
-              device.colorCommandTimeout = setTimeout(() => {
-                shellyLightCommandHandler(mbDevice, child.number, device, 'ColorRGB', undefined, undefined, { r: rgb.r, g: rgb.g, b: rgb.b });
-              }, 500);
-            });
-            child.addCommandHandler('moveToSaturation', async ({ request }) => {
-              child.setAttribute(ColorControlCluster.id, 'colorMode', ColorControl.ColorMode.CurrentHueAndCurrentSaturation, child.log);
-              const hue = child.getAttribute(ColorControlCluster.id, 'currentHue', child.log);
-              const rgb = hslColorToRgbColor((hue / 254) * 360, (request.saturation / 254) * 100, 50);
-              mbDevice.log.debug(`Sending command moveToSaturation => ColorRGB(${rgb.r},  ${rgb.g}, ${rgb.b})`);
-              if (device.colorCommandTimeout) clearTimeout(device.colorCommandTimeout);
-              device.colorCommandTimeout = setTimeout(() => {
-                shellyLightCommandHandler(mbDevice, child.number, device, 'ColorRGB', undefined, undefined, { r: rgb.r, g: rgb.g, b: rgb.b });
-              }, 500);
-            });
-            child.addCommandHandler('moveToHueAndSaturation', async ({ request }) => {
-              child.setAttribute(ColorControlCluster.id, 'colorMode', ColorControl.ColorMode.CurrentHueAndCurrentSaturation, child.log);
-              const rgb = hslColorToRgbColor((request.hue / 254) * 360, (request.saturation / 254) * 100, 50);
-              shellyLightCommandHandler(mbDevice, child.number, device, 'ColorRGB', undefined, undefined, { r: rgb.r, g: rgb.g, b: rgb.b });
-            });
-            child.addCommandHandler('moveToColor', async ({ request }) => {
-              child.setAttribute(ColorControlCluster.id, 'colorMode', ColorControl.ColorMode.CurrentXAndCurrentY, child.log);
-              const rgb = xyColorToRgbColor(request.colorX / 65536, request.colorY / 65536);
-              shellyLightCommandHandler(mbDevice, child.number, device, 'ColorRGB', undefined, undefined, { r: rgb.r, g: rgb.g, b: rgb.b });
-            });
-            child.addCommandHandler('moveToColorTemperature', async ({ request }) => {
-              child.setAttribute(ColorControlCluster.id, 'colorMode', ColorControl.ColorMode.ColorTemperatureMireds, child.log);
-              shellyLightCommandHandler(mbDevice, child.number, device, 'ColorTemp', undefined, undefined, undefined, request.colorTemperatureMireds);
-            });
-
-            // Add event handler from Shelly
-            lightComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
-              shellyUpdateHandler(this, mbDevice, device, component, property, value);
-            });
+        } else if (isLightComponent(component)) {
+          // Set the device type and clusters based on the light component properties
+          let deviceType = DeviceTypes.ON_OFF_LIGHT;
+          if (component.hasProperty('brightness')) {
+            deviceType = DeviceTypes.DIMMABLE_LIGHT;
           }
-        } else if (component.name === 'Switch' || component.name === 'Relay') {
-          const switchComponent = device.getComponent(key);
-          if (switchComponent) {
-            let deviceType = onOffSwitch;
-            if (config.exposeSwitch === 'light') deviceType = onOffLight;
-            if (config.exposeSwitch === 'outlet') deviceType = onOffOutlet;
-            if (config.switchList && (config.switchList as string[]).includes(device.id)) deviceType = onOffSwitch;
-            if (config.lightList && (config.lightList as string[]).includes(device.id)) deviceType = onOffLight;
-            if (config.outletList && (config.outletList as string[]).includes(device.id)) deviceType = onOffOutlet;
-            const child = mbDevice.addChildDeviceType(key, [deviceType], undefined, config.debug as boolean);
-            child.log.logName = `${device.name} ${key}`;
-            child.createDefaultIdentifyClusterServer();
-            child.createDefaultGroupsClusterServer();
-            child.createDefaultOnOffClusterServer();
-
-            // Add the electrical measurementa cluster on the same endpoint
-            this.addElectricalMeasurements(mbDevice, child, device, switchComponent);
-
-            // Add command handlers
-            child.addCommandHandler('identify', async ({ request }) => {
-              shellyIdentifyCommandHandler(child, component, request);
-            });
-            child.addCommandHandler('on', async () => {
-              shellySwitchCommandHandler(mbDevice, child.number, device, 'On');
-            });
-            child.addCommandHandler('off', async () => {
-              shellySwitchCommandHandler(mbDevice, child.number, device, 'Off');
-            });
-            child.addCommandHandler('toggle', async () => {
-              shellySwitchCommandHandler(mbDevice, child.number, device, 'Toggle');
-            });
-
-            // Add event handler
-            switchComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
-              shellyUpdateHandler(this, mbDevice, device, component, property, value);
-            });
+          if (
+            (component.hasProperty('red') && component.hasProperty('green') && component.hasProperty('blue') && device.profile !== 'white') ||
+            (component.hasProperty('temp') && device.profile !== 'color') ||
+            component.hasProperty('rgb')
+          ) {
+            deviceType = DeviceTypes.COLOR_TEMPERATURE_LIGHT;
           }
+          const child = mbDevice.addChildDeviceType(key, [deviceType], undefined, config.debug as boolean);
+          child.log.logName = `${device.name} ${key}`;
+          child.createDefaultIdentifyClusterServer();
+          child.createDefaultGroupsClusterServer();
+          child.createDefaultOnOffClusterServer();
+          if (deviceType.code === DeviceTypes.DIMMABLE_LIGHT.code || deviceType.code === DeviceTypes.COLOR_TEMPERATURE_LIGHT.code) child.createDefaultLevelControlClusterServer();
+          if (deviceType.code === DeviceTypes.COLOR_TEMPERATURE_LIGHT.code) {
+            // mbDevice.log.debug(`***Adding color control cluster to ${key}`);
+            if (component.hasProperty('temp') && component.hasProperty('mode')) child.addClusterServer(child.getDefaultColorControlClusterServer());
+            else if (component.hasProperty('temp') && !component.hasProperty('mode')) child.addClusterServer(child.getCtColorControlClusterServer());
+            else child.addClusterServer(child.getHsColorControlClusterServer());
+          } else {
+            // mbDevice.log.debug(`***Without color control cluster to ${key}`);
+          }
+
+          // Add the electrical measurementa cluster on the same endpoint
+          this.addElectricalMeasurements(mbDevice, child, device, component);
+
+          // Add command handlers from Matter
+          child.addCommandHandler('identify', async ({ request }) => {
+            shellyIdentifyCommandHandler(child, component, request);
+          });
+          child.addCommandHandler('on', async () => {
+            shellyLightCommandHandler(child, component, 'On');
+          });
+          child.addCommandHandler('off', async () => {
+            shellyLightCommandHandler(child, component, 'Off');
+          });
+          child.addCommandHandler('toggle', async () => {
+            shellyLightCommandHandler(child, component, 'Toggle');
+          });
+          child.addCommandHandler('moveToLevel', async ({ request }) => {
+            shellyLightCommandHandler(child, component, 'Level', request.level);
+          });
+          child.addCommandHandler('moveToLevelWithOnOff', async ({ request }) => {
+            shellyLightCommandHandler(child, component, 'Level', request.level);
+          });
+          child.addCommandHandler('moveToHue', async ({ request }) => {
+            child.setAttribute(ColorControlCluster.id, 'colorMode', ColorControl.ColorMode.CurrentHueAndCurrentSaturation, child.log);
+            const saturation = child.getAttribute(ColorControlCluster.id, 'currentSaturation', child.log);
+            const rgb = hslColorToRgbColor((request.hue / 254) * 360, (saturation / 254) * 100, 50);
+            mbDevice.log.debug(`Sending command moveToHue => ColorRGB(${rgb.r},  ${rgb.g}, ${rgb.b})`);
+            if (device.colorCommandTimeout) clearTimeout(device.colorCommandTimeout);
+            device.colorCommandTimeout = setTimeout(() => {
+              shellyLightCommandHandler(child, component, 'ColorRGB', undefined, { r: rgb.r, g: rgb.g, b: rgb.b });
+            }, 500);
+          });
+          child.addCommandHandler('moveToSaturation', async ({ request }) => {
+            child.setAttribute(ColorControlCluster.id, 'colorMode', ColorControl.ColorMode.CurrentHueAndCurrentSaturation, child.log);
+            const hue = child.getAttribute(ColorControlCluster.id, 'currentHue', child.log);
+            const rgb = hslColorToRgbColor((hue / 254) * 360, (request.saturation / 254) * 100, 50);
+            mbDevice.log.debug(`Sending command moveToSaturation => ColorRGB(${rgb.r},  ${rgb.g}, ${rgb.b})`);
+            if (device.colorCommandTimeout) clearTimeout(device.colorCommandTimeout);
+            device.colorCommandTimeout = setTimeout(() => {
+              shellyLightCommandHandler(child, component, 'ColorRGB', undefined, { r: rgb.r, g: rgb.g, b: rgb.b });
+            }, 500);
+          });
+          child.addCommandHandler('moveToHueAndSaturation', async ({ request }) => {
+            child.setAttribute(ColorControlCluster.id, 'colorMode', ColorControl.ColorMode.CurrentHueAndCurrentSaturation, child.log);
+            const rgb = hslColorToRgbColor((request.hue / 254) * 360, (request.saturation / 254) * 100, 50);
+            shellyLightCommandHandler(child, component, 'ColorRGB', undefined, { r: rgb.r, g: rgb.g, b: rgb.b });
+          });
+          child.addCommandHandler('moveToColor', async ({ request }) => {
+            child.setAttribute(ColorControlCluster.id, 'colorMode', ColorControl.ColorMode.CurrentXAndCurrentY, child.log);
+            const rgb = xyColorToRgbColor(request.colorX / 65536, request.colorY / 65536);
+            shellyLightCommandHandler(child, component, 'ColorRGB', undefined, { r: rgb.r, g: rgb.g, b: rgb.b });
+          });
+          child.addCommandHandler('moveToColorTemperature', async ({ request }) => {
+            child.setAttribute(ColorControlCluster.id, 'colorMode', ColorControl.ColorMode.ColorTemperatureMireds, child.log);
+            shellyLightCommandHandler(child, component, 'ColorTemp', undefined, undefined, request.colorTemperatureMireds);
+          });
+
+          // Add event handler from Shelly
+          component.on('update', (component: string, property: string, value: ShellyDataType) => {
+            shellyUpdateHandler(this, mbDevice, device, component, property, value);
+          });
+        } else if (isSwitchComponent(component)) {
+          let deviceType = onOffSwitch;
+          if (config.exposeSwitch === 'light') deviceType = onOffLight;
+          if (config.exposeSwitch === 'outlet') deviceType = onOffOutlet;
+          if (config.switchList && (config.switchList as string[]).includes(device.id)) deviceType = onOffSwitch;
+          if (config.lightList && (config.lightList as string[]).includes(device.id)) deviceType = onOffLight;
+          if (config.outletList && (config.outletList as string[]).includes(device.id)) deviceType = onOffOutlet;
+          const child = mbDevice.addChildDeviceType(key, [deviceType], undefined, config.debug as boolean);
+          child.log.logName = `${device.name} ${key}`;
+          child.createDefaultIdentifyClusterServer();
+          child.createDefaultGroupsClusterServer();
+          child.createDefaultOnOffClusterServer();
+
+          // Add the electrical measurementa cluster on the same endpoint
+          this.addElectricalMeasurements(mbDevice, child, device, component);
+
+          // Add command handlers
+          child.addCommandHandler('identify', async ({ request }) => {
+            shellyIdentifyCommandHandler(child, component, request);
+          });
+          child.addCommandHandler('on', async () => {
+            shellySwitchCommandHandler(child, component, 'On');
+          });
+          child.addCommandHandler('off', async () => {
+            shellySwitchCommandHandler(child, component, 'Off');
+          });
+          child.addCommandHandler('toggle', async () => {
+            shellySwitchCommandHandler(child, component, 'Toggle');
+          });
+
+          // Add event handler
+          component.on('update', (component: string, property: string, value: ShellyDataType) => {
+            shellyUpdateHandler(this, mbDevice, device, component, property, value);
+          });
         } else if (component.name === 'Cover' || component.name === 'Roller') {
           const coverComponent = device.getComponent(key);
           if (coverComponent) {
