@@ -10,6 +10,7 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 
 ### Added
 
+- [shelly]: Remove from discovered devices the device with mongoose firmware.
 - [shelly]: Add shellyIdentifyCommandHandler
 - [shelly]: Refactor shellySwitchCommandHandler
 - [shelly]: Refactor shellyLightCommandHandler
