@@ -201,7 +201,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         this.storedDevices.set(discoveredDevice.id, discoveredDevice);
         await this.saveStoredDevices();
       }
-      if (this.validateWhiteBlackList(discoveredDevice.id)) {
+      if (this._validateDeviceWhiteBlackList(discoveredDevice.id)) {
         await this.addDevice(discoveredDevice.id, discoveredDevice.host);
       }
     });
@@ -242,6 +242,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           this.log.info(`Shelly device ${hk}${device.id}${nf} host ${zb}${device.host}${nf} is a ble gateway. Adding paired BLU devices...`);
           // Register the BLU devices
           for (const [key, bthomeDevice] of device.bthomeDevices) {
+            if (!this._validateDeviceWhiteBlackList(bthomeDevice.name)) continue;
             this.log.info(
               `- ${idn}${bthomeDevice.name}${rs}${nf} address ${CYAN}${bthomeDevice.addr}${nf} id ${CYAN}${bthomeDevice.id}${nf} ` +
                 `model ${CYAN}${bthomeDevice.model}${nf} (${CYAN}${bthomeDevice.type}${nf})`,
@@ -1574,6 +1575,36 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     }
     if (this.blackList.length > 0 && this.blackList.find((name) => name === entityName)) {
       this.log.warn(`Skipping ${dn}${entityName}${wr} because in blacklist`);
+      return false;
+    }
+    return true;
+  }
+
+  // TODO: remove when matterbridge 1.6.6 is released and required
+  _validateDeviceWhiteBlackList(device: string) {
+    if (isValidArray(this.config.whiteList, 1) && !this.config.whiteList.includes(device)) {
+      this.log.info(`Skipping device ${CYAN}${device}${nf} because not in whitelist`);
+      return false;
+    }
+    if (isValidArray(this.config.blackList, 1) && this.config.blackList.includes(device)) {
+      this.log.info(`Skipping device ${CYAN}${device}${nf} because in blacklist`);
+      return false;
+    }
+    return true;
+  }
+
+  // TODO: remove when matterbridge 1.6.6 is released and required
+  _validateEntityBlackList(device: string, entity: string) {
+    if (isValidArray(this.config.entityBlackList, 1) && this.config.entityBlackList.find((e) => e === entity)) {
+      this.log.info(`Skipping entity ${CYAN}${entity}${nf} because in entityBlackList`);
+      return false;
+    }
+    if (
+      isValidObject(this.config.deviceEntityBlackList, 1) &&
+      device in this.config.deviceEntityBlackList &&
+      (this.config.deviceEntityBlackList as Record<string, string[]>)[device].includes(entity)
+    ) {
+      this.log.info(`Skipping entity ${CYAN}${entity}${wr} for device ${CYAN}${device}${nf} because in deviceEntityBlackList`);
       return false;
     }
     return true;
