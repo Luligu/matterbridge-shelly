@@ -363,7 +363,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             if (!isValidString(addr, 11) || !isValidNumber(rssi, -100, 0) || !isValidNumber(packet_id, 0) || !isValidNumber(last_updated_ts)) return;
             const blu = this.bluBridgedDevices.get(addr);
             const bthomeDevice = device.bthomeDevices.get(addr);
-            if (bthomeDevice && !this._validateDeviceWhiteBlackList(bthomeDevice.name)) return;
+            if (bthomeDevice && !this._validateDeviceWhiteBlackList(bthomeDevice.name, false)) return;
             if (!blu || !bthomeDevice) {
               this.log.error(`Shelly device ${hk}${device.id}${er} host ${zb}${device.host}${er} sent an unknown BLU device address ${CYAN}${addr}${er}`);
               return; // Shelly device shelly2pmg3-34CDB0770C4C host 192.168.1.166 sent an unknown BLU device address 0c:ef:f6:f1:d7:7b
@@ -377,7 +377,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             if (!isValidString(addr, 11) || !isValidString(sensorName, 6) || !isValidNumber(sensorIndex, 0, 3)) return;
             const blu = this.bluBridgedDevices.get(addr);
             const bthomeDevice = device.bthomeDevices.get(addr);
-            if (bthomeDevice && !this._validateDeviceWhiteBlackList(bthomeDevice.name)) return;
+            if (bthomeDevice && !this._validateDeviceWhiteBlackList(bthomeDevice.name, false)) return;
             if (!blu || !bthomeDevice) {
               this.log.error(`Shelly device ${hk}${device.id}${er} host ${zb}${device.host}${er} sent an unknown BLU device address ${CYAN}${addr}${er}`);
               return;
@@ -438,7 +438,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             if (!isValidString(addr, 11) || !isValidString(event, 6)) return;
             const blu = this.bluBridgedDevices.get(addr);
             const bthomeDevice = device.bthomeDevices.get(addr);
-            if (bthomeDevice && !this._validateDeviceWhiteBlackList(bthomeDevice.name)) return;
+            if (bthomeDevice && !this._validateDeviceWhiteBlackList(bthomeDevice.name, false)) return;
             if (!blu || !bthomeDevice) {
               this.log.error(`Shelly device ${hk}${device.id}${er} host ${zb}${device.host}${er} sent an unknown BLU device address ${CYAN}${addr}${er}`);
               return;
@@ -460,7 +460,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             if (!isValidString(addr, 11) || !isValidString(sensorName, 6) || !isValidNumber(sensorIndex, 0, 3) || !isValidString(event, 6)) return;
             const blu = this.bluBridgedDevices.get(addr);
             const bthomeDevice = device.bthomeDevices.get(addr);
-            if (bthomeDevice && !this._validateDeviceWhiteBlackList(bthomeDevice.name)) return;
+            if (bthomeDevice && !this._validateDeviceWhiteBlackList(bthomeDevice.name, false)) return;
             if (!blu || !bthomeDevice) {
               this.log.error(`Shelly device ${hk}${device.id}${er} host ${zb}${device.host}${er} sent an unknown BLU device address ${CYAN}${addr}${er}`);
               return;
@@ -1590,22 +1590,22 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
   }
 
   // TODO: remove when matterbridge 1.6.6 is released and required
-  _validateDeviceWhiteBlackList(device: string) {
+  _validateDeviceWhiteBlackList(device: string, log = true) {
     if (isValidArray(this.config.whiteList, 1) && !this.config.whiteList.includes(device)) {
-      this.log.info(`Skipping device ${CYAN}${device}${nf} because not in whitelist`);
+      if (log) this.log.info(`Skipping device ${CYAN}${device}${nf} because not in whitelist`);
       return false;
     }
     if (isValidArray(this.config.blackList, 1) && this.config.blackList.includes(device)) {
-      this.log.info(`Skipping device ${CYAN}${device}${nf} because in blacklist`);
+      if (log) this.log.info(`Skipping device ${CYAN}${device}${nf} because in blacklist`);
       return false;
     }
     return true;
   }
 
   // TODO: remove when matterbridge 1.6.6 is released and required
-  _validateEntityBlackList(device: string, entity: string) {
+  _validateEntityBlackList(device: string, entity: string, log = true) {
     if (isValidArray(this.config.entityBlackList, 1) && this.config.entityBlackList.find((e) => e === entity)) {
-      this.log.info(`Skipping entity ${CYAN}${entity}${nf} because in entityBlackList`);
+      if (log) this.log.info(`Skipping entity ${CYAN}${entity}${nf} because in entityBlackList`);
       return false;
     }
     if (
@@ -1613,7 +1613,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       device in this.config.deviceEntityBlackList &&
       (this.config.deviceEntityBlackList as Record<string, string[]>)[device].includes(entity)
     ) {
-      this.log.info(`Skipping entity ${CYAN}${entity}${wr} for device ${CYAN}${device}${nf} because in deviceEntityBlackList`);
+      if (log) this.log.info(`Skipping entity ${CYAN}${entity}${wr} for device ${CYAN}${device}${nf} because in deviceEntityBlackList`);
       return false;
     }
     return true;
