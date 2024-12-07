@@ -505,10 +505,6 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         device.firmware,
       );
 
-      mbDevice.addCommandHandler('identify', async ({ request, endpoint }) => {
-        mbDevice.log.info(`Identify command received for endpoint ${endpoint.number} request ${debugStringify(request)}`);
-      });
-
       // Set the powerSource cluster
       const childPowerSource = mbDevice.addChildDeviceType('PowerSource', [powerSource], undefined, config.debug as boolean);
       const batteryComponent = device.getComponent('battery');
@@ -649,6 +645,9 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             this.addElectricalMeasurements(mbDevice, child, device, lightComponent);
 
             // Add command handlers from Matter
+            child.addCommandHandler('identify', async ({ request, endpoint }) => {
+              mbDevice.log.info(`Identify command received for endpoint ${endpoint.number} request ${debugStringify(request)}`);
+            });
             mbDevice.addCommandHandler('on', async (data) => {
               shellyLightCommandHandler(mbDevice, data.endpoint.number, device, 'On', true);
             });
@@ -720,6 +719,9 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             this.addElectricalMeasurements(mbDevice, child, device, switchComponent);
 
             // Add command handlers
+            child.addCommandHandler('identify', async ({ request, endpoint }) => {
+              mbDevice.log.info(`Identify command received for endpoint ${endpoint.number} request ${debugStringify(request)}`);
+            });
             mbDevice.addCommandHandler('on', async (data) => {
               shellySwitchCommandHandler(mbDevice, data.endpoint?.number, device, 'On');
             });
@@ -756,6 +758,9 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             this.addElectricalMeasurements(mbDevice, child, device, coverComponent);
 
             // Add command handlers
+            child.addCommandHandler('identify', async ({ request, endpoint }) => {
+              mbDevice.log.info(`Identify command received for endpoint ${endpoint.number} request ${debugStringify(request)}`);
+            });
             mbDevice.addCommandHandler('upOrOpen', async (data) => {
               shellyCoverCommandHandler(mbDevice, data.endpoint.number, device, 'Open', 0);
             });
@@ -1074,6 +1079,10 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               },
               mbDevice.log,
             );
+            // Add command handlers
+            child.addCommandHandler('identify', async ({ request, endpoint }) => {
+              mbDevice.log.info(`Identify command received for endpoint ${endpoint.number} request ${debugStringify(request)}`);
+            });
             // Add event handler
             thermostatComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
               shellyUpdateHandler(this, mbDevice, device, component, property, value);
