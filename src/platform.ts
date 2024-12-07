@@ -505,7 +505,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       );
 
       mbDevice.addCommandHandler('identify', async ({ request, endpoint }) => {
-        this.log.info(`Identify command received for endpoint ${endpoint.number} request ${debugStringify(request)}`);
+        mbDevice.log.info(`Identify command received for endpoint ${endpoint.number} request ${debugStringify(request)}`);
       });
 
       // Set the powerSource cluster
@@ -632,12 +632,12 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             child.log.logName = `${device.name} ${key}`;
             mbDevice.addClusterServerFromList(child, clusterIds);
             if (deviceType.code === DeviceTypes.COLOR_TEMPERATURE_LIGHT.code) {
-              mbDevice.log.info(`***Adding color control cluster to ${key}`);
-              if (lightComponent.hasProperty('temp') && lightComponent.hasProperty('mode')) child.addClusterServer(mbDevice.getXyColorControlClusterServer());
+              // mbDevice.log.debug(`***Adding color control cluster to ${key}`);
+              if (lightComponent.hasProperty('temp') && lightComponent.hasProperty('mode')) child.addClusterServer(mbDevice.getDefaultColorControlClusterServer());
               else if (lightComponent.hasProperty('temp') && !lightComponent.hasProperty('mode')) child.addClusterServer(mbDevice.getCtColorControlClusterServer());
               else child.addClusterServer(mbDevice.getHsColorControlClusterServer());
             } else {
-              mbDevice.log.info(`***Without color control cluster to ${key}`);
+              // mbDevice.log.debug(`***Without color control cluster to ${key}`);
             }
 
             // Add the electrical measurementa cluster on the same endpoint
@@ -663,7 +663,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               attributes.colorMode.setLocal(ColorControl.ColorMode.CurrentHueAndCurrentSaturation);
               const saturation = child.getClusterServer(ColorControlCluster.with(ColorControl.Feature.HueSaturation))?.getCurrentSaturationAttribute() ?? 0;
               const rgb = hslColorToRgbColor((request.hue / 254) * 360, (saturation / 254) * 100, 50);
-              this.log.warn(`Sending command moveToHue => ColorRGB(${rgb.r},  ${rgb.g}, ${rgb.b})`);
+              mbDevice.log.debug(`Sending command moveToHue => ColorRGB(${rgb.r},  ${rgb.g}, ${rgb.b})`);
               if (device.colorCommandTimeout) clearTimeout(device.colorCommandTimeout);
               device.colorCommandTimeout = setTimeout(() => {
                 shellyLightCommandHandler(mbDevice, endpoint.number, device, 'ColorRGB', undefined, undefined, { r: rgb.r, g: rgb.g, b: rgb.b });
@@ -673,7 +673,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               attributes.colorMode.setLocal(ColorControl.ColorMode.CurrentHueAndCurrentSaturation);
               const hue = child.getClusterServer(ColorControlCluster.with(ColorControl.Feature.HueSaturation))?.getCurrentHueAttribute() ?? 0;
               const rgb = hslColorToRgbColor((hue / 254) * 360, (request.saturation / 254) * 100, 50);
-              this.log.warn(`Sending command moveToSaturation => ColorRGB(${rgb.r},  ${rgb.g}, ${rgb.b})`);
+              mbDevice.log.debug(`Sending command moveToSaturation => ColorRGB(${rgb.r},  ${rgb.g}, ${rgb.b})`);
               if (device.colorCommandTimeout) clearTimeout(device.colorCommandTimeout);
               device.colorCommandTimeout = setTimeout(() => {
                 shellyLightCommandHandler(mbDevice, endpoint.number, device, 'ColorRGB', undefined, undefined, { r: rgb.r, g: rgb.g, b: rgb.b });
