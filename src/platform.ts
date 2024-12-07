@@ -59,6 +59,7 @@ import {
   thermostatDevice,
   modeSelect,
   MatterbridgeEndpoint,
+  WindowCoveringCluster,
 } from 'matterbridge';
 
 // import { EveHistory, EveHistoryCluster, MatterHistory } from 'matterbridge/history';
@@ -83,7 +84,7 @@ import * as fs from 'fs';
 import { Shelly } from './shelly.js';
 import { DiscoveredDevice } from './mdnsScanner.js';
 import { ShellyDevice } from './shellyDevice.js';
-import { isLightComponent, isSwitchComponent, ShellyComponent, ShellyCoverComponent, ShellyLightComponent, ShellySwitchComponent } from './shellyComponent.js';
+import { isCoverComponent, isLightComponent, isSwitchComponent, ShellyComponent, ShellyCoverComponent, ShellyLightComponent, ShellySwitchComponent } from './shellyComponent.js';
 import { ShellyData, ShellyDataType } from './shellyTypes.js';
 import { shellyCoverCommandHandler, shellyIdentifyCommandHandler, shellyLightCommandHandler, shellySwitchCommandHandler } from './platformCommandHadlers.js';
 import { shellyUpdateHandler } from './platformUpdateHandler.js';
@@ -740,40 +741,40 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           component.on('update', (component: string, property: string, value: ShellyDataType) => {
             shellyUpdateHandler(this, mbDevice, device, component, property, value);
           });
-        } else if (component.name === 'Cover' || component.name === 'Roller') {
-          const coverComponent = device.getComponent(key);
-          if (coverComponent) {
-            const child = mbDevice.addChildDeviceType(key, [DeviceTypes.WINDOW_COVERING], undefined, config.debug as boolean);
-            child.log.logName = `${device.name} ${key}`;
-            child.createDefaultIdentifyClusterServer();
-            child.createDefaultWindowCoveringClusterServer();
+        } else if (isCoverComponent(component)) {
+          const child = mbDevice.addChildDeviceType(key, [DeviceTypes.WINDOW_COVERING], undefined, config.debug as boolean);
+          child.log.logName = `${device.name} ${key}`;
+          child.createDefaultIdentifyClusterServer();
+          child.createDefaultWindowCoveringClusterServer();
 
-            // Add the electrical measurementa cluster on the same endpoint
-            this.addElectricalMeasurements(mbDevice, child, device, coverComponent);
+          // Add the electrical measurementa cluster on the same endpoint
+          this.addElectricalMeasurements(mbDevice, child, device, component);
 
-            // Add command handlers
-            child.addCommandHandler('identify', async ({ request }) => {
-              shellyIdentifyCommandHandler(child, component, request);
-            });
-            child.addCommandHandler('upOrOpen', async () => {
-              shellyCoverCommandHandler(mbDevice, child.number, device, 'Open', 0);
-            });
-            child.addCommandHandler('downOrClose', async () => {
-              shellyCoverCommandHandler(mbDevice, child.number, device, 'Close', 10000);
-            });
-            child.addCommandHandler('stopMotion', async () => {
-              shellyCoverCommandHandler(mbDevice, child.number, device, 'Stop');
-            });
-            child.addCommandHandler('goToLiftPercentage', async ({ request }) => {
-              if (request.liftPercent100thsValue === 0) shellyCoverCommandHandler(mbDevice, child.number, device, 'Open', 0);
-              else if (request.liftPercent100thsValue === 10000) shellyCoverCommandHandler(mbDevice, child.number, device, 'Close', 10000);
-              else shellyCoverCommandHandler(mbDevice, child.number, device, 'GoToPosition', request.liftPercent100thsValue);
-            });
-            // Add event handler
-            coverComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
-              shellyUpdateHandler(this, mbDevice, device, component, property, value);
-            });
-          }
+          // Add command handlers
+          child.addCommandHandler('identify', async ({ request }) => {
+            shellyIdentifyCommandHandler(child, component, request);
+          });
+          child.addCommandHandler('upOrOpen', async () => {
+            child.setAttribute(WindowCoveringCluster.id, 'targetPositionLiftPercent100ths', 0, child.log);
+            shellyCoverCommandHandler(child, component, 'Open', 0);
+          });
+          child.addCommandHandler('downOrClose', async () => {
+            child.setAttribute(WindowCoveringCluster.id, 'targetPositionLiftPercent100ths', 10000, child.log);
+            shellyCoverCommandHandler(child, component, 'Close', 10000);
+          });
+          child.addCommandHandler('stopMotion', async () => {
+            shellyCoverCommandHandler(child, component, 'Stop');
+          });
+          child.addCommandHandler('goToLiftPercentage', async ({ request }) => {
+            child.setAttribute(WindowCoveringCluster.id, 'targetPositionLiftPercent100ths', request.liftPercent100thsValue, child.log);
+            if (request.liftPercent100thsValue === 0) shellyCoverCommandHandler(child, component, 'Open', 0);
+            else if (request.liftPercent100thsValue === 10000) shellyCoverCommandHandler(child, component, 'Close', 10000);
+            else shellyCoverCommandHandler(child, component, 'GoToPosition', request.liftPercent100thsValue);
+          });
+          // Add event handler
+          component.on('update', (component: string, property: string, value: ShellyDataType) => {
+            shellyUpdateHandler(this, mbDevice, device, component, property, value);
+          });
         } else if (component.name === 'PowerMeter' && config.exposePowerMeter !== 'disabled') {
           const pmComponent = device.getComponent(key);
           if (pmComponent && config.exposePowerMeter === 'matter13') {

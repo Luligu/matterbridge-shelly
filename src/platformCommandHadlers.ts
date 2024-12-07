@@ -4,7 +4,7 @@
  * @file src\platformCommandHandlers.ts
  * @author Luca Liguori
  * @date 2024-12-03
- * @version 1.0.0
+ * @version 1.1.0
  *
  * Copyright 2024, 2025, 2026 Luca Liguori.
  *
@@ -21,11 +21,10 @@
  * limitations under the License. *
  */
 
-import { EndpointNumber, MatterbridgeDevice, WindowCovering, WindowCoveringCluster } from 'matterbridge';
-import { db, debugStringify, dn, er, hk, idn, nf, or, rs, YELLOW } from 'matterbridge/logger';
+import { MatterbridgeDevice } from 'matterbridge';
+import { db, debugStringify, hk, idn, nf, or, rs, YELLOW } from 'matterbridge/logger';
 import { isValidNumber, isValidObject } from 'matterbridge/utils';
 
-import { ShellyDevice } from './shellyDevice.js';
 import { ShellyComponent, ShellyCoverComponent, ShellyLightComponent, ShellySwitchComponent } from './shellyComponent.js';
 
 type PrimitiveValues = boolean | number | bigint | string | object | null | undefined;
@@ -59,6 +58,17 @@ export function shellySwitchCommandHandler(endpoint: MatterbridgeDevice, switchC
   );
 }
 
+/**
+ * Handles light commands (On, Off, Toggle, Level, ColorRGB, ColorTemp) for a Shelly light component.
+ *
+ * @param {MatterbridgeDevice} endpoint - The Matterbridge device endpoint.
+ * @param {ShellyLightComponent} lightComponent - The Shelly light component.
+ * @param {string} command - The command to execute.
+ * @param {number | null} [level] - The level for the command.
+ * @param {{ r: number; g: number; b: number }} [color] - The color for the command.
+ * @param {number} [colorTemp] - The color temperature for the command.
+ * @returns {boolean} - Returns true if the command was executed successfully, false otherwise.
+ */
 export function shellyLightCommandHandler(
   endpoint: MatterbridgeDevice,
   lightComponent: ShellyLightComponent,
@@ -66,7 +76,7 @@ export function shellyLightCommandHandler(
   level?: number | null,
   color?: { r: number; g: number; b: number },
   colorTemp?: number,
-): boolean {
+): void {
   // Send On() Off() Toggle() command
   if (command === 'On') lightComponent.On();
   else if (command === 'Off') lightComponent.Off();
@@ -108,62 +118,39 @@ export function shellyLightCommandHandler(
       `${db}Sent command ${hk}${lightComponent.name}${db}:${hk}${lightComponent.id}${db}:${hk}ColorTemp(for model ${lightComponent.device.model} ${YELLOW}${colorTemp}${hk}->${YELLOW}${temp}${hk})${db} to shelly device ${idn}${lightComponent.device.id}${rs}${db}`,
     );
   }
-  return true;
 }
 
-export function shellyCoverCommandHandler(
-  matterbridgeDevice: MatterbridgeDevice,
-  endpointNumber: EndpointNumber | undefined,
-  shellyDevice: ShellyDevice,
-  command: string,
-  pos?: number,
-): boolean {
-  // Get the matter endpoint
-  if (!endpointNumber) {
-    shellyDevice.log.error(`shellyCoverCommandHandler error: endpointNumber undefined for shelly device ${dn}${shellyDevice?.id}${er}`);
-    return false;
-  }
-  const endpoint = matterbridgeDevice.getChildEndpoint(endpointNumber);
-  if (!endpoint) {
-    shellyDevice.log.error(`shellyCoverCommandHandler error: endpoint not found for shelly device ${dn}${shellyDevice?.id}${er}`);
-    return false;
-  }
-  // Get the Shelly cover component
-  const componentName = endpoint.uniqueStorageKey;
-  if (!componentName) {
-    shellyDevice.log.error(`shellyCoverCommandHandler error: componentName not found for endpoint ${endpointNumber} on shelly device ${dn}${shellyDevice?.id}${er}`);
-    return false;
-  }
-  const coverComponent = shellyDevice?.getComponent(componentName) as ShellyCoverComponent;
-  if (!coverComponent) {
-    shellyDevice.log.error(`shellyCoverCommandHandler error: component ${componentName} not found for shelly device ${dn}${shellyDevice?.id}${er}`);
-    return false;
-  }
+/**
+ * Handles cover commands (Stop, Open, Close, GoToPosition) for a Shelly cover component.
+ *
+ * @param {MatterbridgeDevice} endpoint - The Matterbridge device endpoint.
+ * @param {ShellyCoverComponent} coverComponent - The Shelly cover component.
+ * @param {string} command - The command to execute.
+ * @param {number} [pos] - The position for the command.
+ */
+export function shellyCoverCommandHandler(endpoint: MatterbridgeDevice, coverComponent: ShellyCoverComponent, command: string, pos?: number): void {
   // Matter uses 10000 = fully closed   0 = fully opened
   // Shelly uses 0 = fully closed   100 = fully opened
-  const coverCluster = endpoint.getClusterServer(
-    WindowCoveringCluster.with(WindowCovering.Feature.Lift, WindowCovering.Feature.PositionAwareLift /* , WindowCovering.Feature.AbsolutePosition*/),
-  );
-  if (!coverCluster) {
-    shellyDevice.log.error('shellyCoverCommandHandler error: cluster WindowCoveringCluster not found');
-    return false;
-  }
   if (command === 'Stop') {
-    shellyDevice.log.info(`${db}Sent command ${hk}${componentName}${nf}:${command}()${db} to shelly device ${idn}${shellyDevice?.id}${rs}${db}`);
+    endpoint.log.info(
+      `${db}Sent command ${hk}${coverComponent.name}${db}:${hk}${coverComponent.id}${db}:${hk}${command}()${db} to shelly device ${idn}${coverComponent.device.id}${rs}${db}`,
+    );
     coverComponent.Stop();
   } else if (command === 'Open') {
-    matterbridgeDevice.setAttribute(WindowCoveringCluster.id, 'targetPositionLiftPercent100ths', 0, shellyDevice.log, endpoint);
-    shellyDevice.log.info(`${db}Sent command ${hk}${componentName}${nf}:${command}()${db} to shelly device ${idn}${shellyDevice?.id}${rs}${db}`);
+    endpoint.log.info(
+      `${db}Sent command ${hk}${coverComponent.name}${db}:${hk}${coverComponent.id}${db}:${hk}${command}()${db} to shelly device ${idn}${coverComponent.device.id}${rs}${db}`,
+    );
     coverComponent.Open();
   } else if (command === 'Close') {
-    matterbridgeDevice.setAttribute(WindowCoveringCluster.id, 'targetPositionLiftPercent100ths', 10000, shellyDevice.log, endpoint);
-    shellyDevice.log.info(`${db}Sent command ${hk}${componentName}${nf}:${command}()${db} to shelly device ${idn}${shellyDevice?.id}${rs}${db}`);
+    endpoint.log.info(
+      `${db}Sent command ${hk}${coverComponent.name}${db}:${hk}${coverComponent.id}${db}:${hk}${command}()${db} to shelly device ${idn}${coverComponent.device.id}${rs}${db}`,
+    );
     coverComponent.Close();
   } else if (command === 'GoToPosition' && isValidNumber(pos, 0, 10000)) {
-    matterbridgeDevice.setAttribute(WindowCoveringCluster.id, 'targetPositionLiftPercent100ths', pos, shellyDevice.log, endpoint);
     const shellyPos = 100 - Math.max(Math.min(Math.round(pos / 100), 100), 0);
-    shellyDevice.log.info(`${db}Sent command ${hk}${componentName}${nf}:${command}(${shellyPos})${db} to shelly device ${idn}${shellyDevice?.id}${rs}${db}`);
+    endpoint.log.info(
+      `${db}Sent command ${hk}${coverComponent.name}${db}:${hk}${coverComponent.id}${db}:${hk}${command}(${YELLOW}${shellyPos}${hk})${db} to shelly device ${idn}${coverComponent.device.id}${rs}${db}`,
+    );
     coverComponent.GoToPosition(shellyPos);
   }
-  return true;
 }
