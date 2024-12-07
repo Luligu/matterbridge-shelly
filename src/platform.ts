@@ -1333,7 +1333,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         console.log(`Device ${mbDevice.deviceName} cluster:`, clusterServer.id, clusterServer.name);
       });
       */
-      mbDevice.getChildEndpoints().forEach(async (childEndpoint) => {
+      for (const childEndpoint of mbDevice.getChildEndpoints()) {
         /*
         childEndpoint.getAllClusterServers().forEach((clusterServer) => {
           clusterMap.set(clusterServer.id, clusterServer.name);
@@ -1341,23 +1341,24 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         });
         */
         const label = childEndpoint.uniqueStorageKey;
+        if (!label) return;
         // Configure the cluster OnOff attribute onOff
-        if (label?.startsWith('switch') || label?.startsWith('relay') || label?.startsWith('light') || label?.startsWith('rgb')) {
+        if (label.startsWith('switch') || label.startsWith('relay') || label.startsWith('light') || label.startsWith('rgb')) {
           const switchComponent = shellyDevice.getComponent(label) as ShellySwitchComponent;
           this.log.info(`Configuring device ${dn}${mbDevice.deviceName}${nf} component ${hk}${label}${nf}:${zb}state ${YELLOW}${switchComponent.getValue('state')}${nf}`);
           const state = switchComponent.getValue('state');
           if (isValidBoolean(state)) {
-            mbDevice.setAttribute(OnOffCluster.id, 'onOff', state, shellyDevice.log, childEndpoint);
+            await mbDevice.setAttribute(OnOffCluster.id, 'onOff', state, shellyDevice.log, childEndpoint);
           }
         }
         // Configure the cluster LevelControl attribute currentLevel
-        if (label?.startsWith('light') || label?.startsWith('rgb')) {
+        if (label.startsWith('light') || label.startsWith('rgb')) {
           const lightComponent = shellyDevice.getComponent(label) as ShellyLightComponent;
           const level = lightComponent.getValue('brightness') as number;
           if (isValidNumber(level, 0, 100)) {
             const matterLevel = Math.max(Math.min(Math.round((level / 100) * 254), 254), 0);
             this.log.info(`Configuring device ${dn}${mbDevice.deviceName}${nf} component ${hk}${label}${nf}:${zb}brightness ${YELLOW}${matterLevel}${nf}`);
-            mbDevice.setAttribute(LevelControlCluster.id, 'currentLevel', matterLevel, shellyDevice.log, childEndpoint);
+            await mbDevice.setAttribute(LevelControlCluster.id, 'currentLevel', matterLevel, shellyDevice.log, childEndpoint);
           }
           // Configure the cluster ColorControl attribute currentHue, currentSaturation and colorMode
           if (lightComponent.hasProperty('red') && lightComponent.hasProperty('green') && lightComponent.hasProperty('blue') && shellyDevice.profile !== 'white') {
@@ -1370,13 +1371,13 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               this.log.debug(`ColorRgbToHsl: R:${red} G:${green} B:${blue} => H:${hsl.h} S:${hsl.s} L:${hsl.l}`);
               const hue = Math.max(Math.min(Math.round((hsl.h / 360) * 254), 254), 0);
               const saturation = Math.max(Math.min(Math.round((hsl.s / 100) * 254), 254), 0);
-              if (isValidNumber(hue, 0, 254)) mbDevice.setAttribute(ColorControlCluster.id, 'currentHue', hue, shellyDevice.log, childEndpoint);
-              if (isValidNumber(saturation, 0, 254)) mbDevice.setAttribute(ColorControlCluster.id, 'currentSaturation', saturation, shellyDevice.log, childEndpoint);
-              mbDevice.setAttribute(ColorControlCluster.id, 'colorMode', ColorControl.ColorMode.CurrentHueAndCurrentSaturation, shellyDevice.log, childEndpoint);
+              if (isValidNumber(hue, 0, 254)) await mbDevice.setAttribute(ColorControlCluster.id, 'currentHue', hue, shellyDevice.log, childEndpoint);
+              if (isValidNumber(saturation, 0, 254)) await mbDevice.setAttribute(ColorControlCluster.id, 'currentSaturation', saturation, shellyDevice.log, childEndpoint);
+              await mbDevice.setAttribute(ColorControlCluster.id, 'colorMode', ColorControl.ColorMode.CurrentHueAndCurrentSaturation, shellyDevice.log, childEndpoint);
             }
           }
           if (lightComponent.hasProperty('temp') && shellyDevice.profile !== 'color') {
-            mbDevice.setAttribute(ColorControlCluster.id, 'colorMode', ColorControl.ColorMode.ColorTemperatureMireds, shellyDevice.log, childEndpoint);
+            await mbDevice.setAttribute(ColorControlCluster.id, 'colorMode', ColorControl.ColorMode.ColorTemperatureMireds, shellyDevice.log, childEndpoint);
           }
           if (lightComponent.hasProperty('rgb') && shellyDevice.profile !== 'white') {
             const rgb = lightComponent.getValue('rgb') as object;
@@ -1386,42 +1387,42 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               this.log.debug(`ColorRgbToHsl: R:${rgb[0]} G:${rgb[1]} B:${rgb[2]} => H:${hsl.h} S:${hsl.s} L:${hsl.l}`);
               const hue = Math.max(Math.min(Math.round((hsl.h / 360) * 254), 254), 0);
               const saturation = Math.max(Math.min(Math.round((hsl.s / 100) * 254), 254), 0);
-              if (isValidNumber(hue, 0, 254)) mbDevice.setAttribute(ColorControlCluster.id, 'currentHue', hue, shellyDevice.log, childEndpoint);
-              if (isValidNumber(saturation, 0, 254)) mbDevice.setAttribute(ColorControlCluster.id, 'currentSaturation', saturation, shellyDevice.log, childEndpoint);
-              mbDevice.setAttribute(ColorControlCluster.id, 'colorMode', ColorControl.ColorMode.CurrentHueAndCurrentSaturation, shellyDevice.log, childEndpoint);
+              if (isValidNumber(hue, 0, 254)) await mbDevice.setAttribute(ColorControlCluster.id, 'currentHue', hue, shellyDevice.log, childEndpoint);
+              if (isValidNumber(saturation, 0, 254)) await mbDevice.setAttribute(ColorControlCluster.id, 'currentSaturation', saturation, shellyDevice.log, childEndpoint);
+              await mbDevice.setAttribute(ColorControlCluster.id, 'colorMode', ColorControl.ColorMode.CurrentHueAndCurrentSaturation, shellyDevice.log, childEndpoint);
             }
           }
         }
         // Configure the cluster WindowCovering attribute currentPositionLiftPercent100ths
-        if (label?.startsWith('cover') || label?.startsWith('roller')) {
+        if (label.startsWith('cover') || label.startsWith('roller')) {
           const coverComponent = shellyDevice.getComponent(label) as ShellyCoverComponent;
           const position = coverComponent.hasProperty('current_pos') ? (coverComponent.getValue('current_pos') as number) : undefined;
           if (isValidNumber(position, 0, 100)) {
             this.log.info(`Configuring device ${dn}${mbDevice.deviceName}${nf} component ${hk}${label}${nf}:${zb}current_pos ${YELLOW}${position}${nf}`);
             const matterPos = 10000 - Math.min(Math.max(Math.round(position * 100), 0), 10000);
-            mbDevice.setWindowCoveringCurrentTargetStatus(matterPos, matterPos, WindowCovering.MovementStatus.Stopped, childEndpoint);
+            await mbDevice.setWindowCoveringCurrentTargetStatus(matterPos, matterPos, WindowCovering.MovementStatus.Stopped, childEndpoint);
           } else {
-            mbDevice.setWindowCoveringTargetAsCurrentAndStopped(childEndpoint);
+            await mbDevice.setWindowCoveringTargetAsCurrentAndStopped(childEndpoint);
           }
         }
         // Configure the cluster Thermostat attribute occupiedHeatingSetpoint occupiedCoolingSetpoint
-        if (label?.startsWith('thermostat')) {
+        if (label.startsWith('thermostat')) {
           const thermostatComponent = shellyDevice.getComponent(label) as ShellyCoverComponent;
           const target = thermostatComponent.hasProperty('target_C') ? (thermostatComponent.getValue('target_C') as number) : undefined;
           if (isValidNumber(target, 5, 35)) {
             if (thermostatComponent.getValue('type') === 'heating') {
               this.log.info(`Configuring device ${dn}${mbDevice.deviceName}${nf} component ${hk}${label}${nf}:${zb}occupiedHeatingSetpoint ${YELLOW}${target}${nf}`);
-              mbDevice.setAttribute(ThermostatCluster.id, 'occupiedHeatingSetpoint', target * 100, shellyDevice.log, childEndpoint);
+              await mbDevice.setAttribute(ThermostatCluster.id, 'occupiedHeatingSetpoint', target * 100, shellyDevice.log, childEndpoint);
             } else if (thermostatComponent.getValue('type') === 'cooling') {
               this.log.info(`Configuring device ${dn}${mbDevice.deviceName}${nf} component ${hk}${label}${nf}:${zb}occupiedCoolingSetpoint ${YELLOW}${target}${nf}`);
-              mbDevice.setAttribute(ThermostatCluster.id, 'occupiedCoolingSetpoint', target * 100, shellyDevice.log, childEndpoint);
+              await mbDevice.setAttribute(ThermostatCluster.id, 'occupiedCoolingSetpoint', target * 100, shellyDevice.log, childEndpoint);
             }
           }
         }
-      });
+      }
       if (shellyDevice.bthomeDevices.size > 0) {
         shellyDevice.log.info(`Configuring BLE devices paired to ${hk}${shellyDevice.id}${nf}...`);
-        shellyDevice.bthomeDevices.forEach(async (bthomeDevice) => {
+        shellyDevice.bthomeDevices.forEach((bthomeDevice) => {
           const blu = this.bluBridgedDevices.get(bthomeDevice.addr);
           if (!blu) return;
           blu.log.debug(
