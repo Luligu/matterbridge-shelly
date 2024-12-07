@@ -231,7 +231,7 @@ Should be enabled to discover the shelly BLU devices (it will register the BLU d
 
 ### failsafeCount
 
-Enable the failsafe count of the devices registered. If the plugin registers less devices then the configured number, the plugin will go in error mode. This is to avoid to loose the controller configuration in case of network issues (default 0 = disabled).
+Enable the failsafe count of the devices registered. If the plugin registers less devices then the configured number, the plugin will go in error mode. This is to avoid to lose the controller configuration in case of network issues (default 0 = disabled).
 
 ### postfix
 
@@ -280,6 +280,8 @@ These are the config values:
   "exposePowerMeter": "disabled" | "matter13"
   "blackList": [],
   "whiteList": [],
+  "entityBlackList": [],
+  "deviceEntityBlackList": {},
   "nocacheList": [],
   "deviceIp": {
     "<DEVICEID1>": "x.x.x.x",
