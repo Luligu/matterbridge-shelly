@@ -243,7 +243,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           this.log.info(`Shelly device ${hk}${device.id}${nf} host ${zb}${device.host}${nf} is a ble gateway. Adding paired BLU devices...`);
           // Register the BLU devices
           for (const [key, bthomeDevice] of device.bthomeDevices) {
-            if (!this._validateDeviceWhiteBlackList(bthomeDevice.name)) continue;
+            if (!this._validateDeviceWhiteBlackList(bthomeDevice.addr)) continue;
             this.log.info(
               `- ${idn}${bthomeDevice.name}${rs}${nf} address ${CYAN}${bthomeDevice.addr}${nf} id ${CYAN}${bthomeDevice.id}${nf} ` +
                 `model ${CYAN}${bthomeDevice.model}${nf} (${CYAN}${bthomeDevice.type}${nf})`,
@@ -369,13 +369,13 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             if (!isValidString(addr, 11) || !isValidNumber(rssi, -100, 0) || !isValidNumber(packet_id, 0) || !isValidNumber(last_updated_ts)) return;
             const blu = this.bluBridgedDevices.get(addr);
             const bthomeDevice = device.bthomeDevices.get(addr);
-            if (bthomeDevice && !this._validateDeviceWhiteBlackList(bthomeDevice.name, false)) return;
+            if (bthomeDevice && !this._validateDeviceWhiteBlackList(bthomeDevice.addr, false)) return;
             if (!blu || !bthomeDevice) {
               this.log.error(`Shelly device ${hk}${device.id}${er} host ${zb}${device.host}${er} sent an unknown BLU device address ${CYAN}${addr}${er}`);
-              return; // Shelly device shelly2pmg3-34CDB0770C4C host 192.168.1.166 sent an unknown BLU device address 0c:ef:f6:f1:d7:7b
+              return;
             }
             blu.log.info(
-              `${idn}BLU${rs}${db} observer device update message for BLU device ${idn}${blu?.deviceName ?? addr}${rs}${db}: rssi ${YELLOW}${rssi}${db} packet_id ${YELLOW}${packet_id}${db} last_updated ${YELLOW}${device.getLocalTimeFromLastUpdated(last_updated_ts)}${db}`,
+              `${idn}BLU${rs}${db} observer device update message for BLU device ${idn}${blu.deviceName ?? addr}${rs}${db}: rssi ${YELLOW}${rssi}${db} packet_id ${YELLOW}${packet_id}${db} last_updated ${YELLOW}${device.getLocalTimeFromLastUpdated(last_updated_ts)}${db}`,
             );
           });
           // BLU observer sensor updates
@@ -383,7 +383,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             if (!isValidString(addr, 11) || !isValidString(sensorName, 6) || !isValidNumber(sensorIndex, 0, 3)) return;
             const blu = this.bluBridgedDevices.get(addr);
             const bthomeDevice = device.bthomeDevices.get(addr);
-            if (bthomeDevice && !this._validateDeviceWhiteBlackList(bthomeDevice.name, false)) return;
+            if (bthomeDevice && !this._validateDeviceWhiteBlackList(bthomeDevice.addr, false)) return;
             if (!blu || !bthomeDevice) {
               this.log.error(`Shelly device ${hk}${device.id}${er} host ${zb}${device.host}${er} sent an unknown BLU device address ${CYAN}${addr}${er}`);
               return;
@@ -444,7 +444,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             if (!isValidString(addr, 11) || !isValidString(event, 6)) return;
             const blu = this.bluBridgedDevices.get(addr);
             const bthomeDevice = device.bthomeDevices.get(addr);
-            if (bthomeDevice && !this._validateDeviceWhiteBlackList(bthomeDevice.name, false)) return;
+            if (bthomeDevice && !this._validateDeviceWhiteBlackList(bthomeDevice.addr, false)) return;
             if (!blu || !bthomeDevice) {
               this.log.error(`Shelly device ${hk}${device.id}${er} host ${zb}${device.host}${er} sent an unknown BLU device address ${CYAN}${addr}${er}`);
               return;
@@ -466,7 +466,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             if (!isValidString(addr, 11) || !isValidString(sensorName, 6) || !isValidNumber(sensorIndex, 0, 3) || !isValidString(event, 6)) return;
             const blu = this.bluBridgedDevices.get(addr);
             const bthomeDevice = device.bthomeDevices.get(addr);
-            if (bthomeDevice && !this._validateDeviceWhiteBlackList(bthomeDevice.name, false)) return;
+            if (bthomeDevice && !this._validateDeviceWhiteBlackList(bthomeDevice.addr, false)) return;
             if (!blu || !bthomeDevice) {
               this.log.error(`Shelly device ${hk}${device.id}${er} host ${zb}${device.host}${er} sent an unknown BLU device address ${CYAN}${addr}${er}`);
               return;
@@ -1196,8 +1196,6 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       const endpoints = mbDevice.getChildEndpoints();
       if (endpoints.length > 1 || (device.hasComponent('blugw') && config.exposeBlugw !== 'disabled')) {
         try {
-          // Set configUrl for the device
-          mbDevice.configUrl = `http://${device.host}`;
           // Register the device with Matterbridge
           await this.registerDevice(mbDevice);
           // Save the MatterbridgeDevice in the bridgedDevices map
@@ -1323,6 +1321,10 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         this.log.error(`Shelly device with serial number ${hk}${serial}${er} not found`);
         return;
       }
+      // Set configUrl for the device
+      mbDevice.configUrl = `http://${shellyDevice.host}`;
+      this.log.debug(`Configuring device ${dn}${mbDevice.deviceName}${db} configUrl ${YELLOW}${mbDevice.configUrl}${db}`);
+
       /*
       mbDevice.getAllClusterServers().forEach((clusterServer) => {
         clusterMap.set(clusterServer.id, clusterServer.name);
@@ -1571,21 +1573,48 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     this.shellyDevices.set(device.id, device);
   }
 
-  // TODO: remove when matterbridge 1.6.6 is released and required
-  _validateDeviceWhiteBlackList(device: string, log = true) {
-    if (isValidArray(this.config.whiteList, 1) && !this.config.whiteList.includes(device)) {
-      if (log) this.log.info(`Skipping device ${CYAN}${device}${nf} because not in whitelist`);
+  // TODO: remove when matterbridge 1.6.6 is published
+  /**
+   * Validates if a device is allowed based on the whitelist and blacklist configurations.
+   * The blacklist has priority over the whitelist.
+   *
+   * @param {string | string[]} device - The device name(s) to validate.
+   * @param {boolean} [log=true] - Whether to log the validation result.
+   * @returns {boolean} - Returns true if the device is allowed, false otherwise.
+   */
+  _validateDeviceWhiteBlackList(device: string | string[], log = true): boolean {
+    if (!Array.isArray(device)) device = [device];
+
+    let blackListBlocked = 0;
+    if (isValidArray(this.config.blackList, 1)) {
+      for (const d of device) if (this.config.blackList.includes(d)) blackListBlocked++;
+    }
+    if (blackListBlocked > 0) {
+      if (log) this.log.info(`Skipping device ${CYAN}${device.join(', ')}${nf} because in blacklist`);
       return false;
     }
-    if (isValidArray(this.config.blackList, 1) && this.config.blackList.includes(device)) {
-      if (log) this.log.info(`Skipping device ${CYAN}${device}${nf} because in blacklist`);
-      return false;
+
+    let whiteListPassed = 0;
+    if (isValidArray(this.config.whiteList, 1)) {
+      for (const d of device) if (this.config.whiteList.includes(d)) whiteListPassed++;
+    } else whiteListPassed++;
+    if (whiteListPassed > 0) {
+      if (log) this.log.info(`Skipping device ${CYAN}${device.join(', ')}${nf} because not in whitelist`);
+      return true;
     }
-    return true;
+    return false;
   }
 
-  // TODO: remove when matterbridge 1.6.6 is released and required
-  _validateEntityBlackList(device: string, entity: string, log = true) {
+  // TODO: remove when matterbridge 1.6.6 is published
+  /**
+   * Validates if an entity is allowed based on the entity blacklist and device-entity blacklist configurations.
+   *
+   * @param {string} device - The device to which the entity belongs.
+   * @param {string} entity - The entity to validate.
+   * @param {boolean} [log=true] - Whether to log the validation result.
+   * @returns {boolean} - Returns true if the entity is allowed, false otherwise.
+   */
+  _validateEntityBlackList(device: string, entity: string, log = true): boolean {
     if (isValidArray(this.config.entityBlackList, 1) && this.config.entityBlackList.find((e) => e === entity)) {
       if (log) this.log.info(`Skipping entity ${CYAN}${entity}${nf} because in entityBlackList`);
       return false;
