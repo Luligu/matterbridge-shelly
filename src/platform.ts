@@ -1196,6 +1196,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       const endpoints = mbDevice.getChildEndpoints();
       if (endpoints.length > 1 || (device.hasComponent('blugw') && config.exposeBlugw !== 'disabled')) {
         try {
+          // Set configUrl for the device
+          mbDevice.configUrl = `http://${device.host}`;
           // Register the device with Matterbridge
           await this.registerDevice(mbDevice);
           // Save the MatterbridgeDevice in the bridgedDevices map
