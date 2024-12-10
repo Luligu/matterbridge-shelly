@@ -181,15 +181,15 @@ The devices in the list will expose the Input event component as a momentary swi
 
 ### exposePowerMeter
 
-Choose how to expose the shelly power meters: disabled, matter13 (it uses Matter 1.3 electricalSensor device type that is supported by only by Home Assistant so far).
+Choose how to expose the shelly power meters: disabled, matter13 (it uses Matter 1.3 electricalSensor device type that is supported only by Home Assistant so far).
 
 ### blackList
 
-If the blackList is defined the devices included in the list will not be exposed to Matter. Use the device id (e.g. shellyplus2pm-5443B23D81F8)
+If the blackList is defined the devices included in the list will not be exposed to Matter. Use the device id (e.g. shellyplus2pm-5443B23D81F8) or the BLU addr (i.e. 7c:c6:b6:65:2d:87).
 
 ### whiteList
 
-If the whiteList is defined only the devices included in the list are exposed to Matter. Use the device id (e.g. shellyplus2pm-5443B23D81F8).
+If the whiteList is defined only the devices included in the list are exposed to Matter. Use the device id (e.g. shellyplus2pm-5443B23D81F8) or the BLU addr (i.e. 7c:c6:b6:65:2d:87).
 
 ### entityBlackList
 
