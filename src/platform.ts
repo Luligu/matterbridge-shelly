@@ -59,6 +59,8 @@ import {
   modeSelect,
   MatterbridgeEndpoint,
   WindowCoveringCluster,
+  Semtag,
+  NumberTag,
 } from 'matterbridge';
 
 // import { EveHistory, EveHistoryCluster, MatterHistory } from 'matterbridge/history';
@@ -630,7 +632,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           ) {
             deviceType = DeviceTypes.COLOR_TEMPERATURE_LIGHT;
           }
-          const child = mbDevice.addChildDeviceType(key, [deviceType], undefined, config.debug as boolean);
+          const tagList = this.addTagList(component);
+          const child = mbDevice.addChildDeviceType(key, [deviceType], tagList ? { tagList } : undefined, config.debug as boolean);
           child.log.logName = `${device.name} ${key}`;
           child.createDefaultIdentifyClusterServer();
           child.createDefaultGroupsClusterServer();
@@ -713,7 +716,9 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           if (config.switchList && (config.switchList as string[]).includes(device.id)) deviceType = onOffSwitch;
           if (config.lightList && (config.lightList as string[]).includes(device.id)) deviceType = onOffLight;
           if (config.outletList && (config.outletList as string[]).includes(device.id)) deviceType = onOffOutlet;
-          const child = mbDevice.addChildDeviceType(key, [deviceType], undefined, config.debug as boolean);
+
+          const tagList = this.addTagList(component);
+          const child = mbDevice.addChildDeviceType(key, [deviceType], tagList ? { tagList } : undefined, config.debug as boolean);
           child.log.logName = `${device.name} ${key}`;
           child.createDefaultIdentifyClusterServer();
           child.createDefaultGroupsClusterServer();
@@ -741,7 +746,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             shellyUpdateHandler(this, mbDevice, device, component, property, value);
           });
         } else if (isCoverComponent(component)) {
-          const child = mbDevice.addChildDeviceType(key, [DeviceTypes.WINDOW_COVERING], undefined, config.debug as boolean);
+          const tagList = this.addTagList(component);
+          const child = mbDevice.addChildDeviceType(key, [DeviceTypes.WINDOW_COVERING], tagList ? { tagList } : undefined, config.debug as boolean);
           child.log.logName = `${device.name} ${key}`;
           child.createDefaultIdentifyClusterServer();
           child.createDefaultWindowCoveringClusterServer();
@@ -777,12 +783,13 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         } else if (component.name === 'PowerMeter' && config.exposePowerMeter !== 'disabled') {
           const pmComponent = device.getComponent(key);
           if (pmComponent && config.exposePowerMeter === 'matter13') {
+            const tagList = this.addTagList(component);
             // Add the Matter 1.3 electricalSensor device type with the ElectricalPowerMeasurement and ElectricalEnergyMeasurement clusters
             const child = mbDevice.addChildDeviceTypeWithClusterServer(
               key,
               [electricalSensor],
               [ElectricalPowerMeasurement.Cluster.id, ElectricalEnergyMeasurement.Cluster.id],
-              undefined,
+              tagList ? { tagList } : undefined,
               config.debug as boolean,
             );
             child.log.logName = `${device.name} ${key}`;
@@ -795,6 +802,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             });
           }
         } else if (component.name === 'Input') {
+          const tagList = this.addTagList(component);
           const inputComponent = device.getComponent(key);
           // Skip the input component if it is disabled in Gen 2/3 devices
           if (inputComponent && inputComponent.hasProperty('enable') && inputComponent.getValue('enable') === false) continue;
@@ -805,7 +813,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           ) {
             const state = inputComponent.getValue('state') as boolean;
             if (isValidBoolean(state)) {
-              const child = mbDevice.addChildDeviceType(key, [DeviceTypes.CONTACT_SENSOR], undefined, config.debug as boolean);
+              const child = mbDevice.addChildDeviceType(key, [DeviceTypes.CONTACT_SENSOR], tagList ? { tagList } : undefined, config.debug as boolean);
               child.log.logName = `${device.name} ${key}`;
               // Set the state attribute
               child.addClusterServer(mbDevice.getDefaultBooleanStateClusterServer(state));
@@ -822,7 +830,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           ) {
             const state = inputComponent.getValue('state') as boolean;
             if (isValidBoolean(state)) {
-              const child = mbDevice.addChildDeviceType(key, [DeviceTypes.GENERIC_SWITCH], undefined, config.debug as boolean);
+              const child = mbDevice.addChildDeviceType(key, [DeviceTypes.GENERIC_SWITCH], tagList ? { tagList } : undefined, config.debug as boolean);
               child.log.logName = `${device.name} ${key}`;
               child.addClusterServer(mbDevice.getDefaultSwitchClusterServer());
               child.addRequiredClusterServers(child);
@@ -838,7 +846,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           ) {
             const state = inputComponent.getValue('state') as boolean;
             if (isValidBoolean(state)) {
-              const child = mbDevice.addChildDeviceType(key, [DeviceTypes.GENERIC_SWITCH], undefined, config.debug as boolean);
+              const child = mbDevice.addChildDeviceType(key, [DeviceTypes.GENERIC_SWITCH], tagList ? { tagList } : undefined, config.debug as boolean);
               child.log.logName = `${device.name} ${key}`;
               child.addClusterServer(mbDevice.getDefaultLatchingSwitchClusterServer());
               child.addRequiredClusterServers(child);
@@ -855,7 +863,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             // Gen 1 devices
             const event = inputComponent.getValue('event') as boolean;
             if (isValidString(event)) {
-              const child = mbDevice.addChildDeviceType(key, [DeviceTypes.GENERIC_SWITCH], undefined, config.debug as boolean);
+              const child = mbDevice.addChildDeviceType(key, [DeviceTypes.GENERIC_SWITCH], tagList ? { tagList } : undefined, config.debug as boolean);
               child.log.logName = `${device.name} ${key}`;
               child.addClusterServer(mbDevice.getDefaultSwitchClusterServer());
               child.addRequiredClusterServers(child);
@@ -874,7 +882,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             (config.exposeInputEvent !== 'disabled' || (config.inputEventList && (config.inputEventList as string[]).includes(device.id)))
           ) {
             // Gen 2/3 devices with Input type=button
-            const child = mbDevice.addChildDeviceType(key, [DeviceTypes.GENERIC_SWITCH], undefined, config.debug as boolean);
+            const child = mbDevice.addChildDeviceType(key, [DeviceTypes.GENERIC_SWITCH], tagList ? { tagList } : undefined, config.debug as boolean);
             child.log.logName = `${device.name} ${key}`;
             child.addClusterServer(mbDevice.getDefaultSwitchClusterServer());
             child.addRequiredClusterServers(child);
@@ -1490,6 +1498,16 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     );
     this.shelly.setLogLevel(logLevel, this.config.debugMdns as boolean, this.config.debugCoap as boolean, this.config.debugWs as boolean);
     this.bluBridgedDevices.forEach((bluDevice) => (bluDevice.log.logLevel = logLevel));
+  }
+
+  private addTagList(component: ShellyComponent): Semtag[] | undefined {
+    // Add the tagList to the descriptor cluster
+    let tagList: Semtag | undefined;
+    if (component.index === 0) tagList = { mfgCode: null, namespaceId: NumberTag.Zero.namespaceId, tag: NumberTag.Zero.tag, label: component.id };
+    else if (component.index === 1) tagList = { mfgCode: null, namespaceId: NumberTag.One.namespaceId, tag: NumberTag.One.tag, label: component.id };
+    else if (component.index === 2) tagList = { mfgCode: null, namespaceId: NumberTag.Two.namespaceId, tag: NumberTag.Two.tag, label: component.id };
+    else if (component.index === 3) tagList = { mfgCode: null, namespaceId: NumberTag.Three.namespaceId, tag: NumberTag.Three.tag, label: component.id };
+    return tagList ? [tagList] : undefined;
   }
 
   private addElectricalMeasurements(device: MatterbridgeDevice, endpoint: MatterbridgeDevice, shelly: ShellyDevice, component: ShellyComponent) {
