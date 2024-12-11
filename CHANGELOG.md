@@ -6,7 +6,7 @@ If you like this project and find it useful, please consider giving it a star on
 
 You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his invaluable contribution to this project.
 
-## [1.1.0-dev.7] - 2024-12-12
+## [1.1.0-dev.8] - 2024-12-12
 
 ### Added
 
@@ -15,6 +15,7 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 - [shelly]: Add shellyIdentifyCommandHandler
 - [BLU]: Add validate against white and black list for BLU devices. If you put a shelly BLU in the white list, you need to put also his BLU gateway on the white list.
 - [BLU]: Add global and single device component black list. You can now exclude a shelly component globally or on a device base.
+- [matter]: Add tagList to the descriptor cluster
 
 ### Changed
 
