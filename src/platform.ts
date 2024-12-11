@@ -123,8 +123,6 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
   // Config
   private username = '';
   private password = '';
-  private whiteList: string[] = [];
-  private blackList: string[] = [];
   private postfix;
   private failsafeCount;
 
@@ -140,16 +138,14 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     super(matterbridge, log, config);
 
     // Verify that Matterbridge is the correct version
-    if (this.verifyMatterbridgeVersion === undefined || typeof this.verifyMatterbridgeVersion !== 'function' || !this.verifyMatterbridgeVersion('1.6.5')) {
+    if (this.verifyMatterbridgeVersion === undefined || typeof this.verifyMatterbridgeVersion !== 'function' || !this.verifyMatterbridgeVersion('1.6.6')) {
       throw new Error(
-        `This plugin requires Matterbridge version >= "1.6.5". Please update Matterbridge from ${this.matterbridge.matterbridgeVersion} to the latest version in the frontend."`,
+        `This plugin requires Matterbridge version >= "1.6.6". Please update Matterbridge from ${this.matterbridge.matterbridgeVersion} to the latest version in the frontend."`,
       );
     }
 
     if (config.username) this.username = config.username as string;
     if (config.password) this.password = config.password as string;
-    if (config.whiteList) this.whiteList = config.whiteList as string[];
-    if (config.blackList) this.blackList = config.blackList as string[];
     this.postfix = (config.postfix as string) ?? '';
     if (!isValidString(this.postfix, 0, 3)) this.postfix = '';
     this.failsafeCount = (config.failsafeCount as number) ?? 0;
@@ -1342,6 +1338,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
   }
 
   override async onConfigure() {
+    // Create the list of cluster servers
     // const clusterMap = new Map<ClusterId, string>();
     this.log.info(`Configuring platform ${idn}${this.config.name}${rs}${nf}`);
     this.bridgedDevices.forEach(async (mbDevice) => {
@@ -1361,6 +1358,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       this.log.debug(`Configuring device ${dn}${mbDevice.deviceName}${db} configUrl ${YELLOW}${mbDevice.configUrl}${db}`);
 
       /*
+      // Create the list of cluster servers
       mbDevice.getAllClusterServers().forEach((clusterServer) => {
         clusterMap.set(clusterServer.id, clusterServer.name);
         console.log(`Device ${mbDevice.deviceName} cluster:`, clusterServer.id, clusterServer.name);
@@ -1368,6 +1366,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       */
       for (const childEndpoint of mbDevice.getChildEndpoints()) {
         /*
+        // Create the list of cluster servers
         childEndpoint.getAllClusterServers().forEach((clusterServer) => {
           clusterMap.set(clusterServer.id, clusterServer.name);
           console.log(`Device ${mbDevice.deviceName} child ${childEndpoint.uniqueStorageKey} cluster:`, clusterServer.id, clusterServer.name);
@@ -1484,6 +1483,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     });
 
     /*
+    // Create the list of cluster servers
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (this.matterbridge as any).commissioningServer
       ?.getRootEndpoint()

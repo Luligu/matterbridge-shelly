@@ -3,6 +3,7 @@ import { AnsiLogger } from 'matterbridge/logger';
 import { ShellyPlatform } from './platform.js';
 import initializePlugin from './index';
 import { jest } from '@jest/globals';
+import { wait } from 'matterbridge/utils';
 
 describe('initializePlugin', () => {
   let mockMatterbridge: Matterbridge;
@@ -16,7 +17,7 @@ describe('initializePlugin', () => {
       matterbridgeDirectory: '',
       matterbridgePluginDirectory: 'temp',
       systemInformation: { ipv4Address: undefined },
-      matterbridgeVersion: '1.6.5',
+      matterbridgeVersion: '1.6.6',
       removeAllBridgedDevices: jest.fn(),
     } as unknown as Matterbridge;
     mockLog = { fatal: jest.fn(), error: jest.fn(), warn: jest.fn(), notice: jest.fn(), info: jest.fn(), debug: jest.fn() } as unknown as AnsiLogger;
@@ -43,11 +44,14 @@ describe('initializePlugin', () => {
 
   it('should return an instance of ShellyPlatform', () => {
     platform = initializePlugin(mockMatterbridge, mockLog, mockConfig);
+    expect(platform).toBeDefined();
     expect(platform).toBeInstanceOf(ShellyPlatform);
   });
 
   it('should shutdown the instance of ShellyPlatform', async () => {
-    await platform.onShutdown();
+    expect(platform).toBeDefined();
     expect(platform).toBeInstanceOf(ShellyPlatform);
+    await platform.onShutdown();
+    wait(1000);
   });
 });

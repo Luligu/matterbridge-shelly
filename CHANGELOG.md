@@ -6,10 +6,11 @@ If you like this project and find it useful, please consider giving it a star on
 
 You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his invaluable contribution to this project.
 
-## [1.1.0-dev.9] - 2024-12-12
+## [1.1.0-dev.10] - 2024-12-12
 
 ### Added
 
+- [package]: Requires matterbridge 1.6.6.
 - [package]: Verified to work with matterbridge edge (matter.js new API).
 - [shelly]: Remove from discovered devices the device with mongoose firmware. We ignore them.
 - [shelly]: Add shellyIdentifyCommandHandler
@@ -24,6 +25,7 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 - [shelly]: Refactor shellyCoverCommandHandler
 - [colorControl]: Refactor configuration of the cluster.
 - [electricalSensor]: Refactor electrical measurements initial configuration
+- [matter]: Update all device types.
 - [package]: Updated dependencies.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
