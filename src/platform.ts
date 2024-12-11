@@ -1353,8 +1353,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         if (label.startsWith('light') || label.startsWith('rgb')) {
           const lightComponent = shellyDevice.getComponent(label) as ShellyLightComponent;
           const level = lightComponent.getValue('brightness') as number;
-          if (isValidNumber(level, 0, 100)) {
-            const matterLevel = Math.max(Math.min(Math.round((level / 100) * 254), 254), 0);
+          if (isValidNumber(level, 1, 100)) {
+            const matterLevel = Math.max(Math.min(Math.round((level / 100) * 254), 254), 1);
             this.log.info(`Configuring device ${dn}${mbDevice.deviceName}${nf} component ${hk}${label}${nf}:${zb}brightness ${YELLOW}${matterLevel}${nf}`);
             await mbDevice.setAttribute(LevelControlCluster.id, 'currentLevel', matterLevel, shellyDevice.log, childEndpoint);
           }

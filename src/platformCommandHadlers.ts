@@ -87,7 +87,7 @@ export function shellyLightCommandHandler(
     );
 
   // Send Level() command
-  if (command === 'Level' && isValidNumber(level, 0, 254)) {
+  if (command === 'Level' && isValidNumber(level, 1, 254)) {
     const shellyLevel = Math.max(Math.min(Math.round((level / 254) * 100), 100), 1);
     lightComponent.Level(shellyLevel);
     endpoint.log.info(

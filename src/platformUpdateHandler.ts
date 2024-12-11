@@ -79,7 +79,7 @@ export function shellyUpdateHandler(
   }
   // Update brightness
   if (isLightComponent(shellyComponent) && (property === 'gain' || property === 'brightness') && isValidNumber(value, 0, 100)) {
-    matterbridgeDevice.setAttribute(LevelControlCluster.id, 'currentLevel', Math.max(Math.min(Math.round((value / 100) * 254), 254), 0), shellyDevice.log, endpoint);
+    matterbridgeDevice.setAttribute(LevelControlCluster.id, 'currentLevel', Math.max(Math.min(Math.round((value / 100) * 254), 254), 1), shellyDevice.log, endpoint);
   }
   // Update color gen 1
   if (isLightComponent(shellyComponent) && ['red', 'green', 'blue'].includes(property) && isValidNumber(value, 0, 255)) {
