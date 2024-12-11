@@ -321,6 +321,7 @@ export function shellyUpdateHandler(
     // Gen. 1 devices have: power, total (not all) in PowerMeters and voltage in status (not all)
     // PRO devices have: apower, voltage, freq, current, aenergy.total (wh) and no PowerMeters
     if ((property === 'power' || property === 'apower' || property === 'act_power') && isValidNumber(value, 0)) {
+      if (property === 'power' && shellyComponent.id.startsWith('light') && shellyDevice.id.startsWith('shellyrgbw2')) return; // Skip the rest for shellyrgbw2 devices
       const power = Math.round(value * 1000) / 1000;
       matterbridgeDevice.setAttribute(ElectricalPowerMeasurementCluster.id, 'activePower', power * 1000, shellyDevice.log, endpoint);
       if (property === 'act_power') return; // Skip the rest for PRO devices
