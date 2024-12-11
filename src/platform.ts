@@ -78,6 +78,8 @@ import {
   isValidObject,
   waiter,
   xyColorToRgbColor,
+  miredToKelvin,
+  kelvinToRGB,
 } from 'matterbridge/utils';
 
 import path from 'path';
@@ -646,12 +648,9 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           child.createDefaultOnOffClusterServer();
           if (deviceType.code === DeviceTypes.DIMMABLE_LIGHT.code || deviceType.code === DeviceTypes.COLOR_TEMPERATURE_LIGHT.code) child.createDefaultLevelControlClusterServer();
           if (deviceType.code === DeviceTypes.COLOR_TEMPERATURE_LIGHT.code) {
-            // mbDevice.log.debug(`***Adding color control cluster to ${key}`);
             if (component.hasProperty('temp') && component.hasProperty('mode')) child.addClusterServer(child.getHsColorControlClusterServer());
             else if (component.hasProperty('temp') && !component.hasProperty('mode')) child.addClusterServer(child.getCtColorControlClusterServer());
-            else child.addClusterServer(child.getDefaultColorControlClusterServer());
-          } else {
-            // mbDevice.log.debug(`***Without color control cluster to ${key}`);
+            else child.addClusterServer(child.getHsColorControlClusterServer());
           }
 
           // Add the electrical measurementa cluster on the same endpoint
@@ -708,7 +707,12 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           });
           child.addCommandHandler('moveToColorTemperature', async ({ request }) => {
             child.setAttribute(ColorControlCluster.id, 'colorMode', ColorControl.ColorMode.ColorTemperatureMireds, child.log);
-            shellyLightCommandHandler(child, component, 'ColorTemp', undefined, undefined, request.colorTemperatureMireds);
+            if (component.hasProperty('temp')) {
+              shellyLightCommandHandler(child, component, 'ColorTemp', undefined, undefined, request.colorTemperatureMireds);
+            } else {
+              const rgb = kelvinToRGB(miredToKelvin(request.colorTemperatureMireds));
+              shellyLightCommandHandler(child, component, 'ColorRGB', undefined, { r: rgb.r, g: rgb.g, b: rgb.b });
+            }
           });
 
           // Add event handler from Shelly
