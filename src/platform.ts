@@ -638,9 +638,9 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           if (deviceType.code === DeviceTypes.DIMMABLE_LIGHT.code || deviceType.code === DeviceTypes.COLOR_TEMPERATURE_LIGHT.code) child.createDefaultLevelControlClusterServer();
           if (deviceType.code === DeviceTypes.COLOR_TEMPERATURE_LIGHT.code) {
             // mbDevice.log.debug(`***Adding color control cluster to ${key}`);
-            if (component.hasProperty('temp') && component.hasProperty('mode')) child.addClusterServer(child.getDefaultColorControlClusterServer());
+            if (component.hasProperty('temp') && component.hasProperty('mode')) child.addClusterServer(child.getHsColorControlClusterServer());
             else if (component.hasProperty('temp') && !component.hasProperty('mode')) child.addClusterServer(child.getCtColorControlClusterServer());
-            else child.addClusterServer(child.getHsColorControlClusterServer());
+            else child.addClusterServer(child.getDefaultColorControlClusterServer());
           } else {
             // mbDevice.log.debug(`***Without color control cluster to ${key}`);
           }
