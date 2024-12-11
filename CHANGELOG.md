@@ -10,21 +10,21 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 
 ### Added
 
-- [package]: Requires matterbridge 1.6.6.
 - [package]: Verified to work with matterbridge edge (matter.js new API).
+- [package]: Requires matterbridge 1.6.6.
 - [shelly]: Remove from discovered devices the device with mongoose firmware. We ignore them.
-- [shelly]: Add shellyIdentifyCommandHandler
+- [shelly]: Add shellyIdentifyCommandHandler.
 - [BLU]: Add validate against white and black list for BLU devices. If you put a shelly BLU in the white list, you need to put also his BLU gateway on the white list.
 - [BLU]: Add global and single device component black list. You can now exclude a shelly component globally or on a device base.
-- [matter]: Add tagList to the descriptor cluster
+- [matter]: Add tagList to the descriptor cluster.
 
 ### Changed
 
-- [shelly]: Refactor shellySwitchCommandHandler
-- [shelly]: Refactor shellyLightCommandHandler
-- [shelly]: Refactor shellyCoverCommandHandler
+- [shelly]: Refactor shellySwitchCommandHandler.
+- [shelly]: Refactor shellyLightCommandHandler.
+- [shelly]: Refactor shellyCoverCommandHandler.
 - [colorControl]: Refactor configuration of the cluster.
-- [electricalSensor]: Refactor electrical measurements initial configuration
+- [electricalSensor]: Refactor electrical measurements initial configuration.
 - [matter]: Update all device types.
 - [package]: Updated dependencies.
 
