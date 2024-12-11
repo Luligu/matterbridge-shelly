@@ -192,6 +192,7 @@ If the blackList is defined the devices included in the list will not be exposed
 ### whiteList
 
 If the whiteList is defined only the devices included in the list are exposed to Matter. Use the device id (e.g. shellyplus2pm-5443B23D81F8) or the BLU addr (i.e. 7c:c6:b6:65:2d:87).
+If you add a BLU device in the white list, you need to put also its BLU gateway on the list.
 
 ### entityBlackList
 
