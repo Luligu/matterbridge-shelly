@@ -61,6 +61,7 @@ import {
   WindowCoveringCluster,
   Semtag,
   NumberTag,
+  coverDevice,
 } from 'matterbridge';
 
 // import { EveHistory, EveHistoryCluster, MatterHistory } from 'matterbridge/history';
@@ -633,7 +634,12 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             deviceType = DeviceTypes.COLOR_TEMPERATURE_LIGHT;
           }
           const tagList = this.addTagList(component);
-          const child = mbDevice.addChildDeviceType(key, [deviceType], tagList ? { tagList } : undefined, config.debug as boolean);
+          const child = mbDevice.addChildDeviceType(
+            key,
+            this.hasElectricalMeasurements(component) ? [deviceType, electricalSensor] : [deviceType],
+            tagList ? { tagList } : undefined,
+            config.debug as boolean,
+          );
           child.log.logName = `${device.name} ${key}`;
           child.createDefaultIdentifyClusterServer();
           child.createDefaultGroupsClusterServer();
@@ -718,7 +724,12 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           if (config.outletList && (config.outletList as string[]).includes(device.id)) deviceType = onOffOutlet;
 
           const tagList = this.addTagList(component);
-          const child = mbDevice.addChildDeviceType(key, [deviceType], tagList ? { tagList } : undefined, config.debug as boolean);
+          const child = mbDevice.addChildDeviceType(
+            key,
+            this.hasElectricalMeasurements(component) ? [deviceType, electricalSensor] : [deviceType],
+            tagList ? { tagList } : undefined,
+            config.debug as boolean,
+          );
           child.log.logName = `${device.name} ${key}`;
           child.createDefaultIdentifyClusterServer();
           child.createDefaultGroupsClusterServer();
@@ -747,7 +758,12 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           });
         } else if (isCoverComponent(component)) {
           const tagList = this.addTagList(component);
-          const child = mbDevice.addChildDeviceType(key, [DeviceTypes.WINDOW_COVERING], tagList ? { tagList } : undefined, config.debug as boolean);
+          const child = mbDevice.addChildDeviceType(
+            key,
+            this.hasElectricalMeasurements(component) ? [coverDevice, electricalSensor] : [coverDevice],
+            tagList ? { tagList } : undefined,
+            config.debug as boolean,
+          );
           child.log.logName = `${device.name} ${key}`;
           child.createDefaultIdentifyClusterServer();
           child.createDefaultWindowCoveringClusterServer();
@@ -1501,6 +1517,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
   }
 
   private addTagList(component: ShellyComponent): Semtag[] | undefined {
+    if (this.matterbridge.edge) return undefined;
     // Add the tagList to the descriptor cluster
     let tagList: Semtag | undefined;
     if (component.index === 0) tagList = { mfgCode: null, namespaceId: NumberTag.Zero.namespaceId, tag: NumberTag.Zero.tag, label: component.id };
@@ -1510,6 +1527,17 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     return tagList ? [tagList] : undefined;
   }
 
+  private hasElectricalMeasurements(component: ShellyComponent) {
+    // Check if the component has electricalSensor
+    if (
+      this.config.exposePowerMeter === 'matter13' &&
+      (component.hasProperty('voltage') || component.hasProperty('current') || component.hasProperty('apower') || component.hasProperty('aenergy'))
+    ) {
+      return true;
+    }
+    return false;
+  }
+
   private addElectricalMeasurements(device: MatterbridgeDevice, endpoint: MatterbridgeDevice, shelly: ShellyDevice, component: ShellyComponent) {
     // Add the Matter 1.3 electricalSensor device type and the PowerTopology, ElectricalPowerMeasurement and ElectricalEnergyMeasurement clusters on the same endpoint
     if (
@@ -1517,9 +1545,11 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       (component.hasProperty('voltage') || component.hasProperty('current') || component.hasProperty('apower') || component.hasProperty('aenergy'))
     ) {
       shelly.log.debug(`Adding ElectricalPowerMeasurement and ElectricalEnergyMeasurement clusters to endpoint ${hk}${endpoint.name}${db} component ${hk}${component.id}${db}`);
+      /*
       const deviceTypes = endpoint.getDeviceTypes();
       if (!deviceTypes.includes(electricalSensor)) deviceTypes.push(electricalSensor);
       endpoint.setDeviceTypes(deviceTypes);
+      */
       endpoint.addClusterServer(device.getDefaultPowerTopologyClusterServer());
       endpoint.addClusterServer(device.getDefaultElectricalPowerMeasurementClusterServer());
       endpoint.addClusterServer(device.getDefaultElectricalEnergyMeasurementClusterServer());
