@@ -6,12 +6,12 @@ If you like this project and find it useful, please consider giving it a star on
 
 You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his invaluable contribution to this project.
 
-## [1.1.0] - 2024-12-09
+## [1.1.0-dev.6] - 2024-12-12
 
 ### Added
 
 - [package]: Verified to work with matterbridge edge (matter.js new API).
-- [shelly]: Remove from discovered devices the device with mongoose firmware.
+- [shelly]: Remove from discovered devices the device with mongoose firmware. We ignore them.
 - [shelly]: Add shellyIdentifyCommandHandler
 - [BLU]: Add validate against white and black list for BLU devices. If you put a shelly BLU in the white list, you need to put also his BLU gateway on the white list.
 - [BLU]: Add global and single device component black list. You can now exclude a shelly component globally or on a device base.

@@ -127,7 +127,9 @@ matterbridge
 
 ## How to use it
 
-You may need to set some config values in the frontend (wait that the plugin has been configured before changing the config):
+You may need to set some config values in the frontend.
+Changing configuration after the controller is already paired may cause the controller to see the device as new devices and reset their configuration.
+Wait that the plugin has been configured before changing the config.
 
 ### username
 
