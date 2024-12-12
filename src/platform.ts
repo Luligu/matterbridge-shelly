@@ -285,13 +285,16 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
                 mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer();
                 mbDevice.addFixedLabel('composed', 'Sensor');
                 mbDevice.addChildDeviceTypeWithClusterServer('Contact', [contactSensor], [], undefined, config.debug as boolean);
-                mbDevice.addChildDeviceTypeWithClusterServer('Illuminance', [lightSensor], [], undefined, config.debug as boolean);
+                if (this._validateEntityBlackList(bthomeDevice.addr, 'Illuminance'))
+                  mbDevice.addChildDeviceTypeWithClusterServer('Illuminance', [lightSensor], [], undefined, config.debug as boolean);
               } else if (bthomeDevice.model === 'Shelly BLU Motion') {
                 mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer();
                 mbDevice.addFixedLabel('composed', 'Sensor');
                 mbDevice.addChildDeviceTypeWithClusterServer('Motion', [occupancySensor], [], undefined, config.debug as boolean);
-                mbDevice.addChildDeviceTypeWithClusterServer('Illuminance', [lightSensor], [], undefined, config.debug as boolean);
-                mbDevice.addChildDeviceTypeWithClusterServer('Button', [genericSwitch], [], undefined, config.debug as boolean);
+                if (this._validateEntityBlackList(bthomeDevice.addr, 'Illuminance'))
+                  mbDevice.addChildDeviceTypeWithClusterServer('Illuminance', [lightSensor], [], undefined, config.debug as boolean);
+                if (this._validateEntityBlackList(bthomeDevice.addr, 'Button'))
+                  mbDevice.addChildDeviceTypeWithClusterServer('Button', [genericSwitch], [], undefined, config.debug as boolean);
               } else if (bthomeDevice.model === 'Shelly BLU Button1') {
                 mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer();
                 mbDevice.createDefaultSwitchClusterServer();
@@ -300,7 +303,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
                 mbDevice.addFixedLabel('composed', 'Sensor');
                 mbDevice.addChildDeviceTypeWithClusterServer('Temperature', [temperatureSensor], [], undefined, config.debug as boolean);
                 mbDevice.addChildDeviceTypeWithClusterServer('Humidity', [humiditySensor], [], undefined, config.debug as boolean);
-                mbDevice.addChildDeviceTypeWithClusterServer('Button', [genericSwitch], [], undefined, config.debug as boolean);
+                if (this._validateEntityBlackList(bthomeDevice.addr, 'Button'))
+                  mbDevice.addChildDeviceTypeWithClusterServer('Button', [genericSwitch], [], undefined, config.debug as boolean);
               } else if (bthomeDevice.model === 'Shelly BLU RC Button 4') {
                 mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer();
                 mbDevice.addFixedLabel('composed', 'Input');
@@ -417,7 +421,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               const child = blu.getChildEndpointByName('Humidity');
               blu.setAttribute(RelativeHumidityMeasurementCluster.id, 'measuredValue', value * 100, blu.log, child);
             }
-            if (blu && sensorName === 'Illuminance' && isValidNumber(value, 0, 10000)) {
+            if (blu && sensorName === 'Illuminance' && isValidNumber(value, 0, 10000) && this._validateEntityBlackList(bthomeDevice.addr, 'Illuminance')) {
               const child = blu.getChildEndpointByName('Illuminance');
               const matterLux = Math.round(Math.max(Math.min(10000 * Math.log10(value), 0xfffe), 0));
               blu.setAttribute(IlluminanceMeasurementCluster.id, 'measuredValue', matterLux, blu.log, child);
@@ -490,7 +494,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             } else {
               child = blu.getChildEndpointByName('Button');
             }
-            if (sensorName === 'Button' && isValidString(event, 9)) {
+            if (sensorName === 'Button' && isValidString(event, 9) && this._validateEntityBlackList(bthomeDevice.addr, 'Button')) {
               if (event === 'single_push') {
                 blu.triggerSwitchEvent('Single', blu.log, child);
               }
