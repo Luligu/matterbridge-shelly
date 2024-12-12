@@ -210,7 +210,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         this.storedDevices.set(discoveredDevice.id, discoveredDevice);
         await this.saveStoredDevices();
       }
-      if (this._validateDeviceWhiteBlackList(discoveredDevice.id)) {
+      if (this.validateDeviceWhiteBlackList(discoveredDevice.id)) {
         await this.addDevice(discoveredDevice.id, discoveredDevice.host);
       }
     });
@@ -251,7 +251,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           this.log.info(`Shelly device ${hk}${device.id}${nf} host ${zb}${device.host}${nf} is a ble gateway. Adding paired BLU devices...`);
           // Register the BLU devices
           for (const [key, bthomeDevice] of device.bthomeDevices) {
-            if (!this._validateDeviceWhiteBlackList(bthomeDevice.addr)) continue;
+            if (!this.validateDeviceWhiteBlackList(bthomeDevice.addr)) continue;
             this.log.info(
               `- ${idn}${bthomeDevice.name}${rs}${nf} address ${CYAN}${bthomeDevice.addr}${nf} id ${CYAN}${bthomeDevice.id}${nf} ` +
                 `model ${CYAN}${bthomeDevice.model}${nf} (${CYAN}${bthomeDevice.type}${nf})`,
@@ -285,15 +285,15 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
                 mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer();
                 mbDevice.addFixedLabel('composed', 'Sensor');
                 mbDevice.addChildDeviceTypeWithClusterServer('Contact', [contactSensor], [], undefined, config.debug as boolean);
-                if (this._validateEntityBlackList(bthomeDevice.addr, 'Illuminance'))
+                if (this.validateEntityBlackList(bthomeDevice.addr, 'Illuminance'))
                   mbDevice.addChildDeviceTypeWithClusterServer('Illuminance', [lightSensor], [], undefined, config.debug as boolean);
               } else if (bthomeDevice.model === 'Shelly BLU Motion') {
                 mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer();
                 mbDevice.addFixedLabel('composed', 'Sensor');
                 mbDevice.addChildDeviceTypeWithClusterServer('Motion', [occupancySensor], [], undefined, config.debug as boolean);
-                if (this._validateEntityBlackList(bthomeDevice.addr, 'Illuminance'))
+                if (this.validateEntityBlackList(bthomeDevice.addr, 'Illuminance'))
                   mbDevice.addChildDeviceTypeWithClusterServer('Illuminance', [lightSensor], [], undefined, config.debug as boolean);
-                if (this._validateEntityBlackList(bthomeDevice.addr, 'Button'))
+                if (this.validateEntityBlackList(bthomeDevice.addr, 'Button'))
                   mbDevice.addChildDeviceTypeWithClusterServer('Button', [genericSwitch], [], undefined, config.debug as boolean);
               } else if (bthomeDevice.model === 'Shelly BLU Button1') {
                 mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer();
@@ -303,7 +303,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
                 mbDevice.addFixedLabel('composed', 'Sensor');
                 mbDevice.addChildDeviceTypeWithClusterServer('Temperature', [temperatureSensor], [], undefined, config.debug as boolean);
                 mbDevice.addChildDeviceTypeWithClusterServer('Humidity', [humiditySensor], [], undefined, config.debug as boolean);
-                if (this._validateEntityBlackList(bthomeDevice.addr, 'Button'))
+                if (this.validateEntityBlackList(bthomeDevice.addr, 'Button'))
                   mbDevice.addChildDeviceTypeWithClusterServer('Button', [genericSwitch], [], undefined, config.debug as boolean);
               } else if (bthomeDevice.model === 'Shelly BLU RC Button 4') {
                 mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer();
@@ -381,7 +381,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             if (!isValidString(addr, 11) || !isValidNumber(rssi, -100, 0) || !isValidNumber(packet_id, 0) || !isValidNumber(last_updated_ts)) return;
             const blu = this.bluBridgedDevices.get(addr);
             const bthomeDevice = device.bthomeDevices.get(addr);
-            if (bthomeDevice && !this._validateDeviceWhiteBlackList(bthomeDevice.addr, false)) return;
+            if (bthomeDevice && !this.validateDeviceWhiteBlackList(bthomeDevice.addr, false)) return;
             if (!blu || !bthomeDevice) {
               this.log.error(`Shelly device ${hk}${device.id}${er} host ${zb}${device.host}${er} sent an unknown BLU device address ${CYAN}${addr}${er}`);
               return;
@@ -395,7 +395,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             if (!isValidString(addr, 11) || !isValidString(sensorName, 6) || !isValidNumber(sensorIndex, 0, 3)) return;
             const blu = this.bluBridgedDevices.get(addr);
             const bthomeDevice = device.bthomeDevices.get(addr);
-            if (bthomeDevice && !this._validateDeviceWhiteBlackList(bthomeDevice.addr, false)) return;
+            if (bthomeDevice && !this.validateDeviceWhiteBlackList(bthomeDevice.addr, false)) return;
             if (!blu || !bthomeDevice) {
               this.log.error(`Shelly device ${hk}${device.id}${er} host ${zb}${device.host}${er} sent an unknown BLU device address ${CYAN}${addr}${er}`);
               return;
@@ -421,7 +421,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               const child = blu.getChildEndpointByName('Humidity');
               blu.setAttribute(RelativeHumidityMeasurementCluster.id, 'measuredValue', value * 100, blu.log, child);
             }
-            if (blu && sensorName === 'Illuminance' && isValidNumber(value, 0, 10000) && this._validateEntityBlackList(bthomeDevice.addr, 'Illuminance')) {
+            if (blu && sensorName === 'Illuminance' && isValidNumber(value, 0, 10000) && this.validateEntityBlackList(bthomeDevice.addr, 'Illuminance')) {
               const child = blu.getChildEndpointByName('Illuminance');
               const matterLux = Math.round(Math.max(Math.min(10000 * Math.log10(value), 0xfffe), 0));
               blu.setAttribute(IlluminanceMeasurementCluster.id, 'measuredValue', matterLux, blu.log, child);
@@ -456,7 +456,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             if (!isValidString(addr, 11) || !isValidString(event, 6)) return;
             const blu = this.bluBridgedDevices.get(addr);
             const bthomeDevice = device.bthomeDevices.get(addr);
-            if (bthomeDevice && !this._validateDeviceWhiteBlackList(bthomeDevice.addr, false)) return;
+            if (bthomeDevice && !this.validateDeviceWhiteBlackList(bthomeDevice.addr, false)) return;
             if (!blu || !bthomeDevice) {
               this.log.error(`Shelly device ${hk}${device.id}${er} host ${zb}${device.host}${er} sent an unknown BLU device address ${CYAN}${addr}${er}`);
               return;
@@ -478,7 +478,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             if (!isValidString(addr, 11) || !isValidString(sensorName, 6) || !isValidNumber(sensorIndex, 0, 3) || !isValidString(event, 6)) return;
             const blu = this.bluBridgedDevices.get(addr);
             const bthomeDevice = device.bthomeDevices.get(addr);
-            if (bthomeDevice && !this._validateDeviceWhiteBlackList(bthomeDevice.addr, false)) return;
+            if (bthomeDevice && !this.validateDeviceWhiteBlackList(bthomeDevice.addr, false)) return;
             if (!blu || !bthomeDevice) {
               this.log.error(`Shelly device ${hk}${device.id}${er} host ${zb}${device.host}${er} sent an unknown BLU device address ${CYAN}${addr}${er}`);
               return;
@@ -494,7 +494,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             } else {
               child = blu.getChildEndpointByName('Button');
             }
-            if (sensorName === 'Button' && isValidString(event, 9) && this._validateEntityBlackList(bthomeDevice.addr, 'Button')) {
+            if (sensorName === 'Button' && isValidString(event, 9) && this.validateEntityBlackList(bthomeDevice.addr, 'Button')) {
               if (event === 'single_push') {
                 blu.triggerSwitchEvent('Single', blu.log, child);
               }
@@ -577,8 +577,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       // Scan the device components
       for (const [key, component] of device) {
         // Validate the component against the component black list
-        if (!this._validateEntityBlackList(device.id, component.name)) continue;
-        if (!this._validateEntityBlackList(device.id, key)) continue;
+        if (!this.validateEntityBlackList(device.id, component.name)) continue;
+        if (!this.validateEntityBlackList(device.id, key)) continue;
 
         if (component.name === 'Sys') {
           // Add update handler from Shelly
@@ -1629,62 +1629,5 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     log.logName = device.name ?? device.id;
     await this.shelly.addDevice(device);
     this.shellyDevices.set(device.id, device);
-  }
-
-  // TODO: remove when matterbridge 1.6.6 is published
-  /**
-   * Validates if a device is allowed based on the whitelist and blacklist configurations.
-   * The blacklist has priority over the whitelist.
-   *
-   * @param {string | string[]} device - The device name(s) to validate.
-   * @param {boolean} [log=true] - Whether to log the validation result.
-   * @returns {boolean} - Returns true if the device is allowed, false otherwise.
-   */
-  _validateDeviceWhiteBlackList(device: string | string[], log = true): boolean {
-    if (!Array.isArray(device)) device = [device];
-
-    let blackListBlocked = 0;
-    if (isValidArray(this.config.blackList, 1)) {
-      for (const d of device) if (this.config.blackList.includes(d)) blackListBlocked++;
-    }
-    if (blackListBlocked > 0) {
-      if (log) this.log.info(`Skipping device ${CYAN}${device.join(', ')}${nf} because in blacklist`);
-      return false;
-    }
-
-    let whiteListPassed = 0;
-    if (isValidArray(this.config.whiteList, 1)) {
-      for (const d of device) if (this.config.whiteList.includes(d)) whiteListPassed++;
-    } else whiteListPassed++;
-    if (whiteListPassed > 0) {
-      if (log) this.log.info(`Skipping device ${CYAN}${device.join(', ')}${nf} because not in whitelist`);
-      return true;
-    }
-    return false;
-  }
-
-  // TODO: remove when matterbridge 1.6.6 is published
-  /**
-   * Validates if an entity is allowed based on the entity blacklist and device-entity blacklist configurations.
-   *
-   * @param {string} device - The device to which the entity belongs.
-   * @param {string} entity - The entity to validate.
-   * @param {boolean} [log=true] - Whether to log the validation result.
-   * @returns {boolean} - Returns true if the entity is allowed, false otherwise.
-   */
-  _validateEntityBlackList(device: string, entity: string, log = true): boolean {
-    if (isValidArray(this.config.entityBlackList, 1) && this.config.entityBlackList.find((e) => e === entity)) {
-      if (log) this.log.info(`Skipping entity ${CYAN}${entity}${nf} because in entityBlackList`);
-      return false;
-    }
-    if (
-      isValidObject(this.config.deviceEntityBlackList, 1) &&
-      device in this.config.deviceEntityBlackList &&
-      (this.config.deviceEntityBlackList as Record<string, string[]>)[device].includes(entity)
-    ) {
-      if (log) this.log.info(`Skipping entity ${CYAN}${entity}${wr} for device ${CYAN}${device}${nf} because in deviceEntityBlackList`);
-      return false;
-    }
-    return true;
   }
 }
