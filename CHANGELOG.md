@@ -15,7 +15,7 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 - [shelly]: Remove from discovered devices the device with mongoose firmware. We ignore them.
 - [shelly]: Add shellyIdentifyCommandHandler.
 - [BLU]: Add validate against white and black list for BLU devices. If you put a shelly BLU in the white list, you need to put also his BLU gateway on the white list.
-- [BLU]: Add global and single device component black list. You can now exclude a shelly component globally or on a device base.
+- [BLU]: Add global and single device component black list. You can now exclude a shelly component globally or on a device base (available also for BLU devices).
 - [matter]: Add tagList to the descriptor cluster.
 
 ### Changed
