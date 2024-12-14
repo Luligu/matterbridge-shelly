@@ -95,17 +95,34 @@
       "default": "disabled"
     },
     "blackList": {
-      "description": "The devices in the list will not be exposed. Use the device id (e.g. shellyplus2pm-5443B23D81F8)",
+      "description": "The devices in the list will not be exposed. Use the device id (e.g. shellyplus2pm-5443B23D81F8) or BLU addr (i.e. 7c:c6:b6:65:2d:87)",
       "type": "array",
       "items": {
         "type": "string"
       }
     },
     "whiteList": {
-      "description": "Only the devices in the list will be exposed. Use the device id (e.g. shellyplus2pm-5443B23D81F8)",
+      "description": "Only the devices in the list will be exposed. Use the device id (e.g. shellyplus2pm-5443B23D81F8) or BLU addr (i.e. 7c:c6:b6:65:2d:87). If you add a BLU device in the white list, you need to put also its BLU gateway on the list.",
       "type": "array",
       "items": {
         "type": "string"
+      }
+    },
+    "entityBlackList": {
+      "description": "The components in the list will not be exposed for all devices. Use the component name (i.e. Temperature)",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "deviceEntityBlackList": {
+      "description": "List of components not to be exposed for a single device. Enter in the first field the name of the device id (e.g. shellyplus2pm-5443B23D81F8) and in the second field add all the component names (i.e. Temperature) or component ids (i.e. temperature:0) you want to exclude for that device.",
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
       }
     },
     "nocacheList": {

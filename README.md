@@ -127,7 +127,9 @@ matterbridge
 
 ## How to use it
 
-You may need to set some config values in the frontend (wait that the plugin has been configured before changing the config):
+You may need to set some config values in the frontend.
+Changing configuration after the controller is already paired may cause the controller to see the device as new devices and reset their configuration.
+Wait that the plugin has been configured before changing the config.
 
 ### username
 
@@ -181,15 +183,27 @@ The devices in the list will expose the Input event component as a momentary swi
 
 ### exposePowerMeter
 
-Choose how to expose the shelly power meters: disabled, matter13 (it uses Matter 1.3 electricalSensor device type that is supported by only by Home Assistant so far).
+Choose how to expose the shelly power meters: disabled, matter13 (it uses Matter 1.3 electricalSensor device type that is supported only by Home Assistant so far).
 
 ### blackList
 
-If the blackList is defined the devices included in the list will not be exposed to Matter. Use the device id (e.g. shellyplus2pm-5443B23D81F8)
+If the blackList is defined the devices included in the list will not be exposed to Matter. Use the device id (e.g. shellyplus2pm-5443B23D81F8) or the BLU addr (i.e. 7c:c6:b6:65:2d:87).
 
 ### whiteList
 
-If the whiteList is defined only the devices included in the list are exposed to Matter. Use the device id (e.g. shellyplus2pm-5443B23D81F8).
+If the whiteList is defined only the devices included in the list are exposed to Matter. Use the device id (e.g. shellyplus2pm-5443B23D81F8) or the BLU addr (i.e. 7c:c6:b6:65:2d:87).
+If you add a BLU device in the white list, you need to put also its BLU gateway on the list.
+
+### entityBlackList
+
+The components in the list will not be exposed for all devices. Use the component name (i.e. Temperature).
+
+### deviceEntityBlackList
+
+List of components not to be exposed for a single device. Enter in the first field the name of the device id (e.g. shellyplus2pm-5443B23D81F8 for wifi shelly devices or 7c:c6:b6:65:2d:87 for BLU shelly devices) and in the second field add all the component names (i.e. Temperature) or component ids (i.e. temperature:0) you want to exclude for that device.
+Exammples:
+
+- if you want the BLU motion to only have the motion component, add its device addr and in the list Illuminance and Button;
 
 ### nocacheList
 
@@ -197,7 +211,7 @@ The devices in the list will not be loaded from the cache. Use the device id (e.
 
 ### deviceIp
 
-You can put there one of more of your devices if they have problem with mdns (don't use it unless is needed).
+You can put there one of more of your devices if they have problem with mdns (don't use it unless is needed cause the IP address is fixed).
 E.g. "shelly1minig3-543204547478": "192.168.1.221"
 
 ### enableMdnsDiscover
@@ -223,7 +237,7 @@ Should be enabled to discover the shelly BLU devices (it will register the BLU d
 
 ### failsafeCount
 
-Enable the failsafe count of the devices registered. If the plugin registers less devices then the configured number, the plugin will go in error mode. This is to avoid to loose the controller configuration in case of network issues (default 0 = disabled).
+Enable the failsafe count of the devices registered. If the plugin registers less devices then the configured number, the plugin will go in error mode. This is to avoid to lose the controller configuration in case of network issues (default 0 = disabled).
 
 ### postfix
 
@@ -272,6 +286,8 @@ These are the config values:
   "exposePowerMeter": "disabled" | "matter13"
   "blackList": [],
   "whiteList": [],
+  "entityBlackList": [],
+  "deviceEntityBlackList": {},
   "nocacheList": [],
   "deviceIp": {
     "<DEVICEID1>": "x.x.x.x",

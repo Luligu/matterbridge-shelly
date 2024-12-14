@@ -1,6 +1,6 @@
 {
   "name": "matterbridge-shelly",
-  "version": "1.0.11",
+  "version": "1.1.0",
   "description": "Matterbridge shelly plugin",
   "author": "https://github.com/Luligu",
   "license": "Apache-2.0",
@@ -87,7 +87,7 @@
     "updateDependencies": "npx npm-check-updates -u && npm install && npm link matterbridge && npm run build",
     "prepublishOnly": "npm pkg delete devDependencies && npm pkg delete scripts && npm install --omit=dev && npm shrinkwrap",
     "npmPack": "copy package.json package.log && npm run buildProduction && npm pkg delete devDependencies && npm pkg delete scripts && npx rimraf ./node_modules && npm install --omit=dev && npm shrinkwrap && npm pack && copy package.log package.json && npm run deepCleanBuild && npm run deepCleanBuild",
-    "npmPublishTagDev": "copy package.json package.log && npm run buildProduction && npm pkg delete devDependencies && npm pkg delete scripts && npx rimraf ./node_modules && npm install --omit=dev && npm shrinkwrap && npm publish --tag dev && copy package.log package.json && npm run deepCleanBuild",
+    "npmPublishTagDev": "copy package.json package.log && npm run buildProduction && npm pkg delete devDependencies && npm pkg delete scripts && npm pkg delete types && npx rimraf ./node_modules && npm install --omit=dev && npm shrinkwrap && npm publish --tag dev && copy package.log package.json && npm run deepCleanBuild",
     "npmPublishTagLatest": "copy package.json package.log && npm run buildProduction && npm pkg delete devDependencies && npm pkg delete scripts && npx rimraf ./node_modules && npm install --omit=dev && npm shrinkwrap && npm publish --tag latest && copy package.log package.json && npm run deepCleanBuild",
     "matterbridge:add": "matterbridge -add .\\",
     "matterbridge:remove": "matterbridge -remove .\\",
@@ -112,13 +112,13 @@
     "ws": "8.18.0"
   },
   "devDependencies": {
-    "@eslint/js": "9.16.0",
+    "@eslint/js": "9.17.0",
     "@types/eslint__js": "8.42.3",
     "@types/jest": "29.5.14",
     "@types/multicast-dns": "7.2.4",
-    "@types/node": "22.10.1",
+    "@types/node": "22.10.2",
     "@types/ws": "8.5.13",
-    "eslint": "9.16.0",
+    "eslint": "9.17.0",
     "eslint-config-prettier": "9.1.0",
     "eslint-plugin-jest": "28.9.0",
     "eslint-plugin-prettier": "5.2.1",
@@ -126,6 +126,6 @@
     "prettier": "3.4.2",
     "ts-jest": "29.2.5",
     "typescript": "5.7.2",
-    "typescript-eslint": "8.17.0"
+    "typescript-eslint": "8.18.0"
   }
 }

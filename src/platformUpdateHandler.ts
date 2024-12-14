@@ -41,7 +41,7 @@ import {
   WindowCovering,
   WindowCoveringCluster,
 } from 'matterbridge';
-import { db, debugStringify, dn, hk, idn, or, rs, YELLOW, zb } from 'matterbridge/logger';
+import { db, debugStringify, dn, er, hk, idn, or, rs, YELLOW, zb } from 'matterbridge/logger';
 import { isValidArray, isValidBoolean, isValidNumber, isValidObject, isValidString, rgbColorToHslColor } from 'matterbridge/utils';
 
 import { ShellyDevice } from './shellyDevice.js';
@@ -79,7 +79,7 @@ export function shellyUpdateHandler(
   }
   // Update brightness
   if (isLightComponent(shellyComponent) && (property === 'gain' || property === 'brightness') && isValidNumber(value, 0, 100)) {
-    matterbridgeDevice.setAttribute(LevelControlCluster.id, 'currentLevel', Math.max(Math.min(Math.round((value / 100) * 254), 254), 0), shellyDevice.log, endpoint);
+    matterbridgeDevice.setAttribute(LevelControlCluster.id, 'currentLevel', Math.max(Math.min(Math.round((value / 100) * 254), 254), 1), shellyDevice.log, endpoint);
   }
   // Update color gen 1
   if (isLightComponent(shellyComponent) && ['red', 'green', 'blue'].includes(property) && isValidNumber(value, 0, 255)) {
@@ -276,10 +276,10 @@ export function shellyUpdateHandler(
         const status = WindowCovering.MovementStatus.Stopped;
         matterbridgeDevice.setAttribute(WindowCoveringCluster.id, 'operationalStatus', { global: status, lift: status, tilt: status }, shellyDevice.log, endpoint);
         setTimeout(() => {
-          shellyDevice.log.info(`Setting target position to current position on endpoint ${or}${endpoint.name}:${endpoint.number}${db}`);
+          shellyDevice.log.debug(`Setting target position to current position on endpoint ${or}${endpoint.name}:${endpoint.number}${db}`);
           const current = matterbridgeDevice.getAttribute(WindowCoveringCluster.id, 'currentPositionLiftPercent100ths', shellyDevice.log, endpoint);
           if (!isValidNumber(current, 0, 10000)) {
-            matterbridgeDevice.log.error(`Error: current position not found on endpoint ${or}${endpoint.name}:${endpoint.number}${db} ${hk}WindowCovering${db}`);
+            matterbridgeDevice.log.error(`Error: current position not found on endpoint ${or}${endpoint.name}:${endpoint.number}${er}`);
             return;
           }
           matterbridgeDevice.setAttribute(WindowCoveringCluster.id, 'targetPositionLiftPercent100ths', current, shellyDevice.log, endpoint);
@@ -321,6 +321,7 @@ export function shellyUpdateHandler(
     // Gen. 1 devices have: power, total (not all) in PowerMeters and voltage in status (not all)
     // PRO devices have: apower, voltage, freq, current, aenergy.total (wh) and no PowerMeters
     if ((property === 'power' || property === 'apower' || property === 'act_power') && isValidNumber(value, 0)) {
+      if (property === 'power' && shellyComponent.id.startsWith('light') && shellyDevice.id.startsWith('shellyrgbw2')) return; // Skip the rest for shellyrgbw2 devices
       const power = Math.round(value * 1000) / 1000;
       matterbridgeDevice.setAttribute(ElectricalPowerMeasurementCluster.id, 'activePower', power * 1000, shellyDevice.log, endpoint);
       if (property === 'act_power') return; // Skip the rest for PRO devices

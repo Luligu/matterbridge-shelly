@@ -105,7 +105,7 @@ describe('ShellyPlatform', () => {
       matterbridgeDirectory: 'temp',
       matterbridgePluginDirectory: 'temp',
       systemInformation: { ipv4Address: undefined },
-      matterbridgeVersion: '1.6.5',
+      matterbridgeVersion: '1.6.6',
       addBridgedDevice: jest.fn(),
       removeBridgedDevice: jest.fn(),
       removeAllBridgedDevices: jest.fn(),
@@ -306,56 +306,6 @@ describe('ShellyPlatform', () => {
     expect(isValidUndefined([1, 4, 'string'])).toBe(false);
   });
 
-  it('should return false and log a warning if entity is not in the whitelist', () => {
-    (shellyPlatform as any).whiteList = ['entity1', 'entity2'];
-    (shellyPlatform as any).blackList = [];
-
-    const result = (shellyPlatform as any).validateWhiteBlackList('entity3');
-
-    expect(result).toBe(false);
-    expect(mockLog.warn).toHaveBeenCalledWith(`Skipping ${dn}entity3${wr} because not in whitelist`);
-  });
-
-  it('should return false and log a warning if entity is in the blacklist', () => {
-    (shellyPlatform as any).whiteList = [];
-    (shellyPlatform as any).blackList = ['entity3'];
-
-    const result = (shellyPlatform as any).validateWhiteBlackList('entity3');
-
-    expect(result).toBe(false);
-    expect(mockLog.warn).toHaveBeenCalledWith(`Skipping ${dn}entity3${wr} because in blacklist`);
-  });
-
-  it('should return true if entity is in the whitelist', () => {
-    (shellyPlatform as any).whiteList = ['entity3'];
-    (shellyPlatform as any).blackList = [];
-
-    const result = (shellyPlatform as any).validateWhiteBlackList('entity3');
-
-    expect(result).toBe(true);
-    expect(mockLog.warn).not.toHaveBeenCalled();
-  });
-
-  it('should return true if entity is not in the blacklist and whitelist is empty', () => {
-    (shellyPlatform as any).whiteList = [];
-    (shellyPlatform as any).blackList = [];
-
-    const result = (shellyPlatform as any).validateWhiteBlackList('entity3');
-
-    expect(result).toBe(true);
-    expect(mockLog.warn).not.toHaveBeenCalled();
-  });
-
-  it('should return true if both whitelist and blacklist are empty', () => {
-    (shellyPlatform as any).whiteList = [];
-    (shellyPlatform as any).blackList = [];
-
-    const result = (shellyPlatform as any).validateWhiteBlackList('entity3');
-
-    expect(result).toBe(true);
-    expect(mockLog.warn).not.toHaveBeenCalled();
-  });
-
   it('should validate version', () => {
     mockMatterbridge.matterbridgeVersion = '1.5.4';
     expect(shellyPlatform.verifyMatterbridgeVersion('1.5.3')).toBe(true);
@@ -374,7 +324,7 @@ describe('ShellyPlatform', () => {
   it('should throw because of version', () => {
     mockMatterbridge.matterbridgeVersion = '1.5.4';
     expect(() => new ShellyPlatform(mockMatterbridge, mockLog, mockConfig)).toThrow();
-    mockMatterbridge.matterbridgeVersion = '1.6.0';
+    mockMatterbridge.matterbridgeVersion = '1.6.6';
   });
 
   it('should call onStart with reason and start mDNS', async () => {
