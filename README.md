@@ -202,6 +202,7 @@ The components in the list will not be exposed for all devices. Use the componen
 
 List of components not to be exposed for a single device. Enter in the first field the name of the device id (e.g. shellyplus2pm-5443B23D81F8 for wifi shelly devices or 7c:c6:b6:65:2d:87 for BLU shelly devices) and in the second field add all the component names (i.e. Temperature) or component ids (i.e. temperature:0) you want to exclude for that device.
 Exammples:
+
 - if you want the BLU motion to only have the motion component, add its device addr and in the list Illuminance and Button;
 
 ### nocacheList
@@ -210,7 +211,7 @@ The devices in the list will not be loaded from the cache. Use the device id (e.
 
 ### deviceIp
 
-You can put there one of more of your devices if they have problem with mdns (don't use it unless is needed).
+You can put there one of more of your devices if they have problem with mdns (don't use it unless is needed cause the IP address is fixed).
 E.g. "shelly1minig3-543204547478": "192.168.1.221"
 
 ### enableMdnsDiscover
