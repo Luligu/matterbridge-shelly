@@ -6,6 +6,20 @@ If you like this project and find it useful, please consider giving it a star on
 
 You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his invaluable contribution to this project.
 
+## [1.1.1] - 2024-12-17
+
+### Added
+
+- [matter]: Add list of device types and cluster servers used in the plugin for the certification.
+
+### Changed
+
+- [package]: Updated dependencies.
+
+<a href="https://www.buymeacoffee.com/luligugithub">
+  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+</a>
+
 ## [1.1.0] - 2024-12-14
 
 ### Added

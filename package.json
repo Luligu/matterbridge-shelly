@@ -1,6 +1,6 @@
 {
   "name": "matterbridge-shelly",
-  "version": "1.1.0",
+  "version": "1.1.1-dev.1",
   "description": "Matterbridge shelly plugin",
   "author": "https://github.com/Luligu",
   "license": "Apache-2.0",
@@ -86,9 +86,9 @@
     "checkDependencies": "npx npm-check-updates",
     "updateDependencies": "npx npm-check-updates -u && npm install && npm link matterbridge && npm run build",
     "prepublishOnly": "npm pkg delete devDependencies && npm pkg delete scripts && npm install --omit=dev && npm shrinkwrap",
-    "npmPack": "copy package.json package.log && npm run buildProduction && npm pkg delete devDependencies && npm pkg delete scripts && npx rimraf ./node_modules && npm install --omit=dev && npm shrinkwrap && npm pack && copy package.log package.json && npm run deepCleanBuild && npm run deepCleanBuild",
+    "npmPack": "copy package.json package.log && npm run buildProduction && npm pkg delete devDependencies && npm pkg delete scripts && npm pkg delete types && npx rimraf ./node_modules && npm install --omit=dev && npm shrinkwrap && npm pack && copy package.log package.json && npm run deepCleanBuild",
     "npmPublishTagDev": "copy package.json package.log && npm run buildProduction && npm pkg delete devDependencies && npm pkg delete scripts && npm pkg delete types && npx rimraf ./node_modules && npm install --omit=dev && npm shrinkwrap && npm publish --tag dev && copy package.log package.json && npm run deepCleanBuild",
-    "npmPublishTagLatest": "copy package.json package.log && npm run buildProduction && npm pkg delete devDependencies && npm pkg delete scripts && npx rimraf ./node_modules && npm install --omit=dev && npm shrinkwrap && npm publish --tag latest && copy package.log package.json && npm run deepCleanBuild",
+    "npmPublishTagLatest": "copy package.json package.log && npm run buildProduction && npm pkg delete devDependencies && npm pkg delete scripts && npm pkg delete types && npx rimraf ./node_modules && npm install --omit=dev && npm shrinkwrap && npm publish --tag latest && copy package.log package.json && npm run deepCleanBuild",
     "matterbridge:add": "matterbridge -add .\\",
     "matterbridge:remove": "matterbridge -remove .\\",
     "matterbridge:enable": "matterbridge -enable .\\",
@@ -126,6 +126,6 @@
     "prettier": "3.4.2",
     "ts-jest": "29.2.5",
     "typescript": "5.7.2",
-    "typescript-eslint": "8.18.0"
+    "typescript-eslint": "8.18.1"
   }
 }
