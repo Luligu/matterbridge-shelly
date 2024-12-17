@@ -69,6 +69,9 @@ import {
   humiditySensor,
   dimmableLight,
   colorTemperatureLight,
+  ClusterId,
+  DeviceTypeId,
+  ClusterServerObj,
 } from 'matterbridge';
 
 // import { EveHistory, EveHistoryCluster, MatterHistory } from 'matterbridge/history';
@@ -1343,7 +1346,10 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
 
   override async onConfigure() {
     // Create the list of cluster servers
-    // const clusterMap = new Map<ClusterId, string>();
+    const list = true;
+    const deviceTypeMap = new Map<DeviceTypeId, string>();
+    const clusterMap = new Map<ClusterId, string>();
+
     this.log.info(`Configuring platform ${idn}${this.config.name}${rs}${nf}`);
     this.bridgedDevices.forEach(async (mbDevice) => {
       if (!mbDevice.serialNumber) {
@@ -1361,21 +1367,30 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       mbDevice.configUrl = `http://${shellyDevice.host}`;
       this.log.debug(`Configuring device ${dn}${mbDevice.deviceName}${db} configUrl ${YELLOW}${mbDevice.configUrl}${db}`);
 
-      /*
       // Create the list of cluster servers
-      mbDevice.getAllClusterServers().forEach((clusterServer) => {
-        clusterMap.set(clusterServer.id, clusterServer.name);
-        console.log(`Device ${mbDevice.deviceName} cluster:`, clusterServer.id, clusterServer.name);
-      });
-      */
-      for (const childEndpoint of mbDevice.getChildEndpoints()) {
-        /*
-        // Create the list of cluster servers
-        childEndpoint.getAllClusterServers().forEach((clusterServer) => {
-          clusterMap.set(clusterServer.id, clusterServer.name);
-          console.log(`Device ${mbDevice.deviceName} child ${childEndpoint.uniqueStorageKey} cluster:`, clusterServer.id, clusterServer.name);
+      if (list) {
+        mbDevice.getDeviceTypes().forEach((deviceType) => {
+          deviceTypeMap.set(deviceType.code, deviceType.name);
+          this.log.debug(`Device ${mbDevice.deviceName} deviceType:`, deviceType.code, deviceType.name);
         });
-        */
+        mbDevice.getAllClusterServers().forEach((clusterServer) => {
+          clusterMap.set(clusterServer.id, clusterServer.name);
+          this.log.debug(`Device ${mbDevice.deviceName} cluster:`, clusterServer.id, clusterServer.name);
+        });
+      }
+
+      for (const childEndpoint of mbDevice.getChildEndpoints()) {
+        // Create the list of cluster servers
+        if (list) {
+          childEndpoint.getDeviceTypes().forEach((deviceType) => {
+            deviceTypeMap.set(deviceType.code, deviceType.name);
+            this.log.debug(`Device ${mbDevice.deviceName} child ${childEndpoint.uniqueStorageKey} deviceType:`, deviceType.code, deviceType.name);
+          });
+          childEndpoint.getAllClusterServers().forEach((clusterServer) => {
+            clusterMap.set(clusterServer.id, clusterServer.name);
+            this.log.debug(`Device ${mbDevice.deviceName} child ${childEndpoint.uniqueStorageKey} cluster:`, clusterServer.id, clusterServer.name);
+          });
+        }
         const label = childEndpoint.uniqueStorageKey;
         if (!label) return;
         // Configure the cluster OnOff attribute onOff
@@ -1486,26 +1501,34 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       }
     });
 
-    /*
     // Create the list of cluster servers
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (this.matterbridge as any).commissioningServer
-      ?.getRootEndpoint()
-      .getAllClusterServers()
-      .forEach((clusterServer: ClusterServerObj) => {
-        clusterMap.set(clusterServer.id, clusterServer.name);
-        console.log(`CommissioningServer cluster:`, clusterServer.id, clusterServer.name);
-      });
+    if (list) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (this.matterbridge as any).commissioningServer
+        ?.getRootEndpoint()
+        .getDeviceTypes()
+        .forEach((deviceType: DeviceTypeDefinition) => {
+          deviceTypeMap.set(deviceType.code, deviceType.name);
+          this.log.debug(`RootEndpoint deviceType:`, deviceType.code, deviceType.name);
+        });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (this.matterbridge as any).commissioningServer
+        ?.getRootEndpoint()
+        .getAllClusterServers()
+        .forEach((clusterServer: ClusterServerObj) => {
+          clusterMap.set(clusterServer.id, clusterServer.name);
+          this.log.debug(`CommissioningServer cluster:`, clusterServer.id, clusterServer.name);
+        });
 
-    // Write the clusterMap to clusterMap.txt
-    const clusterMapFilePath = path.join(this.matterbridge.matterbridgeDirectory, 'clusterMap.txt');
-    const clusterMapContent = Array.from(clusterMap.entries())
-      .map(([key, value]) => `Cluster ID 0x${key.toString(16)} name ${value}`)
-      .join('\n');
+      // Write the clusterMap to clusterMap.txt
+      const clusterMapFilePath = path.join(this.matterbridge.matterbridgeDirectory, 'clusterMap.txt');
+      const clusterMapContent = Array.from(clusterMap.entries())
+        .map(([key, value]) => `Cluster ID 0x${key.toString(16)} name ${value}`)
+        .join('\n');
 
-    fs.writeFileSync(clusterMapFilePath, clusterMapContent, 'utf8');
-    this.log.info(`ClusterMap written to ${clusterMapFilePath}`);
-    */
+      fs.writeFileSync(clusterMapFilePath, clusterMapContent, 'utf8');
+      this.log.info(`ClusterMap written to ${clusterMapFilePath}`);
+    }
   }
 
   override async onShutdown(reason?: string) {
