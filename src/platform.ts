@@ -1680,7 +1680,10 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       this.log.error(`Failed to create Shelly device ${hk}${deviceId}${er} host ${zb}${host}${er}`);
       return;
     }
-    if (!this.validateDeviceWhiteBlackList([device.id, device.mac, device.name])) return;
+    if (!this.validateDeviceWhiteBlackList([device.id, device.mac, device.name])) {
+      device.destroy();
+      return;
+    }
 
     log.logName = device.name ?? device.id;
     await this.shelly.addDevice(device);
