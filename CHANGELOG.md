@@ -6,15 +6,21 @@ If you like this project and find it useful, please consider giving it a star on
 
 You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his invaluable contribution to this project.
 
-## [1.1.1] - 2024-12-17
+## [1.1.1-dev.1] - 2024-12-17
 
 ### Added
 
 - [matter]: Add list of device types and cluster servers used in the plugin for the certification.
+- [plugin]: Add the possibility to validate shelly wifi devices by name, id and mac (i.e. you can put in the blacklist and whitelist the device name given in the web UI, the shelly id or the shelly mac).
+- [plugin]: Add the possibility to validate shelly BLU devices by name and mac (i.e. you can put in the blacklist and whitelist the device name given in the gateway web UI or the shelly BLU mac). If you put a shelly BLU in the white list, you need to put also his BLU gateway on the white list.
 
 ### Changed
 
 - [package]: Updated dependencies.
+
+### Fixed
+
+- [configure]: Fixed async loop.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
   <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
