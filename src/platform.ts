@@ -1117,9 +1117,10 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         } else if (component.name === 'Flood' && config.exposeFlood !== 'disabled') {
           const floodComponent = device.getComponent(key);
           if (floodComponent?.hasProperty('flood') && isValidBoolean(floodComponent.getValue('flood'))) {
-            const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [contactSensor], [], undefined, config.debug as boolean);
+            const child = mbDevice.addChildDeviceType(key, [contactSensor], undefined, config.debug as boolean);
             child.log.logName = `${device.name} ${key}`;
             child.addClusterServer(mbDevice.getDefaultBooleanStateClusterServer(!(floodComponent.getValue('flood') as boolean)));
+            child.addRequiredClusterServers(child);
             // Add event handler
             floodComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
               shellyUpdateHandler(this, mbDevice, device, component, property, value);
@@ -1128,9 +1129,10 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         } else if (component.name === 'Gas' && config.exposeGas !== 'disabled') {
           const gasComponent = device.getComponent(key);
           if (gasComponent?.hasProperty('sensor_state') && isValidString(gasComponent.getValue('alarm_state'))) {
-            const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [contactSensor], [], undefined, config.debug as boolean);
+            const child = mbDevice.addChildDeviceType(key, [contactSensor], undefined, config.debug as boolean);
             child.log.logName = `${device.name} ${key}`;
             child.addClusterServer(mbDevice.getDefaultBooleanStateClusterServer(gasComponent.getValue('alarm_state') === 'none'));
+            child.addRequiredClusterServers(child);
             // Add event handler
             gasComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
               shellyUpdateHandler(this, mbDevice, device, component, property, value);
@@ -1139,9 +1141,10 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         } else if (component.name === 'Smoke' && config.exposeSmoke !== 'disabled') {
           const smokeComponent = device.getComponent(key);
           if (smokeComponent?.hasProperty('alarm') && isValidBoolean(smokeComponent.getValue('alarm'))) {
-            const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [contactSensor], [], undefined, config.debug as boolean);
+            const child = mbDevice.addChildDeviceType(key, [contactSensor], undefined, config.debug as boolean);
             child.log.logName = `${device.name} ${key}`;
             child.addClusterServer(mbDevice.getDefaultBooleanStateClusterServer(!smokeComponent.getValue('alarm') as boolean));
+            child.addRequiredClusterServers(child);
             // Add event handler
             smokeComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
               shellyUpdateHandler(this, mbDevice, device, component, property, value);
@@ -1150,10 +1153,11 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         } else if (component.name === 'Lux' && config.exposeLux !== 'disabled') {
           const luxComponent = device.getComponent(key);
           if (luxComponent?.hasProperty('value') && isValidNumber(luxComponent.getValue('value'), 0)) {
-            const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [lightSensor], [], undefined, config.debug as boolean);
+            const child = mbDevice.addChildDeviceType(key, [lightSensor], undefined, config.debug as boolean);
             child.log.logName = `${device.name} ${key}`;
             const matterLux = Math.round(Math.max(Math.min(10000 * Math.log10(luxComponent.getValue('value') as number), 0xfffe), 0));
             child.addClusterServer(mbDevice.getDefaultIlluminanceMeasurementClusterServer(matterLux));
+            child.addRequiredClusterServers(child);
             // Add event handler
             luxComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
               shellyUpdateHandler(this, mbDevice, device, component, property, value);
