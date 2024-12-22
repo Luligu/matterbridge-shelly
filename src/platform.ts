@@ -1348,6 +1348,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
   }
 
   override async onConfigure() {
+    await super.onConfigure();
     // Create the list of device types and cluster servers
     const list = false;
     const deviceTypeMap = new Map<DeviceTypeId, string>();
@@ -1567,6 +1568,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
   }
 
   override async onShutdown(reason?: string) {
+    await super.onShutdown(reason);
     this.log.info(`Shutting down platform ${idn}${this.config.name}${rs}${nf}: ${reason ?? ''}`);
 
     if (!this.nodeStorage) {
