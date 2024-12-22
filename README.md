@@ -151,7 +151,7 @@ If your devices are password protected put there the password. It must be unique
 
 ### exposeSwitch
 
-Choose how to expose the shelly switches: as a switch (don't use it with Alexa), light or outlet.
+Choose how to expose on Matter the shelly switches: as a switch (don't use it with Alexa), light or outlet.
 You can then configure one or more devices to be exposed differently. See the switchList, lightList and outletList.
 
 ### switchList
@@ -168,7 +168,7 @@ The devices in the list will be exposed as outlets, regardless of the main optio
 
 ### exposeInput
 
-Choose how to expose the shelly inputs: disabled, contact, momentary or latching switch (default momentary)
+Choose how to expose the shelly inputs: disabled, contact, momentary or latching switch (default momentary). 
 
 ### inputContactList
 
@@ -177,14 +177,17 @@ The devices in the list will expose the Input event component as a contact senso
 ### inputMomentaryList
 
 The devices in the list will expose the Input event component as a momentary switch, regardless of the main option (you can disable the Input component globally and enable it only for single devices).
+In Matter a momentary switch is button that can be pressed or released.
 
 ### inputLatchingList
 
 The devices in the list will expose the Input event component as a latching switch, regardless of the main option (you can disable the Input component globally and enable it only for single devices).
+In Matter a latching switch is a switch that keeps its position open or closed.
 
 ### exposeInputEvent
 
-Choose how to expose the shelly input events: momentary switch or disabled (default momentary)
+Choose how to expose the shelly input events: momentary switch or disabled (default momentary).
+This type of Input is used by devices like shellybutton1 or by Gen 2/3 devices with Input type=button.
 
 ### inputEventList
 
@@ -221,12 +224,14 @@ Examples:
 
 ### nocacheList
 
-The devices in the list will not be loaded from the cache. Use the device id (e.g. shellyplus2pm-5443B23D81F8). This is usefull if you change the device configuration from the device web ui of from the Shelly app (e.g. changing from color to white or from switch to cover or adding other BLU devices to a ble gateway). In this case put the device id in the list and restart.
+The devices in the list will not be loaded from the cache. Use the device id (e.g. shellyplus2pm-5443B23D81F8). This is only usefull if you change the device configuration from the device web ui of from the Shelly app (e.g. changing from color to white or from switch to cover or adding other BLU devices to a ble gateway) and don't want to wait the plugin to detect the change. In this case put the device id in the list and restart.
 
 ### deviceIp
 
-You can put there one of more of your devices if they have problem with mdns (don't use it unless is needed cause the IP address is fixed).
-E.g. "shelly1minig3-543204547478": "192.168.1.221"
+You can put there one of more of your devices if they have problem with mdns.
+Don't use it unless is needed cause the IP address you add here is fixed.
+You also need to enable the enableConfigDiscover option.
+E.g. "shelly1minig3-543204547478": "192.168.1.221".
 
 ### enableMdnsDiscover
 
