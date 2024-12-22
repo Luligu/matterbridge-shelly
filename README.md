@@ -264,23 +264,23 @@ Add this unique postfix (3 characters max) to each device serial to avoid collis
 
 ### debug
 
-Should be enabled only if you want to debug some issue using the log.
+Should be enabled only if you want to debug some issue using the log. Only for development.
 
 ### debugMdns
 
-Should be enabled only if you want to debug some issue with mdns using the log.
+Should be enabled only if you want to debug some issue with mdns using the log. Only for development.
 
 ### debugCoap
 
-Should be enabled only if you want to debug some issue with CoIoT using the log.
+Should be enabled only if you want to debug some issue with CoIoT using the log. Only for development.
 
 ### debugWs
 
-Should be enabled only if you want to debug some issue with the WebSocket client or server using the log.
+Should be enabled only if you want to debug some issue with the WebSocket client or server using the log. Only for development.
 
 ### unregisterOnShutdown
 
-Should be enabled only if you want to remove the devices from the controllers on shutdown.
+Should be enabled only if you want to remove the devices from the controllers on shutdown. Only for development.
 
 ### Config file
 
