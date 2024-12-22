@@ -187,11 +187,15 @@ Choose how to expose the shelly power meters: disabled, matter13 (it uses Matter
 
 ### blackList
 
-If the blackList is defined the devices included in the list will not be exposed to Matter. Use the device id (e.g. shellyplus2pm-5443B23D81F8) or the BLU addr (i.e. 7c:c6:b6:65:2d:87).
+If the blackList is defined the devices included in the list will not be exposed to Matter. 
+For shelly wifi devices use the device name (i.e. the name defined in the device web UI), the device id (i.e. shellyplus2pm-5443B23D81F8) or the device mac (i.e. 5443B23D81F8).
+For shelly BLU devices use the device name (i.e. the name defined in the device gateway web UI) or the device mac addr (i.e. 7c:c6:b6:65:2d:87).
 
 ### whiteList
 
-If the whiteList is defined only the devices included in the list are exposed to Matter. Use the device id (e.g. shellyplus2pm-5443B23D81F8) or the BLU addr (i.e. 7c:c6:b6:65:2d:87).
+If the whiteList is defined only the devices included in the list are exposed to Matter. 
+For shelly wifi devices use the device name (i.e. the name defined in the device web UI), the device id (i.e. shellyplus2pm-5443B23D81F8) or the device mac (i.e. 5443B23D81F8).
+For shelly BLU devices use the device name (i.e. the name defined in the device gateway web UI) or the device mac addr (i.e. 7c:c6:b6:65:2d:87).
 If you add a BLU device in the white list, you need to put also its BLU gateway on the list.
 
 ### entityBlackList
@@ -201,7 +205,8 @@ The components in the list will not be exposed for all devices. Use the componen
 ### deviceEntityBlackList
 
 List of components not to be exposed for a single device. Enter in the first field the name of the device id (e.g. shellyplus2pm-5443B23D81F8 for wifi shelly devices or 7c:c6:b6:65:2d:87 for BLU shelly devices) and in the second field add all the component names (i.e. Temperature) or component ids (i.e. temperature:0) you want to exclude for that device.
-Exammples:
+
+Examples:
 
 - if you want the BLU motion to only have the motion component, add its device addr and in the list Illuminance and Button;
 
