@@ -221,7 +221,7 @@ Examples:
 
 ### nocacheList
 
-The devices in the list will not be loaded from the cache. Use the device id (e.g. shellyplus2pm-5443B23D81F8). This is usefull and necessary if you change the the device configuration from the device web ui of from the Shelly app (e.g. changing from color to white or from switch to cover or adding other BLU devices to a ble gateway). In this case put the device id in the list and restart.
+The devices in the list will not be loaded from the cache. Use the device id (e.g. shellyplus2pm-5443B23D81F8). This is usefull if you change the device configuration from the device web ui of from the Shelly app (e.g. changing from color to white or from switch to cover or adding other BLU devices to a ble gateway). In this case put the device id in the list and restart.
 
 ### deviceIp
 
