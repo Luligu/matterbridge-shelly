@@ -108,7 +108,7 @@ There are two ways to have the wifi device IP stable:
 
 ### With the frontend (preferred method)
 
-Just open the frontend, select the matterbridge-shelly plugin and click on install. If you are using Matterbridge with Docker (I suggest you do it), all plugins are already loaded in the container so you just need to select and add it.
+Just open the frontend, select the matterbridge-shelly plugin and click on install. If you are using Matterbridge with Docker (I suggest you do it), all plugins are already loaded in the container image so you just need to select and add it.
 
 ### Without the frontend
 
@@ -137,7 +137,9 @@ matterbridge
 ## How to use it
 
 You may need to set some config values in the frontend.
-Changing configuration after the controller is already paired may cause the controller to see the device as new devices and reset their configuration.
+
+Changing configuration after the controller is already paired may cause the controller to see the device as new devices and reset their configuration. You may need to wait a few minutes that the controller reads again all endpoints. 
+
 Wait that the plugin has been configured before changing the config.
 
 ### username
@@ -152,6 +154,7 @@ If your devices are password protected put there the password. It must be unique
 ### exposeSwitch
 
 Choose how to expose on Matter the shelly switches: as a switch (don't use it with Alexa), light or outlet.
+
 You can then configure one or more devices to be exposed differently. See the switchList, lightList and outletList.
 
 ### switchList
