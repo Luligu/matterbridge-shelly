@@ -260,7 +260,7 @@ Enable the failsafe count of the devices registered. If the plugin registers les
 
 ### postfix
 
-Add this unique postfix (3 characters max) to each device serial to avoid collision with other instances (you may loose the configuration of the devices in your controller when changing this value or you may need to pair again the controller).
+Add this unique postfix (3 characters max) to each device serial to avoid collision with other instances (you may loose the configuration of the devices in your controller when changing this value or you may need to pair again the controller). Unless you have a complex setup with more then one controller and different instances of Matterbridge, don't use it.
 
 ### debug
 
