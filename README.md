@@ -168,7 +168,7 @@ The devices in the list will be exposed as outlets, regardless of the main optio
 
 ### exposeInput
 
-Choose how to expose the shelly inputs: disabled, contact, momentary or latching switch (default disabled)
+Choose how to expose the shelly inputs: disabled, contact, momentary or latching switch (default momentary)
 
 ### inputContactList
 
@@ -184,7 +184,7 @@ The devices in the list will expose the Input event component as a latching swit
 
 ### exposeInputEvent
 
-Choose how to expose the shelly input events: momentary switch or disabled (default disabled)
+Choose how to expose the shelly input events: momentary switch or disabled (default momentary)
 
 ### inputEventList
 
