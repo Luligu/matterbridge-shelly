@@ -170,24 +170,31 @@ The devices in the list will be exposed as outlets, regardless of the main optio
 
 Choose how to expose the shelly inputs: disabled, contact, momentary or latching switch (default momentary). 
 
+Is useful only if you create automations on the controller side or you need the controller history.
+
 ### inputContactList
 
-The devices in the list will expose the Input event component as a contact sensor, regardless of the main option (you can disable the Input component globally and enable it only for single devices).
+The devices in the list will expose the Input event component as a contact sensor, regardless of the main option (you can disable the Input component globally and enable it only for single devices like the shellyplusi4).
 
 ### inputMomentaryList
 
-The devices in the list will expose the Input event component as a momentary switch, regardless of the main option (you can disable the Input component globally and enable it only for single devices).
+The devices in the list will expose the Input event component as a momentary switch, regardless of the main option (you can disable the Input component globally and enable it only for single devices like the shellyplusi4).
+
 In Matter a momentary switch is button that can be pressed or released.
 
 ### inputLatchingList
 
-The devices in the list will expose the Input event component as a latching switch, regardless of the main option (you can disable the Input component globally and enable it only for single devices).
+The devices in the list will expose the Input event component as a latching switch, regardless of the main option (you can disable the Input component globally and enable it only for single devices like the shellyplusi4).
+
 In Matter a latching switch is a switch that keeps its position open or closed.
 
 ### exposeInputEvent
 
 Choose how to expose the shelly input events: momentary switch or disabled (default momentary).
+
 This type of Input is used by devices like shellybutton1 or by Gen 2/3 devices with Input type=button.
+
+Is useful only if you create automations on the controller side or you need the controller history.
 
 ### inputEventList
 
@@ -195,19 +202,24 @@ The devices in the list will expose the Input event component as a momentary swi
 
 ### exposePowerMeter
 
-Choose how to expose the shelly power meters: disabled, matter13 (it uses Matter 1.3 electricalSensor device type that is supported only by Home Assistant so far).
+Choose how to expose the shelly power meters: disabled, matter13 (it uses Matter 1.3 electricalSensor device type that is supported only by Home Assistant so far). Unless your controller supports it, set it to disabled.
 
 ### blackList
 
 If the blackList is defined the devices included in the list will not be exposed to Matter. 
+
 For shelly wifi devices use the device name (i.e. the name defined in the device web UI), the device id (i.e. shellyplus2pm-5443B23D81F8) or the device mac (i.e. 5443B23D81F8).
+
 For shelly BLU devices use the device name (i.e. the name defined in the device gateway web UI) or the device mac addr (i.e. 7c:c6:b6:65:2d:87).
 
 ### whiteList
 
 If the whiteList is defined only the devices included in the list are exposed to Matter. 
+
 For shelly wifi devices use the device name (i.e. the name defined in the device web UI), the device id (i.e. shellyplus2pm-5443B23D81F8) or the device mac (i.e. 5443B23D81F8).
+
 For shelly BLU devices use the device name (i.e. the name defined in the device gateway web UI) or the device mac addr (i.e. 7c:c6:b6:65:2d:87).
+
 If you add a BLU device in the white list, you need to put also its BLU gateway on the list.
 
 ### entityBlackList
@@ -224,7 +236,7 @@ Examples:
 
 ### nocacheList
 
-The devices in the list will not be loaded from the cache. Use the device id (e.g. shellyplus2pm-5443B23D81F8). This is only usefull if you change the device configuration from the device web ui of from the Shelly app (e.g. changing from color to white or from switch to cover or adding other BLU devices to a ble gateway) and don't want to wait the plugin to detect the change. In this case put the device id in the list and restart.
+The devices in the list will not be loaded from the cache. Use the device id (e.g. shellyplus2pm-5443B23D81F8). This is only usefull if you change the device configuration from the device web ui or from the Shelly app (e.g. changing from color to white or from switch to cover or adding other BLU devices to a ble gateway) and don't want to wait the plugin to detect the change. In this case put the device id in the list and restart.
 
 ### deviceIp
 
