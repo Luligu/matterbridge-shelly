@@ -95,6 +95,15 @@ Follow these guidelines for specific devices.
 - BLU devices are supported through a local Shelly device acting as a ble gateway. To enable this feature, choose one or more devices that have the ble component and support the ble gateway (e.g. PRO and gen. 3 devices). In the gateway device web page, enable both "Enable Bluetooth" and "Enable Bluetooth gateway". Then, go to the "Components" section and add your BLU devices in "Bluetooth (BTHome) devices". Give a meaningful name to your device if desired and restart Matterbridge.
   See the full guide here: https://github.com/Luligu/matterbridge-shelly/blob/dev/BLU.md
 
+## How to make the device IP address stable
+
+There are two ways to have the wifi device IP stable:
+
+1) In your router configuration find, in the DHCP settings, the option to reserve an ip address for all your shelly wifi devices.
+   
+2) In the device web UI (or Shelly app) go to Settings / WiFi and set a static IP for Wi-Fi 1 settings.
+
+
 ## How to install the plugin
 
 ### With the frontend (preferred method)
