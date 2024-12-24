@@ -15,6 +15,7 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 - [plugin]: Add the possibility to validate shelly BLU devices by name and mac (i.e. you can put in the blacklist and whitelist the device name given in the gateway web UI or the shelly BLU mac). If you put a shelly BLU in the white list, you need to put also his BLU gateway on the white list.
 - [plugin]: Refactor child endpoint creation in ShellyPlatform to use addChildDeviceType and addRequiredClusterServers.
 - [platform]: Added a check for endpoint numbers changes.
+- [readme]: Update COMPONENTS.md and README.md for clarity on blacklisting components.
 
 ### Changed
 
