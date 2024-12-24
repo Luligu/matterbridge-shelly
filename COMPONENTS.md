@@ -9,7 +9,7 @@ Given the components of a shellyplusrgbwpm device (as shown in the logs from the
 
 <img width="709" alt="image" src="https://github.com/user-attachments/assets/6602087b-cc51-43c1-a93d-98d351054cf9" />
 
-### Using the Component Name
+### Blacklist Using the Component Name
 
 To blacklist all Input components of this device, use the component name as shown below:
 
@@ -17,7 +17,7 @@ To blacklist all Input components of this device, use the component name as show
 "deviceEntityBlackList": { "shellyplusrgbwpm-ECC9FF4CEAF0": ["Input"] }
 ```
 
-### Using the Component IDs
+### Blacklist Using the Component IDs
 
 To blacklist only the third (input:2) and fourth (input:3) Input components of this device, use the component IDs as follows:
 
