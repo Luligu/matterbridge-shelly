@@ -229,13 +229,16 @@ If you add a BLU device in the white list, you need to put also its BLU gateway 
 
 The components in the list will not be exposed for all devices. Use the component name (i.e. Temperature).
 
+For detailed examples, refer to the [COMPONENTS.md documentation.](https://github.com/Luligu/matterbridge-shelly/blob/main/COMPONENTS.md)
+
 ### deviceEntityBlackList
 
-List of components not to be exposed for a single device. Enter in the first field the name of the device id (e.g. shellyplus2pm-5443B23D81F8 for wifi shelly devices or 7c:c6:b6:65:2d:87 for BLU shelly devices) and in the second field add all the component names (i.e. Temperature) or component ids (i.e. temperature:0) you want to exclude for that device.
+The deviceEntityBlackList is a list of components that should not be exposed for a specific device.
 
-Examples:
+In the first field, enter the device ID (e.g., shellyplus2pm-5443B23D81F8 for Wi-Fi Shelly devices or 7c:c6:b6:65:2d:87 for BLU Shelly devices).
+In the second field, list all the component names (e.g., Temperature) or component IDs (e.g., temperature:0) you want to exclude for that device.
 
-- if you want the BLU motion to only have the motion component, add its device addr and in the list Illuminance and Button;
+For detailed examples, refer to the [COMPONENTS.md documentation.](https://github.com/Luligu/matterbridge-shelly/blob/main/COMPONENTS.md)
 
 ### nocacheList
 
