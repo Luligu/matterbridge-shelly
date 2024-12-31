@@ -53,10 +53,8 @@ import {
   Switch,
   VendorId,
   ModeSelectCluster,
-  EndpointOptions,
   thermostatDevice,
   modeSelect,
-  MatterbridgeEndpoint,
   WindowCoveringCluster,
   Semtag,
   NumberTag,
@@ -73,9 +71,10 @@ import {
   DeviceTypeId,
   ClusterServerObj,
   Aggregator,
+  EndpointOptions,
+  MatterbridgeEndpoint,
 } from 'matterbridge';
 
-// import { EveHistory, EveHistoryCluster, MatterHistory } from 'matterbridge/history';
 import { AnsiLogger, BLUE, CYAN, GREEN, LogLevel, TimestampFormat, YELLOW, db, dn, er, hk, idn, nf, nt, rs, wr, zb } from 'matterbridge/logger';
 import { NodeStorage, NodeStorageManager } from 'matterbridge/storage';
 import {
