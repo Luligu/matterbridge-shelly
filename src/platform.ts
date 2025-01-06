@@ -252,6 +252,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           this.log.info(`Shelly device ${hk}${device.id}${nf} host ${zb}${device.host}${nf} is a ble gateway. Adding paired BLU devices...`);
           // Register the BLU devices
           for (const [key, bthomeDevice] of device.bthomeDevices) {
+            this.selectDevice.set(bthomeDevice.addr, { serial: bthomeDevice.addr, name: bthomeDevice.name });
             if (!this.validateDeviceWhiteBlackList([bthomeDevice.addr, bthomeDevice.name])) continue;
             this.log.info(
               `- ${idn}${bthomeDevice.name}${rs}${nf} address ${CYAN}${bthomeDevice.addr}${nf} id ${CYAN}${bthomeDevice.id}${nf} ` +
@@ -1685,6 +1686,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       this.log.error(`Failed to create Shelly device ${hk}${deviceId}${er} host ${zb}${host}${er}`);
       return;
     }
+    this.selectDevice.set(device.id, { serial: device.id, name: device.name });
     if (!this.validateDeviceWhiteBlackList([device.id, device.mac, device.name])) {
       device.destroy();
       return;
