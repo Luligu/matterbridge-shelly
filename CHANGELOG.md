@@ -11,6 +11,7 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 ### Added
 
 - [selectDevice]: Added selectDevice to get the device names from a list in the config editor.
+- [package]: Requires matterbridge 1.7.0.
 
 ### Changed
 
