@@ -276,6 +276,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             });
             if (definition) {
               const mbDevice = await this.createMutableDevice(definition, { uniqueStorageKey: bthomeDevice.name }, config.debug as boolean);
+              mbDevice.configUrl = `http://${device.host}`;
               mbDevice.createDefaultBridgedDeviceBasicInformationClusterServer(
                 bthomeDevice.name,
                 bthomeDevice.addr + (this.postfix ? '-' + this.postfix : ''),
@@ -513,6 +514,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
 
       // Create a new Matterbridge device
       const mbDevice = await this.createMutableDevice(bridgedNode, { uniqueStorageKey: device.name }, config.debug as boolean);
+      mbDevice.configUrl = `http://${device.host}`;
       mbDevice.log.logName = device.name;
       mbDevice.createDefaultBridgedDeviceBasicInformationClusterServer(
         device.name,
