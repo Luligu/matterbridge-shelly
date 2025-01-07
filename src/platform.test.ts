@@ -105,7 +105,7 @@ describe('ShellyPlatform', () => {
       matterbridgeDirectory: 'temp',
       matterbridgePluginDirectory: 'temp',
       systemInformation: { ipv4Address: undefined },
-      matterbridgeVersion: '1.7.0',
+      matterbridgeVersion: '1.7.1',
       addBridgedDevice: jest.fn(),
       removeBridgedDevice: jest.fn(),
       removeAllBridgedDevices: jest.fn(),
@@ -324,7 +324,7 @@ describe('ShellyPlatform', () => {
   it('should throw because of version', () => {
     mockMatterbridge.matterbridgeVersion = '1.5.4';
     expect(() => new ShellyPlatform(mockMatterbridge, mockLog, mockConfig)).toThrow();
-    mockMatterbridge.matterbridgeVersion = '1.7.0';
+    mockMatterbridge.matterbridgeVersion = '1.7.1';
   });
 
   it('should call onStart with reason and start mDNS', async () => {
