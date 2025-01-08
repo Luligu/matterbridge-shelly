@@ -1,4 +1,5 @@
-import { Matterbridge, PlatformConfig } from 'matterbridge';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { Matterbridge, MatterbridgeDevice, MatterbridgeEndpoint, PlatformConfig } from 'matterbridge';
 import { AnsiLogger } from 'matterbridge/logger';
 import { ShellyPlatform } from './platform.js';
 import initializePlugin from './index';
@@ -13,12 +14,39 @@ describe('initializePlugin', () => {
 
   beforeEach(() => {
     mockMatterbridge = {
-      addBridgedDevice: jest.fn(),
-      matterbridgeDirectory: '',
-      matterbridgePluginDirectory: 'temp',
-      systemInformation: { ipv4Address: undefined },
+      matterbridgeDirectory: './jest/matterbridge',
+      matterbridgePluginDirectory: './jest/plugins',
+      systemInformation: { ipv4Address: undefined, osRelease: 'xx.xx.xx.xx.xx.xx', nodeVersion: '22.1.10' },
       matterbridgeVersion: '1.7.1',
-      removeAllBridgedDevices: jest.fn(),
+      edge: false,
+      log: mockLog,
+      getDevices: jest.fn(() => {
+        // console.log('getDevices called');
+        return [];
+      }),
+      getPlugins: jest.fn(() => {
+        // console.log('getDevices called');
+        return [];
+      }),
+      addBridgedDevice: jest.fn(async (pluginName: string, device: MatterbridgeDevice) => {
+        // console.log('addBridgedDevice called');
+      }),
+      addBridgedEndpoint: jest.fn(async (pluginName: string, device: MatterbridgeEndpoint) => {
+        // console.log('addBridgedEndpoint called');
+        // await aggregator.add(device);
+      }),
+      removeBridgedDevice: jest.fn(async (pluginName: string, device: MatterbridgeDevice) => {
+        // console.log('removeBridgedDevice called');
+      }),
+      removeBridgedEndpoint: jest.fn(async (pluginName: string, device: MatterbridgeEndpoint) => {
+        // console.log('removeBridgedEndpoint called');
+      }),
+      removeAllBridgedDevices: jest.fn(async (pluginName: string) => {
+        // console.log('removeAllBridgedDevices called');
+      }),
+      removeAllBridgedEndpoints: jest.fn(async (pluginName: string) => {
+        // console.log('removeAllBridgedEndpoints called');
+      }),
     } as unknown as Matterbridge;
     mockLog = { fatal: jest.fn(), error: jest.fn(), warn: jest.fn(), notice: jest.fn(), info: jest.fn(), debug: jest.fn() } as unknown as AnsiLogger;
     mockConfig = {

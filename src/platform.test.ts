@@ -15,6 +15,7 @@ import {
   IdentifyCluster,
   Matterbridge,
   MatterbridgeDevice,
+  MatterbridgeEndpoint,
   OnOffCluster,
   PlatformConfig,
   PowerSourceCluster,
@@ -102,13 +103,39 @@ describe('ShellyPlatform', () => {
   beforeAll(() => {
     // Creates the mocks for Matterbridge, AnsiLogger, and PlatformConfig
     mockMatterbridge = {
-      matterbridgeDirectory: 'temp',
-      matterbridgePluginDirectory: 'temp',
-      systemInformation: { ipv4Address: undefined },
+      matterbridgeDirectory: './jest/matterbridge',
+      matterbridgePluginDirectory: './jest/plugins',
+      systemInformation: { ipv4Address: undefined, osRelease: 'xx.xx.xx.xx.xx.xx', nodeVersion: '22.1.10' },
       matterbridgeVersion: '1.7.1',
-      addBridgedDevice: jest.fn(),
-      removeBridgedDevice: jest.fn(),
-      removeAllBridgedDevices: jest.fn(),
+      edge: false,
+      log: mockLog,
+      getDevices: jest.fn(() => {
+        // console.log('getDevices called');
+        return [];
+      }),
+      getPlugins: jest.fn(() => {
+        // console.log('getDevices called');
+        return [];
+      }),
+      addBridgedDevice: jest.fn(async (pluginName: string, device: MatterbridgeDevice) => {
+        // console.log('addBridgedDevice called');
+      }),
+      addBridgedEndpoint: jest.fn(async (pluginName: string, device: MatterbridgeEndpoint) => {
+        // console.log('addBridgedEndpoint called');
+        // await aggregator.add(device);
+      }),
+      removeBridgedDevice: jest.fn(async (pluginName: string, device: MatterbridgeDevice) => {
+        // console.log('removeBridgedDevice called');
+      }),
+      removeBridgedEndpoint: jest.fn(async (pluginName: string, device: MatterbridgeEndpoint) => {
+        // console.log('removeBridgedEndpoint called');
+      }),
+      removeAllBridgedDevices: jest.fn(async (pluginName: string) => {
+        // console.log('removeAllBridgedDevices called');
+      }),
+      removeAllBridgedEndpoints: jest.fn(async (pluginName: string) => {
+        // console.log('removeAllBridgedEndpoints called');
+      }),
     } as unknown as Matterbridge;
     mockLog = {
       fatal: jest.fn((message) => {
