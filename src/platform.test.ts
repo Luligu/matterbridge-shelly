@@ -160,11 +160,12 @@ describe('ShellyPlatform', () => {
     mockConfig = {
       'name': 'matterbridge-shelly',
       'type': 'DynamicPlatform',
-      'version': '1.0.0',
+      'version': '1.1.2',
       'username': 'admin',
       'password': 'tango',
       'exposeSwitch': 'outlet',
       'exposeInput': 'contact',
+      'exposeInputEvent': 'momentary',
       'exposePowerMeter': 'matter13',
       'blackList': [],
       'whiteList': [],
