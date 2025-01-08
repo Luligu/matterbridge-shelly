@@ -53,10 +53,8 @@ import {
   Switch,
   VendorId,
   ModeSelectCluster,
-  EndpointOptions,
   thermostatDevice,
   modeSelect,
-  MatterbridgeEndpoint,
   WindowCoveringCluster,
   Semtag,
   NumberTag,
@@ -73,9 +71,10 @@ import {
   DeviceTypeId,
   ClusterServerObj,
   Aggregator,
+  EndpointOptions,
+  MatterbridgeEndpoint,
 } from 'matterbridge';
 
-// import { EveHistory, EveHistoryCluster, MatterHistory } from 'matterbridge/history';
 import { AnsiLogger, BLUE, CYAN, GREEN, LogLevel, TimestampFormat, YELLOW, db, dn, er, hk, idn, nf, nt, rs, wr, zb } from 'matterbridge/logger';
 import { NodeStorage, NodeStorageManager } from 'matterbridge/storage';
 import {
@@ -142,9 +141,9 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     super(matterbridge, log, config);
 
     // Verify that Matterbridge is the correct version
-    if (this.verifyMatterbridgeVersion === undefined || typeof this.verifyMatterbridgeVersion !== 'function' || !this.verifyMatterbridgeVersion('1.6.6')) {
+    if (this.verifyMatterbridgeVersion === undefined || typeof this.verifyMatterbridgeVersion !== 'function' || !this.verifyMatterbridgeVersion('1.7.1')) {
       throw new Error(
-        `This plugin requires Matterbridge version >= "1.6.6". Please update Matterbridge from ${this.matterbridge.matterbridgeVersion} to the latest version in the frontend."`,
+        `This plugin requires Matterbridge version >= "1.7.1". Please update Matterbridge from ${this.matterbridge.matterbridgeVersion} to the latest version in the frontend."`,
       );
     }
 
@@ -253,6 +252,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           this.log.info(`Shelly device ${hk}${device.id}${nf} host ${zb}${device.host}${nf} is a ble gateway. Adding paired BLU devices...`);
           // Register the BLU devices
           for (const [key, bthomeDevice] of device.bthomeDevices) {
+            this.selectDevice.set(bthomeDevice.addr, { serial: bthomeDevice.addr, name: bthomeDevice.name, icon: 'ble' });
             if (!this.validateDeviceWhiteBlackList([bthomeDevice.addr, bthomeDevice.name])) continue;
             this.log.info(
               `- ${idn}${bthomeDevice.name}${rs}${nf} address ${CYAN}${bthomeDevice.addr}${nf} id ${CYAN}${bthomeDevice.id}${nf} ` +
@@ -276,6 +276,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             });
             if (definition) {
               const mbDevice = await this.createMutableDevice(definition, { uniqueStorageKey: bthomeDevice.name }, config.debug as boolean);
+              mbDevice.configUrl = `http://${device.host}`;
               mbDevice.createDefaultBridgedDeviceBasicInformationClusterServer(
                 bthomeDevice.name,
                 bthomeDevice.addr + (this.postfix ? '-' + this.postfix : ''),
@@ -513,6 +514,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
 
       // Create a new Matterbridge device
       const mbDevice = await this.createMutableDevice(bridgedNode, { uniqueStorageKey: device.name }, config.debug as boolean);
+      mbDevice.configUrl = `http://${device.host}`;
       mbDevice.log.logName = device.name;
       mbDevice.createDefaultBridgedDeviceBasicInformationClusterServer(
         device.name,
@@ -1686,6 +1688,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       this.log.error(`Failed to create Shelly device ${hk}${deviceId}${er} host ${zb}${host}${er}`);
       return;
     }
+    this.selectDevice.set(device.id, { serial: device.id, name: device.name, icon: 'wifi' });
     if (!this.validateDeviceWhiteBlackList([device.id, device.mac, device.name])) {
       device.destroy();
       return;

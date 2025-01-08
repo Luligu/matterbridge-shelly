@@ -22,12 +22,15 @@ Features:
 - Shelly wifi battery-powered devices with sleep_mode are supported.
 - Shelly BLU devices are supported through local devices configured as ble gateway.
 - Discovered shellies are stored in local storage for quick loading on startup.
-- The components exposed are Light (with brightness and RGB color), Switch, Relay, Roller, Cover, PowerMeter, Temperature, Humidity, Illuminance, Thermostat and Input.
-- PowerMeters expose the electrical measurements with the EveHistory cluster (displayed only in Home Assistant), waiting for the controllers to upgrade to the Matter 1.3 specs.
+- The components exposed are Light (with brightness and RGB color), Switch, Relay, Roller, Cover, PowerMeter, Temperature, Humidity, Illuminance, Thermostat, Button and Input.
+- PowerMeters expose the electrical measurements with the electricalSensor device type (suppoerted by Home Assistant and partially by SmartThings), waiting for the controllers to upgrade to the Matter 1.3 specs.
 - Shellies are controlled locally, eliminating the need for cloud or MQTT (which can both be disabled).
 - Shelly Gen 1 devices are controlled using the CoIoT protocol (see the note below).
 - Shelly Gen 2 and Gen 3 devices are controlled using WebSocket.
 - The Matter device takes the name configured in the Shelly device's web page.
+- Each device can be blacklisted or whitelisted using its name, id or mac address.
+- Device components can be blacklisted globally or on a per-device basis.
+- Devices ids can be selected from a list in the config editor.
 - If the device has a firmware update available, a message is displayed.
 - If the device's CoIoT protocol is not correctly configured, a message is displayed.
 - If the device cover/roller component is not calibrated, a message is displayed.

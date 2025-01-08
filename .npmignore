@@ -174,3 +174,4 @@ mdnsDgram.ts
 mcastServer.ts
 mcastServer.test.ts
 tsconfig.production.json
+jest

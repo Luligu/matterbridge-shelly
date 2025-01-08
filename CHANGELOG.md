@@ -6,6 +6,21 @@ If you like this project and find it useful, please consider giving it a star on
 
 You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his invaluable contribution to this project.
 
+## [1.1.2] - 2025-01-08
+
+### Added
+
+- [selectDevice]: Added selectDevice to get the device names from a list in the config editor.
+- [package]: Requires matterbridge 1.7.1.
+
+### Changed
+
+- [package]: Updated dependencies.
+
+<a href="https://www.buymeacoffee.com/luligugithub">
+  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+</a>
+
 ## [1.1.1] - 2024-12-22
 
 ### Added
