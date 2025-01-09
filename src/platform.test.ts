@@ -114,7 +114,7 @@ describe('ShellyPlatform', () => {
         return [];
       }),
       getPlugins: jest.fn(() => {
-        // console.log('getDevices called');
+        // console.log('getPlugins called');
         return [];
       }),
       addBridgedDevice: jest.fn(async (pluginName: string, device: MatterbridgeDevice) => {

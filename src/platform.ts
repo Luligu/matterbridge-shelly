@@ -174,6 +174,33 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     log.debug(`- debugWs: ${CYAN}${config.debugWs}`);
     log.debug(`- unregisterOnShutdown: ${CYAN}${config.unregisterOnShutdown}`);
 
+    const entities = [
+      { name: 'Relay', description: 'Output component of switches gen 1', icon: 'component' },
+      { name: 'Switch', description: 'Output component of switches gen 2+', icon: 'component' },
+      { name: 'Light', description: 'Output component of lights', icon: 'component' },
+      { name: 'Rgb', description: 'Output component of lights gen 2+', icon: 'component' },
+      { name: 'Input', description: 'Input component of WiFi devices', icon: 'component' },
+      { name: 'Roller', description: 'Window covering component of switches gen 1', icon: 'component' },
+      { name: 'Cover', description: 'Window covering component of switches gen 2+', icon: 'component' },
+      { name: 'PowerMeter', description: 'Electrical measurements component', icon: 'component' },
+      { name: 'Button', description: 'Button component of BLU devices', icon: 'component' },
+      { name: 'Temperature', description: 'Temperature component', icon: 'component' },
+      { name: 'Humidity', description: 'Humidity component', icon: 'component' },
+      { name: 'Flood', description: 'Flood component of flood sensors', icon: 'component' },
+      { name: 'Motion', description: 'Motion component of motion sensors', icon: 'component' },
+      { name: 'Lux', description: 'Illuminance component of illuminance sensors gen 1', icon: 'component' },
+      { name: 'Illuminance', description: 'Illuminance component of illuminance sensors gen 2+', icon: 'component' },
+      { name: 'Contact', description: 'Contact component', icon: 'component' },
+      { name: 'Vibration', description: 'Vibration component of vibration sensors', icon: 'component' },
+      { name: 'Battery', description: 'Battery component of battery powered devices gen 1', icon: 'component' },
+      { name: 'Devicepower', description: 'Battery component of battery powered devices gen 2+', icon: 'component' },
+    ];
+    for (const entity of entities) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      if (this.selectEntity) this.selectEntity.set(entity.name, entity);
+    }
+
     this.shelly = new Shelly(log, this.username, this.password);
     this.shelly.setLogLevel(log.logLevel, this.config.debugMdns as boolean, this.config.debugCoap as boolean, this.config.debugWs as boolean);
     this.shelly.dataPath = path.join(matterbridge.matterbridgePluginDirectory, 'matterbridge-shelly');

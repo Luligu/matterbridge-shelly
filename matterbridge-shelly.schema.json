@@ -37,6 +37,7 @@
       "items": {
         "type": "string"
       },
+      "uniqueItems": true,
       "selectFrom": "serial"
     },
     "lightList": {
@@ -45,6 +46,7 @@
       "items": {
         "type": "string"
       },
+      "uniqueItems": true,
       "selectFrom": "serial"
     },
     "outletList": {
@@ -53,6 +55,7 @@
       "items": {
         "type": "string"
       },
+      "uniqueItems": true,
       "selectFrom": "serial"
     },
     "exposeInput": {
@@ -72,6 +75,7 @@
       "items": {
         "type": "string"
       },
+      "uniqueItems": true,
       "selectFrom": "serial"
     },
     "inputMomentaryList": {
@@ -80,6 +84,7 @@
       "items": {
         "type": "string"
       },
+      "uniqueItems": true,
       "selectFrom": "serial"
     },
     "inputLatchingList": {
@@ -88,6 +93,7 @@
       "items": {
         "type": "string"
       },
+      "uniqueItems": true,
       "selectFrom": "serial"
     },
     "exposeInputEvent": {
@@ -105,6 +111,7 @@
       "items": {
         "type": "string"
       },
+      "uniqueItems": true,
       "selectFrom": "serial"
     },
     "exposePowerMeter": {
@@ -122,6 +129,7 @@
       "items": {
         "type": "string"
       },
+      "uniqueItems": true,
       "selectFrom": "serial"
     },
     "whiteList": {
@@ -130,6 +138,7 @@
       "items": {
         "type": "string"
       },
+      "uniqueItems": true,
       "selectFrom": "serial"
     },
     "entityBlackList": {
@@ -137,7 +146,9 @@
       "type": "array",
       "items": {
         "type": "string"
-      }
+      },
+      "uniqueItems": true,
+      "selectEntityFrom": "name"
     },
     "deviceEntityBlackList": {
       "description": "List of components not to be exposed for a single device. Enter in the first field the device id (e.g. shellyplus2pm-5443B23D81F8) and in the second field add all the component names (i.e. Temperature) or component ids (i.e. temperature:0) you want to exclude for that device.",
@@ -146,7 +157,9 @@
         "type": "array",
         "items": {
           "type": "string"
-        }
+        },
+        "uniqueItems": true,
+        "selectEntityFrom": "name"
       }
     },
     "nocacheList": {
@@ -155,6 +168,7 @@
       "items": {
         "type": "string"
       },
+      "uniqueItems": true,
       "selectFrom": "serial"
     },
     "deviceIp": {
