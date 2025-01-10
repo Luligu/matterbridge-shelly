@@ -141,9 +141,9 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     super(matterbridge, log, config);
 
     // Verify that Matterbridge is the correct version
-    if (this.verifyMatterbridgeVersion === undefined || typeof this.verifyMatterbridgeVersion !== 'function' || !this.verifyMatterbridgeVersion('1.7.1')) {
+    if (this.verifyMatterbridgeVersion === undefined || typeof this.verifyMatterbridgeVersion !== 'function' || !this.verifyMatterbridgeVersion('1.7.2')) {
       throw new Error(
-        `This plugin requires Matterbridge version >= "1.7.1". Please update Matterbridge from ${this.matterbridge.matterbridgeVersion} to the latest version in the frontend."`,
+        `This plugin requires Matterbridge version >= "1.7.2". Please update Matterbridge from ${this.matterbridge.matterbridgeVersion} to the latest version in the frontend."`,
       );
     }
 
@@ -614,7 +614,12 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         const select = this.selectDevice.get(device.id);
         if (select) {
           if (!select.entities) select.entities = [];
-          select.entities.push(component.id);
+          if (!['ble', 'cloud', 'mqtt', 'sys', 'sntp', 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws'].includes(component.id)) {
+            if (!select.entities.find((entity) => entity.name === component.name))
+              select.entities.push({ name: component.name, description: 'All the device ' + component.name + ' components', icon: 'component' });
+            select.entities.push({ name: component.id, description: 'Device ' + component.name + ' component', icon: 'component' });
+          }
+          this.log.debug(`***Select device ${idn}${device.id}${db} add entity ${idn}${component.id}${db}`);
           this.selectDevice.set(device.id, select);
         } else this.log.error(`Select device ${idn}${device.id}${er} not found`);
 
