@@ -154,6 +154,7 @@
       "description": "List of components not to be exposed for a single device. Enter in the first field the device id (e.g. shellyplus2pm-5443B23D81F8) and in the second field add all the component names (i.e. Temperature) or component ids (i.e. temperature:0) you want to exclude for that device.",
       "type": "object",
       "additionalProperties": {
+        "description": "List of components not to be exposed for this device. Enter the component name (i.e. Temperature) or the component id (i.e. temperature:0)",
         "type": "array",
         "items": {
           "type": "string"

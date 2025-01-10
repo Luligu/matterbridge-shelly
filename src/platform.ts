@@ -189,11 +189,12 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       { name: 'Flood', description: 'Flood component of flood sensors', icon: 'component' },
       { name: 'Motion', description: 'Motion component of motion sensors', icon: 'component' },
       { name: 'Lux', description: 'Illuminance component of illuminance sensors gen 1', icon: 'component' },
-      { name: 'Illuminance', description: 'Illuminance component of illuminance sensors gen 2+', icon: 'component' },
+      { name: 'Illuminance', description: 'Illuminance component of illuminance sensors BLU and gen 2+', icon: 'component' },
       { name: 'Contact', description: 'Contact component', icon: 'component' },
       { name: 'Vibration', description: 'Vibration component of vibration sensors', icon: 'component' },
       { name: 'Battery', description: 'Battery component of battery powered devices gen 1', icon: 'component' },
       { name: 'Devicepower', description: 'Battery component of battery powered devices gen 2+', icon: 'component' },
+      { name: 'PowerSource', description: 'Matter component to select wired or battery powered devices', icon: 'matter' },
     ];
     for (const entity of entities) {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -554,38 +555,40 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       );
 
       // Set the powerSource cluster
-      const childPowerSource = mbDevice.addChildDeviceType('PowerSource', [powerSource], undefined, config.debug as boolean);
-      const batteryComponent = device.getComponent('battery');
-      const devicepowerComponent = device.getComponent('devicepower:0');
-      if (batteryComponent) {
-        if (batteryComponent.hasProperty('charging')) {
-          childPowerSource.addClusterServer(mbDevice.getDefaultPowerSourceRechargeableBatteryClusterServer());
-        } else {
-          childPowerSource.addClusterServer(mbDevice.getDefaultPowerSourceReplaceableBatteryClusterServer());
-        }
-        batteryComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
-          shellyUpdateHandler(this, mbDevice, device, component, property, value, 'PowerSource');
-        });
-      } else if (devicepowerComponent) {
-        if (devicepowerComponent.hasProperty('battery') && isValidObject(devicepowerComponent.getValue('battery'), 2)) {
-          const battery = devicepowerComponent.getValue('battery') as { V: number; percent: number };
-          if (isValidNumber(battery.V, 0, 12) && isValidNumber(battery.percent, 0, 100)) {
-            childPowerSource.addClusterServer(
-              mbDevice.getDefaultPowerSourceReplaceableBatteryClusterServer(
-                battery.percent,
-                battery.percent > 20 ? PowerSource.BatChargeLevel.Ok : PowerSource.BatChargeLevel.Critical,
-                battery.V * 1000,
-              ),
-            );
+      if (this.validateEntity(device.id, 'PowerSource')) {
+        const childPowerSource = mbDevice.addChildDeviceType('PowerSource', [powerSource], undefined, config.debug as boolean);
+        const batteryComponent = device.getComponent('battery');
+        const devicepowerComponent = device.getComponent('devicepower:0');
+        if (batteryComponent) {
+          if (batteryComponent.hasProperty('charging')) {
+            childPowerSource.addClusterServer(mbDevice.getDefaultPowerSourceRechargeableBatteryClusterServer());
+          } else {
+            childPowerSource.addClusterServer(mbDevice.getDefaultPowerSourceReplaceableBatteryClusterServer());
           }
+          batteryComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
+            shellyUpdateHandler(this, mbDevice, device, component, property, value, 'PowerSource');
+          });
+        } else if (devicepowerComponent) {
+          if (devicepowerComponent.hasProperty('battery') && isValidObject(devicepowerComponent.getValue('battery'), 2)) {
+            const battery = devicepowerComponent.getValue('battery') as { V: number; percent: number };
+            if (isValidNumber(battery.V, 0, 12) && isValidNumber(battery.percent, 0, 100)) {
+              childPowerSource.addClusterServer(
+                mbDevice.getDefaultPowerSourceReplaceableBatteryClusterServer(
+                  battery.percent,
+                  battery.percent > 20 ? PowerSource.BatChargeLevel.Ok : PowerSource.BatChargeLevel.Critical,
+                  battery.V * 1000,
+                ),
+              );
+            }
+          }
+          devicepowerComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
+            shellyUpdateHandler(this, mbDevice, device, component, property, value, 'PowerSource');
+          });
+        } else {
+          childPowerSource.addClusterServer(mbDevice.getDefaultPowerSourceWiredClusterServer());
         }
-        devicepowerComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
-          shellyUpdateHandler(this, mbDevice, device, component, property, value, 'PowerSource');
-        });
-      } else {
-        childPowerSource.addClusterServer(mbDevice.getDefaultPowerSourceWiredClusterServer());
+        mbDevice.addRequiredClusterServers(childPowerSource);
       }
-      mbDevice.addRequiredClusterServers(childPowerSource);
 
       // Set the composed name at gui
       const names = device.getComponentNames();
@@ -607,9 +610,17 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
 
       // Scan the device components
       for (const [key, component] of device) {
+        // Set selectDevice entities for the device
+        const select = this.selectDevice.get(device.id);
+        if (select) {
+          if (!select.entities) select.entities = [];
+          select.entities.push(component.id);
+          this.selectDevice.set(device.id, select);
+        } else this.log.error(`Select device ${idn}${device.id}${er} not found`);
+
         // Validate the component against the component black list
-        if (!this.validateEntityBlackList(device.id, component.name)) continue;
-        if (!this.validateEntityBlackList(device.id, key)) continue;
+        if (!this.validateEntity(device.id, component.name)) continue;
+        if (!this.validateEntity(device.id, key)) continue;
 
         if (component.name === 'Sys') {
           // Add update handler from Shelly
@@ -1264,7 +1275,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       }
       // Check if we have a device to register with Matterbridge
       const endpoints = mbDevice.getChildEndpoints();
-      if (endpoints.length > 1 || (device.hasComponent('blugw') && config.exposeBlugw !== 'disabled')) {
+      // if (endpoints.length > 1 || (device.hasComponent('blugw') && config.exposeBlugw !== 'disabled')) {
+      if (endpoints.length > 0) {
         try {
           // Register the device with Matterbridge
           await this.registerDevice(mbDevice);
