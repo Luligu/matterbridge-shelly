@@ -174,6 +174,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     log.debug(`- debugWs: ${CYAN}${config.debugWs}`);
     log.debug(`- unregisterOnShutdown: ${CYAN}${config.unregisterOnShutdown}`);
 
+    // Set the entity selection map for the device selection in the frontend
     const entities = [
       { name: 'Relay', description: 'Output component of switches gen 1', icon: 'component' },
       { name: 'Switch', description: 'Output component of switches gen 2+', icon: 'component' },
@@ -197,9 +198,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       { name: 'PowerSource', description: 'Matter component to select wired or battery powered devices', icon: 'matter' },
     ];
     for (const entity of entities) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      if (this.selectEntity) this.selectEntity.set(entity.name, entity);
+      this.selectEntity.set(entity.name, entity);
     }
 
     this.shelly = new Shelly(log, this.username, this.password);
@@ -316,15 +315,15 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
                 mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer();
                 mbDevice.addFixedLabel('composed', 'Sensor');
                 mbDevice.addChildDeviceTypeWithClusterServer('Contact', [contactSensor], [], undefined, config.debug as boolean);
-                if (this.validateEntityBlackList(bthomeDevice.addr, 'Illuminance'))
+                if (this.validateEntity(bthomeDevice.addr, 'Illuminance'))
                   mbDevice.addChildDeviceTypeWithClusterServer('Illuminance', [lightSensor], [], undefined, config.debug as boolean);
               } else if (bthomeDevice.model === 'Shelly BLU Motion') {
                 mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer();
                 mbDevice.addFixedLabel('composed', 'Sensor');
                 mbDevice.addChildDeviceTypeWithClusterServer('Motion', [occupancySensor], [], undefined, config.debug as boolean);
-                if (this.validateEntityBlackList(bthomeDevice.addr, 'Illuminance'))
+                if (this.validateEntity(bthomeDevice.addr, 'Illuminance'))
                   mbDevice.addChildDeviceTypeWithClusterServer('Illuminance', [lightSensor], [], undefined, config.debug as boolean);
-                if (this.validateEntityBlackList(bthomeDevice.addr, 'Button'))
+                if (this.validateEntity(bthomeDevice.addr, 'Button'))
                   mbDevice.addChildDeviceTypeWithClusterServer('Button', [genericSwitch], [], undefined, config.debug as boolean);
               } else if (bthomeDevice.model === 'Shelly BLU Button1') {
                 mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer();
@@ -334,7 +333,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
                 mbDevice.addFixedLabel('composed', 'Sensor');
                 mbDevice.addChildDeviceTypeWithClusterServer('Temperature', [temperatureSensor], [], undefined, config.debug as boolean);
                 mbDevice.addChildDeviceTypeWithClusterServer('Humidity', [humiditySensor], [], undefined, config.debug as boolean);
-                if (this.validateEntityBlackList(bthomeDevice.addr, 'Button'))
+                if (this.validateEntity(bthomeDevice.addr, 'Button'))
                   mbDevice.addChildDeviceTypeWithClusterServer('Button', [genericSwitch], [], undefined, config.debug as boolean);
               } else if (bthomeDevice.model === 'Shelly BLU RC Button 4') {
                 mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer();
@@ -1732,8 +1731,9 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       this.log.error(`Failed to create Shelly device ${hk}${deviceId}${er} host ${zb}${host}${er}`);
       return;
     }
+    // Set the device in the selectDevice map for the frontend device selection
     this.selectDevice.set(device.id, { serial: device.id, name: device.name, icon: 'wifi' });
-    if (!this.validateDeviceWhiteBlackList([device.id, device.mac, device.name])) {
+    if (!this.validateDevice([device.id, device.mac, device.name])) {
       device.destroy();
       return;
     }
