@@ -6,6 +6,23 @@ If you like this project and find it useful, please consider giving it a star on
 
 You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his invaluable contribution to this project.
 
+## [1.1.3] - 2025-01-11
+
+### Added
+
+- [selectDevice]: Added selectEntity to get the components names from a list in the config editor.
+- [selectDevice]: Added the possibility to exclude PowerSource.
+- [schema]: Configured all lists to not have duplicates.
+- [package]: Requires matterbridge 1.7.2.
+
+### Changed
+
+- [package]: Updated dependencies.
+
+<a href="https://www.buymeacoffee.com/luligugithub">
+  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+</a>
+
 ## [1.1.2] - 2025-01-08
 
 ### Added
