@@ -610,16 +610,16 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       // Scan the device components
       for (const [key, component] of device) {
         // Set selectDevice entities for the device
-        const select = this.selectDevice.get(device.id);
-        if (select) {
-          if (!select.entities) select.entities = [];
-          if (!['ble', 'cloud', 'mqtt', 'sys', 'sntp', 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws'].includes(component.id)) {
-            if (!select.entities.find((entity) => entity.name === component.name))
-              select.entities.push({ name: component.name, description: 'All the device ' + component.name + ' components', icon: 'component' });
-            select.entities.push({ name: component.id, description: 'Device ' + component.name + ' component', icon: 'component' });
+        const selectDevice = this.selectDevice.get(device.id);
+        if (selectDevice) {
+          if (!selectDevice.entities) selectDevice.entities = [];
+          if (!['ble', 'cloud', 'mqtt', 'sys', 'sntp', 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws', 'eth'].includes(component.id)) {
+            if (!selectDevice.entities.find((entity) => entity.name === component.name))
+              selectDevice.entities.push({ name: component.name, description: 'All the device ' + component.name + ' components', icon: 'component' });
+            selectDevice.entities.push({ name: component.id, description: 'Device ' + component.name + ' component', icon: 'component' });
+            this.log.debug(`***Select device ${idn}${device.id}${rs}${db} add entity ${CYAN}${component.name}${db}-${CYAN}${component.id}${db}`);
           }
-          this.log.debug(`***Select device ${idn}${device.id}${db} add entity ${idn}${component.id}${db}`);
-          this.selectDevice.set(device.id, select);
+          this.selectDevice.set(device.id, selectDevice);
         } else this.log.error(`Select device ${idn}${device.id}${er} not found`);
 
         // Validate the component against the component black list
@@ -1226,7 +1226,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             // Add command handlers
             mbDevice.addCommandHandler('changeToMode', async (data) => {
               this.log.debug(`***changeToMode: request ${JSON.stringify(data.request)} endpoint ${data.endpoint.name}:0x${data.endpoint.number?.toString(16)}`);
-              if (isValidObject(data) && isValidNumber(data.endpoint?.number) && isValidNumber(data.request?.newMode, 1, 2)) {
+              if (isValidNumber(data.endpoint?.number) && isValidNumber(data.request?.newMode, 1, 2)) {
                 const componentName = mbDevice.getChildEndpoint(data.endpoint.number)?.uniqueStorageKey;
                 mbDevice.setAttribute(ModeSelectCluster.id, 'currentMode', data.request.newMode, mbDevice.log, data.endpoint);
                 if (componentName === 'blugw')
@@ -1525,7 +1525,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           if (!component) return;
           this.log.info(`Configuring device ${dn}${mbDevice.deviceName}${nf} electrical component ${hk}${label}${nf}`);
           for (const property of component.properties) {
-            if (!['voltage', 'current', 'power', 'apower', 'act_power', 'total', 'aenergy'].includes(property.key)) continue;
+            if (!['voltage', 'current', 'power', 'apower', 'act_power', 'total', 'aenergy', 'total_act_energy'].includes(property.key)) continue;
             shellyUpdateHandler(this, mbDevice, shellyDevice, component.id, property.key, property.value);
           }
         }

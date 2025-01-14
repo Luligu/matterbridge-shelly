@@ -177,6 +177,8 @@
     "deviceIp": {
       "description": "Set the IP address for each device. Enter in the first field the shelly ID of the device and in the second field the IP address. (e.g. shelly1minig3-543204547478: 192.168.1.221)",
       "type": "object",
+      "uniqueItems": true,
+      "selectFrom": "serial",
       "additionalProperties": {
         "type": "string"
       }
