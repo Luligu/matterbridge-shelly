@@ -70,7 +70,6 @@ import {
   ClusterId,
   DeviceTypeId,
   ClusterServerObj,
-  Aggregator,
   EndpointOptions,
   MatterbridgeEndpoint,
 } from 'matterbridge';
@@ -112,7 +111,6 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
   public discoveredDevices = new Map<ShellyDeviceId, DiscoveredDevice>();
   public storedDevices = new Map<ShellyDeviceId, DiscoveredDevice>();
   public changedDevices = new Map<ShellyDeviceId, ShellyDeviceId>();
-  public shellyDevices = new Map<ShellyDeviceId, ShellyDevice>();
   public bridgedDevices = new Map<ShellyDeviceId, MatterbridgeDevice>();
   public bluBridgedDevices = new Map<string, MatterbridgeDevice>();
 
@@ -224,8 +222,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           this.storedDevices.set(discoveredDevice.id, discoveredDevice);
           this.changedDevices.set(discoveredDevice.id, discoveredDevice.id);
           await this.saveStoredDevices();
-          if (this.shellyDevices.has(discoveredDevice.id)) {
-            const device = this.shellyDevices.get(discoveredDevice.id) as ShellyDevice;
+          if (this.shelly.hasDevice(discoveredDevice.id)) {
+            const device = this.shelly.getDevice(discoveredDevice.id) as ShellyDevice;
             device.host = discoveredDevice.host;
             device.wsClient?.stop(); // It will be restarted by the ShellyDevice interval if gen > 1
             device.log.warn(`Shelly device ${hk}${discoveredDevice.id}${wr} host ${zb}${discoveredDevice.host}${wr} updated`);
@@ -280,7 +278,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           // Register the BLU devices
           for (const [key, bthomeDevice] of device.bthomeDevices) {
             this.selectDevice.set(bthomeDevice.addr, { serial: bthomeDevice.addr, name: bthomeDevice.name, icon: 'ble' });
-            if (!this.validateDeviceWhiteBlackList([bthomeDevice.addr, bthomeDevice.name])) continue;
+            if (!this.validateDevice([bthomeDevice.addr, bthomeDevice.name])) continue;
             this.log.info(
               `- ${idn}${bthomeDevice.name}${rs}${nf} address ${CYAN}${bthomeDevice.addr}${nf} id ${CYAN}${bthomeDevice.id}${nf} ` +
                 `model ${CYAN}${bthomeDevice.model}${nf} (${CYAN}${bthomeDevice.type}${nf})`,
@@ -617,7 +615,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             if (!selectDevice.entities.find((entity) => entity.name === component.name))
               selectDevice.entities.push({ name: component.name, description: 'All the device ' + component.name + ' components', icon: 'component' });
             selectDevice.entities.push({ name: component.id, description: 'Device ' + component.name + ' component', icon: 'component' });
-            this.log.debug(`***Select device ${idn}${device.id}${rs}${db} add entity ${CYAN}${component.name}${db}-${CYAN}${component.id}${db}`);
+            this.log.debug(`Select device ${idn}${device.id}${rs}${db} add entity ${CYAN}${component.name}${db}-${CYAN}${component.id}${db}`);
           }
           this.selectDevice.set(device.id, selectDevice);
         } else this.log.error(`Select device ${idn}${device.id}${er} not found`);
@@ -1343,53 +1341,70 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     }
     this.log.debug(`Loaded ${CYAN}${this.changedDevices.size}${nf} changed Shelly devices from the storage`);
 
-    // start Shelly mDNS device discoverer if enabled and stop it after 10 minutes
-    if (this.config.enableMdnsDiscover === true) {
-      this.shelly.startMdns(10 * 60 * 1000, this.config.interfaceName as string, 'udp4', this.config.debugMdns as boolean);
-    }
-
     // add all stored devices
     if (this.config.enableStorageDiscover === true) {
       this.log.info(`Loading from storage ${this.storedDevices.size} Shelly devices`);
-      this.storedDevices.forEach(async (storedDevice) => {
+      for (const storedDevice of this.storedDevices.values()) {
         storedDevice.id = ShellyDevice.normalizeId(storedDevice.id).id;
         if (storedDevice.id === undefined || storedDevice.host === undefined || !isValidIpv4Address(storedDevice.host)) {
           this.log.error(
             `Stored Shelly device id ${hk}${storedDevice.id}${er} host ${zb}${storedDevice.host}${er} is not valid. Please enable resetStorageDiscover in plugin config and restart.`,
           );
-          return;
+          continue;
         }
         this.log.debug(`Loading from storage Shelly device ${hk}${storedDevice.id}${db} host ${zb}${storedDevice.host}${db}`);
-        this.shelly.emit('discovered', storedDevice);
-      });
+        // this.shelly.emit('discovered', storedDevice);
+        // add the device to the discoveredDevices map
+        this.discoveredDevices.set(storedDevice.id, storedDevice);
+        await this.addDevice(storedDevice.id, storedDevice.host);
+      }
     }
 
     // add all configured devices
     if (this.config.enableConfigDiscover === true && isValidObject(this.config.deviceIp)) {
       this.log.info(`Loading from config ${Object.entries(this.config.deviceIp as ConfigDeviceIp).length} Shelly devices`);
-      Object.entries(this.config.deviceIp as ConfigDeviceIp).forEach(async ([id, host]) => {
+      // eslint-disable-next-line prefer-const
+      for (let [id, host] of Object.entries(this.config.deviceIp as ConfigDeviceIp)) {
         id = ShellyDevice.normalizeId(id).id;
         const configDevice: DiscoveredDevice = { id, host, port: 0, gen: 0 };
         if (configDevice.id === undefined || configDevice.host === undefined || !isValidIpv4Address(configDevice.host)) {
           this.log.error(`Config Shelly device id ${hk}${configDevice.id}${er} host ${zb}${configDevice.host}${er} is not valid. Please check the plugin config and restart.`);
-          return;
+          continue;
+        }
+        if (this.discoveredDevices.has(configDevice.id)) {
+          this.log.info(`Config Shelly device id ${hk}${configDevice.id}${nf} host ${zb}${configDevice.host}${nf} already loaded from storage. Skipping.`);
+          continue;
         }
         this.log.debug(`Loading from config Shelly device ${hk}${configDevice.id}${db} host ${zb}${configDevice.host}${db}`);
-        this.shelly.emit('discovered', configDevice);
-      });
+        // this.shelly.emit('discovered', configDevice);
+        // add the device to the discoveredDevices map
+        this.discoveredDevices.set(configDevice.id, configDevice);
+        this.storedDevices.set(configDevice.id, configDevice);
+        await this.saveStoredDevices();
+        await this.addDevice(configDevice.id, configDevice.host);
+      }
+    }
+
+    // start Shelly mDNS device discoverer if enabled and stop it after 10 minutes
+    if (this.config.enableMdnsDiscover === true) {
+      this.shelly.startMdns(10 * 60 * 1000, this.config.interfaceName as string, 'udp4', this.config.debugMdns as boolean);
     }
 
     // Wait for the failsafe count to be met
-    if (this.failsafeCount > 0) {
-      this.log.notice(`Waiting for the configured number of ${this.failsafeCount} devices to be loaded.`);
+    if (this.failsafeCount > 0 && this.bridgedDevices.size + this.bluBridgedDevices.size < this.failsafeCount) {
+      this.log.notice(`Waiting for the configured number of ${this.bridgedDevices.size + this.bluBridgedDevices.size}/${this.failsafeCount} devices to be loaded.`);
       /* prettier-ignore */
       const isSafe = await waiter('failsafeCount', () => this.bridgedDevices.size + this.bluBridgedDevices.size >= this.failsafeCount, false, 55000, 1000, this.config.debug as boolean);
       if (!isSafe) {
         throw new Error(
           `The plugin did not add the configured number of ${this.failsafeCount} devices. Registered ${this.bridgedDevices.size + this.bluBridgedDevices.size} devices.`,
         );
+      } else {
+        this.log.notice(`The plugin added the configured number of ${this.failsafeCount} devices.`);
       }
     }
+
+    this.log.info(`Started platform ${idn}${this.config.name}${rs}${nf}: ${reason ?? ''}`);
   }
 
   override async onConfigure() {
@@ -1576,8 +1591,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     if (list) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const rootEndpoint = (this.matterbridge as any).commissioningServer?.getRootEndpoint();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const aggregator = (this.matterbridge as any).matterAggregator as Aggregator;
+
+      // const aggregator = (this.matterbridge as any).matterAggregator as Aggregator;
 
       rootEndpoint.getDeviceTypes().forEach((deviceType: DeviceTypeDefinition) => {
         deviceTypeMap.set(deviceType.code, deviceType.name);
@@ -1589,6 +1604,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         this.log.debug(`***RootEndpoint cluster:`, clusterServer.id, clusterServer.name);
       });
 
+      /*
       aggregator.getDeviceTypes().forEach((deviceType: DeviceTypeDefinition) => {
         deviceTypeMap.set(deviceType.code, deviceType.name);
         this.log.debug(`***Aggregator deviceType:`, deviceType.code, deviceType.name);
@@ -1598,6 +1614,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         clusterMap.set(clusterServer.id, clusterServer.name);
         this.log.debug(`***Aggregator cluster:`, clusterServer.id, clusterServer.name);
       });
+      */
 
       // Write the clusterMap to clusterMap.txt
       const clusterMapFilePath = path.join(this.matterbridge.matterbridgeDirectory, 'clusterMap.txt');
@@ -1740,6 +1757,5 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
 
     log.logName = device.name ?? device.id;
     await this.shelly.addDevice(device);
-    this.shellyDevices.set(device.id, device);
   }
 }
