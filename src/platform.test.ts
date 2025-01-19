@@ -58,11 +58,11 @@ describe('ShellyPlatform', () => {
   let loggerLogSpy: jest.SpiedFunction<(level: LogLevel, message: string, ...parameters: any[]) => void>;
   let consoleLogSpy: jest.SpiedFunction<typeof console.log>;
 
-  jest.spyOn(Matterbridge.prototype, 'addBridgedEndpoint').mockImplementation((pluginName: string, device: MatterbridgeDevice) => {
+  jest.spyOn(Matterbridge.prototype, 'addBridgedEndpoint').mockImplementation((pluginName: string, device: MatterbridgeEndpoint) => {
     // console.log(`Mocked addBridgedDevice: ${pluginName} ${device.name}`);
     return Promise.resolve();
   });
-  jest.spyOn(Matterbridge.prototype, 'removeBridgedEndpoint').mockImplementation((pluginName: string, device: MatterbridgeDevice) => {
+  jest.spyOn(Matterbridge.prototype, 'removeBridgedEndpoint').mockImplementation((pluginName: string, device: MatterbridgeEndpoint) => {
     // console.log(`Mocked unregisterDevice: ${pluginName} ${device.name}`);
     return Promise.resolve();
   });
