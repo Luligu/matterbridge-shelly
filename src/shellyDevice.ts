@@ -1052,7 +1052,7 @@ export class ShellyDevice extends EventEmitter {
         if (key.startsWith('input:')) this.updateComponent(key, data[key] as ShellyData);
         if (key.startsWith('pm1:')) this.updateComponent(key, data[key] as ShellyData);
         if (key.startsWith('em1:')) this.updateComponent(key, data[key] as ShellyData);
-        if (key.startsWith('emdata1:')) this.updateComponent(key.replace('emdata1:', 'em1:'), data[key] as ShellyData);
+        if (key.startsWith('em1data:')) this.updateComponent(key.replace('em1data:', 'em1:'), data[key] as ShellyData);
         if (key.startsWith('em:')) this.updateComponent(key, data[key] as ShellyData);
         if (key.startsWith('emdata:')) this.updateComponent(key.replace('emdata:', 'em:'), data[key] as ShellyData);
         if (key.startsWith('temperature:')) this.updateComponent(key, data[key] as ShellyData);

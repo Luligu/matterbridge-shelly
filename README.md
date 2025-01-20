@@ -28,8 +28,8 @@ Features:
 - Shelly Gen 1 devices are controlled using the CoIoT protocol (see the note below).
 - Shelly Gen 2 and Gen 3 devices are controlled using WebSocket.
 - The Matter device takes the name configured in the Shelly device's web page.
-- Each device can be blacklisted or whitelisted using its name, id or mac address.
-- Device components can be blacklisted globally or on a per-device basis.
+- Each device can be blacklisted or whitelisted using its name, id or mac address. Refer to the [COMPONENTS.md documentation.](https://github.com/Luligu/matterbridge-shelly/blob/main/COMPONENTS.md)
+- Device components can be blacklisted globally or on a per-device basis. Refer to the [COMPONENTS.md documentation.](https://github.com/Luligu/matterbridge-shelly/blob/main/COMPONENTS.md)
 - Devices ids can be selected from a list in the config editor.
 - If the device has a firmware update available, a message is displayed.
 - If the device's CoIoT protocol is not correctly configured, a message is displayed.
@@ -102,10 +102,8 @@ Follow these guidelines for specific devices.
 
 There are two ways to have the wifi device IP stable:
 
-1) In your router configuration find, in the DHCP settings, the option to reserve an ip address for all your shelly wifi devices.
-   
-2) In the device web UI (or Shelly app) go to Settings / WiFi and set a static IP for Wi-Fi 1 settings.
-
+1. In your router configuration find, in the DHCP settings, the option to reserve an ip address for all your shelly wifi devices.
+2. In the device web UI (or Shelly app) go to Settings / WiFi and set a static IP for Wi-Fi 1 settings.
 
 ## How to install the plugin
 
@@ -141,7 +139,7 @@ matterbridge
 
 You may need to set some config values in the frontend.
 
-Changing configuration after the controller is already paired may cause the controller to see the device as new devices and reset their configuration. You may need to wait a few minutes that the controller reads again all endpoints. 
+Changing configuration after the controller is already paired may cause the controller to see the device as new devices and reset their configuration. You may need to wait a few minutes that the controller reads again all endpoints.
 
 Wait that the plugin has been configured before changing the config.
 
@@ -174,7 +172,7 @@ The devices in the list will be exposed as outlets, regardless of the main optio
 
 ### exposeInput
 
-Choose how to expose the shelly inputs: disabled, contact, momentary or latching switch (default momentary). 
+Choose how to expose the shelly inputs: disabled, contact, momentary or latching switch (default momentary).
 
 Is useful only if you create automations on the controller side or you need the controller history.
 
@@ -212,7 +210,7 @@ Choose how to expose the shelly power meters: disabled, matter13 (it uses Matter
 
 ### blackList
 
-If the blackList is defined the devices included in the list will not be exposed to Matter. 
+If the blackList is defined the devices included in the list will not be exposed to Matter.
 
 For shelly wifi devices use the device name (i.e. the name defined in the device web UI), the device id (i.e. shellyplus2pm-5443B23D81F8) or the device mac (i.e. 5443B23D81F8).
 
@@ -220,7 +218,7 @@ For shelly BLU devices use the device name (i.e. the name defined in the device 
 
 ### whiteList
 
-If the whiteList is defined only the devices included in the list are exposed to Matter. 
+If the whiteList is defined only the devices included in the list are exposed to Matter.
 
 For shelly wifi devices use the device name (i.e. the name defined in the device web UI), the device id (i.e. shellyplus2pm-5443B23D81F8) or the device mac (i.e. 5443B23D81F8).
 

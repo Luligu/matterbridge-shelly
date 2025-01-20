@@ -36,7 +36,7 @@ Reset Device OK.
 rsetup
 ```
 
-then System, System Update and confirm.
+then System Maintenance, System Update and confirm.
 
 ## Set locale time
 
@@ -107,7 +107,7 @@ then check and reload the settings with:
 sudo visudo -c
 ```
 
-# Install node 22.x
+# Install node 22.x from NodeSource
 
 ```
 sudo curl -fsSL https://deb.nodesource.com/setup_22.x -o nodesource_setup.sh
@@ -239,3 +239,17 @@ sudo journalctl -u matterbridge.service -n 1000 -f --output cat
 ```
 sudo journalctl --no-pager -u matterbridge.service --since "2024-10-31 08:00:00" --until "2024-10-31 12:00:00 --output cat"
 ```
+
+## Leds and button
+
+red no pudate available
+
+green update available
+
+blinkin blue, updates, any of it
+
+hold 11-15 sec, start update
+
+fast red blink rgb, updating ...
+
+green blink after boot, reset board to default in the givving time

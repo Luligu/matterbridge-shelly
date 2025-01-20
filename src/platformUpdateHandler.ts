@@ -351,6 +351,10 @@ export function shellyUpdateHandler(
       const energy = Math.round(((value as ShellyData).total as number) * 1000) / 1000;
       matterbridgeDevice.setAttribute(ElectricalEnergyMeasurementCluster.id, 'cumulativeEnergyImported', { energy: energy * 1000 }, shellyDevice.log, endpoint);
     }
+    if (property === 'total_act_energy' && isValidNumber(value, 0)) {
+      const energy = Math.round(value * 1000) / 1000;
+      matterbridgeDevice.setAttribute(ElectricalEnergyMeasurementCluster.id, 'cumulativeEnergyImported', { energy: energy * 1000 }, shellyDevice.log, endpoint);
+    }
     if (property === 'voltage' && isValidNumber(value, 0)) {
       matterbridgeDevice.setAttribute(ElectricalPowerMeasurementCluster.id, 'voltage', value * 1000, shellyDevice.log, endpoint);
     }
