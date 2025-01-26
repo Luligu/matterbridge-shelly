@@ -6,6 +6,27 @@ If you like this project and find it useful, please consider giving it a star on
 
 You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his invaluable contribution to this project.
 
+## [1.1.5-dev.1] - 2025-02-01
+
+### Added
+
+- [platform]: Refactor onStart to await device creation to address some cases where the controller reset the configuration on slow host.
+- [selectDevice]: Added selectDevice to deviceIp to get the components names from a list in the config editor.
+- [em1data]: Added update for total_act_energy in onConfigure.
+- [package]: Requires matterbridge 1.7.3.
+
+### Changed
+
+- [package]: Updated dependencies.
+
+### Fixed
+
+- [em1data]: Fixed typo em1data.
+
+<a href="https://www.buymeacoffee.com/luligugithub">
+  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+</a>
+
 ## [1.1.4] - 2025-01-20
 
 ### Added

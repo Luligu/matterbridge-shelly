@@ -1,6 +1,6 @@
 {
   "name": "matterbridge-shelly",
-  "version": "1.1.4",
+  "version": "1.1.5-dev.1",
   "description": "Matterbridge shelly plugin",
   "author": "https://github.com/Luligu",
   "license": "Apache-2.0",
@@ -104,7 +104,7 @@
     "install:jest": "npm install --save-dev jest ts-jest @types/jest eslint-plugin-jest"
   },
   "dependencies": {
-    "coap": "1.4.0",
+    "coap": "1.4.1",
     "multicast-dns": "7.2.5",
     "node-ansi-logger": "3.0.0",
     "node-fetch": "3.3.2",
@@ -112,13 +112,13 @@
     "ws": "8.18.0"
   },
   "devDependencies": {
-    "@eslint/js": "9.18.0",
+    "@eslint/js": "9.19.0",
     "@types/eslint__js": "8.42.3",
     "@types/jest": "29.5.14",
     "@types/multicast-dns": "7.2.4",
-    "@types/node": "22.10.7",
-    "@types/ws": "8.5.13",
-    "eslint": "9.18.0",
+    "@types/node": "22.10.10",
+    "@types/ws": "8.5.14",
+    "eslint": "9.19.0",
     "eslint-config-prettier": "10.0.1",
     "eslint-plugin-jest": "28.11.0",
     "eslint-plugin-prettier": "5.2.3",
@@ -126,6 +126,6 @@
     "prettier": "3.4.2",
     "ts-jest": "29.2.5",
     "typescript": "5.7.3",
-    "typescript-eslint": "8.20.0"
+    "typescript-eslint": "8.21.0"
   }
 }
