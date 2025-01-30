@@ -21,28 +21,25 @@
  * limitations under the License. *
  */
 
-import {
-  BooleanStateCluster,
-  ColorControl,
-  ColorControlCluster,
-  ElectricalEnergyMeasurementCluster,
-  ElectricalPowerMeasurementCluster,
-  IlluminanceMeasurementCluster,
-  LevelControlCluster,
-  MatterbridgeEndpoint,
-  OccupancySensingCluster,
-  OnOffCluster,
-  PowerSource,
-  PowerSourceCluster,
-  RelativeHumidityMeasurementCluster,
-  TemperatureMeasurementCluster,
-  Thermostat,
-  ThermostatCluster,
-  WindowCovering,
-  WindowCoveringCluster,
-} from 'matterbridge';
+import { MatterbridgeEndpoint } from 'matterbridge';
 import { db, debugStringify, dn, er, hk, idn, or, rs, YELLOW, zb } from 'matterbridge/logger';
 import { isValidArray, isValidBoolean, isValidNumber, isValidObject, isValidString, rgbColorToHslColor } from 'matterbridge/utils';
+
+import {
+  OnOff,
+  PowerSource,
+  WindowCovering,
+  ColorControl,
+  LevelControl,
+  BooleanState,
+  OccupancySensing,
+  IlluminanceMeasurement,
+  TemperatureMeasurement,
+  RelativeHumidityMeasurement,
+  Thermostat,
+  ElectricalPowerMeasurement,
+  ElectricalEnergyMeasurement,
+} from 'matterbridge/matter/clusters';
 
 import { ShellyDevice } from './shellyDevice.js';
 import { ShellyData, ShellyDataType } from './shellyTypes.js';
@@ -75,11 +72,11 @@ export function shellyUpdateHandler(
   );
   // Update state
   if ((isLightComponent(shellyComponent) || isSwitchComponent(shellyComponent)) && property === 'state' && isValidBoolean(value)) {
-    endpoint.setAttribute(OnOffCluster.id, 'onOff', value, shellyDevice.log);
+    endpoint.setAttribute(OnOff.Cluster.id, 'onOff', value, shellyDevice.log);
   }
   // Update brightness
   if (isLightComponent(shellyComponent) && (property === 'gain' || property === 'brightness') && isValidNumber(value, 0, 100)) {
-    endpoint.setAttribute(LevelControlCluster.id, 'currentLevel', Math.max(Math.min(Math.round((value / 100) * 254), 254), 1), shellyDevice.log);
+    endpoint.setAttribute(LevelControl.Cluster.id, 'currentLevel', Math.max(Math.min(Math.round((value / 100) * 254), 254), 1), shellyDevice.log);
   }
   // Update color gen 1
   if (isLightComponent(shellyComponent) && ['red', 'green', 'blue'].includes(property) && isValidNumber(value, 0, 255)) {
@@ -92,9 +89,9 @@ export function shellyUpdateHandler(
     shellyDevice.colorUpdateTimeout = setTimeout(() => {
       const hue = Math.max(Math.min(Math.round((hsl.h / 360) * 254), 254), 0);
       const saturation = Math.max(Math.min(Math.round((hsl.s / 100) * 254), 254), 0);
-      if (isValidNumber(hue, 0, 254)) endpoint.setAttribute(ColorControlCluster.id, 'currentHue', hue, shellyDevice.log);
-      if (isValidNumber(saturation, 0, 254)) endpoint.setAttribute(ColorControlCluster.id, 'currentSaturation', saturation, shellyDevice.log);
-      matterbridgeDevice.setAttribute(ColorControlCluster.id, 'colorMode', ColorControl.ColorMode.CurrentHueAndCurrentSaturation, shellyDevice.log);
+      if (isValidNumber(hue, 0, 254)) endpoint.setAttribute(ColorControl.Cluster.id, 'currentHue', hue, shellyDevice.log);
+      if (isValidNumber(saturation, 0, 254)) endpoint.setAttribute(ColorControl.Cluster.id, 'currentSaturation', saturation, shellyDevice.log);
+      matterbridgeDevice.setAttribute(ColorControl.Cluster.id, 'colorMode', ColorControl.ColorMode.CurrentHueAndCurrentSaturation, shellyDevice.log);
     }, 200);
   }
   // Update colorTemp gen 1
@@ -105,9 +102,9 @@ export function shellyUpdateHandler(
     const maxMatterTemp = 500;
     const matterTemp = Math.max(Math.min(Math.round(((value - minValue) / (maxValue - minValue)) * (minMatterTemp - maxMatterTemp) + maxMatterTemp), maxMatterTemp), minMatterTemp);
     matterbridgeDevice.log.debug(`ColorTemp for ${shellyDevice.model}: colorTemperature:${value} => colorTemperatureMireds:${matterTemp}`);
-    endpoint.setAttribute(ColorControlCluster.id, 'colorMode', ColorControl.ColorMode.ColorTemperatureMireds, shellyDevice.log);
-    endpoint.setAttribute(ColorControlCluster.id, 'enhancedColorMode', ColorControl.EnhancedColorMode.ColorTemperatureMireds, shellyDevice.log);
-    endpoint.setAttribute(ColorControlCluster.id, 'colorTemperatureMireds', matterTemp, shellyDevice.log);
+    endpoint.setAttribute(ColorControl.Cluster.id, 'colorMode', ColorControl.ColorMode.ColorTemperatureMireds, shellyDevice.log);
+    endpoint.setAttribute(ColorControl.Cluster.id, 'enhancedColorMode', ColorControl.EnhancedColorMode.ColorTemperatureMireds, shellyDevice.log);
+    endpoint.setAttribute(ColorControl.Cluster.id, 'colorTemperatureMireds', matterTemp, shellyDevice.log);
   }
   // Update color gen 2/3
   if (
@@ -122,9 +119,9 @@ export function shellyUpdateHandler(
     matterbridgeDevice.log.debug(`ColorRgbToHsl: R:${value[0]} G:${value[1]} B:${value[2]} => H:${hsl.h} S:${hsl.s} L:${hsl.l}`);
     const hue = Math.max(Math.min(Math.round((hsl.h / 360) * 254), 254), 0);
     const saturation = Math.max(Math.min(Math.round((hsl.s / 100) * 254), 254), 0);
-    if (isValidNumber(hue, 0, 254)) endpoint.setAttribute(ColorControlCluster.id, 'currentHue', hue, shellyDevice.log);
-    if (isValidNumber(hue, 0, 254)) endpoint.setAttribute(ColorControlCluster.id, 'currentSaturation', saturation, shellyDevice.log);
-    matterbridgeDevice.setAttribute(ColorControlCluster.id, 'colorMode', ColorControl.ColorMode.CurrentHueAndCurrentSaturation, shellyDevice.log);
+    if (isValidNumber(hue, 0, 254)) endpoint.setAttribute(ColorControl.Cluster.id, 'currentHue', hue, shellyDevice.log);
+    if (isValidNumber(hue, 0, 254)) endpoint.setAttribute(ColorControl.Cluster.id, 'currentSaturation', saturation, shellyDevice.log);
+    matterbridgeDevice.setAttribute(ColorControl.Cluster.id, 'colorMode', ColorControl.ColorMode.CurrentHueAndCurrentSaturation, shellyDevice.log);
   }
   // Update Input component with state
   if (shellyComponent.name === 'Input' && property === 'state' && isValidBoolean(value)) {
@@ -132,7 +129,7 @@ export function shellyUpdateHandler(
       platform.config.exposeInput === 'contact' ||
       (platform.config.exposeInput === 'disabled' && platform.config.inputContactList && (platform.config.inputContactList as string[]).includes(shellyDevice.id))
     ) {
-      endpoint.setAttribute(BooleanStateCluster.id, 'stateValue', value, shellyDevice.log);
+      endpoint.setAttribute(BooleanState.Cluster.id, 'stateValue', value, shellyDevice.log);
     }
     if (
       (platform.config.exposeInput === 'momentary' ||
@@ -164,17 +161,17 @@ export function shellyUpdateHandler(
   }
   // Update for Battery
   if (shellyComponent.name === 'Battery' && property === 'level' && isValidNumber(value, 0, 100)) {
-    endpoint.setAttribute(PowerSourceCluster.id, 'batPercentRemaining', Math.min(Math.max(value * 2, 0), 200), shellyDevice.log);
-    if (value < 10) endpoint.setAttribute(PowerSourceCluster.id, 'batChargeLevel', PowerSource.BatChargeLevel.Critical, shellyDevice.log);
-    else if (value < 20) endpoint.setAttribute(PowerSourceCluster.id, 'batChargeLevel', PowerSource.BatChargeLevel.Warning, shellyDevice.log);
-    else endpoint.setAttribute(PowerSourceCluster.id, 'batChargeLevel', PowerSource.BatChargeLevel.Ok, shellyDevice.log);
+    endpoint.setAttribute(PowerSource.Cluster.id, 'batPercentRemaining', Math.min(Math.max(value * 2, 0), 200), shellyDevice.log);
+    if (value < 10) endpoint.setAttribute(PowerSource.Cluster.id, 'batChargeLevel', PowerSource.BatChargeLevel.Critical, shellyDevice.log);
+    else if (value < 20) endpoint.setAttribute(PowerSource.Cluster.id, 'batChargeLevel', PowerSource.BatChargeLevel.Warning, shellyDevice.log);
+    else endpoint.setAttribute(PowerSource.Cluster.id, 'batChargeLevel', PowerSource.BatChargeLevel.Ok, shellyDevice.log);
   }
   if (shellyComponent.name === 'Battery' && property === 'voltage' && isValidNumber(value, 0)) {
-    endpoint.setAttribute(PowerSourceCluster.id, 'batVoltage', value / 1000, shellyDevice.log);
+    endpoint.setAttribute(PowerSource.Cluster.id, 'batVoltage', value / 1000, shellyDevice.log);
   }
   if (shellyComponent.name === 'Battery' && property === 'charging' && isValidNumber(value)) {
     endpoint.setAttribute(
-      PowerSourceCluster.id,
+      PowerSource.Cluster.id,
       'batChargeState',
       value ? PowerSource.BatChargeState.IsCharging : PowerSource.BatChargeState.IsNotCharging,
       matterbridgeDevice.log,
@@ -184,70 +181,70 @@ export function shellyUpdateHandler(
   if (shellyComponent.name === 'Devicepower' && property === 'battery' && isValidObject(value, 2)) {
     const battery = value as { V: number; percent: number };
     if (isValidNumber(battery.V, 0, 12) && isValidNumber(battery.percent, 0, 100)) {
-      endpoint.setAttribute(PowerSourceCluster.id, 'batPercentRemaining', battery.percent * 2, shellyDevice.log);
-      if (battery.percent < 10) endpoint.setAttribute(PowerSourceCluster.id, 'batChargeLevel', PowerSource.BatChargeLevel.Critical, shellyDevice.log);
-      else if (battery.percent < 20) endpoint.setAttribute(PowerSourceCluster.id, 'batChargeLevel', PowerSource.BatChargeLevel.Warning, shellyDevice.log);
-      else endpoint.setAttribute(PowerSourceCluster.id, 'batChargeLevel', PowerSource.BatChargeLevel.Ok, shellyDevice.log);
-      endpoint.setAttribute(PowerSourceCluster.id, 'batVoltage', battery.V * 1000, shellyDevice.log);
+      endpoint.setAttribute(PowerSource.Cluster.id, 'batPercentRemaining', battery.percent * 2, shellyDevice.log);
+      if (battery.percent < 10) endpoint.setAttribute(PowerSource.Cluster.id, 'batChargeLevel', PowerSource.BatChargeLevel.Critical, shellyDevice.log);
+      else if (battery.percent < 20) endpoint.setAttribute(PowerSource.Cluster.id, 'batChargeLevel', PowerSource.BatChargeLevel.Warning, shellyDevice.log);
+      else endpoint.setAttribute(PowerSource.Cluster.id, 'batChargeLevel', PowerSource.BatChargeLevel.Ok, shellyDevice.log);
+      endpoint.setAttribute(PowerSource.Cluster.id, 'batVoltage', battery.V * 1000, shellyDevice.log);
     }
   }
 
   // Update for Motion
   if (shellyComponent.name === 'Sensor' && property === 'motion' && isValidBoolean(value)) {
-    endpoint.setAttribute(OccupancySensingCluster.id, 'occupancy', { occupied: value }, shellyDevice.log);
+    endpoint.setAttribute(OccupancySensing.Cluster.id, 'occupancy', { occupied: value }, shellyDevice.log);
   }
   // Update for Contact
   if (shellyComponent.name === 'Sensor' && property === 'contact_open' && isValidBoolean(value)) {
-    endpoint.setAttribute(BooleanStateCluster.id, 'stateValue', !value, shellyDevice.log);
+    endpoint.setAttribute(BooleanState.Cluster.id, 'stateValue', !value, shellyDevice.log);
   }
   // Update for Flood
   if (shellyComponent.name === 'Flood' && property === 'flood' && isValidBoolean(value)) {
-    endpoint.setAttribute(BooleanStateCluster.id, 'stateValue', !value, shellyDevice.log);
+    endpoint.setAttribute(BooleanState.Cluster.id, 'stateValue', !value, shellyDevice.log);
   }
   // Update for Gas
   if (shellyComponent.name === 'Gas' && property === 'alarm_state' && isValidString(value)) {
-    endpoint.setAttribute(BooleanStateCluster.id, 'stateValue', value === 'none', shellyDevice.log);
+    endpoint.setAttribute(BooleanState.Cluster.id, 'stateValue', value === 'none', shellyDevice.log);
   }
   // Update for Smoke
   if (shellyComponent.name === 'Smoke' && property === 'alarm' && isValidBoolean(value)) {
-    endpoint.setAttribute(BooleanStateCluster.id, 'stateValue', !value, shellyDevice.log);
+    endpoint.setAttribute(BooleanState.Cluster.id, 'stateValue', !value, shellyDevice.log);
   }
   // Update for Lux
   if (shellyComponent.name === 'Lux' && property === 'value' && isValidNumber(value, 0)) {
     const matterLux = Math.round(Math.max(Math.min(10000 * Math.log10(value), 0xfffe), 0));
-    endpoint.setAttribute(IlluminanceMeasurementCluster.id, 'measuredValue', matterLux, shellyDevice.log);
+    endpoint.setAttribute(IlluminanceMeasurement.Cluster.id, 'measuredValue', matterLux, shellyDevice.log);
   }
   // Update for Temperature when has value or tC
   if (shellyComponent.name === 'Temperature' && (property === 'value' || property === 'tC') && isValidNumber(value, -100, +100)) {
-    endpoint.setAttribute(TemperatureMeasurementCluster.id, 'measuredValue', value * 100, shellyDevice.log);
+    endpoint.setAttribute(TemperatureMeasurement.Cluster.id, 'measuredValue', value * 100, shellyDevice.log);
   }
   // Update for Humidity when has value or rh
   if (shellyComponent.name === 'Humidity' && (property === 'value' || property === 'rh') && isValidNumber(value, 0, 100)) {
-    endpoint.setAttribute(RelativeHumidityMeasurementCluster.id, 'measuredValue', value * 100, shellyDevice.log);
+    endpoint.setAttribute(RelativeHumidityMeasurement.Cluster.id, 'measuredValue', value * 100, shellyDevice.log);
   }
   // Update for Illuminance when has lux
   if (shellyComponent.name === 'Illuminance' && property === 'lux' && isValidNumber(value, 0)) {
     const matterLux = Math.round(Math.max(Math.min(10000 * Math.log10(value), 0xfffe), 0));
-    endpoint.setAttribute(IlluminanceMeasurementCluster.id, 'measuredValue', matterLux, shellyDevice.log);
+    endpoint.setAttribute(IlluminanceMeasurement.Cluster.id, 'measuredValue', matterLux, shellyDevice.log);
   }
   // Update for Thermostat enable
   if (shellyComponent.name === 'Thermostat' && property === 'enable' && isValidBoolean(value)) {
-    if (value === false) endpoint.setAttribute(ThermostatCluster.id, 'systemMode', Thermostat.SystemMode.Off, shellyDevice.log);
+    if (value === false) endpoint.setAttribute(Thermostat.Cluster.id, 'systemMode', Thermostat.SystemMode.Off, shellyDevice.log);
     else if (value === true && shellyComponent.hasProperty('type') && shellyComponent.getValue('type') === 'heating')
-      endpoint.setAttribute(ThermostatCluster.id, 'systemMode', Thermostat.SystemMode.Heat, shellyDevice.log);
+      endpoint.setAttribute(Thermostat.Cluster.id, 'systemMode', Thermostat.SystemMode.Heat, shellyDevice.log);
     else if (value === true && shellyComponent.hasProperty('type') && shellyComponent.getValue('type') === 'cooling')
-      endpoint.setAttribute(ThermostatCluster.id, 'systemMode', Thermostat.SystemMode.Cool, shellyDevice.log);
+      endpoint.setAttribute(Thermostat.Cluster.id, 'systemMode', Thermostat.SystemMode.Cool, shellyDevice.log);
   }
   // Update for Thermostat current_C
   if (shellyComponent.name === 'Thermostat' && property === 'current_C' && isValidNumber(value, -100, +100)) {
-    endpoint.setAttribute(ThermostatCluster.id, 'localTemperature', value * 100, shellyDevice.log);
+    endpoint.setAttribute(Thermostat.Cluster.id, 'localTemperature', value * 100, shellyDevice.log);
   }
   // Update for Thermostat target_C
   if (shellyComponent.name === 'Thermostat' && property === 'target_C' && isValidNumber(value, -100, +100)) {
     if (shellyComponent.hasProperty('type') && shellyComponent.getValue('type') === 'heating')
-      endpoint.setAttribute(ThermostatCluster.id, 'occupiedHeatingSetpoint', value * 100, shellyDevice.log);
+      endpoint.setAttribute(Thermostat.Cluster.id, 'occupiedHeatingSetpoint', value * 100, shellyDevice.log);
     if (shellyComponent.hasProperty('type') && shellyComponent.getValue('type') === 'cooling')
-      endpoint.setAttribute(ThermostatCluster.id, 'occupiedCoolingSetpoint', value * 100, shellyDevice.log);
+      endpoint.setAttribute(Thermostat.Cluster.id, 'occupiedCoolingSetpoint', value * 100, shellyDevice.log);
   }
   // Update for vibration
   if (shellyComponent.name === 'Vibration' && property === 'vibration' && isValidBoolean(value)) {
@@ -273,45 +270,45 @@ export function shellyUpdateHandler(
       // Gen 1 devices send stop. Gen 2 devices send stopped.
       if ((shellyDevice.gen === 1 && value === 'stop') || (shellyDevice.gen > 1 && value === 'stopped')) {
         const status = WindowCovering.MovementStatus.Stopped;
-        endpoint.setAttribute(WindowCoveringCluster.id, 'operationalStatus', { global: status, lift: status, tilt: status }, shellyDevice.log);
+        endpoint.setAttribute(WindowCovering.Cluster.id, 'operationalStatus', { global: status, lift: status, tilt: status }, shellyDevice.log);
         setTimeout(() => {
           shellyDevice.log.debug(`Setting target position to current position on endpoint ${or}${endpoint.name}:${endpoint.number}${db}`);
-          const current = endpoint.getAttribute(WindowCoveringCluster.id, 'currentPositionLiftPercent100ths', shellyDevice.log);
+          const current = endpoint.getAttribute(WindowCovering.Cluster.id, 'currentPositionLiftPercent100ths', shellyDevice.log);
           if (!isValidNumber(current, 0, 10000)) {
             matterbridgeDevice.log.error(`Error: current position not found on endpoint ${or}${endpoint.name}:${endpoint.number}${er}`);
             return;
           }
-          endpoint.setAttribute(WindowCoveringCluster.id, 'targetPositionLiftPercent100ths', current, shellyDevice.log);
+          endpoint.setAttribute(WindowCovering.Cluster.id, 'targetPositionLiftPercent100ths', current, shellyDevice.log);
         }, 1000);
       }
       // Gen 2 devices send open for fully open
       if (shellyDevice.gen > 1 && value === 'open') {
-        endpoint.setAttribute(WindowCoveringCluster.id, 'targetPositionLiftPercent100ths', 0, shellyDevice.log);
-        endpoint.setAttribute(WindowCoveringCluster.id, 'currentPositionLiftPercent100ths', 0, shellyDevice.log);
+        endpoint.setAttribute(WindowCovering.Cluster.id, 'targetPositionLiftPercent100ths', 0, shellyDevice.log);
+        endpoint.setAttribute(WindowCovering.Cluster.id, 'currentPositionLiftPercent100ths', 0, shellyDevice.log);
         const status = WindowCovering.MovementStatus.Stopped;
-        endpoint.setAttribute(WindowCoveringCluster.id, 'operationalStatus', { global: status, lift: status, tilt: status }, shellyDevice.log);
+        endpoint.setAttribute(WindowCovering.Cluster.id, 'operationalStatus', { global: status, lift: status, tilt: status }, shellyDevice.log);
       }
       // Gen 2 devices send closed for fully closed
       if (shellyDevice.gen > 1 && value === 'closed') {
-        endpoint.setAttribute(WindowCoveringCluster.id, 'targetPositionLiftPercent100ths', 10000, shellyDevice.log);
-        endpoint.setAttribute(WindowCoveringCluster.id, 'currentPositionLiftPercent100ths', 10000, shellyDevice.log);
+        endpoint.setAttribute(WindowCovering.Cluster.id, 'targetPositionLiftPercent100ths', 10000, shellyDevice.log);
+        endpoint.setAttribute(WindowCovering.Cluster.id, 'currentPositionLiftPercent100ths', 10000, shellyDevice.log);
         const status = WindowCovering.MovementStatus.Stopped;
-        endpoint.setAttribute(WindowCoveringCluster.id, 'operationalStatus', { global: status, lift: status, tilt: status }, shellyDevice.log);
+        endpoint.setAttribute(WindowCovering.Cluster.id, 'operationalStatus', { global: status, lift: status, tilt: status }, shellyDevice.log);
       }
       if ((shellyDevice.gen === 1 && value === 'open') || (shellyDevice.gen > 1 && value === 'opening')) {
         const status = WindowCovering.MovementStatus.Opening;
-        endpoint.setAttribute(WindowCoveringCluster.id, 'operationalStatus', { global: status, lift: status, tilt: status }, shellyDevice.log);
+        endpoint.setAttribute(WindowCovering.Cluster.id, 'operationalStatus', { global: status, lift: status, tilt: status }, shellyDevice.log);
       }
       if ((shellyDevice.gen === 1 && value === 'close') || (shellyDevice.gen > 1 && value === 'closing')) {
         const status = WindowCovering.MovementStatus.Closing;
-        endpoint.setAttribute(WindowCoveringCluster.id, 'operationalStatus', { global: status, lift: status, tilt: status }, shellyDevice.log);
+        endpoint.setAttribute(WindowCovering.Cluster.id, 'operationalStatus', { global: status, lift: status, tilt: status }, shellyDevice.log);
       }
     } else if (property === 'current_pos' && isValidNumber(value, 0, 100)) {
       const matterPos = 10000 - Math.min(Math.max(Math.round(value * 100), 0), 10000);
-      endpoint.setAttribute(WindowCoveringCluster.id, 'currentPositionLiftPercent100ths', matterPos, shellyDevice.log);
+      endpoint.setAttribute(WindowCovering.Cluster.id, 'currentPositionLiftPercent100ths', matterPos, shellyDevice.log);
     } else if (property === 'target_pos' && isValidNumber(value, 0, 100)) {
       const matterPos = 10000 - Math.min(Math.max(Math.round(value * 100), 0), 10000);
-      endpoint.setAttribute(WindowCoveringCluster.id, 'targetPositionLiftPercent100ths', matterPos, shellyDevice.log);
+      endpoint.setAttribute(WindowCovering.Cluster.id, 'targetPositionLiftPercent100ths', matterPos, shellyDevice.log);
     }
     // const statusLookup = ['stopped', 'opening', 'closing', 'unknown'];
   }
@@ -322,7 +319,7 @@ export function shellyUpdateHandler(
     if ((property === 'power' || property === 'apower' || property === 'act_power') && isValidNumber(value, 0)) {
       if (property === 'power' && shellyComponent.id.startsWith('light') && shellyDevice.id.startsWith('shellyrgbw2')) return; // Skip the rest for shellyrgbw2 devices
       const power = Math.round(value * 1000) / 1000;
-      endpoint.setAttribute(ElectricalPowerMeasurementCluster.id, 'activePower', power * 1000, shellyDevice.log);
+      endpoint.setAttribute(ElectricalPowerMeasurement.Cluster.id, 'activePower', power * 1000, shellyDevice.log);
       if (property === 'act_power') return; // Skip the rest for PRO devices
       if (shellyComponent.id.startsWith('emeter')) return; // Skip the rest for em3 devices
       if (shellyComponent.hasProperty('current')) return; // Skip if we have already current reading
@@ -330,35 +327,35 @@ export function shellyUpdateHandler(
       if (property === 'power' && shellyDevice.hasComponent('sys') && shellyDevice.getComponent('sys')?.hasProperty('voltage')) {
         const voltage = shellyDevice.getComponent('sys')?.getValue('voltage');
         if (isValidNumber(voltage, 10)) {
-          endpoint.setAttribute(ElectricalPowerMeasurementCluster.id, 'voltage', voltage * 1000, shellyDevice.log);
+          endpoint.setAttribute(ElectricalPowerMeasurement.Cluster.id, 'voltage', voltage * 1000, shellyDevice.log);
           const current = Math.round((value / voltage) * 1000) / 1000;
-          endpoint.setAttribute(ElectricalPowerMeasurementCluster.id, 'activeCurrent', current * 1000, shellyDevice.log);
+          endpoint.setAttribute(ElectricalPowerMeasurement.Cluster.id, 'activeCurrent', current * 1000, shellyDevice.log);
         }
       }
       // Calculate current from power and voltage
       const voltage = shellyComponent.hasProperty('voltage') ? (shellyComponent.getValue('voltage') as number) : undefined;
       if (isValidNumber(voltage, 10)) {
         const current = Math.round((value / voltage) * 1000) / 1000;
-        endpoint.setAttribute(ElectricalPowerMeasurementCluster.id, 'activeCurrent', current * 1000, shellyDevice.log);
+        endpoint.setAttribute(ElectricalPowerMeasurement.Cluster.id, 'activeCurrent', current * 1000, shellyDevice.log);
       }
     }
     if (property === 'total' && isValidNumber(value, 0)) {
       const energy = Math.round(value * 1000) / 1000;
-      endpoint.setAttribute(ElectricalEnergyMeasurementCluster.id, 'cumulativeEnergyImported', { energy: energy * 1000 }, shellyDevice.log);
+      endpoint.setAttribute(ElectricalEnergyMeasurement.Cluster.id, 'cumulativeEnergyImported', { energy: energy * 1000 }, shellyDevice.log);
     }
     if (property === 'aenergy' && isValidObject(value) && isValidNumber((value as ShellyData).total, 0)) {
       const energy = Math.round(((value as ShellyData).total as number) * 1000) / 1000;
-      endpoint.setAttribute(ElectricalEnergyMeasurementCluster.id, 'cumulativeEnergyImported', { energy: energy * 1000 }, shellyDevice.log);
+      endpoint.setAttribute(ElectricalEnergyMeasurement.Cluster.id, 'cumulativeEnergyImported', { energy: energy * 1000 }, shellyDevice.log);
     }
     if (property === 'total_act_energy' && isValidNumber(value, 0)) {
       const energy = Math.round(value * 1000) / 1000;
-      endpoint.setAttribute(ElectricalEnergyMeasurementCluster.id, 'cumulativeEnergyImported', { energy: energy * 1000 }, shellyDevice.log);
+      endpoint.setAttribute(ElectricalEnergyMeasurement.Cluster.id, 'cumulativeEnergyImported', { energy: energy * 1000 }, shellyDevice.log);
     }
     if (property === 'voltage' && isValidNumber(value, 0)) {
-      endpoint.setAttribute(ElectricalPowerMeasurementCluster.id, 'voltage', value * 1000, shellyDevice.log);
+      endpoint.setAttribute(ElectricalPowerMeasurement.Cluster.id, 'voltage', value * 1000, shellyDevice.log);
     }
     if (property === 'current' && isValidNumber(value, 0)) {
-      endpoint.setAttribute(ElectricalPowerMeasurementCluster.id, 'activeCurrent', value * 1000, shellyDevice.log);
+      endpoint.setAttribute(ElectricalPowerMeasurement.Cluster.id, 'activeCurrent', value * 1000, shellyDevice.log);
       if (shellyComponent.hasProperty('act_power')) return;
       if (shellyComponent.hasProperty('apower')) return;
       if (shellyComponent.hasProperty('power')) return;
@@ -367,7 +364,7 @@ export function shellyUpdateHandler(
       const voltage = shellyComponent.hasProperty('voltage') ? (shellyComponent.getValue('voltage') as number) : undefined;
       if (isValidNumber(voltage, 0)) {
         const power = Math.round(value * voltage * 1000) / 1000;
-        endpoint.setAttribute(ElectricalPowerMeasurementCluster.id, 'activePower', power * 1000, shellyDevice.log);
+        endpoint.setAttribute(ElectricalPowerMeasurement.Cluster.id, 'activePower', power * 1000, shellyDevice.log);
       }
     }
   }

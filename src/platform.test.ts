@@ -1,7 +1,9 @@
 /* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { Matterbridge, MatterbridgeEndpoint, PlatformConfig } from 'matterbridge';
 import {
+  OnOffCluster,
   BindingCluster,
   BridgedDeviceBasicInformationCluster,
   DescriptorCluster,
@@ -10,14 +12,10 @@ import {
   FixedLabelCluster,
   GroupsCluster,
   IdentifyCluster,
-  Matterbridge,
-  MatterbridgeEndpoint,
-  OnOffCluster,
-  PlatformConfig,
   PowerSourceCluster,
   PowerTopology,
   Switch,
-} from 'matterbridge';
+} from 'matterbridge/matter/clusters';
 import { AnsiLogger, db, er, hk, idn, LogLevel, nf, rs, wr, zb, CYAN } from 'matterbridge/logger';
 import { getMacAddress, isValidArray, isValidBoolean, isValidNull, isValidNumber, isValidObject, isValidString, isValidUndefined, wait } from 'matterbridge/utils';
 import { jest } from '@jest/globals';
@@ -86,7 +84,7 @@ describe('ShellyPlatform', () => {
       matterbridgeDirectory: './jest/matterbridge',
       matterbridgePluginDirectory: './jest/plugins',
       systemInformation: { ipv4Address: undefined, osRelease: 'xx.xx.xx.xx.xx.xx', nodeVersion: '22.1.10' },
-      matterbridgeVersion: '1.7.3',
+      matterbridgeVersion: '2.1.0',
       edge: false,
       log: mockLog,
       getDevices: jest.fn(() => {
@@ -538,21 +536,21 @@ describe('ShellyPlatform', () => {
     expect(device.hasClusterServer(FixedLabelCluster)).toBeTruthy();
     expect(device.getChildEndpoints()).toHaveLength(4);
     expect(device.getChildEndpointByName('PowerSource')).toBeDefined();
-    expect(device.getChildEndpointByName('PowerSource')?.hasClusterServer(DescriptorCluster)).not.toBeTruthy();
+    expect(device.getChildEndpointByName('PowerSource')?.hasClusterServer(DescriptorCluster)).toBeTruthy();
     expect(device.getChildEndpointByName('PowerSource')?.hasClusterServer(PowerSourceCluster)).toBeTruthy();
     expect(device.getChildEndpointByName('relay:0')).toBeDefined();
-    expect(device.getChildEndpointByName('relay:0')?.hasClusterServer(DescriptorCluster)).not.toBeTruthy();
+    expect(device.getChildEndpointByName('relay:0')?.hasClusterServer(DescriptorCluster)).toBeTruthy();
     expect(device.getChildEndpointByName('relay:0')?.hasClusterServer(BindingCluster)).not.toBeTruthy();
     expect(device.getChildEndpointByName('relay:0')?.hasClusterServer(IdentifyCluster)).toBeTruthy();
     expect(device.getChildEndpointByName('relay:0')?.hasClusterServer(GroupsCluster)).toBeTruthy();
     expect(device.getChildEndpointByName('relay:0')?.hasClusterServer(OnOffCluster)).toBeTruthy();
     expect(device.getChildEndpointByName('meter:0')).toBeDefined();
-    expect(device.getChildEndpointByName('meter:0')?.hasClusterServer(DescriptorCluster)).not.toBeTruthy();
+    expect(device.getChildEndpointByName('meter:0')?.hasClusterServer(DescriptorCluster)).toBeTruthy();
     expect(device.getChildEndpointByName('meter:0')?.hasClusterServer(PowerTopology.Complete)).toBeTruthy();
     expect(device.getChildEndpointByName('meter:0')?.hasClusterServer(ElectricalPowerMeasurement.Complete)).toBeTruthy();
     expect(device.getChildEndpointByName('meter:0')?.hasClusterServer(ElectricalEnergyMeasurement.Complete)).toBeTruthy();
     expect(device.getChildEndpointByName('input:0')).toBeDefined();
-    expect(device.getChildEndpointByName('input:0')?.hasClusterServer(DescriptorCluster)).not.toBeTruthy();
+    expect(device.getChildEndpointByName('input:0')?.hasClusterServer(DescriptorCluster)).toBeTruthy();
     expect(device.getChildEndpointByName('input:0')?.hasClusterServer(BindingCluster)).not.toBeTruthy();
     expect(device.getChildEndpointByName('input:0')?.hasClusterServer(IdentifyCluster)).toBeTruthy();
     expect(device.getChildEndpointByName('input:0')?.hasClusterServer(Switch.Complete)).toBeTruthy();
