@@ -91,7 +91,7 @@ export function shellyUpdateHandler(
       const saturation = Math.max(Math.min(Math.round((hsl.s / 100) * 254), 254), 0);
       if (isValidNumber(hue, 0, 254)) endpoint.setAttribute(ColorControl.Cluster.id, 'currentHue', hue, shellyDevice.log);
       if (isValidNumber(saturation, 0, 254)) endpoint.setAttribute(ColorControl.Cluster.id, 'currentSaturation', saturation, shellyDevice.log);
-      matterbridgeDevice.setAttribute(ColorControl.Cluster.id, 'colorMode', ColorControl.ColorMode.CurrentHueAndCurrentSaturation, shellyDevice.log);
+      endpoint.setAttribute(ColorControl.Cluster.id, 'colorMode', ColorControl.ColorMode.CurrentHueAndCurrentSaturation, shellyDevice.log);
     }, 200);
   }
   // Update colorTemp gen 1
@@ -121,7 +121,7 @@ export function shellyUpdateHandler(
     const saturation = Math.max(Math.min(Math.round((hsl.s / 100) * 254), 254), 0);
     if (isValidNumber(hue, 0, 254)) endpoint.setAttribute(ColorControl.Cluster.id, 'currentHue', hue, shellyDevice.log);
     if (isValidNumber(hue, 0, 254)) endpoint.setAttribute(ColorControl.Cluster.id, 'currentSaturation', saturation, shellyDevice.log);
-    matterbridgeDevice.setAttribute(ColorControl.Cluster.id, 'colorMode', ColorControl.ColorMode.CurrentHueAndCurrentSaturation, shellyDevice.log);
+    endpoint.setAttribute(ColorControl.Cluster.id, 'colorMode', ColorControl.ColorMode.CurrentHueAndCurrentSaturation, shellyDevice.log);
   }
   // Update Input component with state
   if (shellyComponent.name === 'Input' && property === 'state' && isValidBoolean(value)) {
