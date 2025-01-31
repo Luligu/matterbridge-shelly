@@ -15,6 +15,10 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 - [package]: Optimized imports.
 - [plugin]: Requires Matterbridge 2.1.0.
 
+### Fixed
+
+- [switch]: Update triggerSwitch logic for edge.
+
 <a href="https://www.buymeacoffee.com/luligugithub">
   <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
 </a>
