@@ -501,23 +501,27 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             blu.log.info(
               `${idn}BLU${rs}${db} observer sensor event message for BLU device ${idn}${blu?.deviceName ?? addr}${rs}${db}: sensor ${YELLOW}${sensorName}${db} index ${YELLOW}${sensorIndex}${db} event ${YELLOW}${event}${db}`,
             );
-            let child = undefined;
+            let buttonEndpoint: MatterbridgeEndpoint | undefined;
             if (bthomeDevice.model === 'Shelly BLU RC Button 4') {
-              child = blu.getChildEndpointByName('Button' + sensorIndex);
+              buttonEndpoint = blu.getChildEndpointByName('Button' + sensorIndex);
             } else if (bthomeDevice.model === 'Shelly BLU Wall Switch 4') {
-              child = blu.getChildEndpointByName('Button' + sensorIndex);
+              buttonEndpoint = blu.getChildEndpointByName('Button' + sensorIndex);
+            } else if (bthomeDevice.model === 'Shelly BLU Button1') {
+              buttonEndpoint = blu;
             } else {
-              child = blu.getChildEndpointByName('Button');
+              buttonEndpoint = blu.getChildEndpointByName('Button');
             }
-            if (sensorName === 'Button' && isValidString(event, 9) && this.validateEntityBlackList(bthomeDevice.addr, 'Button')) {
+            if (!buttonEndpoint) {
+              blu.log.warn(`Shelly device ${idn}${blu?.deviceName ?? addr}${rs}${wr} child endpoint for button not found`);
+              return;
+            }
+            if (sensorName === 'Button' && isValidString(event, 9) && this.validateEntity(bthomeDevice.addr, 'Button')) {
               if (event === 'single_push') {
-                child?.triggerSwitchEvent('Single', blu.log);
-              }
-              if (event === 'double_push') {
-                child?.triggerSwitchEvent('Double', blu.log);
-              }
-              if (event === 'long_push') {
-                child?.triggerSwitchEvent('Long', blu.log);
+                buttonEndpoint.triggerSwitchEvent('Single', blu.log);
+              } else if (event === 'double_push') {
+                buttonEndpoint.triggerSwitchEvent('Double', blu.log);
+              } else if (event === 'long_push') {
+                buttonEndpoint.triggerSwitchEvent('Long', blu.log);
               }
             }
           });
