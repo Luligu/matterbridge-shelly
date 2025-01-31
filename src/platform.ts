@@ -396,7 +396,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             if (!isValidString(addr, 11) || !isValidNumber(rssi, -100, 0) || !isValidNumber(packet_id, 0) || !isValidNumber(last_updated_ts)) return;
             const blu = this.bluBridgedDevices.get(addr);
             const bthomeDevice = device.bthomeDevices.get(addr);
-            if (bthomeDevice && !this.validateDeviceWhiteBlackList([bthomeDevice.addr, bthomeDevice.name], false)) return;
+            if (bthomeDevice && !this.validateDevice([bthomeDevice.addr, bthomeDevice.name], false)) return;
             if (!blu || !bthomeDevice) {
               this.log.error(`Shelly device ${hk}${device.id}${er} host ${zb}${device.host}${er} sent an unknown BLU device address ${CYAN}${addr}${er}`);
               return;
@@ -410,7 +410,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             if (!isValidString(addr, 11) || !isValidString(sensorName, 6) || !isValidNumber(sensorIndex, 0, 3)) return;
             const blu = this.bluBridgedDevices.get(addr);
             const bthomeDevice = device.bthomeDevices.get(addr);
-            if (bthomeDevice && !this.validateDeviceWhiteBlackList([bthomeDevice.addr, bthomeDevice.name], false)) return;
+            if (bthomeDevice && !this.validateDevice([bthomeDevice.addr, bthomeDevice.name], false)) return;
             if (!blu || !bthomeDevice) {
               this.log.error(`Shelly device ${hk}${device.id}${er} host ${zb}${device.host}${er} sent an unknown BLU device address ${CYAN}${addr}${er}`);
               return;
@@ -436,7 +436,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               const child = blu.getChildEndpointByName('Humidity');
               child?.setAttribute(RelativeHumidityMeasurement.Cluster.id, 'measuredValue', value * 100, blu.log);
             }
-            if (blu && sensorName === 'Illuminance' && isValidNumber(value, 0, 10000) && this.validateEntityBlackList(bthomeDevice.addr, 'Illuminance')) {
+            if (blu && sensorName === 'Illuminance' && isValidNumber(value, 0, 10000) && this.validateEntity(bthomeDevice.addr, 'Illuminance')) {
               const child = blu.getChildEndpointByName('Illuminance');
               const matterLux = Math.round(Math.max(Math.min(10000 * Math.log10(value), 0xfffe), 0));
               child?.setAttribute(IlluminanceMeasurement.Cluster.id, 'measuredValue', matterLux, blu.log);
@@ -471,7 +471,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             if (!isValidString(addr, 11) || !isValidString(event, 6)) return;
             const blu = this.bluBridgedDevices.get(addr);
             const bthomeDevice = device.bthomeDevices.get(addr);
-            if (bthomeDevice && !this.validateDeviceWhiteBlackList([bthomeDevice.addr, bthomeDevice.name], false)) return;
+            if (bthomeDevice && !this.validateDevice([bthomeDevice.addr, bthomeDevice.name], false)) return;
             if (!blu || !bthomeDevice) {
               this.log.error(`Shelly device ${hk}${device.id}${er} host ${zb}${device.host}${er} sent an unknown BLU device address ${CYAN}${addr}${er}`);
               return;
@@ -493,7 +493,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             if (!isValidString(addr, 11) || !isValidString(sensorName, 6) || !isValidNumber(sensorIndex, 0, 3) || !isValidString(event, 6)) return;
             const blu = this.bluBridgedDevices.get(addr);
             const bthomeDevice = device.bthomeDevices.get(addr);
-            if (bthomeDevice && !this.validateDeviceWhiteBlackList([bthomeDevice.addr, bthomeDevice.name], false)) return;
+            if (bthomeDevice && !this.validateDevice([bthomeDevice.addr, bthomeDevice.name], false)) return;
             if (!blu || !bthomeDevice) {
               this.log.error(`Shelly device ${hk}${device.id}${er} host ${zb}${device.host}${er} sent an unknown BLU device address ${CYAN}${addr}${er}`);
               return;
