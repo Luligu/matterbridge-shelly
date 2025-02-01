@@ -6,7 +6,7 @@ If you like this project and find it useful, please consider giving it a star on
 
 You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his invaluable contribution to this project.
 
-## [1.1.5-dev.5] - 2025-02-01
+## [1.1.5] - 2025-02-02
 
 ### Changed
 
@@ -19,6 +19,7 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 ### Fixed
 
 - [switch]: Update triggerSwitch logic for edge.
+- [shellywalldisplay]: Fix NotifyEvent for "user_1".
 
 <a href="https://www.buymeacoffee.com/luligugithub">
   <img src="./yellow-button.png" alt="Buy me a coffee" width="120">

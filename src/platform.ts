@@ -1731,7 +1731,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       }
     }
     if (!device) {
-      this.log.error(`Failed to create Shelly device ${hk}${deviceId}${er} host ${zb}${host}${er}`);
+      this.log.error(`Failed to create Shelly device ${hk}${deviceId}${er} host ${zb}${host}${er} (loadFromCache: ${loadFromCache} cacheFileExist: ${fs.existsSync(fileName)})`);
       return;
     }
     // Set the device in the selectDevice map for the frontend device selection

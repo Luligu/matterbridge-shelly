@@ -146,8 +146,14 @@ describe('ShellyWsClient', () => {
     wsClient = new WsClient('Jest', 'localhost');
     wsClient.start();
     wsClient.stop();
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Terminated ws client for Shelly device ${hk}Jest${db} host ${zb}localhost${db}`);
     expect(wsClient.isConnected).toBeFalsy();
     expect(wsClient.isConnecting).toBeFalsy();
+    await new Promise<void>((resolve) => {
+      setTimeout(() => {
+        resolve();
+      }, 2000);
+    });
   }, 10000);
 
   test('create the wsClient', () => {
@@ -391,6 +397,7 @@ describe('ShellyWsClient', () => {
 
             (wsClient as any).wsDeviceId = 'shellywalldisplay';
             ws.send(JSON.stringify({ src: 'Jest', dst: 'user_1', id: msg.id, method: 'NotifyStatus', params: { state: true } }));
+            ws.send(JSON.stringify({ src: 'Jest', dst: 'user_1', id: msg.id, method: 'NotifyEvent', params: { events: [] } }));
 
             resolve(ws);
           }
