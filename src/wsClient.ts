@@ -274,6 +274,7 @@ export class WsClient extends EventEmitter {
       clearTimeout(this.pongTimeout);
       this.pongTimeout = undefined;
     }
+    this.wsClient?.removeAllListeners('pong');
   }
 
   /**
@@ -303,7 +304,7 @@ export class WsClient extends EventEmitter {
       if (this.wsClient?.readyState === WebSocket.OPEN) {
         this.log.debug(`Sending request to Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}`, this.requestFrame);
         this.wsClient?.send(JSON.stringify(this.requestFrame));
-      } else this.log.error(`WebSocket connection state ${this.wsClient?.readyState} with Shelly device ${hk}${this.wsDeviceId}${er} host ${zb}${this.wsHost}${er}`);
+      }
 
       // Start the ping/pong mechanism
       this.startPingPong();
@@ -360,6 +361,9 @@ export class WsClient extends EventEmitter {
         } else if (response.method && response.method === 'NotifyEvent' && response.dst === 'Matterbridge' + this.requestId) {
           this.log.debug(`Received ${CYAN}${response.method}${db} from ${hk}${this.id}${db} host ${zb}${this.wsHost}${db}:${rs}\n`, response.params.events);
           this.emit('event', response.params.events);
+        } else if (response.method && response.method === 'NotifyEvent' && response.dst === 'user_1' && this.wsDeviceId.startsWith('shellywalldisplay')) {
+          this.log.debug(`Received ${CYAN}${response.method}${db} from ${hk}${this.id}${db} host ${zb}${this.wsHost}${db}:${rs}\n`, response.params.events);
+          this.emit('event', response.params.events);
         } else if (response.error && response.id === this.requestId && response.dst === 'Matterbridge' + this.requestId) {
           this.log.error(`Received ${CYAN}error response${er} from ${hk}${this.id}${er} host ${zb}${this.wsHost}${er}:${rs}\n`, response);
         } else {
@@ -404,7 +408,7 @@ export class WsClient extends EventEmitter {
       if (this.wsClient.readyState === WebSocket.OPEN) {
         this.wsClient.close();
         this.log.debug(`Closed ws client for Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}`);
-      } else if (this.wsClient.readyState === WebSocket.CONNECTING || this.wsClient?.readyState === WebSocket.CLOSING) {
+      } else if (this.wsClient.readyState === WebSocket.CONNECTING || this.wsClient.readyState === WebSocket.CLOSING) {
         this.wsClient.terminate();
         this.log.debug(`Terminated ws client for Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}`);
       } else if (this.wsClient.readyState === WebSocket.CLOSED) {

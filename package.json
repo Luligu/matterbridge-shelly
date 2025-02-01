@@ -1,6 +1,6 @@
 {
   "name": "matterbridge-shelly",
-  "version": "1.1.5-dev.4",
+  "version": "1.1.5-dev.5",
   "description": "Matterbridge shelly plugin",
   "author": "https://github.com/Luligu",
   "license": "Apache-2.0",
@@ -83,7 +83,7 @@
     "deepClean": "npx rimraf tsconfig.tsbuildinfo package-lock.json npm-shrinkwrap.json ./dist ./node_modules",
     "deepCleanBuild": "npm run deepClean && npm install && npm link matterbridge && npm run build",
     "checkDependencies": "npx npm-check-updates",
-    "updateDependencies": "npx npm-check-updates -u && npm install && npm link matterbridge && npm run build",
+    "updateDependencies": "npx npm-check-updates -u && npm run deepCleanBuild",
     "prepublishOnly": "npm run cleanBuildProduction && npm pkg delete devDependencies scripts types && npx rimraf ./node_modules && npm install --omit=dev && npm shrinkwrap",
     "npmPack": "copy package.json package.log && npm run prepublishOnly && npm pack && copy package.log package.json && npm run deepCleanBuild",
     "npmPublishTagDev": "copy package.json package.log && npm run prepublishOnly && npm publish --tag dev && copy package.log package.json && npm run deepCleanBuild",

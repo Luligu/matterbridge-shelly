@@ -6,7 +6,7 @@ If you like this project and find it useful, please consider giving it a star on
 
 You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his invaluable contribution to this project.
 
-## [1.1.5-dev.4] - 2025-02-01
+## [1.1.5-dev.5] - 2025-02-01
 
 ### Changed
 
@@ -14,6 +14,7 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 - [package]: Updated dependencies.
 - [package]: Optimized imports.
 - [plugin]: Requires Matterbridge 2.1.0.
+- [wsClient]: Optimized wsClient and Jest tests.
 
 ### Fixed
 
