@@ -8,13 +8,16 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 
 ## [1.1.5] - 2025-02-02
 
+### Added
+
+- [package]: Optimized imports.
+- [wsClient]: Optimized wsClient and Jest tests.
+
 ### Changed
 
 - [package]: Updated package.
 - [package]: Updated dependencies.
-- [package]: Optimized imports.
 - [plugin]: Requires Matterbridge 2.1.0.
-- [wsClient]: Optimized wsClient and Jest tests.
 
 ### Fixed
 
