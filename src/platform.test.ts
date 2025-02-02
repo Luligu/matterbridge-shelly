@@ -1,31 +1,23 @@
 /* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { Matterbridge, MatterbridgeEndpoint, PlatformConfig } from 'matterbridge';
 import {
+  OnOffCluster,
   BindingCluster,
   BridgedDeviceBasicInformationCluster,
-  ClusterServerObj,
   DescriptorCluster,
   ElectricalEnergyMeasurement,
   ElectricalPowerMeasurement,
-  ElectricalPowerMeasurementCluster,
   FixedLabelCluster,
   GroupsCluster,
-  Identify,
   IdentifyCluster,
-  Matterbridge,
-  MatterbridgeDevice,
-  MatterbridgeEndpoint,
-  OnOffCluster,
-  PlatformConfig,
   PowerSourceCluster,
   PowerTopology,
-  PowerTopologyCluster,
   Switch,
-  SwitchCluster,
-} from 'matterbridge';
-import { AnsiLogger, db, dn, er, hk, idn, LogLevel, nf, rs, wr, zb, CYAN } from 'matterbridge/logger';
-import { getMacAddress, isValidArray, isValidBoolean, isValidNull, isValidNumber, isValidObject, isValidString, isValidUndefined, wait, waiter } from 'matterbridge/utils';
+} from 'matterbridge/matter/clusters';
+import { AnsiLogger, db, er, hk, idn, LogLevel, nf, rs, wr, zb, CYAN } from 'matterbridge/logger';
+import { getMacAddress, isValidArray, isValidBoolean, isValidNull, isValidNumber, isValidObject, isValidString, isValidUndefined, wait } from 'matterbridge/utils';
 import { jest } from '@jest/globals';
 
 import { Shelly } from './shelly';
@@ -34,20 +26,6 @@ import { ShellyDevice } from './shellyDevice';
 import path from 'path';
 
 const address = 'c4:cb:76:b3:cd:1f';
-
-async function invokeCommands(cluster: ClusterServerObj, data?: Record<string, boolean | number | bigint | string | object | null | undefined>): Promise<void> {
-  const commands = (cluster as any).commands as object;
-  for (const [key, value] of Object.entries(commands)) {
-    if (typeof value.handler === 'function') await value.handler(data ?? {});
-  }
-}
-
-async function invokeCommand(cluster: ClusterServerObj, command: string, data?: Record<string, boolean | number | bigint | string | object | null | undefined>): Promise<void> {
-  const commands = (cluster as any).commands as object;
-  for (const [key, value] of Object.entries(commands)) {
-    if (key === command && typeof value.handler === 'function') await value.handler(data ?? {});
-  }
-}
 
 describe('ShellyPlatform', () => {
   let mockMatterbridge: Matterbridge;
@@ -106,7 +84,7 @@ describe('ShellyPlatform', () => {
       matterbridgeDirectory: './jest/matterbridge',
       matterbridgePluginDirectory: './jest/plugins',
       systemInformation: { ipv4Address: undefined, osRelease: 'xx.xx.xx.xx.xx.xx', nodeVersion: '22.1.10' },
-      matterbridgeVersion: '1.7.3',
+      matterbridgeVersion: '2.1.0',
       edge: false,
       log: mockLog,
       getDevices: jest.fn(() => {
@@ -117,21 +95,12 @@ describe('ShellyPlatform', () => {
         // console.log('getPlugins called');
         return [];
       }),
-      addBridgedDevice: jest.fn(async (pluginName: string, device: MatterbridgeDevice) => {
-        // console.log('addBridgedDevice called');
-      }),
       addBridgedEndpoint: jest.fn(async (pluginName: string, device: MatterbridgeEndpoint) => {
         // console.log('addBridgedEndpoint called');
         // await aggregator.add(device);
       }),
-      removeBridgedDevice: jest.fn(async (pluginName: string, device: MatterbridgeDevice) => {
-        // console.log('removeBridgedDevice called');
-      }),
       removeBridgedEndpoint: jest.fn(async (pluginName: string, device: MatterbridgeEndpoint) => {
         // console.log('removeBridgedEndpoint called');
-      }),
-      removeAllBridgedDevices: jest.fn(async (pluginName: string) => {
-        // console.log('removeAllBridgedDevices called');
       }),
       removeAllBridgedEndpoints: jest.fn(async (pluginName: string) => {
         // console.log('removeAllBridgedEndpoints called');
@@ -561,39 +530,35 @@ describe('ShellyPlatform', () => {
     expect(device).toBeDefined();
     if (!device) return;
 
-    expect(device.getAllClusterServers()).toHaveLength(2);
-    expect(device.getClusterServer(DescriptorCluster)).not.toBeDefined();
-    expect(device.getClusterServer(BridgedDeviceBasicInformationCluster)).toBeDefined();
-    expect(device.getClusterServer(FixedLabelCluster)).toBeDefined();
+    // expect(device.getAllClusterServers()).toHaveLength(2);
+    expect(device.hasClusterServer(DescriptorCluster)).toBeTruthy();
+    expect(device.hasClusterServer(BridgedDeviceBasicInformationCluster)).toBeTruthy();
+    expect(device.hasClusterServer(FixedLabelCluster)).toBeTruthy();
     expect(device.getChildEndpoints()).toHaveLength(4);
     expect(device.getChildEndpointByName('PowerSource')).toBeDefined();
-    expect(device.getChildEndpointByName('PowerSource')?.getAllClusterServers()).toHaveLength(1);
-    expect(device.getChildEndpointByName('PowerSource')?.hasClusterServer(DescriptorCluster)).not.toBeTruthy();
+    expect(device.getChildEndpointByName('PowerSource')?.hasClusterServer(DescriptorCluster)).toBeTruthy();
     expect(device.getChildEndpointByName('PowerSource')?.hasClusterServer(PowerSourceCluster)).toBeTruthy();
     expect(device.getChildEndpointByName('relay:0')).toBeDefined();
-    expect(device.getChildEndpointByName('relay:0')?.getAllClusterServers()).toHaveLength(3);
-    expect(device.getChildEndpointByName('relay:0')?.hasClusterServer(DescriptorCluster)).not.toBeTruthy();
+    expect(device.getChildEndpointByName('relay:0')?.hasClusterServer(DescriptorCluster)).toBeTruthy();
     expect(device.getChildEndpointByName('relay:0')?.hasClusterServer(BindingCluster)).not.toBeTruthy();
     expect(device.getChildEndpointByName('relay:0')?.hasClusterServer(IdentifyCluster)).toBeTruthy();
     expect(device.getChildEndpointByName('relay:0')?.hasClusterServer(GroupsCluster)).toBeTruthy();
     expect(device.getChildEndpointByName('relay:0')?.hasClusterServer(OnOffCluster)).toBeTruthy();
     expect(device.getChildEndpointByName('meter:0')).toBeDefined();
-    expect(device.getChildEndpointByName('meter:0')?.getAllClusterServers()).toHaveLength(3);
-    expect(device.getChildEndpointByName('meter:0')?.hasClusterServer(DescriptorCluster)).not.toBeTruthy();
+    expect(device.getChildEndpointByName('meter:0')?.hasClusterServer(DescriptorCluster)).toBeTruthy();
     expect(device.getChildEndpointByName('meter:0')?.hasClusterServer(PowerTopology.Complete)).toBeTruthy();
     expect(device.getChildEndpointByName('meter:0')?.hasClusterServer(ElectricalPowerMeasurement.Complete)).toBeTruthy();
     expect(device.getChildEndpointByName('meter:0')?.hasClusterServer(ElectricalEnergyMeasurement.Complete)).toBeTruthy();
     expect(device.getChildEndpointByName('input:0')).toBeDefined();
-    expect(device.getChildEndpointByName('input:0')?.getAllClusterServers()).toHaveLength(2);
-    expect(device.getChildEndpointByName('input:0')?.hasClusterServer(DescriptorCluster)).not.toBeTruthy();
+    expect(device.getChildEndpointByName('input:0')?.hasClusterServer(DescriptorCluster)).toBeTruthy();
     expect(device.getChildEndpointByName('input:0')?.hasClusterServer(BindingCluster)).not.toBeTruthy();
     expect(device.getChildEndpointByName('input:0')?.hasClusterServer(IdentifyCluster)).toBeTruthy();
     expect(device.getChildEndpointByName('input:0')?.hasClusterServer(Switch.Complete)).toBeTruthy();
 
-    const onOff = device.getChildEndpointByName('relay:0')?.getClusterServer(OnOffCluster);
-    expect(onOff).toBeDefined();
-    if (!onOff) return;
-    invokeCommands(onOff as unknown as ClusterServerObj, { endpoint: { number: 100 } });
+    // const onOff = device.getChildEndpointByName('relay:0')?.getClusterServer(OnOffCluster);
+    // expect(onOff).toBeDefined();
+    // if (!onOff) return;
+    // invokeCommands(onOff as unknown as ClusterServerObj, { endpoint: { number: 100 } });
 
     cleanup();
     expect(await (shellyPlatform as any).saveStoredDevices()).toBeTruthy();

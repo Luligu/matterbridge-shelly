@@ -52,7 +52,7 @@ interface WsServerEvent {
 export class WsServer extends EventEmitter {
   public readonly log;
   private httpServer: Server | undefined;
-  private wsServer: WebSocket.Server | undefined;
+  private wsServer: WebSocketServer | undefined;
   private pingPeriod = 30000;
   private pongPeriod = 30000;
   private _isListening = false;

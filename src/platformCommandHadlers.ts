@@ -21,7 +21,7 @@
  * limitations under the License. *
  */
 
-import { MatterbridgeDevice } from 'matterbridge';
+import { MatterbridgeEndpoint } from 'matterbridge';
 import { db, debugStringify, hk, idn, nf, or, rs, YELLOW } from 'matterbridge/logger';
 import { isValidNumber, isValidObject } from 'matterbridge/utils';
 
@@ -36,7 +36,7 @@ type PrimitiveValues = boolean | number | bigint | string | object | null | unde
  * @param {ShellyComponent} component - The Shelly component.
  * @param {Record<string, PrimitiveValues>} request - The request payload.
  */
-export function shellyIdentifyCommandHandler(endpoint: MatterbridgeDevice, component: ShellyComponent, request: Record<string, PrimitiveValues>): void {
+export function shellyIdentifyCommandHandler(endpoint: MatterbridgeEndpoint, component: ShellyComponent, request: Record<string, PrimitiveValues>): void {
   endpoint.log.info(
     `Identify command received for endpoint ${or}${endpoint.name}${nf}:${or}${endpoint.number}${nf} component ${hk}${component.name}${nf}:${hk}${component.id}${nf} request ${debugStringify(request)}`,
   );
@@ -49,7 +49,7 @@ export function shellyIdentifyCommandHandler(endpoint: MatterbridgeDevice, compo
  * @param {ShellySwitchComponent} switchComponent - The Shelly switch component.
  * @param {string} command - The command to execute (On, Off, Toggle).
  */
-export function shellySwitchCommandHandler(endpoint: MatterbridgeDevice, switchComponent: ShellySwitchComponent, command: string): void {
+export function shellySwitchCommandHandler(endpoint: MatterbridgeEndpoint, switchComponent: ShellySwitchComponent, command: string): void {
   if (command === 'On') switchComponent.On();
   else if (command === 'Off') switchComponent.Off();
   else if (command === 'Toggle') switchComponent.Toggle();
@@ -70,7 +70,7 @@ export function shellySwitchCommandHandler(endpoint: MatterbridgeDevice, switchC
  * @returns {boolean} - Returns true if the command was executed successfully, false otherwise.
  */
 export function shellyLightCommandHandler(
-  endpoint: MatterbridgeDevice,
+  endpoint: MatterbridgeEndpoint,
   lightComponent: ShellyLightComponent,
   command: string,
   level?: number | null,
@@ -128,7 +128,7 @@ export function shellyLightCommandHandler(
  * @param {string} command - The command to execute.
  * @param {number} [pos] - The position for the command.
  */
-export function shellyCoverCommandHandler(endpoint: MatterbridgeDevice, coverComponent: ShellyCoverComponent, command: string, pos?: number): void {
+export function shellyCoverCommandHandler(endpoint: MatterbridgeEndpoint, coverComponent: ShellyCoverComponent, command: string, pos?: number): void {
   // Matter uses 10000 = fully closed   0 = fully opened
   // Shelly uses 0 = fully closed   100 = fully opened
   if (command === 'Stop') {
