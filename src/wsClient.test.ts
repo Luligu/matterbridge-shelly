@@ -2,11 +2,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { jest } from '@jest/globals';
+
+import { WebSocket, WebSocketServer } from 'ws';
 import { getMacAddress, wait, waiter } from 'matterbridge/utils';
 import { WsClient } from './wsClient';
-import { WebSocket, WebSocketServer } from 'ws';
 import { AnsiLogger, db, er, hk, LogLevel, nf, zb } from 'matterbridge/logger';
-import exp from 'constants';
 
 describe('ShellyWsClient', () => {
   let loggerLogSpy: jest.SpiedFunction<(level: LogLevel, message: string, ...parameters: any[]) => void>;
@@ -339,6 +339,83 @@ describe('ShellyWsClient', () => {
     expect(wsClient.isConnected).toBeFalsy();
   }, 10000);
 
+  test('should not connect to the server with auth if no password is provided', async () => {
+    if (getMacAddress() !== address) return;
+    // Await connection to the server
+    const connectPromise = new Promise<WebSocket>((resolve) => {
+      server.once('connection', (ws: WebSocket) => {
+        // The server has received a connection
+        console.info('Server received connection');
+
+        // Listen for messages from the client
+        ws.once('message', (message) => {
+          // The server has received a message
+          const msg = JSON.parse(message.toString());
+          expect(msg).toBeDefined();
+          console.info('Server received a message:\n', msg);
+          expect(msg.method).toBe('Shelly.GetStatus');
+
+          // Ask for auth
+          ws.send(
+            JSON.stringify({
+              src: 'Jest',
+              dst: 'Matterbridge' + msg.id,
+              id: msg.id,
+              error: {
+                code: 401,
+                message: JSON.stringify({
+                  auth_type: 'digest',
+                  nonce: 123456,
+                  nc: 123,
+                  realm: 'device_id shelly1minig3-543204547478',
+                  algorithm: 'SHA-256',
+                }),
+              },
+            }),
+          );
+        });
+        ws.on('message', (message) => {
+          // The server has received a message
+          const msg = JSON.parse(message.toString());
+          expect(msg).toBeDefined();
+          console.info('Server received auth message:\n', msg);
+          resolve(ws);
+        });
+      });
+    });
+
+    // Create a WebSocket client and connect to the server and await its connection
+    wsClient = new WsClient('Jest', 'localhost');
+    wsClient.log.logLevel = LogLevel.DEBUG;
+    wsClient.start();
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Starting ws client for Shelly device ${hk}Jest${db} host ${zb}localhost${db}`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Started ws client for Shelly device ${hk}Jest${db} host ${zb}localhost${db}`);
+    expect(wsClient.isConnecting).toBeTruthy();
+    expect(wsClient.isConnected).toBeFalsy();
+    const ws = await connectPromise;
+    // prettier-ignore
+    await waiter('WsClient connection timeout', () => { return wsClient.isConnected; }, true);
+    expect((wsClient as any).auth).toBeTruthy();
+    expect(wsClient.isConnecting).toBeFalsy();
+    expect(wsClient.isConnected).toBeTruthy();
+
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.ERROR, `Authentication required for Jest but the password is not set. Exiting...`);
+
+    // Send a request from the client to the server
+    wsClient.sendRequest('Shelly.GetStatus');
+
+    // Stop the WebSocket client
+    (wsClient as any).wsDeviceId = 'Jest';
+    wsClient.stop();
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`Stopping ws client for Shelly device ${hk}Jest${db} host ${zb}localhost${db}`));
+    // prettier-ignore
+    await waiter('WsClient close isConnecting timeout', () => { return !wsClient.isConnecting; }, true);
+    expect(wsClient.isConnecting).toBeFalsy();
+    // prettier-ignore
+    await waiter('WsClient close isConnected timeout', () => { return !wsClient.isConnected; }, true);
+    expect(wsClient.isConnected).toBeFalsy();
+  }, 10000);
+
   test('should connect to the server with auth', async () => {
     if (getMacAddress() !== address) return;
     // Await connection to the server
@@ -419,6 +496,8 @@ describe('ShellyWsClient', () => {
     expect((wsClient as any).auth).toBeTruthy();
     expect(wsClient.isConnecting).toBeFalsy();
     expect(wsClient.isConnected).toBeTruthy();
+
+    expect(loggerLogSpy).not.toHaveBeenCalledWith(LogLevel.ERROR, `Authentication required for Jest but the password is not set. Exiting...`);
 
     // Send a request from the client to the server
     wsClient.sendRequest('Shelly.GetStatus');
