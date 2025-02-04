@@ -529,7 +529,9 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       }
 
       // Create a new Matterbridge device
-      const mbDevice = new MatterbridgeEndpoint(bridgedNode, { uniqueStorageKey: device.name }, config.debug as boolean);
+      const deviceTypes: AtLeastOne<DeviceTypeDefinition> = [bridgedNode];
+      if (this.validateEntity(device.id, 'PowerSource')) deviceTypes.push(powerSource);
+      const mbDevice = new MatterbridgeEndpoint(deviceTypes, { uniqueStorageKey: device.name }, config.debug as boolean);
       mbDevice.configUrl = `http://${device.host}`;
       mbDevice.log.logName = device.name;
       mbDevice.createDefaultBridgedDeviceBasicInformationClusterServer(
@@ -544,14 +546,14 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
 
       // Set the powerSource cluster
       if (this.validateEntity(device.id, 'PowerSource')) {
-        const childPowerSource = mbDevice.addChildDeviceType('PowerSource', powerSource, undefined, config.debug as boolean);
+        // const childPowerSource = mbDevice.addChildDeviceType('PowerSource', powerSource, undefined, config.debug as boolean);
         const batteryComponent = device.getComponent('battery');
         const devicepowerComponent = device.getComponent('devicepower:0');
         if (batteryComponent) {
           if (batteryComponent.hasProperty('charging')) {
-            childPowerSource.createDefaultPowerSourceRechargeableBatteryClusterServer();
+            mbDevice.createDefaultPowerSourceRechargeableBatteryClusterServer();
           } else {
-            childPowerSource.createDefaultPowerSourceReplaceableBatteryClusterServer();
+            mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer();
           }
           batteryComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
             shellyUpdateHandler(this, mbDevice, device, component, property, value, 'PowerSource');
@@ -560,7 +562,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           if (devicepowerComponent.hasProperty('battery') && isValidObject(devicepowerComponent.getValue('battery'), 2)) {
             const battery = devicepowerComponent.getValue('battery') as { V: number; percent: number };
             if (isValidNumber(battery.V, 0, 12) && isValidNumber(battery.percent, 0, 100)) {
-              childPowerSource.createDefaultPowerSourceReplaceableBatteryClusterServer(
+              mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer(
                 battery.percent,
                 battery.percent > 20 ? PowerSource.BatChargeLevel.Ok : PowerSource.BatChargeLevel.Critical,
                 battery.V * 1000,
@@ -571,9 +573,9 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             shellyUpdateHandler(this, mbDevice, device, component, property, value, 'PowerSource');
           });
         } else {
-          childPowerSource.createDefaultPowerSourceWiredClusterServer();
+          mbDevice.createDefaultPowerSourceWiredClusterServer();
         }
-        childPowerSource.addRequiredClusterServers();
+        // childPowerSource.addRequiredClusterServers();
       }
 
       // Set the composed name at gui
