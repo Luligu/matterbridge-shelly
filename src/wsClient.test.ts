@@ -37,7 +37,7 @@ describe('ShellyWsClient', () => {
     // Spy on console.error
     consoleErrorSpy = jest.spyOn(console, 'error');
 
-    // if (getMacAddress() !== address) return;
+    if (getMacAddress() !== address) return;
 
     // Create a WebSocket server and await its listening state
     await new Promise<void>((resolve) => {
@@ -91,7 +91,8 @@ describe('ShellyWsClient', () => {
   });
 
   afterAll(async () => {
-    // if (getMacAddress() !== address) return;
+    if (getMacAddress() !== address) return;
+
     console.log('Closing Jest test ws server');
 
     // Stop the WebSocket client
