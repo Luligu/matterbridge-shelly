@@ -1,6 +1,6 @@
 {
   "name": "matterbridge-shelly",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "description": "Matterbridge shelly plugin",
   "author": "https://github.com/Luligu",
   "license": "Apache-2.0",
@@ -56,8 +56,8 @@
     "test:verbose": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js --verbose",
     "test:watch": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
     "test:coverage": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js --coverage",
-    "test:index": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js index.test.ts --detectOpenHandles --coverage",
-    "test:platform": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js platform.test.ts --detectOpenHandles --coverage",
+    "test:index": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js index.test.ts --detectOpenHandles --verbose --coverage",
+    "test:platform": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js platform.test.ts --detectOpenHandles --verbose --coverage",
     "test:auth": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js src/auth.test.ts --coverage",
     "test:mdns": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js src/mdnsScanner.test.ts --verbose --coverage",
     "test:coap": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js src/coapServer.test.ts --verbose --coverage",
@@ -115,7 +115,7 @@
     "@types/eslint__js": "8.42.3",
     "@types/jest": "29.5.14",
     "@types/multicast-dns": "7.2.4",
-    "@types/node": "22.13.0",
+    "@types/node": "22.13.1",
     "@types/ws": "8.5.14",
     "eslint": "9.19.0",
     "eslint-config-prettier": "10.0.1",
@@ -125,6 +125,6 @@
     "prettier": "3.4.2",
     "ts-jest": "29.2.5",
     "typescript": "5.7.3",
-    "typescript-eslint": "8.22.0"
+    "typescript-eslint": "8.23.0"
   }
 }
