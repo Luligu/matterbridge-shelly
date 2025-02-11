@@ -17,7 +17,7 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 
 - [package]: Updated package.
 - [package]: Updated dependencies.
-- [plugin]: Requires Matterbridge 2.1.2.
+- [plugin]: Requires Matterbridge 2.1.5.
 
 ### Fixed
 
