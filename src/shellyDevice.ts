@@ -799,7 +799,7 @@ export class ShellyDevice extends EventEmitter {
           const awaken = await ShellyDevice.create(shelly, log, device.host);
           await awaken?.saveDevicePayloads(shelly.dataPath);
           awaken?.destroy();
-          log.info(`Updated cache file for sleepy device ${hk}${device.id}${db} host ${zb}${device.host}${db}`);
+          log.debug(`Updated cache file for sleepy device ${hk}${device.id}${db} host ${zb}${device.host}${db}`);
         } catch (error) {
           log.debug(`Error saving device cache ${hk}${device.id}${db} host ${zb}${device.host}${db}: ${error instanceof Error ? error.message : error}`);
         }

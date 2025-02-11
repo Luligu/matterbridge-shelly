@@ -55,7 +55,9 @@ export function shellyUpdateHandler(
   value: ShellyDataType,
   endpointName?: string,
 ) {
-  let endpoint = matterbridgeDevice.getChildEndpointByName(endpointName ?? component);
+  let endpoint: MatterbridgeEndpoint | undefined;
+  if (endpointName === 'PowerSource') endpoint = matterbridgeDevice;
+  if (!endpoint) endpoint = matterbridgeDevice.getChildEndpointByName(endpointName ?? component);
   if (!endpoint) endpoint = matterbridgeDevice.getChildEndpointByName(component.replace(':', ''));
   if (!endpoint) {
     shellyDevice.log.debug(`shellyUpdateHandler error: endpoint ${component} not found for shelly device ${dn}${shellyDevice?.id}${db}`);

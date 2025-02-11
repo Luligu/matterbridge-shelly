@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Matterbridge, MatterbridgeEndpoint, PlatformConfig } from 'matterbridge';
+import { Matterbridge, MatterbridgeBehavior, MatterbridgeEndpoint, PlatformConfig } from 'matterbridge';
 import {
   OnOffCluster,
   BindingCluster,
@@ -84,7 +84,7 @@ describe('ShellyPlatform', () => {
       matterbridgeDirectory: './jest/matterbridge',
       matterbridgePluginDirectory: './jest/plugins',
       systemInformation: { ipv4Address: undefined, osRelease: 'xx.xx.xx.xx.xx.xx', nodeVersion: '22.1.10' },
-      matterbridgeVersion: '2.1.0',
+      matterbridgeVersion: '2.1.5',
       edge: false,
       log: mockLog,
       getDevices: jest.fn(() => {
@@ -321,7 +321,7 @@ describe('ShellyPlatform', () => {
   it('should throw because of version', () => {
     mockMatterbridge.matterbridgeVersion = '1.5.4';
     expect(() => new ShellyPlatform(mockMatterbridge, mockLog, mockConfig)).toThrow();
-    mockMatterbridge.matterbridgeVersion = '1.7.3';
+    mockMatterbridge.matterbridgeVersion = '2.1.5';
   });
 
   it('should call onStart with reason and start mDNS', async () => {
@@ -530,14 +530,14 @@ describe('ShellyPlatform', () => {
     expect(device).toBeDefined();
     if (!device) return;
 
-    // expect(device.getAllClusterServers()).toHaveLength(2);
     expect(device.hasClusterServer(DescriptorCluster)).toBeTruthy();
+    expect(device.hasClusterServer(MatterbridgeBehavior)).toBeTruthy();
     expect(device.hasClusterServer(BridgedDeviceBasicInformationCluster)).toBeTruthy();
     expect(device.hasClusterServer(FixedLabelCluster)).toBeTruthy();
-    expect(device.getChildEndpoints()).toHaveLength(4);
-    expect(device.getChildEndpointByName('PowerSource')).toBeDefined();
-    expect(device.getChildEndpointByName('PowerSource')?.hasClusterServer(DescriptorCluster)).toBeTruthy();
-    expect(device.getChildEndpointByName('PowerSource')?.hasClusterServer(PowerSourceCluster)).toBeTruthy();
+    expect(device.hasClusterServer(PowerSourceCluster)).toBeTruthy();
+    expect(device.getAllClusterServerNames()).toEqual(['descriptor', 'matterbridge', 'bridgedDeviceBasicInformation', 'powerSource', 'fixedLabel']);
+    expect(device.getChildEndpoints()).toHaveLength(3);
+    expect(device.getChildEndpointByName('PowerSource')).not.toBeDefined();
     expect(device.getChildEndpointByName('relay:0')).toBeDefined();
     expect(device.getChildEndpointByName('relay:0')?.hasClusterServer(DescriptorCluster)).toBeTruthy();
     expect(device.getChildEndpointByName('relay:0')?.hasClusterServer(BindingCluster)).not.toBeTruthy();

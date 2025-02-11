@@ -6,12 +6,31 @@ If you like this project and find it useful, please consider giving it a star on
 
 You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his invaluable contribution to this project.
 
+## [1.1.6] - 2025-02-11
+
+### Added
+
+- [wsClient]: Optimized wsClient Jest test.
+- [wsClient]: Optimized memory moving the PowerSource cluster to the main endpoint. The controller can see the devices as new.
+
+### Changed
+
+- [package]: Updated package.
+- [package]: Updated dependencies.
+- [plugin]: Requires Matterbridge 2.1.5.
+
+### Fixed
+
+<a href="https://www.buymeacoffee.com/luligugithub">
+  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+</a>
+
 ## [1.1.5] - 2025-02-02
 
 ### Added
 
 - [package]: Optimized imports.
-- [wsClient]: Optimized wsClient and Jest tests.
+- [wsClient]: Optimized wsClient and wsClient Jest test.
 
 ### Changed
 
