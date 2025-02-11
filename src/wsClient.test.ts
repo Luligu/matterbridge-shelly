@@ -37,7 +37,7 @@ describe('ShellyWsClient', () => {
     // Spy on console.error
     consoleErrorSpy = jest.spyOn(console, 'error');
 
-    if (getMacAddress() !== address) return;
+    // if (getMacAddress() !== address) return;
 
     // Create a WebSocket server and await its listening state
     await new Promise<void>((resolve) => {
@@ -91,7 +91,7 @@ describe('ShellyWsClient', () => {
   });
 
   afterAll(async () => {
-    if (getMacAddress() !== address) return;
+    // if (getMacAddress() !== address) return;
     console.log('Closing Jest test ws server');
 
     // Stop the WebSocket client
@@ -112,6 +112,7 @@ describe('ShellyWsClient', () => {
   });
 
   test('should fail with wrong address', async () => {
+    if (!server) return;
     wsClient = new WsClient('Jest', 'xxxxxx');
     expect(wsClient).toBeDefined();
     expect(wsClient).toBeInstanceOf(WsClient);
@@ -143,6 +144,7 @@ describe('ShellyWsClient', () => {
   }, 10000);
 
   test('should terminate before connected', async () => {
+    if (!server) return;
     wsClient = new WsClient('Jest', 'localhost');
     wsClient.start();
     wsClient.stop();
@@ -157,6 +159,7 @@ describe('ShellyWsClient', () => {
   }, 10000);
 
   test('create the wsClient', () => {
+    if (!server) return;
     wsClient = new WsClient('Jest', 'localhost');
     expect(wsClient).toBeDefined();
     expect(wsClient).toBeInstanceOf(WsClient);
@@ -170,12 +173,13 @@ describe('ShellyWsClient', () => {
   });
 
   test('should log error if not connected', () => {
+    if (!server) return;
     wsClient.sendRequest('Shelly.GetStatus');
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.ERROR, `SendRequest error: WebSocket client is not connected to device ${hk}Jest${er} host ${zb}localhost${er}`);
   });
 
   test('should connect to the server', async () => {
-    if (getMacAddress() !== address) return;
+    if (!server) return;
     // Await connection to the server
     const connectPromise = new Promise<WebSocket>((resolve) => {
       server.once('connection', (ws: WebSocket) => {
@@ -215,7 +219,7 @@ describe('ShellyWsClient', () => {
   }, 10000);
 
   test('should start ping pong and timeout', async () => {
-    if (getMacAddress() !== address) return;
+    if (!server) return;
     (wsClient as any).startPingPong(500);
     expect((wsClient as any).pingInterval).toBeDefined();
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Start PingPong with device ${hk}Jest${db} host ${zb}localhost${db}.`);
@@ -233,12 +237,14 @@ describe('ShellyWsClient', () => {
   }, 10000);
 
   test('should respond to error event', async () => {
+    if (!server) return;
     (wsClient as any).wsClient?.emit('error', new Error('Test error'));
     expect(wsClient.isConnecting).toBeFalsy();
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.ERROR, expect.stringContaining(`WebSocket error with Shelly device ${hk}Jest${er} host ${zb}localhost${er}`));
   }, 10000);
 
   test('should respond to close event', async () => {
+    if (!server) return;
     (wsClient as any).wsClient?.emit('close');
     expect(wsClient.isConnected).toBeFalsy();
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `WebSocket connection closed with Shelly device ${hk}Jest${nf} host ${zb}localhost${nf}`);
@@ -246,12 +252,14 @@ describe('ShellyWsClient', () => {
   }, 10000);
 
   test('should be connected', async () => {
+    if (!server) return;
     expect((wsClient as any).wsClient?.readyState).toBe(WebSocket.OPEN);
     expect((wsClient as any).pingInterval).toBeUndefined();
     expect((wsClient as any).pongTimeout).toBeUndefined();
   }, 10000);
 
   test('should react to ping pong error', async () => {
+    if (!server) return;
     console.log('PingPong error test');
     sendPong = false;
     (wsClient as any).startPingPong(500);
@@ -268,6 +276,7 @@ describe('ShellyWsClient', () => {
   }, 10000);
 
   test('should close the connection', async () => {
+    if (!server) return;
     wsClient.stop();
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`Stopping ws client for Shelly device ${hk}Jest${db} host ${zb}localhost${db}`));
     // prettier-ignore
@@ -279,7 +288,7 @@ describe('ShellyWsClient', () => {
   }, 10000);
 
   test('should connect to the server without auth', async () => {
-    if (getMacAddress() !== address) return;
+    if (!server) return;
     // Await connection to the server
     const connectPromise = new Promise<WebSocket>((resolve) => {
       server.once('connection', (ws: WebSocket) => {
@@ -340,7 +349,7 @@ describe('ShellyWsClient', () => {
   }, 10000);
 
   test('should not connect to the server with auth if no password is provided', async () => {
-    if (getMacAddress() !== address) return;
+    if (!server) return;
     // Await connection to the server
     const connectPromise = new Promise<WebSocket>((resolve) => {
       server.once('connection', (ws: WebSocket) => {
@@ -417,7 +426,7 @@ describe('ShellyWsClient', () => {
   }, 10000);
 
   test('should connect to the server with auth', async () => {
-    if (getMacAddress() !== address) return;
+    if (!server) return;
     // Await connection to the server
     const connectPromise = new Promise<WebSocket>((resolve) => {
       server.once('connection', (ws: WebSocket) => {
