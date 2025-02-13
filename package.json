@@ -1,6 +1,6 @@
 {
   "name": "matterbridge-shelly",
-  "version": "1.1.6",
+  "version": "1.1.7-dev.1",
   "description": "Matterbridge shelly plugin",
   "author": "https://github.com/Luligu",
   "license": "Apache-2.0",
@@ -70,10 +70,10 @@
     "test:shellyDevice": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js src/shellyDevice.test.ts --runInBand --detectOpenHandles --verbose --coverage",
     "test:shellyDevice:mock": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js src/shellyDevice.mock.test.ts --runInBand --detectOpenHandles --verbose --coverage",
     "test:shellyDevice:all": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js src/shellyDevice.test.ts src/shellyDevice.mock.test.ts --runInBand --detectOpenHandles --verbose --coverage",
-    "test:real": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js src/shellyDevice.real.test.ts --runInBand --detectOpenHandles --verbose --coverage",
-    "test:real1": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js src/shellyDevice.realgen1.test.ts --runInBand --detectOpenHandles --verbose --coverage",
-    "test:real2": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js src/shellyDevice.realgen2.test.ts --runInBand --detectOpenHandles --verbose --coverage",
-    "test:real3": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js src/shellyDevice.realgen3.test.ts --runInBand --detectOpenHandles --verbose --coverage",
+    "test:shellyDevice:real": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js src/shellyDevice.real.test.ts --runInBand --detectOpenHandles --verbose --coverage",
+    "test:shellyDevice:real1": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js src/shellyDevice.realgen1.test.ts --runInBand --detectOpenHandles --verbose --coverage",
+    "test:shellyDevice:real2": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js src/shellyDevice.realgen2.test.ts --runInBand --detectOpenHandles --verbose --coverage",
+    "test:shellyDevice:real3": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js src/shellyDevice.realgen3.test.ts --runInBand --detectOpenHandles --verbose --coverage",
     "lint": "eslint --max-warnings=0 .",
     "lint:fix": "eslint --fix --max-warnings=0 .",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,css,md}\"",
@@ -100,7 +100,8 @@
     "install:eslint": "npm install --save-dev eslint @eslint/js @types/eslint__js typescript typescript-eslint",
     "install:prettier": "npm install --save-dev prettier eslint-config-prettier eslint-plugin-prettier",
     "install:jest": "npm install --save-dev jest ts-jest @types/jest eslint-plugin-jest",
-    "cleanBuildProduction": "npm run clean && npm run buildProduction"
+    "cleanBuildProduction": "npm run clean && npm run buildProduction",
+    "runMeBeforePublish": "npm run lint && npm run format && npm run build && npm run test"
   },
   "dependencies": {
     "coap": "1.4.1",
@@ -111,21 +112,21 @@
     "ws": "8.18.0"
   },
   "devDependencies": {
-    "@eslint/js": "9.19.0",
+    "@eslint/js": "9.20.0",
     "@types/eslint__js": "8.42.3",
     "@types/jest": "29.5.14",
     "@types/multicast-dns": "7.2.4",
-    "@types/node": "22.13.1",
+    "@types/node": "22.13.2",
     "@types/ws": "8.5.14",
     "cross-env": "^7.0.3",
-    "eslint": "9.19.0",
+    "eslint": "9.20.1",
     "eslint-config-prettier": "10.0.1",
     "eslint-plugin-jest": "28.11.0",
     "eslint-plugin-prettier": "5.2.3",
     "jest": "29.7.0",
-    "prettier": "3.4.2",
+    "prettier": "3.5.1",
     "ts-jest": "29.2.5",
     "typescript": "5.7.3",
-    "typescript-eslint": "8.23.0"
+    "typescript-eslint": "8.24.0"
   }
 }

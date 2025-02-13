@@ -5543,8 +5543,8 @@ button.pf-v5-c-breadcrumb__link {
   --pf-v5-c-menu--m-drilldown--c-menu--Transition: transform var(--pf-v5-c-menu--m-drilldown--c-menu--TransitionDuration--transform);
   --pf-v5-c-menu--m-drilldown__content--TransitionDuration--height: var(--pf-v5-global--TransitionDuration);
   --pf-v5-c-menu--m-drilldown__content--TransitionDuration--transform: var(--pf-v5-global--TransitionDuration);
-  --pf-v5-c-menu--m-drilldown__content--Transition: transform var(--pf-v5-c-menu--m-drilldown__content--TransitionDuration--transform),
-    height var(--pf-v5-c-menu--m-drilldown__content--TransitionDuration--height);
+  --pf-v5-c-menu--m-drilldown__content--Transition:
+    transform var(--pf-v5-c-menu--m-drilldown__content--TransitionDuration--transform), height var(--pf-v5-c-menu--m-drilldown__content--TransitionDuration--height);
   --pf-v5-c-menu--m-drilldown__list--TransitionDuration--transform: var(--pf-v5-global--TransitionDuration);
   --pf-v5-c-menu--m-drilldown__list--Transition: transform var(--pf-v5-c-menu--m-drilldown__list--TransitionDuration--transform);
   --pf-v5-c-menu--m-drilled-in--c-menu__list-item--m-current-path--c-menu--ZIndex: var(--pf-v5-global--ZIndex--xs);

@@ -46,8 +46,6 @@ import {
   colorTemperatureLight,
   MatterbridgeEndpoint,
 } from 'matterbridge';
-import { AnsiLogger, BLUE, CYAN, GREEN, LogLevel, TimestampFormat, YELLOW, db, dn, er, hk, idn, nf, nt, rs, wr, zb } from 'matterbridge/logger';
-import { NodeStorage, NodeStorageManager } from 'matterbridge/storage';
 import {
   hslColorToRgbColor,
   rgbColorToHslColor,
@@ -62,6 +60,12 @@ import {
   miredToKelvin,
   kelvinToRGB,
 } from 'matterbridge/utils';
+
+// Logger imports
+import { AnsiLogger, BLUE, CYAN, GREEN, LogLevel, TimestampFormat, YELLOW, db, dn, er, hk, idn, nf, nt, rs, wr, zb } from 'matterbridge/logger';
+
+// Storage imports
+import { NodeStorage, NodeStorageManager } from 'matterbridge/storage';
 
 // @matter imports
 import { AtLeastOne, NumberTag } from 'matterbridge/matter';
@@ -93,14 +97,11 @@ import { Shelly } from './shelly.js';
 import { DiscoveredDevice } from './mdnsScanner.js';
 import { ShellyDevice } from './shellyDevice.js';
 import { isCoverComponent, isLightComponent, isSwitchComponent, ShellyComponent, ShellyCoverComponent, ShellyLightComponent, ShellySwitchComponent } from './shellyComponent.js';
-import { ShellyData, ShellyDataType } from './shellyTypes.js';
+import { ShellyData, ShellyDataType, ShellyDeviceId } from './shellyTypes.js';
 import { shellyCoverCommandHandler, shellyIdentifyCommandHandler, shellyLightCommandHandler, shellySwitchCommandHandler } from './platformCommandHadlers.js';
 import { shellyUpdateHandler } from './platformUpdateHandler.js';
 
 type ConfigDeviceIp = Record<string, string>;
-
-// Shelly device id (e.g. shellyplus1pm-441793d69718)
-type ShellyDeviceId = string;
 
 export class ShellyPlatform extends MatterbridgeDynamicPlatform {
   public discoveredDevices = new Map<ShellyDeviceId, DiscoveredDevice>();
@@ -1279,7 +1280,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
   override async onStart(reason?: string) {
     this.log.info(`Starting platform ${idn}${this.config.name}${rs}${nf}: ${reason ?? ''}`);
 
-    // create NodeStorageManager
+    // Create NodeStorageManager
     this.nodeStorageManager = new NodeStorageManager({
       dir: path.join(this.matterbridge.matterbridgeDirectory, 'matterbridge-shelly'),
       writeQueue: false,
@@ -1315,7 +1316,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       await this.loadStoredDevices();
     }
 
-    // load the changed Shelly devices from previous session
+    // Load the changed Shelly devices from previous session
     this.log.info(`Loading changed Shelly devices from the storage...`);
     const changedDevices = await this.nodeStorage.get<string[]>('ChangedDevices', []);
     for (const device of changedDevices) {
@@ -1324,7 +1325,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     }
     this.log.debug(`Loaded ${CYAN}${this.changedDevices.size}${nf} changed Shelly devices from the storage`);
 
-    // add all stored devices
+    // Add all stored devices
     if (this.config.enableStorageDiscover === true) {
       this.log.info(`Loading from storage ${this.storedDevices.size} Shelly devices`);
       for (const storedDevice of this.storedDevices.values()) {
@@ -1343,7 +1344,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       }
     }
 
-    // add all configured devices
+    // Add all configured devices
     if (this.config.enableConfigDiscover === true && isValidObject(this.config.deviceIp)) {
       this.log.info(`Loading from config ${Object.entries(this.config.deviceIp as ConfigDeviceIp).length} Shelly devices`);
       // eslint-disable-next-line prefer-const
@@ -1621,14 +1622,22 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     await super.onShutdown(reason);
     this.log.info(`Shutting down platform ${idn}${this.config.name}${rs}${nf}: ${reason ?? ''}`);
 
-    if (!this.nodeStorage) {
+    if (this.nodeStorage) {
+      this.log.info(`Saving ${CYAN}${this.changedDevices.size}${nf} changed Shelly devices to the storage`);
+      await this.nodeStorage.set<string[]>('ChangedDevices', Array.from(this.changedDevices.values()));
+    } else {
       this.log.error('NodeStorage is not initialized');
       return;
     }
-    this.log.info(`Saving ${CYAN}${this.changedDevices.size}${nf} changed Shelly devices to the storage`);
-    await this.nodeStorage.set<string[]>('ChangedDevices', Array.from(this.changedDevices.values()));
 
+    this.shelly.removeAllListeners();
     this.shelly.destroy();
+
+    this.discoveredDevices.clear();
+    this.storedDevices.clear();
+    this.changedDevices.clear();
+    this.bridgedDevices.clear();
+    this.bluBridgedDevices.clear();
 
     if (this.config.unregisterOnShutdown === true) await this.unregisterAllDevices();
   }
@@ -1704,7 +1713,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     }
     this.log.info(`Adding shelly device ${hk}${deviceId}${nf} host ${zb}${host}${nf}`);
     const log = new AnsiLogger({ logName: deviceId, logTimestampFormat: TimestampFormat.TIME_MILLIS, logLevel: this.log.logLevel });
-    const fileName = path.join(this.matterbridge.matterbridgePluginDirectory, 'matterbridge-shelly', `${deviceId}.json`);
+    const cacheFileName = path.join(this.matterbridge.matterbridgePluginDirectory, 'matterbridge-shelly', `${deviceId}.json`);
     let device: ShellyDevice | undefined;
 
     let loadFromCache = true;
@@ -1715,9 +1724,9 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       loadFromCache = false;
     }
 
-    if (loadFromCache && fs.existsSync(fileName)) {
+    if (loadFromCache && fs.existsSync(cacheFileName)) {
       this.log.info(`Loading from cache Shelly device ${hk}${deviceId}${nf} host ${zb}${host}${nf}`);
-      device = await ShellyDevice.create(this.shelly, log, fileName);
+      device = await ShellyDevice.create(this.shelly, log, cacheFileName);
       if (device) {
         this.log.info(`Loaded from cache Shelly device ${hk}${deviceId}${nf} host ${zb}${host}${nf}`);
         device.setHost(host);
@@ -1733,7 +1742,9 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       }
     }
     if (!device) {
-      this.log.error(`Failed to create Shelly device ${hk}${deviceId}${er} host ${zb}${host}${er} (loadFromCache: ${loadFromCache} cacheFileExist: ${fs.existsSync(fileName)})`);
+      this.log.error(
+        `Failed to create Shelly device ${hk}${deviceId}${er} host ${zb}${host}${er} (loadFromCache: ${loadFromCache} cacheFileExist: ${fs.existsSync(cacheFileName)})`,
+      );
       return;
     }
     // Set the device in the selectDevice map for the frontend device selection

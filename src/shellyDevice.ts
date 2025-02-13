@@ -93,7 +93,7 @@ export class ShellyDevice extends EventEmitter {
   thermostatSetpointTimeout?: NodeJS.Timeout;
   private lastseenInterval?: NodeJS.Timeout;
   private startWsClientTimeout?: NodeJS.Timeout;
-  wsClient: WsClient | undefined;
+  wsClient?: WsClient;
 
   private readonly _components = new Map<string, ShellyComponent>();
 
@@ -148,6 +148,18 @@ export class ShellyDevice extends EventEmitter {
     this.startWsClientTimeout = undefined;
     this.wsClient?.stop();
     this.wsClient?.removeAllListeners();
+    this.wsClient = undefined;
+
+    this._components.clear();
+
+    this.shellyPayload = null;
+    this.statusPayload = null;
+    this.settingsPayload = null;
+    this.componentsPayload = null;
+
+    this.bthomeTrvs.clear();
+    this.bthomeDevices.clear();
+    this.bthomeSensors.clear();
 
     this.removeAllListeners();
   }
@@ -470,11 +482,12 @@ export class ShellyDevice extends EventEmitter {
    * @returns {Promise<ShellyDevice | undefined>} A Promise that resolves to a ShellyDevice instance or undefined if an error occurs.
    */
   static async create(shelly: Shelly, log: AnsiLogger, host: string): Promise<ShellyDevice | undefined> {
-    const shellyPayload = await ShellyDevice.fetch(shelly, log, host, 'shelly');
+    let shellyPayload: ShellyData | null = null;
     let statusPayload: ShellyData | null = null;
     let settingsPayload: ShellyData | null = null;
     let componentsPayload: ShellyData | null = null;
 
+    shellyPayload = await ShellyDevice.fetch(shelly, log, host, 'shelly');
     if (!shellyPayload) {
       log.debug(`Error creating device at host ${zb}${host}${db}. No shelly data found.`);
       return undefined;
@@ -1228,8 +1241,9 @@ export class ShellyDevice extends EventEmitter {
     if (host.endsWith('.json')) {
       log.debug(`Fetching device payloads from file ${host}: service ${service} params ${JSON.stringify(params)}`);
       try {
-        const data = await fs.readFile(host, 'utf8');
+        let data = await fs.readFile(host, 'utf8');
         const deviceData = JSON.parse(data);
+        data = '';
         if (service === 'shelly') return deviceData.shelly;
         if (service === 'status') return deviceData.status;
         if (service === 'settings') return deviceData.settings;

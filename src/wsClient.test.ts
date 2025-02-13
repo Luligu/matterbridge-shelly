@@ -23,7 +23,34 @@ describe('ShellyWsClient', () => {
 
   const address = 'c4:cb:76:b3:cd:1f';
 
-  beforeAll(async () => {
+  const debug = false;
+
+  if (!debug) {
+    // Spy on and mock AnsiLogger.log
+    loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log').mockImplementation((level: string, message: string, ...parameters: any[]) => {
+      //
+    });
+    // Spy on and mock console.log
+    consoleLogSpy = jest.spyOn(console, 'log').mockImplementation((...args: any[]) => {
+      //
+    });
+    // Spy on and mock console.debug
+    consoleDebugSpy = jest.spyOn(console, 'debug').mockImplementation((...args: any[]) => {
+      //
+    });
+    // Spy on and mock console.info
+    consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation((...args: any[]) => {
+      //
+    });
+    // Spy on and mock console.warn
+    consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation((...args: any[]) => {
+      //
+    });
+    // Spy on and mock console.error
+    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation((...args: any[]) => {
+      //
+    });
+  } else {
     // Spy on AnsiLogger.log
     loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log');
     // Spy on console.log
@@ -36,8 +63,10 @@ describe('ShellyWsClient', () => {
     consoleWarnSpy = jest.spyOn(console, 'warn');
     // Spy on console.error
     consoleErrorSpy = jest.spyOn(console, 'error');
+  }
 
-    if (getMacAddress() !== address) return;
+  beforeAll(async () => {
+    if (getMacAddress() !== address) return; // Only run these tests on the correct machine
 
     // Create a WebSocket server and await its listening state
     await new Promise<void>((resolve) => {
