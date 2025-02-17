@@ -23,11 +23,11 @@
 
 import { AnsiLogger, LogLevel, BLUE, CYAN, GREEN, GREY, MAGENTA, RESET, db, debugStringify, er, hk, nf, wr, zb, rs, YELLOW, idn, nt, rk } from 'matterbridge/logger';
 import { getIpv4InterfaceAddress, isValidNumber, isValidObject, isValidString } from 'matterbridge/utils';
-import { EventEmitter } from 'events';
+import { EventEmitter } from 'node:events';
 import fetch, { RequestInit } from 'node-fetch';
-import crypto from 'crypto';
-import { promises as fs } from 'fs';
-import path from 'path';
+import crypto from 'node:crypto';
+import { promises as fs } from 'node:fs';
+import path from 'node:path';
 
 import { parseDigestAuthenticateHeader, createDigestShellyAuth, createBasicShellyAuth, parseBasicAuthenticateHeader, getGen2BodyOptions, getGen1BodyOptions } from './auth.js';
 

@@ -23,9 +23,9 @@
 
 import { AnsiLogger, BLUE, CYAN, LogLevel, MAGENTA, RESET, TimestampFormat, db, debugStringify, er, hk, idn, rs, zb } from 'matterbridge/logger';
 import coap, { Server, IncomingMessage, OutgoingMessage, globalAgent, parameters } from 'coap';
-import EventEmitter from 'events';
-import path from 'path';
-import { promises as fs } from 'fs';
+import EventEmitter from 'node:events';
+import path from 'node:path';
+import { promises as fs } from 'node:fs';
 
 // 192.168.1.189:5683
 

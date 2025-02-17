@@ -23,13 +23,13 @@
 
 import { AnsiLogger, CYAN, MAGENTA, BRIGHT, hk, db, nf, wr, zb, er, LogLevel } from 'matterbridge/logger';
 
-import crypto from 'crypto';
-import EventEmitter from 'events';
+import crypto from 'node:crypto';
+import EventEmitter from 'node:events';
 
 import { ShellyDevice } from './shellyDevice.js';
 import { DiscoveredDevice, MdnsScanner } from './mdnsScanner.js';
 import { CoapServer } from './coapServer.js';
-import { SocketType } from 'dgram';
+import { SocketType } from 'node:dgram';
 import { WsClient } from './wsClient.js';
 import { WsServer } from './wsServer.js';
 import { ShellyData, ShellyDeviceId } from './shellyTypes.js';

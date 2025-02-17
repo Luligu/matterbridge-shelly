@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Multicast } from './mcastServer';
 import { jest } from '@jest/globals';
-import dgram from 'dgram';
+import dgram from 'node:dgram';
 import { wait } from 'matterbridge/utils';
 
 describe('Muticast server and client test', () => {

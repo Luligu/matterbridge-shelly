@@ -23,7 +23,7 @@ import { jest } from '@jest/globals';
 import { Shelly } from './shelly';
 import { ShellyPlatform } from './platform';
 import { ShellyDevice } from './shellyDevice';
-import path from 'path';
+import path from 'node:path';
 
 const address = 'c4:cb:76:b3:cd:1f';
 

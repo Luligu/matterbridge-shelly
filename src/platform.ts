@@ -89,8 +89,8 @@ import {
 } from 'matterbridge/matter/clusters';
 
 // Node.js imports
-import path from 'path';
-import * as fs from 'fs';
+import path from 'node:path';
+import * as fs from 'node:fs';
 
 // Shelly imports
 import { Shelly } from './shelly.js';

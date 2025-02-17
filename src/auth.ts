@@ -21,7 +21,7 @@
  * limitations under the License. *
  */
 
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 
 export interface AuthParams {
   realm: string; // device_id

@@ -23,8 +23,8 @@
 
 import { AnsiLogger, CYAN, LogLevel, TimestampFormat, db, er, hk, nf, rs, zb } from 'matterbridge/logger';
 import WebSocket from 'ws';
-import crypto from 'crypto';
-import EventEmitter from 'events';
+import crypto from 'node:crypto';
+import EventEmitter from 'node:events';
 import { createDigestShellyAuth } from './auth.js';
 import { ShellyDevice } from './shellyDevice.js';
 

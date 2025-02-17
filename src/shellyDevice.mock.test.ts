@@ -4,7 +4,7 @@ import { ShellyDevice } from './shellyDevice.js';
 import { AnsiLogger, TimestampFormat, LogLevel } from 'matterbridge/logger';
 import { Shelly } from './shelly.js';
 import { ShellyComponent } from './shellyComponent.js';
-import path from 'path';
+import path from 'node:path';
 import { jest } from '@jest/globals';
 import { ShellyData } from './shellyTypes.js';
 import { wait } from 'matterbridge/utils';
