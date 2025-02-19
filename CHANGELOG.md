@@ -10,16 +10,27 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 
 Since the plugin config got very complex and also confusing, from this release a lot of options have been removed or simplified:
 
-Removed:
+Removed options:
 
-- exposeSwitch: the default is now outlet (matter compliant). You can still expose a device like a switch adding it it to the switchList or like a light adding it it to the lightList.
+- exposeSwitch: the default is outlet (matter compliant). You can expose a device like a switch adding it it to the switchList or like a light adding it it to the lightList.
 - outletList: since the default is now outlet has been removed.
 
 - exposeInput: inputs are now disabled by default. You can still expose them adding the device to inputContactList, inputMomentaryList or inputLatchingList.
-- exposeInputEvent: inputs events are now disabled by default. You can still expose them adding the device to inputMomentaryList.
+- exposeInputEvent: inputs events are now disabled by default. You can expose them adding the device to inputMomentaryList.
 - inputEventList: use inputMomentaryList instead.
 
-- exposePowerMeter: electrical sensors are now enabled by default. You can disable them globally or on a per-device basis adding "PowerMeter" to entityBlackList, see [COMPONENTS.md documentation.](https://github.com/Luligu/matterbridge-shelly/blob/main/COMPONENTS.md). On new setups the "PowerMeter" components are already disabled.
+- exposePowerMeter: electrical sensors are enabled by default. You can disable them globally or on a per-device basis adding "PowerMeter" to entityBlackList or deviceEntityBlackList, see [COMPONENTS.md documentation.](https://github.com/Luligu/matterbridge-shelly/blob/main/COMPONENTS.md). On new setups the "PowerMeter" components are already globally disabled by default.
+
+New setups:
+
+- these components are blacklisted (with entityBlackList) by default: "PowerMeter", "Lux", "Illuminance", "Vibration", "Button".
+- all switches are exposed like outlet (matter compliant).
+- shellyplusi4, shellyi4g3, shellyix3 and shellybutton1 are added to inputMomentaryList.
+- expertMode is disabled.
+
+Expert mode:
+
+The expertMode option has been added to show a complete or simplified config.
 
 ## [1.1.7] - 2025-02-13
 

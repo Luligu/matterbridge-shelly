@@ -122,6 +122,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
   private password = '';
   private postfix;
   private failsafeCount;
+  private firstRun = false;
 
   constructor(matterbridge: Matterbridge, log: AnsiLogger, config: PlatformConfig) {
     super(matterbridge, log, config);
@@ -155,11 +156,12 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     // First config setup
     if (config.firstRun === undefined) {
       config.firstRun = true;
+      this.firstRun = true;
       if (!isValidArray(config.whiteList, 1) && !isValidArray(config.blackList, 1) && !isValidArray(config.entityBlackList, 1) && !isValidObject(config.deviceEntityBlackList, 1))
         config.expertMode = false;
       else config.expertMode = true;
       // If not already set user
-      if (!isValidArray(config.entityBlackList, 1)) config.entityBlackList = ['PowerMeter', 'Lux', 'Illuminance', 'Vibration'];
+      if (!isValidArray(config.entityBlackList, 1)) config.entityBlackList = ['PowerMeter', 'Lux', 'Illuminance', 'Vibration', 'Button'];
     }
     // Expert mode setup
     if (config.expertMode === false) {
@@ -274,6 +276,19 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         this.discoveredDevices.set(discoveredDevice.id, discoveredDevice);
         this.storedDevices.set(discoveredDevice.id, discoveredDevice);
         await this.saveStoredDevices();
+        if (
+          this.firstRun &&
+          (discoveredDevice.id.includes('shellybutton1') ||
+            discoveredDevice.id.includes('shellyix3') ||
+            discoveredDevice.id.includes('shellyplusi4') ||
+            discoveredDevice.id.includes('shellyi4g3'))
+        ) {
+          this.log.info(`Shelly device ${hk}${discoveredDevice.id}${nf} host ${zb}${discoveredDevice.host}${nf} added to inputMomentaryList`);
+          if (!this.config.inputMomentaryList) this.config.inputMomentaryList = [];
+          (this.config.inputMomentaryList as string[]).push(discoveredDevice.id);
+          const shelly = this.matterbridge.plugins.get('matterbridge-shelly');
+          if (shelly) this.matterbridge.plugins.saveConfigFromJson(shelly, this.config);
+        }
       }
       await this.addDevice(discoveredDevice.id, discoveredDevice.host);
     });
