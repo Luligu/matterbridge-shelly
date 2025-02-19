@@ -6,6 +6,15 @@ If you like this project and find it useful, please consider giving it a star on
 
 You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his invaluable contribution to this project.
 
+### Breaking Changes
+
+Since the plugin config got very complex and also confusing, from this release a lot of options have been removed or simplified:
+
+Removed:
+
+- exposeSwitch: the default is now outlet (matter compliant). You can still expose a device like a switch adding it it to the switchList or like a light adding it it to the lightList.
+- outletList: since the default is now outlet is useless.
+
 ## [1.1.7] - 2025-02-13
 
 ### Added
@@ -20,6 +29,8 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 - [plugin]: Requires Matterbridge 2.1.5.
 
 ### Fixed
+
+- [platform]: Removed coiot component from Select.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
   <img src="./yellow-button.png" alt="Buy me a coffee" width="120">

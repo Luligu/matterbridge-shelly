@@ -140,10 +140,13 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     this.failsafeCount = (config.failsafeCount as number) ?? 0;
     if (!isValidNumber(this.failsafeCount, 0)) this.failsafeCount = 0;
 
+    // Config cleanup
+    if (config.exposeSwitch !== undefined) delete config.exposeSwitch;
+    if (config.outletList !== undefined) delete config.outletList;
+
     log.debug(`Initializing platform: ${idn}${config.name}${rs}${db} v.${CYAN}${config.version}`);
     log.debug(`- username: ${CYAN}${config.username ? '********' : 'undefined'}`);
     log.debug(`- password: ${CYAN}${config.password ? '********' : 'undefined'}`);
-    log.debug(`- exposeSwitch: ${CYAN}${config.exposeSwitch}`);
     log.debug(`- exposeInput: ${CYAN}${config.exposeInput}`);
     log.debug(`- exposePowerMeter: ${CYAN}${config.exposePowerMeter}`);
     log.debug(`- mdnsDiscover: ${CYAN}${config.enableMdnsDiscover}`);
@@ -763,12 +766,9 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             shellyUpdateHandler(this, mbDevice, device, component, property, value);
           });
         } else if (isSwitchComponent(component)) {
-          let deviceType = onOffSwitch;
-          if (config.exposeSwitch === 'light') deviceType = onOffLight;
-          if (config.exposeSwitch === 'outlet') deviceType = onOffOutlet;
+          let deviceType = onOffOutlet;
           if (config.switchList && (config.switchList as string[]).includes(device.id)) deviceType = onOffSwitch;
           if (config.lightList && (config.lightList as string[]).includes(device.id)) deviceType = onOffLight;
-          if (config.outletList && (config.outletList as string[]).includes(device.id)) deviceType = onOffOutlet;
 
           const tagList = this.addTagList(component);
           const child = mbDevice.addChildDeviceType(
@@ -866,15 +866,13 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           }
         } else if (component.name === 'Input') {
           const tagList = this.addTagList(component);
-          const inputComponent = device.getComponent(key);
           // Skip the input component if it is disabled in Gen 2/3 devices
-          if (inputComponent && inputComponent.hasProperty('enable') && inputComponent.getValue('enable') === false) continue;
+          if (component.hasProperty('enable') && component.getValue('enable') === false) continue;
           if (
-            inputComponent &&
-            inputComponent.hasProperty('state') &&
+            component.hasProperty('state') &&
             (config.exposeInput === 'contact' || (config.exposeInput === 'disabled' && config.inputContactList && (config.inputContactList as string[]).includes(device.id)))
           ) {
-            const state = inputComponent.getValue('state') as boolean;
+            const state = component.getValue('state') as boolean;
             if (isValidBoolean(state)) {
               const child = mbDevice.addChildDeviceType(key, [contactSensor], tagList ? { tagList } : undefined, config.debug as boolean);
               child.log.logName = `${device.name} ${key}`;
@@ -882,56 +880,53 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               child.createDefaultBooleanStateClusterServer(state);
               child.addRequiredClusterServers();
               // Add event handler
-              inputComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
+              component.on('update', (component: string, property: string, value: ShellyDataType) => {
                 shellyUpdateHandler(this, mbDevice, device, component, property, value);
               });
             }
           } else if (
-            inputComponent &&
-            inputComponent?.hasProperty('state') &&
+            component?.hasProperty('state') &&
             (config.exposeInput === 'momentary' || (config.exposeInput === 'disabled' && config.inputMomentaryList && (config.inputMomentaryList as string[]).includes(device.id)))
           ) {
-            const state = inputComponent.getValue('state') as boolean;
+            const state = component.getValue('state') as boolean;
             if (isValidBoolean(state)) {
               const child = mbDevice.addChildDeviceType(key, [genericSwitch], tagList ? { tagList } : undefined, config.debug as boolean);
               child.log.logName = `${device.name} ${key}`;
               child.createDefaultSwitchClusterServer();
               child.addRequiredClusterServers();
               // Add event handler
-              inputComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
+              component.on('update', (component: string, property: string, value: ShellyDataType) => {
                 shellyUpdateHandler(this, mbDevice, device, component, property, value);
               });
             }
           } else if (
-            inputComponent &&
-            inputComponent?.hasProperty('state') &&
+            component?.hasProperty('state') &&
             (config.exposeInput === 'latching' || (config.exposeInput === 'disabled' && config.inputLatchingList && (config.inputLatchingList as string[]).includes(device.id)))
           ) {
-            const state = inputComponent.getValue('state') as boolean;
+            const state = component.getValue('state') as boolean;
             if (isValidBoolean(state)) {
               const child = mbDevice.addChildDeviceType(key, [genericSwitch], tagList ? { tagList } : undefined, config.debug as boolean);
               child.log.logName = `${device.name} ${key}`;
               child.createDefaultLatchingSwitchClusterServer();
               child.addRequiredClusterServers();
               // Add event handler
-              inputComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
+              component.on('update', (component: string, property: string, value: ShellyDataType) => {
                 shellyUpdateHandler(this, mbDevice, device, component, property, value);
               });
             }
           } else if (
-            inputComponent &&
-            inputComponent?.hasProperty('event') &&
+            component?.hasProperty('event') &&
             (config.exposeInputEvent !== 'disabled' || (config.inputEventList && (config.inputEventList as string[]).includes(device.id)))
           ) {
-            // Gen 1 devices
-            const event = inputComponent.getValue('event') as boolean;
+            // Gen 1 devices input event
+            const event = component.getValue('event') as boolean;
             if (isValidString(event)) {
               const child = mbDevice.addChildDeviceType(key, [genericSwitch], tagList ? { tagList } : undefined, config.debug as boolean);
               child.log.logName = `${device.name} ${key}`;
               child.createDefaultSwitchClusterServer();
               child.addRequiredClusterServers();
               // Add event handler
-              inputComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
+              component.on('update', (component: string, property: string, value: ShellyDataType) => {
                 shellyUpdateHandler(this, mbDevice, device, component, property, value);
               });
             }

@@ -152,23 +152,13 @@ It is only used for gen 1 devices. Gen 2 and 3 devices have always admin.
 
 If your devices are password protected put there the password. It must be unique for all the devices.
 
-### exposeSwitch
-
-Choose how to expose on Matter the shelly switches: as a switch (don't use it with Alexa), light or outlet.
-
-You can then configure one or more devices to be exposed differently. See the switchList, lightList and outletList.
-
 ### switchList
 
-The devices in the list will be exposed as switches, regardless of the main option "exposeSwitch".
+The devices in the list will be exposed as switches (don't use it for Alexa).
 
 ### lightList
 
-The devices in the list will be exposed as lights, regardless of the main option "exposeSwitch".
-
-### outletList
-
-The devices in the list will be exposed as outlets, regardless of the main option "exposeSwitch".
+The devices in the list will be exposed as lights.
 
 ### exposeInput
 

@@ -21,14 +21,8 @@
       "description": "Password (must be unique for all the devices)",
       "type": "string"
     },
-    "exposeSwitch": {
-      "description": "Choose how to expose the shelly switches: as a switch (don't use it for Alexa), light or outlet",
-      "type": "string",
-      "enum": ["switch", "light", "outlet"],
-      "default": "outlet"
-    },
     "switchList": {
-      "description": "The devices in the list will be exposed as switches, regardless of the main option.",
+      "description": "The devices in the list will be exposed as switches (don't use it for Alexa).",
       "type": "array",
       "items": {
         "type": "string"
@@ -37,16 +31,7 @@
       "selectFrom": "serial"
     },
     "lightList": {
-      "description": "The devices in the list will be exposed as lights, regardless of the main option.",
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "uniqueItems": true,
-      "selectFrom": "serial"
-    },
-    "outletList": {
-      "description": "The devices in the list will be exposed as outlets, regardless of the main option.",
+      "description": "The devices in the list will be exposed as lights.",
       "type": "array",
       "items": {
         "type": "string"
