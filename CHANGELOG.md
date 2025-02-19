@@ -32,7 +32,7 @@ Expert mode:
 
 The expertMode option has been added to show a complete or simplified config.
 
-## [1.1.7] - 2025-02-13
+## [1.1.7] - 2025-02-22
 
 ### Added
 
@@ -43,7 +43,7 @@ The expertMode option has been added to show a complete or simplified config.
 
 - [package]: Updated package.
 - [package]: Updated dependencies.
-- [plugin]: Requires Matterbridge 2.1.5.
+- [plugin]: Requires Matterbridge 2.1.6.
 
 ### Fixed
 
