@@ -146,7 +146,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     if (config.exposeInput !== undefined) delete config.exposeInput;
     if (config.exposeInputEvent !== undefined) delete config.exposeInputEvent;
     if (config.inputEventList !== undefined) {
-      config.inputMomentaryList = config.inputEventList;
+      if (isValidArray(config.inputEventList, 1)) config.inputMomentaryList = config.inputEventList;
       delete config.inputEventList;
     }
 
