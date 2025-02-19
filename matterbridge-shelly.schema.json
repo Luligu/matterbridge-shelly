@@ -66,12 +66,6 @@
       "uniqueItems": true,
       "selectFrom": "serial"
     },
-    "exposePowerMeter": {
-      "description": "Choose how to expose the shelly power meters: disabled, matter13 (will use Matter 1.3 electricalSensor)",
-      "type": "string",
-      "enum": ["disabled", "matter13"],
-      "default": "disabled"
-    },
     "blackList": {
       "description": "The devices in the list will not be exposed. Use the device id (e.g. shellyplus2pm-5443B23D81F8) or BLU addr (i.e. 7c:c6:b6:65:2d:87)",
       "type": "array",

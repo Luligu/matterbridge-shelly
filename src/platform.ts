@@ -149,11 +149,11 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       if (isValidArray(config.inputEventList, 1)) config.inputMomentaryList = config.inputEventList;
       delete config.inputEventList;
     }
+    if (config.exposePowerMeter !== undefined) delete config.exposePowerMeter;
 
     log.debug(`Initializing platform: ${idn}${config.name}${rs}${db} v.${CYAN}${config.version}`);
     log.debug(`- username: ${CYAN}${config.username ? '********' : 'undefined'}`);
     log.debug(`- password: ${CYAN}${config.password ? '********' : 'undefined'}`);
-    log.debug(`- exposePowerMeter: ${CYAN}${config.exposePowerMeter}`);
     log.debug(`- mdnsDiscover: ${CYAN}${config.enableMdnsDiscover}`);
     log.debug(`- storageDiscover: ${CYAN}${config.enableStorageDiscover}`);
     log.debug(`- configDiscover: ${CYAN}${config.enableConfigDiscover}`);
@@ -848,9 +848,9 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           component.on('update', (component: string, property: string, value: ShellyDataType) => {
             shellyUpdateHandler(this, mbDevice, device, component, property, value);
           });
-        } else if (component.name === 'PowerMeter' && config.exposePowerMeter !== 'disabled') {
+        } else if (component.name === 'PowerMeter') {
           const pmComponent = device.getComponent(key);
-          if (pmComponent && config.exposePowerMeter === 'matter13') {
+          if (pmComponent) {
             const tagList = this.addTagList(component);
             // Add the Matter 1.3 electricalSensor device type with the ElectricalPowerMeasurement and ElectricalEnergyMeasurement clusters
             const child = mbDevice.addChildDeviceTypeWithClusterServer(
@@ -1651,10 +1651,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
 
   private hasElectricalMeasurements(component: ShellyComponent) {
     // Check if the component has electricalSensor
-    if (
-      this.config.exposePowerMeter === 'matter13' &&
-      (component.hasProperty('voltage') || component.hasProperty('current') || component.hasProperty('apower') || component.hasProperty('aenergy'))
-    ) {
+    if (component.hasProperty('voltage') || component.hasProperty('current') || component.hasProperty('apower') || component.hasProperty('aenergy')) {
       return true;
     }
     return false;
@@ -1662,10 +1659,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
 
   private addElectricalMeasurements(device: MatterbridgeEndpoint, endpoint: MatterbridgeEndpoint, shelly: ShellyDevice, component: ShellyComponent) {
     // Add the Matter 1.3 electricalSensor device type and the PowerTopology, ElectricalPowerMeasurement and ElectricalEnergyMeasurement clusters on the same endpoint
-    if (
-      this.config.exposePowerMeter === 'matter13' &&
-      (component.hasProperty('voltage') || component.hasProperty('current') || component.hasProperty('apower') || component.hasProperty('aenergy'))
-    ) {
+    if (component.hasProperty('voltage') || component.hasProperty('current') || component.hasProperty('apower') || component.hasProperty('aenergy')) {
       shelly.log.debug(`Adding ElectricalPowerMeasurement and ElectricalEnergyMeasurement clusters to endpoint ${hk}${endpoint.name}${db} component ${hk}${component.id}${db}`);
       endpoint.createDefaultPowerTopologyClusterServer();
       endpoint.createDefaultElectricalPowerMeasurementClusterServer();

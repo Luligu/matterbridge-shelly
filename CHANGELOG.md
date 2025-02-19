@@ -19,6 +19,8 @@ Removed:
 - exposeInputEvent: inputs events are disabled by default. You can still expose them adding the device to inputMomentaryList.
 - inputEventList: use inputMomentaryList.
 
+- exposePowerMeter: electrical sensors are exposed like default. You can disable them globally or on a per-device basis [COMPONENTS.md documentation.](https://github.com/Luligu/matterbridge-shelly/blob/main/COMPONENTS.md).
+
 ## [1.1.7] - 2025-02-13
 
 ### Added

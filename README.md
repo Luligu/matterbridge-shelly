@@ -182,10 +182,6 @@ The devices in the list will expose the Input component as a latching switch (la
 
 In Matter a latching switch is a switch that keeps its position open or closed.
 
-### exposePowerMeter
-
-Choose how to expose the shelly power meters: disabled, matter13 (it uses Matter 1.3 electricalSensor device type that is supported only by Home Assistant so far). Unless your controller supports it, set it to disabled.
-
 ### blackList
 
 If the blackList is defined the devices included in the list will not be exposed to Matter.
