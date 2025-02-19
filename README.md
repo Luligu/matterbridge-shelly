@@ -168,31 +168,19 @@ Is useful only if you create automations on the controller side or you need the 
 
 ### inputContactList
 
-The devices in the list will expose the Input event component as a contact sensor, regardless of the main option (you can disable the Input component globally and enable it only for single devices like the shellyplusi4).
+The devices in the list will expose the Input component as a contact sensor.
 
 ### inputMomentaryList
 
-The devices in the list will expose the Input event component as a momentary switch, regardless of the main option (you can disable the Input component globally and enable it only for single devices like the shellyplusi4).
+The devices in the list will expose the Input component as a momentary switch.
 
 In Matter a momentary switch is button that can be pressed or released.
 
 ### inputLatchingList
 
-The devices in the list will expose the Input event component as a latching switch, regardless of the main option (you can disable the Input component globally and enable it only for single devices like the shellyplusi4).
+The devices in the list will expose the Input component as a latching switch (latching switches are not supported by all controllers).
 
 In Matter a latching switch is a switch that keeps its position open or closed.
-
-### exposeInputEvent
-
-Choose how to expose the shelly input events: momentary switch or disabled (default momentary).
-
-This type of Input is used by devices like shellybutton1 or by Gen 2/3 devices with Input type=button.
-
-Is useful only if you create automations on the controller side or you need the controller history.
-
-### inputEventList
-
-The devices in the list will expose the Input event component as a momentary switch, regardless of the main option (you can disable the Input event component globally and enable it only for single devices).
 
 ### exposePowerMeter
 

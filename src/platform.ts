@@ -143,11 +143,16 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     // Config cleanup
     if (config.exposeSwitch !== undefined) delete config.exposeSwitch;
     if (config.outletList !== undefined) delete config.outletList;
+    if (config.exposeInput !== undefined) delete config.exposeInput;
+    if (config.exposeInputEvent !== undefined) delete config.exposeInputEvent;
+    if (config.inputEventList !== undefined) {
+      config.inputMomentaryList = config.inputEventList;
+      delete config.inputEventList;
+    }
 
     log.debug(`Initializing platform: ${idn}${config.name}${rs}${db} v.${CYAN}${config.version}`);
     log.debug(`- username: ${CYAN}${config.username ? '********' : 'undefined'}`);
     log.debug(`- password: ${CYAN}${config.password ? '********' : 'undefined'}`);
-    log.debug(`- exposeInput: ${CYAN}${config.exposeInput}`);
     log.debug(`- exposePowerMeter: ${CYAN}${config.exposePowerMeter}`);
     log.debug(`- mdnsDiscover: ${CYAN}${config.enableMdnsDiscover}`);
     log.debug(`- storageDiscover: ${CYAN}${config.enableStorageDiscover}`);
@@ -868,10 +873,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           const tagList = this.addTagList(component);
           // Skip the input component if it is disabled in Gen 2/3 devices
           if (component.hasProperty('enable') && component.getValue('enable') === false) continue;
-          if (
-            component.hasProperty('state') &&
-            (config.exposeInput === 'contact' || (config.exposeInput === 'disabled' && config.inputContactList && (config.inputContactList as string[]).includes(device.id)))
-          ) {
+          if (component.hasProperty('state') && config.inputContactList && (config.inputContactList as string[]).includes(device.id)) {
             const state = component.getValue('state') as boolean;
             if (isValidBoolean(state)) {
               const child = mbDevice.addChildDeviceType(key, [contactSensor], tagList ? { tagList } : undefined, config.debug as boolean);
@@ -884,10 +886,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
                 shellyUpdateHandler(this, mbDevice, device, component, property, value);
               });
             }
-          } else if (
-            component?.hasProperty('state') &&
-            (config.exposeInput === 'momentary' || (config.exposeInput === 'disabled' && config.inputMomentaryList && (config.inputMomentaryList as string[]).includes(device.id)))
-          ) {
+          } else if (component?.hasProperty('state') && config.inputMomentaryList && (config.inputMomentaryList as string[]).includes(device.id)) {
             const state = component.getValue('state') as boolean;
             if (isValidBoolean(state)) {
               const child = mbDevice.addChildDeviceType(key, [genericSwitch], tagList ? { tagList } : undefined, config.debug as boolean);
@@ -899,10 +898,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
                 shellyUpdateHandler(this, mbDevice, device, component, property, value);
               });
             }
-          } else if (
-            component?.hasProperty('state') &&
-            (config.exposeInput === 'latching' || (config.exposeInput === 'disabled' && config.inputLatchingList && (config.inputLatchingList as string[]).includes(device.id)))
-          ) {
+          } else if (component?.hasProperty('state') && config.inputLatchingList && (config.inputLatchingList as string[]).includes(device.id)) {
             const state = component.getValue('state') as boolean;
             if (isValidBoolean(state)) {
               const child = mbDevice.addChildDeviceType(key, [genericSwitch], tagList ? { tagList } : undefined, config.debug as boolean);
@@ -914,10 +910,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
                 shellyUpdateHandler(this, mbDevice, device, component, property, value);
               });
             }
-          } else if (
-            component?.hasProperty('event') &&
-            (config.exposeInputEvent !== 'disabled' || (config.inputEventList && (config.inputEventList as string[]).includes(device.id)))
-          ) {
+          } else if (component?.hasProperty('event') && config.inputMomentaryList && (config.inputMomentaryList as string[]).includes(device.id)) {
             // Gen 1 devices input event
             const event = component.getValue('event') as boolean;
             if (isValidString(event)) {
@@ -937,14 +930,14 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             component.getValue('state') === null &&
             component.hasProperty('type') &&
             component.getValue('type') === 'button' &&
-            (config.exposeInputEvent !== 'disabled' || (config.inputEventList && (config.inputEventList as string[]).includes(device.id)))
+            config.inputMomentaryList &&
+            (config.inputMomentaryList as string[]).includes(device.id)
           ) {
             // Gen 2/3 devices with Input type=button
             const child = mbDevice.addChildDeviceType(key, [genericSwitch], tagList ? { tagList } : undefined, config.debug as boolean);
             child.log.logName = `${device.name} ${key}`;
             child.createDefaultSwitchClusterServer();
             child.addRequiredClusterServers();
-            device.log.info(`Add device event handler for device ${idn}${device.id}${rs} component ${hk}${component.id}${db} type Button`);
             component.on('event', (component: string, event: string) => {
               if (isValidString(component, 7) && isValidString(event, 9, 11) && device.getComponent(component)) {
                 device.log.info(`${db}Shelly event ${hk}${component}${db}:${zb}${event}${db} for device ${idn}${device.id}${rs}${db}`);

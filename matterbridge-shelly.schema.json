@@ -39,14 +39,8 @@
       "uniqueItems": true,
       "selectFrom": "serial"
     },
-    "exposeInput": {
-      "description": "Choose how to expose the shelly inputs: disabled, contact, momentary or latching switch (you may need to pair again the controller when changed)",
-      "type": "string",
-      "enum": ["disabled", "contact", "momentary", "latching"],
-      "default": "disabled"
-    },
     "inputContactList": {
-      "description": "The devices in the list will expose the Input event component as a contact sensor, regardless of the main option (you can disable the Input component globally and enable it only for single devices).",
+      "description": "The devices in the list will expose the Input component as a contact sensor.",
       "type": "array",
       "items": {
         "type": "string"
@@ -55,7 +49,7 @@
       "selectFrom": "serial"
     },
     "inputMomentaryList": {
-      "description": "The devices in the list will expose the Input event component as a momentary switch, regardless of the main option (you can disable the Input component globally and enable it only for single devices).",
+      "description": "The devices in the list will expose the Input component as a momentary switch.",
       "type": "array",
       "items": {
         "type": "string"
@@ -64,22 +58,7 @@
       "selectFrom": "serial"
     },
     "inputLatchingList": {
-      "description": "The devices in the list will expose the Input event component as a latching switch, regardless of the main option (you can disable the Input component globally and enable it only for single devices).",
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "uniqueItems": true,
-      "selectFrom": "serial"
-    },
-    "exposeInputEvent": {
-      "description": "Choose weather to expose the shelly input events: momentary or disabled (you may need to pair again the controller when changed)",
-      "type": "string",
-      "enum": ["momentary", "disabled"],
-      "default": "disabled"
-    },
-    "inputEventList": {
-      "description": "The devices in the list will expose the Input event component as a momentary switch, regardless of the main option (you can disable the Input event component globally and enable it only for single devices).",
+      "description": "The devices in the list will expose the Input component as a latching switch.",
       "type": "array",
       "items": {
         "type": "string"

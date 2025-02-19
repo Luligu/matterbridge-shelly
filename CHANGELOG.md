@@ -15,6 +15,10 @@ Removed:
 - exposeSwitch: the default is now outlet (matter compliant). You can still expose a device like a switch adding it it to the switchList or like a light adding it it to the lightList.
 - outletList: since the default is now outlet is useless.
 
+- exposeInput: inputs are disabled by default. You can still expose them adding the device to inputContactList, inputMomentaryList or inputLatchingList.
+- exposeInputEvent: inputs events are disabled by default. You can still expose them adding the device to inputMomentaryList.
+- inputEventList: use inputMomentaryList.
+
 ## [1.1.7] - 2025-02-13
 
 ### Added
