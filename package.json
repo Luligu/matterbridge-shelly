@@ -106,7 +106,7 @@
   "dependencies": {
     "coap": "1.4.1",
     "multicast-dns": "7.2.5",
-    "node-ansi-logger": "3.0.0",
+    "node-ansi-logger": "3.0.1",
     "node-fetch": "3.3.2",
     "node-persist-manager": "1.0.8",
     "ws": "8.18.0"
@@ -116,7 +116,7 @@
     "@types/eslint__js": "8.42.3",
     "@types/jest": "29.5.14",
     "@types/multicast-dns": "7.2.4",
-    "@types/node": "22.13.2",
+    "@types/node": "22.13.4",
     "@types/ws": "8.5.14",
     "cross-env": "^7.0.3",
     "eslint": "9.20.1",
@@ -128,6 +128,6 @@
     "prettier": "3.5.1",
     "ts-jest": "29.2.5",
     "typescript": "5.7.3",
-    "typescript-eslint": "8.24.0"
+    "typescript-eslint": "8.24.1"
   }
 }
