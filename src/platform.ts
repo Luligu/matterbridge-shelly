@@ -603,7 +603,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         const selectDevice = this.selectDevice.get(device.id);
         if (selectDevice) {
           if (!selectDevice.entities) selectDevice.entities = [];
-          if (!['ble', 'cloud', 'mqtt', 'sys', 'sntp', 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws', 'eth'].includes(component.id)) {
+          if (!['ble', 'cloud', 'coiot', 'mqtt', 'sys', 'sntp', 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws', 'eth'].includes(component.id)) {
             if (!selectDevice.entities.find((entity) => entity.name === component.name))
               selectDevice.entities.push({ name: component.name, description: 'All the device ' + component.name + ' components', icon: 'component' });
             selectDevice.entities.push({ name: component.id, description: 'Device ' + component.name + ' component', icon: 'component' });
