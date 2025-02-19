@@ -13,7 +13,7 @@ Since the plugin config got very complex and also confusing, from this release a
 Removed:
 
 - exposeSwitch: the default is now outlet (matter compliant). You can still expose a device like a switch adding it it to the switchList or like a light adding it it to the lightList.
-- outletList: since the default is now outlet is useless.
+- outletList: since the default is now outlet has been removed.
 
 - exposeInput: inputs are now disabled by default. You can still expose them adding the device to inputContactList, inputMomentaryList or inputLatchingList.
 - exposeInputEvent: inputs events are now disabled by default. You can still expose them adding the device to inputMomentaryList.

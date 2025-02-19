@@ -244,6 +244,8 @@ Reset the storage discovery on the next restart (it will clear the storage of al
 
 Should be enabled only if the mdns is not working in your network. It adds the devices defined in deviceIp.
 
+Once all the devices are loaded and stored, disable this setting.
+
 ### enableBleDiscover
 
 Should be enabled to discover the shelly BLU devices (it will register the BLU devices paired in each ble gateway, see https://github.com/Luligu/matterbridge-shelly/blob/dev/BLU.md for more informations).

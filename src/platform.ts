@@ -1417,6 +1417,10 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       }
     }
 
+    // Clear the firstRun flag
+    this.config.firstRun = false;
+    this.log.notice(`Platform first configuration terminated`);
+
     this.log.info(`Started platform ${idn}${this.config.name}${rs}${nf}: ${reason ?? ''}`);
   }
 

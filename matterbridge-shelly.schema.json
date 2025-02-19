@@ -118,7 +118,7 @@
       "selectFrom": "serial"
     },
     "deviceIp": {
-      "description": "Set the IP address for each device. Enter in the first field the shelly ID of the device and in the second field the IP address. (e.g. shelly1minig3-543204547478: 192.168.1.221). Enable enableConfigDiscover to load the devices from this setting.",
+      "description": "Set the IP address for each device that is not discovered automatically. Enter in the first field the shelly ID of the device and in the second field the IP address. (e.g. shelly1minig3-543204547478: 192.168.1.221). Enable enableConfigDiscover to load the devices from this setting.",
       "type": "object",
       "uniqueItems": true,
       "selectFrom": "serial",
@@ -142,7 +142,7 @@
       "default": false
     },
     "enableConfigDiscover": {
-      "description": "Enable config discovery for shelly devices (it will load the devices from deviceIp config setting)",
+      "description": "Enable config discovery for shelly devices (it will load the devices from deviceIp config setting). It is only needed if a device is not discovered on your network. Once they are loaded ans stored, disable this setting.", 
       "type": "boolean",
       "default": false
     },
