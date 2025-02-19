@@ -181,10 +181,6 @@
       "type": "boolean",
       "default": false
     },
-    "interfaceName": {
-      "description": "Network interface name for shellies (development only)",
-      "type": "string"
-    },
     "unregisterOnShutdown": {
       "description": "Unregister all devices on shutdown (development only)",
       "type": "boolean",
