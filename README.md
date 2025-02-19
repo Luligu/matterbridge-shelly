@@ -145,12 +145,13 @@ Wait that the plugin has been configured before changing the config.
 
 ### username
 
-If your devices are password protected put there the username. It must be unique for all the devices.
+If your devices are password protected put here the username. It must be unique for all the devices.
+
 It is only used for gen 1 devices. Gen 2 and 3 devices have always admin.
 
 ### password
 
-If your devices are password protected put there the password. It must be unique for all the devices.
+If your devices are password protected put here the password. It must be unique for all the devices.
 
 ### switchList
 

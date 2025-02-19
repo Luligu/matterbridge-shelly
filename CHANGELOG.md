@@ -15,11 +15,11 @@ Removed:
 - exposeSwitch: the default is now outlet (matter compliant). You can still expose a device like a switch adding it it to the switchList or like a light adding it it to the lightList.
 - outletList: since the default is now outlet is useless.
 
-- exposeInput: inputs are disabled by default. You can still expose them adding the device to inputContactList, inputMomentaryList or inputLatchingList.
-- exposeInputEvent: inputs events are disabled by default. You can still expose them adding the device to inputMomentaryList.
-- inputEventList: use inputMomentaryList.
+- exposeInput: inputs are now disabled by default. You can still expose them adding the device to inputContactList, inputMomentaryList or inputLatchingList.
+- exposeInputEvent: inputs events are now disabled by default. You can still expose them adding the device to inputMomentaryList.
+- inputEventList: use inputMomentaryList instead.
 
-- exposePowerMeter: electrical sensors are exposed like default. You can disable them globally or on a per-device basis [COMPONENTS.md documentation.](https://github.com/Luligu/matterbridge-shelly/blob/main/COMPONENTS.md).
+- exposePowerMeter: electrical sensors are now enabled by default. You can disable them globally or on a per-device basis adding "PowerMeter" to entityBlackList, see [COMPONENTS.md documentation.](https://github.com/Luligu/matterbridge-shelly/blob/main/COMPONENTS.md). On new setups the "PowerMeter" components are already disabled.
 
 ## [1.1.7] - 2025-02-13
 

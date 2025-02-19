@@ -133,6 +133,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       );
     }
 
+    // Validate the config
     if (config.username) this.username = config.username as string;
     if (config.password) this.password = config.password as string;
     this.postfix = (config.postfix as string) ?? '';
@@ -150,6 +151,46 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       delete config.inputEventList;
     }
     if (config.exposePowerMeter !== undefined) delete config.exposePowerMeter;
+
+    // First config setup
+    if (config.firstRun === undefined) {
+      config.firstRun = true;
+      if (!isValidArray(config.whiteList, 1) && !isValidArray(config.blackList, 1) && !isValidArray(config.entityBlackList, 1) && !isValidObject(config.deviceEntityBlackList, 1))
+        config.expertMode = false;
+      else config.expertMode = true;
+      // If not already set user
+      if (!isValidArray(config.entityBlackList, 1)) config.entityBlackList = ['PowerMeter', 'Lux', 'Illuminance', 'Vibration'];
+    }
+    // Expert mode setup
+    if (config.expertMode === false) {
+      const shelly = matterbridge.plugins.get('matterbridge-shelly');
+      if (shelly && shelly.schemaJson && isValidObject(shelly.schemaJson.properties, 1)) {
+        const properties = shelly.schemaJson.properties as Record<string, object>;
+        delete properties.switchList;
+        delete properties.lightList;
+        delete properties.inputContactList;
+        delete properties.inputLatchingList;
+        delete properties.inputMomentaryList;
+        delete properties.inputLatchingList;
+        delete properties.whiteList;
+        delete properties.entityBlackList;
+        delete properties.deviceEntityBlackList;
+        delete properties.nocacheList;
+        delete properties.deviceIp;
+        delete properties.enableMdnsDiscover;
+        delete properties.enableStorageDiscover;
+        delete properties.resetStorageDiscover;
+        delete properties.enableConfigDiscover;
+        delete properties.enableBleDiscover;
+        delete properties.failsafeCount;
+        delete properties.postfix;
+        delete properties.debug;
+        delete properties.debugMdns;
+        delete properties.debugCoap;
+        delete properties.debugWs;
+        delete properties.unregisterOnShutdown;
+      }
+    }
 
     log.debug(`Initializing platform: ${idn}${config.name}${rs}${db} v.${CYAN}${config.version}`);
     log.debug(`- username: ${CYAN}${config.username ? '********' : 'undefined'}`);
@@ -689,7 +730,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           const tagList = this.addTagList(component);
           const child = mbDevice.addChildDeviceType(
             key,
-            this.hasElectricalMeasurements(component) ? [deviceType, electricalSensor] : [deviceType],
+            this.hasElectricalMeasurements(device, component) ? [deviceType, electricalSensor] : [deviceType],
             tagList ? { tagList } : undefined,
             config.debug as boolean,
           );
@@ -778,7 +819,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           const tagList = this.addTagList(component);
           const child = mbDevice.addChildDeviceType(
             key,
-            this.hasElectricalMeasurements(component) ? [deviceType, electricalSensor] : [deviceType],
+            this.hasElectricalMeasurements(device, component) ? [deviceType, electricalSensor] : [deviceType],
             tagList ? { tagList } : undefined,
             config.debug as boolean,
           );
@@ -812,7 +853,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           const tagList = this.addTagList(component);
           const child = mbDevice.addChildDeviceType(
             key,
-            this.hasElectricalMeasurements(component) ? [coverDevice, electricalSensor] : [coverDevice],
+            this.hasElectricalMeasurements(device, component) ? [coverDevice, electricalSensor] : [coverDevice],
             tagList ? { tagList } : undefined,
             config.debug as boolean,
           );
@@ -1649,7 +1690,11 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     return tagList ? [tagList] : undefined;
   }
 
-  private hasElectricalMeasurements(component: ShellyComponent) {
+  private hasElectricalMeasurements(shelly: ShellyDevice, component: ShellyComponent) {
+    // Check if PowerMetering is enabled
+    if (isValidArray(this.config.entityBlackList, 1) && this.config.entityBlackList.includes('PowerMeter')) {
+      return false;
+    }
     // Check if the component has electricalSensor
     if (component.hasProperty('voltage') || component.hasProperty('current') || component.hasProperty('apower') || component.hasProperty('aenergy')) {
       return true;
@@ -1657,7 +1702,12 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     return false;
   }
 
+  // Add electrical measurements to the child endpoint of the switch light cover component
   private addElectricalMeasurements(device: MatterbridgeEndpoint, endpoint: MatterbridgeEndpoint, shelly: ShellyDevice, component: ShellyComponent) {
+    // Check if PowerMetering is enabled
+    if (isValidArray(this.config.entityBlackList, 1) && this.config.entityBlackList.includes('PowerMeter')) {
+      return;
+    }
     // Add the Matter 1.3 electricalSensor device type and the PowerTopology, ElectricalPowerMeasurement and ElectricalEnergyMeasurement clusters on the same endpoint
     if (component.hasProperty('voltage') || component.hasProperty('current') || component.hasProperty('apower') || component.hasProperty('aenergy')) {
       shelly.log.debug(`Adding ElectricalPowerMeasurement and ElectricalEnergyMeasurement clusters to endpoint ${hk}${endpoint.name}${db} component ${hk}${component.id}${db}`);

@@ -14,11 +14,11 @@
       "readOnly": true
     },
     "username": {
-      "description": "Username (used only for gen 1 devices)",
+      "description": "Username for password protected shelly devices (used only for gen 1 devices)",
       "type": "string"
     },
     "password": {
-      "description": "Password (must be unique for all the devices)",
+      "description": "Password for password protected shelly devices (must be unique for all the devices)",
       "type": "string"
     },
     "switchList": {
@@ -160,6 +160,11 @@
       "description": "Add this unique postfix (3 characters max) to each device serial to avoid collision with other instances (you may loose the configuration of the devices in your controller when changing this value or you may need to pair again the controller).",
       "type": "string",
       "default": ""
+    },
+    "expertMode": {
+      "description": "Enable the expert mode for the plugin (restart required)",
+      "type": "boolean",
+      "default": false
     },
     "debug": {
       "description": "Enable the debug for the plugin (development only)",
