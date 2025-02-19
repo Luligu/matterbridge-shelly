@@ -230,7 +230,10 @@ E.g. "shelly1minig3-543204547478": "192.168.1.221".
 ### enableMdnsDiscover
 
 Should always be enabled to discover new devices. It turns off automatically after 10 minutes to reduce network traffic.
+
 Once a device is discovered, it is added to the shelly storage.
+
+Once all the devices are loaded and stored, it is possible to disable this setting to reduce the network traffic.
 
 ### enableStorageDiscover
 
