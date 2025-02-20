@@ -1380,12 +1380,23 @@ export class ShellyDevice extends EventEmitter {
           deviceData.settings.timezone = null;
           deviceData.settings.lat = null;
           deviceData.settings.lng = null;
+          if (deviceData.settings.wifi_ap) (deviceData.settings.wifi_ap as ShellyData).ssid = '';
+          if (deviceData.settings.wifi_sta) (deviceData.settings.wifi_sta as ShellyData).ssid = '';
+          if (deviceData.settings.wifi_sta1) (deviceData.settings.wifi_sta1 as ShellyData).ssid = '';
+          if (deviceData.status.wifi_ap) (deviceData.status.wifi_ap as ShellyData).ssid = '';
+          if (deviceData.status.wifi_sta) (deviceData.status.wifi_sta as ShellyData).ssid = '';
+          if (deviceData.status.wifi_sta1) (deviceData.status.wifi_sta1 as ShellyData).ssid = '';
         }
         // Remove sensitive data for Gen 2 and 3 devices
         if (this.gen === 2 || this.gen === 3) {
-          if (deviceData.settings.sys) {
-            (deviceData.settings.sys as ShellyData).location = null;
+          if (deviceData.settings.sys) (deviceData.settings.sys as ShellyData).location = null;
+          if (deviceData.settings.wifi) {
+            const wifi = deviceData.settings.wifi as ShellyData;
+            if (wifi.ap) (wifi.ap as ShellyData).ssid = '';
+            if (wifi.sta) (wifi.sta as ShellyData).ssid = '';
+            if (wifi.sta1) (wifi.sta1 as ShellyData).ssid = '';
           }
+          if (deviceData.status.wifi) (deviceData.status.wifi as ShellyData).ssid = '';
         }
         const data = JSON.stringify(deviceData, null, 2);
         await fs.writeFile(path.join(dataPath, `${this.id}.json`), data, 'utf8');
