@@ -39,6 +39,8 @@ The expertMode option has been added to show an advanced or simplified config.
 - [platform]: Optimized memory and memory release.
 - [shelly]: Optimized memory and memory release.
 - [shelly]: Added online offline status on matter.
+- [BLU]: Verified firmware 1.0.21.
+- [TRV]: Verified firmware 1.2.0.
 
 ### Changed
 
@@ -49,6 +51,7 @@ The expertMode option has been added to show an advanced or simplified config.
 ### Fixed
 
 - [platform]: Removed coiot component from Select.
+- [select]: Fix bthomesensor_event with select Button.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
   <img src="./yellow-button.png" alt="Buy me a coffee" width="120">

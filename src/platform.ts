@@ -581,7 +581,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
                 blu.log.warn(`Shelly device ${idn}${blu?.deviceName ?? addr}${rs}${wr} child endpoint for button not found`);
               return;
             }
-            if (sensorName === 'Button' && isValidString(event, 9) && this.validateEntity(bthomeDevice.addr, 'Button')) {
+            if (sensorName === 'Button' /* && isValidString(event, 9) && this.validateEntity(bthomeDevice.addr, 'Button')*/) {
               if (event === 'single_push') {
                 buttonEndpoint?.triggerSwitchEvent('Single', blu.log);
               } else if (event === 'double_push') {
