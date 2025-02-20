@@ -1098,23 +1098,29 @@ export class ShellyDevice extends EventEmitter {
   async fetchUpdate(): Promise<ShellyData | null> {
     this.shellyPayload = await ShellyDevice.fetch(this.shelly, this.log, this.host, 'shelly');
     if (!this.shellyPayload) {
-      this.log.warn(`Error fetching shelly from device ${hk}${this.id}${wr} host ${zb}${this.host}${wr}. No data found. The device may be offline.`);
-      this.online = false;
-      this.emit('offline');
+      if (this.online) {
+        this.log.warn(`Error fetching shelly from device ${hk}${this.id}${wr} host ${zb}${this.host}${wr}. No data found. The device may be offline.`);
+        this.online = false;
+        this.emit('offline');
+      }
       return null;
     }
     this.settingsPayload = await ShellyDevice.fetch(this.shelly, this.log, this.host, this.gen === 1 ? 'settings' : 'Shelly.GetConfig');
     if (!this.settingsPayload) {
-      this.log.warn(`Error fetching settings from device ${hk}${this.id}${wr} host ${zb}${this.host}${wr}. No data found. The device may be offline.`);
-      this.online = false;
-      this.emit('offline');
+      if (this.online) {
+        this.log.warn(`Error fetching settings from device ${hk}${this.id}${wr} host ${zb}${this.host}${wr}. No data found. The device may be offline.`);
+        this.online = false;
+        this.emit('offline');
+      }
       return null;
     }
     this.statusPayload = await ShellyDevice.fetch(this.shelly, this.log, this.host, this.gen === 1 ? 'status' : 'Shelly.GetStatus');
     if (!this.statusPayload) {
-      this.log.warn(`Error fetching status from device ${hk}${this.id}${wr} host ${zb}${this.host}${wr}. No data found. The device may be offline.`);
-      this.online = false;
-      this.emit('offline');
+      if (this.online) {
+        this.log.warn(`Error fetching status from device ${hk}${this.id}${wr} host ${zb}${this.host}${wr}. No data found. The device may be offline.`);
+        this.online = false;
+        this.emit('offline');
+      }
       return null;
     }
     if (this.gen !== 1) {
