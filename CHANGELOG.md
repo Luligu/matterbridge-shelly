@@ -38,6 +38,7 @@ The expertMode option has been added to show an advanced or simplified config.
 
 - [platform]: Optimized memory and memory release.
 - [shelly]: Optimized memory and memory release.
+- [shelly]: Added online offline status on matter.
 
 ### Changed
 

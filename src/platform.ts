@@ -577,16 +577,17 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               buttonEndpoint = blu.getChildEndpointByName('Button');
             }
             if (!buttonEndpoint) {
-              blu.log.warn(`Shelly device ${idn}${blu?.deviceName ?? addr}${rs}${wr} child endpoint for button not found`);
+              if (['Shelly BLU Button1', 'Shelly BLU RC Button 4', 'Shelly BLU Wall Switch 4'].includes(bthomeDevice.model))
+                blu.log.warn(`Shelly device ${idn}${blu?.deviceName ?? addr}${rs}${wr} child endpoint for button not found`);
               return;
             }
             if (sensorName === 'Button' && isValidString(event, 9) && this.validateEntity(bthomeDevice.addr, 'Button')) {
               if (event === 'single_push') {
-                buttonEndpoint.triggerSwitchEvent('Single', blu.log);
+                buttonEndpoint?.triggerSwitchEvent('Single', blu.log);
               } else if (event === 'double_push') {
-                buttonEndpoint.triggerSwitchEvent('Double', blu.log);
+                buttonEndpoint?.triggerSwitchEvent('Double', blu.log);
               } else if (event === 'long_push') {
-                buttonEndpoint.triggerSwitchEvent('Long', blu.log);
+                buttonEndpoint?.triggerSwitchEvent('Long', blu.log);
               }
             }
           });
@@ -1310,10 +1311,11 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         try {
           // Register the device with Matterbridge
           await this.registerDevice(mbDevice);
+
           // Save the MatterbridgeDevice in the bridgedDevices map
           this.bridgedDevices.set(device.id, mbDevice);
-          // Add online/offline event handlers
 
+          // Add online/offline event handlers
           device.on('online', () => {
             mbDevice.log.notice(`Device ${hk}${device.id}${nt} host ${zb}${device.host}${nt} is online`);
             if (mbDevice.maybeNumber) {
