@@ -71,6 +71,7 @@ import { NodeStorage, NodeStorageManager } from 'matterbridge/storage';
 import { AtLeastOne, NumberTag } from 'matterbridge/matter';
 import { VendorId, Semtag, ClusterId, DeviceTypeId } from 'matterbridge/matter/types';
 import {
+  BridgedDeviceBasicInformation,
   OnOff,
   PowerSource,
   WindowCovering,
@@ -1302,15 +1303,31 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           }
         }*/
       }
+
       // Check if we have a device to register with Matterbridge
       const endpoints = mbDevice.getChildEndpoints();
-      // if (endpoints.length > 1 || (device.hasComponent('blugw') && config.exposeBlugw !== 'disabled')) {
       if (endpoints.length > 0) {
         try {
           // Register the device with Matterbridge
           await this.registerDevice(mbDevice);
           // Save the MatterbridgeDevice in the bridgedDevices map
           this.bridgedDevices.set(device.id, mbDevice);
+          // Add online/offline event handlers
+
+          device.on('online', () => {
+            mbDevice.log.notice(`Device ${hk}${device.id}${nt} host ${zb}${device.host}${nt} is online`);
+            if (mbDevice.maybeNumber) {
+              mbDevice.setAttribute('BridgedDeviceBasicInformation', 'reachable', true, mbDevice.log);
+              mbDevice.triggerEvent(BridgedDeviceBasicInformation.Cluster.id, 'reachableChanged', { reachableNewValue: true }, mbDevice.log);
+            }
+          });
+          device.on('offline', () => {
+            mbDevice.log.warn(`Device ${hk}${device.id}${wr} host ${zb}${device.host}${wr} is offline`);
+            if (mbDevice.maybeNumber) {
+              mbDevice.setAttribute('BridgedDeviceBasicInformation', 'reachable', false, mbDevice.log);
+              mbDevice.triggerEvent(BridgedDeviceBasicInformation.Cluster.id, 'reachableChanged', { reachableNewValue: false }, mbDevice.log);
+            }
+          });
         } catch (error) {
           this.log.error(`Shelly device ${hk}${device.id}${er} host ${zb}${device.host}${er} failed to register with Matterbridge: ${error}`);
         }
