@@ -23,14 +23,14 @@ Removed options:
 
 New setups:
 
-- these components are blacklisted (with entityBlackList) by default: "PowerMeter", "Lux", "Illuminance", "Vibration", "Button".
+- these components are blacklisted (with entityBlackList) by default: "PowerMeter", "Lux", "Illuminance", "Vibration", "Button". This allows to create simplified devices for the controllers that don't manage correctly composed devices.
 - all switches are exposed like outlet (matter compliant).
 - shellyplusi4, shellyi4g3, shellyix3 and shellybutton1 are added to inputMomentaryList.
 - expertMode is disabled.
 
 Expert mode:
 
-The expertMode option has been added to show a complete or simplified config.
+The expertMode option has been added to show an advanced or simplified config.
 
 ## [1.1.7] - 2025-02-22
 

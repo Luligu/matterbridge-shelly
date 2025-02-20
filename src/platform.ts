@@ -160,7 +160,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       if (!isValidArray(config.whiteList, 1) && !isValidArray(config.blackList, 1) && !isValidArray(config.entityBlackList, 1) && !isValidObject(config.deviceEntityBlackList, 1))
         config.expertMode = false;
       else config.expertMode = true;
-      // If not already set user
+      // If not already set by the user
       if (!isValidArray(config.entityBlackList, 1)) config.entityBlackList = ['PowerMeter', 'Lux', 'Illuminance', 'Vibration', 'Button'];
     }
     // Expert mode setup
@@ -204,7 +204,6 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     log.debug(`- resetStorage: ${CYAN}${config.resetStorageDiscover}`);
     log.debug(`- postfixHostname: ${CYAN}${config.postfixHostname}`);
     log.debug(`- failsafeCount: ${CYAN}${config.failsafeCount}`);
-    log.debug(`- interfaceName: ${CYAN}${config.interfaceName}`);
     log.debug(`- debug: ${CYAN}${config.debug}`);
     log.debug(`- debugMdns: ${CYAN}${config.debugMdns}`);
     log.debug(`- debugCoap: ${CYAN}${config.debugCoap}`);
@@ -1433,8 +1432,10 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     }
 
     // Clear the firstRun flag
-    this.config.firstRun = false;
-    this.log.notice(`Platform first configuration terminated`);
+    if (this.firstRun === true) {
+      this.log.notice(`Platform first configuration terminated`);
+      this.config.firstRun = false;
+    }
 
     this.log.info(`Started platform ${idn}${this.config.name}${rs}${nf}: ${reason ?? ''}`);
   }
@@ -1768,7 +1769,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     let device: ShellyDevice | undefined;
 
     let loadFromCache = true;
-    if (['shellywalldisplay', 'shellyblugwg3'].includes(ShellyDevice.normalizeId(deviceId).type)) loadFromCache = false;
+    // if (['shellywalldisplay', 'shellyblugwg3'].includes(ShellyDevice.normalizeId(deviceId).type)) loadFromCache = false;
     if (isValidArray(this.config.nocacheList, 1) && this.config.nocacheList.includes(deviceId)) loadFromCache = false;
     if (this.changedDevices.has(deviceId)) {
       this.changedDevices.delete(deviceId);

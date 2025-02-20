@@ -389,11 +389,16 @@ describe('ShellyPlatform', () => {
     await shellyPlatform.onStart('Test reason');
     expect(mockLog.info).toHaveBeenCalledWith(`Starting platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
 
+    const create = jest.spyOn(ShellyDevice, 'create' as any).mockImplementation(async () => {
+      return Promise.resolve(undefined);
+    });
+
     (shellyPlatform as any).shelly.emit('discovered', { id: 'shelly1l-E8DB84AAD781', host: '192.168.1.241', port: 80, gen: 1 });
     await wait(1000);
     expect((shellyPlatform as any).discoveredDevices.size).toBe(1);
-    expect((shellyPlatform as any).shelly._devices.size).toBe(getMacAddress() !== address ? 0 : 1);
+    expect((shellyPlatform as any).shelly._devices.size).toBe(0);
 
+    create.mockRestore();
     cleanup();
     expect(await (shellyPlatform as any).saveStoredDevices()).toBeTruthy();
     expect((shellyPlatform as any).discoveredDevices.size).toBe(0);

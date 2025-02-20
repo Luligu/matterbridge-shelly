@@ -142,7 +142,7 @@
       "default": false
     },
     "enableConfigDiscover": {
-      "description": "Enable config discovery for shelly devices (it will load the devices from deviceIp config setting). It is only needed if a device is not discovered on your network. Once they are loaded ans stored, disable this setting.",
+      "description": "Enable config discovery for shelly devices (it will load the devices from deviceIp config setting). It is only needed if a device is not discovered on your network. Once they are loaded and stored, disable this setting.",
       "type": "boolean",
       "default": false
     },
@@ -162,7 +162,7 @@
       "default": ""
     },
     "expertMode": {
-      "description": "Enable the expert mode for the plugin (restart required)",
+      "description": "Enable the expert mode for the plugin configuration (restart required)",
       "type": "boolean",
       "default": false
     },
