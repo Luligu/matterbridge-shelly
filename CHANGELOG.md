@@ -23,7 +23,7 @@ Removed options:
 
 New setups:
 
-- these components are blacklisted (with entityBlackList) by default: "PowerMeter", "Lux", "Illuminance", "Vibration", "Button". This allows to create simplified devices for the controllers that don't manage correctly composed devices.
+- these components are blacklisted (with entityBlackList) by default: "PowerMeter", "Lux", "Illuminance", "Vibration", "Button". This allows to create simplified devices for the controllers that don't manage correctly composed devices (i.e. Alexa and SmartThings).
 - all switches are exposed like outlet (matter compliant).
 - shellyplusi4, shellyi4g3, shellyix3 and shellybutton1 are added to inputMomentaryList.
 - expertMode is disabled.
@@ -32,7 +32,7 @@ Expert mode:
 
 The expertMode option has been added to show an advanced or simplified config.
 
-## [1.1.7] - 2025-02-22
+## [2.0.0] - 2025-02-25
 
 ### Added
 
@@ -41,12 +41,13 @@ The expertMode option has been added to show an advanced or simplified config.
 - [shelly]: Added online offline status on matter.
 - [BLU]: Verified firmware 1.0.21.
 - [TRV]: Verified firmware 1.2.0.
+- [WIFI]: Verified firmware 1.5.0.
 
 ### Changed
 
 - [package]: Updated package.
 - [package]: Updated dependencies.
-- [plugin]: Requires Matterbridge 2.1.6.
+- [plugin]: Requires Matterbridge 2.2.0.
 
 ### Fixed
 
