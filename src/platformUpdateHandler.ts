@@ -127,38 +127,30 @@ export function shellyUpdateHandler(
   }
   // Update Input component with state
   if (shellyComponent.name === 'Input' && property === 'state' && isValidBoolean(value)) {
-    if (
-      platform.config.exposeInput === 'contact' ||
-      (platform.config.exposeInput === 'disabled' && platform.config.inputContactList && (platform.config.inputContactList as string[]).includes(shellyDevice.id))
-    ) {
+    if (platform.config.inputContactList && (platform.config.inputContactList as string[]).includes(shellyDevice.id)) {
       endpoint.setAttribute(BooleanState.Cluster.id, 'stateValue', value, shellyDevice.log);
     }
-    if (
-      (platform.config.exposeInput === 'momentary' ||
-        (platform.config.exposeInput === 'disabled' && platform.config.inputMomentaryList && (platform.config.inputMomentaryList as string[]).includes(shellyDevice.id))) &&
-      value === true
-    ) {
+    if (platform.config.inputMomentaryList && (platform.config.inputMomentaryList as string[]).includes(shellyDevice.id) && value === true) {
       endpoint.triggerSwitchEvent('Single', shellyDevice.log);
     }
-    if (
-      platform.config.exposeInput === 'latching' ||
-      (platform.config.exposeInput === 'disabled' && platform.config.inputLatchingList && (platform.config.inputLatchingList as string[]).includes(shellyDevice.id))
-    ) {
+    if (platform.config.inputLatchingList && (platform.config.inputLatchingList as string[]).includes(shellyDevice.id)) {
       endpoint.triggerSwitchEvent(value ? 'Press' : 'Release', shellyDevice.log);
     }
   }
   // Update Input component with event for Gen 1 devices
   if (shellyComponent.name === 'Input' && property === 'event_cnt' && isValidNumber(value) && shellyComponent.hasProperty('event')) {
-    const event = shellyComponent.getValue('event');
-    if (!isValidString(event, 1)) return;
-    if (event === 'S') {
-      endpoint.triggerSwitchEvent('Single', shellyDevice.log);
-    }
-    if (event === 'SS') {
-      endpoint.triggerSwitchEvent('Double', shellyDevice.log);
-    }
-    if (event === 'L') {
-      endpoint.triggerSwitchEvent('Long', shellyDevice.log);
+    if (platform.config.inputMomentaryList && (platform.config.inputMomentaryList as string[]).includes(shellyDevice.id)) {
+      const event = shellyComponent.getValue('event');
+      if (!isValidString(event, 1)) return;
+      if (event === 'S') {
+        endpoint.triggerSwitchEvent('Single', shellyDevice.log);
+      }
+      if (event === 'SS') {
+        endpoint.triggerSwitchEvent('Double', shellyDevice.log);
+      }
+      if (event === 'L') {
+        endpoint.triggerSwitchEvent('Long', shellyDevice.log);
+      }
     }
   }
   // Update for Battery
@@ -315,7 +307,8 @@ export function shellyUpdateHandler(
     // const statusLookup = ['stopped', 'opening', 'closing', 'unknown'];
   }
   // Update energy from main components (gen 2 devices send power total inside the component not with meter)
-  if (platform.config.exposePowerMeter === 'matter13' && ['Light', 'Rgb', 'Relay', 'Switch', 'Cover', 'Roller', 'PowerMeter'].includes(shellyComponent.name)) {
+  if (['Light', 'Rgb', 'Relay', 'Switch', 'Cover', 'Roller', 'PowerMeter'].includes(shellyComponent.name)) {
+    if (isValidArray(platform.config.entityBlackList, 1) && platform.config.entityBlackList.includes('PowerMeter')) return;
     // Gen. 1 devices have: power, total (not all) in PowerMeters and voltage in status (not all)
     // PRO devices have: apower, voltage, freq, current, aenergy.total (wh) and no PowerMeters
     if ((property === 'power' || property === 'apower' || property === 'act_power') && isValidNumber(value, 0)) {
