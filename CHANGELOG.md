@@ -19,14 +19,14 @@ Removed options:
 - exposeInputEvent: inputs events are now disabled by default. You can expose them adding the device to inputMomentaryList.
 - inputEventList: use inputMomentaryList instead.
 
-- exposePowerMeter: electrical sensors are enabled by default. You can disable them globally or on a per-device basis adding "PowerMeter" to entityBlackList or deviceEntityBlackList, see [COMPONENTS.md documentation.](https://github.com/Luligu/matterbridge-shelly/blob/main/COMPONENTS.md). On new setups the "PowerMeter" components are already globally disabled by default.
+- exposePowerMeter: electrical sensors are enabled by default on existing setups. You can disable them globally or on a per-device basis adding "PowerMeter" to entityBlackList or deviceEntityBlackList, see [COMPONENTS.md documentation.](https://github.com/Luligu/matterbridge-shelly/blob/main/COMPONENTS.md). On new setups the "PowerMeter" components are already globally disabled by default.
 
 New setups:
 
 - these components are blacklisted (with entityBlackList) by default: "PowerMeter", "Lux", "Illuminance", "Vibration", "Button". This allows to create simplified devices for the controllers that don't manage correctly composed devices (i.e. Alexa and SmartThings).
 - all switches are exposed like outlet (matter compliant).
-- shellyplusi4, shellyi4g3, shellyix3 and shellybutton1 are added to inputMomentaryList.
-- expertMode is disabled.
+- shellyplusi4, shellyi4g3, shellyix3 and shellybutton1 are automatically added to inputMomentaryList when discovered.
+- expertMode is disabled. This makes the config showing only username, password and blackList.
 
 Expert mode:
 
