@@ -7,7 +7,7 @@ import { ShellyProperty } from './shellyProperty';
 import { ShellyData, ShellyDataType } from './shellyTypes';
 import { Shelly } from './shelly';
 import { jest } from '@jest/globals';
-import path from 'path';
+import path from 'node:path';
 import exp from 'constants';
 
 describe('ShellyComponent', () => {

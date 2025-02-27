@@ -27,7 +27,7 @@ import { ShellyData, ShellyDataType } from './shellyTypes.js';
 import { ShellyProperty } from './shellyProperty.js';
 import { ShellyDevice } from './shellyDevice.js';
 import { deepEqual, isValidArray, isValidNumber, isValidObject } from 'matterbridge/utils';
-import EventEmitter from 'events';
+import EventEmitter from 'node:events';
 
 interface LightComponent {
   On(): void;

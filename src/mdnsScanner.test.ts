@@ -4,8 +4,8 @@
 import { LogLevel } from 'matterbridge/logger';
 import { MdnsScanner, DiscoveredDeviceListener, DiscoveredDevice } from './mdnsScanner';
 import { jest } from '@jest/globals';
-import path from 'path';
-import { readFileSync } from 'fs';
+import path from 'node:path';
+import { readFileSync } from 'node:fs';
 import { ResponsePacket } from 'multicast-dns';
 import { getIpv4InterfaceAddress } from 'matterbridge/utils';
 

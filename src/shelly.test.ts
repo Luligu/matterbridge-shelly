@@ -5,7 +5,7 @@ import { AnsiLogger, LogLevel, TimestampFormat } from 'matterbridge/logger';
 import { Shelly } from './shelly.js';
 import { ShellyDevice } from './shellyDevice.js';
 import { jest } from '@jest/globals';
-import path from 'path';
+import path from 'node:path';
 
 describe('Shellies test', () => {
   const log = new AnsiLogger({ logName: 'shellyDeviceTest', logTimestampFormat: TimestampFormat.TIME_MILLIS });

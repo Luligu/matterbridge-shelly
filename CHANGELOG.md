@@ -6,6 +6,58 @@ If you like this project and find it useful, please consider giving it a star on
 
 You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his invaluable contribution to this project.
 
+### Breaking Changes
+
+Since the plugin config got very complex and also confusing, from this release same options have been removed or simplified:
+
+Removed options:
+
+- exposeSwitch: the default is outlet (matter compliant). You can expose a device like a switch adding it it to the switchList or like a light adding it it to the lightList.
+- outletList: since the default is now outlet, outletList has been removed.
+
+- exposeInput: inputs are now disabled by default. You can still expose them adding the device to inputContactList, inputMomentaryList or inputLatchingList.
+- exposeInputEvent: inputs events are now disabled by default. You can expose them adding the device to inputMomentaryList.
+- inputEventList: use inputMomentaryList instead.
+
+- exposePowerMeter: electrical sensors are enabled by default on existing setups. You can disable them globally or on a per-device basis adding "PowerMeter" to entityBlackList or deviceEntityBlackList, see [COMPONENTS.md documentation.](https://github.com/Luligu/matterbridge-shelly/blob/main/COMPONENTS.md). On new setups the "PowerMeter" components are already globally disabled by default.
+
+New setups:
+
+- these components are blacklisted (with entityBlackList) by default: "PowerMeter", "Lux", "Illuminance", "Vibration", "Button". This allows to create simplified devices for the controllers that don't manage correctly composed devices (i.e. Alexa and SmartThings).
+- all switches are exposed like outlet (matter compliant).
+- shellyplusi4, shellyi4g3, shellyix3 and shellybutton1 are automatically added to inputMomentaryList when discovered.
+- expertMode is disabled. This makes the config showing only username, password and blackList.
+
+Expert mode:
+
+The expertMode option has been added to show an advanced or simplified config.
+
+## [2.0.0] - 2025-02-27
+
+### Added
+
+- [platform]: Optimized memory and memory release.
+- [shelly]: Optimized memory and memory release.
+- [shelly]: Added online offline status on matter.
+- [BLU]: Verified firmware 1.0.21.
+- [TRV]: Verified firmware 1.2.0.
+- [WIFI]: Verified firmware 1.5.0.
+
+### Changed
+
+- [package]: Updated package.
+- [package]: Updated dependencies.
+- [plugin]: Requires Matterbridge 2.2.0.
+
+### Fixed
+
+- [platform]: Removed coiot component from Select.
+- [select]: Fix bthomesensor_event with select Button.
+
+<a href="https://www.buymeacoffee.com/luligugithub">
+  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+</a>
+
 ## [1.1.6] - 2025-02-11
 
 ### Added

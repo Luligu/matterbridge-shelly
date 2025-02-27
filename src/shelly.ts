@@ -23,16 +23,16 @@
 
 import { AnsiLogger, CYAN, MAGENTA, BRIGHT, hk, db, nf, wr, zb, er, LogLevel } from 'matterbridge/logger';
 
-import crypto from 'crypto';
-import EventEmitter from 'events';
+import crypto from 'node:crypto';
+import EventEmitter from 'node:events';
 
 import { ShellyDevice } from './shellyDevice.js';
 import { DiscoveredDevice, MdnsScanner } from './mdnsScanner.js';
 import { CoapServer } from './coapServer.js';
-import { SocketType } from 'dgram';
+import { SocketType } from 'node:dgram';
 import { WsClient } from './wsClient.js';
 import { WsServer } from './wsServer.js';
-import { ShellyData } from './shellyTypes.js';
+import { ShellyData, ShellyDeviceId } from './shellyTypes.js';
 import { isValidArray, isValidObject } from 'matterbridge/utils';
 
 /**
@@ -201,6 +201,7 @@ export class Shelly extends EventEmitter {
     this.coapServer?.removeAllListeners();
     this.coapServer?.stop();
     this.coapServer = undefined;
+    this._devices.clear();
   }
 
   /**
@@ -310,14 +311,11 @@ export class Shelly extends EventEmitter {
   /**
    * Removes a device from the Shelly instance.
    *
-   * @param {ShellyDevice | string} deviceOrId - The device or its ID to be removed.
+   * @param {ShellyDevice | ShellyDeviceId} device - The device or the device id to be removed.
    * @returns {Shelly} The updated Shelly instance.
    */
-  removeDevice(device: ShellyDevice): Shelly;
-  // eslint-disable-next-line @typescript-eslint/unified-signatures
-  removeDevice(deviceId: string): Shelly;
-  removeDevice(deviceOrId: ShellyDevice | string): Shelly {
-    const id = typeof deviceOrId === 'string' ? deviceOrId : deviceOrId.id;
+  removeDevice(device: ShellyDevice | ShellyDeviceId): Shelly {
+    const id = typeof device === 'string' ? device : device.id;
     this._devices.delete(id);
     return this;
   }

@@ -23,11 +23,11 @@
 
 import { AnsiLogger, LogLevel, BLUE, CYAN, GREEN, GREY, MAGENTA, RESET, db, debugStringify, er, hk, nf, wr, zb, rs, YELLOW, idn, nt, rk } from 'matterbridge/logger';
 import { getIpv4InterfaceAddress, isValidNumber, isValidObject, isValidString } from 'matterbridge/utils';
-import { EventEmitter } from 'events';
+import { EventEmitter } from 'node:events';
 import fetch, { RequestInit } from 'node-fetch';
-import crypto from 'crypto';
-import { promises as fs } from 'fs';
-import path from 'path';
+import crypto from 'node:crypto';
+import { promises as fs } from 'node:fs';
+import path from 'node:path';
 
 import { parseDigestAuthenticateHeader, createDigestShellyAuth, createBasicShellyAuth, parseBasicAuthenticateHeader, getGen2BodyOptions, getGen1BodyOptions } from './auth.js';
 
@@ -93,7 +93,7 @@ export class ShellyDevice extends EventEmitter {
   thermostatSetpointTimeout?: NodeJS.Timeout;
   private lastseenInterval?: NodeJS.Timeout;
   private startWsClientTimeout?: NodeJS.Timeout;
-  wsClient: WsClient | undefined;
+  wsClient?: WsClient;
 
   private readonly _components = new Map<string, ShellyComponent>();
 
@@ -148,6 +148,18 @@ export class ShellyDevice extends EventEmitter {
     this.startWsClientTimeout = undefined;
     this.wsClient?.stop();
     this.wsClient?.removeAllListeners();
+    this.wsClient = undefined;
+
+    this._components.clear();
+
+    this.shellyPayload = null;
+    this.statusPayload = null;
+    this.settingsPayload = null;
+    this.componentsPayload = null;
+
+    this.bthomeTrvs.clear();
+    this.bthomeDevices.clear();
+    this.bthomeSensors.clear();
 
     this.removeAllListeners();
   }
@@ -470,11 +482,12 @@ export class ShellyDevice extends EventEmitter {
    * @returns {Promise<ShellyDevice | undefined>} A Promise that resolves to a ShellyDevice instance or undefined if an error occurs.
    */
   static async create(shelly: Shelly, log: AnsiLogger, host: string): Promise<ShellyDevice | undefined> {
-    const shellyPayload = await ShellyDevice.fetch(shelly, log, host, 'shelly');
+    let shellyPayload: ShellyData | null = null;
     let statusPayload: ShellyData | null = null;
     let settingsPayload: ShellyData | null = null;
     let componentsPayload: ShellyData | null = null;
 
+    shellyPayload = await ShellyDevice.fetch(shelly, log, host, 'shelly');
     if (!shellyPayload) {
       log.debug(`Error creating device at host ${zb}${host}${db}. No shelly data found.`);
       return undefined;
@@ -1085,23 +1098,29 @@ export class ShellyDevice extends EventEmitter {
   async fetchUpdate(): Promise<ShellyData | null> {
     this.shellyPayload = await ShellyDevice.fetch(this.shelly, this.log, this.host, 'shelly');
     if (!this.shellyPayload) {
-      this.log.warn(`Error fetching shelly from device ${hk}${this.id}${wr} host ${zb}${this.host}${wr}. No data found. The device may be offline.`);
-      this.online = false;
-      this.emit('offline');
+      if (this.online) {
+        this.log.warn(`Error fetching shelly from device ${hk}${this.id}${wr} host ${zb}${this.host}${wr}. No data found. The device may be offline.`);
+        this.online = false;
+        this.emit('offline');
+      }
       return null;
     }
     this.settingsPayload = await ShellyDevice.fetch(this.shelly, this.log, this.host, this.gen === 1 ? 'settings' : 'Shelly.GetConfig');
     if (!this.settingsPayload) {
-      this.log.warn(`Error fetching settings from device ${hk}${this.id}${wr} host ${zb}${this.host}${wr}. No data found. The device may be offline.`);
-      this.online = false;
-      this.emit('offline');
+      if (this.online) {
+        this.log.warn(`Error fetching settings from device ${hk}${this.id}${wr} host ${zb}${this.host}${wr}. No data found. The device may be offline.`);
+        this.online = false;
+        this.emit('offline');
+      }
       return null;
     }
     this.statusPayload = await ShellyDevice.fetch(this.shelly, this.log, this.host, this.gen === 1 ? 'status' : 'Shelly.GetStatus');
     if (!this.statusPayload) {
-      this.log.warn(`Error fetching status from device ${hk}${this.id}${wr} host ${zb}${this.host}${wr}. No data found. The device may be offline.`);
-      this.online = false;
-      this.emit('offline');
+      if (this.online) {
+        this.log.warn(`Error fetching status from device ${hk}${this.id}${wr} host ${zb}${this.host}${wr}. No data found. The device may be offline.`);
+        this.online = false;
+        this.emit('offline');
+      }
       return null;
     }
     if (this.gen !== 1) {
@@ -1228,8 +1247,9 @@ export class ShellyDevice extends EventEmitter {
     if (host.endsWith('.json')) {
       log.debug(`Fetching device payloads from file ${host}: service ${service} params ${JSON.stringify(params)}`);
       try {
-        const data = await fs.readFile(host, 'utf8');
+        let data = await fs.readFile(host, 'utf8');
         const deviceData = JSON.parse(data);
+        data = '';
         if (service === 'shelly') return deviceData.shelly;
         if (service === 'status') return deviceData.status;
         if (service === 'settings') return deviceData.settings;
@@ -1366,12 +1386,23 @@ export class ShellyDevice extends EventEmitter {
           deviceData.settings.timezone = null;
           deviceData.settings.lat = null;
           deviceData.settings.lng = null;
+          if (deviceData.settings.wifi_ap) (deviceData.settings.wifi_ap as ShellyData).ssid = '';
+          if (deviceData.settings.wifi_sta) (deviceData.settings.wifi_sta as ShellyData).ssid = '';
+          if (deviceData.settings.wifi_sta1) (deviceData.settings.wifi_sta1 as ShellyData).ssid = '';
+          if (deviceData.status.wifi_ap) (deviceData.status.wifi_ap as ShellyData).ssid = '';
+          if (deviceData.status.wifi_sta) (deviceData.status.wifi_sta as ShellyData).ssid = '';
+          if (deviceData.status.wifi_sta1) (deviceData.status.wifi_sta1 as ShellyData).ssid = '';
         }
         // Remove sensitive data for Gen 2 and 3 devices
         if (this.gen === 2 || this.gen === 3) {
-          if (deviceData.settings.sys) {
-            (deviceData.settings.sys as ShellyData).location = null;
+          if (deviceData.settings.sys) (deviceData.settings.sys as ShellyData).location = null;
+          if (deviceData.settings.wifi) {
+            const wifi = deviceData.settings.wifi as ShellyData;
+            if (wifi.ap) (wifi.ap as ShellyData).ssid = '';
+            if (wifi.sta) (wifi.sta as ShellyData).ssid = '';
+            if (wifi.sta1) (wifi.sta1 as ShellyData).ssid = '';
           }
+          if (deviceData.status.wifi) (deviceData.status.wifi as ShellyData).ssid = '';
         }
         const data = JSON.stringify(deviceData, null, 2);
         await fs.writeFile(path.join(dataPath, `${this.id}.json`), data, 'utf8');

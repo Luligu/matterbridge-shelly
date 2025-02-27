@@ -14,21 +14,15 @@
       "readOnly": true
     },
     "username": {
-      "description": "Username (used only for gen 1 devices)",
+      "description": "Username for password protected shelly devices (used only for gen 1 devices)",
       "type": "string"
     },
     "password": {
-      "description": "Password (must be unique for all the devices)",
+      "description": "Password for password protected shelly devices (must be unique for all the devices)",
       "type": "string"
     },
-    "exposeSwitch": {
-      "description": "Choose how to expose the shelly switches: as a switch (don't use it for Alexa), light or outlet",
-      "type": "string",
-      "enum": ["switch", "light", "outlet"],
-      "default": "outlet"
-    },
     "switchList": {
-      "description": "The devices in the list will be exposed as switches, regardless of the main option.",
+      "description": "The devices in the list will be exposed as switches (don't use it for Alexa).",
       "type": "array",
       "items": {
         "type": "string"
@@ -37,31 +31,16 @@
       "selectFrom": "serial"
     },
     "lightList": {
-      "description": "The devices in the list will be exposed as lights, regardless of the main option.",
+      "description": "The devices in the list will be exposed as lights.",
       "type": "array",
       "items": {
         "type": "string"
       },
       "uniqueItems": true,
       "selectFrom": "serial"
-    },
-    "outletList": {
-      "description": "The devices in the list will be exposed as outlets, regardless of the main option.",
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "uniqueItems": true,
-      "selectFrom": "serial"
-    },
-    "exposeInput": {
-      "description": "Choose how to expose the shelly inputs: disabled, contact, momentary or latching switch (you may need to pair again the controller when changed)",
-      "type": "string",
-      "enum": ["disabled", "contact", "momentary", "latching"],
-      "default": "disabled"
     },
     "inputContactList": {
-      "description": "The devices in the list will expose the Input event component as a contact sensor, regardless of the main option (you can disable the Input component globally and enable it only for single devices).",
+      "description": "The devices in the list will expose the Input component as a contact sensor.",
       "type": "array",
       "items": {
         "type": "string"
@@ -70,7 +49,7 @@
       "selectFrom": "serial"
     },
     "inputMomentaryList": {
-      "description": "The devices in the list will expose the Input event component as a momentary switch, regardless of the main option (you can disable the Input component globally and enable it only for single devices).",
+      "description": "The devices in the list will expose the Input component as a momentary switch.",
       "type": "array",
       "items": {
         "type": "string"
@@ -79,34 +58,13 @@
       "selectFrom": "serial"
     },
     "inputLatchingList": {
-      "description": "The devices in the list will expose the Input event component as a latching switch, regardless of the main option (you can disable the Input component globally and enable it only for single devices).",
+      "description": "The devices in the list will expose the Input component as a latching switch.",
       "type": "array",
       "items": {
         "type": "string"
       },
       "uniqueItems": true,
       "selectFrom": "serial"
-    },
-    "exposeInputEvent": {
-      "description": "Choose weather to expose the shelly input events: momentary or disabled (you may need to pair again the controller when changed)",
-      "type": "string",
-      "enum": ["momentary", "disabled"],
-      "default": "disabled"
-    },
-    "inputEventList": {
-      "description": "The devices in the list will expose the Input event component as a momentary switch, regardless of the main option (you can disable the Input event component globally and enable it only for single devices).",
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "uniqueItems": true,
-      "selectFrom": "serial"
-    },
-    "exposePowerMeter": {
-      "description": "Choose how to expose the shelly power meters: disabled, matter13 (will use Matter 1.3 electricalSensor)",
-      "type": "string",
-      "enum": ["disabled", "matter13"],
-      "default": "disabled"
     },
     "blackList": {
       "description": "The devices in the list will not be exposed. Use the device id (e.g. shellyplus2pm-5443B23D81F8) or BLU addr (i.e. 7c:c6:b6:65:2d:87)",
@@ -160,7 +118,7 @@
       "selectFrom": "serial"
     },
     "deviceIp": {
-      "description": "Set the IP address for each device. Enter in the first field the shelly ID of the device and in the second field the IP address. (e.g. shelly1minig3-543204547478: 192.168.1.221). Enable enableConfigDiscover to load the devices from this setting.",
+      "description": "Set the IP address for each device that is not discovered automatically. Enter in the first field the shelly ID of the device and in the second field the IP address. (e.g. shelly1minig3-543204547478: 192.168.1.221). Enable enableConfigDiscover to load the devices from this setting.",
       "type": "object",
       "uniqueItems": true,
       "selectFrom": "serial",
@@ -184,7 +142,7 @@
       "default": false
     },
     "enableConfigDiscover": {
-      "description": "Enable config discovery for shelly devices (it will load the devices from deviceIp config setting)",
+      "description": "Enable config discovery for shelly devices (it will load the devices from deviceIp config setting). It is only needed if a device is not discovered on your network. Once they are loaded and stored, disable this setting.",
       "type": "boolean",
       "default": false
     },
@@ -202,6 +160,11 @@
       "description": "Add this unique postfix (3 characters max) to each device serial to avoid collision with other instances (you may loose the configuration of the devices in your controller when changing this value or you may need to pair again the controller).",
       "type": "string",
       "default": ""
+    },
+    "expertMode": {
+      "description": "Enable the expert mode for the plugin configuration (restart required)",
+      "type": "boolean",
+      "default": false
     },
     "debug": {
       "description": "Enable the debug for the plugin (development only)",
@@ -222,10 +185,6 @@
       "description": "Enable the debug for the shelly WsClient or WsServer (development only)",
       "type": "boolean",
       "default": false
-    },
-    "interfaceName": {
-      "description": "Network interface name for shellies (development only)",
-      "type": "string"
     },
     "unregisterOnShutdown": {
       "description": "Unregister all devices on shutdown (development only)",

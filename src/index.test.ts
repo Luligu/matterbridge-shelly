@@ -6,6 +6,7 @@ import { ShellyPlatform } from './platform.js';
 import initializePlugin from './index';
 import { jest } from '@jest/globals';
 import { wait } from 'matterbridge/utils';
+import { get } from 'node:http';
 
 describe('initializePlugin', () => {
   let platform: ShellyPlatform;
@@ -35,7 +36,7 @@ describe('initializePlugin', () => {
     matterbridgeDirectory: './jest/matterbridge',
     matterbridgePluginDirectory: './jest/plugins',
     systemInformation: { ipv4Address: undefined, osRelease: 'xx.xx.xx.xx.xx.xx', nodeVersion: '22.1.10' },
-    matterbridgeVersion: '2.1.5',
+    matterbridgeVersion: '2.2.0',
     edge: false,
     log: mockLog,
     getDevices: jest.fn(() => {
@@ -46,6 +47,12 @@ describe('initializePlugin', () => {
       // console.log('getPlugins called');
       return [];
     }),
+    plugins: {
+      get: jest.fn((pluginName: string) => {
+        // console.log('plugins.get() called');
+        return undefined;
+      }),
+    },
     addBridgedEndpoint: jest.fn(async (pluginName: string, device: MatterbridgeEndpoint) => {
       // console.log('addBridgedEndpoint called');
       // await aggregator.add(device);

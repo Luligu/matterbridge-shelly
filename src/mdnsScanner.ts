@@ -23,10 +23,10 @@
 
 import { AnsiLogger, BLUE, CYAN, LogLevel, TimestampFormat, db, debugStringify, er, hk, idn, ign, nf, rs, zb } from 'matterbridge/logger';
 import mdns, { ResponsePacket } from 'multicast-dns';
-import EventEmitter from 'events';
-import { RemoteInfo, SocketType } from 'dgram';
-import { promises as fs } from 'fs';
-import path from 'path';
+import EventEmitter from 'node:events';
+import { RemoteInfo, SocketType } from 'node:dgram';
+import { promises as fs } from 'node:fs';
+import path from 'node:path';
 
 export interface DiscoveredDevice {
   id: string;

@@ -23,7 +23,7 @@
 
 import { AnsiLogger, LogLevel, TimestampFormat } from 'matterbridge/logger';
 import { getIpv4InterfaceAddress } from 'matterbridge/utils';
-import dgram from 'dgram';
+import dgram from 'node:dgram';
 
 export class Multicast {
   private log;

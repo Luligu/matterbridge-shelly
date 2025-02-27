@@ -47,3 +47,15 @@ To expose only the temperature and humidity components while blacklisting all se
 ```
 "deviceEntityBlackList": { "7c:c6:b6:65:2d:87": ["Button"] }
 ```
+
+## Example 5: How to disable for all devices the electrical measurements
+
+```
+"entityBlackList": ["PowerMeter"]
+```
+
+## Example 6: How to disable for a single device
+
+```
+"deviceEntityBlackList": { "shellyplusrgbwpm-ECC9FF4CEAF0": ["PowerMeter"] }
+```

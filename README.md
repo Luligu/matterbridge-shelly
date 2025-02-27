@@ -145,30 +145,21 @@ Wait that the plugin has been configured before changing the config.
 
 ### username
 
-If your devices are password protected put there the username. It must be unique for all the devices.
+If your devices are password protected put here the username. It must be unique for all the devices.
+
 It is only used for gen 1 devices. Gen 2 and 3 devices have always admin.
 
 ### password
 
-If your devices are password protected put there the password. It must be unique for all the devices.
-
-### exposeSwitch
-
-Choose how to expose on Matter the shelly switches: as a switch (don't use it with Alexa), light or outlet.
-
-You can then configure one or more devices to be exposed differently. See the switchList, lightList and outletList.
+If your devices are password protected put here the password. It must be unique for all the devices.
 
 ### switchList
 
-The devices in the list will be exposed as switches, regardless of the main option "exposeSwitch".
+The devices in the list will be exposed as switches (don't use it for Alexa).
 
 ### lightList
 
-The devices in the list will be exposed as lights, regardless of the main option "exposeSwitch".
-
-### outletList
-
-The devices in the list will be exposed as outlets, regardless of the main option "exposeSwitch".
+The devices in the list will be exposed as lights.
 
 ### exposeInput
 
@@ -178,35 +169,19 @@ Is useful only if you create automations on the controller side or you need the 
 
 ### inputContactList
 
-The devices in the list will expose the Input event component as a contact sensor, regardless of the main option (you can disable the Input component globally and enable it only for single devices like the shellyplusi4).
+The devices in the list will expose the Input component as a contact sensor.
 
 ### inputMomentaryList
 
-The devices in the list will expose the Input event component as a momentary switch, regardless of the main option (you can disable the Input component globally and enable it only for single devices like the shellyplusi4).
+The devices in the list will expose the Input component as a momentary switch.
 
 In Matter a momentary switch is button that can be pressed or released.
 
 ### inputLatchingList
 
-The devices in the list will expose the Input event component as a latching switch, regardless of the main option (you can disable the Input component globally and enable it only for single devices like the shellyplusi4).
+The devices in the list will expose the Input component as a latching switch (latching switches are not supported by all controllers).
 
 In Matter a latching switch is a switch that keeps its position open or closed.
-
-### exposeInputEvent
-
-Choose how to expose the shelly input events: momentary switch or disabled (default momentary).
-
-This type of Input is used by devices like shellybutton1 or by Gen 2/3 devices with Input type=button.
-
-Is useful only if you create automations on the controller side or you need the controller history.
-
-### inputEventList
-
-The devices in the list will expose the Input event component as a momentary switch, regardless of the main option (you can disable the Input event component globally and enable it only for single devices).
-
-### exposePowerMeter
-
-Choose how to expose the shelly power meters: disabled, matter13 (it uses Matter 1.3 electricalSensor device type that is supported only by Home Assistant so far). Unless your controller supports it, set it to disabled.
 
 ### blackList
 
@@ -255,7 +230,10 @@ E.g. "shelly1minig3-543204547478": "192.168.1.221".
 ### enableMdnsDiscover
 
 Should always be enabled to discover new devices. It turns off automatically after 10 minutes to reduce network traffic.
+
 Once a device is discovered, it is added to the shelly storage.
+
+Once all the devices are loaded and stored, it is possible to disable this setting to reduce the network traffic.
 
 ### enableStorageDiscover
 
@@ -268,6 +246,8 @@ Reset the storage discovery on the next restart (it will clear the storage of al
 ### enableConfigDiscover
 
 Should be enabled only if the mdns is not working in your network. It adds the devices defined in deviceIp.
+
+Once all the devices are loaded and stored, disable this setting.
 
 ### enableBleDiscover
 

@@ -24,8 +24,8 @@
 
 import { AnsiLogger, CYAN, LogLevel, TimestampFormat, db, er, hk, nf, rs, wr, zb } from 'matterbridge/logger';
 import WebSocket, { WebSocketServer } from 'ws';
-import EventEmitter from 'events';
-import { createServer, IncomingMessage, Server } from 'http';
+import EventEmitter from 'node:events';
+import { createServer, IncomingMessage, Server } from 'node:http';
 import { ShellyDevice } from './shellyDevice.js';
 import { ShellyData } from './shellyTypes.js';
 

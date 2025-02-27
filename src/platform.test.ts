@@ -21,9 +21,9 @@ import { getMacAddress, isValidArray, isValidBoolean, isValidNull, isValidNumber
 import { jest } from '@jest/globals';
 
 import { Shelly } from './shelly';
-import { ShellyPlatform } from './platform';
+import { ShellyPlatform, ShellyPlatformConfig } from './platform';
 import { ShellyDevice } from './shellyDevice';
-import path from 'path';
+import path from 'node:path';
 
 const address = 'c4:cb:76:b3:cd:1f';
 
@@ -84,7 +84,7 @@ describe('ShellyPlatform', () => {
       matterbridgeDirectory: './jest/matterbridge',
       matterbridgePluginDirectory: './jest/plugins',
       systemInformation: { ipv4Address: undefined, osRelease: 'xx.xx.xx.xx.xx.xx', nodeVersion: '22.1.10' },
-      matterbridgeVersion: '2.1.5',
+      matterbridgeVersion: '2.2.0',
       edge: false,
       log: mockLog,
       getDevices: jest.fn(() => {
@@ -95,6 +95,12 @@ describe('ShellyPlatform', () => {
         // console.log('getPlugins called');
         return [];
       }),
+      plugins: {
+        get: jest.fn((pluginName: string) => {
+          // console.log('plugins.get() called');
+          return undefined;
+        }),
+      },
       addBridgedEndpoint: jest.fn(async (pluginName: string, device: MatterbridgeEndpoint) => {
         // console.log('addBridgedEndpoint called');
         // await aggregator.add(device);
@@ -132,12 +138,10 @@ describe('ShellyPlatform', () => {
       'version': '1.1.2',
       'username': 'admin',
       'password': 'tango',
-      'exposeSwitch': 'outlet',
-      'exposeInput': 'contact',
-      'exposeInputEvent': 'momentary',
-      'exposePowerMeter': 'matter13',
       'blackList': [],
       'whiteList': [],
+      'entityBlackList': [],
+      'deviceEntityBlackList': {},
       'enableMdnsDiscover': false,
       'enableStorageDiscover': false,
       'resetStorageDiscover': false,
@@ -177,130 +181,11 @@ describe('ShellyPlatform', () => {
   });
 
   it('should initialize platform with config name and version', () => {
-    shellyPlatform = new ShellyPlatform(mockMatterbridge, mockLog, mockConfig);
+    shellyPlatform = new ShellyPlatform(mockMatterbridge, mockLog, mockConfig as any);
     expect(mockLog.debug).toHaveBeenCalledWith(`Initializing platform: ${idn}${mockConfig.name}${rs}${db} v.${CYAN}${mockConfig.version}`);
     clearInterval((shellyPlatform as any).shelly.fetchInterval);
     clearTimeout((shellyPlatform as any).shelly.coapServerTimeout);
-  });
-
-  it('should validate number', () => {
-    expect(isValidNumber(1222222)).toBe(true);
-    expect(isValidNumber(NaN)).toBe(false);
-    expect(isValidNumber(true)).toBe(false);
-    expect(isValidNumber(false)).toBe(false);
-    expect(isValidNumber(1212222222222222222111122222222n)).toBe(false);
-    expect(isValidNumber('string')).toBe(false);
-    expect(isValidNumber(null)).toBe(false);
-    expect(isValidNumber(undefined)).toBe(false);
-    expect(isValidNumber({ x: 1, y: 4 })).toBe(false);
-    expect(isValidNumber([1, 4, 'string'])).toBe(false);
-  });
-  it('should validate number in range', () => {
-    expect(isValidNumber(5, 0, 100)).toBe(true);
-    expect(isValidNumber(-5, 0, 100)).toBe(false);
-    expect(isValidNumber(5555, 0, 100)).toBe(false);
-    expect(isValidNumber(5, -100, 100)).toBe(true);
-    expect(isValidNumber(-50, -100, 100)).toBe(true);
-    expect(isValidNumber(0, 0, 100)).toBe(true);
-    expect(isValidNumber(100, 0, 100)).toBe(true);
-    expect(isValidNumber(0, 0)).toBe(true);
-    expect(isValidNumber(-1, 0)).toBe(false);
-    expect(isValidNumber(123, 0)).toBe(true);
-    expect(isValidNumber(100, 0, 100)).toBe(true);
-  });
-
-  it('should validate boolean', () => {
-    expect(isValidBoolean(1222222)).toBe(false);
-    expect(isValidBoolean(NaN)).toBe(false);
-    expect(isValidBoolean(true)).toBe(true);
-    expect(isValidBoolean(false)).toBe(true);
-    expect(isValidBoolean(1212222222222222222111122222222n)).toBe(false);
-    expect(isValidBoolean('string')).toBe(false);
-    expect(isValidBoolean(null)).toBe(false);
-    expect(isValidBoolean(undefined)).toBe(false);
-    expect(isValidBoolean({ x: 1, y: 4 })).toBe(false);
-    expect(isValidBoolean([1, 4, 'string'])).toBe(false);
-  });
-
-  it('should validate string', () => {
-    expect(isValidString(1222222)).toBe(false);
-    expect(isValidString(NaN)).toBe(false);
-    expect(isValidString(true)).toBe(false);
-    expect(isValidString(false)).toBe(false);
-    expect(isValidString(1212222222222222222111122222222n)).toBe(false);
-    expect(isValidString('string')).toBe(true);
-    expect(isValidString('string', 1, 20)).toBe(true);
-    expect(isValidString('string', 0)).toBe(true);
-    expect(isValidString('string', 10)).toBe(false);
-    expect(isValidString('', 1)).toBe(false);
-    expect(isValidString('1234', 1, 3)).toBe(false);
-    expect(isValidString(null)).toBe(false);
-    expect(isValidString(undefined)).toBe(false);
-    expect(isValidString({ x: 1, y: 4 })).toBe(false);
-    expect(isValidString([1, 4, 'string'])).toBe(false);
-  });
-
-  it('should validate object', () => {
-    expect(isValidObject(1222222)).toBe(false);
-    expect(isValidObject(NaN)).toBe(false);
-    expect(isValidObject(true)).toBe(false);
-    expect(isValidObject(false)).toBe(false);
-    expect(isValidObject(1212222222222222222111122222222n)).toBe(false);
-    expect(isValidObject('string')).toBe(false);
-    expect(isValidObject(null)).toBe(false);
-    expect(isValidObject(undefined)).toBe(false);
-    expect(isValidObject({ x: 1, y: 4 })).toBe(true);
-    expect(isValidObject([1, 4, 'string'])).toBe(false);
-
-    expect(isValidObject({ x: 1, y: 4 }, 1, 2)).toBe(true);
-    expect(isValidObject({ x: 1, y: 4 }, 2, 2)).toBe(true);
-    expect(isValidObject({ x: 1, y: 4 }, 2, 3)).toBe(true);
-    expect(isValidObject({ x: 1, y: 4 }, 3, 3)).toBe(false);
-    expect(isValidObject({ x: 1, y: 4 }, 1, 1)).toBe(false);
-  });
-
-  it('should validate array', () => {
-    expect(isValidArray(1222222)).toBe(false);
-    expect(isValidArray(NaN)).toBe(false);
-    expect(isValidArray(true)).toBe(false);
-    expect(isValidArray(false)).toBe(false);
-    expect(isValidArray(1212222222222222222111122222222n)).toBe(false);
-    expect(isValidArray('string')).toBe(false);
-    expect(isValidArray(null)).toBe(false);
-    expect(isValidArray(undefined)).toBe(false);
-    expect(isValidArray({ x: 1, y: 4 })).toBe(false);
-    expect(isValidArray([1, 4, 'string'])).toBe(true);
-
-    expect(isValidArray([1, 4, 'string'], 3, 3)).toBe(true);
-    expect(isValidArray([1, 4, 'string'], 4, 4)).toBe(false);
-    expect(isValidArray([1, 4, 'string'], 1, 2)).toBe(false);
-    expect(isValidArray([1, 4, 'string'], 0, 3)).toBe(true);
-  });
-
-  it('should validate null', () => {
-    expect(isValidNull(1222222)).toBe(false);
-    expect(isValidNull(NaN)).toBe(false);
-    expect(isValidNull(true)).toBe(false);
-    expect(isValidNull(false)).toBe(false);
-    expect(isValidNull(1212222222222222222111122222222n)).toBe(false);
-    expect(isValidNull('string')).toBe(false);
-    expect(isValidNull(null)).toBe(true);
-    expect(isValidNull(undefined)).toBe(false);
-    expect(isValidNull({ x: 1, y: 4 })).toBe(false);
-    expect(isValidNull([1, 4, 'string'])).toBe(false);
-  });
-
-  it('should validate undefined', () => {
-    expect(isValidUndefined(1222222)).toBe(false);
-    expect(isValidUndefined(NaN)).toBe(false);
-    expect(isValidUndefined(true)).toBe(false);
-    expect(isValidUndefined(false)).toBe(false);
-    expect(isValidUndefined(1212222222222222222111122222222n)).toBe(false);
-    expect(isValidUndefined('string')).toBe(false);
-    expect(isValidUndefined(null)).toBe(false);
-    expect(isValidUndefined(undefined)).toBe(true);
-    expect(isValidUndefined({ x: 1, y: 4 })).toBe(false);
-    expect(isValidUndefined([1, 4, 'string'])).toBe(false);
+    shellyPlatform.config.entityBlackList = [];
   });
 
   it('should validate version', () => {
@@ -320,8 +205,8 @@ describe('ShellyPlatform', () => {
 
   it('should throw because of version', () => {
     mockMatterbridge.matterbridgeVersion = '1.5.4';
-    expect(() => new ShellyPlatform(mockMatterbridge, mockLog, mockConfig)).toThrow();
-    mockMatterbridge.matterbridgeVersion = '2.1.5';
+    expect(() => new ShellyPlatform(mockMatterbridge, mockLog, mockConfig as any)).toThrow();
+    mockMatterbridge.matterbridgeVersion = '2.2.0';
   });
 
   it('should call onStart with reason and start mDNS', async () => {
@@ -375,6 +260,9 @@ describe('ShellyPlatform', () => {
       expect(mockLog.debug).toHaveBeenCalledWith(`Saving ${CYAN}2${db} discovered Shelly devices to the storage`);
       expect((shellyPlatform as any).storedDevices.size).toBe(2);
 
+      const create = jest.spyOn(ShellyDevice, 'create' as any).mockImplementation(async () => {
+        return Promise.resolve(undefined);
+      });
       await shellyPlatform.onStart('Test reason');
 
       expect(mockLog.info).toHaveBeenCalledWith(`Starting platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
@@ -392,6 +280,7 @@ describe('ShellyPlatform', () => {
 
       shellyPlatform.config.enableStorageDiscover = false;
 
+      create.mockRestore();
       cleanup();
     },
     30 * 1000,
@@ -408,6 +297,10 @@ describe('ShellyPlatform', () => {
         'shellyemg3-84FCE636582C': 'invalid',
         'shellyplus-34FCE636582C': '192.168.255.1',
       };
+
+      const create = jest.spyOn(ShellyDevice, 'create' as any).mockImplementation(async () => {
+        return Promise.resolve(undefined);
+      });
       await shellyPlatform.onStart('Test reason');
       expect(mockLog.info).toHaveBeenCalledWith(`Starting platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
       expect(mockLog.info).toHaveBeenCalledWith(`Loading from config 2 Shelly devices`);
@@ -425,6 +318,7 @@ describe('ShellyPlatform', () => {
       shellyPlatform.config.enableConfigDiscover = false;
       shellyPlatform.config.deviceIp = undefined;
 
+      create.mockRestore();
       cleanup();
     },
     30 * 1000,
@@ -491,11 +385,16 @@ describe('ShellyPlatform', () => {
     await shellyPlatform.onStart('Test reason');
     expect(mockLog.info).toHaveBeenCalledWith(`Starting platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
 
+    const create = jest.spyOn(ShellyDevice, 'create' as any).mockImplementation(async () => {
+      return Promise.resolve(undefined);
+    });
+
     (shellyPlatform as any).shelly.emit('discovered', { id: 'shelly1l-E8DB84AAD781', host: '192.168.1.241', port: 80, gen: 1 });
     await wait(1000);
     expect((shellyPlatform as any).discoveredDevices.size).toBe(1);
-    expect((shellyPlatform as any).shelly._devices.size).toBe(getMacAddress() !== address ? 0 : 1);
+    expect((shellyPlatform as any).shelly._devices.size).toBe(0);
 
+    create.mockRestore();
     cleanup();
     expect(await (shellyPlatform as any).saveStoredDevices()).toBeTruthy();
     expect((shellyPlatform as any).discoveredDevices.size).toBe(0);
@@ -507,6 +406,8 @@ describe('ShellyPlatform', () => {
 
   it('should call onStart with reason and add shelly1', async () => {
     expect(shellyPlatform).toBeDefined();
+    shellyPlatform.config.enableMdnsDiscover = false;
+    shellyPlatform.config.inputMomentaryList = ['shelly1-34945472A643'];
 
     await shellyPlatform.onStart('Test reason');
     expect(mockLog.info).toHaveBeenCalledWith(`Starting platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
