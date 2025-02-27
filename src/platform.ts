@@ -313,8 +313,9 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         this.discoveredDevices.set(discoveredDevice.id, discoveredDevice);
         this.storedDevices.set(discoveredDevice.id, discoveredDevice);
         await this.saveStoredDevices();
+        // On the first run or after if expertMode is false, add the device with only inputs to the inputMomentaryList
         if (
-          this.firstRun &&
+          (this.firstRun === true || config.expertMode === false) &&
           (discoveredDevice.id.includes('shellybutton1') ||
             discoveredDevice.id.includes('shellyix3') ||
             discoveredDevice.id.includes('shellyplusi4') ||
