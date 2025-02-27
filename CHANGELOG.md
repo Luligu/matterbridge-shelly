@@ -8,12 +8,12 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 
 ### Breaking Changes
 
-Since the plugin config got very complex and also confusing, from this release a lot of options have been removed or simplified:
+Since the plugin config got very complex and also confusing, from this release same options have been removed or simplified:
 
 Removed options:
 
 - exposeSwitch: the default is outlet (matter compliant). You can expose a device like a switch adding it it to the switchList or like a light adding it it to the lightList.
-- outletList: since the default is now outlet has been removed.
+- outletList: since the default is now outlet, outletList has been removed.
 
 - exposeInput: inputs are now disabled by default. You can still expose them adding the device to inputContactList, inputMomentaryList or inputLatchingList.
 - exposeInputEvent: inputs events are now disabled by default. You can expose them adding the device to inputMomentaryList.
@@ -32,7 +32,7 @@ Expert mode:
 
 The expertMode option has been added to show an advanced or simplified config.
 
-## [2.0.0] - 2025-02-25
+## [2.0.0] - 2025-02-27
 
 ### Added
 
