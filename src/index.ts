@@ -23,7 +23,7 @@
 
 import { Matterbridge, PlatformConfig } from 'matterbridge';
 import { AnsiLogger } from 'matterbridge/logger';
-import { ShellyPlatform } from './platform.js';
+import { ShellyPlatform, ShellyPlatformConfig } from './platform.js';
 
 /**
  * This is the standard interface for Matterbridge plugins.
@@ -35,7 +35,6 @@ import { ShellyPlatform } from './platform.js';
  * @returns {ShellyPlatform} - An instance of the ShellyPlatform. This is the main interface for interacting with the Shellies.
  *
  */
-
 export default function initializePlugin(matterbridge: Matterbridge, log: AnsiLogger, config: PlatformConfig): ShellyPlatform {
-  return new ShellyPlatform(matterbridge, log, config);
+  return new ShellyPlatform(matterbridge, log, config as unknown as ShellyPlatformConfig);
 }

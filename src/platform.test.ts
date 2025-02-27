@@ -21,7 +21,7 @@ import { getMacAddress, isValidArray, isValidBoolean, isValidNull, isValidNumber
 import { jest } from '@jest/globals';
 
 import { Shelly } from './shelly';
-import { ShellyPlatform } from './platform';
+import { ShellyPlatform, ShellyPlatformConfig } from './platform';
 import { ShellyDevice } from './shellyDevice';
 import path from 'node:path';
 
@@ -138,14 +138,10 @@ describe('ShellyPlatform', () => {
       'version': '1.1.2',
       'username': 'admin',
       'password': 'tango',
-      'exposeSwitch': 'outlet',
-      'exposeInput': 'contact',
-      'exposeInputEvent': 'momentary',
-      'exposePowerMeter': 'matter13',
       'blackList': [],
       'whiteList': [],
       'entityBlackList': [],
-      'deviceEntityBlackList': [],
+      'deviceEntityBlackList': {},
       'enableMdnsDiscover': false,
       'enableStorageDiscover': false,
       'resetStorageDiscover': false,
@@ -185,7 +181,7 @@ describe('ShellyPlatform', () => {
   });
 
   it('should initialize platform with config name and version', () => {
-    shellyPlatform = new ShellyPlatform(mockMatterbridge, mockLog, mockConfig);
+    shellyPlatform = new ShellyPlatform(mockMatterbridge, mockLog, mockConfig as any);
     expect(mockLog.debug).toHaveBeenCalledWith(`Initializing platform: ${idn}${mockConfig.name}${rs}${db} v.${CYAN}${mockConfig.version}`);
     clearInterval((shellyPlatform as any).shelly.fetchInterval);
     clearTimeout((shellyPlatform as any).shelly.coapServerTimeout);
@@ -209,7 +205,7 @@ describe('ShellyPlatform', () => {
 
   it('should throw because of version', () => {
     mockMatterbridge.matterbridgeVersion = '1.5.4';
-    expect(() => new ShellyPlatform(mockMatterbridge, mockLog, mockConfig)).toThrow();
+    expect(() => new ShellyPlatform(mockMatterbridge, mockLog, mockConfig as any)).toThrow();
     mockMatterbridge.matterbridgeVersion = '2.2.0';
   });
 

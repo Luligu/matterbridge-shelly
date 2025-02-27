@@ -104,6 +104,40 @@ import { shellyUpdateHandler } from './platformUpdateHandler.js';
 
 type ConfigDeviceIp = Record<string, string>;
 
+export interface ShellyPlatformConfig {
+  name: string;
+  type: string;
+  version: string;
+  username: string;
+  password: string;
+  switchList: string[];
+  lightList: string[];
+  inputContactList: string[];
+  inputMomentaryList: string[];
+  inputLatchingList: string[];
+  blackList: string[];
+  whiteList: string[];
+  entityBlackList: string[];
+  deviceEntityBlackList: Record<string, string[]>;
+  nocacheList: string[];
+  deviceIp: ConfigDeviceIp;
+  postfixHostname?: boolean;
+  enableMdnsDiscover: boolean;
+  enableStorageDiscover: boolean;
+  resetStorageDiscover: boolean;
+  enableConfigDiscover: boolean;
+  enableBleDiscover: boolean;
+  failsafeCount: number;
+  postfix: string;
+  expertMode: boolean;
+  firstRun?: boolean;
+  debug: boolean;
+  debugMdns: boolean;
+  debugCoap: boolean;
+  debugWs: boolean;
+  unregisterOnShutdown: boolean;
+}
+
 export class ShellyPlatform extends MatterbridgeDynamicPlatform {
   public discoveredDevices = new Map<ShellyDeviceId, DiscoveredDevice>();
   public storedDevices = new Map<ShellyDeviceId, DiscoveredDevice>();
@@ -125,8 +159,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
   private failsafeCount;
   private firstRun = false;
 
-  constructor(matterbridge: Matterbridge, log: AnsiLogger, config: PlatformConfig) {
-    super(matterbridge, log, config);
+  constructor(matterbridge: Matterbridge, log: AnsiLogger, config: ShellyPlatformConfig) {
+    super(matterbridge, log, config as unknown as PlatformConfig);
 
     // Verify that Matterbridge is the correct version
     if (this.verifyMatterbridgeVersion === undefined || typeof this.verifyMatterbridgeVersion !== 'function' || !this.verifyMatterbridgeVersion('2.2.0')) {
@@ -143,16 +177,19 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     this.failsafeCount = (config.failsafeCount as number) ?? 0;
     if (!isValidNumber(this.failsafeCount, 0)) this.failsafeCount = 0;
 
-    // Config cleanup
-    if (config.exposeSwitch !== undefined) delete config.exposeSwitch;
-    if (config.outletList !== undefined) delete config.outletList;
-    if (config.exposeInput !== undefined) delete config.exposeInput;
-    if (config.exposeInputEvent !== undefined) delete config.exposeInputEvent;
-    if (config.inputEventList !== undefined) {
-      if (isValidArray(config.inputEventList, 1)) config.inputMomentaryList = config.inputEventList;
-      delete config.inputEventList;
+    // Cleanup the old config format
+    {
+      const config = this.config as PlatformConfig;
+      if (config.exposeSwitch !== undefined) delete config.exposeSwitch;
+      if (config.outletList !== undefined) delete config.outletList;
+      if (config.exposeInput !== undefined) delete config.exposeInput;
+      if (config.exposeInputEvent !== undefined) delete config.exposeInputEvent;
+      if (config.inputEventList !== undefined) {
+        if (isValidArray(config.inputEventList, 1)) config.inputMomentaryList = config.inputEventList;
+        delete config.inputEventList;
+      }
+      if (config.exposePowerMeter !== undefined) delete config.exposePowerMeter;
     }
-    if (config.exposePowerMeter !== undefined) delete config.exposePowerMeter;
 
     // First config setup
     if (config.firstRun === undefined) {
@@ -1009,9 +1046,9 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               }
             });
           }
-        } else if (component.name === 'Sensor' && config.exposeSensor !== 'disabled') {
+        } else if (component.name === 'Sensor') {
           const sensorComponent = device.getComponent(key);
-          if (sensorComponent?.hasProperty('contact_open') && config.exposeContact !== 'disabled') {
+          if (sensorComponent?.hasProperty('contact_open')) {
             const child = mbDevice.addChildDeviceType(key, [contactSensor], undefined, config.debug as boolean);
             child.log.logName = `${device.name} ${key}`;
             child.createDefaultBooleanStateClusterServer(sensorComponent.getValue('contact_open') === false);
@@ -1021,7 +1058,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               shellyUpdateHandler(this, mbDevice, device, component, property, value);
             });
           }
-          if (sensorComponent?.hasProperty('motion') && config.exposeMotion !== 'disabled') {
+          if (sensorComponent?.hasProperty('motion')) {
             const child = mbDevice.addChildDeviceType(key, [occupancySensor], undefined, config.debug as boolean);
             child.createDefaultOccupancySensingClusterServer(sensorComponent.getValue('motion') === true);
             child.addRequiredClusterServers();
@@ -1030,7 +1067,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               shellyUpdateHandler(this, mbDevice, device, component, property, value);
             });
           }
-        } else if (component.name === 'Vibration' && config.exposeVibration !== 'disabled') {
+        } else if (component.name === 'Vibration') {
           const vibrationComponent = device.getComponent(key);
           if (vibrationComponent?.hasProperty('vibration') && isValidBoolean(vibrationComponent.getValue('vibration'))) {
             const child = mbDevice.addChildDeviceType(key, [genericSwitch], undefined, config.debug as boolean);
@@ -1042,7 +1079,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               shellyUpdateHandler(this, mbDevice, device, component, property, value);
             });
           }
-        } else if (component.name === 'Temperature' && config.exposeTemperature !== 'disabled') {
+        } else if (component.name === 'Temperature') {
           const tempComponent = device.getComponent(key);
           if (tempComponent?.hasProperty('value') && isValidNumber(tempComponent.getValue('value'))) {
             const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [temperatureSensor], [], undefined, config.debug as boolean);
@@ -1063,7 +1100,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               shellyUpdateHandler(this, mbDevice, device, component, property, value);
             });
           }
-        } else if (component.name === 'Humidity' && config.exposeHumidity !== 'disabled') {
+        } else if (component.name === 'Humidity') {
           const humidityComponent = device.getComponent(key);
           if (humidityComponent?.hasProperty('value') && isValidNumber(humidityComponent.getValue('value'), 0, 100)) {
             const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [humiditySensor], [], undefined, config.debug as boolean);
@@ -1085,7 +1122,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               shellyUpdateHandler(this, mbDevice, device, component, property, value);
             });
           }
-        } else if (component.name === 'Illuminance' && config.exposeIlluminance !== 'disabled') {
+        } else if (component.name === 'Illuminance') {
           const illuminanceComponent = device.getComponent(key);
           if (illuminanceComponent?.hasProperty('lux') && isValidNumber(illuminanceComponent.getValue('lux'), 0, 10000)) {
             const child = mbDevice.addChildDeviceTypeWithClusterServer(key, [lightSensor], [], undefined, config.debug as boolean);
@@ -1097,7 +1134,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               shellyUpdateHandler(this, mbDevice, device, component, property, value);
             });
           }
-        } else if (component.name === 'Thermostat' && config.exposeThermostat !== 'disabled') {
+        } else if (component.name === 'Thermostat') {
           const thermostatComponent = device.getComponent(key);
           if (
             thermostatComponent?.hasProperty('enable') &&
@@ -1189,7 +1226,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               shellyUpdateHandler(this, mbDevice, device, component, property, value);
             });
           }
-        } else if (component.name === 'Flood' && config.exposeFlood !== 'disabled') {
+        } else if (component.name === 'Flood') {
           const floodComponent = device.getComponent(key);
           if (floodComponent?.hasProperty('flood') && isValidBoolean(floodComponent.getValue('flood'))) {
             const child = mbDevice.addChildDeviceType(key, [contactSensor], undefined, config.debug as boolean);
@@ -1201,7 +1238,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               shellyUpdateHandler(this, mbDevice, device, component, property, value);
             });
           }
-        } else if (component.name === 'Gas' && config.exposeGas !== 'disabled') {
+        } else if (component.name === 'Gas') {
           const gasComponent = device.getComponent(key);
           if (gasComponent?.hasProperty('sensor_state') && isValidString(gasComponent.getValue('alarm_state'))) {
             const child = mbDevice.addChildDeviceType(key, [contactSensor], undefined, config.debug as boolean);
@@ -1213,7 +1250,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               shellyUpdateHandler(this, mbDevice, device, component, property, value);
             });
           }
-        } else if (component.name === 'Smoke' && config.exposeSmoke !== 'disabled') {
+        } else if (component.name === 'Smoke') {
           const smokeComponent = device.getComponent(key);
           if (smokeComponent?.hasProperty('alarm') && isValidBoolean(smokeComponent.getValue('alarm'))) {
             const child = mbDevice.addChildDeviceType(key, [contactSensor], undefined, config.debug as boolean);
@@ -1225,7 +1262,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               shellyUpdateHandler(this, mbDevice, device, component, property, value);
             });
           }
-        } else if (component.name === 'Lux' && config.exposeLux !== 'disabled') {
+        } else if (component.name === 'Lux') {
           const luxComponent = device.getComponent(key);
           if (luxComponent?.hasProperty('value') && isValidNumber(luxComponent.getValue('value'), 0)) {
             const child = mbDevice.addChildDeviceType(key, [lightSensor], undefined, config.debug as boolean);
@@ -1238,7 +1275,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               shellyUpdateHandler(this, mbDevice, device, component, property, value);
             });
           }
-        } else if (component.name === 'Blugw' && config.exposeBlugw !== 'disabled') {
+        } else if (component.name === 'Blugw') {
           const blugwComponent = device.getComponent(key);
           if (blugwComponent?.hasProperty('sys_led_enable') && isValidBoolean(blugwComponent.getValue('sys_led_enable'))) {
             const child = mbDevice.addChildDeviceType(key, [modeSelect], undefined, config.debug as boolean);
