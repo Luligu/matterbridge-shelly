@@ -1,6 +1,6 @@
 {
   "name": "matterbridge-shelly",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Matterbridge shelly plugin",
   "author": "https://github.com/Luligu",
   "license": "Apache-2.0",
@@ -118,7 +118,7 @@
     "@types/node": "22.13.5",
     "@types/ws": "8.5.14",
     "cross-env": "^7.0.3",
-    "eslint-config-prettier": "10.0.1",
+    "eslint-config-prettier": "10.0.2",
     "eslint-plugin-jest": "28.11.0",
     "eslint-plugin-n": "^17.15.1",
     "eslint-plugin-prettier": "5.2.3",
@@ -126,6 +126,6 @@
     "prettier": "3.5.2",
     "ts-jest": "29.2.6",
     "typescript": "5.7.3",
-    "typescript-eslint": "^8.24.1"
+    "typescript-eslint": "8.24.1"
   }
 }

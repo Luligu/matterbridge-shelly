@@ -8,7 +8,7 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 
 ### Breaking Changes
 
-Since the plugin config got very complex and also confusing, from this release same options have been removed or simplified:
+Since the plugin config got very complex and also confusing, from release 2.0.0 same options have been removed or simplified:
 
 Removed options:
 
@@ -31,6 +31,20 @@ New setups:
 Expert mode:
 
 The expertMode option has been added to show an advanced or simplified config.
+
+## [2.0.1] - 2025-03-02
+
+### Changed
+
+- [blugateway]: The BLU gateways can now be disabled (with whiteList or blackList). The paired BLU devices are exposed even if the gateway is disabled.
+- [mDns]: The MdnsScanner doesn't stop anymore after 10 minutes. Once all the devices have been discovered, it is possible to disable it in the config to reduce the network traffic.
+- [platform]: Refactor select devices and entities for the select in the frontend.
+- [package]: Updated dependencies.
+- [plugin]: Requires Matterbridge 2.2.1.
+
+<a href="https://www.buymeacoffee.com/luligugithub">
+  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+</a>
 
 ## [2.0.0] - 2025-02-27
 
