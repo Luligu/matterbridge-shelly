@@ -21,16 +21,16 @@ Features:
 - Shelly wifi battery-powered devices are supported.
 - Shelly wifi battery-powered devices with sleep_mode are supported.
 - Shelly BLU devices are supported through local devices configured as ble gateway.
-- Discovered shellies are stored in local storage for quick loading on startup.
+- Discovered shellies are stored in local storage and cached for fast loading on startup.
 - The components exposed are Light (with brightness and RGB color), Switch, Relay, Roller, Cover, PowerMeter, Temperature, Humidity, Illuminance, Thermostat, Button and Input.
 - PowerMeters expose the electrical measurements with the electricalSensor device type (suppoerted by Home Assistant and partially by SmartThings), waiting for the controllers to upgrade to the Matter 1.3 specs.
 - Shellies are controlled locally, eliminating the need for cloud or MQTT (which can both be disabled).
 - Shelly Gen 1 devices are controlled using the CoIoT protocol (see the note below).
 - Shelly Gen 2 and Gen 3 devices are controlled using WebSocket.
-- The Matter device takes the name configured in the Shelly device's web page.
+- The Matter device takes the name configured in the Shelly device's web page (each Shelly device must have a different name).
 - Each device can be blacklisted or whitelisted using its name, id or mac address. Refer to the [COMPONENTS.md documentation.](https://github.com/Luligu/matterbridge-shelly/blob/main/COMPONENTS.md)
 - Device components can be blacklisted globally or on a per-device basis. Refer to the [COMPONENTS.md documentation.](https://github.com/Luligu/matterbridge-shelly/blob/main/COMPONENTS.md)
-- Devices ids can be selected from a list in the config editor.
+- Devices ids can be selected from a list in the config editor or in the Devices panel on the Home page.
 - If the device has a firmware update available, a message is displayed.
 - If the device's CoIoT protocol is not correctly configured, a message is displayed.
 - If the device cover/roller component is not calibrated, a message is displayed.
@@ -87,11 +87,11 @@ Follow these guidelines for specific devices.
 
 ### Add Gen. 1 battery-powered devices
 
-- only for the first time, when you want to register them: check that enableMdnsDiscover and enableStorageDiscover are flagged in the plugin configuration. Restart matterbridge (the mdns discovery is active for the first 10 minutes) and awake each device you want to register pressing the device button.
+- only for the first time, when you want to register them: check that enableMdnsDiscover and enableStorageDiscover are flagged in the plugin configuration. Restart matterbridge and awake each device you want to register pressing the device button.
 
 ### Add Gen. 2 or 3 battery-powered devices
 
-- in the device web page go to "Settings", then "Outbound websocket" and enable it, select "TLS no validation" and put in the server field `ws://<matterbridge-ipv4>:8485` (where `<matterbridge-ipv4>` is the ipv4 address of Matterbridge e.g. ws://192.168.1.100:8485). You can find the matterbridge ipv4Address address in the frontend or in the log. Then, only for the first time, when you want to register them: check that enableMdnsDiscover and enableStorageDiscover are flagged in the plugin configuration. Restart matterbridge (the mdns discovery is active for the first 10 minutes) and awake each device you want to register pressing the device button.
+- in the device web page go to "Settings", then "Outbound websocket" and enable it, select "TLS no validation" and put in the server field `ws://<matterbridge-ipv4>:8485` (where `<matterbridge-ipv4>` is the ipv4 address of Matterbridge e.g. ws://192.168.1.100:8485). You can find the matterbridge ipv4Address address in the frontend or in the log. Then, only for the first time, when you want to register them: check that enableMdnsDiscover and enableStorageDiscover are flagged in the plugin configuration. Restart matterbridge and awake each device you want to register pressing the device button.
 
 ### Add BLU devices
 
@@ -161,12 +161,6 @@ The devices in the list will be exposed as switches (don't use it for Alexa).
 
 The devices in the list will be exposed as lights.
 
-### exposeInput
-
-Choose how to expose the shelly inputs: disabled, contact, momentary or latching switch (default momentary).
-
-Is useful only if you create automations on the controller side or you need the controller history.
-
 ### inputContactList
 
 The devices in the list will expose the Input component as a contact sensor.
@@ -199,8 +193,6 @@ For shelly wifi devices use the device name (i.e. the name defined in the device
 
 For shelly BLU devices use the device name (i.e. the name defined in the device gateway web UI) or the device mac addr (i.e. 7c:c6:b6:65:2d:87).
 
-If you add a BLU device in the white list, you need to put also its BLU gateway on the list.
-
 ### entityBlackList
 
 The components in the list will not be exposed for all devices. Use the component name (i.e. Temperature).
@@ -223,13 +215,13 @@ The devices in the list will not be loaded from the cache. Use the device id (e.
 ### deviceIp
 
 You can put there one of more of your devices if they have problem with mdns.
-Don't use it unless is needed cause the IP address you add here is fixed.
+Don't use it unless is needed cause the IP address you add here is static.
 You also need to enable the enableConfigDiscover option.
 E.g. "shelly1minig3-543204547478": "192.168.1.221".
 
 ### enableMdnsDiscover
 
-Should always be enabled to discover new devices. It turns off automatically after 10 minutes to reduce network traffic.
+Should always be enabled to discover new devices.
 
 Once a device is discovered, it is added to the shelly storage.
 
@@ -241,7 +233,7 @@ Should always be enabled to automatically add all the devices previously discove
 
 ### resetStorageDiscover
 
-Reset the storage discovery on the next restart (it will clear the storage of already discovered devices and the cache files).
+Reset the storage on the next restart (it will clear the storage and the cache files).
 
 ### enableConfigDiscover
 
@@ -291,17 +283,11 @@ These are the config values:
   "type": "DynamicPlatform",
   "username": "<USERNAME>",
   "password": "<PASSWORD>",
-  "exposeSwitch": "switch" | "light" | "outlet"
   "switchList": []
   "lightList": []
-  "outletList": []
-  "exposeInput": "disabled" | "contact" | "momentary" | "latching"
   "inputContactList": []
   "inputMomentaryList": []
   "inputLatchingList": []
-  "exposeInputEvent": "disabled" | "momentary"
-  "inputEventList": []
-  "exposePowerMeter": "disabled" | "matter13"
   "blackList": [],
   "whiteList": [],
   "entityBlackList": [],
@@ -322,7 +308,6 @@ These are the config values:
   "debugMdns": false,
   "debugCoap": false,
   "debugWs": false,
-  "interfaceName": ""
   "unregisterOnShutdown": false,
 }
 ```

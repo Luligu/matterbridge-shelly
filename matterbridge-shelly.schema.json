@@ -76,7 +76,7 @@
       "selectFrom": "serial"
     },
     "whiteList": {
-      "description": "Only the devices in the list will be exposed. Use the device id (e.g. shellyplus2pm-5443B23D81F8) or BLU addr (i.e. 7c:c6:b6:65:2d:87). If you add a BLU device in the white list, you need to put also its BLU gateway on the list.",
+      "description": "Only the devices in the list will be exposed. Use the device id (e.g. shellyplus2pm-5443B23D81F8) or BLU addr (i.e. 7c:c6:b6:65:2d:87).",
       "type": "array",
       "items": {
         "type": "string"
@@ -127,7 +127,7 @@
       }
     },
     "enableMdnsDiscover": {
-      "description": "Enable the mdns discovery for shelly devices (it will stop after 10 minutes)",
+      "description": "Enable the mdns discovery for shelly devices",
       "type": "boolean",
       "default": true
     },
@@ -137,7 +137,7 @@
       "default": true
     },
     "resetStorageDiscover": {
-      "description": "Reset the storage discovery on the next restart (it will clear the storage of already discovered devices and the cache files)",
+      "description": "Reset the storage on the next restart (it will clear the storage and the cache files)",
       "type": "boolean",
       "default": false
     },

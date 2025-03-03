@@ -343,7 +343,7 @@ export class Shelly extends EventEmitter {
   /**
    * Starts the mDNS scanner.
    *
-   * @param {number} mdnsShutdownTimeout - The timeout for shutting down the mDNS scanner.
+   * @param {number} mdnsShutdownTimeout - The timeout for shutting down the mDNS scanner (optional, if not provided the MdnsScanner will not stop).
    * @param {string} mdnsInterface - The network interface to use for mDNS scanning.
    * @param {SocketType} type - The socket type to use for mDNS scanning.
    * @param {boolean} debug - Whether to enable debug mode for mDNS scanning.
