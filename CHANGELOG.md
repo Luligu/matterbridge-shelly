@@ -32,6 +32,20 @@ Expert mode:
 
 The expertMode option has been added to show an advanced or simplified config.
 
+## [2.0.2] - 2025-03-05
+
+### Changed
+
+- [package]: Updated dependencies.
+
+### Fixed
+
+- [platform]: Fixed edge case for select and unselect.
+
+<a href="https://www.buymeacoffee.com/luligugithub">
+  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+</a>
+
 ## [2.0.1] - 2025-03-02
 
 ### Changed
