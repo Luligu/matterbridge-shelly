@@ -290,6 +290,10 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         );
         return;
       }
+      if (discoveredDevice.gen > 3 || discoveredDevice.id.includes('g4-')) {
+        this.log.warn(`Shelly device ${hk}${discoveredDevice.id}${wr} host ${zb}${discoveredDevice.host}${wr} has been discovered. Gen 4 devices are not supported.`);
+        return;
+      }
       if (this.discoveredDevices.has(discoveredDevice.id)) {
         const stored = this.storedDevices.get(discoveredDevice.id);
         if (stored?.host !== discoveredDevice.host) {
@@ -1449,6 +1453,12 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     if (this.config.enableStorageDiscover === true) {
       this.log.info(`Loading from storage ${this.storedDevices.size} Shelly devices`);
       for (const storedDevice of this.storedDevices.values()) {
+        if (storedDevice.id.includes('g4-')) {
+          this.log.error(
+            `Stored Shelly device id ${hk}${storedDevice.id}${er} host ${zb}${storedDevice.host}${er} is not valid. Please enable resetStorageDiscover in plugin config and restart.`,
+          );
+          continue;
+        }
         storedDevice.id = ShellyDevice.normalizeId(storedDevice.id).id;
         if (storedDevice.id === undefined || storedDevice.host === undefined || !isValidIpv4Address(storedDevice.host)) {
           this.log.error(
