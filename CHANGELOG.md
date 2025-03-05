@@ -32,6 +32,16 @@ Expert mode:
 
 The expertMode option has been added to show an advanced or simplified config.
 
+## [2.0.3] - 2025-03-05
+
+### Added
+
+- [MdnsScanner]: Added discovery of gen 4 devices.
+
+<a href="https://www.buymeacoffee.com/luligugithub">
+  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+</a>
+
 ## [2.0.2] - 2025-03-05
 
 ### Changed

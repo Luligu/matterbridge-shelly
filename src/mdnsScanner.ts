@@ -141,6 +141,7 @@ export class MdnsScanner extends EventEmitter {
         if (a.type === 'TXT' && (a.name.startsWith('shelly') || a.name.startsWith('Shelly'))) {
           if (a.data.toString().includes('gen=2')) gen = 2;
           if (a.data.toString().includes('gen=3')) gen = 3;
+          if (a.data.toString().includes('gen=4')) gen = 4;
         }
       }
       for (const a of response.answers) {
@@ -188,6 +189,7 @@ export class MdnsScanner extends EventEmitter {
         if (a.type === 'TXT' && (a.name.startsWith('shelly') || a.name.startsWith('Shelly'))) {
           if (a.data.toString().includes('gen=2')) gen = 2;
           if (a.data.toString().includes('gen=3')) gen = 3;
+          if (a.data.toString().includes('gen=4')) gen = 4;
         }
       }
       for (const a of response.additionals) {
