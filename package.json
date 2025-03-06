@@ -52,7 +52,7 @@
     "start": "matterbridge",
     "start:bridge": "matterbridge -bridge",
     "start:childbridge": "matterbridge -childbridge",
-    "test": "cross-env node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand --testPathIgnorePatterns=\"src/shellyDevice.real.test.ts|src/shellyDevice.realgen1.test.ts|src/shellyDevice.realgen2.test.ts|src/shellyDevice.realgen3.test.ts\"",
+    "test": "cross-env node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js --testPathIgnorePatterns=\"src/shellyDevice.real.test.ts|src/shellyDevice.realgen1.test.ts|src/shellyDevice.realgen2.test.ts|src/shellyDevice.realgen3.test.ts\"",
     "test:verbose": "cross-env node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js --verbose --testPathIgnorePatterns=\"src/shellyDevice.real.test.ts|src/shellyDevice.realgen1.test.ts|src/shellyDevice.realgen2.test.ts|src/shellyDevice.realgen3.test.ts\"",
     "test:watch": "cross-env node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js --watch --testPathIgnorePatterns=\"src/shellyDevice.real.test.ts|src/shellyDevice.realgen1.test.ts|src/shellyDevice.realgen2.test.ts|src/shellyDevice.realgen3.test.ts\"",
     "test:coverage": "cross-env node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js --coverage --testPathIgnorePatterns=\"src/shellyDevice.real.test.ts|src/shellyDevice.realgen1.test.ts|src/shellyDevice.realgen2.test.ts|src/shellyDevice.realgen3.test.ts\"",
