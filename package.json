@@ -86,6 +86,7 @@
     "checkDependencies": "npx npm-check-updates",
     "updateDependencies": "npx npm-check-updates -u && npm run deepCleanBuild",
     "runMeBeforePublish": "npm run lint && npm run format && npm run build && npm run test",
+    "git:status": "git status && git branch -vv && git diff dev origin/dev",
     "prepublishOnly": "npm run cleanBuildProduction && npm pkg delete devDependencies scripts types && npx rimraf ./node_modules && npm install --omit=dev && npm shrinkwrap",
     "npmPack": "copy package.json package.log && npm run prepublishOnly && npm pack && copy package.log package.json && npm run deepCleanBuild",
     "npmPublishTagDev": "copy package.json package.log && npm run prepublishOnly && npm publish --tag dev && copy package.log package.json && npm run deepCleanBuild",

@@ -6,8 +6,8 @@
     "slot": 0,
     "model": "S3EM-002CXCEU",
     "gen": 3,
-    "fw_id": "20240724-112312/g1216eb0",
-    "ver": "1.4.99-dev101493",
+    "fw_id": "20250220-082138/1.5.0-g0087a06",
+    "ver": "1.5.0",
     "app": "EMG3",
     "auth_en": false,
     "auth_domain": null
@@ -16,9 +16,6 @@
     "ble": {
       "enable": true,
       "rpc": {
-        "enable": true
-      },
-      "observer": {
         "enable": true
       }
     },
@@ -67,7 +64,7 @@
       "device": {
         "name": "EM Gen3",
         "mac": "84FCE636582C",
-        "fw_id": "20240724-112312/g1216eb0",
+        "fw_id": "20250220-082138/1.5.0-g0087a06",
         "discoverable": true,
         "eco_mode": true,
         "addon_type": null
@@ -82,11 +79,8 @@
         "websocket": {
           "enable": false
         },
-        "file_log": {
-          "enable": false
-        },
         "udp": {
-          "addr": "35.205.173.252:8910"
+          "addr": null
         }
       },
       "ui_data": {},
@@ -95,13 +89,13 @@
         "listen_port": null
       },
       "sntp": {
-        "server": "time.google.com"
+        "server": "time.cloudflare.com"
       },
-      "cfg_rev": 69
+      "cfg_rev": 73
     },
     "wifi": {
       "ap": {
-        "ssid": "ShellyEMG3-84FCE636582C",
+        "ssid": "",
         "is_open": true,
         "enable": false,
         "range_extender": {
@@ -109,7 +103,7 @@
         }
       },
       "sta": {
-        "ssid": "FibreBox_X6-12A4C7",
+        "ssid": "",
         "is_open": false,
         "enable": true,
         "ipv4mode": "dhcp",
@@ -119,9 +113,9 @@
         "nameserver": null
       },
       "sta1": {
-        "ssid": "wifiAlbatros",
+        "ssid": "",
         "is_open": false,
-        "enable": false,
+        "enable": true,
         "ipv4mode": "dhcp",
         "ip": null,
         "netmask": null,
@@ -147,32 +141,32 @@
     },
     "em1:0": {
       "id": 0,
+      "voltage": 237.1,
+      "current": 0.04,
+      "act_power": 3.5,
+      "aprt_power": 9.5,
+      "pf": 0.4,
+      "freq": 50,
+      "calibration": "factory"
+    },
+    "em1:1": {
+      "id": 1,
+      "voltage": 237,
       "current": 0.02,
-      "voltage": 237.5,
       "act_power": 0,
       "aprt_power": 4.8,
       "pf": 0,
       "freq": 50,
       "calibration": "factory"
     },
-    "em1:1": {
-      "id": 1,
-      "current": 0.021,
-      "voltage": 237.5,
-      "act_power": 0,
-      "aprt_power": 4.9,
-      "pf": 0,
-      "freq": 50,
-      "calibration": "factory"
-    },
     "em1data:0": {
       "id": 0,
-      "total_act_energy": 0.01,
+      "total_act_energy": 2874.36,
       "total_act_ret_energy": 0
     },
     "em1data:1": {
       "id": 1,
-      "total_act_energy": 0,
+      "total_act_energy": 1516.75,
       "total_act_ret_energy": 0
     },
     "mqtt": {
@@ -183,39 +177,46 @@
       "source": "init",
       "output": false,
       "temperature": {
-        "tC": 52.9,
-        "tF": 127.3
+        "tC": 45.4,
+        "tF": 113.8
       }
     },
     "sys": {
       "mac": "84FCE636582C",
       "restart_required": false,
-      "time": "17:24",
-      "unixtime": 1732119845,
-      "uptime": 17,
-      "ram_size": 252664,
-      "ram_free": 76236,
+      "time": "10:02",
+      "unixtime": 1741251734,
+      "last_sync_ts": 1741250570,
+      "uptime": 598469,
+      "ram_size": 253972,
+      "ram_free": 74440,
+      "ram_min_free": 54068,
       "fs_size": 786432,
-      "fs_free": 323584,
-      "cfg_rev": 69,
+      "fs_free": 315392,
+      "cfg_rev": 73,
       "kvs_rev": 0,
       "schedule_rev": 0,
       "webhook_rev": 0,
-      "available_updates": {},
-      "reset_reason": 3
+      "btrelay_rev": 156,
+      "available_updates": {
+        "beta": {
+          "version": "1.5.1-beta1"
+        }
+      },
+      "reset_reason": 1
     },
     "wifi": {
       "sta_ip": "192.168.1.243",
       "status": "got ip",
-      "ssid": "FibreBox_X6-12A4C7",
-      "rssi": -60
+      "ssid": "",
+      "rssi": -55
     },
     "ws": {
       "connected": false
     }
   },
   "components": [],
-  "cfg_rev": 69,
+  "cfg_rev": 73,
   "offset": 0,
   "total": 0
 }

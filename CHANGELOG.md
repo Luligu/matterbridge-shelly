@@ -32,6 +32,16 @@ Expert mode:
 
 The expertMode option has been added to show an advanced or simplified config.
 
+## [2.0.4] - 2025-03-06
+
+### Added
+
+- [MdnsScanner]: Refactor Jest test to include all gen 1, 2, 3 and 4 devices mdns response.
+
+<a href="https://www.buymeacoffee.com/luligugithub">
+  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+</a>
+
 ## [2.0.3] - 2025-03-05
 
 ### Added

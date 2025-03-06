@@ -87,7 +87,7 @@ export class MdnsScanner extends EventEmitter {
   /**
    * Sends an mDNS query for shelly devices.
    */
-  private sendQuery() {
+  sendQuery() {
     this.scanner?.query([
       { name: '_http._tcp.local', type: 'PTR' },
       { name: '_shelly._tcp.local', type: 'PTR' },
@@ -303,9 +303,8 @@ export class MdnsScanner extends EventEmitter {
     const sortedDevices = Array.from(this.devices).sort((a, b) => {
       const hostA = a[1].toLowerCase();
       const hostB = b[1].toLowerCase();
-      if (hostA < hostB) return -1;
-      if (hostA > hostB) return 1;
-      return 0;
+      if (hostA >= hostB) return 1;
+      else return -1;
     });
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     for (const [name, host] of sortedDevices) {
@@ -317,9 +316,8 @@ export class MdnsScanner extends EventEmitter {
     const sortedDiscoveredDevices = Array.from(this.discoveredDevices).sort((a, b) => {
       const idA = a[1].id;
       const idB = b[1].id;
-      if (idA < idB) return -1;
-      if (idA > idB) return 1;
-      return 0;
+      if (idA >= idB) return 1;
+      else return -1;
     });
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     for (const [name, { id, host, port, gen }] of sortedDiscoveredDevices) {
@@ -335,7 +333,7 @@ export class MdnsScanner extends EventEmitter {
    * @param {ResponsePacket} response - The response packet to be saved.
    * @returns {Promise<void>} A promise that resolves when the response is successfully saved, or rejects with an error.
    */
-  private async saveResponse(shellyId: string, response: ResponsePacket): Promise<void> {
+  async saveResponse(shellyId: string, response: ResponsePacket): Promise<void> {
     const responseFile = path.join(this._dataPath, `${shellyId}.mdns.json`);
     try {
       await fs.mkdir(this._dataPath, { recursive: true });
@@ -354,7 +352,7 @@ export class MdnsScanner extends EventEmitter {
         }
       }
       await fs.writeFile(responseFile, JSON.stringify(response, null, 2), 'utf8');
-      this.log.debug(`*Saved shellyId ${hk}${shellyId}${db} response file ${CYAN}${responseFile}${db}`);
+      this.log.debug(`Saved shellyId ${hk}${shellyId}${db} response file ${CYAN}${responseFile}${db}`);
       return Promise.resolve();
     } catch (err) {
       this.log.error(`Error saving shellyId ${hk}${shellyId}${er} response file ${CYAN}${responseFile}${er}: ${err instanceof Error ? err.message : err}`);
