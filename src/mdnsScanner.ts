@@ -50,7 +50,6 @@ export class MdnsScanner extends EventEmitter {
   private scannerTimeout?: NodeJS.Timeout;
   private queryTimeout?: NodeJS.Timeout;
   private _dataPath = 'temp';
-  private _debug = false;
 
   constructor(logLevel: LogLevel = LogLevel.INFO) {
     super();
@@ -64,15 +63,6 @@ export class MdnsScanner extends EventEmitter {
    */
   set dataPath(path: string) {
     this._dataPath = path;
-  }
-
-  /**
-   * Sets the debug mode.
-   *
-   * @param {boolean} debug - The new debug mode.
-   */
-  set debug(debug: boolean) {
-    this._debug = debug;
   }
 
   /**
@@ -105,7 +95,6 @@ export class MdnsScanner extends EventEmitter {
    * @param {boolean} debug - Indicates whether to enable debug mode (default: false).
    */
   start(shutdownTimeout?: number, mdnsInterface?: string, type?: SocketType, debug = false) {
-    this._debug = debug;
     if (this._isScanning) return;
     this._isScanning = true;
 

@@ -120,14 +120,6 @@ describe('Shellies MdnsScanner test', () => {
     expect((mdns as any)._dataPath).toBe('temp');
   });
 
-  test('debug', () => {
-    expect(mdns.debug).toBeUndefined();
-    mdns.debug = true;
-    expect((mdns as any)._debug).toBe(true);
-    mdns.debug = false;
-    expect((mdns as any)._debug).toBe(false);
-  });
-
   test('NormalizeId', () => {
     expect(mdns.normalizeShellyId('ShellySwitch25-3494546bbF7E.local')).toBe('shellyswitch25-3494546BBF7E');
     expect(mdns.normalizeShellyId('shellyPlug-S-C38Eab.local')).toBe('shellyplug-s-C38EAB');
