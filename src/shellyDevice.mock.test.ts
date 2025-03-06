@@ -1841,7 +1841,7 @@ describe('Shelly devices test', () => {
       expect(device.model).toBe('S3EM-002CXCEU');
       expect(device.mac).toBe('84FCE636582C');
       expect(device.id).toBe(id);
-      expect(device.firmware).toBe('g1216eb0'); // firmwareGen1
+      expect(device.firmware).toBe('1.5.0-g0087a06');
       expect(device.auth).toBe(false);
       expect(device.gen).toBe(3);
       expect(device.profile).toBe(undefined);

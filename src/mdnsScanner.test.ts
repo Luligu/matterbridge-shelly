@@ -8,10 +8,8 @@ import { MdnsScanner, DiscoveredDeviceListener, DiscoveredDevice } from './mdnsS
 import { jest } from '@jest/globals';
 import path from 'node:path';
 import { readFileSync } from 'node:fs';
-import { getIpv4InterfaceAddress } from 'matterbridge/utils';
-import { RemoteInfo, SocketType } from 'node:dgram';
+import { RemoteInfo } from 'node:dgram';
 import { ResponsePacket } from 'multicast-dns';
-import exp from 'node:constants';
 
 function loadResponse(shellyId: string) {
   const responseFile = path.join('src', 'mock', `${shellyId}.mdns.json`);
@@ -34,7 +32,7 @@ let consoleDebugSpy: jest.SpiedFunction<typeof console.log>;
 let consoleInfoSpy: jest.SpiedFunction<typeof console.log>;
 let consoleWarnSpy: jest.SpiedFunction<typeof console.log>;
 let consoleErrorSpy: jest.SpiedFunction<typeof console.log>;
-const debug = true;
+const debug = false;
 
 if (!debug) {
   // Spy on and mock AnsiLogger.log
@@ -162,6 +160,7 @@ describe('Shellies MdnsScanner test', () => {
     // Start the mdns scanner
     mdns.start(undefined, '127.0.0.1', 'udp4', true);
     expect(mdns.isScanning).toBeTruthy();
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Starting mDNS query service for shelly devices with interface 127.0.0.1 bind 127.0.0.1 type udp4 ip 224.0.0.251...`);
 
     // Set up a promise that resolves when the listener is invoked.
     const discoveredDeviceListener: jest.MockedFunction<DiscoveredDeviceListener> = jest.fn();
@@ -188,6 +187,7 @@ describe('Shellies MdnsScanner test', () => {
     // Start the mdns scanner
     mdns.start(undefined, '127.0.0.1', 'udp4', true);
     expect(mdns.isScanning).toBeTruthy();
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Starting mDNS query service for shelly devices with interface 127.0.0.1 bind 127.0.0.1 type udp4 ip 224.0.0.251...`);
 
     // Set up a promise that resolves when the listener is invoked.
     const discoveredDeviceListener: jest.MockedFunction<DiscoveredDeviceListener> = jest.fn();
@@ -214,6 +214,7 @@ describe('Shellies MdnsScanner test', () => {
     // Start the mdns scanner
     mdns.start(undefined, '127.0.0.1', 'udp4', true);
     expect(mdns.isScanning).toBeTruthy();
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Starting mDNS query service for shelly devices with interface 127.0.0.1 bind 127.0.0.1 type udp4 ip 224.0.0.251...`);
 
     // Set up a promise that resolves when the listener is invoked.
     const discoveredDeviceListener: jest.MockedFunction<DiscoveredDeviceListener> = jest.fn();
