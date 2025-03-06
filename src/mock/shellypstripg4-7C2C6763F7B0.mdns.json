@@ -68,9 +68,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": [
-        "gen=4"
-      ]
+      "data": ["gen=4"]
     },
     {
       "name": "ShellyPStripG4-7C2C6763F7B0.local",
@@ -99,11 +97,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": [
-        "gen=4",
-        "app=PowerStrip",
-        "ver=1.5.99-dev118314"
-      ]
+      "data": ["gen=4", "app=PowerStrip", "ver=1.5.99-dev118314"]
     },
     {
       "name": "ShellyPStripG4-7C2C6763F7B0.local",

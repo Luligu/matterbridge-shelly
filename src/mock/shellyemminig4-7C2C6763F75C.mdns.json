@@ -68,9 +68,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": [
-        "gen=4"
-      ]
+      "data": ["gen=4"]
     },
     {
       "name": "ShellyEMMiniG4-7C2C6763F75C.local",
@@ -99,11 +97,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": [
-        "gen=4",
-        "app=MiniEMG4",
-        "ver=1.5.99-dev114743"
-      ]
+      "data": ["gen=4", "app=MiniEMG4", "ver=1.5.99-dev114743"]
     },
     {
       "name": "ShellyEMMiniG4-7C2C6763F75C.local",

@@ -68,9 +68,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": [
-        "gen=4"
-      ]
+      "data": ["gen=4"]
     },
     {
       "name": "Shelly1G4-A085E3BC987C.local",
@@ -99,11 +97,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": [
-        "gen=4",
-        "app=S1G4",
-        "ver=1.5.99-g4prod0"
-      ]
+      "data": ["gen=4", "app=S1G4", "ver=1.5.99-g4prod0"]
     },
     {
       "name": "Shelly1G4-A085E3BC987C.local",

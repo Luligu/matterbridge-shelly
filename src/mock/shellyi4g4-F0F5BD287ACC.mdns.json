@@ -44,9 +44,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": [
-        "gen=4"
-      ]
+      "data": ["gen=4"]
     },
     {
       "name": "ShellyI4G4-F0F5BD287ACC.local",

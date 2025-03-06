@@ -225,15 +225,6 @@ export class Shelly extends EventEmitter {
   }
 
   /**
-   * Sets the debug mode for mDNS scanning.
-   *
-   * @param {boolean} debug - A boolean value indicating whether to enable debug mode.
-   */
-  set debugMdns(debug: boolean) {
-    if (this.mdnsScanner) this.mdnsScanner.debug = debug;
-  }
-
-  /**
    * Sets the debug mode for CoAP server.
    *
    * @param {boolean} debug - A boolean value indicating whether to enable debug mode or not.

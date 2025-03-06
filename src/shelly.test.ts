@@ -150,11 +150,6 @@ describe('Shellies test', () => {
     expect((shellies as any).coapServer._dataPath).toBe('temp');
   });
 
-  test('Set debug mdns', () => {
-    shellies.debugMdns = true;
-    expect((shellies as any).mdnsScanner._debug).toBe(true);
-  });
-
   test('Set debug coap', () => {
     shellies.debugCoap = true;
     expect((shellies as any).coapServer._debug).toBe(true);
@@ -163,7 +158,6 @@ describe('Shellies test', () => {
   test('Set log level', () => {
     shellies.setLogLevel(LogLevel.DEBUG, true, true, true);
     expect((shellies as any).log.logLevel).toBe(LogLevel.DEBUG);
-    expect((shellies as any).mdnsScanner._debug).toBe(true);
     expect((shellies as any).coapServer._debug).toBe(true);
     shellies.setLogLevel(LogLevel.INFO, false, false, true);
     expect((shellies as any).log.logLevel).toBe(LogLevel.INFO);

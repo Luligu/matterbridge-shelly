@@ -68,9 +68,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": [
-        "gen=4"
-      ]
+      "data": ["gen=4"]
     },
     {
       "name": "Shelly2PMG4-7C2C677A0110.local",
@@ -99,11 +97,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": [
-        "gen=4",
-        "app=S2PMG4",
-        "ver=1.4.99"
-      ]
+      "data": ["gen=4", "app=S2PMG4", "ver=1.4.99"]
     },
     {
       "name": "Shelly2PMG4-7C2C677A0110.local",
