@@ -97,7 +97,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": ["gen=2", "app=Pro3EM", "ver=1.4.3"]
+      "data": ["gen=2", "app=Pro3EM", "ver=1.4.4"]
     },
     {
       "name": "ShellyPro3EM-A0DD6CA0C27C.local",

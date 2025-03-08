@@ -17,12 +17,12 @@
     },
     "wifi_ap": {
       "enabled": false,
-      "ssid": "shellydw2-483FDA825476",
+      "ssid": "",
       "key": ""
     },
     "wifi_sta": {
       "enabled": true,
-      "ssid": "FibreBox_X6-12A4C7",
+      "ssid": "",
       "ipv4_method": "dhcp",
       "ip": null,
       "gw": null,
@@ -31,7 +31,7 @@
     },
     "wifi_sta1": {
       "enabled": true,
-      "ssid": "wifiAlbatros",
+      "ssid": "",
       "ipv4_method": "dhcp",
       "ip": null,
       "gw": null,
@@ -54,7 +54,7 @@
     "coiot": {
       "enabled": true,
       "update_period": 15,
-      "peer": "192.168.1.189:5683"
+      "peer": "192.168.1.20:5683"
     },
     "sntp": {
       "server": "time.google.com",
@@ -116,9 +116,9 @@
   "status": {
     "wifi_sta": {
       "connected": true,
-      "ssid": "FibreBox_X6-12A4C7",
-      "ip": "192.168.1.254",
-      "rssi": -76
+      "ssid": "",
+      "ip": "192.168.1.247",
+      "rssi": -53
     },
     "cloud": {
       "enabled": true,
@@ -129,7 +129,7 @@
     },
     "time": "",
     "unixtime": 0,
-    "serial": 5,
+    "serial": 1,
     "has_update": false,
     "mac": "483FDA825476",
     "cfg_changed_cnt": 0,
@@ -138,15 +138,15 @@
     },
     "is_valid": true,
     "tmp": {
-      "value": 24.1,
+      "value": 22.6,
       "units": "C",
-      "tC": 24.1,
-      "tF": 75.38,
+      "tC": 22.6,
+      "tF": 72.68,
       "is_valid": true
     },
     "lux": {
-      "value": 48,
-      "illumination": "dark",
+      "value": 292,
+      "illumination": "twilight",
       "is_valid": true
     },
     "accel": {
@@ -154,27 +154,26 @@
       "vibration": 0
     },
     "sensor": {
-      "state": "close",
+      "state": "open",
       "is_valid": true
     },
     "bat": {
-      "value": 99,
-      "voltage": 5.93
+      "value": 100,
+      "voltage": 5.98
     },
-    "act_reasons": ["poweron"],
+    "act_reasons": ["sensor", "movement"],
     "sensor_error": 0,
     "update": {
-      "status": "idle",
+      "status": "unknown",
       "has_update": false,
-      "new_version": "20230913-112843/v1.14.0-gcb84623",
-      "old_version": "20230913-112843/v1.14.0-gcb84623",
-      "beta_version": "20231107-163707/v1.14.1-rc1-g0617c15"
+      "new_version": "",
+      "old_version": "20230913-112843/v1.14.0-gcb84623"
     },
     "ram_total": 52216,
-    "ram_free": 40340,
+    "ram_free": 40988,
     "fs_size": 233681,
     "fs_free": 154616,
-    "uptime": 26
+    "uptime": 2
   },
   "components": [],
   "cfg_rev": 0,

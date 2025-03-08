@@ -141,27 +141,27 @@
     },
     "em1:0": {
       "id": 0,
-      "voltage": 237.1,
-      "current": 0.04,
-      "act_power": 3.5,
-      "aprt_power": 9.5,
+      "voltage": 239.9,
+      "current": 0.044,
+      "act_power": 4.8,
+      "aprt_power": 10.5,
       "pf": 0.4,
       "freq": 50,
       "calibration": "factory"
     },
     "em1:1": {
       "id": 1,
-      "voltage": 237,
+      "voltage": 239.8,
       "current": 0.02,
       "act_power": 0,
-      "aprt_power": 4.8,
+      "aprt_power": 4.9,
       "pf": 0,
       "freq": 50,
       "calibration": "factory"
     },
     "em1data:0": {
       "id": 0,
-      "total_act_energy": 2874.36,
+      "total_act_energy": 3087,
       "total_act_ret_energy": 0
     },
     "em1data:1": {
@@ -177,19 +177,19 @@
       "source": "init",
       "output": false,
       "temperature": {
-        "tC": 45.4,
-        "tF": 113.8
+        "tC": 46.9,
+        "tF": 116.4
       }
     },
     "sys": {
       "mac": "84FCE636582C",
       "restart_required": false,
-      "time": "10:02",
-      "unixtime": 1741251734,
-      "last_sync_ts": 1741250570,
-      "uptime": 598469,
-      "ram_size": 253972,
-      "ram_free": 74440,
+      "time": "14:59",
+      "unixtime": 1741442386,
+      "last_sync_ts": 1741440734,
+      "uptime": 789125,
+      "ram_size": 253924,
+      "ram_free": 73020,
       "ram_min_free": 54068,
       "fs_size": 786432,
       "fs_free": 315392,
@@ -209,7 +209,7 @@
       "sta_ip": "192.168.1.243",
       "status": "got ip",
       "ssid": "",
-      "rssi": -55
+      "rssi": -60
     },
     "ws": {
       "connected": false

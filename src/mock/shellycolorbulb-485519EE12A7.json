@@ -18,12 +18,12 @@
     },
     "wifi_ap": {
       "enabled": false,
-      "ssid": "shellycolorbulb-485519EE12A7",
+      "ssid": "",
       "key": ""
     },
     "wifi_sta": {
       "enabled": true,
-      "ssid": "FibreBox_X6-12A4C7",
+      "ssid": "",
       "ipv4_method": "dhcp",
       "ip": null,
       "gw": null,
@@ -32,7 +32,7 @@
     },
     "wifi_sta1": {
       "enabled": true,
-      "ssid": "wifiAlbatros",
+      "ssid": "",
       "ipv4_method": "dhcp",
       "ip": null,
       "gw": null,
@@ -59,8 +59,8 @@
     "coiot": {
       "enabled": true,
       "update_period": 15,
-      "peer": "192.168.1.189:5683",
-      "execute_enable": false
+      "peer": "192.168.1.20:5683",
+      "execute_enable": true
     },
     "sntp": {
       "server": "time.google.com",
@@ -83,7 +83,7 @@
     },
     "cloud": {
       "enabled": true,
-      "connected": true
+      "connected": false
     },
     "timezone": null,
     "lat": null,
@@ -92,8 +92,8 @@
     "tz_utc_offset": 3600,
     "tz_dst": false,
     "tz_dst_auto": true,
-    "time": "14:45",
-    "unixtime": 1730468725,
+    "time": "14:53",
+    "unixtime": 1741441985,
     "debug_enable": false,
     "allow_cross_origin": false,
     "actions": {
@@ -104,20 +104,20 @@
       "hw_revision": "prod-102020",
       "batch_id": 0
     },
-    "mode": "color",
+    "mode": "white",
     "lights": [
       {
         "ison": false,
-        "red": 0,
-        "green": 255,
-        "blue": 0,
-        "white": 100,
-        "gain": 40,
+        "red": 255,
+        "green": 0,
+        "blue": 211,
+        "white": 0,
+        "gain": 100,
         "temp": 3000,
-        "brightness": 40,
+        "brightness": 100,
         "transition": 1000,
         "effect": 0,
-        "default_state": "off",
+        "default_state": "on",
         "auto_on": 0,
         "auto_off": 0,
         "schedule": false,
@@ -136,28 +136,28 @@
       "end_time": "00:00",
       "brightness": 0
     },
-    "eco_mode_enabled": true
+    "eco_mode_enabled": false
   },
   "status": {
     "wifi_sta": {
       "connected": true,
-      "ssid": "FibreBox_X6-12A4C7",
+      "ssid": "",
       "ip": "192.168.1.155",
-      "rssi": -68
+      "rssi": -57
     },
     "cloud": {
       "enabled": true,
-      "connected": true
+      "connected": false
     },
     "mqtt": {
       "connected": false
     },
-    "time": "14:45",
-    "unixtime": 1730468726,
-    "serial": 60,
+    "time": "14:53",
+    "unixtime": 1741441986,
+    "serial": 15,
     "has_update": false,
     "mac": "485519EE12A7",
-    "cfg_changed_cnt": 16,
+    "cfg_changed_cnt": 0,
     "actions_stats": {
       "skipped": 0
     },
@@ -169,14 +169,14 @@
         "timer_started": 0,
         "timer_duration": 0,
         "timer_remaining": 0,
-        "mode": "color",
-        "red": 0,
-        "green": 255,
-        "blue": 0,
-        "white": 100,
-        "gain": 40,
+        "mode": "white",
+        "red": 255,
+        "green": 0,
+        "blue": 211,
+        "white": 0,
+        "gain": 100,
         "temp": 3000,
-        "brightness": 40,
+        "brightness": 100,
         "effect": 0,
         "transition": 0
       }
@@ -185,9 +185,9 @@
       {
         "power": 0,
         "is_valid": true,
-        "timestamp": 1730472326,
+        "timestamp": 1741445586,
         "counters": [0, 0, 0],
-        "total": 2776
+        "total": 1975
       }
     ],
     "update": {
@@ -198,10 +198,10 @@
       "beta_version": "20231107-162425/v1.14.1-rc1-g0617c15"
     },
     "ram_total": 51616,
-    "ram_free": 39236,
+    "ram_free": 38204,
     "fs_size": 233681,
     "fs_free": 158381,
-    "uptime": 165908
+    "uptime": 593077
   },
   "components": [],
   "cfg_rev": 0,

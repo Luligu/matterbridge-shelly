@@ -97,7 +97,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": ["gen=2", "app=ProDimmerx", "ver=1.4.2"]
+      "data": ["gen=2", "app=ProDimmerx", "ver=1.4.4"]
     },
     {
       "name": "ShellyProDM1PM-34987A4957C4.local",

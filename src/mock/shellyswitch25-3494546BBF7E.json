@@ -23,12 +23,12 @@
     },
     "wifi_ap": {
       "enabled": false,
-      "ssid": "shellyswitch25-3494546BBF7E",
+      "ssid": "",
       "key": ""
     },
     "wifi_sta": {
       "enabled": true,
-      "ssid": "FibreBox_X6-12A4C7",
+      "ssid": "",
       "ipv4_method": "dhcp",
       "ip": null,
       "gw": null,
@@ -37,7 +37,7 @@
     },
     "wifi_sta1": {
       "enabled": true,
-      "ssid": "wifiAlbatros",
+      "ssid": "",
       "ipv4_method": "dhcp",
       "ip": null,
       "gw": null,
@@ -45,7 +45,7 @@
       "dns": null
     },
     "ap_roaming": {
-      "enabled": false,
+      "enabled": true,
       "threshold": -70
     },
     "mqtt": {
@@ -97,8 +97,8 @@
     "tz_utc_offset": 3600,
     "tz_dst": false,
     "tz_dst_auto": true,
-    "time": "16:26",
-    "unixtime": 1732116409,
+    "time": "14:59",
+    "unixtime": 1741442386,
     "led_status_disable": false,
     "debug_enable": false,
     "allow_cross_origin": false,
@@ -212,9 +212,9 @@
   "status": {
     "wifi_sta": {
       "connected": true,
-      "ssid": "FibreBox_X6-12A4C7",
+      "ssid": "",
       "ip": "192.168.1.222",
-      "rssi": -55
+      "rssi": -49
     },
     "cloud": {
       "enabled": true,
@@ -223,9 +223,9 @@
     "mqtt": {
       "connected": false
     },
-    "time": "16:26",
-    "unixtime": 1732116409,
-    "serial": 207,
+    "time": "14:59",
+    "unixtime": 1741442386,
+    "serial": 17426,
     "has_update": false,
     "mac": "3494546BBF7E",
     "cfg_changed_cnt": 0,
@@ -252,17 +252,17 @@
         "power": 0,
         "overpower": 0,
         "is_valid": true,
-        "timestamp": 1732120009,
+        "timestamp": 1741445986,
         "counters": [0, 0, 0],
-        "total": 2
+        "total": 0
       },
       {
         "power": 0,
         "overpower": 0,
         "is_valid": true,
-        "timestamp": 1732120009,
+        "timestamp": 1741445986,
         "counters": [0, 0, 0],
-        "total": 2
+        "total": 5
       }
     ],
     "inputs": [
@@ -277,11 +277,11 @@
         "event_cnt": 0
       }
     ],
-    "temperature": 54.9,
+    "temperature": 58.32,
     "overtemperature": false,
     "tmp": {
-      "tC": 54.9,
-      "tF": 130.81,
+      "tC": 58.32,
+      "tF": 136.98,
       "is_valid": true
     },
     "temperature_status": "Normal",
@@ -293,11 +293,11 @@
       "beta_version": "20231107-163214/v1.14.1-rc1-g0617c15"
     },
     "ram_total": 50720,
-    "ram_free": 37452,
+    "ram_free": 37372,
     "fs_size": 233681,
     "fs_free": 145831,
-    "voltage": 241.68,
-    "uptime": 9440
+    "voltage": 241.8,
+    "uptime": 789035
   },
   "components": [],
   "cfg_rev": 0,

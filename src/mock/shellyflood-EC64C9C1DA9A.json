@@ -17,12 +17,12 @@
     },
     "wifi_ap": {
       "enabled": false,
-      "ssid": "shellyflood-EC64C9C1DA9A",
+      "ssid": "",
       "key": ""
     },
     "wifi_sta": {
       "enabled": true,
-      "ssid": "FibreBox_X6-12A4C7",
+      "ssid": "",
       "ipv4_method": "dhcp",
       "ip": null,
       "gw": null,
@@ -31,7 +31,7 @@
     },
     "wifi_sta1": {
       "enabled": true,
-      "ssid": "wifiAlbatros",
+      "ssid": "",
       "ipv4_method": "dhcp",
       "ip": null,
       "gw": null,
@@ -54,7 +54,7 @@
     "coiot": {
       "enabled": true,
       "update_period": 15,
-      "peer": "192.168.1.189:5683"
+      "peer": "192.168.1.20:5683"
     },
     "sntp": {
       "server": "time.google.com",
@@ -108,9 +108,9 @@
   "status": {
     "wifi_sta": {
       "connected": true,
-      "ssid": "FibreBox_X6-12A4C7",
-      "ip": "192.168.1.188",
-      "rssi": -53
+      "ssid": "",
+      "ip": "192.168.1.248",
+      "rssi": -48
     },
     "cloud": {
       "enabled": true,
@@ -131,15 +131,15 @@
     "is_valid": true,
     "flood": false,
     "tmp": {
-      "value": 22,
+      "value": 22.12,
       "units": "C",
-      "tC": 22,
-      "tF": 71.6,
+      "tC": 22.12,
+      "tF": 71.82,
       "is_valid": true
     },
     "bat": {
-      "value": 100,
-      "voltage": 3
+      "value": 94,
+      "voltage": 2.91
     },
     "act_reasons": ["button"],
     "rain_sensor": false,
@@ -151,10 +151,10 @@
       "old_version": "20230913-112632/v1.14.0-gcb84623"
     },
     "ram_total": 52392,
-    "ram_free": 41868,
+    "ram_free": 39364,
     "fs_size": 233681,
     "fs_free": 146333,
-    "uptime": 3
+    "uptime": 2
   },
   "components": [],
   "cfg_rev": 0,

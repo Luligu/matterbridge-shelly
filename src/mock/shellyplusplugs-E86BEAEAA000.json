@@ -1,13 +1,13 @@
 {
   "shelly": {
-    "name": "My Shelly Plug S Plus",
+    "name": "PlugS Plus",
     "id": "shellyplusplugs-e86beaeaa000",
     "mac": "E86BEAEAA000",
-    "slot": 1,
+    "slot": 0,
     "model": "SNPL-00112EU",
     "gen": 2,
-    "fw_id": "20240819-074351/1.4.2-gc2639da",
-    "ver": "1.4.2",
+    "fw_id": "20241011-114442/1.4.4-g6d2a586",
+    "ver": "1.4.4",
     "app": "PlusPlugS",
     "auth_en": false,
     "auth_domain": null
@@ -71,7 +71,7 @@
     },
     "switch:0": {
       "id": 0,
-      "name": null,
+      "name": "PlugS Plus",
       "initial_state": "off",
       "auto_on": false,
       "auto_on_delay": 60,
@@ -83,9 +83,9 @@
     },
     "sys": {
       "device": {
-        "name": "My Shelly Plug S Plus",
+        "name": "PlugS Plus",
         "mac": "E86BEAEAA000",
-        "fw_id": "20240819-074351/1.4.2-gc2639da",
+        "fw_id": "20241011-114442/1.4.4-g6d2a586",
         "discoverable": true,
         "eco_mode": false
       },
@@ -111,11 +111,11 @@
       "sntp": {
         "server": "time.google.com"
       },
-      "cfg_rev": 12
+      "cfg_rev": 23
     },
     "wifi": {
       "ap": {
-        "ssid": "ShellyPlusPlugS-E86BEAEAA000",
+        "ssid": "",
         "is_open": true,
         "enable": false,
         "range_extender": {
@@ -123,7 +123,7 @@
         }
       },
       "sta": {
-        "ssid": "FibreBox_X6-12A4C7",
+        "ssid": "",
         "is_open": false,
         "enable": true,
         "ipv4mode": "dhcp",
@@ -133,9 +133,9 @@
         "nameserver": null
       },
       "sta1": {
-        "ssid": null,
-        "is_open": true,
-        "enable": false,
+        "ssid": "",
+        "is_open": false,
+        "enable": true,
         "ipv4mode": "dhcp",
         "ip": null,
         "netmask": null,
@@ -164,221 +164,54 @@
     "plugs_ui": {},
     "switch:0": {
       "id": 0,
-      "source": "init",
+      "source": "HTTP_in",
       "output": true,
-      "apower": 0,
-      "voltage": 235.6,
-      "current": 0,
+      "apower": 37.1,
+      "voltage": 237.6,
+      "current": 0.32,
       "aenergy": {
-        "total": 0,
-        "by_minute": [0, 0, 0],
-        "minute_ts": 1725546180
+        "total": 135456.536,
+        "by_minute": [615.778, 615.332, 615.778],
+        "minute_ts": 1741442580
       },
       "temperature": {
-        "tC": 43.4,
-        "tF": 110.1
+        "tC": 41.5,
+        "tF": 106.6
       }
     },
     "sys": {
       "mac": "E86BEAEAA000",
       "restart_required": false,
-      "time": "16:23",
-      "unixtime": 1725546204,
-      "uptime": 1270,
-      "ram_size": 253776,
-      "ram_free": 132876,
+      "time": "15:03",
+      "unixtime": 1741442636,
+      "uptime": 1057429,
+      "ram_size": 253688,
+      "ram_free": 131252,
       "fs_size": 393216,
       "fs_free": 102400,
-      "cfg_rev": 12,
+      "cfg_rev": 23,
       "kvs_rev": 0,
       "schedule_rev": 1,
       "webhook_rev": 0,
-      "available_updates": {},
+      "available_updates": {
+        "beta": {
+          "version": "1.5.1-beta1"
+        }
+      },
       "reset_reason": 3
     },
     "wifi": {
       "sta_ip": "192.168.1.153",
       "status": "got ip",
-      "ssid": "FibreBox_X6-12A4C7",
-      "rssi": -63
+      "ssid": "",
+      "rssi": -58
     },
     "ws": {
       "connected": false
     }
   },
-  "components": [
-    {
-      "key": "ble",
-      "status": {},
-      "config": {
-        "enable": false,
-        "rpc": {
-          "enable": true
-        },
-        "observer": {
-          "enable": false
-        }
-      }
-    },
-    {
-      "key": "cloud",
-      "status": {
-        "connected": true
-      },
-      "config": {
-        "enable": true,
-        "server": "shelly-103-eu.shelly.cloud:6022/jrpc"
-      }
-    },
-    {
-      "key": "ffs",
-      "status": {
-        "ts": 0
-      },
-      "config": {
-        "enable": false
-      }
-    },
-    {
-      "key": "mqtt",
-      "status": {
-        "connected": false
-      },
-      "config": {
-        "enable": false,
-        "server": null,
-        "client_id": "shellyplusplugs-e86beaeaa000",
-        "user": null,
-        "ssl_ca": null,
-        "topic_prefix": "shellyplusplugs-e86beaeaa000",
-        "rpc_ntf": true,
-        "status_ntf": false,
-        "use_client_cert": false,
-        "enable_rpc": true,
-        "enable_control": true
-      }
-    },
-    {
-      "key": "plugs_ui",
-      "status": {},
-      "config": {
-        "leds": {
-          "mode": "power",
-          "colors": {
-            "switch:0": {
-              "on": {
-                "rgb": [0, 100, 0],
-                "brightness": 100
-              },
-              "off": {
-                "rgb": [100, 0, 0],
-                "brightness": 100
-              }
-            },
-            "power": {
-              "brightness": 100
-            }
-          },
-          "night_mode": {
-            "enable": false,
-            "brightness": 100,
-            "active_between": []
-          }
-        },
-        "controls": {
-          "switch:0": {
-            "in_mode": "momentary"
-          }
-        }
-      }
-    },
-    {
-      "key": "switch:0",
-      "status": {
-        "id": 0,
-        "source": "init",
-        "output": true,
-        "apower": 0,
-        "voltage": 235.6,
-        "current": 0,
-        "aenergy": {
-          "total": 0,
-          "by_minute": [0, 0, 0],
-          "minute_ts": 1725546180
-        },
-        "temperature": {
-          "tC": 43.3,
-          "tF": 110
-        }
-      },
-      "config": {
-        "id": 0,
-        "name": null,
-        "initial_state": "off",
-        "auto_on": false,
-        "auto_on_delay": 60,
-        "auto_off": false,
-        "auto_off_delay": 60,
-        "power_limit": 2500,
-        "voltage_limit": 280,
-        "current_limit": 12
-      }
-    },
-    {
-      "key": "sys",
-      "status": {
-        "mac": "E86BEAEAA000",
-        "restart_required": false,
-        "time": "16:23",
-        "unixtime": 1725546205,
-        "uptime": 1270,
-        "ram_size": 253788,
-        "ram_free": 131668,
-        "fs_size": 393216,
-        "fs_free": 102400,
-        "cfg_rev": 12,
-        "kvs_rev": 0,
-        "schedule_rev": 1,
-        "webhook_rev": 0,
-        "available_updates": {},
-        "reset_reason": 3
-      },
-      "config": {
-        "device": {
-          "name": "My Shelly Plug S Plus",
-          "mac": "E86BEAEAA000",
-          "fw_id": "20240819-074351/1.4.2-gc2639da",
-          "discoverable": true,
-          "eco_mode": false
-        },
-        "location": {
-          "tz": "Europe/Monaco",
-          "lat": 43.7314,
-          "lon": 7.419
-        },
-        "debug": {
-          "level": 2,
-          "file_level": null,
-          "mqtt": {
-            "enable": false
-          },
-          "websocket": {
-            "enable": false
-          },
-          "udp": {
-            "addr": null
-          }
-        },
-        "ui_data": {},
-        "rpc_udp": {
-          "dst_addr": null,
-          "listen_port": null
-        },
-        "sntp": {
-          "server": "time.google.com"
-        },
-        "cfg_rev": 12
-      }
-    }
-  ]
+  "components": [],
+  "cfg_rev": 23,
+  "offset": 0,
+  "total": 0
 }

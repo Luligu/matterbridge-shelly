@@ -4,47 +4,46 @@
     "mac": "00082261E102",
     "model": "SAWD-0A1XX10EU1",
     "gen": 2,
-    "fw_id": "20240831-114811/2.2.1-eb899af6",
-    "ver": "2.2.1",
+    "fw_id": "20250228-105335/2.3.5-be75436c",
+    "ver": "2.3.5",
     "app": "WallDisplay",
     "auth_en": false,
-    "uptime": 522,
-    "app_uptime": 1728225624,
-    "discoverable": true,
-    "cfg_rev": 13,
+    "uptime": 285262,
+    "app_uptime": 285164,
+    "ram_size": 134217728,
+    "ram_free": 39560416,
+    "fs_size": 5009186816,
+    "fs_free": 4861382656,
+    "discoverable": false,
+    "cfg_rev": 107,
     "schedule_rev": 0,
     "webhook_rev": 0,
     "platform": "vXD10000M2",
     "serial": "SAWD89D0132BU",
     "batch_id": "3872b",
     "batch_date": 231211,
-    "available_updates": {
-      "beta": {
-        "version": "2.3.0-beta3",
-        "build_id": "20240926-093308/2.3.0-dd2e06a3-beta3"
-      }
-    },
+    "available_updates": {},
     "restart_required": false,
-    "unixtime": 1728225624,
-    "relay_in_thermostat": false,
-    "sensor_in_thermostat": false,
-    "awaiting_auth_code": true
+    "unixtime": 1741441928,
+    "relay_in_thermostat": true,
+    "sensor_in_thermostat": true,
+    "awaiting_auth_code": false
   },
   "settings": {
     "ble": {
       "enable": true,
-      "rpc": {
+      "observer": {
         "enable": true
       },
-      "observer": {
-        "enable": false
+      "rpc": {
+        "enable": true
       }
     },
     "wifi": {
       "sta": {
         "enable": true,
         "ipv4mode": "dhcp",
-        "ssid": "FibreBox_X6-12A4C7",
+        "ssid": "",
         "is_open": false,
         "ip": "192.168.1.97",
         "netmask": "255.255.255.0",
@@ -91,7 +90,7 @@
       "use_F": false,
       "screen_saver": {
         "enable": false,
-        "timeout": 20,
+        "timeout": 10,
         "priority_element": "CLOCK"
       },
       "screen_off_when_idle": true,
@@ -111,11 +110,11 @@
     "sys": {
       "device": {
         "name": "Wall Display",
-        "fw_id": "20240831-114811/2.2.1-eb899af6",
+        "fw_id": "20250228-105335/2.3.5-be75436c",
         "mac": "00082261E102",
-        "discoverable": true
+        "discoverable": false
       },
-      "cfg_rev": 13,
+      "cfg_rev": 107,
       "location": null,
       "sntp": {
         "server": "time.google.com"
@@ -138,11 +137,13 @@
           "RPC": true,
           "Thermostat": true,
           "Screen": true,
+          "ShellySmartControl": true,
           "UART": true,
           "Webhooks": true,
           "WebSocket": true
         }
-      }
+      },
+      "media_player_enabled": false
     },
     "cloud": {
       "enable": true,
@@ -159,6 +160,18 @@
     },
     "media": {
       "rev": 0
+    },
+    "thermostat:0": {
+      "id": 0,
+      "enable": true,
+      "sensor": "shelly://shellywalldisplay-00082261e102/c/temperature:0",
+      "type": "heating",
+      "actuator": "shelly://shellywalldisplay-00082261e102/c/switch:0",
+      "hysteresis": 0.5,
+      "invert_output": false,
+      "display_unit": "C",
+      "target_C": 19,
+      "name": null
     }
   },
   "status": {
@@ -171,22 +184,22 @@
     },
     "temperature:0": {
       "id": 0,
-      "tC": 23.3,
-      "tF": 74
+      "tC": 30.9,
+      "tF": 87.7
     },
     "humidity:0": {
       "id": 0,
-      "rh": 50
+      "rh": 25.9
     },
     "illuminance:0": {
       "id": 0,
-      "lux": 450,
-      "illumination": "bright"
+      "lux": 90,
+      "illumination": "twilight"
     },
     "switch:0": {
       "id": 0,
       "output": false,
-      "source": "Ui"
+      "source": "Auto power on (off)"
     },
     "input:0": {
       "id": 0,
@@ -197,38 +210,37 @@
       "mac": "00082261E102",
       "model": "SAWD-0A1XX10EU1",
       "gen": 2,
-      "fw_id": "20240831-114811/2.2.1-eb899af6",
-      "ver": "2.2.1",
+      "fw_id": "20250228-105335/2.3.5-be75436c",
+      "ver": "2.3.5",
       "app": "WallDisplay",
       "auth_en": false,
-      "uptime": 522,
-      "app_uptime": 1728225624,
-      "discoverable": true,
-      "cfg_rev": 13,
+      "uptime": 285262,
+      "app_uptime": 285165,
+      "ram_size": 134217728,
+      "ram_free": 39214488,
+      "fs_size": 5009186816,
+      "fs_free": 4861378560,
+      "discoverable": false,
+      "cfg_rev": 107,
       "schedule_rev": 0,
       "webhook_rev": 0,
       "platform": "vXD10000M2",
       "serial": "SAWD89D0132BU",
       "batch_id": "3872b",
       "batch_date": 231211,
-      "available_updates": {
-        "beta": {
-          "version": "2.3.0-beta3",
-          "build_id": "20240926-093308/2.3.0-dd2e06a3-beta3"
-        }
-      },
+      "available_updates": {},
       "restart_required": false,
-      "unixtime": 1728225624,
-      "relay_in_thermostat": false,
-      "sensor_in_thermostat": false,
-      "awaiting_auth_code": true
+      "unixtime": 1741441928,
+      "relay_in_thermostat": true,
+      "sensor_in_thermostat": true,
+      "awaiting_auth_code": false
     },
     "wifi": {
       "sta_ip": "192.168.1.167",
       "status": "got ip",
       "mac": "00:08:22:61:E1:02",
-      "ssid": "FibreBox_X6-12A4C7",
-      "rssi": -53,
+      "ssid": "",
+      "rssi": -65,
       "netmask": "255.255.255.0",
       "gw": "192.168.1.1",
       "nameserver": "208.67.222.222"
@@ -252,10 +264,37 @@
       "external": {
         "present": true
       }
+    },
+    "thermostat:0": {
+      "id": 0,
+      "enable": true,
+      "target_C": 19,
+      "current_C": 30.9,
+      "output": false,
+      "schedules": {
+        "enable": false
+      }
     }
   },
-  "components": [],
-  "cfg_rev": 0,
+  "components": [
+    {
+      "key": "button:200",
+      "status": {},
+      "config": {
+        "name": "MyButton",
+        "id": 200
+      }
+    },
+    {
+      "key": "button:201",
+      "status": {},
+      "config": {
+        "name": "MyButton2",
+        "id": 201
+      }
+    }
+  ],
+  "cfg_rev": 107,
   "offset": 0,
-  "total": 0
+  "total": 2
 }

@@ -23,12 +23,12 @@
     },
     "wifi_ap": {
       "enabled": false,
-      "ssid": "shellyem3-485519D732F4",
+      "ssid": "",
       "key": ""
     },
     "wifi_sta": {
       "enabled": true,
-      "ssid": "FibreBox_X6-12A4C7",
+      "ssid": "",
       "ipv4_method": "dhcp",
       "ip": null,
       "gw": null,
@@ -37,7 +37,7 @@
     },
     "wifi_sta1": {
       "enabled": true,
-      "ssid": "wifiAlbatros",
+      "ssid": "",
       "ipv4_method": "dhcp",
       "ip": null,
       "gw": null,
@@ -64,7 +64,7 @@
     "coiot": {
       "enabled": true,
       "update_period": 15,
-      "peer": "192.168.1.189:5683"
+      "peer": "192.168.1.20:5683"
     },
     "sntp": {
       "server": "time.google.com",
@@ -96,8 +96,8 @@
     "tz_utc_offset": 3600,
     "tz_dst": false,
     "tz_dst_auto": true,
-    "time": "14:38",
-    "unixtime": 1730468313,
+    "time": "14:55",
+    "unixtime": 1741442124,
     "led_status_disable": false,
     "debug_enable": false,
     "allow_cross_origin": false,
@@ -163,9 +163,9 @@
   "status": {
     "wifi_sta": {
       "connected": true,
-      "ssid": "FibreBox_X6-12A4C7",
+      "ssid": "",
       "ip": "192.168.1.249",
-      "rssi": -56
+      "rssi": -49
     },
     "cloud": {
       "enabled": true,
@@ -174,9 +174,9 @@
     "mqtt": {
       "connected": false
     },
-    "time": "14:38",
-    "unixtime": 1730468314,
-    "serial": 147,
+    "time": "14:55",
+    "unixtime": 1741442124,
+    "serial": 481,
     "has_update": false,
     "mac": "485519D732F4",
     "cfg_changed_cnt": 0,
@@ -197,34 +197,34 @@
     ],
     "emeters": [
       {
-        "power": 6.2,
-        "pf": 0.4,
+        "power": 6.6,
+        "pf": 0.39,
         "current": 0.07,
-        "voltage": 236.23,
+        "voltage": 238.82,
         "is_valid": true,
-        "total": 13634.1,
+        "total": 31972.1,
         "total_returned": 0
       },
       {
         "power": 0,
-        "pf": -0.05,
+        "pf": 0.01,
         "current": 0.01,
-        "voltage": 236.13,
+        "voltage": 238.72,
         "is_valid": true,
         "total": 0,
         "total_returned": 0
       },
       {
         "power": 0,
-        "pf": 0,
+        "pf": 0.02,
         "current": 0.01,
-        "voltage": 236.16,
+        "voltage": 238.75,
         "is_valid": true,
         "total": 0,
         "total_returned": 0
       }
     ],
-    "total_power": 6.2,
+    "total_power": 6.6,
     "emeter_n": {
       "current": 0,
       "ixsum": 0.07,
@@ -242,10 +242,10 @@
       "beta_version": "20231107-165007/v1.14.1-rc1-g0617c15"
     },
     "ram_total": 49920,
-    "ram_free": 31464,
+    "ram_free": 31460,
     "fs_size": 233681,
     "fs_free": 154867,
-    "uptime": 86811
+    "uptime": 283122
   },
   "components": [],
   "cfg_rev": 0,

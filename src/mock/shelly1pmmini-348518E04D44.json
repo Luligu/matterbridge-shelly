@@ -1,13 +1,13 @@
 {
   "shelly": {
-    "name": null,
+    "name": "1PMmini Gen2",
     "id": "shelly1pmmini-348518e04d44",
     "mac": "348518E04D44",
     "slot": 1,
     "model": "SNSW-001P8EU",
     "gen": 2,
-    "fw_id": "20240726-114511/1.4.0-gb2aeadb",
-    "ver": "1.4.0",
+    "fw_id": "20241011-114441/1.4.4-g6d2a586",
+    "ver": "1.4.4",
     "app": "Plus1PMMini",
     "auth_en": false,
     "auth_domain": null
@@ -63,9 +63,9 @@
     },
     "sys": {
       "device": {
-        "name": null,
+        "name": "1PMmini Gen2",
         "mac": "348518E04D44",
-        "fw_id": "20240726-114511/1.4.0-gb2aeadb",
+        "fw_id": "20241011-114441/1.4.4-g6d2a586",
         "discoverable": true,
         "eco_mode": false
       },
@@ -91,11 +91,11 @@
       "sntp": {
         "server": "time.google.com"
       },
-      "cfg_rev": 14
+      "cfg_rev": 23
     },
     "wifi": {
       "ap": {
-        "ssid": "Shelly1PMMini-348518E04D44",
+        "ssid": "",
         "is_open": true,
         "enable": false,
         "range_extender": {
@@ -103,7 +103,7 @@
         }
       },
       "sta": {
-        "ssid": "FibreBox_X6-12A4C7",
+        "ssid": "",
         "is_open": false,
         "enable": true,
         "ipv4mode": "dhcp",
@@ -113,9 +113,9 @@
         "nameserver": null
       },
       "sta1": {
-        "ssid": null,
-        "is_open": true,
-        "enable": false,
+        "ssid": "",
+        "is_open": false,
+        "enable": true,
         "ipv4mode": "dhcp",
         "ip": null,
         "netmask": null,
@@ -150,49 +150,57 @@
       "source": "HTTP_in",
       "output": false,
       "apower": 0,
-      "voltage": 233.8,
+      "voltage": 238.9,
       "freq": 50,
       "current": 0,
       "aenergy": {
         "total": 0,
         "by_minute": [0, 0, 0],
-        "minute_ts": 1722525300
+        "minute_ts": 1741442220
       },
       "ret_aenergy": {
         "total": 0,
         "by_minute": [0, 0, 0],
-        "minute_ts": 1722525300
+        "minute_ts": 1741442220
       },
       "temperature": {
-        "tC": 63.4,
-        "tF": 146.2
+        "tC": 59.5,
+        "tF": 139.1
       }
     },
     "sys": {
       "mac": "348518E04D44",
       "restart_required": false,
-      "time": "17:15",
-      "unixtime": 1722525319,
-      "uptime": 1409,
-      "ram_size": 261912,
-      "ram_free": 139268,
+      "time": "14:57",
+      "unixtime": 1741442255,
+      "uptime": 789000,
+      "ram_size": 261772,
+      "ram_free": 135492,
       "fs_size": 393216,
       "fs_free": 114688,
-      "cfg_rev": 14,
+      "cfg_rev": 23,
       "kvs_rev": 0,
       "schedule_rev": 1,
       "webhook_rev": 0,
-      "available_updates": {},
-      "reset_reason": 3
+      "available_updates": {
+        "beta": {
+          "version": "1.5.1-beta1"
+        }
+      },
+      "reset_reason": 1
     },
     "wifi": {
       "sta_ip": "192.168.1.239",
       "status": "got ip",
-      "ssid": "FibreBox_X6-12A4C7",
-      "rssi": -60
+      "ssid": "",
+      "rssi": -57
     },
     "ws": {
       "connected": false
     }
-  }
+  },
+  "components": [],
+  "cfg_rev": 23,
+  "offset": 0,
+  "total": 0
 }

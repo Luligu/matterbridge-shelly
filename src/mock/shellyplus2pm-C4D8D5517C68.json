@@ -92,7 +92,7 @@
         "mac": "C4D8D5517C68",
         "fw_id": "20241011-114448/1.4.4-g6d2a586",
         "discoverable": true,
-        "eco_mode": true,
+        "eco_mode": false,
         "profile": "switch",
         "addon_type": null
       },
@@ -118,11 +118,11 @@
       "sntp": {
         "server": "time.google.com"
       },
-      "cfg_rev": 15
+      "cfg_rev": 18
     },
     "wifi": {
       "ap": {
-        "ssid": "ShellyPlus2PM-C4D8D5517C68",
+        "ssid": "",
         "is_open": true,
         "enable": false,
         "range_extender": {
@@ -130,7 +130,7 @@
         }
       },
       "sta": {
-        "ssid": "FibreBox_X6-12A4C7",
+        "ssid": "",
         "is_open": false,
         "enable": true,
         "ipv4mode": "dhcp",
@@ -140,7 +140,7 @@
         "nameserver": null
       },
       "sta1": {
-        "ssid": "wifiAlbatros",
+        "ssid": "",
         "is_open": false,
         "enable": true,
         "ipv4mode": "dhcp",
@@ -178,81 +178,85 @@
     },
     "switch:0": {
       "id": 0,
-      "source": "HTTP_in",
+      "source": "init",
       "output": false,
       "apower": 0,
-      "voltage": 236.9,
+      "voltage": 237.8,
       "freq": 50,
       "current": 0,
       "pf": 0,
       "aenergy": {
-        "total": 4.002,
+        "total": 7,
         "by_minute": [0, 0, 0],
-        "minute_ts": 1730474820
+        "minute_ts": 1741442640
       },
       "ret_aenergy": {
         "total": 0,
         "by_minute": [0, 0, 0],
-        "minute_ts": 1730474820
+        "minute_ts": 1741442640
       },
       "temperature": {
-        "tC": 42.4,
-        "tF": 108.4
+        "tC": 56.7,
+        "tF": 134
       }
     },
     "switch:1": {
       "id": 1,
-      "source": "HTTP_in",
+      "source": "init",
       "output": false,
       "apower": 0,
-      "voltage": 237,
+      "voltage": 237.9,
       "freq": 50,
       "current": 0,
       "pf": 0,
       "aenergy": {
-        "total": 4.002,
+        "total": 7,
         "by_minute": [0, 0, 0],
-        "minute_ts": 1730474820
+        "minute_ts": 1741442640
       },
       "ret_aenergy": {
         "total": 0,
         "by_minute": [0, 0, 0],
-        "minute_ts": 1730474820
+        "minute_ts": 1741442640
       },
       "temperature": {
-        "tC": 42.4,
-        "tF": 108.4
+        "tC": 56.7,
+        "tF": 134
       }
     },
     "sys": {
       "mac": "C4D8D5517C68",
       "restart_required": false,
-      "time": "16:27",
-      "unixtime": 1730474822,
-      "uptime": 172206,
-      "ram_size": 252028,
-      "ram_free": 122740,
+      "time": "15:04",
+      "unixtime": 1741442646,
+      "uptime": 789376,
+      "ram_size": 252068,
+      "ram_free": 124024,
       "fs_size": 393216,
       "fs_free": 98304,
-      "cfg_rev": 15,
+      "cfg_rev": 18,
       "kvs_rev": 0,
       "schedule_rev": 1,
       "webhook_rev": 0,
-      "available_updates": {},
+      "available_updates": {
+        "beta": {
+          "version": "1.5.1-beta1"
+        }
+      },
       "reset_reason": 1
     },
     "wifi": {
       "sta_ip": "192.168.1.163",
       "status": "got ip",
-      "ssid": "FibreBox_X6-12A4C7",
-      "rssi": -50
+      "ssid": "",
+      "rssi": -59
     },
     "ws": {
       "connected": false
     }
   },
   "components": [],
-  "cfg_rev": 15,
+  "cfg_rev": 18,
   "offset": 0,
   "total": 0
 }

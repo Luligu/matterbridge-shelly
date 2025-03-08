@@ -1,0 +1,233 @@
+{
+  "shelly": {
+    "name": "1 Gen3 II",
+    "id": "shelly1g3-dcda0cdeec20",
+    "mac": "DCDA0CDEEC20",
+    "slot": 1,
+    "model": "S3SW-001X16EU",
+    "gen": 3,
+    "fw_id": "20241011-114449/1.4.4-g6d2a586",
+    "ver": "1.4.4",
+    "app": "S1G3",
+    "auth_en": false,
+    "auth_domain": null
+  },
+  "settings": {
+    "ble": {
+      "enable": true,
+      "rpc": {
+        "enable": true
+      },
+      "observer": {
+        "enable": true
+      }
+    },
+    "bthome": {},
+    "cloud": {
+      "enable": true,
+      "server": "shelly-103-eu.shelly.cloud:6022/jrpc"
+    },
+    "input:0": {
+      "id": 0,
+      "name": null,
+      "type": "switch",
+      "enable": true,
+      "invert": false,
+      "factory_reset": true
+    },
+    "input:100": {
+      "id": 100,
+      "name": null,
+      "type": "switch",
+      "enable": true,
+      "invert": false,
+      "factory_reset": false
+    },
+    "knx": {
+      "enable": false,
+      "ia": "15.15.255",
+      "routing": {
+        "addr": "224.0.23.12:3671"
+      }
+    },
+    "mqtt": {
+      "enable": false,
+      "server": null,
+      "client_id": "shelly1g3-dcda0cdeec20",
+      "user": null,
+      "ssl_ca": null,
+      "topic_prefix": "shelly1g3-dcda0cdeec20",
+      "rpc_ntf": true,
+      "status_ntf": false,
+      "use_client_cert": false,
+      "enable_rpc": true,
+      "enable_control": true
+    },
+    "switch:0": {
+      "id": 0,
+      "name": null,
+      "in_mode": "follow",
+      "initial_state": "match_input",
+      "auto_on": false,
+      "auto_on_delay": 60,
+      "auto_off": false,
+      "auto_off_delay": 60
+    },
+    "sys": {
+      "device": {
+        "name": "1 Gen3 II",
+        "mac": "DCDA0CDEEC20",
+        "fw_id": "20241011-114449/1.4.4-g6d2a586",
+        "discoverable": true,
+        "eco_mode": false,
+        "addon_type": "sensor"
+      },
+      "location": null,
+      "debug": {
+        "level": 2,
+        "file_level": null,
+        "mqtt": {
+          "enable": false
+        },
+        "websocket": {
+          "enable": false
+        },
+        "udp": {
+          "addr": null
+        }
+      },
+      "ui_data": {},
+      "rpc_udp": {
+        "dst_addr": null,
+        "listen_port": null
+      },
+      "sntp": {
+        "server": "time.google.com"
+      },
+      "cfg_rev": 19
+    },
+    "temperature:100": {
+      "id": 100,
+      "name": null,
+      "report_thr_C": 0.1,
+      "offset_C": 0
+    },
+    "temperature:101": {
+      "id": 101,
+      "name": null,
+      "report_thr_C": 0.1,
+      "offset_C": 0
+    },
+    "wifi": {
+      "ap": {
+        "ssid": "",
+        "is_open": true,
+        "enable": false,
+        "range_extender": {
+          "enable": false
+        }
+      },
+      "sta": {
+        "ssid": "",
+        "is_open": false,
+        "enable": true,
+        "ipv4mode": "dhcp",
+        "ip": null,
+        "netmask": null,
+        "gw": null,
+        "nameserver": null
+      },
+      "sta1": {
+        "ssid": "",
+        "is_open": false,
+        "enable": true,
+        "ipv4mode": "dhcp",
+        "ip": null,
+        "netmask": null,
+        "gw": null,
+        "nameserver": null
+      },
+      "roam": {
+        "rssi_thr": -80,
+        "interval": 60
+      }
+    },
+    "ws": {
+      "enable": false,
+      "server": null,
+      "ssl_ca": "ca.pem"
+    }
+  },
+  "status": {
+    "ble": {},
+    "bthome": {},
+    "cloud": {
+      "connected": true
+    },
+    "input:0": {
+      "id": 0,
+      "state": false
+    },
+    "input:100": {
+      "id": 100,
+      "state": false
+    },
+    "knx": {},
+    "mqtt": {
+      "connected": false
+    },
+    "switch:0": {
+      "id": 0,
+      "source": "HTTP_in",
+      "output": true,
+      "temperature": {
+        "tC": 62.4,
+        "tF": 144.3
+      }
+    },
+    "sys": {
+      "mac": "DCDA0CDEEC20",
+      "restart_required": false,
+      "time": "14:53",
+      "unixtime": 1741442035,
+      "uptime": 788773,
+      "ram_size": 258328,
+      "ram_free": 81952,
+      "fs_size": 1048576,
+      "fs_free": 581632,
+      "cfg_rev": 19,
+      "kvs_rev": 0,
+      "schedule_rev": 1,
+      "webhook_rev": 0,
+      "available_updates": {
+        "beta": {
+          "version": "1.5.1-beta1"
+        }
+      },
+      "reset_reason": 1
+    },
+    "temperature:100": {
+      "id": 100,
+      "tC": 24.7,
+      "tF": 76.4
+    },
+    "temperature:101": {
+      "id": 101,
+      "tC": 24.6,
+      "tF": 76.3
+    },
+    "wifi": {
+      "sta_ip": "192.168.1.105",
+      "status": "got ip",
+      "ssid": "",
+      "rssi": -57
+    },
+    "ws": {
+      "connected": false
+    }
+  },
+  "components": [],
+  "cfg_rev": 19,
+  "offset": 0,
+  "total": 0
+}

@@ -18,12 +18,12 @@
     },
     "wifi_ap": {
       "enabled": false,
-      "ssid": "ShellyBulbDuo-34945479CFA4",
+      "ssid": "",
       "key": ""
     },
     "wifi_sta": {
       "enabled": true,
-      "ssid": "FibreBox_X6-12A4C7",
+      "ssid": "",
       "ipv4_method": "dhcp",
       "ip": null,
       "gw": null,
@@ -32,7 +32,7 @@
     },
     "wifi_sta1": {
       "enabled": true,
-      "ssid": "wifiAlbatros",
+      "ssid": "",
       "ipv4_method": "dhcp",
       "ip": null,
       "gw": null,
@@ -40,7 +40,7 @@
       "dns": null
     },
     "ap_roaming": {
-      "enabled": false,
+      "enabled": true,
       "threshold": -70
     },
     "mqtt": {
@@ -59,7 +59,7 @@
     "coiot": {
       "enabled": true,
       "update_period": 15,
-      "peer": "192.168.1.189:5683"
+      "peer": "192.168.1.20:5683"
     },
     "sntp": {
       "server": "time.google.com",
@@ -91,8 +91,8 @@
     "tz_utc_offset": 3600,
     "tz_dst": false,
     "tz_dst_auto": true,
-    "time": "14:41",
-    "unixtime": 1730468505,
+    "time": "14:48",
+    "unixtime": 1741441725,
     "debug_enable": false,
     "allow_cross_origin": false,
     "actions": {
@@ -109,9 +109,9 @@
       {
         "name": null,
         "ison": false,
-        "brightness": 40,
-        "white": 60,
-        "temp": 5000,
+        "brightness": 100,
+        "white": 97,
+        "temp": 6403,
         "transition": 1000,
         "default_state": "off",
         "auto_on": 0,
@@ -132,14 +132,14 @@
       "end_time": "00:00",
       "brightness": 0
     },
-    "eco_mode_enabled": true
+    "eco_mode_enabled": false
   },
   "status": {
     "wifi_sta": {
       "connected": true,
-      "ssid": "FibreBox_X6-12A4C7",
+      "ssid": "",
       "ip": "192.168.1.154",
-      "rssi": -57
+      "rssi": -56
     },
     "cloud": {
       "enabled": true,
@@ -148,9 +148,9 @@
     "mqtt": {
       "connected": false
     },
-    "time": "14:41",
-    "unixtime": 1730468505,
-    "serial": 3674,
+    "time": "14:48",
+    "unixtime": 1741441725,
+    "serial": 13086,
     "has_update": false,
     "mac": "34945479CFA4",
     "cfg_changed_cnt": 0,
@@ -165,9 +165,9 @@
         "timer_started": 0,
         "timer_duration": 0,
         "timer_remaining": 0,
-        "brightness": 40,
-        "white": 60,
-        "temp": 5000,
+        "brightness": 100,
+        "white": 97,
+        "temp": 6403,
         "transition": 0
       }
     ],
@@ -175,9 +175,9 @@
       {
         "power": 0,
         "is_valid": true,
-        "timestamp": 1730472105,
+        "timestamp": 1741445325,
         "counters": [0, 0, 0],
-        "total": 3669
+        "total": 0
       }
     ],
     "update": {
@@ -188,10 +188,10 @@
       "beta_version": "20231107-162700/v1.14.1-rc1-g0617c15"
     },
     "ram_total": 52128,
-    "ram_free": 40192,
+    "ram_free": 40156,
     "fs_size": 233681,
     "fs_free": 163401,
-    "uptime": 165689
+    "uptime": 592812
   },
   "components": [],
   "cfg_rev": 0,

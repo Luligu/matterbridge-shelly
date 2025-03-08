@@ -63,7 +63,7 @@
         "mac": "E465B8F3028C",
         "fw_id": "20241011-114452/1.4.4-g6d2a586",
         "discoverable": true,
-        "eco_mode": true,
+        "eco_mode": false,
         "addon_type": null
       },
       "location": null,
@@ -88,11 +88,11 @@
       "sntp": {
         "server": "time.google.com"
       },
-      "cfg_rev": 22
+      "cfg_rev": 25
     },
     "wifi": {
       "ap": {
-        "ssid": "ShellyPlus1-E465B8F3028C",
+        "ssid": "",
         "is_open": true,
         "enable": false,
         "range_extender": {
@@ -100,7 +100,7 @@
         }
       },
       "sta": {
-        "ssid": "FibreBox_X6-12A4C7",
+        "ssid": "",
         "is_open": false,
         "enable": true,
         "ipv4mode": "dhcp",
@@ -110,7 +110,7 @@
         "nameserver": null
       },
       "sta1": {
-        "ssid": "wifiAlbatros",
+        "ssid": "",
         "is_open": false,
         "enable": true,
         "ipv4mode": "dhcp",
@@ -147,39 +147,43 @@
       "source": "HTTP_in",
       "output": false,
       "temperature": {
-        "tC": 44.8,
-        "tF": 112.7
+        "tC": 56.2,
+        "tF": 133.1
       }
     },
     "sys": {
       "mac": "E465B8F3028C",
       "restart_required": false,
-      "time": "15:38",
-      "unixtime": 1730471899,
-      "uptime": 169404,
-      "ram_size": 253764,
-      "ram_free": 133024,
+      "time": "14:50",
+      "unixtime": 1741441805,
+      "uptime": 788544,
+      "ram_size": 253788,
+      "ram_free": 132992,
       "fs_size": 393216,
       "fs_free": 106496,
-      "cfg_rev": 22,
+      "cfg_rev": 25,
       "kvs_rev": 0,
       "schedule_rev": 9,
       "webhook_rev": 0,
-      "available_updates": {},
+      "available_updates": {
+        "beta": {
+          "version": "1.5.1-beta1"
+        }
+      },
       "reset_reason": 1
     },
     "wifi": {
       "sta_ip": "192.168.1.237",
       "status": "got ip",
-      "ssid": "FibreBox_X6-12A4C7",
-      "rssi": -70
+      "ssid": "",
+      "rssi": -51
     },
     "ws": {
       "connected": false
     }
   },
   "components": [],
-  "cfg_rev": 22,
+  "cfg_rev": 25,
   "offset": 0,
   "total": 0
 }

@@ -19,12 +19,12 @@
     },
     "wifi_ap": {
       "enabled": false,
-      "ssid": "shellyrgbw2-EC64C9D3FFEF",
+      "ssid": "",
       "key": ""
     },
     "wifi_sta": {
       "enabled": true,
-      "ssid": "FibreBox_X6-12A4C7",
+      "ssid": "",
       "ipv4_method": "dhcp",
       "ip": null,
       "gw": null,
@@ -33,7 +33,7 @@
     },
     "wifi_sta1": {
       "enabled": true,
-      "ssid": "wifiAlbatros",
+      "ssid": "",
       "ipv4_method": "dhcp",
       "ip": null,
       "gw": null,
@@ -60,7 +60,7 @@
     "coiot": {
       "enabled": true,
       "update_period": 15,
-      "peer": "192.168.1.189:5683",
+      "peer": "192.168.1.20:5683",
       "execute_enable": false
     },
     "sntp": {
@@ -94,8 +94,8 @@
     "tz_utc_offset": 3600,
     "tz_dst": false,
     "tz_dst_auto": true,
-    "time": "14:42",
-    "unixtime": 1730468555,
+    "time": "14:49",
+    "unixtime": 1741441775,
     "led_status_disable": false,
     "debug_enable": false,
     "allow_cross_origin": false,
@@ -119,7 +119,7 @@
         "green": 255,
         "blue": 0,
         "white": 0,
-        "gain": 60,
+        "gain": 100,
         "transition": 1000,
         "effect": 0,
         "default_state": "last",
@@ -143,14 +143,14 @@
       "end_time": "00:00",
       "brightness": 0
     },
-    "eco_mode_enabled": true
+    "eco_mode_enabled": false
   },
   "status": {
     "wifi_sta": {
       "connected": true,
-      "ssid": "FibreBox_X6-12A4C7",
+      "ssid": "",
       "ip": "192.168.1.226",
-      "rssi": -62
+      "rssi": -53
     },
     "cloud": {
       "enabled": true,
@@ -159,9 +159,9 @@
     "mqtt": {
       "connected": false
     },
-    "time": "14:42",
-    "unixtime": 1730468556,
-    "serial": 15516,
+    "time": "14:49",
+    "unixtime": 1741441775,
+    "serial": 17433,
     "has_update": false,
     "mac": "EC64C9D3FFEF",
     "cfg_changed_cnt": 0,
@@ -183,7 +183,7 @@
         "green": 255,
         "blue": 0,
         "white": 0,
-        "gain": 60,
+        "gain": 100,
         "effect": 0,
         "transition": 0,
         "power": 0,
@@ -195,9 +195,9 @@
         "power": 0,
         "is_valid": true,
         "overpower": false,
-        "timestamp": 1730472156,
+        "timestamp": 1741445375,
         "counters": [0, 0, 0],
-        "total": 2900
+        "total": 0
       }
     ],
     "inputs": [
@@ -215,10 +215,10 @@
       "beta_version": "20231107-164040/v1.14.1-rc1-g0617c15"
     },
     "ram_total": 51672,
-    "ram_free": 39188,
+    "ram_free": 39156,
     "fs_size": 233681,
     "fs_free": 152106,
-    "uptime": 165779
+    "uptime": 788493
   },
   "components": [],
   "cfg_rev": 0,

@@ -1,13 +1,13 @@
 {
   "shelly": {
-    "name": "My Shelly 0-10V Dimmer PLUS",
+    "name": "0-10V Dimmer Plus",
     "id": "shellyplus010v-80646fe1fac4",
     "mac": "80646FE1FAC4",
-    "slot": 0,
+    "slot": 1,
     "model": "SNDM-00100WW",
     "gen": 2,
-    "fw_id": "20240819-074324/1.4.2-gc2639da",
-    "ver": "1.4.2",
+    "fw_id": "20241011-114443/1.4.4-g6d2a586",
+    "ver": "1.4.4",
     "app": "Plus10V",
     "auth_en": false,
     "auth_domain": null
@@ -79,9 +79,9 @@
     },
     "sys": {
       "device": {
-        "name": "My Shelly 0-10V Dimmer PLUS",
+        "name": "0-10V Dimmer Plus",
         "mac": "80646FE1FAC4",
-        "fw_id": "20240819-074324/1.4.2-gc2639da",
+        "fw_id": "20241011-114443/1.4.4-g6d2a586",
         "discoverable": true,
         "addon_type": null
       },
@@ -107,11 +107,11 @@
       "sntp": {
         "server": "time.google.com"
       },
-      "cfg_rev": 14
+      "cfg_rev": 20
     },
     "wifi": {
       "ap": {
-        "ssid": "ShellyPlus010V-80646FE1FAC4",
+        "ssid": "",
         "is_open": true,
         "enable": false,
         "range_extender": {
@@ -119,7 +119,7 @@
         }
       },
       "sta": {
-        "ssid": "FibreBox_X6-12A4C7",
+        "ssid": "",
         "is_open": false,
         "enable": true,
         "ipv4mode": "dhcp",
@@ -129,9 +129,9 @@
         "nameserver": null
       },
       "sta1": {
-        "ssid": null,
-        "is_open": true,
-        "enable": false,
+        "ssid": "",
+        "is_open": false,
+        "enable": true,
         "ipv4mode": "dhcp",
         "ip": null,
         "netmask": null,
@@ -164,12 +164,12 @@
     },
     "light:0": {
       "id": 0,
-      "source": "HTTP_in",
+      "source": "init",
       "output": false,
-      "brightness": 30,
+      "brightness": 100,
       "temperature": {
-        "tC": 62.1,
-        "tF": 143.9
+        "tC": 68.5,
+        "tF": 155.2
       }
     },
     "mqtt": {
@@ -178,193 +178,36 @@
     "sys": {
       "mac": "80646FE1FAC4",
       "restart_required": false,
-      "time": "23:00",
-      "unixtime": 1725915627,
-      "uptime": 629,
-      "ram_size": 253948,
-      "ram_free": 135384,
+      "time": "14:48",
+      "unixtime": 1741441725,
+      "uptime": 592830,
+      "ram_size": 253792,
+      "ram_free": 131956,
       "fs_size": 393216,
       "fs_free": 98304,
-      "cfg_rev": 14,
+      "cfg_rev": 20,
       "kvs_rev": 0,
       "schedule_rev": 1,
       "webhook_rev": 0,
-      "available_updates": {},
-      "reset_reason": 3
+      "available_updates": {
+        "beta": {
+          "version": "1.5.1-beta1"
+        }
+      },
+      "reset_reason": 1
     },
     "wifi": {
       "sta_ip": "192.168.1.160",
       "status": "got ip",
-      "ssid": "FibreBox_X6-12A4C7",
-      "rssi": -63
+      "ssid": "",
+      "rssi": -62
     },
     "ws": {
       "connected": false
     }
   },
-  "components": [
-    {
-      "key": "ble",
-      "status": {},
-      "config": {
-        "enable": false,
-        "rpc": {
-          "enable": true
-        },
-        "observer": {
-          "enable": false
-        }
-      }
-    },
-    {
-      "key": "cloud",
-      "status": {
-        "connected": true
-      },
-      "config": {
-        "enable": true,
-        "server": "shelly-103-eu.shelly.cloud:6022/jrpc"
-      }
-    },
-    {
-      "key": "input:0",
-      "status": {
-        "id": 0,
-        "state": null
-      },
-      "config": {
-        "id": 0,
-        "name": null,
-        "type": "button",
-        "enable": true,
-        "invert": false
-      }
-    },
-    {
-      "key": "input:1",
-      "status": {
-        "id": 1,
-        "state": null
-      },
-      "config": {
-        "id": 1,
-        "name": null,
-        "type": "button",
-        "enable": true,
-        "invert": false
-      }
-    },
-    {
-      "key": "light:0",
-      "status": {
-        "id": 0,
-        "source": "HTTP_in",
-        "output": false,
-        "brightness": 30,
-        "temperature": {
-          "tC": 62.2,
-          "tF": 144
-        }
-      },
-      "config": {
-        "id": 0,
-        "name": null,
-        "initial_state": "restore_last",
-        "auto_on": false,
-        "auto_on_delay": 60,
-        "auto_off": false,
-        "auto_off_delay": 60,
-        "transition_duration": 3,
-        "min_brightness_on_toggle": 3,
-        "night_mode": {
-          "enable": false,
-          "brightness": 50,
-          "active_between": []
-        },
-        "range_map": [0, 100],
-        "button_fade_rate": 3,
-        "button_presets": {
-          "button_doublepush": {
-            "brightness": 100
-          }
-        },
-        "in_mode": "dim"
-      }
-    },
-    {
-      "key": "mqtt",
-      "status": {
-        "connected": false
-      },
-      "config": {
-        "enable": false,
-        "server": null,
-        "client_id": "shellyplus010v-80646fe1fac4",
-        "user": null,
-        "ssl_ca": null,
-        "topic_prefix": "shellyplus010v-80646fe1fac4",
-        "rpc_ntf": true,
-        "status_ntf": false,
-        "use_client_cert": false,
-        "enable_rpc": true,
-        "enable_control": true
-      }
-    },
-    {
-      "key": "sys",
-      "status": {
-        "mac": "80646FE1FAC4",
-        "restart_required": false,
-        "time": "23:00",
-        "unixtime": 1725915628,
-        "uptime": 630,
-        "ram_size": 253944,
-        "ram_free": 133536,
-        "fs_size": 393216,
-        "fs_free": 98304,
-        "cfg_rev": 14,
-        "kvs_rev": 0,
-        "schedule_rev": 1,
-        "webhook_rev": 0,
-        "available_updates": {},
-        "reset_reason": 3
-      },
-      "config": {
-        "device": {
-          "name": "My Shelly 0-10V Dimmer PLUS",
-          "mac": "80646FE1FAC4",
-          "fw_id": "20240819-074324/1.4.2-gc2639da",
-          "discoverable": true,
-          "addon_type": null
-        },
-        "location": {
-          "tz": "Europe/Monaco",
-          "lat": 43.7314,
-          "lon": 7.419
-        },
-        "debug": {
-          "level": 2,
-          "file_level": null,
-          "mqtt": {
-            "enable": false
-          },
-          "websocket": {
-            "enable": false
-          },
-          "udp": {
-            "addr": null
-          }
-        },
-        "ui_data": {},
-        "rpc_udp": {
-          "dst_addr": null,
-          "listen_port": null
-        },
-        "sntp": {
-          "server": "time.google.com"
-        },
-        "cfg_rev": 14
-      }
-    }
-  ]
+  "components": [],
+  "cfg_rev": 20,
+  "offset": 0,
+  "total": 0
 }

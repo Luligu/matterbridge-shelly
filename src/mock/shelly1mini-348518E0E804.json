@@ -1,13 +1,13 @@
 {
   "shelly": {
-    "name": null,
+    "name": "1mini Gen2",
     "id": "shelly1mini-348518e0e804",
     "mac": "348518E0E804",
     "slot": 0,
     "model": "SNSW-001X8EU",
     "gen": 2,
-    "fw_id": "20240726-114504/1.4.0-gb2aeadb",
-    "ver": "1.4.0",
+    "fw_id": "20241011-114452/1.4.4-g6d2a586",
+    "ver": "1.4.4",
     "app": "Plus1Mini",
     "auth_en": false,
     "auth_domain": null
@@ -59,9 +59,9 @@
     },
     "sys": {
       "device": {
-        "name": null,
+        "name": "1mini Gen2",
         "mac": "348518E0E804",
-        "fw_id": "20240726-114504/1.4.0-gb2aeadb",
+        "fw_id": "20241011-114452/1.4.4-g6d2a586",
         "discoverable": true,
         "eco_mode": false
       },
@@ -87,11 +87,11 @@
       "sntp": {
         "server": "time.google.com"
       },
-      "cfg_rev": 14
+      "cfg_rev": 25
     },
     "wifi": {
       "ap": {
-        "ssid": "Shelly1Mini-348518E0E804",
+        "ssid": "",
         "is_open": true,
         "enable": false,
         "range_extender": {
@@ -99,7 +99,7 @@
         }
       },
       "sta": {
-        "ssid": "FibreBox_X6-12A4C7",
+        "ssid": "",
         "is_open": false,
         "enable": true,
         "ipv4mode": "dhcp",
@@ -109,9 +109,9 @@
         "nameserver": null
       },
       "sta1": {
-        "ssid": null,
-        "is_open": true,
-        "enable": false,
+        "ssid": "",
+        "is_open": false,
+        "enable": true,
         "ipv4mode": "dhcp",
         "ip": null,
         "netmask": null,
@@ -146,35 +146,43 @@
       "source": "HTTP_in",
       "output": false,
       "temperature": {
-        "tC": 58.8,
-        "tF": 137.9
+        "tC": 59.4,
+        "tF": 139
       }
     },
     "sys": {
       "mac": "348518E0E804",
       "restart_required": false,
-      "time": "17:15",
-      "unixtime": 1722525319,
-      "uptime": 1418,
-      "ram_size": 262400,
-      "ram_free": 142920,
+      "time": "14:53",
+      "unixtime": 1741441995,
+      "uptime": 788743,
+      "ram_size": 262196,
+      "ram_free": 137788,
       "fs_size": 393216,
       "fs_free": 114688,
-      "cfg_rev": 14,
+      "cfg_rev": 25,
       "kvs_rev": 0,
       "schedule_rev": 1,
       "webhook_rev": 0,
-      "available_updates": {},
-      "reset_reason": 3
+      "available_updates": {
+        "beta": {
+          "version": "1.5.1-beta1"
+        }
+      },
+      "reset_reason": 1
     },
     "wifi": {
       "sta_ip": "192.168.1.238",
       "status": "got ip",
-      "ssid": "FibreBox_X6-12A4C7",
-      "rssi": -59
+      "ssid": "",
+      "rssi": -58
     },
     "ws": {
       "connected": false
     }
-  }
+  },
+  "components": [],
+  "cfg_rev": 25,
+  "offset": 0,
+  "total": 0
 }
