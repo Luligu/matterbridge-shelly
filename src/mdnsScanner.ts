@@ -4,7 +4,7 @@
  * @file src\mdnsScanner.ts
  * @author Luca Liguori
  * @date 2024-05-01
- * @version 1.1.0
+ * @version 1.2.0
  *
  * Copyright 2024, 2025, 2026 Luca Liguori.
  *
@@ -27,6 +27,8 @@ import EventEmitter from 'node:events';
 import { RemoteInfo, SocketType } from 'node:dgram';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { getIpv4InterfaceAddress, getIpv6InterfaceAddress } from 'matterbridge/utils';
 
 export interface DiscoveredDevice {
   id: string;
@@ -360,7 +362,8 @@ if (process.argv.includes('testMdnsScanner')) {
   // mdnsScanner.start(0, 'fd78:cbf8:4939:746:d555:85a9:74f6:9c6', 'udp6', true);
   // mdnsScanner.start(0, undefined, 'udp4', true);
   // mdnsScanner.start(0, '192.168.1.189', 'udp4', true);
-  mdnsScanner.start(0, getIpv4InterfaceAddress(), 'udp4', true);
+  // mdnsScanner.start(0, getIpv4InterfaceAddress(), 'udp4', true);
+  // mdnsScanner.start(0, getIpv6InterfaceAddress(), 'udp6', true);
   // mdnsScanner.start(0, undefined, undefined, true);
 
   process.on('SIGINT', async function () {
