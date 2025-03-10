@@ -4,7 +4,7 @@
  * @file src\mdnsScanner.ts
  * @author Luca Liguori
  * @date 2024-05-01
- * @version 1.2.0
+ * @version 1.2.1
  *
  * Copyright 2024, 2025, 2026 Luca Liguori.
  *
