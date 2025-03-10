@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { ShellyDevice } from './shellyDevice.js';
-import { AnsiLogger, TimestampFormat, LogLevel, MAGENTA, db, BLUE, hk, zb, nt } from 'matterbridge/logger';
+import { AnsiLogger, TimestampFormat, LogLevel, MAGENTA, db, BLUE, hk, zb, nt, dn, er } from 'matterbridge/logger';
 import { Shelly } from './shelly.js';
 import { ShellyComponent } from './shellyComponent.js';
 import path from 'node:path';
@@ -325,6 +325,51 @@ describe('Shelly devices test', () => {
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`Error creating device gen 2+ from host ${zb}${host}${db}. No data found.`));
   });
 
+  test('create gen 2+ battery should log wrong settings', async () => {
+    fetchSpy = jest
+      .spyOn(ShellyDevice, 'fetch')
+      .mockImplementation((shelly: Shelly, log: AnsiLogger, host: string, service: string, params?: Record<string, string | number | boolean | object>) => {
+        if (service === 'shelly')
+          return Promise.resolve({
+            name: 'H&T Gen3',
+            id: 'shellyhtg3-3030f9ec8468',
+            mac: '3030F9EC8468',
+            model: 'S3SN-0U12A',
+            gen: 3,
+            fw_id: '20241011-121127/1.4.5-gbf870ca',
+            ver: '1.4.5',
+            auth_en: false,
+          });
+        if (service === 'Shelly.GetConfig')
+          return Promise.resolve({
+            ws: {
+              enable: false,
+              server: 'ws://192.168.1.XXX:8485XXX',
+              ssl_ca: '*',
+            },
+            sys: {
+              device: {},
+              cfg_rev: 23,
+            },
+          });
+        if (service === 'Shelly.GetStatus')
+          return Promise.resolve({
+            sys: {
+              available_updates: {},
+              wakeup_period: 7200,
+            },
+          });
+        return Promise.resolve({ gen: 3 });
+      });
+    const host = '192.168.100.100';
+    const device = await ShellyDevice.create(shelly, log, host);
+    expect(device).toBeDefined();
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.WARN, expect.stringContaining(`The Outbound websocket settings is not enabled`));
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.WARN, expect.stringContaining(`The port must be 8485`));
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.WARN, expect.stringContaining(`The ip must be the matterbridge ip`));
+    device?.destroy();
+  });
+
   test('create gen 1', async () => {
     fetchSpy = jest
       .spyOn(ShellyDevice, 'fetch')
@@ -339,7 +384,7 @@ describe('Shelly devices test', () => {
     expect(device).toBeDefined();
     if (!device) return;
     expect((device as any).lastseenInterval).toBeDefined();
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.ERROR, expect.stringContaining(`CoIoT service not found for device ${device.name} id ${device.id}.`));
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.ERROR, expect.stringContaining(`CoIoT service not found for device ${dn}${device.name}${er} id ${hk}${device.id}${er}.`));
     expect(loggerLogSpy).toHaveBeenCalledWith(
       LogLevel.NOTICE,
       expect.stringContaining(`Device ${hk}${device.id}${nt} host ${zb}${device.host}${nt} has an available firmware update.`),
