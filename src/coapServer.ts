@@ -315,6 +315,7 @@ export class CoapServer extends EventEmitter {
    * @returns {CoapMessage} An object containing the parsed information from the message.
    */
   private parseShellyMessage(msg: IncomingMessage) {
+    // if (!this.deviceId.get(msg.rsinfo.address)) return;
     this.log.debug(`Parsing CoIoT (coap) response from device ${hk}${this.deviceId.get(msg.rsinfo.address)}${db} host ${zb}${msg.rsinfo.address}${db}...`);
 
     const host = msg.rsinfo.address;

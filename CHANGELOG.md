@@ -51,6 +51,10 @@ The expertMode option has been added to show an advanced or simplified config.
 - [CoapServer]: Removed log of error message for shellymotionsensor and shellymotion2 that don't answer to the /cit/s and /cit/d CoIoT requests.
 - [package]: Updated dependencies.
 
+### Fixed
+
+- [platform]: Fixed initial values of battery component.
+
 <a href="https://www.buymeacoffee.com/luligugithub">
   <img src="yellow-button.png" alt="Buy me a coffee" width="120">
 </a>

@@ -681,10 +681,17 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         const batteryComponent = device.getComponent('battery');
         const devicepowerComponent = device.getComponent('devicepower:0');
         if (batteryComponent) {
+          let level = batteryComponent.hasProperty('level') ? batteryComponent.getValue('level') : undefined;
+          level = isValidNumber(level, 0, 100) ? level : undefined;
+          let status = PowerSource.BatChargeLevel.Ok;
+          if (level && level < 10) status = PowerSource.BatChargeLevel.Critical;
+          else if (level && level < 20) status = PowerSource.BatChargeLevel.Warning;
+          let voltage = batteryComponent.hasProperty('voltage') ? batteryComponent.getValue('voltage') : undefined;
+          voltage = isValidNumber(voltage, 0, 12) ? voltage * 1000 : undefined;
           if (batteryComponent.hasProperty('charging')) {
-            mbDevice.createDefaultPowerSourceRechargeableBatteryClusterServer();
+            mbDevice.createDefaultPowerSourceRechargeableBatteryClusterServer(level, status, voltage);
           } else {
-            mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer();
+            mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer(level, status, voltage);
           }
           batteryComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
             shellyUpdateHandler(this, mbDevice, device, component, property, value, 'PowerSource');
@@ -1510,7 +1517,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
 
     // start Shelly mDNS device discoverer if enabled
     if (this.config.enableMdnsDiscover === true) {
-      this.shelly.mdnsScanner.start(0, this.config.interfaceName as string | undefined, 'udp4', this.config.debugMdns as boolean);
+      this.shelly.mdnsScanner.start(0, 10 * 60 * 1000, this.config.interfaceName as string | undefined, 'udp4', this.config.debugMdns as boolean);
     }
 
     // Wait for the failsafe count to be met
