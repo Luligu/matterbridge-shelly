@@ -1,4 +1,4 @@
-# <img src="https://github.com/Luligu/matterbridge/blob/main/frontend/public/matterbridge%2064x64.png" alt="Matterbridge Logo" width="64px" height="64px">&nbsp;&nbsp;&nbsp;Matterbridge shelly plugin changelog
+# <img src="matterbridge.svg" alt="Matterbridge Logo" width="64px" height="64px">&nbsp;&nbsp;&nbsp;Matterbridge shelly plugin changelog
 
 All notable changes to this project will be documented in this file.
 
@@ -32,14 +32,27 @@ Expert mode:
 
 The expertMode option has been added to show an advanced or simplified config.
 
-## [2.0.4] - 2025-03-06
+## [2.0.4] - 2025-03-09
 
 ### Added
 
-- [MdnsScanner]: Refactor Jest test to include all gen 1, 2, 3 and 4 devices mdns response.
+- [MdnsScanner]: Refactor Jest test to include all gen 1, 2, 3 and 4 devices mdns responses (gen 4 are still not supported and blocked).
+- [CoapServer]: CoapServer v. 2.0.0.
+- [WsServer]: WsServer v. 1.3.1.
+- [WsClient]: WsClient v. 2.0.2.
+- [Shelly]: Shelly v. 2.2.0.
+- [ShellyDevice]: ShellyDevice v. 3.1.0
+- [shelly]: Refactor fetchInterval logic to reduce cpu load and network traffic on the board in the first 5 minutes from start.
+- [shelly]: Added check of ws component configuration for gen 2+ battery powered device (i.e. shellyhtg3).
+- [shelly]: Optimized state updates for gen 1 and gen 2+ devices.
+
+### Changed
+
+- [CoapServer]: Removed log of error message for shellymotionsensor and shellymotion2 that don't answer to the /cit/s and /cit/d CoIoT requests.
+- [package]: Updated dependencies.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+  <img src="yellow-button.png" alt="Buy me a coffee" width="120">
 </a>
 
 ## [2.0.3] - 2025-03-05
@@ -49,7 +62,7 @@ The expertMode option has been added to show an advanced or simplified config.
 - [MdnsScanner]: Added discovery of gen 4 devices.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+  <img src="yellow-button.png" alt="Buy me a coffee" width="120">
 </a>
 
 ## [2.0.2] - 2025-03-05

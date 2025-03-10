@@ -1,4 +1,4 @@
-# <img src="https://github.com/Luligu/matterbridge/blob/main/frontend/public/matterbridge%2064x64.png" alt="Matterbridge Logo" width="64px" height="64px">&nbsp;&nbsp;&nbsp;Matterbridge shelly plugin &nbsp;&nbsp; <img src="https://github.com/Luligu/matterbridge/blob/main/screenshot/Shelly.png" alt="Shelly logo" width="200" />
+# <img src="matterbridge.svg" alt="Matterbridge Logo" width="64px" height="64px">&nbsp;&nbsp;&nbsp;Matterbridge shelly plugin &nbsp;&nbsp; <img src="Shelly.svg" alt="Shelly logo" width="200" />
 
 [![npm version](https://img.shields.io/npm/v/matterbridge-shelly.svg)](https://www.npmjs.com/package/matterbridge-shelly)
 [![npm downloads](https://img.shields.io/npm/dt/matterbridge-shelly.svg)](https://www.npmjs.com/package/matterbridge-shelly)
@@ -23,7 +23,7 @@ Features:
 - Shelly BLU devices are supported through local devices configured as ble gateway.
 - Discovered shellies are stored in local storage and cached for fast loading on startup.
 - The components exposed are Light (with brightness and RGB color), Switch, Relay, Roller, Cover, PowerMeter, Temperature, Humidity, Illuminance, Thermostat, Button and Input.
-- PowerMeters expose the electrical measurements with the electricalSensor device type (suppoerted by Home Assistant and partially by SmartThings), waiting for the controllers to upgrade to the Matter 1.3 specs.
+- PowerMeters expose the electrical measurements with the electricalSensor device type (suppoerted by Home Assistant and partially by SmartThings), waiting for the other controllers to upgrade to the Matter 1.3 specs.
 - Shellies are controlled locally, eliminating the need for cloud or MQTT (which can both be disabled).
 - Shelly Gen 1 devices are controlled using the CoIoT protocol (see the note below).
 - Shelly Gen 2 and Gen 3 devices are controlled using WebSocket.
@@ -32,7 +32,8 @@ Features:
 - Device components can be blacklisted globally or on a per-device basis. Refer to the [COMPONENTS.md documentation.](https://github.com/Luligu/matterbridge-shelly/blob/main/COMPONENTS.md)
 - Devices ids can be selected from a list in the config editor or in the Devices panel on the Home page.
 - If the device has a firmware update available, a message is displayed.
-- If the device's CoIoT protocol is not correctly configured, a message is displayed.
+- If the device's CoIoT protocol is not correctly configured for the gen 1 devices, a message is displayed.
+- If the device's Outbound websocket settings is not correctly configured for the gen 2+ battery powered devices, a message is displayed.
 - If the device cover/roller component is not calibrated, a message is displayed.
 - If a device changes its ip address on the network, a message is displayed and the new address is stored.
 - A 10-minute timer checks if the device has reported within that time frame, and fetch un update.
@@ -44,7 +45,7 @@ If you like this project and find it useful, please consider giving it a star on
 This project is proudly sponsored by:
 
 <a href="https://www.shelly.com/en">
-  <img src="https://github.com/Luligu/matterbridge/blob/main/screenshot/Shelly.png" alt="Shelly logo" width="100" />
+  <img src="Shelly.svg" alt="Shelly logo" width="100" />
 </a>
 
 [Shelly Group](https://corporate.shelly.com/about-shelly-group/)
