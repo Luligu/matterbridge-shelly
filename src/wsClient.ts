@@ -4,9 +4,9 @@
  * @file src\wsClient.ts
  * @author Luca Liguori
  * @date 2024-05-01
- * @version 2.0.1
+ * @version 2.0.2
  *
- * Copyright 2024, 2025 Luca Liguori.
+ * Copyright 2024, 2025, 2026 Luca Liguori.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -288,6 +288,10 @@ export class WsClient extends EventEmitter {
    * @returns void
    */
   async listenForStatusUpdates() {
+    if (this._isConnecting || this._isConnected) {
+      this.log.debug(`WebSocket client is already ${this._isConnecting ? 'connecting' : 'connected'} to device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}`);
+      return;
+    }
     try {
       this._isConnecting = true;
       this.wsClient = new WebSocket(this.wsUrl);
@@ -319,6 +323,7 @@ export class WsClient extends EventEmitter {
     // Handle the close event
     this.wsClient.on('close', () => {
       this.log.info(`WebSocket connection closed with Shelly device ${hk}${this.wsDeviceId}${nf} host ${zb}${this.wsHost}${nf}`);
+      this._isConnecting = false;
       this._isConnected = false;
       this.stopPingPong();
     });
