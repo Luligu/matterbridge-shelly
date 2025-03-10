@@ -19,7 +19,7 @@ Features:
 
 - Shellies are automatically discovered using mDNS.
 - Shelly wifi battery-powered devices are supported.
-- Shelly wifi battery-powered devices with sleep_mode are supported.
+- Shelly wifi battery-powered devices with sleep_mode are supported. If they don't report in the last 24h, they are considered offline.
 - Shelly BLU devices are supported through local devices configured as ble gateway.
 - Discovered shellies are stored in local storage and cached for fast loading on startup.
 - The components exposed are Light (with brightness and RGB color), Switch, Relay, Roller, Cover, PowerMeter, Temperature, Humidity, Illuminance, Thermostat, Button and Input.
@@ -36,7 +36,7 @@ Features:
 - If the device's Outbound websocket settings is not correctly configured for the gen 2+ battery powered devices, a message is displayed.
 - If the device cover/roller component is not calibrated, a message is displayed.
 - If a device changes its ip address on the network, a message is displayed and the new address is stored.
-- A 10-minute timer checks if the device has reported within that time frame, and fetch un update.
+- A 1 hour timer checks if the device has reported within that time frame, and fetch un update.
 
 If you like this project and find it useful, please consider giving it a star on GitHub at https://github.com/Luligu/matterbridge-shelly and sponsoring it.
 

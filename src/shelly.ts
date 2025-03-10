@@ -152,11 +152,11 @@ export class Shelly extends EventEmitter {
             `Device ${hk}${device.id}${db} host ${zb}${device.host}${db} fetch interval ${CYAN}${fetchIntervalMinutes}${db} minutes and ${CYAN}${fetchIntervalSeconds}${db} seconds`,
           );
         }
-        // Set device offline if sleepMode is enabled and lastseen is older than 12 hours
+        // Set device offline if sleepMode is enabled and lastseen is older than 24 hours
         if (device.sleepMode) {
-          if (Date.now() - device.lastseen > 12 * 60 * 60 * 1000) {
+          if (Date.now() - device.lastseen > 24 * 60 * 60 * 1000) {
             if (device.online) {
-              device.log.warn(`Device ${hk}${device.id}${wr} host ${zb}${device.host}${wr} has not been seen since 12 hours. The device may be offline.`);
+              device.log.warn(`Device ${hk}${device.id}${wr} host ${zb}${device.host}${wr} has not reported in the last 24 hours.`);
               device.online = false;
               device.emit('offline');
             }

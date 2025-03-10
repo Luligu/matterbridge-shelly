@@ -1124,7 +1124,7 @@ export class ShellyDevice extends EventEmitter {
     this.shellyPayload = await ShellyDevice.fetch(this.shelly, this.log, this.host, 'shelly');
     if (!this.shellyPayload) {
       if (this.online) {
-        this.log.warn(`Error fetching shelly from device ${hk}${this.id}${wr} host ${zb}${this.host}${wr}. No data found. The device may be offline.`);
+        this.log.warn(`Error fetching shelly from device ${hk}${this.id}${wr} host ${zb}${this.host}${wr}. No data found.`);
         this.online = false;
         this.emit('offline');
       }
@@ -1133,7 +1133,7 @@ export class ShellyDevice extends EventEmitter {
     this.settingsPayload = await ShellyDevice.fetch(this.shelly, this.log, this.host, this.gen === 1 ? 'settings' : 'Shelly.GetConfig');
     if (!this.settingsPayload) {
       if (this.online) {
-        this.log.warn(`Error fetching settings from device ${hk}${this.id}${wr} host ${zb}${this.host}${wr}. No data found. The device may be offline.`);
+        this.log.warn(`Error fetching settings from device ${hk}${this.id}${wr} host ${zb}${this.host}${wr}. No data found.`);
         this.online = false;
         this.emit('offline');
       }
@@ -1142,7 +1142,7 @@ export class ShellyDevice extends EventEmitter {
     this.statusPayload = await ShellyDevice.fetch(this.shelly, this.log, this.host, this.gen === 1 ? 'status' : 'Shelly.GetStatus');
     if (!this.statusPayload) {
       if (this.online) {
-        this.log.warn(`Error fetching status from device ${hk}${this.id}${wr} host ${zb}${this.host}${wr}. No data found. The device may be offline.`);
+        this.log.warn(`Error fetching status from device ${hk}${this.id}${wr} host ${zb}${this.host}${wr}. No data found.`);
         this.online = false;
         this.emit('offline');
       }
@@ -1161,10 +1161,9 @@ export class ShellyDevice extends EventEmitter {
       } while (btHomePayload && offset < btHomePayload.total);
       this.componentsPayload = { components: btHomeComponents, cfg_rev: btHomePayload?.cfg_rev | 0, offset: 0, total: btHomeComponents.length };
     }
+    this.lastseen = Date.now();
     if (this.cached) {
       this.cached = false;
-      // Check if device is a cached device and register it to the CoAP server
-      // if (this.gen === 1) this.shelly.coapServer.registerDevice(this.host, this.id);
     }
     if (!this.online) {
       this.log.info(`The device ${hk}${this.id}${nf} host ${zb}${this.host}${nf} is online.`);
