@@ -152,7 +152,10 @@ describe('Shellies MdnsScanner test', () => {
     // Start the mdns scanner
     mdns.start(undefined, '127.0.0.1', 'udp4', true);
     expect(mdns.isScanning).toBeTruthy();
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Starting mDNS query service for shelly devices with interface 127.0.0.1 bind 127.0.0.1 type udp4 ip 224.0.0.251...`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(
+      LogLevel.INFO,
+      `Starting MdnsScanner for shelly devices (interface 127.0.0.1 bind 127.0.0.1 type udp4 ip 224.0.0.251) for shelly devices...`,
+    );
 
     // Set up a promise that resolves when the listener is invoked.
     const discoveredDeviceListener: jest.MockedFunction<DiscoveredDeviceListener> = jest.fn();
@@ -179,7 +182,10 @@ describe('Shellies MdnsScanner test', () => {
     // Start the mdns scanner
     mdns.start(undefined, '127.0.0.1', 'udp4', true);
     expect(mdns.isScanning).toBeTruthy();
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Starting mDNS query service for shelly devices with interface 127.0.0.1 bind 127.0.0.1 type udp4 ip 224.0.0.251...`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(
+      LogLevel.INFO,
+      `Starting MdnsScanner for shelly devices (interface 127.0.0.1 bind 127.0.0.1 type udp4 ip 224.0.0.251) for shelly devices...`,
+    );
 
     // Set up a promise that resolves when the listener is invoked.
     const discoveredDeviceListener: jest.MockedFunction<DiscoveredDeviceListener> = jest.fn();
@@ -206,7 +212,10 @@ describe('Shellies MdnsScanner test', () => {
     // Start the mdns scanner
     mdns.start(undefined, '127.0.0.1', 'udp4', true);
     expect(mdns.isScanning).toBeTruthy();
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Starting mDNS query service for shelly devices with interface 127.0.0.1 bind 127.0.0.1 type udp4 ip 224.0.0.251...`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(
+      LogLevel.INFO,
+      `Starting MdnsScanner for shelly devices (interface 127.0.0.1 bind 127.0.0.1 type udp4 ip 224.0.0.251) for shelly devices...`,
+    );
 
     // Set up a promise that resolves when the listener is invoked.
     const discoveredDeviceListener: jest.MockedFunction<DiscoveredDeviceListener> = jest.fn();
@@ -248,7 +257,10 @@ describe('Shellies MdnsScanner test', () => {
     mdns.once('discovered', discoveredDeviceListener);
     mdns.start(undefined, '127.0.0.1', 'udp4', true);
     expect(mdns.isScanning).toBeTruthy();
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Starting mDNS query service for shelly devices with interface 127.0.0.1 bind 127.0.0.1 type udp4 ip 224.0.0.251...`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(
+      LogLevel.INFO,
+      `Starting MdnsScanner for shelly devices (interface 127.0.0.1 bind 127.0.0.1 type udp4 ip 224.0.0.251) for shelly devices...`,
+    );
     const responsePacket: ResponsePacket = loadResponse(deviceId);
     expect(responsePacket).not.toBeUndefined();
     if (!responsePacket) return;
@@ -323,8 +335,8 @@ describe('Shellies MdnsScanner test', () => {
       mdns.start(undefined, '127.0.0.1', 'udp4', true);
       expect(mdns.isScanning).toBeTruthy();
       expect(loggerLogSpy).toHaveBeenCalledWith(
-        LogLevel.DEBUG,
-        `Starting mDNS query service for shelly devices with interface 127.0.0.1 bind 127.0.0.1 type udp4 ip 224.0.0.251...`,
+        LogLevel.INFO,
+        `Starting MdnsScanner for shelly devices (interface 127.0.0.1 bind 127.0.0.1 type udp4 ip 224.0.0.251) for shelly devices...`,
       );
       const responsePacket: ResponsePacket = loadResponse(deviceId);
       expect(responsePacket).not.toBeUndefined();
@@ -393,8 +405,8 @@ describe('Shellies MdnsScanner test', () => {
       mdns.start(undefined, '127.0.0.1', 'udp4', true);
       expect(mdns.isScanning).toBeTruthy();
       expect(loggerLogSpy).toHaveBeenCalledWith(
-        LogLevel.DEBUG,
-        `Starting mDNS query service for shelly devices with interface 127.0.0.1 bind 127.0.0.1 type udp4 ip 224.0.0.251...`,
+        LogLevel.INFO,
+        `Starting MdnsScanner for shelly devices (interface 127.0.0.1 bind 127.0.0.1 type udp4 ip 224.0.0.251) for shelly devices...`,
       );
       const responsePacket: ResponsePacket = loadResponse(deviceId);
       expect(responsePacket).not.toBeUndefined();
@@ -453,8 +465,8 @@ describe('Shellies MdnsScanner test', () => {
       mdns.start(undefined, '127.0.0.1', 'udp4', true);
       expect(mdns.isScanning).toBeTruthy();
       expect(loggerLogSpy).toHaveBeenCalledWith(
-        LogLevel.DEBUG,
-        `Starting mDNS query service for shelly devices with interface 127.0.0.1 bind 127.0.0.1 type udp4 ip 224.0.0.251...`,
+        LogLevel.INFO,
+        `Starting MdnsScanner for shelly devices (interface 127.0.0.1 bind 127.0.0.1 type udp4 ip 224.0.0.251) for shelly devices...`,
       );
       const responsePacket: ResponsePacket = loadResponse(deviceId);
       expect(responsePacket).not.toBeUndefined();
@@ -518,8 +530,8 @@ describe('Shellies MdnsScanner test', () => {
       mdns.start(undefined, '127.0.0.1', 'udp4', true);
       expect(mdns.isScanning).toBeTruthy();
       expect(loggerLogSpy).toHaveBeenCalledWith(
-        LogLevel.DEBUG,
-        `Starting mDNS query service for shelly devices with interface 127.0.0.1 bind 127.0.0.1 type udp4 ip 224.0.0.251...`,
+        LogLevel.INFO,
+        `Starting MdnsScanner for shelly devices (interface 127.0.0.1 bind 127.0.0.1 type udp4 ip 224.0.0.251) for shelly devices...`,
       );
       const responsePacket: ResponsePacket = loadResponse(deviceId);
       expect(responsePacket).not.toBeUndefined();
@@ -579,8 +591,8 @@ describe('Shellies MdnsScanner test', () => {
       mdns.start(undefined, '127.0.0.1', 'udp4', true);
       expect(mdns.isScanning).toBeTruthy();
       expect(loggerLogSpy).toHaveBeenCalledWith(
-        LogLevel.DEBUG,
-        `Starting mDNS query service for shelly devices with interface 127.0.0.1 bind 127.0.0.1 type udp4 ip 224.0.0.251...`,
+        LogLevel.INFO,
+        `Starting MdnsScanner for shelly devices (interface 127.0.0.1 bind 127.0.0.1 type udp4 ip 224.0.0.251) for shelly devices...`,
       );
       const responsePacket: ResponsePacket = loadResponse(deviceId);
       expect(responsePacket).not.toBeUndefined();
@@ -620,7 +632,7 @@ describe('Shellies MdnsScanner test', () => {
 
     console.log(`Shellies MdnsScanner Jest Test: starting...`);
     mdns.start(120000, undefined, undefined, true);
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Starting mDNS query service for shelly devices...`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Starting MdnsScanner for shelly devices...`);
     expect(sendQuerySpyII).toHaveBeenCalled();
 
     console.log(`Shellies MdnsScanner Jest Test: testing error...`);
@@ -636,7 +648,7 @@ describe('Shellies MdnsScanner test', () => {
 
     console.log(`Shellies MdnsScanner Jest Test: stopping...`);
     jest.advanceTimersByTime(65 * 1000);
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Stopped mDNS query service.`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Stopped MdnsScanner for shelly devices.`);
 
     jest.useRealTimers();
   });
