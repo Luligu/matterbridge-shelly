@@ -4,7 +4,7 @@
  * @file src\mdnsScanner.ts
  * @author Luca Liguori
  * @date 2024-05-01
- * @version 1.2.1
+ * @version 1.2.2
  *
  * Copyright 2024, 2025, 2026 Luca Liguori.
  *
@@ -54,6 +54,7 @@ export class MdnsScanner extends EventEmitter {
   private scanner?: mdns.MulticastDNS;
   private _isScanning = false;
   private scannerTimeout?: NodeJS.Timeout;
+  private queryTimeout?: NodeJS.Timeout;
   private queryInterval?: NodeJS.Timeout;
   private _dataPath = 'temp';
 
@@ -103,12 +104,13 @@ export class MdnsScanner extends EventEmitter {
   /**
    * Starts the mDNS query service for shelly devices.
    *
-   * @param {number} shutdownTimeout - The timeout value in milliseconds to stop the MdnsScanner (optional, if not provided the MdnsScanner will not stop).
+   * @param {number} scannerTimeout - The timeout value in milliseconds to stop the MdnsScanner (optional, if not provided the MdnsScanner will not stop).
+   * @param {number} queryTimeout - The timeout value in milliseconds to stop the query service (optional, if not provided the query service will not stop).
    * @param {string} mdnsInterface - Explicitly specify a network interface name. Will use all interfaces when not specified.
    * @param {SocketType} type - Explicitly specify a socket type: "udp4" | "udp6". Default is "udp4".
    * @param {boolean} debug - Indicates whether to enable debug mode (default: false).
    */
-  start(shutdownTimeout?: number, mdnsInterface?: string, type?: SocketType, debug = false) {
+  start(scannerTimeout?: number, queryTimeout?: number, mdnsInterface?: string, type?: SocketType, debug = false) {
     if (this._isScanning) return;
     this._isScanning = true;
 
@@ -251,10 +253,19 @@ export class MdnsScanner extends EventEmitter {
     }, 60 * 1000);
 
     // Set the timeout to stop the scanner if it is defined
-    if (shutdownTimeout && shutdownTimeout > 0) {
+    if (scannerTimeout && scannerTimeout > 0) {
       this.scannerTimeout = setTimeout(() => {
         this.stop();
-      }, shutdownTimeout);
+      }, scannerTimeout);
+    }
+
+    // Set the timeout to stop the query if it is defined
+    if (queryTimeout && queryTimeout > 0) {
+      this.queryTimeout = setTimeout(() => {
+        if (this.queryInterval) clearInterval(this.queryInterval);
+        this.queryInterval = undefined;
+        this.log.info('Stopped MdnsScanner query service for shelly devices.');
+      }, queryTimeout);
     }
     this.log.info('Started MdnsScanner for shelly devices.');
   }
@@ -266,6 +277,8 @@ export class MdnsScanner extends EventEmitter {
     this.log.info('Stopping MdnsScanner for shelly devices...');
     if (this.scannerTimeout) clearTimeout(this.scannerTimeout);
     this.scannerTimeout = undefined;
+    if (this.queryTimeout) clearTimeout(this.queryTimeout);
+    this.queryTimeout = undefined;
     if (this.queryInterval) clearTimeout(this.queryInterval);
     this.queryInterval = undefined;
     this._isScanning = false;
