@@ -4,9 +4,9 @@
  * @file src\coapServer.ts
  * @author Luca Liguori
  * @date 2024-05-01
- * @version 1.1.0
+ * @version 2.0.0
  *
- * Copyright 2024, 2025 Luca Liguori.
+ * Copyright 2024, 2025, 2026 Luca Liguori.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,12 @@
  * limitations under the License. *
  */
 
-import { AnsiLogger, BLUE, CYAN, LogLevel, MAGENTA, RESET, TimestampFormat, db, debugStringify, er, hk, idn, rs, zb } from 'matterbridge/logger';
-import coap, { Server, IncomingMessage, OutgoingMessage, globalAgent, parameters } from 'coap';
+import { AnsiLogger, BLUE, CYAN, LogLevel, MAGENTA, RESET, TimestampFormat, db, debugStringify, er, hk, nf, zb } from 'matterbridge/logger';
+import coap, { Server, IncomingMessage, OutgoingMessage } from 'coap';
 import EventEmitter from 'node:events';
 import path from 'node:path';
 import { promises as fs } from 'node:fs';
+import { ShellyDataType } from './shellyTypes.js';
 
 // 192.168.1.189:5683
 
@@ -75,13 +76,18 @@ interface CoIoTDescription {
   range: string | string[];
 }
 
+interface CoapServerEvent {
+  update: [host: string, component: string, property: string, value: ShellyDataType];
+}
+
 export class CoapServer extends EventEmitter {
   public readonly log;
   private coapServer: Server | undefined;
   private _isListening = false;
-  private _debug = false;
-  private readonly devices = new Map<string, CoIoTDescription[]>();
-  private readonly deviceSerial = new Map<string, number>();
+  private _isReady = false;
+  private readonly devices = new Map<string, CoIoTDescription[]>(); // host, descriptions
+  private readonly deviceSerial = new Map<string, number>(); // host, serial
+  private readonly deviceId = new Map<string, string>(); // host, deviceId
   private _dataPath = 'temp';
 
   constructor(logLevel: LogLevel = LogLevel.INFO) {
@@ -89,11 +95,19 @@ export class CoapServer extends EventEmitter {
     this.log = new AnsiLogger({ logName: 'ShellyCoapServer', logTimestampFormat: TimestampFormat.TIME_MILLIS, logLevel });
 
     // Set the CoAP parameters to minimum values
-    parameters.maxRetransmit = 1;
-    parameters.maxLatency = 1;
-    if (parameters.refreshTiming) parameters.refreshTiming();
+    // parameters.maxRetransmit = 1;
+    // parameters.maxLatency = 1;
+    // if (parameters.refreshTiming) parameters.refreshTiming();
 
     this.registerShellyOptions();
+  }
+
+  override emit<K extends keyof CoapServerEvent>(eventName: K, ...args: CoapServerEvent[K]): boolean {
+    return super.emit(eventName, ...args);
+  }
+
+  override on<K extends keyof CoapServerEvent>(eventName: K, listener: (...args: CoapServerEvent[K]) => void): this {
+    return super.on(eventName, listener);
   }
 
   /**
@@ -106,15 +120,6 @@ export class CoapServer extends EventEmitter {
   }
 
   /**
-   * Sets the debug mode.
-   *
-   * @param {boolean} debug - The new debug mode.
-   */
-  set debug(debug: boolean) {
-    this._debug = debug;
-  }
-
-  /**
    * Indicates whether the CoAP server is currently listening for incoming requests.
    *
    * @returns {boolean} A boolean value indicating whether the CoAP is listening.
@@ -124,12 +129,21 @@ export class CoapServer extends EventEmitter {
   }
 
   /**
+   * Indicates whether the CoAP server is ready.
+   *
+   * @returns {boolean} A boolean value indicating whether the CoAP is ready.
+   */
+  get isReady(): boolean {
+    return this._isReady;
+  }
+
+  /**
    * Retrieves the device description from the specified host using CoAP protocol.
    * @param {string} host The host from which to retrieve the device description.
    * @param {string} id - The id to request the device status from (default undefined).
    * @returns {Promise<IncomingMessage | null>} A Promise that resolves with the IncomingMessage object representing the response, or null if the request times out.
    */
-  async getDeviceDescription(host: string, id?: string): Promise<IncomingMessage | null> {
+  async getDeviceDescription(host: string, id: string): Promise<IncomingMessage | null> {
     this.log.debug(`Requesting CoIoT (coap) device description from ${hk}${id ? id + ' ' : ''}${db}${zb}${host}${db}...`);
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -170,7 +184,7 @@ export class CoapServer extends EventEmitter {
    * @param {string} id - The id to request the device status from (default undefined).
    * @returns {Promise<IncomingMessage | null>} A Promise that resolves with the IncomingMessage containing the device status, or null if the request times out.
    */
-  async getDeviceStatus(host: string, id?: string): Promise<IncomingMessage | null> {
+  async getDeviceStatus(host: string, id: string): Promise<IncomingMessage | null> {
     this.log.debug(`Requesting CoIoT (coap) device status from ${hk}${id ? id + ' ' : ''}${db}${zb}${host}${db}...`);
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -301,7 +315,7 @@ export class CoapServer extends EventEmitter {
    * @returns {CoapMessage} An object containing the parsed information from the message.
    */
   private parseShellyMessage(msg: IncomingMessage) {
-    this.log.debug(`Parsing device CoIoT (coap) response from ${zb}${msg.rsinfo.address}${db}...`);
+    this.log.debug(`Parsing CoIoT (coap) response from device ${hk}${this.deviceId.get(msg.rsinfo.address)}${db} host ${zb}${msg.rsinfo.address}${db}...`);
 
     const host = msg.rsinfo.address;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -309,8 +323,8 @@ export class CoapServer extends EventEmitter {
 
     const code = msg.code;
     const url = msg.url;
-    let deviceType = '';
-    let deviceId = '';
+    let deviceModel = '';
+    let deviceMac = '';
     let protocolRevision = '';
     let validFor = 0;
     let serial = 0;
@@ -318,8 +332,8 @@ export class CoapServer extends EventEmitter {
 
     if (headers[COIOT_OPTION_GLOBAL_DEVID]) {
       const parts = headers[COIOT_OPTION_GLOBAL_DEVID].split('#');
-      deviceType = parts[0];
-      deviceId = parts[1];
+      deviceModel = parts[0];
+      deviceMac = parts[1];
       protocolRevision = parts[2];
     }
 
@@ -336,8 +350,8 @@ export class CoapServer extends EventEmitter {
       serial = headers[COIOT_OPTION_STATUS_SERIAL];
     }
 
-    if (url === '/cit/s' && this.deviceSerial.get(host) === serial && !['SHDW-1', 'SHDW-2'].includes(deviceType)) {
-      this.log.debug(`No updates (serial not changed) for host ${zb}${host}${db}`);
+    if (url === '/cit/s' && this.deviceSerial.get(host) === serial && !['SHDW-1', 'SHDW-2'].includes(deviceModel)) {
+      this.log.debug(`No updates (serial not changed) for device ${hk}${this.deviceId.get(host)}${db} host ${zb}${host}${db}`);
       return;
     }
 
@@ -347,18 +361,23 @@ export class CoapServer extends EventEmitter {
       payload = msg.payload.toString();
     }
 
-    this.log.debug(`url:  ${CYAN}${url}${db}`);
+    this.log.debug(`url: ${CYAN}${url}${db}`);
     this.log.debug(`code: ${CYAN}${code}${db}`);
-    this.log.debug(`host: ${idn}${host}${rs}${db}`);
-    this.log.debug(`deviceType: ${CYAN}${deviceType}${db}`);
-    this.log.debug(`deviceId: ${CYAN}${deviceId}${db}`);
+    this.log.debug(`host: ${CYAN}${host}${db}`);
+    this.log.debug(`deviceId: ${CYAN}${this.deviceId.get(host)}${db}`);
+    this.log.debug(`deviceModel: ${CYAN}${deviceModel}${db}`);
+    this.log.debug(`deviceMac: ${CYAN}${deviceMac}${db}`);
     this.log.debug(`protocolRevision: ${CYAN}${protocolRevision}${db}`);
-    this.log.debug(`validFor: ${CYAN}${validFor}${db} seconds`);
+    this.log.debug(`validFor (${validFor}): ${CYAN}${Math.round(validFor / 60)}${db} minutes`);
     this.log.debug(`serial (${this.deviceSerial.get(host) === serial ? 'not changed' : 'updated'}): ${CYAN}${serial}${db}`);
     this.log.debug(`payload:${RESET}\n`, payload);
 
     if (msg.url === '/cit/d') {
-      if (this._debug) this.saveResponse(deviceType + '-' + deviceId + '.coap.citd.json', payload);
+      try {
+        if (this.log.logLevel === LogLevel.DEBUG) this.saveResponse(deviceModel + '-' + deviceMac + '.coap.citd.json', payload);
+      } catch {
+        // Ignore cause the error is already logged
+      }
       const desc: CoIoTDescription[] = [];
       this.log.debug(`parsing ${MAGENTA}blocks${db}:`);
       const blk: CoIoTBlkComponent[] = payload.blk;
@@ -419,6 +438,14 @@ export class CoapServer extends EventEmitter {
             if (s.D === 'inputEventCnt' && b.D.startsWith('sensor'))
               desc.push({ id: s.I, component: b.D.replace('_', ':').replace('sensor', 'input'), property: 'event_cnt', range: s.R }); // SHBTN-2
 
+            // dw component
+            if (s.D === 'dwIsOpened' && b.D.startsWith('sensor')) desc.push({ id: s.I, component: 'sensor', property: 'contact_open', range: ['0/1', '-1'] }); // SHDW-1 and SHDW-2
+            if (s.D === 'vibration' && b.D.startsWith('sensor')) desc.push({ id: s.I, component: 'vibration', property: 'vibration', range: ['0/1', '-1'] }); // SHDW-1 and SHDW-2
+            if (s.D === 'luminosity' && b.D.startsWith('sensor')) desc.push({ id: s.I, component: 'lux', property: 'value', range: ['U32', '-1'] }); // SHDW-1 and SHDW-2
+
+            // flood component
+            if (s.D === 'flood' && b.D.startsWith('sensor')) desc.push({ id: s.I, component: 'flood', property: 'flood', range: ['0/1', '-1'] }); // SHWT-1
+
             // ht component
             if (s.D === 'extTemp' && s.U === 'C' && b.D.startsWith('sensor')) desc.push({ id: s.I, component: 'temperature', property: 'tC', range: s.R }); // SHHT-1
             if (s.D === 'extTemp' && s.U === 'F' && b.D.startsWith('sensor')) desc.push({ id: s.I, component: 'temperature', property: 'tF', range: s.R }); // SHHT-1
@@ -442,12 +469,16 @@ export class CoapServer extends EventEmitter {
     }
 
     if (msg.url === '/cit/s') {
-      if (this._debug) this.saveResponse(deviceType + '-' + deviceId + '.coap.cits.json', payload);
+      try {
+        if (this.log.logLevel === LogLevel.DEBUG) this.saveResponse(deviceModel + '-' + deviceMac + '.coap.cits.json', payload);
+      } catch {
+        // Ignore cause the error is already logged
+      }
       this.deviceSerial.set(host, serial);
       const descriptions: CoIoTDescription[] = this.devices.get(host) || [];
       if (!descriptions || descriptions.length === 0) {
         // Bug on SHMOS-01 and SHMOS-02
-        if (deviceType === 'SHDW-1' || deviceType === 'SHDW-2') {
+        if (deviceModel === 'SHDW-1' || deviceModel === 'SHDW-2') {
           this.log.debug(`*Set coap descriptions for host ${zb}${host}${db} deviceType ${CYAN}SHDW-1/SHDW-2${db}`);
           // battery component
           descriptions.push({ id: 3111, component: 'battery', property: 'level', range: ['0/100', '-1'] }); // SHDW-1 and SHDW-2
@@ -459,7 +490,7 @@ export class CoapServer extends EventEmitter {
           // temperature component
           descriptions.push({ id: 3101, component: 'temperature', property: 'value', range: ['-55/125', '999'] }); // SHDW-1 and SHDW-2
           this.devices.set(host, descriptions);
-        } else if (deviceType === 'SHBTN-1' || deviceType === 'SHBTN-2') {
+        } else if (deviceModel === 'SHBTN-1' || deviceModel === 'SHBTN-2') {
           this.log.debug(`*Set coap descriptions for host ${zb}${host}${db} deviceType ${CYAN}SHBTN-1/SHBTN-2${db}`);
           // battery component
           descriptions.push({ id: 3111, component: 'battery', property: 'level', range: ['0/100', '-1'] }); // SHMOS-01
@@ -467,29 +498,31 @@ export class CoapServer extends EventEmitter {
           descriptions.push({ id: 2102, component: 'input:0', property: 'event', range: ['S/L/SS/SSS', ''] }); // SHBTN-2
           descriptions.push({ id: 2103, component: 'input:0', property: 'event_cnt', range: 'U16' }); // SHBTN-2
           this.devices.set(host, descriptions);
-        } else if (deviceType === 'SHMOS-01') {
+        } else if (deviceModel === 'SHMOS-01') {
           this.log.debug(`*Set coap descriptions for host ${zb}${host}${db} deviceType ${CYAN}SHMOS-01${db}`);
           // battery component
           descriptions.push({ id: 3111, component: 'battery', property: 'level', range: ['0/100', '-1'] }); // SHMOS-01
           // motion component
           descriptions.push({ id: 6107, component: 'sensor', property: 'motion', range: ['0/1', '-1'] }); // SHMOS-01
+          // vibration component
           descriptions.push({ id: 6110, component: 'vibration', property: 'vibration', range: ['0/1', '-1'] }); // SHMOS-01
           // luminosity component
           descriptions.push({ id: 3106, component: 'lux', property: 'value', range: ['U32', '-1'] }); // SHMOS-01
           this.devices.set(host, descriptions);
-        } else if (deviceType === 'SHMOS-02') {
+        } else if (deviceModel === 'SHMOS-02') {
           this.log.debug(`*Set coap descriptions for host ${zb}${host}${db} deviceType ${CYAN}SHMOS-02${db}`);
           // battery component
           descriptions.push({ id: 3111, component: 'battery', property: 'level', range: ['0/100', '-1'] }); // SHMOS-02
           // motion component
           descriptions.push({ id: 6107, component: 'sensor', property: 'motion', range: ['0/1', '-1'] }); // SHMOS-02
+          // vibration component
           descriptions.push({ id: 6110, component: 'vibration', property: 'vibration', range: ['0/1', '-1'] }); // SHMOS-02
           // luminosity component
           descriptions.push({ id: 3106, component: 'lux', property: 'value', range: ['U32', '-1'] }); // SHMOS-02
           // temperature component
           descriptions.push({ id: 3101, component: 'temperature', property: 'value', range: ['-55/125', '999'] }); // SHDW-1 and SHDW-2
           this.devices.set(host, descriptions);
-        } else if (deviceType === 'SHWT-1') {
+        } else if (deviceModel === 'SHWT-1') {
           this.log.debug(`*Set coap descriptions for host ${zb}${host}${db} deviceType ${CYAN}SHWT-1${db}`);
           // battery component
           descriptions.push({ id: 3111, component: 'battery', property: 'level', range: ['0/100', '-1'] }); // SHWT-1
@@ -499,8 +532,8 @@ export class CoapServer extends EventEmitter {
           descriptions.push({ id: 3101, component: 'temperature', property: 'value', range: ['-55/125', '999'] }); // SHWT-1
           this.devices.set(host, descriptions);
         } else {
-          this.log.debug(`*No coap description found for host ${zb}${host}${db} fetching it...`);
-          this.getDeviceDescription(host, deviceType); // No await
+          this.log.info(`No coap description found for ${hk}${deviceModel}${nf} host ${zb}${host}${nf} fetching it...`);
+          this.getDeviceDescription(host, deviceModel); // No await
         }
       }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -517,21 +550,22 @@ export class CoapServer extends EventEmitter {
             `- channel ${CYAN}${v.channel}${db} id ${CYAN}${v.id}${db} value ${CYAN}${v.value}${db} => ${CYAN}${desc.component}${db} ${CYAN}${desc.property}${db} ${CYAN}${desc.range === '0/1' ? v.value === 1 : v.value}${db}`,
           );
           if (typeof desc.range === 'string' && desc.range === '0/1') {
-            this.log.debug(`sending update for component ${CYAN}${desc.component}${db} property ${CYAN}${desc.property}${db}`);
+            this.log.debug(`sending update for component ${CYAN}${desc.component}${db} property ${CYAN}${desc.property}${db} value ${CYAN}${v.value === 1}${db}`);
             this.emit('update', host, desc.component, desc.property, v.value === 1);
           } else if (Array.isArray(desc.range) && desc.range[0] === '0/1' && desc.range[1] === '-1') {
-            this.log.debug(`sending update for component ${CYAN}${desc.component}${db} property ${CYAN}${desc.property}${db}`);
+            this.log.debug(
+              `sending update for component ${CYAN}${desc.component}${db} property ${CYAN}${desc.property}${db} value ${CYAN}${v.value === -1 ? null : v.value === 1}${db}`,
+            );
             this.emit('update', host, desc.component, desc.property, v.value === -1 ? null : v.value === 1);
           } else {
-            this.log.debug(`sending update for component ${CYAN}${desc.component}${db} property ${CYAN}${desc.property}${db}`);
+            this.log.debug(`sending update for component ${CYAN}${desc.component}${db} property ${CYAN}${desc.property}${db} value ${CYAN}${v.value}${db}`);
             this.emit('update', host, desc.component, desc.property, v.value);
           }
-        }
-        // else this.log.debug(`No coap description found for id ${v.id}`);
+        } else this.log.debug(`No coap description found for id ${v.id}`);
       });
     }
 
-    return { msg, host, deviceType, deviceId, protocolRevision, validFor, serial, payload } as CoapMessage;
+    return { msg, host, deviceType: deviceModel, deviceId: deviceMac, protocolRevision, validFor, serial, payload } as CoapMessage;
   }
 
   /**
@@ -556,7 +590,7 @@ export class CoapServer extends EventEmitter {
       if (msg.code === '0.30' && msg.url === '/cit/s') {
         this.parseShellyMessage(msg);
       } else {
-        // this.log.warn(`Coap server got a wrong messagge code ${BLUE}${msg.code}${wr} url ${BLUE}${msg.url}${wr} rsinfo ${db}${debugStringify(msg.rsinfo)}...`);
+        this.log.debug(`Coap server got a wrong messagge code ${BLUE}${msg.code}${db} url ${BLUE}${msg.url}${db} rsinfo ${db}${debugStringify(msg.rsinfo)}...`);
         // console.log(msg);
       }
     });
@@ -565,6 +599,7 @@ export class CoapServer extends EventEmitter {
       if (err) {
         this.log.warn('CoIoT (coap) server error while listening:', err);
       } else {
+        this._isReady = true;
         this.log.debug('CoIoT (coap) server is listening ...');
       }
     });
@@ -574,26 +609,34 @@ export class CoapServer extends EventEmitter {
    * Registers a device with the specified host.
    *
    * @param {string} host - The host of the device to register.
-   * @param {string} id - The id to request the device status from (default undefined).
+   * @param {string} id - The id of the device to register.
+   * @param {boolean} registerOnly - Whether the device has sleep mode and needs to be only registered.
    * @returns {Promise<void>} - A promise that resolves when the device is registered.
    */
-  async registerDevice(host: string, id?: string): Promise<void> {
-    this.log.debug(`Registering device ${host}...`);
-    this.getDeviceDescription(host, id); // No await
-    // this.log.debug(`Registered device ${host}.`);
+  async registerDevice(host: string, id: string, registerOnly: boolean): Promise<void> {
+    this.deviceId.set(host, id);
+    if (registerOnly) return;
+    // Bug on SHMOS-01 and SHMOS-02. They don't answer to the /cit/d and /cit/s requests
+    if (id.includes('shellymotionsensor') || id.includes('shellymotion2')) return;
+    this.log.debug(`Registering device ${hk}${id}${db} host ${zb}${host}${db}...`);
+    this.getDeviceDescription(host, id).then((msg) => {
+      if (msg) this.log.debug(`Registered CoIoT (coap) ${CYAN}/cit/d${db} for device ${hk}${id}${db} host ${zb}${host}${db}.`);
+    });
+    this.getDeviceStatus(host, id).then((msg) => {
+      if (msg) this.log.debug(`Registered CoIoT (coap) ${CYAN}/cit/s${db} for device ${hk}${id}${db} host ${zb}${host}${db}.`);
+    });
   }
 
   /**
    * Starts the CoIoT (coap) server for shelly devices.
    * If the server is already listening, this method does nothing.
    */
-  start(debug = false) {
-    this._debug = debug;
+  start() {
     if (this._isListening) return;
-    this.log.debug('Starting CoIoT (coap) server for shelly devices...');
+    this.log.info('Starting CoIoT (coap) server for shelly devices...');
     this._isListening = true;
     this.listenForStatusUpdates();
-    this.log.debug('Started CoIoT (coap) server for shelly devices.');
+    this.log.info('Started CoIoT (coap) server for shelly devices.');
   }
 
   /**
@@ -601,39 +644,42 @@ export class CoapServer extends EventEmitter {
    *
    * @remarks
    * This method stops the CoIoT server by performing the following actions:
-   * - Logs a debug message indicating the server is being stopped.
+   * - Logs a message indicating the server is being stopped.
    * - Removes all event listeners.
-   * - Sets the `_isListening` flag to `false`.
    * - Closes the global agent.
    * - Closes the `coapServer` if it exists.
    * - Clears the `devices` map.
-   * - Logs a debug message indicating the server has been stopped.
+   * - Logs a message indicating the server has been stopped.
    */
   stop() {
-    this.log.debug('Stopping CoIoT (coap) server for shelly devices...');
+    this.log.info('Stopping CoIoT (coap) server for shelly devices...');
     this.removeAllListeners();
     this._isListening = false;
-    globalAgent.close((err?: Error) => this.log.debug(`CoIoT (coap) agent closed${err ? ' with error ' + err.message : ''}.`));
-    if (this.coapServer) this.coapServer.close((err?: Error) => this.log.debug(`CoIoT (coap) server closed${err ? ' with error ' + err.message : ''}.`));
+    // globalAgent.close((err?: Error) => this.log.debug(`CoIoT (coap) agent closed${err ? ' with error ' + err.message : ''}.`));
+    if (this.coapServer)
+      this.coapServer.close((err?: Error) => {
+        this._isReady = false;
+        this.log.debug(`CoIoT (coap) server closed${err ? ' with error ' + err.message : ''}.`);
+      });
     this.devices.clear();
-    this.log.debug('Stopped CoIoT (coap) server for shelly devices.');
+    this.log.info('Stopped CoIoT (coap) server for shelly devices.');
   }
 
   /**
    * Saves the response packet to a file.
    *
-   * @param {shellyId} shellyId - The ID of the Shelly device.
-   * @param {ResponsePacket} response - The response packet to be saved.
+   * @param {string} fileName - The ID of the Shelly device.
+   * @param {object} payload - The response payload to be saved.
    * @returns {Promise<void>} A promise that resolves when the response is successfully saved, or rejects with an error.
    */
-  private async saveResponse(shellyId: string, payload: object): Promise<void> {
-    const responseFile = path.join(this._dataPath, `${shellyId}`);
+  private async saveResponse(fileName: string, payload: object): Promise<void> {
+    const responseFile = path.join(this._dataPath, `${fileName}`);
     try {
       await fs.writeFile(responseFile, JSON.stringify(payload, null, 2), 'utf8');
-      this.log.debug(`*Saved shellyId ${hk}${shellyId}${db} coap response file ${CYAN}${responseFile}${db}`);
+      this.log.debug(`*Saved shellyId ${hk}${fileName}${db} coap response file ${CYAN}${responseFile}${db}`);
       return Promise.resolve();
     } catch (err) {
-      this.log.error(`Error saving shellyId ${hk}${shellyId}${er} coap response file ${CYAN}${responseFile}${er}: ${err instanceof Error ? err.message : err}`);
+      this.log.error(`Error saving shellyId ${hk}${fileName}${er} coap response file ${CYAN}${responseFile}${er}: ${err instanceof Error ? err.message : err}`);
       return Promise.reject(err);
     }
   }
