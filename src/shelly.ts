@@ -343,8 +343,8 @@ export class Shelly extends EventEmitter {
     this.devices.forEach((device) => {
       device.setLogLevel(level);
       if (device.wsClient) {
-        if (debugWs)
-          device.wsClient.log.logLevel = LogLevel.DEBUG; // Set log level for existing WebSocket clients
+        // Set log level for existing WebSocket clients
+        if (debugWs) device.wsClient.log.logLevel = LogLevel.DEBUG;
         else device.wsClient.log.logLevel = LogLevel.INFO;
       }
     });
