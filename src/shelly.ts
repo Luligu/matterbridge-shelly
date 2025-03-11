@@ -4,7 +4,7 @@
  * @file src\shelly.ts
  * @author Luca Liguori
  * @date 2024-05-01
- * @version 2.2.1
+ * @version 2.2.2
  *
  * Copyright 2024, 2025, 2026 Luca Liguori.
  *
