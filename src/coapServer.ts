@@ -4,7 +4,7 @@
  * @file src\coapServer.ts
  * @author Luca Liguori
  * @date 2024-05-01
- * @version 2.0.1
+ * @version 2.0.2
  *
  * Copyright 2024, 2025, 2026 Luca Liguori.
  *
@@ -22,7 +22,7 @@
  */
 
 import { AnsiLogger, BLUE, CYAN, LogLevel, MAGENTA, RESET, TimestampFormat, db, debugStringify, er, hk, nf, wr, zb } from 'matterbridge/logger';
-import coap, { Server, IncomingMessage, OutgoingMessage } from 'coap';
+import coap, { Server, IncomingMessage, OutgoingMessage, parameters } from 'coap';
 import EventEmitter from 'node:events';
 import path from 'node:path';
 import { promises as fs } from 'node:fs';
@@ -95,9 +95,9 @@ export class CoapServer extends EventEmitter {
     this.log = new AnsiLogger({ logName: 'ShellyCoapServer', logTimestampFormat: TimestampFormat.TIME_MILLIS, logLevel });
 
     // Set the CoAP parameters to minimum values
-    // parameters.maxRetransmit = 1;
+    parameters.maxRetransmit = 3;
     // parameters.maxLatency = 1;
-    // if (parameters.refreshTiming) parameters.refreshTiming();
+    if (parameters.refreshTiming) parameters.refreshTiming();
 
     this.registerShellyOptions();
   }
@@ -589,7 +589,7 @@ export class CoapServer extends EventEmitter {
 
     this.coapServer.listen((err) => {
       if (err) {
-        this.log.warn('CoIoT (coap) server error while listening:', err);
+        this.log.error(`CoIoT (coap) server error: ${err instanceof Error ? err.message : err}`);
       } else {
         this._isReady = true;
         this.log.info('CoIoT (coap) server is listening...');
@@ -613,9 +613,9 @@ export class CoapServer extends EventEmitter {
     this.log.debug(`Registering device ${hk}${id}${db} host ${zb}${host}${db}...`);
     this.getDeviceDescription(host, id).then((msg) => {
       if (msg) this.log.debug(`Registered CoIoT (coap) ${CYAN}/cit/d${db} for device ${hk}${id}${db} host ${zb}${host}${db}.`);
-    });
-    this.getDeviceStatus(host, id).then((msg) => {
-      if (msg) this.log.debug(`Registered CoIoT (coap) ${CYAN}/cit/s${db} for device ${hk}${id}${db} host ${zb}${host}${db}.`);
+      this.getDeviceStatus(host, id).then((msg) => {
+        if (msg) this.log.debug(`Registered CoIoT (coap) ${CYAN}/cit/s${db} for device ${hk}${id}${db} host ${zb}${host}${db}.`);
+      });
     });
   }
 
@@ -679,7 +679,19 @@ export class CoapServer extends EventEmitter {
 
 // Use with: node dist/coapServer.js coapStatus coapDescription
 /*
-if (process.argv.includes('coapServer') || process.argv.includes('coapDescription') || process.argv.includes('coapStatus') || process.argv.includes('coapMcast')) {
+if (
+  process.argv.includes('coapServer') ||
+  process.argv.includes('coapRegister') ||
+  process.argv.includes('coapDescription') ||
+  process.argv.includes('coapStatus') ||
+  process.argv.includes('coapMcast')
+) {
+  // Set the CoAP parameters to minimum values
+  const { parameters } = await import('coap');
+  parameters.maxRetransmit = 3;
+  // parameters.maxLatency = 1;
+  if (parameters.refreshTiming) parameters.refreshTiming();
+
   const coapServer = new CoapServer(LogLevel.DEBUG);
 
   const devices = [
@@ -693,26 +705,36 @@ if (process.argv.includes('coapServer') || process.argv.includes('coapDescriptio
     { host: '192.168.1.241', id: 'shelly1l-E8DB84AAD781' },
     { host: '192.168.1.152', id: 'shellyrgbw2-EC64C9D199AD' },
     { host: '192.168.1.226', id: 'shellyrgbw2-EC64C9D3FFEF' },
-    // { host: '192.168.1.245', id: 'shellymotionsensor-60A42386E566' },
-    // { host: '192.168.1.246', id: 'shellymotion2-8CF68108A6F5' },
+    { host: '192.168.1.245', id: 'shellymotionsensor-60A42386E566' },
+    { host: '192.168.1.246', id: 'shellymotion2-8CF68108A6F5' },
   ];
   for (const device of devices) {
-    // for (let i = 0; i < 100; i++) {
-    coapServer.registerDevice(device.host, device.id, true);
-    if (process.argv.includes('coapDescription')) await coapServer.getDeviceDescription(device.host, device.id);
-    if (process.argv.includes('coapStatus')) await coapServer.getDeviceStatus(device.host, device.id);
-    // }
+    for (let i = 0; i < 5; i++) {
+      if (process.argv.includes('coapRegister')) await coapServer.registerDevice(device.host, device.id, false);
+      if (process.argv.includes('coapDescription')) await coapServer.getDeviceDescription(device.host, device.id);
+      if (process.argv.includes('coapStatus')) await coapServer.getDeviceStatus(device.host, device.id);
+      await new Promise((resolve) => setTimeout(resolve, 500));
+    }
+  }
+  // await coapServer.getDeviceDescription('192.168.1.246', 'shellymotion2-8CF68108A6F5');
+
+  if (process.argv.includes('coapDescription')) {
+    await coapServer.getDeviceDescription('192.168.1.219', 'shellydimmer2-98CDAC0D01BB');
+  }
+
+  if (process.argv.includes('coapStatus')) {
+    await coapServer.getDeviceStatus('192.168.1.219', 'shellydimmer2-98CDAC0D01BB');
   }
 
   if (process.argv.includes('coapMcast')) {
     await coapServer.getMulticastDeviceStatus(30);
-    coapServer.stop();
   }
 
   if (process.argv.includes('coapServer')) coapServer.start();
 
   process.on('SIGINT', async function () {
     coapServer.stop();
+    process.exit();
   });
 }
 */
