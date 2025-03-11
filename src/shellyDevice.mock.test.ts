@@ -8,11 +8,21 @@ import path from 'node:path';
 import { jest } from '@jest/globals';
 import { ShellyData } from './shellyTypes.js';
 import { wait } from 'matterbridge/utils';
+import { CoapServer } from './coapServer.js';
+import { WsServer } from './wsServer.js';
 
 // shellyDevice.ts    |   76.51 |    65.16 |   84.37 |    78.5 | ...5,633-635,638-639,645-656,675-691,705-721,726-736,759-761,794-798,802-804,807,882-885,889-892,896-899,903-905,908-910,965-968,1101-1106
 
 describe('Shelly devices test', () => {
   let consoleLogSpy: jest.SpiedFunction<typeof console.log>;
+
+  jest.spyOn(CoapServer.prototype, 'start').mockImplementation(() => {
+    return;
+  });
+
+  jest.spyOn(WsServer.prototype, 'start').mockImplementation(() => {
+    return;
+  });
 
   const log = new AnsiLogger({ logName: 'shellyDeviceTest', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: false });
   const shelly = new Shelly(log, 'admin', 'tango');

@@ -6,14 +6,22 @@ import { Shelly } from './shelly.js';
 import { ShellyComponent } from './shellyComponent.js';
 import path from 'node:path';
 import { jest } from '@jest/globals';
-import { ShellyData, ShellyDataType } from './shellyTypes.js';
-import { wait } from 'matterbridge/utils';
-import { mock } from 'node:test';
+import { ShellyDataType } from './shellyTypes.js';
+import { CoapServer } from './coapServer.js';
+import { WsServer } from './wsServer.js';
 
 describe('Shelly devices test', () => {
   let consoleLogSpy: jest.SpiedFunction<typeof console.log>;
   let loggerLogSpy: jest.SpiedFunction<AnsiLogger['log']>;
   let fetchSpy: jest.SpiedFunction<typeof ShellyDevice.fetch>;
+
+  jest.spyOn(CoapServer.prototype, 'start').mockImplementation(() => {
+    return;
+  });
+
+  jest.spyOn(WsServer.prototype, 'start').mockImplementation(() => {
+    return;
+  });
 
   const log = new AnsiLogger({ logName: 'shellyDeviceTest', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: false });
   const shelly = new Shelly(log, 'admin', 'tango');
@@ -42,17 +50,6 @@ describe('Shelly devices test', () => {
     loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log').mockImplementation((level: string, message: string, ...parameters: any[]) => {
       // console.error(`Mocked log: ${level} - ${message}`, ...parameters);
     });
-
-    // device = (await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shelly1g3-34B7DACAC830.json'))) as ShellyDevice;
-
-    /*
-    fetchSpy = jest
-      .spyOn(ShellyDevice, 'fetch')
-      .mockImplementation((shelly: Shelly, log: AnsiLogger, host: string, service: string, params?: Record<string, string | number | boolean | object>) => {
-        // console.error(`ShellyDevice.fetch: ${host} ${service} ${stringify(params ?? {})}`);
-        return Promise.resolve({});
-      });
-    */
   });
 
   beforeEach(() => {

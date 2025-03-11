@@ -4,7 +4,7 @@
  * @file src\shellyDevice.ts
  * @author Luca Liguori
  * @date 2024-05-01
- * @version 3.1.0
+ * @version 3.1.1
  *
  * Copyright 2024, 2025, 2026 Luca Liguori.
  *
@@ -686,7 +686,7 @@ export class ShellyDevice extends EventEmitter {
 
     if (statusPayload) device.onUpdate(statusPayload);
 
-    // For gen 1 devices check if CoIoT is enabled and peer is set correctly: like <matterbridge-ipv4>:5683 e.g. 192.168.1.189:5683
+    // For gen 1 devices check if CoIoT is enabled and peer is set correctly
     if (device.gen === 1) {
       const CoIoT = device.getComponent('coiot');
       if (CoIoT) {
@@ -708,8 +708,8 @@ export class ShellyDevice extends EventEmitter {
       }
     }
 
-    // For gen 2+ battery powered devices check if WsServer is enabled and set correctly: like <matterbridge-ipv4>:5683 e.g. 192.168.1.189:5683
-    if (device.gen >= 2 && (device.id.startsWith('shellyhtg3') || device.id.startsWith('shellyplussmoke'))) {
+    // For gen 2+ battery powered devices check if WsServer is enabled and set correctly
+    if (device.gen >= 2 && device.sleepMode === true) {
       const ws = device.getComponent('ws');
       if (ws) {
         if ((ws.getValue('enable') as boolean | undefined) === false) {
@@ -717,15 +717,16 @@ export class ShellyDevice extends EventEmitter {
             `The Outbound websocket settings is not enabled for device ${dn}${device.name}${wr} id ${hk}${device.id}${wr}. Enable it in the web ui settings to receive updates from the device.`,
           );
         }
+        const ipv4 = getIpv4InterfaceAddress();
         const server = ws.getValue('server') as string | undefined;
         if (!server || !server.endsWith(':8485')) {
           log.warn(
-            `The Outbound websocket settings is not configured correctly for device ${dn}${device.name}${wr} id ${hk}${device.id}${wr}. The port must be 8485 (i.e. ws://<matterbridge-ipv4>:8485). Set it in the web ui settings to receive updates from the device.`,
+            `The Outbound websocket settings is not configured correctly for device ${dn}${device.name}${wr} id ${hk}${device.id}${wr}. The port must be 8485 (i.e. ws://${ipv4}:8485). Set it in the web ui settings to receive updates from the device.`,
           );
         }
         if (!server || !server.includes(getIpv4InterfaceAddress() ?? '')) {
           log.warn(
-            `The Outbound websocket settings is not configured correctly for device ${dn}${device.name}${wr} id ${hk}${device.id}${wr}. The ip must be the matterbridge ip (i.e. ws://<matterbridge-ipv4>:8485). Set it in the web ui settings to receive updates from the device.`,
+            `The Outbound websocket settings is not configured correctly for device ${dn}${device.name}${wr} id ${hk}${device.id}${wr}. The ip must be the matterbridge ip (i.e. ws://${ipv4}:8485). Set it in the web ui settings to receive updates from the device.`,
           );
         }
       } else {
