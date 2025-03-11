@@ -1,14 +1,28 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable jest/no-done-callback */
-import { AnsiLogger, LogLevel, TimestampFormat } from 'matterbridge/logger';
+
+import { AnsiLogger, db, hk, LogLevel, TimestampFormat } from 'matterbridge/logger';
 import { Shelly } from './shelly.js';
 import { ShellyDevice } from './shellyDevice.js';
 import { jest } from '@jest/globals';
 import path from 'node:path';
 import { WsClient } from './wsClient.js';
+import { CoapServer } from './coapServer.js';
+import { WsServer } from './wsServer.js';
 
 describe('Shellies test', () => {
+  const coapServerStartSpy = jest.spyOn(CoapServer.prototype, 'start').mockImplementation(() => {
+    return;
+  });
+
+  const coapServerRegisterDeviceSpy = jest.spyOn(CoapServer.prototype, 'registerDevice').mockImplementation(async () => {
+    return;
+  });
+
+  const wsServerStartSpy = jest.spyOn(WsServer.prototype, 'start').mockImplementation(() => {
+    return;
+  });
+
   const log = new AnsiLogger({ logName: 'shellyDeviceTest', logTimestampFormat: TimestampFormat.TIME_MILLIS });
   const shellies = new Shelly(log, 'admin', 'tango');
 
@@ -86,6 +100,9 @@ describe('Shellies test', () => {
 
   test('Constructor', () => {
     expect(shellies).not.toBeUndefined();
+    expect(shellies).toBeInstanceOf(Shelly);
+    // expect(coapServerStartSpy).toHaveBeenCalledTimes(1);
+    // expect(wsServerStartSpy).toHaveBeenCalledTimes(1);
   });
 
   test('Empty shellies', () => {
@@ -154,7 +171,7 @@ describe('Shellies test', () => {
     expect(shellies.devices.length).toBe(0);
   });
 
-  test('Add device to test', async () => {
+  test('Add device twice', async () => {
     const device3g = await ShellyDevice.create(shellies, log, path.join('src', 'mock', 'shelly1minig3-543204547478.json'));
     expect(device3g).not.toBeUndefined();
     if (!device3g) return;
@@ -165,13 +182,61 @@ describe('Shellies test', () => {
     device3g.destroy();
   }, 7000);
 
-  test('Start mdnsdiscover', (done) => {
-    shellies.mdnsScanner.start(60, 'localhost', 'udp4', true);
-    setTimeout(() => {
-      done();
-      expect(shellies.devices.length).toBe(1);
-    }, 5000);
+  test('wsServer on wssupdate', async () => {
+    const device = shellies.getDeviceByHost(path.join('src', 'mock', 'shelly1minig3-543204547478.json'));
+    expect(device).toBeDefined();
+    if (!device) return;
+    device.sleepMode = true;
+    device.online = false;
+    device.cached = true;
+    const onAwake = jest.fn();
+    const onOnline = jest.fn();
+    device.on('awake', onAwake);
+    device.on('online', onOnline);
+    (shellies as any).wsServer.emit('wssupdate', 'shelly1minig3-543204547478', {});
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`setting online to true`));
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`setting cached to false`));
+    expect(onAwake).toHaveBeenCalledTimes(1);
+    expect(onOnline).toHaveBeenCalledTimes(1);
+    (shellies as any).wsServer.emit('wssupdate', 'shellyxxx', {});
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`Received wssupdate from a not registered device`));
+  }, 7000);
+
+  test('wsServer on wssevent', async () => {
+    const device = shellies.getDeviceByHost(path.join('src', 'mock', 'shelly1minig3-543204547478.json'));
+    expect(device).toBeDefined();
+    if (!device) return;
+    device.sleepMode = true;
+    device.online = false;
+    device.cached = true;
+    const onAwake = jest.fn();
+    const onOnline = jest.fn();
+    device.on('awake', onAwake);
+    device.on('online', onOnline);
+    (shellies as any).wsServer.emit('wssevent', 'shelly1minig3-543204547478', {});
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`setting online to true`));
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`setting cached to false`));
+    expect(onAwake).toHaveBeenCalledTimes(1);
+    expect(onOnline).toHaveBeenCalledTimes(1);
+    (shellies as any).wsServer.emit('wssevent', 'shellyxxx', {});
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`Received wssevent from a not registered device`));
+  }, 7000);
+
+  test('mdnsScanner on discovered', async () => {
+    const onDiscovered = jest.fn();
+    shellies.on('discovered', onDiscovered);
     (shellies as any).mdnsScanner.emit('discovered', {
+      id: 'shelly1minig3-543204547478',
+      host: '192.168.234.235',
+      port: 80,
+      gen: 3,
+    });
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    expect(onDiscovered).toHaveBeenCalledWith({
       id: 'shelly1minig3-543204547478',
       host: '192.168.234.235',
       port: 80,
@@ -179,30 +244,34 @@ describe('Shellies test', () => {
     });
   }, 7000);
 
-  test('Start coap', (done) => {
-    shellies.coapServer.start();
-    setTimeout(() => {
-      done();
-      expect(shellies.devices.length).toBe(1);
-    }, 5000);
-    shellies.logDevices();
+  test('coapServer on update', async () => {
+    const device = shellies.getDeviceByHost(path.join('src', 'mock', 'shelly1minig3-543204547478.json'));
+    expect(device).toBeDefined();
+    if (!device) return;
+    device.sleepMode = true;
+    device.online = false;
+    device.cached = true;
+    const onAwake = jest.fn();
+    const onOnline = jest.fn();
+    device.on('awake', onAwake);
+    device.on('online', onOnline);
     (shellies as any).coapServer.emit('update', path.join('src', 'mock', 'shelly1minig3-543204547478.json'), 'sys', 'temperature', 12.3);
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`CoIoT update from device id ${hk}shelly1minig3-543204547478${db}`));
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`setting online to true`));
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`setting cached to false`));
+    expect(onAwake).toHaveBeenCalledTimes(1);
+    expect(onOnline).toHaveBeenCalledTimes(1);
   }, 7000);
 
-  test('Start coap timeout', (done) => {
-    shellies.coapServer.start();
-    setTimeout(() => {
-      done();
-      expect(shellies.devices.length).toBe(1);
-    }, 5000);
-  }, 7000);
-
-  test('Set data path', () => {
+  test('Set get data path', () => {
     shellies.dataPath = 'local';
+    expect(shellies.dataPath).toBe('local');
     expect((shellies as any)._dataPath).toBe('local');
     expect((shellies as any).mdnsScanner._dataPath).toBe('local');
     expect((shellies as any).coapServer._dataPath).toBe('local');
     shellies.dataPath = 'temp';
+    expect(shellies.dataPath).toBe('temp');
     expect((shellies as any)._dataPath).toBe('temp');
     expect((shellies as any).mdnsScanner._dataPath).toBe('temp');
     expect((shellies as any).coapServer._dataPath).toBe('temp');

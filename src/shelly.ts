@@ -4,7 +4,7 @@
  * @file src\shelly.ts
  * @author Luca Liguori
  * @date 2024-05-01
- * @version 2.2.0
+ * @version 2.2.1
  *
  * Copyright 2024, 2025, 2026 Luca Liguori.
  *
@@ -22,6 +22,7 @@
  */
 
 import { AnsiLogger, CYAN, MAGENTA, BRIGHT, hk, db, nf, wr, zb, er, LogLevel } from 'matterbridge/logger';
+import { isValidArray, isValidObject } from 'matterbridge/utils';
 
 import crypto from 'node:crypto';
 import EventEmitter from 'node:events';
@@ -32,7 +33,6 @@ import { CoapServer } from './coapServer.js';
 import { WsClient } from './wsClient.js';
 import { WsServer } from './wsServer.js';
 import { ShellyData, ShellyDataType, ShellyDeviceId } from './shellyTypes.js';
-import { isValidArray, isValidObject } from 'matterbridge/utils';
 
 /**
  * Creates a new instance of the Shelly class.
@@ -222,7 +222,7 @@ export class Shelly extends EventEmitter {
    *
    * @returns {string} The data path for the Shelly instance.
    */
-  get dataPath() {
+  get dataPath(): string {
     return this._dataPath;
   }
 
@@ -282,16 +282,11 @@ export class Shelly extends EventEmitter {
     }
     this._devices.set(device.id, device);
     if (device.gen === 1) {
-      this.coapServer.start();
       this.coapServer.registerDevice(device.host, device.id, device.sleepMode); // No await to register device for CoIoT updates
     } else if (device.gen >= 2) {
-      if (device.sleepMode) {
-        this.wsServer.start();
-      } else {
-        if (device.wsClient && device.wsClient.isConnected === false) {
-          device.log.info(`WebSocket client for device ${hk}${device.id}${nf} host ${zb}${device.host}${nf} is not connected. Starting connection...`);
-          device.wsClient.start();
-        }
+      if (!device.sleepMode && device.wsClient && device.wsClient.isConnected === false) {
+        device.log.info(`WebSocket client for device ${hk}${device.id}${nf} host ${zb}${device.host}${nf} is not connected. Starting connection...`);
+        device.wsClient.start();
       }
     }
     this.emit('add', device);
@@ -305,8 +300,8 @@ export class Shelly extends EventEmitter {
    * @returns {Shelly} The updated Shelly instance.
    */
   removeDevice(device: ShellyDevice | ShellyDeviceId): Shelly {
-    const id = typeof device === 'string' ? device : device.id;
-    this._devices.delete(id);
+    const key = typeof device === 'string' ? device : device.id;
+    this._devices.delete(key);
     return this;
   }
 
