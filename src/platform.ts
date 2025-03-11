@@ -4,7 +4,7 @@
  * @file src\platform.ts
  * @author Luca Liguori
  * @date 2024-05-01
- * @version 2.0.0
+ * @version 2.0.4
  *
  * Copyright 2024, 2025, 2026 Luca Liguori.
  *
@@ -687,7 +687,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           if (level && level < 10) status = PowerSource.BatChargeLevel.Critical;
           else if (level && level < 20) status = PowerSource.BatChargeLevel.Warning;
           let voltage = batteryComponent.hasProperty('voltage') ? batteryComponent.getValue('voltage') : undefined;
-          voltage = isValidNumber(voltage, 0, 12) ? voltage * 1000 : undefined;
+          voltage = isValidNumber(voltage, 0, 12) ? Math.round(voltage * 1000) : undefined;
           if (batteryComponent.hasProperty('charging')) {
             mbDevice.createDefaultPowerSourceRechargeableBatteryClusterServer(level, status, voltage);
           } else {
@@ -1519,6 +1519,12 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     if (this.config.enableMdnsDiscover === true) {
       this.shelly.mdnsScanner.start(0, 10 * 60 * 1000, this.config.interfaceName as string | undefined, 'udp4', this.config.debugMdns as boolean);
     }
+
+    // Start the CoAP server
+    this.shelly.coapServer.start();
+
+    // Start the WebSocket server
+    this.shelly.wsServer.start();
 
     // Wait for the failsafe count to be met
     if (this.failsafeCount > 0 && this.bridgedDevices.size + this.bluBridgedDevices.size < this.failsafeCount) {

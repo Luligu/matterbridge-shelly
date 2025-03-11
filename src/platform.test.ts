@@ -24,6 +24,8 @@ import { Shelly } from './shelly';
 import { ShellyPlatform, ShellyPlatformConfig } from './platform';
 import { ShellyDevice } from './shellyDevice';
 import path from 'node:path';
+import { CoapServer } from './coapServer';
+import { WsServer } from './wsServer';
 
 const address = 'c4:cb:76:b3:cd:1f';
 
@@ -47,6 +49,18 @@ describe('ShellyPlatform', () => {
   jest.spyOn(Matterbridge.prototype, 'removeAllBridgedEndpoints').mockImplementation((pluginName: string) => {
     // console.log(`Mocked removeAllBridgedDevices: ${pluginName}`);
     return Promise.resolve();
+  });
+
+  jest.spyOn(CoapServer.prototype, 'start').mockImplementation(() => {
+    return;
+  });
+
+  jest.spyOn(CoapServer.prototype, 'registerDevice').mockImplementation(async () => {
+    return;
+  });
+
+  jest.spyOn(WsServer.prototype, 'start').mockImplementation(() => {
+    return;
   });
 
   const cleanup = () => {

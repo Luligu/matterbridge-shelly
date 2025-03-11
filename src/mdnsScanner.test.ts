@@ -127,7 +127,7 @@ describe('Shellies MdnsScanner test', () => {
   });
 
   test('Start discover', (done) => {
-    mdns.start(3000, undefined, undefined, true);
+    mdns.start(3000, 0, undefined, undefined, true);
     expect(mdns.isScanning).toBeTruthy();
     expect(sendQuerySpy).toHaveBeenCalled();
     setTimeout(() => {
@@ -138,7 +138,7 @@ describe('Shellies MdnsScanner test', () => {
   }, 10000);
 
   test('Start discover with interface', (done) => {
-    mdns.start(3000, '127.0.0.1', 'udp4', true);
+    mdns.start(3000, 0, '127.0.0.1', 'udp4', true);
     expect(mdns.isScanning).toBeTruthy();
     expect(sendQuerySpy).toHaveBeenCalled();
     setTimeout(() => {
@@ -150,7 +150,7 @@ describe('Shellies MdnsScanner test', () => {
 
   test('Shelly gen 1', async () => {
     // Start the mdns scanner
-    mdns.start(undefined, '127.0.0.1', 'udp4', true);
+    mdns.start(undefined, 0, '127.0.0.1', 'udp4', true);
     expect(mdns.isScanning).toBeTruthy();
     expect(loggerLogSpy).toHaveBeenCalledWith(
       LogLevel.INFO,
@@ -180,7 +180,7 @@ describe('Shellies MdnsScanner test', () => {
 
   test('Shelly gen 2', async () => {
     // Start the mdns scanner
-    mdns.start(undefined, '127.0.0.1', 'udp4', true);
+    mdns.start(undefined, 0, '127.0.0.1', 'udp4', true);
     expect(mdns.isScanning).toBeTruthy();
     expect(loggerLogSpy).toHaveBeenCalledWith(
       LogLevel.INFO,
@@ -210,7 +210,7 @@ describe('Shellies MdnsScanner test', () => {
 
   test('Shelly gen 3', async () => {
     // Start the mdns scanner
-    mdns.start(undefined, '127.0.0.1', 'udp4', true);
+    mdns.start(undefined, 0, '127.0.0.1', 'udp4', true);
     expect(mdns.isScanning).toBeTruthy();
     expect(loggerLogSpy).toHaveBeenCalledWith(
       LogLevel.INFO,
@@ -255,7 +255,7 @@ describe('Shellies MdnsScanner test', () => {
     });
 
     mdns.once('discovered', discoveredDeviceListener);
-    mdns.start(undefined, '127.0.0.1', 'udp4', true);
+    mdns.start(undefined, 0, '127.0.0.1', 'udp4', true);
     expect(mdns.isScanning).toBeTruthy();
     expect(loggerLogSpy).toHaveBeenCalledWith(
       LogLevel.INFO,
@@ -332,7 +332,7 @@ describe('Shellies MdnsScanner test', () => {
       });
 
       mdns.once('discovered', discoveredDeviceListener);
-      mdns.start(undefined, '127.0.0.1', 'udp4', true);
+      mdns.start(undefined, 0, '127.0.0.1', 'udp4', true);
       expect(mdns.isScanning).toBeTruthy();
       expect(loggerLogSpy).toHaveBeenCalledWith(
         LogLevel.INFO,
@@ -402,7 +402,7 @@ describe('Shellies MdnsScanner test', () => {
       });
 
       mdns.once('discovered', discoveredDeviceListener);
-      mdns.start(undefined, '127.0.0.1', 'udp4', true);
+      mdns.start(undefined, 0, '127.0.0.1', 'udp4', true);
       expect(mdns.isScanning).toBeTruthy();
       expect(loggerLogSpy).toHaveBeenCalledWith(
         LogLevel.INFO,
@@ -462,7 +462,7 @@ describe('Shellies MdnsScanner test', () => {
       });
 
       mdns.once('discovered', discoveredDeviceListener);
-      mdns.start(undefined, '127.0.0.1', 'udp4', true);
+      mdns.start(undefined, 0, '127.0.0.1', 'udp4', true);
       expect(mdns.isScanning).toBeTruthy();
       expect(loggerLogSpy).toHaveBeenCalledWith(
         LogLevel.INFO,
@@ -527,7 +527,7 @@ describe('Shellies MdnsScanner test', () => {
       });
 
       mdns.once('discovered', discoveredDeviceListener);
-      mdns.start(undefined, '127.0.0.1', 'udp4', true);
+      mdns.start(undefined, 0, '127.0.0.1', 'udp4', true);
       expect(mdns.isScanning).toBeTruthy();
       expect(loggerLogSpy).toHaveBeenCalledWith(
         LogLevel.INFO,
@@ -588,7 +588,7 @@ describe('Shellies MdnsScanner test', () => {
       });
 
       mdns.once('discovered', discoveredDeviceListener);
-      mdns.start(undefined, '127.0.0.1', 'udp4', true);
+      mdns.start(undefined, 0, '127.0.0.1', 'udp4', true);
       expect(mdns.isScanning).toBeTruthy();
       expect(loggerLogSpy).toHaveBeenCalledWith(
         LogLevel.INFO,
@@ -631,7 +631,7 @@ describe('Shellies MdnsScanner test', () => {
     jest.useFakeTimers({ legacyFakeTimers: false });
 
     console.log(`Shellies MdnsScanner Jest Test: starting...`);
-    mdns.start(120000, undefined, undefined, true);
+    mdns.start(120000, 0, undefined, undefined, true);
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Starting MdnsScanner for shelly devices...`);
     expect(sendQuerySpyII).toHaveBeenCalled();
 
