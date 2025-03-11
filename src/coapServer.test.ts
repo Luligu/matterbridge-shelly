@@ -92,18 +92,22 @@ describe('Coap scanner', () => {
   });
 
   test('Parse status message', async () => {
+    (coapServer as any).deviceId.set('192.168.1.219', 'shellydimmer2-98CDAC0D01BB');
     msg.payload = JSON.stringify(msg.payload) as any;
     (coapServer as any).parseShellyMessage(msg as unknown as IncomingMessage);
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining('Parsing CoIoT (coap) response from device'));
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`url: ${CYAN}/cit/s${db}`));
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`code: ${CYAN}2.05${db}`));
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`host: ${CYAN}192.168.1.219${db}`));
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`deviceId: ${CYAN}undefined${db}`));
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`deviceId: ${CYAN}shellydimmer2-98CDAC0D01BB${db}`));
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`deviceModel: ${CYAN}SHDM-2${db}`));
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`deviceMac: ${CYAN}98CDAC0D01BB${db}`));
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`protocolRevision: ${CYAN}2${db}`));
 
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, expect.stringContaining(`No coap description found for ${hk}SHDM-2${nf} host ${zb}192.168.1.219${nf} fetching it...`));
+    expect(loggerLogSpy).toHaveBeenCalledWith(
+      LogLevel.INFO,
+      expect.stringContaining(`No coap description found for ${hk}SHDM-2${nf} id ${hk}shellydimmer2-98CDAC0D01BB${nf} host ${zb}192.168.1.219${nf} fetching it...`),
+    );
   }, 30000);
 
   test('Getting device description', async () => {
@@ -128,7 +132,7 @@ describe('Coap scanner', () => {
     expect(coapServer.isReady).toBeTruthy();
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, 'Starting CoIoT (coap) server for shelly devices...');
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, 'Started CoIoT (coap) server for shelly devices.');
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining('CoIoT (coap) server is listening ...'));
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, expect.stringContaining('CoIoT (coap) server is listening...'));
   }, 5000);
 
   test('Start receving', async () => {
