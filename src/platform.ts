@@ -677,7 +677,6 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
 
       // Set the powerSource cluster
       if (this.validateEntity(device.id, 'PowerSource')) {
-        // const childPowerSource = mbDevice.addChildDeviceType('PowerSource', powerSource, undefined, config.debug as boolean);
         const batteryComponent = device.getComponent('battery');
         const devicepowerComponent = device.getComponent('devicepower:0');
         if (batteryComponent) {
@@ -713,7 +712,6 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         } else {
           mbDevice.createDefaultPowerSourceWiredClusterServer();
         }
-        // childPowerSource.addRequiredClusterServers();
       }
 
       // Set the composed name at gui
@@ -1435,7 +1433,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       this.log.info('Resetting the Shellies storage...');
       await this.nodeStorage.clear();
       this.storedDevices.clear();
-      await this.saveStoredDevices();
+      await this.nodeStorage.set<DiscoveredDevice[]>('DeviceIdentifiers', []);
       await this.nodeStorage.set<string[]>('ChangedDevices', []);
       await this.nodeStorage.set<string[]>('GatewayDevices', []);
       this.log.info('Reset of Shellies storage done!');
@@ -1883,7 +1881,10 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     let device: ShellyDevice | undefined;
 
     let loadFromCache = true;
-    if (isValidArray(this.config.nocacheList, 1) && this.config.nocacheList.includes(deviceId)) loadFromCache = false;
+    if (isValidArray(this.config.nocacheList, 1) && this.config.nocacheList.includes(deviceId)) {
+      loadFromCache = false;
+      this.log.debug(`Loading nocache Shelly device ${hk}${deviceId}${db} host ${zb}${host}${db}`);
+    }
     if (this.changedDevices.has(deviceId)) {
       this.changedDevices.delete(deviceId);
       loadFromCache = false;
