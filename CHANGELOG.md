@@ -49,7 +49,9 @@ The expertMode option has been added to show an advanced or simplified config.
 ### Changed
 
 - [CoapServer]: Removed log of error message for shellymotionsensor and shellymotion2 that don't answer to the /cit/s and /cit/d CoIoT requests.
+- [package]: Updated package.
 - [package]: Updated dependencies.
+- [plugin]: Requires Matterbridge 2.2.4.
 
 ### Fixed
 
