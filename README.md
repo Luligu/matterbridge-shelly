@@ -1,4 +1,4 @@
-# <img src="https://github.com/Luligu/matterbridge/blob/main/frontend/public/matterbridge%2064x64.png" alt="Matterbridge Logo" width="64px" height="64px">&nbsp;&nbsp;&nbsp;Matterbridge shelly plugin &nbsp;&nbsp; <img src="https://github.com/Luligu/matterbridge/blob/main/screenshot/Shelly.png" alt="Shelly logo" width="200" />
+# <img src="matterbridge.svg" alt="Matterbridge Logo" width="64px" height="64px">&nbsp;&nbsp;&nbsp;Matterbridge shelly plugin &nbsp;&nbsp; <img src="Shelly.svg" alt="Shelly logo" width="200" />
 
 [![npm version](https://img.shields.io/npm/v/matterbridge-shelly.svg)](https://www.npmjs.com/package/matterbridge-shelly)
 [![npm downloads](https://img.shields.io/npm/dt/matterbridge-shelly.svg)](https://www.npmjs.com/package/matterbridge-shelly)
@@ -7,7 +7,6 @@
 ![Node.js CI](https://github.com/Luligu/matterbridge-shelly/actions/workflows/build-matterbridge-plugin.yml/badge.svg)
 
 [![power by](https://img.shields.io/badge/powered%20by-matterbridge-blue)](https://www.npmjs.com/package/matterbridge)
-[![power by](https://img.shields.io/badge/powered%20by-matter--history-blue)](https://www.npmjs.com/package/matter-history)
 [![power by](https://img.shields.io/badge/powered%20by-node--ansi--logger-blue)](https://www.npmjs.com/package/node-ansi-logger)
 [![power by](https://img.shields.io/badge/powered%20by-node--persist--manager-blue)](https://www.npmjs.com/package/node-persist-manager)
 
@@ -19,11 +18,11 @@ Features:
 
 - Shellies are automatically discovered using mDNS.
 - Shelly wifi battery-powered devices are supported.
-- Shelly wifi battery-powered devices with sleep_mode are supported.
+- Shelly wifi battery-powered devices with sleep_mode are supported. If they don't report in the last 24h, they are considered offline.
 - Shelly BLU devices are supported through local devices configured as ble gateway.
 - Discovered shellies are stored in local storage and cached for fast loading on startup.
 - The components exposed are Light (with brightness and RGB color), Switch, Relay, Roller, Cover, PowerMeter, Temperature, Humidity, Illuminance, Thermostat, Button and Input.
-- PowerMeters expose the electrical measurements with the electricalSensor device type (suppoerted by Home Assistant and partially by SmartThings), waiting for the controllers to upgrade to the Matter 1.3 specs.
+- PowerMeters expose the electrical measurements with the electricalSensor device type (suppoerted by Home Assistant and partially by SmartThings), waiting for the other controllers to upgrade to the Matter 1.3 specs.
 - Shellies are controlled locally, eliminating the need for cloud or MQTT (which can both be disabled).
 - Shelly Gen 1 devices are controlled using the CoIoT protocol (see the note below).
 - Shelly Gen 2 and Gen 3 devices are controlled using WebSocket.
@@ -32,19 +31,24 @@ Features:
 - Device components can be blacklisted globally or on a per-device basis. Refer to the [COMPONENTS.md documentation.](https://github.com/Luligu/matterbridge-shelly/blob/main/COMPONENTS.md)
 - Devices ids can be selected from a list in the config editor or in the Devices panel on the Home page.
 - If the device has a firmware update available, a message is displayed.
-- If the device's CoIoT protocol is not correctly configured, a message is displayed.
+- If the device's CoIoT protocol is not correctly configured for the gen 1 devices, a message is displayed.
+- If the device's Outbound websocket settings is not correctly configured for the gen 2+ battery powered devices, a message is displayed.
 - If the device cover/roller component is not calibrated, a message is displayed.
 - If a device changes its ip address on the network, a message is displayed and the new address is stored.
-- A 10-minute timer checks if the device has reported within that time frame, and fetch un update.
+- A 1 hour timer checks if the device has reported within that time frame, fetch un update and save the cache file.
 
 If you like this project and find it useful, please consider giving it a star on GitHub at https://github.com/Luligu/matterbridge-shelly and sponsoring it.
 
-## Sponsor
+<a href="https://www.buymeacoffee.com/luligugithub">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="120">
+</a>
+
+## Sponsors
 
 This project is proudly sponsored by:
 
 <a href="https://www.shelly.com/en">
-  <img src="https://github.com/Luligu/matterbridge/blob/main/screenshot/Shelly.png" alt="Shelly logo" width="100" />
+  <img src="Shelly.svg" alt="Shelly logo" width="100" />
 </a>
 
 [Shelly Group](https://corporate.shelly.com/about-shelly-group/)
@@ -77,7 +81,9 @@ A shelly device gen. 1 or 2 or 3 or BLU.
 
 ## How to add a device
 
-Verify that enableMdnsDiscover and enableStorageDiscover are selected in the plugin configuration. Restart matterbridge (the mdns discovery is active for the first 10 minutes) and the devices will be discovered.
+Verify that enableMdnsDiscover and enableStorageDiscover are selected in the plugin configuration. Restart matterbridge in case these options were not flagged and the devices will be discovered.
+
+When all the devices have been discovered and stored, I suggest to unselect enableMdnsDiscover.
 
 Follow these guidelines for specific devices.
 
@@ -216,6 +222,7 @@ The devices in the list will not be loaded from the cache. Use the device id (e.
 
 You can put there one of more of your devices if they have problem with mdns.
 Don't use it unless is needed cause the IP address you add here is static.
+Don't use it for battery powered device that go in sleepmode.
 You also need to enable the enableConfigDiscover option.
 E.g. "shelly1minig3-543204547478": "192.168.1.221".
 

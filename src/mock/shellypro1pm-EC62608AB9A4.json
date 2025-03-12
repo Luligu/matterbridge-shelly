@@ -1,13 +1,13 @@
 {
   "shelly": {
-    "name": "My Shelly 1PM PRO",
+    "name": "1PM Pro",
     "id": "shellypro1pm-ec62608ab9a4",
     "mac": "EC62608AB9A4",
-    "slot": 1,
+    "slot": 0,
     "model": "SPSW-201PE16EU",
     "gen": 2,
-    "fw_id": "20240819-074450/1.4.2-gc2639da",
-    "ver": "1.4.2",
+    "fw_id": "20241011-114451/1.4.4-g6d2a586",
+    "ver": "1.4.4",
     "app": "Pro1PM",
     "auth_en": false,
     "auth_domain": null
@@ -87,9 +87,9 @@
     },
     "sys": {
       "device": {
-        "name": "My Shelly 1PM PRO",
+        "name": "1PM Pro",
         "mac": "EC62608AB9A4",
-        "fw_id": "20240819-074450/1.4.2-gc2639da",
+        "fw_id": "20241011-114451/1.4.4-g6d2a586",
         "discoverable": true,
         "eco_mode": false,
         "sys_btn_toggle": true
@@ -116,11 +116,11 @@
       "sntp": {
         "server": "time.google.com"
       },
-      "cfg_rev": 36
+      "cfg_rev": 43
     },
     "wifi": {
       "ap": {
-        "ssid": "ShellyPro1PM-EC62608AB9A4",
+        "ssid": "",
         "is_open": true,
         "enable": false,
         "range_extender": {
@@ -128,7 +128,7 @@
         }
       },
       "sta": {
-        "ssid": "FibreBox_X6-12A4C7",
+        "ssid": "",
         "is_open": false,
         "enable": true,
         "ipv4mode": "dhcp",
@@ -138,9 +138,9 @@
         "nameserver": null
       },
       "sta1": {
-        "ssid": null,
-        "is_open": true,
-        "enable": false,
+        "ssid": "",
+        "is_open": false,
+        "enable": true,
         "ipv4mode": "dhcp",
         "ip": null,
         "netmask": null,
@@ -183,48 +183,52 @@
       "id": 0,
       "source": "HTTP_in",
       "output": true,
-      "apower": 6.3,
-      "voltage": 234.8,
+      "apower": 5.1,
+      "voltage": 238.1,
       "freq": 50,
-      "current": 0.066,
+      "current": 0.056,
       "pf": 0.62,
       "aenergy": {
-        "total": 9492.4,
-        "by_minute": [101.605, 101.605, 101.53],
-        "minute_ts": 1725565560
+        "total": 32762.372,
+        "by_minute": [89.865, 89.88, 89.835],
+        "minute_ts": 1741441980
       },
       "ret_aenergy": {
         "total": 0,
         "by_minute": [0, 0, 0],
-        "minute_ts": 1725565560
+        "minute_ts": 1741441980
       },
       "temperature": {
-        "tC": 42,
-        "tF": 107.7
+        "tC": 41.8,
+        "tF": 107.2
       }
     },
     "sys": {
       "mac": "EC62608AB9A4",
       "restart_required": false,
-      "time": "21:46",
-      "unixtime": 1725565578,
-      "uptime": 15226,
-      "ram_size": 265320,
-      "ram_free": 95188,
+      "time": "14:53",
+      "unixtime": 1741442035,
+      "uptime": 788773,
+      "ram_size": 265092,
+      "ram_free": 90524,
       "fs_size": 524288,
-      "fs_free": 188416,
-      "cfg_rev": 36,
+      "fs_free": 184320,
+      "cfg_rev": 43,
       "kvs_rev": 0,
       "schedule_rev": 1,
       "webhook_rev": 0,
-      "available_updates": {},
+      "available_updates": {
+        "beta": {
+          "version": "1.5.1-beta1"
+        }
+      },
       "reset_reason": 1
     },
     "wifi": {
       "sta_ip": "192.168.1.227",
       "status": "got ip",
-      "ssid": "FibreBox_X6-12A4C7",
-      "rssi": -63
+      "ssid": "",
+      "rssi": -54
     },
     "ws": {
       "connected": false
@@ -232,31 +236,13 @@
   },
   "components": [
     {
-      "key": "ble",
-      "status": {},
-      "config": {
-        "enable": true,
-        "rpc": {
-          "enable": true
-        },
-        "observer": {
-          "enable": true
-        }
-      }
-    },
-    {
-      "key": "bthome",
-      "status": {},
-      "config": {}
-    },
-    {
       "key": "bthomedevice:200",
       "status": {
         "id": 200,
-        "rssi": -72,
+        "rssi": -58,
         "battery": 100,
-        "packet_id": 235,
-        "last_updated_ts": 1725553794
+        "packet_id": 4,
+        "last_updated_ts": 1741437301
       },
       "config": {
         "id": 200,
@@ -276,10 +262,10 @@
       "key": "bthomedevice:201",
       "status": {
         "id": 201,
-        "rssi": -60,
+        "rssi": -68,
         "battery": 100,
-        "packet_id": 55,
-        "last_updated_ts": 1725561804
+        "packet_id": 42,
+        "last_updated_ts": 1741442003
       },
       "config": {
         "id": 201,
@@ -300,7 +286,7 @@
       "status": {
         "id": 200,
         "value": 100,
-        "last_updated_ts": 1725553794
+        "last_updated_ts": 1741437301
       },
       "config": {
         "id": 200,
@@ -339,7 +325,7 @@
       "status": {
         "id": 202,
         "value": 100,
-        "last_updated_ts": 1725561804
+        "last_updated_ts": 1741442003
       },
       "config": {
         "id": 202,
@@ -354,8 +340,8 @@
       "key": "bthomesensor:203",
       "status": {
         "id": 203,
-        "value": 63,
-        "last_updated_ts": 1725561804
+        "value": 35,
+        "last_updated_ts": 1741442003
       },
       "config": {
         "id": 203,
@@ -385,8 +371,8 @@
       "key": "bthomesensor:205",
       "status": {
         "id": 205,
-        "value": 25,
-        "last_updated_ts": 1725561804
+        "value": 22.9,
+        "last_updated_ts": 1741442003
       },
       "config": {
         "id": 205,
@@ -396,30 +382,9 @@
         "idx": 0,
         "meta": null
       }
-    },
-    {
-      "key": "cloud",
-      "status": {
-        "connected": true
-      },
-      "config": {
-        "enable": true,
-        "server": "shelly-103-eu.shelly.cloud:6022/jrpc"
-      }
-    },
-    {
-      "key": "eth",
-      "status": {
-        "ip": null
-      },
-      "config": {
-        "enable": true,
-        "ipv4mode": "dhcp",
-        "ip": null,
-        "netmask": null,
-        "gw": null,
-        "nameserver": null
-      }
     }
-  ]
+  ],
+  "cfg_rev": 43,
+  "offset": 0,
+  "total": 8
 }

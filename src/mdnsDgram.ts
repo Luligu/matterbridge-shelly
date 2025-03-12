@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
-import dgram from 'node:dgram';
 import { AnsiLogger, CYAN, db, debugStringify, er, GREEN, hk, idn, ign, LogLevel, nf, rs, TimestampFormat, wr, YELLOW, zb } from 'node-ansi-logger';
+import dgram from 'node:dgram';
 import os, { NetworkInterfaceInfoIPv4, NetworkInterfaceInfoIPv6 } from 'node:os';
 
 class MdnsScanner {
@@ -746,6 +746,7 @@ class MdnsScanner {
   }
 }
 
+/*
 MdnsScanner.listNetworkInterfaces(); // List available network interfaces
 
 const scanner = new MdnsScanner(process.argv[2], process.argv[3] === 'true' ? true : false);
@@ -812,7 +813,6 @@ function logDevices() {
   });
 }
 
-/*
 process.on('SIGINT', () => {
   clearInterval(interval);
   scanner.stop();

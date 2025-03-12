@@ -85,7 +85,7 @@
         "mac": "5432045661B4",
         "fw_id": "20241011-114457/1.4.4-g6d2a586",
         "discoverable": true,
-        "eco_mode": true,
+        "eco_mode": false,
         "addon_type": null
       },
       "location": null,
@@ -110,11 +110,11 @@
       "sntp": {
         "server": "time.google.com"
       },
-      "cfg_rev": 15
+      "cfg_rev": 18
     },
     "wifi": {
       "ap": {
-        "ssid": "ShellyI4G3-5432045661B4",
+        "ssid": "",
         "is_open": true,
         "enable": false,
         "range_extender": {
@@ -122,7 +122,7 @@
         }
       },
       "sta": {
-        "ssid": "FibreBox_X6-12A4C7",
+        "ssid": "",
         "is_open": false,
         "enable": true,
         "ipv4mode": "dhcp",
@@ -132,7 +132,7 @@
         "nameserver": null
       },
       "sta1": {
-        "ssid": "wifiAlbatros",
+        "ssid": "",
         "is_open": false,
         "enable": true,
         "ipv4mode": "dhcp",
@@ -183,32 +183,36 @@
     "sys": {
       "mac": "5432045661B4",
       "restart_required": false,
-      "time": "17:31",
-      "unixtime": 1732120286,
-      "uptime": 3618,
-      "ram_size": 259732,
-      "ram_free": 130736,
+      "time": "15:01",
+      "unixtime": 1741442506,
+      "uptime": 593631,
+      "ram_size": 259672,
+      "ram_free": 130076,
       "fs_size": 1048576,
       "fs_free": 593920,
-      "cfg_rev": 15,
+      "cfg_rev": 18,
       "kvs_rev": 0,
       "schedule_rev": 0,
       "webhook_rev": 0,
-      "available_updates": {},
+      "available_updates": {
+        "beta": {
+          "version": "1.5.1-beta1"
+        }
+      },
       "reset_reason": 1
     },
     "wifi": {
       "sta_ip": "192.168.1.159",
       "status": "got ip",
-      "ssid": "FibreBox_X6-12A4C7",
-      "rssi": -44
+      "ssid": "",
+      "rssi": -50
     },
     "ws": {
       "connected": false
     }
   },
   "components": [],
-  "cfg_rev": 15,
+  "cfg_rev": 18,
   "offset": 0,
   "total": 0
 }

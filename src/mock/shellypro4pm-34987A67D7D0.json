@@ -1,13 +1,13 @@
 {
   "shelly": {
-    "name": "My Shelly 4PM PRO",
+    "name": "4PM Pro",
     "id": "shellypro4pm-34987a67d7d0",
     "mac": "34987A67D7D0",
-    "slot": 0,
+    "slot": 1,
     "model": "SPSW-104PE16EU",
     "gen": 2,
-    "fw_id": "20240819-074544/1.4.2-gc2639da",
-    "ver": "1.4.2",
+    "fw_id": "20241011-114451/1.4.4-g6d2a586",
+    "ver": "1.4.4",
     "app": "Pro4PM",
     "auth_en": false,
     "auth_domain": null
@@ -130,7 +130,7 @@
     },
     "switch:3": {
       "id": 3,
-      "name": null,
+      "name": "DC line",
       "in_mode": "follow",
       "initial_state": "match_input",
       "auto_on": false,
@@ -145,9 +145,9 @@
     },
     "sys": {
       "device": {
-        "name": "My Shelly 4PM PRO",
+        "name": "4PM Pro",
         "mac": "34987A67D7D0",
-        "fw_id": "20240819-074544/1.4.2-gc2639da",
+        "fw_id": "20241011-114451/1.4.4-g6d2a586",
         "discoverable": true,
         "eco_mode": false
       },
@@ -173,14 +173,14 @@
       "sntp": {
         "server": "time.google.com"
       },
-      "cfg_rev": 15
+      "cfg_rev": 23
     },
     "ui": {
       "idle_brightness": 100
     },
     "wifi": {
       "ap": {
-        "ssid": "ShellyPro4PM-34987A67D7D0",
+        "ssid": "",
         "is_open": true,
         "enable": false,
         "range_extender": {
@@ -188,7 +188,7 @@
         }
       },
       "sta": {
-        "ssid": "FibreBox_X6-12A4C7",
+        "ssid": "",
         "is_open": false,
         "enable": true,
         "ipv4mode": "dhcp",
@@ -198,9 +198,9 @@
         "nameserver": null
       },
       "sta1": {
-        "ssid": null,
-        "is_open": true,
-        "enable": false,
+        "ssid": "",
+        "is_open": false,
+        "enable": true,
         "ipv4mode": "dhcp",
         "ip": null,
         "netmask": null,
@@ -253,340 +253,132 @@
       "id": 0,
       "source": "HTTP_in",
       "output": true,
-      "apower": 7,
-      "voltage": 235.3,
+      "apower": 20.6,
+      "voltage": 238,
       "freq": 50,
-      "current": 0.067,
-      "pf": 0.64,
+      "current": 0.184,
+      "pf": 0.47,
       "aenergy": {
-        "total": 3800.265,
-        "by_minute": [108.433, 108.285, 108.078],
-        "minute_ts": 1725565560
+        "total": 73809.18,
+        "by_minute": [349.383, 348.999, 348.91],
+        "minute_ts": 1741442580
       },
       "ret_aenergy": {
         "total": 0,
         "by_minute": [0, 0, 0],
-        "minute_ts": 1725565560
+        "minute_ts": 1741442580
       },
       "temperature": {
-        "tC": 59.7,
-        "tF": 139.4
+        "tC": 54,
+        "tF": 129.3
       }
     },
     "switch:1": {
       "id": 1,
       "source": "HTTP_in",
       "output": true,
-      "apower": 7.8,
-      "voltage": 235.2,
+      "apower": 6.7,
+      "voltage": 237.9,
       "freq": 50,
-      "current": 0.086,
+      "current": 0.073,
       "pf": 0.62,
       "aenergy": {
-        "total": 5676.794,
-        "by_minute": [123.384, 123.605, 123.12],
-        "minute_ts": 1725565560
+        "total": 33922.922,
+        "by_minute": [112.002, 112.12, 111.958],
+        "minute_ts": 1741442580
       },
       "ret_aenergy": {
         "total": 0,
         "by_minute": [0, 0, 0],
-        "minute_ts": 1725565560
+        "minute_ts": 1741442580
       },
       "temperature": {
-        "tC": 59.7,
-        "tF": 139.4
+        "tC": 54,
+        "tF": 129.3
       }
     },
     "switch:2": {
       "id": 2,
       "source": "HTTP_in",
       "output": true,
-      "apower": 5,
-      "voltage": 233.2,
+      "apower": 4.6,
+      "voltage": 235.9,
       "freq": 50,
-      "current": 0.059,
+      "current": 0.053,
       "pf": 0.6,
       "aenergy": {
-        "total": 2185.363,
-        "by_minute": [72.752, 72.974, 71.864],
-        "minute_ts": 1725565560
+        "total": 19051,
+        "by_minute": [70.843, 71.05, 70.799],
+        "minute_ts": 1741442580
       },
       "ret_aenergy": {
         "total": 0,
         "by_minute": [0, 0, 0],
-        "minute_ts": 1725565560
+        "minute_ts": 1741442580
       },
       "temperature": {
-        "tC": 59.7,
-        "tF": 139.4
+        "tC": 54,
+        "tF": 129.3
       }
     },
     "switch:3": {
       "id": 3,
       "source": "HTTP_in",
       "output": true,
-      "apower": 1.4,
-      "voltage": 233.2,
+      "apower": 2.9,
+      "voltage": 235.9,
       "freq": 50,
-      "current": 0.039,
-      "pf": 0.15,
+      "current": 0.045,
+      "pf": 0.25,
       "aenergy": {
-        "total": 493.321,
-        "by_minute": [21.357, 21.328, 21.128],
-        "minute_ts": 1725565560
+        "total": 11013.763,
+        "by_minute": [43.244, 43.301, 43.416],
+        "minute_ts": 1741442580
       },
       "ret_aenergy": {
         "total": 0,
         "by_minute": [0, 0, 0],
-        "minute_ts": 1725565560
+        "minute_ts": 1741442580
       },
       "temperature": {
-        "tC": 59.7,
-        "tF": 139.4
+        "tC": 54,
+        "tF": 129.3
       }
     },
     "sys": {
       "mac": "34987A67D7D0",
       "restart_required": false,
-      "time": "21:46",
-      "unixtime": 1725565578,
-      "uptime": 15248,
-      "ram_size": 248264,
-      "ram_free": 93484,
+      "time": "15:03",
+      "unixtime": 1741442606,
+      "uptime": 789359,
+      "ram_size": 248080,
+      "ram_free": 88712,
       "fs_size": 524288,
       "fs_free": 180224,
-      "cfg_rev": 15,
+      "cfg_rev": 23,
       "kvs_rev": 0,
       "schedule_rev": 1,
       "webhook_rev": 0,
-      "available_updates": {},
+      "available_updates": {
+        "beta": {
+          "version": "1.5.1-beta1"
+        }
+      },
       "reset_reason": 1
     },
     "ui": {},
     "wifi": {
       "sta_ip": "192.168.1.234",
       "status": "got ip",
-      "ssid": "FibreBox_X6-12A4C7",
-      "rssi": -60
+      "ssid": "",
+      "rssi": -50
     },
     "ws": {
       "connected": false
     }
   },
-  "components": [
-    {
-      "key": "ble",
-      "status": {},
-      "config": {
-        "enable": false,
-        "rpc": {
-          "enable": true
-        },
-        "observer": {
-          "enable": false
-        }
-      }
-    },
-    {
-      "key": "bthome",
-      "status": {
-        "errors": ["bluetooth_disabled"]
-      },
-      "config": {}
-    },
-    {
-      "key": "cloud",
-      "status": {
-        "connected": true
-      },
-      "config": {
-        "enable": true,
-        "server": "shelly-103-eu.shelly.cloud:6022/jrpc"
-      }
-    },
-    {
-      "key": "eth",
-      "status": {
-        "ip": null
-      },
-      "config": {
-        "enable": true,
-        "ipv4mode": "dhcp",
-        "ip": null,
-        "netmask": null,
-        "gw": null,
-        "nameserver": null
-      }
-    },
-    {
-      "key": "input:0",
-      "status": {
-        "id": 0,
-        "state": false
-      },
-      "config": {
-        "id": 0,
-        "name": null,
-        "type": "switch",
-        "enable": true,
-        "invert": false
-      }
-    },
-    {
-      "key": "input:1",
-      "status": {
-        "id": 1,
-        "state": false
-      },
-      "config": {
-        "id": 1,
-        "name": null,
-        "type": "switch",
-        "enable": true,
-        "invert": false
-      }
-    },
-    {
-      "key": "input:2",
-      "status": {
-        "id": 2,
-        "state": false
-      },
-      "config": {
-        "id": 2,
-        "name": null,
-        "type": "switch",
-        "enable": true,
-        "invert": false
-      }
-    },
-    {
-      "key": "input:3",
-      "status": {
-        "id": 3,
-        "state": false
-      },
-      "config": {
-        "id": 3,
-        "name": null,
-        "type": "switch",
-        "enable": true,
-        "invert": false
-      }
-    },
-    {
-      "key": "knx",
-      "status": {},
-      "config": {
-        "enable": false,
-        "ia": "15.15.255",
-        "routing": {
-          "addr": "224.0.23.12:3671"
-        }
-      }
-    },
-    {
-      "key": "mqtt",
-      "status": {
-        "connected": false
-      },
-      "config": {
-        "enable": false,
-        "server": null,
-        "client_id": "shellypro4pm-34987a67d7d0",
-        "user": null,
-        "ssl_ca": null,
-        "topic_prefix": "shellypro4pm-34987a67d7d0",
-        "rpc_ntf": true,
-        "status_ntf": false,
-        "use_client_cert": false,
-        "enable_rpc": true,
-        "enable_control": true
-      }
-    },
-    {
-      "key": "switch:0",
-      "status": {
-        "id": 0,
-        "source": "HTTP_in",
-        "output": true,
-        "apower": 6.6,
-        "voltage": 235.2,
-        "freq": 50,
-        "current": 0.064,
-        "pf": 0.64,
-        "aenergy": {
-          "total": 3800.267,
-          "by_minute": [108.433, 108.285, 108.078],
-          "minute_ts": 1725565560
-        },
-        "ret_aenergy": {
-          "total": 0,
-          "by_minute": [0, 0, 0],
-          "minute_ts": 1725565560
-        },
-        "temperature": {
-          "tC": 60,
-          "tF": 140
-        }
-      },
-      "config": {
-        "id": 0,
-        "name": null,
-        "in_mode": "follow",
-        "initial_state": "match_input",
-        "auto_on": false,
-        "auto_on_delay": 60,
-        "auto_off": false,
-        "auto_off_delay": 60,
-        "power_limit": 4480,
-        "voltage_limit": 280,
-        "undervoltage_limit": 0,
-        "autorecover_voltage_errors": false,
-        "current_limit": 16
-      }
-    },
-    {
-      "key": "switch:1",
-      "status": {
-        "id": 1,
-        "source": "HTTP_in",
-        "output": true,
-        "apower": 7.4,
-        "voltage": 235.1,
-        "freq": 50,
-        "current": 0.082,
-        "pf": 0.62,
-        "aenergy": {
-          "total": 5676.796,
-          "by_minute": [123.384, 123.605, 123.12],
-          "minute_ts": 1725565560
-        },
-        "ret_aenergy": {
-          "total": 0,
-          "by_minute": [0, 0, 0],
-          "minute_ts": 1725565560
-        },
-        "temperature": {
-          "tC": 60,
-          "tF": 140
-        }
-      },
-      "config": {
-        "id": 1,
-        "name": null,
-        "in_mode": "follow",
-        "initial_state": "match_input",
-        "auto_on": false,
-        "auto_on_delay": 60,
-        "auto_off": false,
-        "auto_off_delay": 60,
-        "power_limit": 4480,
-        "voltage_limit": 280,
-        "undervoltage_limit": 0,
-        "autorecover_voltage_errors": false,
-        "current_limit": 16
-      }
-    }
-  ]
+  "components": [],
+  "cfg_rev": 23,
+  "offset": 0,
+  "total": 0
 }

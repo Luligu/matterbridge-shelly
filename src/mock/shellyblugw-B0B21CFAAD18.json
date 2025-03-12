@@ -1,13 +1,13 @@
 {
   "shelly": {
-    "name": "Bluetooth Gateway Plus",
+    "name": "BLU Gateway Plus I",
     "id": "shellyblugw-b0b21cfaad18",
     "mac": "B0B21CFAAD18",
-    "slot": 1,
+    "slot": 0,
     "model": "SNGW-BT01",
     "gen": 2,
-    "fw_id": "20240819-074225/1.4.2-gc2639da",
-    "ver": "1.4.2",
+    "fw_id": "20241011-114449/1.4.4-g6d2a586",
+    "ver": "1.4.4",
     "app": "BluGw",
     "auth_en": false,
     "auth_domain": null
@@ -44,9 +44,9 @@
     },
     "sys": {
       "device": {
-        "name": "BLU Gateway Plus",
+        "name": "BLU Gateway Plus I",
         "mac": "B0B21CFAAD18",
-        "fw_id": "20240819-074225/1.4.2-gc2639da",
+        "fw_id": "20241011-114449/1.4.4-g6d2a586",
         "discoverable": true,
         "eco_mode": false
       },
@@ -72,11 +72,11 @@
       "sntp": {
         "server": "time.google.com"
       },
-      "cfg_rev": 10
+      "cfg_rev": 19
     },
     "wifi": {
       "ap": {
-        "ssid": "ShellyBluGw-B0B21CFAAD18",
+        "ssid": "",
         "is_open": true,
         "enable": false,
         "range_extender": {
@@ -84,7 +84,7 @@
         }
       },
       "sta": {
-        "ssid": "FibreBox_X6-12A4C7",
+        "ssid": "",
         "is_open": false,
         "enable": true,
         "ipv4mode": "dhcp",
@@ -94,7 +94,7 @@
         "nameserver": null
       },
       "sta1": {
-        "ssid": null,
+        "ssid": "",
         "is_open": true,
         "enable": false,
         "ipv4mode": "dhcp",
@@ -126,32 +126,36 @@
     "sys": {
       "mac": "B0B21CFAAD18",
       "restart_required": false,
-      "time": "12:35",
-      "unixtime": 1728556512,
-      "uptime": 287,
-      "ram_size": 269552,
-      "ram_free": 124588,
+      "time": "14:56",
+      "unixtime": 1741442205,
+      "uptime": 86234,
+      "ram_size": 269380,
+      "ram_free": 122888,
       "fs_size": 393216,
-      "fs_free": 131072,
-      "cfg_rev": 10,
+      "fs_free": 126976,
+      "cfg_rev": 19,
       "kvs_rev": 0,
       "schedule_rev": 1,
       "webhook_rev": 0,
-      "available_updates": {},
-      "reset_reason": 3
+      "available_updates": {
+        "beta": {
+          "version": "1.5.1-beta1"
+        }
+      },
+      "reset_reason": 1
     },
     "wifi": {
       "sta_ip": "192.168.1.168",
       "status": "got ip",
-      "ssid": "FibreBox_X6-12A4C7",
-      "rssi": -55
+      "ssid": "",
+      "rssi": -53
     },
     "ws": {
       "connected": false
     }
   },
   "components": [],
-  "cfg_rev": 10,
+  "cfg_rev": 19,
   "offset": 0,
   "total": 0
 }

@@ -19,12 +19,12 @@
     },
     "wifi_ap": {
       "enabled": false,
-      "ssid": "shellyrgbw2-EC64C9D199AD",
+      "ssid": "",
       "key": ""
     },
     "wifi_sta": {
       "enabled": true,
-      "ssid": "FibreBox_X6-12A4C7",
+      "ssid": "",
       "ipv4_method": "dhcp",
       "ip": null,
       "gw": null,
@@ -33,7 +33,7 @@
     },
     "wifi_sta1": {
       "enabled": true,
-      "ssid": "wifiAlbatros",
+      "ssid": "",
       "ipv4_method": "dhcp",
       "ip": null,
       "gw": null,
@@ -60,7 +60,7 @@
     "coiot": {
       "enabled": true,
       "update_period": 15,
-      "peer": "192.168.1.189:5683"
+      "peer": "192.168.1.20:5683"
     },
     "sntp": {
       "server": "time.google.com",
@@ -84,7 +84,7 @@
     },
     "cloud": {
       "enabled": true,
-      "connected": true
+      "connected": false
     },
     "timezone": null,
     "lat": null,
@@ -93,8 +93,8 @@
     "tz_utc_offset": 3600,
     "tz_dst": false,
     "tz_dst_auto": true,
-    "time": "14:43",
-    "unixtime": 1730468605,
+    "time": "14:53",
+    "unixtime": 1741441985,
     "led_status_disable": false,
     "debug_enable": false,
     "allow_cross_origin": false,
@@ -185,7 +185,7 @@
       {
         "name": null,
         "ison": false,
-        "brightness": 28,
+        "brightness": 1,
         "transition": 1000,
         "default_state": "switch",
         "auto_on": 0,
@@ -233,20 +233,20 @@
   "status": {
     "wifi_sta": {
       "connected": true,
-      "ssid": "FibreBox_X6-12A4C7",
+      "ssid": "",
       "ip": "192.168.1.152",
-      "rssi": -60
+      "rssi": -54
     },
     "cloud": {
       "enabled": true,
-      "connected": true
+      "connected": false
     },
     "mqtt": {
       "connected": false
     },
-    "time": "14:43",
-    "unixtime": 1730468605,
-    "serial": 12395,
+    "time": "14:53",
+    "unixtime": 1741441986,
+    "serial": 10668,
     "has_update": false,
     "mac": "EC64C9D199AD",
     "cfg_changed_cnt": 0,
@@ -304,7 +304,7 @@
         "timer_duration": 0,
         "timer_remaining": 0,
         "mode": "white",
-        "brightness": 28,
+        "brightness": 1,
         "transition": 0,
         "power": 0,
         "overpower": false
@@ -315,15 +315,7 @@
         "power": 0,
         "is_valid": "true",
         "overpower": false,
-        "timestamp": 1730472205,
-        "counters": [0, 0, 0],
-        "total": 3760
-      },
-      {
-        "power": 0,
-        "is_valid": "true",
-        "overpower": false,
-        "timestamp": 1730472205,
+        "timestamp": 1741445586,
         "counters": [0, 0, 0],
         "total": 0
       },
@@ -331,7 +323,7 @@
         "power": 0,
         "is_valid": "true",
         "overpower": false,
-        "timestamp": 1730472205,
+        "timestamp": 1741445586,
         "counters": [0, 0, 0],
         "total": 0
       },
@@ -339,7 +331,15 @@
         "power": 0,
         "is_valid": "true",
         "overpower": false,
-        "timestamp": 1730472205,
+        "timestamp": 1741445586,
+        "counters": [0, 0, 0],
+        "total": 0
+      },
+      {
+        "power": 0,
+        "is_valid": "true",
+        "overpower": false,
+        "timestamp": 1741445586,
         "counters": [0, 0, 0],
         "total": 0
       }
@@ -359,10 +359,10 @@
       "beta_version": "20231107-164128/v1.14.1-rc1-g0617c15"
     },
     "ram_total": 50936,
-    "ram_free": 36396,
+    "ram_free": 36876,
     "fs_size": 233681,
     "fs_free": 159636,
-    "uptime": 165828
+    "uptime": 788698
   },
   "components": [],
   "cfg_rev": 0,

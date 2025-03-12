@@ -127,7 +127,7 @@
       }
     },
     "enableMdnsDiscover": {
-      "description": "Enable the mdns discovery for shelly devices",
+      "description": "Enable the mdns discovery for shelly devices. Once all the devices are loaded and stored, it is possible to disable this setting to reduce the network traffic.",
       "type": "boolean",
       "default": true
     },

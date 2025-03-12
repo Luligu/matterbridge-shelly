@@ -4,9 +4,9 @@
  * @file src\shellyDevice.ts
  * @author Luca Liguori
  * @date 2024-05-01
- * @version 3.0.0
+ * @version 3.1.1
  *
- * Copyright 2024, 2025 Luca Liguori.
+ * Copyright 2024, 2025, 2026 Luca Liguori.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@
  * limitations under the License. *
  */
 
-import { AnsiLogger, LogLevel, BLUE, CYAN, GREEN, GREY, MAGENTA, RESET, db, debugStringify, er, hk, nf, wr, zb, rs, YELLOW, idn, nt, rk } from 'matterbridge/logger';
+import { AnsiLogger, LogLevel, BLUE, CYAN, GREEN, GREY, MAGENTA, RESET, db, debugStringify, er, hk, nf, wr, zb, rs, YELLOW, idn, nt, rk, dn } from 'matterbridge/logger';
 import { getIpv4InterfaceAddress, isValidNumber, isValidObject, isValidString } from 'matterbridge/utils';
 import { EventEmitter } from 'node:events';
 import fetch, { RequestInit } from 'node-fetch';
@@ -81,7 +81,7 @@ export class ShellyDevice extends EventEmitter {
   online = false;
   gen = 0;
   lastseen = 0;
-  lastFetched = Date.now() - 55 * 60 * 1000; // 55 minutes ago (lowest random value)
+  lastFetched = Date.now() - 50 * 60 * 1000; // 50 minutes ago (lowest random value is 55 minutes, highest is 65 minutes). So we fetch the first time after 5 minutes to 15 minutes.
   fetchInterval = 0;
   hasUpdate = false;
   sleepMode = false;
@@ -610,8 +610,8 @@ export class ShellyDevice extends EventEmitter {
       device.addComponent(new ShellyComponent(device, 'sys', 'Sys')); // Always present since we process now cfgChanged
     }
 
-    // Gen 2 Shelly device
-    if (shellyPayload.gen === 2 || shellyPayload.gen === 3) {
+    // Gen 2+ Shelly device
+    if (shellyPayload.gen === 2 || shellyPayload.gen === 3 || shellyPayload.gen === 4) {
       statusPayload = await ShellyDevice.fetch(shelly, log, host, 'Shelly.GetStatus');
       settingsPayload = await ShellyDevice.fetch(shelly, log, host, 'Shelly.GetConfig');
       if (!statusPayload || !settingsPayload) {
@@ -686,21 +686,51 @@ export class ShellyDevice extends EventEmitter {
 
     if (statusPayload) device.onUpdate(statusPayload);
 
-    // For gen 1 devices check if CoIoT is enabled and peer is set correctly: like <matterbridge-ipv4>:5683 e.g. 192.168.1.189:5683
+    // For gen 1 devices check if CoIoT is enabled and peer is set correctly
     if (device.gen === 1) {
       const CoIoT = device.getComponent('coiot');
       if (CoIoT) {
         if ((CoIoT.getValue('enabled') as boolean) === false)
-          log.warn(`The CoIoT service is not enabled for device ${device.name} id ${device.id}. Enable it in the settings to receive updates from the device.`);
+          log.warn(
+            `The CoIoT service is not enabled for device ${dn}${device.name}${wr} id ${hk}${device.id}${wr}. Enable it in the web ui settings to receive updates from the device.`,
+          );
         // When peer is mcast we get "" as value
         if ((CoIoT.getValue('peer') as string) !== '') {
           const peer = CoIoT.getValue('peer') as string;
           const ipv4 = getIpv4InterfaceAddress() + ':5683';
           if (peer !== ipv4)
-            log.warn(`The CoIoT peer for device ${device.name} id ${device.id} is not mcast or ${ipv4}. Set it in the settings to receive updates from the device.`);
+            log.warn(
+              `The CoIoT peer for device ${dn}${device.name}${wr} id ${hk}${device.id}${wr} is not mcast or ${ipv4}. Set it in the web ui settings to receive updates from the device.`,
+            );
         }
       } else {
-        log.error(`CoIoT service not found for device ${device.name} id ${device.id}.`);
+        log.error(`CoIoT service not found for device ${dn}${device.name}${er} id ${hk}${device.id}${er}.`);
+      }
+    }
+
+    // For gen 2+ battery powered devices check if WsServer is enabled and set correctly
+    if (device.gen >= 2 && device.sleepMode === true) {
+      const ws = device.getComponent('ws');
+      if (ws) {
+        if ((ws.getValue('enable') as boolean | undefined) === false) {
+          log.warn(
+            `The Outbound websocket settings is not enabled for device ${dn}${device.name}${wr} id ${hk}${device.id}${wr}. Enable it in the web ui settings to receive updates from the device.`,
+          );
+        }
+        const ipv4 = getIpv4InterfaceAddress();
+        const server = ws.getValue('server') as string | undefined;
+        if (!server || !server.endsWith(':8485')) {
+          log.warn(
+            `The Outbound websocket settings is not configured correctly for device ${dn}${device.name}${wr} id ${hk}${device.id}${wr}. The port must be 8485 (i.e. ws://${ipv4}:8485). Set it in the web ui settings to receive updates from the device.`,
+          );
+        }
+        if (!server || !server.includes(getIpv4InterfaceAddress() ?? '')) {
+          log.warn(
+            `The Outbound websocket settings is not configured correctly for device ${dn}${device.name}${wr} id ${hk}${device.id}${wr}. The ip must be the matterbridge ip (i.e. ws://${ipv4}:8485). Set it in the web ui settings to receive updates from the device.`,
+          );
+        }
+      } else {
+        log.error(`WebSocket server component not found for device ${dn}${device.name}${er} id ${hk}${device.id}${er}.`);
       }
     }
 
@@ -713,7 +743,7 @@ export class ShellyDevice extends EventEmitter {
           device.log.notice(`Roller device ${hk}${device.id}${nt} host ${zb}${device.host}${nt} does not have position control enabled.`);
         }
       }
-    } else if (device.gen === 2 || device.gen === 3) {
+    } else if (device.gen >= 2) {
       if (device.profile === 'cover') {
         const cover = device.getComponent('cover:0');
         // Check if the device has position control enabled
@@ -728,34 +758,27 @@ export class ShellyDevice extends EventEmitter {
 
     // Start lastseen interval
     device.lastseenInterval = setInterval(() => {
-      // Check lastseen interval
       const lastSeenDate = new Date(device.lastseen);
-      const lastSeenDateString = lastSeenDate.toLocaleString();
-      if (!device.sleepMode && Date.now() - device.lastseen > 10 * 60 * 1000) {
-        log.info(`Fetching update for device ${hk}${device.id}${nf} host ${zb}${device.host}${nf} cached ${CYAN}${device.cached}${db}.`);
-        device.fetchUpdate(); // We don't await for the update to complete
-      } else {
-        log.debug(
-          `Device ${hk}${device.id}${db} host ${zb}${device.host}${db} online ${!device.online ? wr : CYAN}${device.online}${db} sleep mode ${device.sleepMode ? wr : CYAN}${device.sleepMode}${db} cached ${device.cached ? wr : CYAN}${device.cached}${db} has been seen the last time: ${CYAN}${lastSeenDateString}${db}.`,
-        );
-      }
+      log.debug(
+        `Device ${hk}${device.id}${db} host ${zb}${device.host}${db} online ${!device.online ? wr : CYAN}${device.online}${db} ` +
+          `sleep mode ${device.sleepMode ? wr : CYAN}${device.sleepMode}${db} cached ${device.cached ? wr : CYAN}${device.cached}${db} ` +
+          `${device.gen >= 2 && device.sleepMode === false && device.wsClient?.isConnected === false ? 'websocket ' + er + 'false ' + db : ''}` +
+          `last seen ${CYAN}${lastSeenDate.toLocaleString()}${db}.`,
+      );
 
-      // Check WebSocket client for gen 2 and 3 devices
-      if (device.gen === 2 || device.gen === 3) {
-        if (!device.sleepMode && device.wsClient?.isConnected === false) {
-          log.info(`WebSocket client for device ${hk}${device.id}${nf} host ${zb}${device.host}${nf} is not connected. Starting connection...`);
-          device.wsClient?.start();
-        }
+      // Check WebSocket client for gen 2+ devices and restart if not connected
+      if (device.gen >= 2 && !device.sleepMode && device.wsClient && device.wsClient.isConnected === false) {
+        log.info(`WebSocket client for device ${hk}${device.id}${nf} host ${zb}${device.host}${nf} is not connected. Starting connection...`);
+        device.wsClient.start();
       }
     }, 60 * 1000);
 
-    // Start WebSocket client for gen 2 and 3 devices
-    if (device.gen === 2 || device.gen === 3) {
+    // Start WebSocket client for gen 2+ devices if not in sleep mode
+    if (device.gen >= 2 && !device.sleepMode) {
       device.wsClient = new WsClient(device.id, host, shelly.password);
-      device.startWsClientTimeout = setTimeout(() => {
-        // Start WebSocket client after 10 seconds only if it's not a cached device. Will try it in the last seen interval.
-        if (!host.endsWith('.json')) device.wsClient?.start();
-      }, 10 * 1000);
+
+      // Start the WebSocket client for devices that are not a cache JSON file
+      if (!host.endsWith('.json')) device.wsClient.start();
 
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       device.wsClient.on('response', (message) => {
@@ -803,15 +826,18 @@ export class ShellyDevice extends EventEmitter {
       });
     }
 
-    // Emitted when a sleepy device wakes up by WsServer and CoapServer. We update the cache file.
+    // Emitted when a sleepy device wakes up by WsServer and CoapServer. We update the cache file and register the device with Coap.
     device.on('awake', async () => {
       log.debug(`Device ${hk}${device.id}${db} host ${zb}${device.host}${db} is awake (cached: ${device.cached}).`);
       if (device.sleepMode && (device.cached || Date.now() - device.lastFetched > device.fetchInterval)) {
         try {
           device.lastFetched = Date.now();
           const awaken = await ShellyDevice.create(shelly, log, device.host);
-          await awaken?.saveDevicePayloads(shelly.dataPath);
-          awaken?.destroy();
+          if (awaken) {
+            if (device.gen === 1) shelly.coapServer.registerDevice(device.host, device.id, false); // No await to register device for CoIoT updates
+            await awaken.saveDevicePayloads(shelly.dataPath);
+            awaken.destroy();
+          }
           log.debug(`Updated cache file for sleepy device ${hk}${device.id}${db} host ${zb}${device.host}${db}`);
         } catch (error) {
           log.debug(`Error saving device cache ${hk}${device.id}${db} host ${zb}${device.host}${db}: ${error instanceof Error ? error.message : error}`);
@@ -1044,7 +1070,7 @@ export class ShellyDevice extends EventEmitter {
           }
         }
       }
-    } else if (this.gen === 2 || this.gen === 3) {
+    } else if (this.gen >= 2) {
       // Update passive components
       for (const key in data) {
         if (key === 'sys') this.updateComponent(key, data[key] as ShellyData);
@@ -1099,7 +1125,7 @@ export class ShellyDevice extends EventEmitter {
     this.shellyPayload = await ShellyDevice.fetch(this.shelly, this.log, this.host, 'shelly');
     if (!this.shellyPayload) {
       if (this.online) {
-        this.log.warn(`Error fetching shelly from device ${hk}${this.id}${wr} host ${zb}${this.host}${wr}. No data found. The device may be offline.`);
+        this.log.warn(`Error fetching shelly from device ${hk}${this.id}${wr} host ${zb}${this.host}${wr}. No data found.`);
         this.online = false;
         this.emit('offline');
       }
@@ -1108,7 +1134,7 @@ export class ShellyDevice extends EventEmitter {
     this.settingsPayload = await ShellyDevice.fetch(this.shelly, this.log, this.host, this.gen === 1 ? 'settings' : 'Shelly.GetConfig');
     if (!this.settingsPayload) {
       if (this.online) {
-        this.log.warn(`Error fetching settings from device ${hk}${this.id}${wr} host ${zb}${this.host}${wr}. No data found. The device may be offline.`);
+        this.log.warn(`Error fetching settings from device ${hk}${this.id}${wr} host ${zb}${this.host}${wr}. No data found.`);
         this.online = false;
         this.emit('offline');
       }
@@ -1117,13 +1143,13 @@ export class ShellyDevice extends EventEmitter {
     this.statusPayload = await ShellyDevice.fetch(this.shelly, this.log, this.host, this.gen === 1 ? 'status' : 'Shelly.GetStatus');
     if (!this.statusPayload) {
       if (this.online) {
-        this.log.warn(`Error fetching status from device ${hk}${this.id}${wr} host ${zb}${this.host}${wr}. No data found. The device may be offline.`);
+        this.log.warn(`Error fetching status from device ${hk}${this.id}${wr} host ${zb}${this.host}${wr}. No data found.`);
         this.online = false;
         this.emit('offline');
       }
       return null;
     }
-    if (this.gen !== 1) {
+    if (this.gen >= 2) {
       const btHomeComponents: BTHomeComponent[] = [];
       let btHomePayload: BTHomeComponentPayload;
       let offset = 0;
@@ -1136,10 +1162,9 @@ export class ShellyDevice extends EventEmitter {
       } while (btHomePayload && offset < btHomePayload.total);
       this.componentsPayload = { components: btHomeComponents, cfg_rev: btHomePayload?.cfg_rev | 0, offset: 0, total: btHomeComponents.length };
     }
+    this.lastseen = Date.now();
     if (this.cached) {
       this.cached = false;
-      // Check if device is a cached device and register it to the CoAP server
-      if (this.gen === 1) await this.shelly.coapServer?.registerDevice(this.host, this.id);
     }
     if (!this.online) {
       this.log.info(`The device ${hk}${this.id}${nf} host ${zb}${this.host}${nf} is online.`);
@@ -1393,8 +1418,8 @@ export class ShellyDevice extends EventEmitter {
           if (deviceData.status.wifi_sta) (deviceData.status.wifi_sta as ShellyData).ssid = '';
           if (deviceData.status.wifi_sta1) (deviceData.status.wifi_sta1 as ShellyData).ssid = '';
         }
-        // Remove sensitive data for Gen 2 and 3 devices
-        if (this.gen === 2 || this.gen === 3) {
+        // Remove sensitive data for Gen 2+
+        if (this.gen >= 2) {
           if (deviceData.settings.sys) (deviceData.settings.sys as ShellyData).location = null;
           if (deviceData.settings.wifi) {
             const wifi = deviceData.settings.wifi as ShellyData;

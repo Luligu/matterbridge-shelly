@@ -97,7 +97,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": ["gen=2", "app=PlusI4", "ver=1.4.2"]
+      "data": ["gen=2", "app=PlusI4", "ver=1.4.4"]
     },
     {
       "name": "ShellyPlusI4-CC7B5C8AEA2C.local",

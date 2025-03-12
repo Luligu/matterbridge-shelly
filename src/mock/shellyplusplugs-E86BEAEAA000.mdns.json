@@ -97,7 +97,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": ["gen=2", "app=PlusPlugS", "ver=1.4.2"]
+      "data": ["gen=2", "app=PlusPlugS", "ver=1.4.4"]
     },
     {
       "name": "ShellyPlusPlugS-E86BEAEAA000.local",

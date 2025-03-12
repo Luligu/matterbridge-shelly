@@ -80,7 +80,7 @@
         "mac": "A0DD6CA09158",
         "fw_id": "20241011-114451/1.4.4-g6d2a586",
         "discoverable": true,
-        "eco_mode": true,
+        "eco_mode": false,
         "addon_type": null,
         "sys_btn_toggle": true
       },
@@ -106,11 +106,11 @@
       "sntp": {
         "server": "time.google.com"
       },
-      "cfg_rev": 23
+      "cfg_rev": 26
     },
     "wifi": {
       "ap": {
-        "ssid": "ShellyProEM50-A0DD6CA09158",
+        "ssid": "",
         "is_open": true,
         "enable": false,
         "range_extender": {
@@ -118,7 +118,7 @@
         }
       },
       "sta": {
-        "ssid": "FibreBox_X6-12A4C7",
+        "ssid": "",
         "is_open": false,
         "enable": true,
         "ipv4mode": "dhcp",
@@ -128,7 +128,7 @@
         "nameserver": null
       },
       "sta1": {
-        "ssid": null,
+        "ssid": "",
         "is_open": true,
         "enable": false,
         "ipv4mode": "dhcp",
@@ -158,18 +158,18 @@
     },
     "em1:0": {
       "id": 0,
-      "current": 2.595,
-      "voltage": 237.1,
-      "act_power": 353.1,
-      "aprt_power": 616.2,
-      "pf": 0.7,
+      "current": 2.431,
+      "voltage": 237.4,
+      "act_power": 457.1,
+      "aprt_power": 578.3,
+      "pf": 0.83,
       "freq": 50,
       "calibration": "factory"
     },
     "em1:1": {
       "id": 1,
       "current": 0.02,
-      "voltage": 237.1,
+      "voltage": 237.5,
       "act_power": 0,
       "aprt_power": 4.8,
       "pf": 0,
@@ -178,7 +178,7 @@
     },
     "em1data:0": {
       "id": 0,
-      "total_act_energy": 1306525.13,
+      "total_act_energy": 2707040.26,
       "total_act_ret_energy": 0
     },
     "em1data:1": {
@@ -195,42 +195,46 @@
     },
     "switch:0": {
       "id": 0,
-      "source": "init",
+      "source": "HTTP_in",
       "output": false,
       "temperature": {
-        "tC": 35,
-        "tF": 95
+        "tC": 43.1,
+        "tF": 109.5
       }
     },
     "sys": {
       "mac": "A0DD6CA09158",
       "restart_required": false,
-      "time": "16:35",
-      "unixtime": 1730475302,
-      "uptime": 319198,
-      "ram_size": 249732,
-      "ram_free": 119840,
+      "time": "14:58",
+      "unixtime": 1741442305,
+      "uptime": 1056310,
+      "ram_size": 249780,
+      "ram_free": 121672,
       "fs_size": 524288,
       "fs_free": 188416,
-      "cfg_rev": 23,
+      "cfg_rev": 26,
       "kvs_rev": 0,
       "schedule_rev": 1,
       "webhook_rev": 0,
-      "available_updates": {},
+      "available_updates": {
+        "beta": {
+          "version": "1.5.1-beta1"
+        }
+      },
       "reset_reason": 3
     },
     "wifi": {
       "sta_ip": "192.168.1.81",
       "status": "got ip",
-      "ssid": "FibreBox_X6-12A4C7",
-      "rssi": -58
+      "ssid": "",
+      "rssi": -57
     },
     "ws": {
       "connected": false
     }
   },
   "components": [],
-  "cfg_rev": 23,
+  "cfg_rev": 26,
   "offset": 0,
   "total": 0
 }

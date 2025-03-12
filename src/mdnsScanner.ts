@@ -4,7 +4,7 @@
  * @file src\mdnsScanner.ts
  * @author Luca Liguori
  * @date 2024-05-01
- * @version 1.1.0
+ * @version 1.2.2
  *
  * Copyright 2024, 2025, 2026 Luca Liguori.
  *
@@ -27,15 +27,21 @@ import EventEmitter from 'node:events';
 import { RemoteInfo, SocketType } from 'node:dgram';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
+import { ShellyDeviceId } from './shellyTypes.js';
+// import { getIpv4InterfaceAddress, getIpv6InterfaceAddress } from 'matterbridge/utils';
 
 export interface DiscoveredDevice {
-  id: string;
+  id: ShellyDeviceId;
   host: string;
   port: number;
   gen: number;
 }
 
 export type DiscoveredDeviceListener = (data: DiscoveredDevice) => void;
+
+interface MdnsScannerEvent {
+  discovered: [{ id: ShellyDeviceId; host: string; port: number; gen: number }];
+}
 
 /**
  * Creates an instance of MdnsScanner.
@@ -49,12 +55,20 @@ export class MdnsScanner extends EventEmitter {
   private _isScanning = false;
   private scannerTimeout?: NodeJS.Timeout;
   private queryTimeout?: NodeJS.Timeout;
+  private queryInterval?: NodeJS.Timeout;
   private _dataPath = 'temp';
-  private _debug = false;
 
   constructor(logLevel: LogLevel = LogLevel.INFO) {
     super();
     this.log = new AnsiLogger({ logName: 'ShellyMdnsScanner', logTimestampFormat: TimestampFormat.TIME_MILLIS, logLevel });
+  }
+
+  override emit<K extends keyof MdnsScannerEvent>(eventName: K, ...args: MdnsScannerEvent[K]): boolean {
+    return super.emit(eventName, ...args);
+  }
+
+  override on<K extends keyof MdnsScannerEvent>(eventName: K, listener: (...args: MdnsScannerEvent[K]) => void): this {
+    return super.on(eventName, listener);
   }
 
   /**
@@ -64,15 +78,6 @@ export class MdnsScanner extends EventEmitter {
    */
   set dataPath(path: string) {
     this._dataPath = path;
-  }
-
-  /**
-   * Sets the debug mode.
-   *
-   * @param {boolean} debug - The new debug mode.
-   */
-  set debug(debug: boolean) {
-    this._debug = debug;
   }
 
   /**
@@ -87,7 +92,7 @@ export class MdnsScanner extends EventEmitter {
   /**
    * Sends an mDNS query for shelly devices.
    */
-  private sendQuery() {
+  sendQuery() {
     this.scanner?.query([
       { name: '_http._tcp.local', type: 'PTR' },
       { name: '_shelly._tcp.local', type: 'PTR' },
@@ -99,13 +104,13 @@ export class MdnsScanner extends EventEmitter {
   /**
    * Starts the mDNS query service for shelly devices.
    *
-   * @param {number} shutdownTimeout - The timeout value in milliseconds to stop the MdnsScanner (optional, if not provided the MdnsScanner will not stop).
+   * @param {number} scannerTimeout - The timeout value in milliseconds to stop the MdnsScanner (optional, if not provided the MdnsScanner will not stop).
+   * @param {number} queryTimeout - The timeout value in milliseconds to stop the query service (optional, if not provided the query service will not stop).
    * @param {string} mdnsInterface - Explicitly specify a network interface name. Will use all interfaces when not specified.
    * @param {SocketType} type - Explicitly specify a socket type: "udp4" | "udp6". Default is "udp4".
    * @param {boolean} debug - Indicates whether to enable debug mode (default: false).
    */
-  start(shutdownTimeout?: number, mdnsInterface?: string, type?: SocketType, debug = false) {
-    this._debug = debug;
+  start(scannerTimeout?: number, queryTimeout?: number, mdnsInterface?: string, type?: SocketType, debug = false) {
     if (this._isScanning) return;
     this._isScanning = true;
 
@@ -119,12 +124,12 @@ export class MdnsScanner extends EventEmitter {
       mdnsOptions.port = 5353;
       mdnsOptions.multicast = true;
       mdnsOptions.reuseAddr = true;
-      this.log.debug(
-        `Starting mDNS query service for shelly devices with interface ${mdnsOptions.interface} bind ${mdnsOptions.bind} type ${mdnsOptions.type} ip ${mdnsOptions.ip}...`,
+      this.log.info(
+        `Starting MdnsScanner for shelly devices (interface ${mdnsOptions.interface} bind ${mdnsOptions.bind} type ${mdnsOptions.type} ip ${mdnsOptions.ip}) for shelly devices...`,
       );
       this.scanner = mdns(mdnsOptions);
     } else {
-      this.log.debug('Starting mDNS query service for shelly devices...');
+      this.log.info('Starting MdnsScanner for shelly devices...');
       this.scanner = mdns();
     }
 
@@ -243,28 +248,39 @@ export class MdnsScanner extends EventEmitter {
 
     // Send the query and set the timeout to send it again every 60 seconds
     this.sendQuery();
-    this.queryTimeout = setInterval(() => {
+    this.queryInterval = setInterval(() => {
       this.sendQuery();
     }, 60 * 1000);
 
     // Set the timeout to stop the scanner if it is defined
-    if (shutdownTimeout && shutdownTimeout > 0) {
+    if (scannerTimeout && scannerTimeout > 0) {
       this.scannerTimeout = setTimeout(() => {
         this.stop();
-      }, shutdownTimeout);
+      }, scannerTimeout);
     }
-    this.log.debug('Started mDNS query service for shelly devices.');
+
+    // Set the timeout to stop the query if it is defined
+    if (queryTimeout && queryTimeout > 0) {
+      this.queryTimeout = setTimeout(() => {
+        if (this.queryInterval) clearInterval(this.queryInterval);
+        this.queryInterval = undefined;
+        this.log.info('Stopped MdnsScanner query service for shelly devices.');
+      }, queryTimeout);
+    }
+    this.log.info('Started MdnsScanner for shelly devices.');
   }
 
   /**
    * Stops the MdnsScanner query service.
    */
   stop(keepAlive = false) {
-    this.log.debug('Stopping mDNS query service...');
+    this.log.info('Stopping MdnsScanner for shelly devices...');
     if (this.scannerTimeout) clearTimeout(this.scannerTimeout);
     this.scannerTimeout = undefined;
     if (this.queryTimeout) clearTimeout(this.queryTimeout);
     this.queryTimeout = undefined;
+    if (this.queryInterval) clearTimeout(this.queryInterval);
+    this.queryInterval = undefined;
     this._isScanning = false;
     if (keepAlive) return;
     this.scanner?.removeAllListeners();
@@ -272,7 +288,7 @@ export class MdnsScanner extends EventEmitter {
     this.scanner = undefined;
     this.removeAllListeners();
     this.logPeripheral();
-    this.log.debug('Stopped mDNS query service.');
+    this.log.info('Stopped MdnsScanner for shelly devices.');
   }
 
   /**
@@ -303,9 +319,8 @@ export class MdnsScanner extends EventEmitter {
     const sortedDevices = Array.from(this.devices).sort((a, b) => {
       const hostA = a[1].toLowerCase();
       const hostB = b[1].toLowerCase();
-      if (hostA < hostB) return -1;
-      if (hostA > hostB) return 1;
-      return 0;
+      if (hostA >= hostB) return 1;
+      else return -1;
     });
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     for (const [name, host] of sortedDevices) {
@@ -317,9 +332,8 @@ export class MdnsScanner extends EventEmitter {
     const sortedDiscoveredDevices = Array.from(this.discoveredDevices).sort((a, b) => {
       const idA = a[1].id;
       const idB = b[1].id;
-      if (idA < idB) return -1;
-      if (idA > idB) return 1;
-      return 0;
+      if (idA >= idB) return 1;
+      else return -1;
     });
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     for (const [name, { id, host, port, gen }] of sortedDiscoveredDevices) {
@@ -335,7 +349,7 @@ export class MdnsScanner extends EventEmitter {
    * @param {ResponsePacket} response - The response packet to be saved.
    * @returns {Promise<void>} A promise that resolves when the response is successfully saved, or rejects with an error.
    */
-  private async saveResponse(shellyId: string, response: ResponsePacket): Promise<void> {
+  async saveResponse(shellyId: string, response: ResponsePacket): Promise<void> {
     const responseFile = path.join(this._dataPath, `${shellyId}.mdns.json`);
     try {
       await fs.mkdir(this._dataPath, { recursive: true });
@@ -354,7 +368,7 @@ export class MdnsScanner extends EventEmitter {
         }
       }
       await fs.writeFile(responseFile, JSON.stringify(response, null, 2), 'utf8');
-      this.log.debug(`*Saved shellyId ${hk}${shellyId}${db} response file ${CYAN}${responseFile}${db}`);
+      this.log.debug(`Saved shellyId ${hk}${shellyId}${db} response file ${CYAN}${responseFile}${db}`);
       return Promise.resolve();
     } catch (err) {
       this.log.error(`Error saving shellyId ${hk}${shellyId}${er} response file ${CYAN}${responseFile}${er}: ${err instanceof Error ? err.message : err}`);
@@ -369,15 +383,19 @@ export class MdnsScanner extends EventEmitter {
 // const multicastCommand = isWindows ? 'netsh interface ipv4 show joins' : 'ip maddr show';
 /*
 if (process.argv.includes('testMdnsScanner')) {
-  const mdnsScanner = new MdnsScanner(LogLevel.DEBUG);
+  console.log(`Starting MdnsScanner with host interface ipv4="${getIpv4InterfaceAddress()}" ipv6="${getIpv6InterfaceAddress()}" ...`);
+  const mdnsScannerIpv4 = new MdnsScanner(LogLevel.DEBUG);
+  const mdnsScannerIpv6 = new MdnsScanner(LogLevel.DEBUG);
   // mdnsScanner.start(0, 'fd78:cbf8:4939:746:d555:85a9:74f6:9c6', 'udp6', true);
-  // mdnsScanner.start(0, undefined, 'udp4', true);
+  // mdnsScannerIpv6.start(0, '::', 'udp6', true);
   // mdnsScanner.start(0, '192.168.1.189', 'udp4', true);
-  mdnsScanner.start(0, getIpv4InterfaceAddress(), 'udp4', true);
+  mdnsScannerIpv4.start(0, getIpv4InterfaceAddress(), 'udp4', true);
+  mdnsScannerIpv6.start(0, getIpv6InterfaceAddress(), 'udp6', true);
   // mdnsScanner.start(0, undefined, undefined, true);
 
   process.on('SIGINT', async function () {
-    mdnsScanner.stop();
+    mdnsScannerIpv4.stop();
+    mdnsScannerIpv6.stop();
   });
 }
 */

@@ -3,11 +3,11 @@
     "name": "2PM Gen3 Switch",
     "id": "shelly2pmg3-8cbfea9de29c",
     "mac": "8CBFEA9DE29C",
-    "slot": 1,
+    "slot": 0,
     "model": "S3SW-002P16EU",
     "gen": 3,
-    "fw_id": "20240731-123728/1.4.99-2pmg3prod0-ge3db05c",
-    "ver": "1.4.99-2pmg3prod0",
+    "fw_id": "20250220-082359/1.5.0-g0087a06",
+    "ver": "1.5.0",
     "app": "S2PMG3",
     "auth_en": false,
     "auth_domain": null,
@@ -17,9 +17,6 @@
     "ble": {
       "enable": true,
       "rpc": {
-        "enable": true
-      },
-      "observer": {
         "enable": true
       }
     },
@@ -77,7 +74,8 @@
       "voltage_limit": 280,
       "undervoltage_limit": 0,
       "autorecover_voltage_errors": false,
-      "current_limit": 10
+      "current_limit": 10,
+      "reverse": false
     },
     "switch:1": {
       "id": 1,
@@ -92,13 +90,14 @@
       "voltage_limit": 280,
       "undervoltage_limit": 0,
       "autorecover_voltage_errors": false,
-      "current_limit": 10
+      "current_limit": 10,
+      "reverse": false
     },
     "sys": {
       "device": {
         "name": "2PM Gen3 Switch",
         "mac": "8CBFEA9DE29C",
-        "fw_id": "20240731-123728/1.4.99-2pmg3prod0-ge3db05c",
+        "fw_id": "20250220-082359/1.5.0-g0087a06",
         "discoverable": true,
         "eco_mode": false,
         "profile": "switch",
@@ -124,13 +123,13 @@
         "listen_port": null
       },
       "sntp": {
-        "server": "time.google.com"
+        "server": "time.cloudflare.com"
       },
-      "cfg_rev": 14
+      "cfg_rev": 17
     },
     "wifi": {
       "ap": {
-        "ssid": "Shelly2PMG3-8CBFEA9DE29C",
+        "ssid": "",
         "is_open": true,
         "enable": false,
         "range_extender": {
@@ -138,7 +137,7 @@
         }
       },
       "sta": {
-        "ssid": "FibreBox_X6-12A4C7",
+        "ssid": "",
         "is_open": false,
         "enable": true,
         "ipv4mode": "dhcp",
@@ -148,9 +147,9 @@
         "nameserver": null
       },
       "sta1": {
-        "ssid": null,
-        "is_open": true,
-        "enable": false,
+        "ssid": "",
+        "is_open": false,
+        "enable": true,
         "ipv4mode": "dhcp",
         "ip": null,
         "netmask": null,
@@ -188,81 +187,88 @@
     },
     "switch:0": {
       "id": 0,
-      "source": "WS_in",
+      "source": "init",
       "output": false,
       "apower": 0,
-      "voltage": 235.2,
+      "voltage": 238.4,
       "freq": 50,
       "current": 0,
       "pf": 0,
       "aenergy": {
         "total": 0,
         "by_minute": [0, 0, 0],
-        "minute_ts": 1733069100
+        "minute_ts": 1741441860
       },
       "ret_aenergy": {
         "total": 0,
         "by_minute": [0, 0, 0],
-        "minute_ts": 1733069100
+        "minute_ts": 1741441860
       },
       "temperature": {
-        "tC": 44.5,
-        "tF": 112
+        "tC": 51.3,
+        "tF": 124.3
       }
     },
     "switch:1": {
       "id": 1,
-      "source": "WS_in",
+      "source": "init",
       "output": false,
       "apower": 0,
-      "voltage": 235.3,
+      "voltage": 238.4,
       "freq": 50,
       "current": 0,
       "pf": 0,
       "aenergy": {
         "total": 0,
         "by_minute": [0, 0, 0],
-        "minute_ts": 1733069100
+        "minute_ts": 1741441860
       },
       "ret_aenergy": {
         "total": 0,
         "by_minute": [0, 0, 0],
-        "minute_ts": 1733069100
+        "minute_ts": 1741441860
       },
       "temperature": {
-        "tC": 44.5,
-        "tF": 112
+        "tC": 51.3,
+        "tF": 124.3
       }
     },
     "sys": {
       "mac": "8CBFEA9DE29C",
       "restart_required": false,
-      "time": "17:05",
-      "unixtime": 1733069123,
-      "uptime": 817,
-      "ram_size": 255592,
-      "ram_free": 71512,
-      "fs_size": 1048576,
-      "fs_free": 569344,
-      "cfg_rev": 14,
+      "time": "14:51",
+      "unixtime": 1741441895,
+      "last_sync_ts": 1741441359,
+      "uptime": 788631,
+      "ram_size": 250672,
+      "ram_free": 60500,
+      "ram_min_free": 45832,
+      "fs_size": 1015808,
+      "fs_free": 540672,
+      "cfg_rev": 17,
       "kvs_rev": 0,
       "schedule_rev": 1,
       "webhook_rev": 0,
-      "available_updates": {},
-      "reset_reason": 3
+      "btrelay_rev": 24,
+      "available_updates": {
+        "beta": {
+          "version": "1.5.1-beta1"
+        }
+      },
+      "reset_reason": 1
     },
     "wifi": {
       "sta_ip": "192.168.1.172",
       "status": "got ip",
-      "ssid": "FibreBox_X6-12A4C7",
-      "rssi": -53
+      "ssid": "",
+      "rssi": -54
     },
     "ws": {
       "connected": false
     }
   },
   "components": [],
-  "cfg_rev": 14,
+  "cfg_rev": 17,
   "offset": 0,
   "total": 0
 }

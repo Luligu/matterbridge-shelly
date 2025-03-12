@@ -17,12 +17,12 @@
     },
     "wifi_ap": {
       "enabled": false,
-      "ssid": "shelly1-34945472A643",
+      "ssid": "",
       "key": ""
     },
     "wifi_sta": {
       "enabled": true,
-      "ssid": "FibreBox_X6-12A4C7",
+      "ssid": "",
       "ipv4_method": "dhcp",
       "ip": null,
       "gw": null,
@@ -31,7 +31,7 @@
     },
     "wifi_sta1": {
       "enabled": true,
-      "ssid": "wifiAlbatros",
+      "ssid": "",
       "ipv4_method": "dhcp",
       "ip": null,
       "gw": null,
@@ -58,7 +58,7 @@
     "coiot": {
       "enabled": true,
       "update_period": 15,
-      "peer": "192.168.1.189:5683"
+      "peer": "192.168.1.20:5683"
     },
     "sntp": {
       "server": "time.google.com",
@@ -91,8 +91,8 @@
     "tz_utc_offset": 3600,
     "tz_dst": false,
     "tz_dst_auto": true,
-    "time": "14:43",
-    "unixtime": 1730468595,
+    "time": "14:44",
+    "unixtime": 1741441485,
     "debug_enable": false,
     "allow_cross_origin": false,
     "ext_switch_enable": false,
@@ -138,7 +138,7 @@
         "appliance_type": "General",
         "ison": false,
         "has_timer": false,
-        "default_state": "last",
+        "default_state": "off",
         "btn_type": "toggle",
         "btn_reverse": 0,
         "auto_on": 0,
@@ -156,9 +156,9 @@
   "status": {
     "wifi_sta": {
       "connected": true,
-      "ssid": "FibreBox_X6-12A4C7",
+      "ssid": "",
       "ip": "192.168.1.240",
-      "rssi": -65
+      "rssi": -52
     },
     "cloud": {
       "enabled": true,
@@ -167,9 +167,9 @@
     "mqtt": {
       "connected": false
     },
-    "time": "14:43",
-    "unixtime": 1730468595,
-    "serial": 43,
+    "time": "14:44",
+    "unixtime": 1741441486,
+    "serial": 8,
     "has_update": false,
     "mac": "34945472A643",
     "cfg_changed_cnt": 0,
@@ -213,7 +213,7 @@
     "ram_free": 39720,
     "fs_size": 233681,
     "fs_free": 150851,
-    "uptime": 165815
+    "uptime": 788180
   },
   "components": [],
   "cfg_rev": 0,

@@ -4,9 +4,9 @@
  * @file src\shelly.ts
  * @author Luca Liguori
  * @date 2024-05-01
- * @version 2.0.0
+ * @version 2.2.2
  *
- * Copyright 2024, 2025 Luca Liguori.
+ * Copyright 2024, 2025, 2026 Luca Liguori.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@
  */
 
 import { AnsiLogger, CYAN, MAGENTA, BRIGHT, hk, db, nf, wr, zb, er, LogLevel } from 'matterbridge/logger';
+import { isValidArray, isValidObject } from 'matterbridge/utils';
 
 import crypto from 'node:crypto';
 import EventEmitter from 'node:events';
@@ -29,11 +30,9 @@ import EventEmitter from 'node:events';
 import { ShellyDevice } from './shellyDevice.js';
 import { DiscoveredDevice, MdnsScanner } from './mdnsScanner.js';
 import { CoapServer } from './coapServer.js';
-import { SocketType } from 'node:dgram';
 import { WsClient } from './wsClient.js';
 import { WsServer } from './wsServer.js';
-import { ShellyData, ShellyDeviceId } from './shellyTypes.js';
-import { isValidArray, isValidObject } from 'matterbridge/utils';
+import { ShellyData, ShellyDataType, ShellyDeviceId } from './shellyTypes.js';
 
 /**
  * Creates a new instance of the Shelly class.
@@ -45,14 +44,11 @@ export class Shelly extends EventEmitter {
   private readonly _devices = new Map<string, ShellyDevice>();
   private readonly log: AnsiLogger;
   private fetchInterval?: NodeJS.Timeout;
-  private mdnsScanner: MdnsScanner | undefined;
-  public coapServer: CoapServer | undefined;
-  public wsServer: WsServer | undefined;
-  private coapServerTimeout?: NodeJS.Timeout;
+  public mdnsScanner: MdnsScanner;
+  public coapServer: CoapServer;
+  public wsServer: WsServer;
   public username: string | undefined;
   public password: string | undefined;
-  private _debugMdns = false;
-  private _debugCoap = false;
   private _dataPath = '';
 
   /**
@@ -119,7 +115,7 @@ export class Shelly extends EventEmitter {
       this.emit('discovered', device);
     });
 
-    this.coapServer.on('update', async (host: string, component: string, property: string, value: string | number | boolean) => {
+    this.coapServer.on('update', async (host: string, component: string, property: string, value: ShellyDataType) => {
       const device = this.getDeviceByHost(host);
       if (device) {
         device.log.debug(
@@ -144,6 +140,7 @@ export class Shelly extends EventEmitter {
     // Fetch updates from devices every 55-65 minutes (randomized) and save payloads to disk
     this.fetchInterval = setInterval(() => {
       this.devices.forEach((device) => {
+        // Randomize fetch interval from 55 to 65 minutes for each device on the first run
         if (device.fetchInterval === 0) {
           const minMinutes = 55;
           const maxMinutes = 65;
@@ -152,21 +149,30 @@ export class Shelly extends EventEmitter {
           const fetchIntervalMinutes = Math.floor(device.fetchInterval / 1000 / 60);
           const fetchIntervalSeconds = Math.round((device.fetchInterval / 1000) % 60);
           this.log.debug(
-            `*Device ${hk}${device.id}${db} host ${zb}${device.host}${db} fetch interval ${CYAN}${fetchIntervalMinutes}${db} minutes and ${CYAN}${fetchIntervalSeconds}${db} seconds`,
+            `Device ${hk}${device.id}${db} host ${zb}${device.host}${db} fetch interval ${CYAN}${fetchIntervalMinutes}${db} minutes and ${CYAN}${fetchIntervalSeconds}${db} seconds`,
           );
         }
-        if (device.sleepMode) return;
-        if (Date.now() - device.lastFetched > device.fetchInterval) {
-          device.fetchUpdate().then((data) => {
-            device.lastFetched = Date.now();
-            if (data) {
-              const fetchIntervalMinutes = Math.floor(device.fetchInterval / 1000 / 60);
-              const fetchIntervalSeconds = Math.round((device.fetchInterval / 1000) % 60);
-              this.log.debug(
-                `*Fetching data from device ${hk}${device.id}${db} host ${zb}${device.host}${db} (fetch interval ${CYAN}${fetchIntervalMinutes}${db} minutes and ${CYAN}${fetchIntervalSeconds}${db} seconds)`,
-              );
-              device.saveDevicePayloads(this._dataPath);
+        // Set device offline if sleepMode is enabled and lastseen is older than 24 hours
+        if (device.sleepMode) {
+          if (Date.now() - device.lastseen > 24 * 60 * 60 * 1000) {
+            if (device.online) {
+              device.log.warn(`Device ${hk}${device.id}${wr} host ${zb}${device.host}${wr} has not reported in the last 24 hours.`);
+              device.online = false;
+              device.emit('offline');
             }
+          }
+          return;
+        }
+        // Fetch data if fetchInterval has passed
+        if (Date.now() - device.lastFetched > device.fetchInterval) {
+          const fetchIntervalMinutes = Math.floor(device.fetchInterval / 1000 / 60);
+          const fetchIntervalSeconds = Math.round((device.fetchInterval / 1000) % 60);
+          this.log.debug(
+            `Fetching data from device ${hk}${device.id}${db} host ${zb}${device.host}${db} (fetch interval ${CYAN}${fetchIntervalMinutes}${db} minutes and ${CYAN}${fetchIntervalSeconds}${db} seconds)`,
+          );
+          device.fetchUpdate().then((data) => {
+            device.lastFetched = Date.now(); // Update lastFetched timestamp even if no data is fetched to avoid multiple fetches
+            if (data) device.saveDevicePayloads(this._dataPath);
           });
         }
       });
@@ -185,22 +191,17 @@ export class Shelly extends EventEmitter {
   destroy() {
     clearInterval(this.fetchInterval);
     this.fetchInterval = undefined;
-    clearTimeout(this.coapServerTimeout);
-    this.coapServerTimeout = undefined;
     this.devices.forEach((device) => {
       device.destroy();
       this.removeDevice(device);
     });
     this.removeAllListeners();
-    this.wsServer?.removeAllListeners();
-    this.wsServer?.stop();
-    this.wsServer = undefined;
-    this.mdnsScanner?.removeAllListeners();
-    this.mdnsScanner?.stop();
-    this.mdnsScanner = undefined;
-    this.coapServer?.removeAllListeners();
-    this.coapServer?.stop();
-    this.coapServer = undefined;
+    this.wsServer.removeAllListeners();
+    this.wsServer.stop();
+    this.mdnsScanner.removeAllListeners();
+    this.mdnsScanner.stop();
+    this.coapServer.removeAllListeners();
+    this.coapServer.stop();
     this._devices.clear();
   }
 
@@ -210,36 +211,19 @@ export class Shelly extends EventEmitter {
    * @param {string} path - The new data path to set.
    */
   set dataPath(path: string) {
+    this.log.debug(`Set shelly data path to ${CYAN}${path}${db}`);
     this._dataPath = path;
-    if (this.mdnsScanner) this.mdnsScanner.dataPath = path;
-    if (this.coapServer) this.coapServer.dataPath = path;
+    this.mdnsScanner.dataPath = path;
+    this.coapServer.dataPath = path;
   }
 
   /**
    * Gets the data path for the Shelly instance.
    *
-   * @returns {string} The current data path.
+   * @returns {string} The data path for the Shelly instance.
    */
   get dataPath(): string {
     return this._dataPath;
-  }
-
-  /**
-   * Sets the debug mode for mDNS scanning.
-   *
-   * @param {boolean} debug - A boolean value indicating whether to enable debug mode.
-   */
-  set debugMdns(debug: boolean) {
-    if (this.mdnsScanner) this.mdnsScanner.debug = debug;
-  }
-
-  /**
-   * Sets the debug mode for CoAP server.
-   *
-   * @param {boolean} debug - A boolean value indicating whether to enable debug mode or not.
-   */
-  set debugCoap(debug: boolean) {
-    if (this.coapServer) this.coapServer.debug = debug;
   }
 
   /**
@@ -298,11 +282,12 @@ export class Shelly extends EventEmitter {
     }
     this._devices.set(device.id, device);
     if (device.gen === 1) {
-      if (!device.cached && !device.host.endsWith('.json')) this.coapServer?.registerDevice(device.host, device.id); // No await to register device for CoIoT updates
-      this.startCoap(10000);
-    }
-    if (device.gen === 2 || device.gen === 3) {
-      if (device.sleepMode) this.wsServer?.start();
+      this.coapServer.registerDevice(device.host, device.id, device.sleepMode); // No await to register device for CoIoT updates
+    } else if (device.gen >= 2) {
+      if (!device.sleepMode && device.wsClient && device.wsClient.isConnected === false) {
+        device.log.info(`WebSocket client for device ${hk}${device.id}${nf} host ${zb}${device.host}${nf} is not connected. Starting connection...`);
+        device.wsClient.start();
+      }
     }
     this.emit('add', device);
     return this;
@@ -315,8 +300,8 @@ export class Shelly extends EventEmitter {
    * @returns {Shelly} The updated Shelly instance.
    */
   removeDevice(device: ShellyDevice | ShellyDeviceId): Shelly {
-    const id = typeof device === 'string' ? device : device.id;
-    this._devices.delete(id);
+    const key = typeof device === 'string' ? device : device.id;
+    this._devices.delete(key);
     return this;
   }
 
@@ -341,34 +326,6 @@ export class Shelly extends EventEmitter {
   }
 
   /**
-   * Starts the mDNS scanner.
-   *
-   * @param {number} mdnsShutdownTimeout - The timeout for shutting down the mDNS scanner (optional, if not provided the MdnsScanner will not stop).
-   * @param {string} mdnsInterface - The network interface to use for mDNS scanning.
-   * @param {SocketType} type - The socket type to use for mDNS scanning.
-   * @param {boolean} debug - Whether to enable debug mode for mDNS scanning.
-   */
-  startMdns(mdnsShutdownTimeout?: number, mdnsInterface?: string, type?: SocketType, debug = false) {
-    this.mdnsScanner?.start(mdnsShutdownTimeout, mdnsInterface, type, debug);
-  }
-
-  /**
-   * Starts the CoAP server.
-   *
-   * @param {number} [coapStartTimeout] - The timeout value in milliseconds before starting the CoAP server.
-   * @returns {void}
-   */
-  startCoap(coapStartTimeout?: number) {
-    if (coapStartTimeout) {
-      this.coapServerTimeout = setTimeout(() => {
-        this.coapServer?.start(this._debugCoap);
-      }, coapStartTimeout);
-    } else {
-      this.coapServer?.start(this._debugCoap);
-    }
-  }
-
-  /**
    * Sets the log level and debug flags for the Shelly instance.
    *
    * @param {LogLevel} level - The log level to set.
@@ -379,14 +336,17 @@ export class Shelly extends EventEmitter {
   setLogLevel(level: LogLevel, debugMdns: boolean, debugCoap: boolean, debugWs: boolean) {
     // Called 2 times in platform.ts: 1) at startup, 2) after onChangeLoggerLevel
     this.log.logLevel = level;
-    this._debugMdns = debugMdns;
-    this._debugCoap = debugCoap;
-    if (this.mdnsScanner) this.mdnsScanner.log.logLevel = debugMdns ? LogLevel.DEBUG : LogLevel.INFO;
-    if (this.coapServer) this.coapServer.log.logLevel = debugCoap ? LogLevel.DEBUG : LogLevel.INFO;
-    if (this.wsServer) this.wsServer.log.logLevel = debugWs ? LogLevel.DEBUG : LogLevel.INFO;
-    WsClient.logLevel = debugWs ? LogLevel.DEBUG : LogLevel.INFO;
+    this.mdnsScanner.log.logLevel = debugMdns ? LogLevel.DEBUG : LogLevel.INFO;
+    this.coapServer.log.logLevel = debugCoap ? LogLevel.DEBUG : LogLevel.INFO;
+    this.wsServer.log.logLevel = debugWs ? LogLevel.DEBUG : LogLevel.INFO;
+    WsClient.logLevel = debugWs ? LogLevel.DEBUG : LogLevel.INFO; // Static property for new instances
     this.devices.forEach((device) => {
       device.setLogLevel(level);
+      if (device.wsClient) {
+        // Set log level for existing WebSocket clients
+        if (debugWs) device.wsClient.log.logLevel = LogLevel.DEBUG;
+        else device.wsClient.log.logLevel = LogLevel.INFO;
+      }
     });
   }
 

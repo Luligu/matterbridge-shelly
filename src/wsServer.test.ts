@@ -80,7 +80,7 @@ describe('ShellyWsServer', () => {
     expect(wsServer.isListening).toBeTruthy();
   });
 
-  test('Should fail to crete the wsServer', async () => {
+  test('Should fail to create the wsServer', async () => {
     const wsServer = new WsServer(LogLevel.DEBUG);
     wsServer.start();
     // prettier-ignore

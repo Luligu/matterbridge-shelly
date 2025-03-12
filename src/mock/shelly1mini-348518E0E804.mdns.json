@@ -15,56 +15,46 @@
   "questions": [],
   "answers": [
     {
-      "name": "Shelly1Mini-348518E0E804.local",
-      "type": "A",
-      "ttl": 0,
-      "class": "IN",
-      "flush": true,
-      "data": "192.168.1.238"
-    },
-    {
-      "name": "_shelly._tcp.local",
-      "type": "PTR",
-      "ttl": 0,
-      "class": "IN",
-      "flush": false,
-      "data": "shelly1mini-348518e0e804._shelly._tcp.local"
-    },
-    {
-      "name": "shelly1mini-348518e0e804._shelly._tcp.local",
-      "type": "SRV",
-      "ttl": 0,
-      "class": "IN",
-      "flush": true,
-      "data": {
-        "priority": 0,
-        "weight": 0,
-        "port": 80,
-        "target": "Shelly1Mini-348518E0E804.local"
-      }
-    },
-    {
-      "name": "shelly1mini-348518e0e804._shelly._tcp.local",
-      "type": "TXT",
-      "ttl": 0,
-      "class": "IN",
-      "flush": true,
-      "data": ["gen=2", "app=Plus1Mini", "ver=1.4.0"]
-    },
-    {
       "name": "_http._tcp.local",
       "type": "PTR",
-      "ttl": 0,
+      "ttl": 120,
       "class": "IN",
       "flush": false,
       "data": "shelly1mini-348518e0e804._http._tcp.local"
     },
     {
+      "name": "_shelly._tcp.local",
+      "type": "PTR",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": "shelly1mini-348518e0e804._shelly._tcp.local"
+    },
+    {
+      "name": "_services._dns-sd._udp.local",
+      "type": "PTR",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": "_shelly._tcp.local"
+    },
+    {
+      "name": "_services._dns-sd._udp.local",
+      "type": "PTR",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": "_http._tcp.local"
+    }
+  ],
+  "authorities": [],
+  "additionals": [
+    {
       "name": "shelly1mini-348518e0e804._http._tcp.local",
       "type": "SRV",
-      "ttl": 0,
+      "ttl": 120,
       "class": "IN",
-      "flush": true,
+      "flush": false,
       "data": {
         "priority": 0,
         "weight": 0,
@@ -75,24 +65,47 @@
     {
       "name": "shelly1mini-348518e0e804._http._tcp.local",
       "type": "TXT",
-      "ttl": 0,
+      "ttl": 120,
       "class": "IN",
-      "flush": true,
+      "flush": false,
       "data": ["gen=2"]
-    }
-  ],
-  "authorities": [],
-  "additionals": [
+    },
     {
       "name": "Shelly1Mini-348518E0E804.local",
-      "type": "NSEC",
-      "ttl": 1,
+      "type": "A",
+      "ttl": 120,
       "class": "IN",
       "flush": true,
+      "data": "192.168.1.238"
+    },
+    {
+      "name": "shelly1mini-348518e0e804._shelly._tcp.local",
+      "type": "SRV",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
       "data": {
-        "nextDomain": "Shelly1Mini-348518E0E804.local",
-        "rrtypes": []
+        "priority": 0,
+        "weight": 0,
+        "port": 80,
+        "target": "Shelly1Mini-348518E0E804.local"
       }
+    },
+    {
+      "name": "shelly1mini-348518e0e804._shelly._tcp.local",
+      "type": "TXT",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": ["gen=2", "app=Plus1Mini", "ver=1.4.4"]
+    },
+    {
+      "name": "Shelly1Mini-348518E0E804.local",
+      "type": "A",
+      "ttl": 120,
+      "class": "IN",
+      "flush": true,
+      "data": "192.168.1.238"
     }
   ]
 }

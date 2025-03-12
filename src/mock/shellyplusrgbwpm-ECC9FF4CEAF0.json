@@ -1,0 +1,355 @@
+{
+  "shelly": {
+    "name": "RGBW PM Plus White",
+    "id": "shellyplusrgbwpm-ecc9ff4ceaf0",
+    "mac": "ECC9FF4CEAF0",
+    "slot": 0,
+    "model": "SNDC-0D4P10WW",
+    "gen": 2,
+    "fw_id": "20241011-114446/1.4.4-g6d2a586",
+    "ver": "1.4.4",
+    "app": "PlusRGBWPM",
+    "auth_en": false,
+    "auth_domain": null,
+    "profile": "light"
+  },
+  "settings": {
+    "ble": {
+      "enable": false,
+      "rpc": {
+        "enable": true
+      },
+      "observer": {
+        "enable": false
+      }
+    },
+    "cloud": {
+      "enable": true,
+      "server": "shelly-103-eu.shelly.cloud:6022/jrpc"
+    },
+    "input:0": {
+      "id": 0,
+      "name": null,
+      "type": "button",
+      "enable": true,
+      "invert": false,
+      "factory_reset": true
+    },
+    "input:1": {
+      "id": 1,
+      "name": null,
+      "type": "button",
+      "enable": true,
+      "invert": false,
+      "factory_reset": true
+    },
+    "input:2": {
+      "id": 2,
+      "name": null,
+      "type": "button",
+      "enable": true,
+      "invert": false,
+      "factory_reset": true
+    },
+    "input:3": {
+      "id": 3,
+      "name": null,
+      "type": "button",
+      "enable": true,
+      "invert": false,
+      "factory_reset": true
+    },
+    "light:0": {
+      "id": 0,
+      "name": null,
+      "initial_state": "restore_last",
+      "auto_on": false,
+      "auto_on_delay": 60,
+      "auto_off": false,
+      "auto_off_delay": 60,
+      "transition_duration": 3,
+      "min_brightness_on_toggle": 3,
+      "night_mode": {
+        "enable": false,
+        "brightness": 50,
+        "active_between": []
+      },
+      "range_map": [0, 100],
+      "button_fade_rate": 3,
+      "button_presets": {
+        "button_doublepush": {
+          "brightness": 100
+        }
+      },
+      "in_mode": "dim"
+    },
+    "light:1": {
+      "id": 1,
+      "name": null,
+      "initial_state": "restore_last",
+      "auto_on": false,
+      "auto_on_delay": 60,
+      "auto_off": false,
+      "auto_off_delay": 60,
+      "transition_duration": 3,
+      "min_brightness_on_toggle": 3,
+      "night_mode": {
+        "enable": false,
+        "brightness": 50,
+        "active_between": []
+      },
+      "range_map": [0, 100],
+      "button_fade_rate": 3,
+      "button_presets": {
+        "button_doublepush": {
+          "brightness": 100
+        }
+      },
+      "in_mode": "dim"
+    },
+    "light:2": {
+      "id": 2,
+      "name": null,
+      "initial_state": "restore_last",
+      "auto_on": false,
+      "auto_on_delay": 60,
+      "auto_off": false,
+      "auto_off_delay": 60,
+      "transition_duration": 3,
+      "min_brightness_on_toggle": 3,
+      "night_mode": {
+        "enable": false,
+        "brightness": 50,
+        "active_between": []
+      },
+      "range_map": [0, 100],
+      "button_fade_rate": 3,
+      "button_presets": {
+        "button_doublepush": {
+          "brightness": 100
+        }
+      },
+      "in_mode": "dim"
+    },
+    "light:3": {
+      "id": 3,
+      "name": null,
+      "initial_state": "restore_last",
+      "auto_on": false,
+      "auto_on_delay": 60,
+      "auto_off": false,
+      "auto_off_delay": 60,
+      "transition_duration": 3,
+      "min_brightness_on_toggle": 3,
+      "night_mode": {
+        "enable": false,
+        "brightness": 50,
+        "active_between": []
+      },
+      "range_map": [0, 100],
+      "button_fade_rate": 3,
+      "button_presets": {
+        "button_doublepush": {
+          "brightness": 100
+        }
+      },
+      "in_mode": "dim"
+    },
+    "mqtt": {
+      "enable": false,
+      "server": null,
+      "client_id": "shellyplusrgbwpm-ecc9ff4ceaf0",
+      "user": null,
+      "ssl_ca": null,
+      "topic_prefix": "shellyplusrgbwpm-ecc9ff4ceaf0",
+      "rpc_ntf": true,
+      "status_ntf": false,
+      "use_client_cert": false,
+      "enable_rpc": true,
+      "enable_control": true
+    },
+    "plusrgbwpm": {
+      "hf_mode": false
+    },
+    "sys": {
+      "device": {
+        "name": "RGBW PM Plus White",
+        "mac": "ECC9FF4CEAF0",
+        "fw_id": "20241011-114446/1.4.4-g6d2a586",
+        "discoverable": true,
+        "profile": "light",
+        "addon_type": null
+      },
+      "location": null,
+      "debug": {
+        "level": 2,
+        "file_level": null,
+        "mqtt": {
+          "enable": false
+        },
+        "websocket": {
+          "enable": false
+        },
+        "udp": {
+          "addr": null
+        }
+      },
+      "ui_data": {},
+      "rpc_udp": {
+        "dst_addr": null,
+        "listen_port": null
+      },
+      "sntp": {
+        "server": "time.google.com"
+      },
+      "cfg_rev": 21
+    },
+    "wifi": {
+      "ap": {
+        "ssid": "",
+        "is_open": true,
+        "enable": false,
+        "range_extender": {
+          "enable": false
+        }
+      },
+      "sta": {
+        "ssid": "",
+        "is_open": false,
+        "enable": true,
+        "ipv4mode": "dhcp",
+        "ip": null,
+        "netmask": null,
+        "gw": null,
+        "nameserver": null
+      },
+      "sta1": {
+        "ssid": "",
+        "is_open": false,
+        "enable": true,
+        "ipv4mode": "dhcp",
+        "ip": null,
+        "netmask": null,
+        "gw": null,
+        "nameserver": null
+      },
+      "roam": {
+        "rssi_thr": -80,
+        "interval": 60
+      }
+    },
+    "ws": {
+      "enable": false,
+      "server": null,
+      "ssl_ca": "ca.pem"
+    }
+  },
+  "status": {
+    "ble": {},
+    "cloud": {
+      "connected": true
+    },
+    "input:0": {
+      "id": 0,
+      "state": null
+    },
+    "input:1": {
+      "id": 1,
+      "state": null
+    },
+    "input:2": {
+      "id": 2,
+      "state": null
+    },
+    "input:3": {
+      "id": 3,
+      "state": null
+    },
+    "light:0": {
+      "id": 0,
+      "source": "init",
+      "output": false,
+      "brightness": 1,
+      "temperature": {
+        "tC": 55.5,
+        "tF": 131.8
+      },
+      "voltage": 12.4,
+      "flags": ["no_load"]
+    },
+    "light:1": {
+      "id": 1,
+      "source": "init",
+      "output": false,
+      "brightness": 1,
+      "temperature": {
+        "tC": 55.5,
+        "tF": 131.8
+      },
+      "voltage": 12.4,
+      "flags": ["no_load"]
+    },
+    "light:2": {
+      "id": 2,
+      "source": "init",
+      "output": false,
+      "brightness": 1,
+      "temperature": {
+        "tC": 55.5,
+        "tF": 131.8
+      },
+      "voltage": 12.4,
+      "flags": ["no_load"]
+    },
+    "light:3": {
+      "id": 3,
+      "source": "init",
+      "output": false,
+      "brightness": 1,
+      "temperature": {
+        "tC": 55.5,
+        "tF": 131.8
+      },
+      "voltage": 12.4,
+      "flags": ["no_load"]
+    },
+    "mqtt": {
+      "connected": false
+    },
+    "plusrgbwpm": {},
+    "sys": {
+      "mac": "ECC9FF4CEAF0",
+      "restart_required": false,
+      "time": "14:49",
+      "unixtime": 1741441745,
+      "uptime": 788456,
+      "ram_size": 251832,
+      "ram_free": 118136,
+      "fs_size": 393216,
+      "fs_free": 90112,
+      "cfg_rev": 21,
+      "kvs_rev": 0,
+      "schedule_rev": 2,
+      "webhook_rev": 1,
+      "available_updates": {
+        "beta": {
+          "version": "1.5.1-beta1"
+        }
+      },
+      "reset_reason": 1
+    },
+    "wifi": {
+      "sta_ip": "192.168.1.171",
+      "status": "got ip",
+      "ssid": "",
+      "rssi": -54
+    },
+    "ws": {
+      "connected": false
+    }
+  },
+  "components": [],
+  "cfg_rev": 21,
+  "offset": 0,
+  "total": 0
+}

@@ -1,13 +1,13 @@
 {
   "shelly": {
-    "name": "My Shelly WiFi H&T Gen 3",
+    "name": "H&T Gen3",
     "id": "shellyhtg3-3030f9ec8468",
     "mac": "3030F9EC8468",
     "slot": 0,
     "model": "S3SN-0U12A",
     "gen": 3,
-    "fw_id": "20240807-142710/1.4.2-beta1-g84969a6",
-    "ver": "1.4.2-beta1",
+    "fw_id": "20241011-121127/1.4.5-gbf870ca",
+    "ver": "1.4.5",
     "app": "HTG3",
     "auth_en": false,
     "auth_domain": null
@@ -48,9 +48,9 @@
     },
     "sys": {
       "device": {
-        "name": "My Shelly WiFi H&T Gen 3",
+        "name": "H&T Gen3",
         "mac": "3030F9EC8468",
-        "fw_id": "20240807-142710/1.4.2-beta1-g84969a6",
+        "fw_id": "20241011-121127/1.4.5-gbf870ca",
         "discoverable": true
       },
       "location": null,
@@ -75,7 +75,7 @@
       "sntp": {
         "server": "time.google.com"
       },
-      "cfg_rev": 12
+      "cfg_rev": 23
     },
     "temperature:0": {
       "id": 0,
@@ -85,12 +85,12 @@
     },
     "wifi": {
       "ap": {
-        "ssid": "ShellyHTG3-3030F9EC8468",
+        "ssid": "",
         "is_open": true,
         "enable": false
       },
       "sta": {
-        "ssid": "FibreBox_X6-12A4C7",
+        "ssid": "",
         "is_open": false,
         "enable": true,
         "ipv4mode": "dhcp",
@@ -100,9 +100,9 @@
         "nameserver": null
       },
       "sta1": {
-        "ssid": null,
-        "is_open": true,
-        "enable": false,
+        "ssid": "",
+        "is_open": false,
+        "enable": true,
         "ipv4mode": "dhcp",
         "ip": null,
         "netmask": null,
@@ -115,21 +115,21 @@
       }
     },
     "ws": {
-      "enable": false,
-      "server": null,
-      "ssl_ca": "ca.pem"
+      "enable": true,
+      "server": "ws://192.168.1.20:8485",
+      "ssl_ca": "*"
     }
   },
   "status": {
     "ble": {},
     "cloud": {
-      "connected": true
+      "connected": false
     },
     "devicepower:0": {
       "id": 0,
       "battery": {
-        "V": 6.34,
-        "percent": 100
+        "V": 5.28,
+        "percent": 64
       },
       "external": {
         "present": false
@@ -138,7 +138,7 @@
     "ht_ui": {},
     "humidity:0": {
       "id": 0,
-      "rh": 51.6
+      "rh": 31.5
     },
     "mqtt": {
       "connected": false
@@ -146,229 +146,41 @@
     "sys": {
       "mac": "3030F9EC8468",
       "restart_required": false,
-      "time": "14:38",
-      "unixtime": 1723552688,
-      "uptime": 64,
-      "ram_size": 256328,
-      "ram_free": 145560,
+      "time": null,
+      "unixtime": null,
+      "uptime": 2,
+      "ram_size": 248716,
+      "ram_free": 139592,
       "fs_size": 1048576,
       "fs_free": 700416,
-      "cfg_rev": 12,
+      "cfg_rev": 23,
       "kvs_rev": 0,
       "webhook_rev": 0,
-      "available_updates": {
-        "stable": {
-          "version": "1.4.0"
-        }
-      },
+      "available_updates": {},
       "wakeup_reason": {
         "boot": "deepsleep_wake",
-        "cause": "button"
+        "cause": "status_update"
       },
       "wakeup_period": 7200,
       "reset_reason": 8
     },
     "temperature:0": {
       "id": 0,
-      "tC": 29.9,
-      "tF": 85.8
+      "tC": 23,
+      "tF": 73.4
     },
     "wifi": {
       "sta_ip": "192.168.1.100",
       "status": "got ip",
-      "ssid": "FibreBox_X6-12A4C7",
-      "rssi": -64
+      "ssid": "",
+      "rssi": -61
     },
     "ws": {
-      "connected": false
+      "connected": true
     }
   },
-  "components": [
-    {
-      "key": "ble",
-      "status": {},
-      "config": {
-        "enable": false,
-        "rpc": {
-          "enable": true
-        }
-      }
-    },
-    {
-      "key": "cloud",
-      "status": {
-        "connected": true
-      },
-      "config": {
-        "enable": true,
-        "server": "shelly-103-eu.shelly.cloud:6022/jrpc"
-      }
-    },
-    {
-      "key": "devicepower:0",
-      "status": {
-        "id": 0,
-        "battery": {
-          "V": 6.34,
-          "percent": 100
-        },
-        "external": {
-          "present": false
-        }
-      },
-      "config": {}
-    },
-    {
-      "key": "ht_ui",
-      "status": {},
-      "config": {
-        "temperature_unit": "C"
-      }
-    },
-    {
-      "key": "humidity:0",
-      "status": {
-        "id": 0,
-        "rh": 51.6
-      },
-      "config": {
-        "id": 0,
-        "name": null,
-        "report_thr": 5,
-        "offset": 0
-      }
-    },
-    {
-      "key": "mqtt",
-      "status": {
-        "connected": false
-      },
-      "config": {
-        "enable": false,
-        "server": null,
-        "client_id": "shellyhtg3-3030f9ec8468",
-        "user": null,
-        "ssl_ca": null,
-        "topic_prefix": "shellyhtg3-3030f9ec8468",
-        "rpc_ntf": true,
-        "status_ntf": false,
-        "use_client_cert": false,
-        "enable_rpc": true,
-        "enable_control": true
-      }
-    },
-    {
-      "key": "sys",
-      "status": {
-        "mac": "3030F9EC8468",
-        "restart_required": false,
-        "time": "14:38",
-        "unixtime": 1723552688,
-        "uptime": 64,
-        "ram_size": 256312,
-        "ram_free": 144632,
-        "fs_size": 1048576,
-        "fs_free": 700416,
-        "cfg_rev": 12,
-        "kvs_rev": 0,
-        "webhook_rev": 0,
-        "available_updates": {
-          "stable": {
-            "version": "1.4.0"
-          }
-        },
-        "wakeup_reason": {
-          "boot": "deepsleep_wake",
-          "cause": "button"
-        },
-        "wakeup_period": 7200,
-        "reset_reason": 8
-      },
-      "config": {
-        "device": {
-          "name": "My Shelly WiFi H&T Gen 3",
-          "mac": "3030F9EC8468",
-          "fw_id": "20240807-142710/1.4.2-beta1-g84969a6",
-          "discoverable": true
-        },
-        "location": null,
-        "debug": {
-          "level": 2,
-          "file_level": null,
-          "mqtt": {
-            "enable": false
-          },
-          "websocket": {
-            "enable": false
-          },
-          "udp": {
-            "addr": null
-          }
-        },
-        "ui_data": {},
-        "rpc_udp": {
-          "dst_addr": null,
-          "listen_port": null
-        },
-        "sntp": {
-          "server": "time.google.com"
-        },
-        "cfg_rev": 12
-      }
-    },
-    {
-      "key": "temperature:0",
-      "status": {
-        "id": 0,
-        "tC": 29.9,
-        "tF": 85.8
-      },
-      "config": {
-        "id": 0,
-        "name": null,
-        "report_thr_C": 0.5,
-        "offset_C": 0
-      }
-    },
-    {
-      "key": "wifi",
-      "status": {
-        "sta_ip": "192.168.1.100",
-        "status": "got ip",
-        "ssid": "FibreBox_X6-12A4C7",
-        "rssi": -65
-      },
-      "config": {
-        "ap": {
-          "ssid": "ShellyHTG3-3030F9EC8468",
-          "is_open": true,
-          "enable": false
-        },
-        "sta": {
-          "ssid": "FibreBox_X6-12A4C7",
-          "is_open": false,
-          "enable": true,
-          "ipv4mode": "dhcp",
-          "ip": null,
-          "netmask": null,
-          "gw": null,
-          "nameserver": null
-        },
-        "sta1": {
-          "ssid": null,
-          "is_open": true,
-          "enable": false,
-          "ipv4mode": "dhcp",
-          "ip": null,
-          "netmask": null,
-          "gw": null,
-          "nameserver": null
-        },
-        "roam": {
-          "rssi_thr": -80,
-          "interval": 60
-        }
-      }
-    }
-  ]
+  "components": [],
+  "cfg_rev": 23,
+  "offset": 0,
+  "total": 0
 }

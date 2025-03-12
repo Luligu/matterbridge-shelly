@@ -17,12 +17,12 @@
     },
     "wifi_ap": {
       "enabled": false,
-      "ssid": "shellybutton1-485519F31EA3",
+      "ssid": "",
       "key": ""
     },
     "wifi_sta": {
       "enabled": true,
-      "ssid": "FibreBox_X6-12A4C7",
+      "ssid": "",
       "ipv4_method": "dhcp",
       "ip": null,
       "gw": null,
@@ -30,8 +30,8 @@
       "dns": null
     },
     "wifi_sta1": {
-      "enabled": false,
-      "ssid": null,
+      "enabled": true,
+      "ssid": "",
       "ipv4_method": "dhcp",
       "ip": null,
       "gw": null,
@@ -54,7 +54,7 @@
     "coiot": {
       "enabled": true,
       "update_period": 15,
-      "peer": ""
+      "peer": "192.168.1.20:5683"
     },
     "sntp": {
       "server": "time.google.com",
@@ -66,7 +66,7 @@
       "username": "admin"
     },
     "pin_code": "",
-    "name": "My Shelly button1",
+    "name": "Button1 Gen1",
     "fw": "20230913-113105/v1.14.0-gcb84623",
     "pon_wifi_reset": false,
     "discoverable": false,
@@ -77,11 +77,11 @@
     },
     "cloud": {
       "enabled": true,
-      "connected": true
+      "connected": false
     },
     "timezone": null,
-    "lat": 500,
-    "lng": 500,
+    "lat": null,
+    "lng": null,
     "tzautodetect": true,
     "tz_utc_offset": 0,
     "tz_dst": false,
@@ -109,7 +109,7 @@
     "multipush_time_between_pushes_ms": {
       "max": 500
     },
-    "remain_awake": 0,
+    "remain_awake": 5,
     "inputs": [
       {
         "name": null
@@ -119,20 +119,20 @@
   "status": {
     "wifi_sta": {
       "connected": true,
-      "ssid": "FibreBox_X6-12A4C7",
+      "ssid": "",
       "ip": "192.168.1.233",
-      "rssi": -61
+      "rssi": -41
     },
     "cloud": {
       "enabled": true,
-      "connected": true
+      "connected": false
     },
     "mqtt": {
       "connected": false
     },
     "time": "",
     "unixtime": 0,
-    "serial": 3,
+    "serial": 1,
     "has_update": false,
     "mac": "485519F31EA3",
     "cfg_changed_cnt": 0,
@@ -142,30 +142,33 @@
     "inputs": [
       {
         "input": 0,
-        "event": "",
-        "event_cnt": 0
+        "event": "S",
+        "event_cnt": 304
       }
     ],
     "is_valid": true,
     "bat": {
-      "value": 88,
-      "voltage": 4.1
+      "value": 85,
+      "voltage": 4.07
     },
-    "charger": true,
-    "act_reasons": ["poweron"],
+    "charger": false,
+    "act_reasons": ["button"],
     "connect_retries": 0,
     "sensor_error": 0,
     "update": {
-      "status": "idle",
+      "status": "unknown",
       "has_update": false,
-      "new_version": "20230913-113105/v1.14.0-gcb84623",
-      "old_version": "20230913-113105/v1.14.0-gcb84623",
-      "beta_version": "20231107-163903/v1.14.1-rc1-g0617c15"
+      "new_version": "",
+      "old_version": "20230913-113105/v1.14.0-gcb84623"
     },
     "ram_total": 52456,
-    "ram_free": 40928,
+    "ram_free": 39444,
     "fs_size": 233681,
     "fs_free": 162146,
-    "uptime": 38
-  }
+    "uptime": 3
+  },
+  "components": [],
+  "cfg_rev": 0,
+  "offset": 0,
+  "total": 0
 }

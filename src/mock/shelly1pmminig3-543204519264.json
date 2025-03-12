@@ -1,13 +1,13 @@
 {
   "shelly": {
-    "name": "My Shelly 1PM mini",
+    "name": "1PMmini Gen3",
     "id": "shelly1pmminig3-543204519264",
     "mac": "543204519264",
     "slot": 0,
     "model": "S3SW-001P8EU",
     "gen": 3,
-    "fw_id": "20240726-114516/1.4.0-gb2aeadb",
-    "ver": "1.4.0",
+    "fw_id": "20241011-114450/1.4.4-g6d2a586",
+    "ver": "1.4.4",
     "app": "Mini1PMG3",
     "auth_en": false,
     "auth_domain": null
@@ -57,7 +57,7 @@
     },
     "switch:0": {
       "id": 0,
-      "name": null,
+      "name": "1PMmini Gen3",
       "in_mode": "follow",
       "initial_state": "match_input",
       "auto_on": false,
@@ -71,9 +71,9 @@
     },
     "sys": {
       "device": {
-        "name": "My Shelly 1PM mini",
+        "name": "1PMmini Gen3",
         "mac": "543204519264",
-        "fw_id": "20240726-114516/1.4.0-gb2aeadb",
+        "fw_id": "20241011-114450/1.4.4-g6d2a586",
         "discoverable": true,
         "eco_mode": false
       },
@@ -99,11 +99,11 @@
       "sntp": {
         "server": "time.google.com"
       },
-      "cfg_rev": 15
+      "cfg_rev": 23
     },
     "wifi": {
       "ap": {
-        "ssid": "Shelly1PMMiniG3-543204519264",
+        "ssid": "",
         "is_open": true,
         "enable": false,
         "range_extender": {
@@ -111,7 +111,7 @@
         }
       },
       "sta": {
-        "ssid": "FibreBox_X6-12A4C7",
+        "ssid": "",
         "is_open": false,
         "enable": true,
         "ipv4mode": "dhcp",
@@ -121,9 +121,9 @@
         "nameserver": null
       },
       "sta1": {
-        "ssid": null,
-        "is_open": true,
-        "enable": false,
+        "ssid": "",
+        "is_open": false,
+        "enable": true,
         "ipv4mode": "dhcp",
         "ip": null,
         "netmask": null,
@@ -159,52 +159,60 @@
     },
     "switch:0": {
       "id": 0,
-      "source": "init",
+      "source": "HTTP_in",
       "output": false,
       "apower": 0,
-      "voltage": 233.6,
+      "voltage": 238.5,
       "freq": 50,
       "current": 0,
       "aenergy": {
         "total": 0,
         "by_minute": [0, 0, 0],
-        "minute_ts": 1722525300
+        "minute_ts": 1741442580
       },
       "ret_aenergy": {
         "total": 0,
         "by_minute": [0, 0, 0],
-        "minute_ts": 1722525300
+        "minute_ts": 1741442580
       },
       "temperature": {
-        "tC": 64.9,
-        "tF": 148.9
+        "tC": 61.4,
+        "tF": 142.5
       }
     },
     "sys": {
       "mac": "543204519264",
       "restart_required": false,
-      "time": "17:15",
-      "unixtime": 1722525319,
-      "uptime": 19371,
-      "ram_size": 259528,
-      "ram_free": 128832,
+      "time": "15:03",
+      "unixtime": 1741442626,
+      "uptime": 789331,
+      "ram_size": 259616,
+      "ram_free": 128880,
       "fs_size": 1048576,
       "fs_free": 593920,
-      "cfg_rev": 15,
+      "cfg_rev": 23,
       "kvs_rev": 3,
       "schedule_rev": 1,
       "webhook_rev": 0,
-      "available_updates": {},
+      "available_updates": {
+        "beta": {
+          "version": "1.5.1-beta1"
+        }
+      },
       "reset_reason": 1
     },
     "wifi": {
       "sta_ip": "192.168.1.225",
       "status": "got ip",
-      "ssid": "FibreBox_X6-12A4C7",
-      "rssi": -62
+      "ssid": "",
+      "rssi": -70
     },
     "ws": {
       "connected": false
     }
-  }
+  },
+  "components": [],
+  "cfg_rev": 23,
+  "offset": 0,
+  "total": 0
 }

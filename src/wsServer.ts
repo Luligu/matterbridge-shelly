@@ -5,7 +5,7 @@
  * @file src\wsServer.ts
  * @author Luca Liguori
  * @date 2024-08-13
- * @version 1.3.0
+ * @version 1.3.1
  *
  * Copyright 2024, 2025 Luca Liguori.
  *
@@ -198,8 +198,9 @@ export class WsServer extends EventEmitter {
 
     // Start the server
     this.httpServer.listen(port, () => {
-      this.log.debug(`HttpServer for WebSocketServer is listening on port ${port}`);
       this._isListening = true;
+      this.log.debug(`HttpServer for WebSocketServer is listening on port ${port}`);
+      this.log.info(`Started WebSocket server for shelly devices.`);
     });
   }
 
@@ -218,9 +219,8 @@ export class WsServer extends EventEmitter {
       this.log.debug(`WebSocketServer is already listening.`);
       return;
     }
-    this.log.debug(`Starting WebSocketServer...`);
+    this.log.info(`Starting WebSocket server for shelly devices...`);
     this.listenForStatusUpdates(port); // No await to start listening for status updates
-    this.log.debug(`Started WebSocketServer.`);
   }
 
   /**
@@ -233,7 +233,7 @@ export class WsServer extends EventEmitter {
    * @returns void
    */
   stop() {
-    this.log.debug(`Stopping WebSocketServer listening ${this._isListening}`);
+    this.log.info(`Stopping WebSocket server (listening ${this._isListening}) for shelly devices...`);
     for (const client of this.wsServer?.clients || []) {
       client?.terminate();
     }
@@ -244,7 +244,7 @@ export class WsServer extends EventEmitter {
     this.httpServer?.close();
     this.httpServer?.removeAllListeners();
     this.httpServer = undefined;
-    this.log.debug(`Stopped WebSocketServer.`);
+    this.log.info(`Stopped WebSocket server for shelly devices...`);
   }
 }
 

@@ -3,11 +3,11 @@
     "name": "Breaker box PRO-3EM",
     "id": "shellypro3em-a0dd6ca0c27c",
     "mac": "A0DD6CA0C27C",
-    "slot": 1,
+    "slot": 0,
     "model": "SPEM-003CEBEU",
     "gen": 2,
-    "fw_id": "20240822-121054/1.4.3-g143ff62",
-    "ver": "1.4.3",
+    "fw_id": "20241011-114455/1.4.4-g6d2a586",
+    "ver": "1.4.4",
     "app": "Pro3EM",
     "auth_en": false,
     "auth_domain": null,
@@ -77,7 +77,7 @@
       "device": {
         "name": "Breaker box PRO-3EM",
         "mac": "A0DD6CA0C27C",
-        "fw_id": "20240822-121054/1.4.3-g143ff62",
+        "fw_id": "20241011-114455/1.4.4-g6d2a586",
         "discoverable": true,
         "eco_mode": false,
         "profile": "monophase",
@@ -106,7 +106,7 @@
       "sntp": {
         "server": "time.google.com"
       },
-      "cfg_rev": 15
+      "cfg_rev": 21
     },
     "temperature:0": {
       "id": 0,
@@ -116,7 +116,7 @@
     },
     "wifi": {
       "ap": {
-        "ssid": "ShellyPro3EM-A0DD6CA0C27C",
+        "ssid": "",
         "is_open": true,
         "enable": false,
         "range_extender": {
@@ -124,7 +124,7 @@
         }
       },
       "sta": {
-        "ssid": "FibreBox_X6-12A4C7",
+        "ssid": "",
         "is_open": false,
         "enable": true,
         "ipv4mode": "dhcp",
@@ -134,9 +134,9 @@
         "nameserver": null
       },
       "sta1": {
-        "ssid": null,
-        "is_open": true,
-        "enable": false,
+        "ssid": "",
+        "is_open": false,
+        "enable": true,
         "ipv4mode": "dhcp",
         "ip": null,
         "netmask": null,
@@ -164,7 +164,7 @@
     },
     "em1:0": {
       "id": 0,
-      "current": 0.029,
+      "current": 0.028,
       "voltage": 0,
       "act_power": 0,
       "aprt_power": 0,
@@ -184,11 +184,11 @@
     },
     "em1:2": {
       "id": 2,
-      "current": 0.027,
-      "voltage": 235.7,
-      "act_power": 0,
-      "aprt_power": 6.4,
-      "pf": 0,
+      "current": 0.07,
+      "voltage": 237.8,
+      "act_power": 7,
+      "aprt_power": 16.6,
+      "pf": 0.41,
       "freq": 50,
       "calibration": "factory"
     },
@@ -204,8 +204,8 @@
     },
     "em1data:2": {
       "id": 2,
-      "total_act_energy": 0.34,
-      "total_act_ret_energy": 1.02
+      "total_act_energy": 8434.24,
+      "total_act_ret_energy": 18.35
     },
     "eth": {
       "ip": null
@@ -217,248 +217,41 @@
     "sys": {
       "mac": "A0DD6CA0C27C",
       "restart_required": false,
-      "time": "21:46",
-      "unixtime": 1725565578,
-      "uptime": 15218,
-      "ram_size": 247444,
-      "ram_free": 122020,
+      "time": "14:47",
+      "unixtime": 1741441625,
+      "uptime": 788360,
+      "ram_size": 247192,
+      "ram_free": 115636,
       "fs_size": 524288,
-      "fs_free": 180224,
-      "cfg_rev": 15,
+      "fs_free": 176128,
+      "cfg_rev": 21,
       "kvs_rev": 0,
-      "schedule_rev": 3,
+      "schedule_rev": 4,
       "webhook_rev": 3,
-      "available_updates": {},
+      "available_updates": {
+        "beta": {
+          "version": "1.5.1-beta1"
+        }
+      },
       "reset_reason": 1
     },
     "temperature:0": {
       "id": 0,
-      "tC": 59.1,
-      "tF": 138.4
+      "tC": 47.6,
+      "tF": 117.7
     },
     "wifi": {
       "sta_ip": "192.168.1.80",
       "status": "got ip",
-      "ssid": "FibreBox_X6-12A4C7",
-      "rssi": -63
+      "ssid": "",
+      "rssi": -54
     },
     "ws": {
       "connected": false
     }
   },
-  "components": [
-    {
-      "key": "ble",
-      "status": {},
-      "config": {
-        "enable": false,
-        "rpc": {
-          "enable": false
-        },
-        "observer": {
-          "enable": false
-        }
-      }
-    },
-    {
-      "key": "bthome",
-      "status": {
-        "errors": ["bluetooth_disabled"]
-      },
-      "config": {}
-    },
-    {
-      "key": "cloud",
-      "status": {
-        "connected": false
-      },
-      "config": {
-        "enable": false,
-        "server": "iot.shelly.cloud:6012/jrpc"
-      }
-    },
-    {
-      "key": "em1:0",
-      "status": {
-        "id": 0,
-        "current": 0.028,
-        "voltage": 0,
-        "act_power": 0,
-        "aprt_power": 0,
-        "pf": 0,
-        "freq": 0,
-        "calibration": "factory"
-      },
-      "config": {
-        "id": 0,
-        "name": null,
-        "reverse": false,
-        "ct_type": "120A"
-      }
-    },
-    {
-      "key": "em1:1",
-      "status": {
-        "id": 1,
-        "current": 0.027,
-        "voltage": 0,
-        "act_power": 0,
-        "aprt_power": 0,
-        "pf": 0,
-        "freq": 0,
-        "calibration": "factory"
-      },
-      "config": {
-        "id": 1,
-        "name": null,
-        "reverse": false,
-        "ct_type": "120A"
-      }
-    },
-    {
-      "key": "em1:2",
-      "status": {
-        "id": 2,
-        "current": 0.027,
-        "voltage": 235.6,
-        "act_power": 0,
-        "aprt_power": 6.5,
-        "pf": 0,
-        "freq": 50,
-        "calibration": "factory"
-      },
-      "config": {
-        "id": 2,
-        "name": null,
-        "reverse": false,
-        "ct_type": "120A"
-      }
-    },
-    {
-      "key": "em1data:0",
-      "status": {
-        "id": 0,
-        "total_act_energy": 0.07,
-        "total_act_ret_energy": 0
-      },
-      "config": {}
-    },
-    {
-      "key": "em1data:1",
-      "status": {
-        "id": 1,
-        "total_act_energy": 0.08,
-        "total_act_ret_energy": 0
-      },
-      "config": {}
-    },
-    {
-      "key": "em1data:2",
-      "status": {
-        "id": 2,
-        "total_act_energy": 0.34,
-        "total_act_ret_energy": 1.02
-      },
-      "config": {}
-    },
-    {
-      "key": "eth",
-      "status": {
-        "ip": null
-      },
-      "config": {
-        "enable": false,
-        "ipv4mode": "dhcp",
-        "ip": null,
-        "netmask": null,
-        "gw": null,
-        "nameserver": null
-      }
-    },
-    {
-      "key": "modbus",
-      "status": {},
-      "config": {
-        "enable": true
-      }
-    },
-    {
-      "key": "mqtt",
-      "status": {
-        "connected": false
-      },
-      "config": {
-        "enable": false,
-        "server": null,
-        "client_id": "shellypro3em-a0dd6ca0c27c",
-        "user": null,
-        "ssl_ca": null,
-        "topic_prefix": "shellypro3em-a0dd6ca0c27c",
-        "rpc_ntf": true,
-        "status_ntf": false,
-        "use_client_cert": false,
-        "enable_rpc": true,
-        "enable_control": true
-      }
-    },
-    {
-      "key": "sys",
-      "status": {
-        "mac": "A0DD6CA0C27C",
-        "restart_required": false,
-        "time": "21:46",
-        "unixtime": 1725565579,
-        "uptime": 15219,
-        "ram_size": 247436,
-        "ram_free": 120592,
-        "fs_size": 524288,
-        "fs_free": 180224,
-        "cfg_rev": 15,
-        "kvs_rev": 0,
-        "schedule_rev": 3,
-        "webhook_rev": 3,
-        "available_updates": {},
-        "reset_reason": 1
-      },
-      "config": {
-        "device": {
-          "name": "Breaker box PRO-3EM",
-          "mac": "A0DD6CA0C27C",
-          "fw_id": "20240822-121054/1.4.3-g143ff62",
-          "discoverable": true,
-          "eco_mode": false,
-          "profile": "monophase",
-          "addon_type": null,
-          "sys_btn_toggle": true
-        },
-        "location": {
-          "tz": "Europe/Monaco",
-          "lat": 43.7312,
-          "lon": 7.4138
-        },
-        "debug": {
-          "level": 2,
-          "file_level": null,
-          "mqtt": {
-            "enable": false
-          },
-          "websocket": {
-            "enable": false
-          },
-          "udp": {
-            "addr": null
-          }
-        },
-        "ui_data": {},
-        "rpc_udp": {
-          "dst_addr": null,
-          "listen_port": null
-        },
-        "sntp": {
-          "server": "time.google.com"
-        },
-        "cfg_rev": 15
-      }
-    }
-  ]
+  "components": [],
+  "cfg_rev": 21,
+  "offset": 0,
+  "total": 0
 }

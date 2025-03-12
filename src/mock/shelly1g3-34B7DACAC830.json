@@ -1,6 +1,6 @@
 {
   "shelly": {
-    "name": "1 Gen3",
+    "name": "1 Gen3 I",
     "id": "shelly1g3-34b7dacac830",
     "mac": "34B7DACAC830",
     "slot": 0,
@@ -14,12 +14,12 @@
   },
   "settings": {
     "ble": {
-      "enable": false,
+      "enable": true,
       "rpc": {
         "enable": true
       },
       "observer": {
-        "enable": false
+        "enable": true
       }
     },
     "bthome": {},
@@ -30,7 +30,7 @@
     "input:0": {
       "id": 0,
       "name": null,
-      "type": "switch",
+      "type": "button",
       "enable": true,
       "invert": false,
       "factory_reset": true
@@ -58,8 +58,8 @@
     "switch:0": {
       "id": 0,
       "name": "1 Gen3",
-      "in_mode": "follow",
-      "initial_state": "match_input",
+      "in_mode": "momentary",
+      "initial_state": "restore_last",
       "auto_on": false,
       "auto_on_delay": 60,
       "auto_off": false,
@@ -67,7 +67,7 @@
     },
     "sys": {
       "device": {
-        "name": "1 Gen3",
+        "name": "1 Gen3 I",
         "mac": "34B7DACAC830",
         "fw_id": "20241011-114449/1.4.4-g6d2a586",
         "discoverable": true,
@@ -96,11 +96,11 @@
       "sntp": {
         "server": "time.google.com"
       },
-      "cfg_rev": 18
+      "cfg_rev": 27
     },
     "wifi": {
       "ap": {
-        "ssid": "Shelly1G3-34B7DACAC830",
+        "ssid": "",
         "is_open": true,
         "enable": false,
         "range_extender": {
@@ -108,7 +108,7 @@
         }
       },
       "sta": {
-        "ssid": "FibreBox_X6-12A4C7",
+        "ssid": "",
         "is_open": false,
         "enable": true,
         "ipv4mode": "dhcp",
@@ -118,7 +118,7 @@
         "nameserver": null
       },
       "sta1": {
-        "ssid": "wifiAlbatros",
+        "ssid": "",
         "is_open": false,
         "enable": true,
         "ipv4mode": "dhcp",
@@ -140,15 +140,13 @@
   },
   "status": {
     "ble": {},
-    "bthome": {
-      "errors": ["bluetooth_disabled"]
-    },
+    "bthome": {},
     "cloud": {
       "connected": true
     },
     "input:0": {
       "id": 0,
-      "state": false
+      "state": null
     },
     "knx": {},
     "mqtt": {
@@ -156,42 +154,46 @@
     },
     "switch:0": {
       "id": 0,
-      "source": "init",
+      "source": "HTTP_in",
       "output": false,
       "temperature": {
-        "tC": 51.9,
-        "tF": 125.4
+        "tC": 49.5,
+        "tF": 121.1
       }
     },
     "sys": {
       "mac": "34B7DACAC830",
       "restart_required": false,
-      "time": "16:51",
-      "unixtime": 1732117867,
-      "uptime": 1199,
-      "ram_size": 259180,
-      "ram_free": 131496,
+      "time": "14:58",
+      "unixtime": 1741442305,
+      "uptime": 789038,
+      "ram_size": 258584,
+      "ram_free": 84868,
       "fs_size": 1048576,
-      "fs_free": 585728,
-      "cfg_rev": 18,
+      "fs_free": 581632,
+      "cfg_rev": 27,
       "kvs_rev": 0,
       "schedule_rev": 1,
       "webhook_rev": 0,
-      "available_updates": {},
+      "available_updates": {
+        "beta": {
+          "version": "1.5.1-beta1"
+        }
+      },
       "reset_reason": 1
     },
     "wifi": {
       "sta_ip": "192.168.1.157",
       "status": "got ip",
-      "ssid": "FibreBox_X6-12A4C7",
-      "rssi": -51
+      "ssid": "",
+      "rssi": -47
     },
     "ws": {
       "connected": false
     }
   },
   "components": [],
-  "cfg_rev": 18,
+  "cfg_rev": 27,
   "offset": 0,
   "total": 0
 }

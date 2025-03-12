@@ -3,11 +3,11 @@
     "name": "BLU Gateway Gen3",
     "id": "shellyblugwg3-34cdb077bcd4",
     "mac": "34CDB077BCD4",
-    "slot": 0,
+    "slot": 1,
     "model": "S3GW-1DBT001",
     "gen": 3,
-    "fw_id": "20241021-140344/1.4.99-blugwg3prod4-g110402b",
-    "ver": "1.4.99-blugwg3prod4",
+    "fw_id": "20250220-082145/1.5.0-g0087a06",
+    "ver": "1.5.0",
     "app": "BluGwG3",
     "auth_en": false,
     "auth_domain": null
@@ -44,7 +44,7 @@
       "device": {
         "name": "BLU Gateway Gen3",
         "mac": "34CDB077BCD4",
-        "fw_id": "20241021-140344/1.4.99-blugwg3prod4-g110402b",
+        "fw_id": "20250220-082145/1.5.0-g0087a06",
         "discoverable": true,
         "eco_mode": false
       },
@@ -56,9 +56,6 @@
           "enable": false
         },
         "websocket": {
-          "enable": false
-        },
-        "file_log": {
           "enable": false
         },
         "udp": {
@@ -73,11 +70,11 @@
       "sntp": {
         "server": "time.cloudflare.com"
       },
-      "cfg_rev": 2336
+      "cfg_rev": 5503
     },
     "wifi": {
       "ap": {
-        "ssid": "ShellyBluGwG3-34CDB077BCD4",
+        "ssid": "",
         "is_open": true,
         "enable": false,
         "range_extender": {
@@ -85,7 +82,7 @@
         }
       },
       "sta": {
-        "ssid": "FibreBox_X6-12A4C7",
+        "ssid": "",
         "is_open": false,
         "enable": true,
         "ipv4mode": "dhcp",
@@ -95,7 +92,7 @@
         "nameserver": null
       },
       "sta1": {
-        "ssid": "wifiAlbatros",
+        "ssid": "",
         "is_open": false,
         "enable": true,
         "ipv4mode": "dhcp",
@@ -128,26 +125,32 @@
     "sys": {
       "mac": "34CDB077BCD4",
       "restart_required": false,
-      "time": "16:51",
-      "unixtime": 1732117918,
-      "uptime": 20388,
-      "ram_size": 253732,
-      "ram_free": 67588,
-      "ram_min_free": 34164,
+      "time": "14:52",
+      "unixtime": 1741441965,
+      "last_sync_ts": 1741441042,
+      "uptime": 20995,
+      "ram_size": 255740,
+      "ram_free": 68592,
+      "ram_min_free": 50364,
       "fs_size": 1048576,
-      "fs_free": 569344,
-      "cfg_rev": 2336,
+      "fs_free": 565248,
+      "cfg_rev": 5503,
       "kvs_rev": 0,
       "schedule_rev": 1,
       "webhook_rev": 0,
-      "available_updates": {},
-      "reset_reason": 3
+      "btrelay_rev": 136,
+      "available_updates": {
+        "beta": {
+          "version": "1.5.1-beta1"
+        }
+      },
+      "reset_reason": 1
     },
     "wifi": {
       "sta_ip": "192.168.1.164",
       "status": "got ip",
-      "ssid": "FibreBox_X6-12A4C7",
-      "rssi": -41
+      "ssid": "",
+      "rssi": -43
     },
     "ws": {
       "connected": false
@@ -158,13 +161,16 @@
       "key": "blutrv:200",
       "status": {
         "id": 200,
-        "rssi": -47,
+        "target_C": 25,
+        "current_C": 22.7,
+        "pos": 100,
+        "rssi": -46,
         "battery": 100,
-        "packet_id": 186,
-        "last_updated_ts": 1732117911,
+        "packet_id": 86,
+        "last_updated_ts": 1741441958,
         "paired": true,
         "rpc": true,
-        "rsv": 51
+        "rsv": 10
       },
       "config": {
         "id": 200,
@@ -174,20 +180,29 @@
         "trv": "bthomedevice:200",
         "temp_sensors": ["bthomesensor:207"],
         "dw_sensors": ["bthomesensor:210"],
+        "override_delay": 30,
         "meta": {}
+      },
+      "attrs": {
+        "flags": 17,
+        "model_id": 8
       }
     },
     {
       "key": "blutrv:201",
       "status": {
         "id": 201,
-        "rssi": -49,
+        "target_C": 20,
+        "current_C": 22.6,
+        "pos": 0,
+        "errors": ["not_calibrated"],
+        "rssi": -50,
         "battery": 100,
-        "packet_id": 79,
-        "last_updated_ts": 1732117916,
+        "packet_id": 124,
+        "last_updated_ts": 1741441952,
         "paired": true,
         "rpc": true,
-        "rsv": 20
+        "rsv": 13
       },
       "config": {
         "id": 201,
@@ -197,20 +212,25 @@
         "trv": "bthomedevice:203",
         "temp_sensors": ["bthomesensor:219"],
         "dw_sensors": ["bthomesensor:210"],
+        "override_delay": 30,
         "meta": {}
+      },
+      "attrs": {
+        "flags": 17,
+        "model_id": 8
       }
     },
     {
       "key": "bthomedevice:200",
       "status": {
         "id": 200,
-        "rssi": -47,
+        "rssi": -46,
         "battery": 100,
-        "packet_id": 186,
-        "last_updated_ts": 1732117911,
+        "packet_id": 86,
+        "last_updated_ts": 1741441958,
         "paired": true,
         "rpc": true,
-        "rsv": 51
+        "rsv": 10
       },
       "config": {
         "id": 200,
@@ -233,10 +253,10 @@
       "key": "bthomedevice:201",
       "status": {
         "id": 201,
-        "rssi": -65,
+        "rssi": -69,
         "battery": 100,
-        "packet_id": 103,
-        "last_updated_ts": 1732117913,
+        "packet_id": 47,
+        "last_updated_ts": 1741441956,
         "paired": true,
         "rpc": false,
         "rsv": -1
@@ -257,10 +277,10 @@
       "key": "bthomedevice:202",
       "status": {
         "id": 202,
-        "rssi": -59,
+        "rssi": -49,
         "battery": 100,
-        "packet_id": 34,
-        "last_updated_ts": 1732116452,
+        "packet_id": 152,
+        "last_updated_ts": 1741430047,
         "paired": true,
         "rpc": false,
         "rsv": -1
@@ -281,13 +301,13 @@
       "key": "bthomedevice:203",
       "status": {
         "id": 203,
-        "rssi": -49,
+        "rssi": -50,
         "battery": 100,
-        "packet_id": 79,
-        "last_updated_ts": 1732117916,
+        "packet_id": 124,
+        "last_updated_ts": 1741441952,
         "paired": true,
         "rpc": true,
-        "rsv": 20
+        "rsv": 13
       },
       "config": {
         "id": 203,
@@ -310,10 +330,10 @@
       "key": "bthomedevice:204",
       "status": {
         "id": 204,
-        "rssi": -57,
+        "rssi": -61,
         "battery": 100,
-        "packet_id": 95,
-        "last_updated_ts": 1732117909,
+        "packet_id": 41,
+        "last_updated_ts": 1741441942,
         "paired": true,
         "rpc": false,
         "rsv": -1
@@ -335,7 +355,7 @@
       "status": {
         "id": 200,
         "value": 100,
-        "last_updated_ts": 1732117911
+        "last_updated_ts": 1741441958
       },
       "config": {
         "id": 200,
@@ -350,7 +370,7 @@
       "key": "bthomesensor:201",
       "status": {
         "id": 201,
-        "last_updated_ts": 1070226336
+        "last_updated_ts": 1070223632
       },
       "config": {
         "id": 201,
@@ -365,8 +385,8 @@
       "key": "bthomesensor:202",
       "status": {
         "id": 202,
-        "value": 18,
-        "last_updated_ts": 1732117911
+        "value": 25,
+        "last_updated_ts": 1741441958
       },
       "config": {
         "id": 202,
@@ -381,8 +401,8 @@
       "key": "bthomesensor:203",
       "status": {
         "id": 203,
-        "value": 22.7,
-        "last_updated_ts": 1732117911
+        "value": 23,
+        "last_updated_ts": 1741441958
       },
       "config": {
         "id": 203,
@@ -398,7 +418,7 @@
       "status": {
         "id": 204,
         "value": 100,
-        "last_updated_ts": 1732117913
+        "last_updated_ts": 1741441956
       },
       "config": {
         "id": 204,
@@ -413,8 +433,8 @@
       "key": "bthomesensor:205",
       "status": {
         "id": 205,
-        "value": 27,
-        "last_updated_ts": 1732117913
+        "value": 36,
+        "last_updated_ts": 1741441956
       },
       "config": {
         "id": 205,
@@ -429,7 +449,7 @@
       "key": "bthomesensor:206",
       "status": {
         "id": 206,
-        "last_updated_ts": 4
+        "last_updated_ts": 1070223632
       },
       "config": {
         "id": 206,
@@ -444,8 +464,8 @@
       "key": "bthomesensor:207",
       "status": {
         "id": 207,
-        "value": 22.6,
-        "last_updated_ts": 1732117913
+        "value": 22.9,
+        "last_updated_ts": 1741441956
       },
       "config": {
         "id": 207,
@@ -461,7 +481,7 @@
       "status": {
         "id": 208,
         "value": 100,
-        "last_updated_ts": 1732116452
+        "last_updated_ts": 1741430047
       },
       "config": {
         "id": 208,
@@ -476,8 +496,8 @@
       "key": "bthomesensor:209",
       "status": {
         "id": 209,
-        "value": 37,
-        "last_updated_ts": 1732116452
+        "value": 4,
+        "last_updated_ts": 1740089312
       },
       "config": {
         "id": 209,
@@ -493,7 +513,7 @@
       "status": {
         "id": 210,
         "value": false,
-        "last_updated_ts": 1732116452
+        "last_updated_ts": 1740089314
       },
       "config": {
         "id": 210,
@@ -509,7 +529,7 @@
       "status": {
         "id": 211,
         "value": 0,
-        "last_updated_ts": 1732116452
+        "last_updated_ts": 1740089310
       },
       "config": {
         "id": 211,
@@ -525,7 +545,7 @@
       "status": {
         "id": 212,
         "value": 100,
-        "last_updated_ts": 1732117916
+        "last_updated_ts": 1741441952
       },
       "config": {
         "id": 212,
@@ -540,7 +560,7 @@
       "key": "bthomesensor:213",
       "status": {
         "id": 213,
-        "last_updated_ts": 1070226336
+        "last_updated_ts": 1070223632
       },
       "config": {
         "id": 213,
@@ -555,8 +575,8 @@
       "key": "bthomesensor:214",
       "status": {
         "id": 214,
-        "value": 21,
-        "last_updated_ts": 1732117916
+        "value": 20,
+        "last_updated_ts": 1741441952
       },
       "config": {
         "id": 214,
@@ -571,8 +591,8 @@
       "key": "bthomesensor:215",
       "status": {
         "id": 215,
-        "value": 22.5,
-        "last_updated_ts": 1732117916
+        "value": 23,
+        "last_updated_ts": 1741441952
       },
       "config": {
         "id": 215,
@@ -588,7 +608,7 @@
       "status": {
         "id": 216,
         "value": 100,
-        "last_updated_ts": 1732117909
+        "last_updated_ts": 1741441942
       },
       "config": {
         "id": 216,
@@ -603,8 +623,8 @@
       "key": "bthomesensor:217",
       "status": {
         "id": 217,
-        "value": 26,
-        "last_updated_ts": 1732117909
+        "value": 35,
+        "last_updated_ts": 1741441942
       },
       "config": {
         "id": 217,
@@ -619,7 +639,7 @@
       "key": "bthomesensor:218",
       "status": {
         "id": 218,
-        "last_updated_ts": 1070226336
+        "last_updated_ts": 1070223632
       },
       "config": {
         "id": 218,
@@ -634,8 +654,8 @@
       "key": "bthomesensor:219",
       "status": {
         "id": 219,
-        "value": 22.7,
-        "last_updated_ts": 1732117909
+        "value": 22.9,
+        "last_updated_ts": 1741441942
       },
       "config": {
         "id": 219,
@@ -647,7 +667,7 @@
       }
     }
   ],
-  "cfg_rev": 2336,
+  "cfg_rev": 5503,
   "offset": 0,
   "total": 27
 }
