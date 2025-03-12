@@ -7,7 +7,6 @@
 ![Node.js CI](https://github.com/Luligu/matterbridge-shelly/actions/workflows/build-matterbridge-plugin.yml/badge.svg)
 
 [![power by](https://img.shields.io/badge/powered%20by-matterbridge-blue)](https://www.npmjs.com/package/matterbridge)
-[![power by](https://img.shields.io/badge/powered%20by-matter--history-blue)](https://www.npmjs.com/package/matter-history)
 [![power by](https://img.shields.io/badge/powered%20by-node--ansi--logger-blue)](https://www.npmjs.com/package/node-ansi-logger)
 [![power by](https://img.shields.io/badge/powered%20by-node--persist--manager-blue)](https://www.npmjs.com/package/node-persist-manager)
 
@@ -83,6 +82,8 @@ A shelly device gen. 1 or 2 or 3 or BLU.
 ## How to add a device
 
 Verify that enableMdnsDiscover and enableStorageDiscover are selected in the plugin configuration. Restart matterbridge in case these options were not flagged and the devices will be discovered.
+
+When all the devices have been discovered and stored, I suggest to unselect enableMdnsDiscover.
 
 Follow these guidelines for specific devices.
 
@@ -221,6 +222,7 @@ The devices in the list will not be loaded from the cache. Use the device id (e.
 
 You can put there one of more of your devices if they have problem with mdns.
 Don't use it unless is needed cause the IP address you add here is static.
+Don't use it for battery powered device that go in sleepmode.
 You also need to enable the enableConfigDiscover option.
 E.g. "shelly1minig3-543204547478": "192.168.1.221".
 
