@@ -56,7 +56,7 @@ The expertMode option has been added to show an advanced or simplified config.
 - [platform]: Fixed initial values of battery component.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="yellow-button.png" alt="Buy me a coffee" width="120">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="120">
 </a>
 
 ## [2.0.3] - 2025-03-05
@@ -66,7 +66,7 @@ The expertMode option has been added to show an advanced or simplified config.
 - [MdnsScanner]: Added discovery of gen 4 devices.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="yellow-button.png" alt="Buy me a coffee" width="120">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="120">
 </a>
 
 ## [2.0.2] - 2025-03-05
@@ -80,7 +80,7 @@ The expertMode option has been added to show an advanced or simplified config.
 - [platform]: Fixed edge case for select and unselect.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="120">
 </a>
 
 ## [2.0.1] - 2025-03-02
@@ -94,7 +94,7 @@ The expertMode option has been added to show an advanced or simplified config.
 - [plugin]: Requires Matterbridge 2.2.1.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="120">
 </a>
 
 ## [2.0.0] - 2025-02-27
@@ -120,7 +120,7 @@ The expertMode option has been added to show an advanced or simplified config.
 - [select]: Fix bthomesensor_event with select Button.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="120">
 </a>
 
 ## [1.1.6] - 2025-02-11
@@ -139,7 +139,7 @@ The expertMode option has been added to show an advanced or simplified config.
 ### Fixed
 
 <a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="120">
 </a>
 
 ## [1.1.5] - 2025-02-02
@@ -161,7 +161,7 @@ The expertMode option has been added to show an advanced or simplified config.
 - [shellywalldisplay]: Fix NotifyEvent for "user_1".
 
 <a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="120">
 </a>
 
 ## [1.1.4] - 2025-01-20
@@ -182,7 +182,7 @@ The expertMode option has been added to show an advanced or simplified config.
 - [em1data]: Fixed typo em1data.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="120">
 </a>
 
 ## [1.1.3] - 2025-01-11
@@ -199,7 +199,7 @@ The expertMode option has been added to show an advanced or simplified config.
 - [package]: Updated dependencies.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="120">
 </a>
 
 ## [1.1.2] - 2025-01-08
@@ -214,7 +214,7 @@ The expertMode option has been added to show an advanced or simplified config.
 - [package]: Updated dependencies.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="120">
 </a>
 
 ## [1.1.1] - 2024-12-22
@@ -237,7 +237,7 @@ The expertMode option has been added to show an advanced or simplified config.
 - [configure]: Fixed async loop.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="120">
 </a>
 
 ## [1.1.0] - 2024-12-14
@@ -263,7 +263,7 @@ The expertMode option has been added to show an advanced or simplified config.
 - [package]: Updated dependencies.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="120">
 </a>
 
 ## [1.0.11] - 2024-12-04
@@ -286,7 +286,7 @@ The expertMode option has been added to show an advanced or simplified config.
 - [levelControl]: Fix max level to 254.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="120">
 </a>
 
 ## [1.0.10] - 2024-11-21
@@ -306,7 +306,7 @@ The expertMode option has been added to show an advanced or simplified config.
 - [package]: Updated dependencies.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="120">
 </a>
 
 ## [1.0.9] - 2024-11-11
@@ -330,7 +330,7 @@ The expertMode option has been added to show an advanced or simplified config.
 - [BTHome]: Fixed log level for BLU devices.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="120">
 </a>
 
 ## [1.0.8] - 2024-10-23
@@ -344,7 +344,7 @@ The expertMode option has been added to show an advanced or simplified config.
 - [package]: Updated dependencies.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="120">
 </a>
 
 ## [1.0.7] - 2024-10-23
@@ -358,7 +358,7 @@ The expertMode option has been added to show an advanced or simplified config.
 - [package]: Updated dependencies.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="120">
 </a>
 
 ## [1.0.6] - 2024-10-21
@@ -368,7 +368,7 @@ The expertMode option has been added to show an advanced or simplified config.
 - [package]: Updated package.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="120">
 </a>
 
 ## [1.0.5] - 2024-10-21
@@ -384,7 +384,7 @@ The expertMode option has been added to show an advanced or simplified config.
 - [cockpit]: Added cockpit dashboard 1.0
 
 <a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="120">
 </a>
 
 ## [1.0.4] - 2024-10-17
@@ -399,7 +399,7 @@ The expertMode option has been added to show an advanced or simplified config.
 - [package]: Updated dependencies.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="120">
 </a>
 
 ## [1.0.3] - 2024-10-15
@@ -414,7 +414,7 @@ The expertMode option has been added to show an advanced or simplified config.
 - [package]: Updated dependencies.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="120">
 </a>
 
 ## [1.0.2] - 2024-10-13
@@ -430,7 +430,7 @@ The expertMode option has been added to show an advanced or simplified config.
 - [BTHome]: Fixed issue to BTHome components discovery.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="120">
 </a>
 
 ## [1.0.1] - 2024-10-10
@@ -447,7 +447,7 @@ The expertMode option has been added to show an advanced or simplified config.
 - [BTHome]: Fixed the case when blutrv ids and bthomedevice ids are different in the shellyblugwg3 config.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="120">
 </a>
 
 ## [1.0.0] - 2024-10-07
@@ -511,7 +511,7 @@ To allow an easy update to the new version, please after the update, restart, wa
 - [shelly BLU]: Fixed bthome discover when one BLU is paired with more then one gateway.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="120">
 </a>
 
 ## [0.11.0] - 2024-10-01
@@ -533,7 +533,7 @@ To allow an easy update to the new version, please after the update, restart, wa
 - [ShellyDevice]: Fixed normalizeId.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="120">
 </a>
 
 ## [0.10.0] - 2024-09-26
@@ -563,7 +563,7 @@ To allow an easy update to the new version, please after the update, restart, wa
 - [mdns]: Fixed gen discovery.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="120">
 </a>
 
 ## [0.9.10] - 2024-09-19
@@ -574,7 +574,7 @@ To allow an easy update to the new version, please after the update, restart, wa
 - [package]: Updated dependencies.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="120">
 </a>
 
 ## [0.9.9] - 2024-09-17
@@ -589,7 +589,7 @@ To allow an easy update to the new version, please after the update, restart, wa
 - [shelly]: Fixed the bug in configure when postfix is used.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="120">
 </a>
 
 ## [0.9.8] - 2024-09-13
@@ -612,7 +612,7 @@ To allow an easy update to the new version, please after the update, restart, wa
 - [package]: Updated dependencies.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="120">
 </a>
 
 ## [0.9.7] - 2024-09-09
@@ -635,7 +635,7 @@ To allow an easy update to the new version, please after the update, restart, wa
 - [package]: Updated dependencies.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="120">
 </a>
 
 ## [0.9.6] - 2024-09-06
@@ -655,7 +655,7 @@ To allow an easy update to the new version, please after the update, restart, wa
 - [package]: Updated dependencies.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="120">
 </a>
 
 ## [0.9.5] - 2024-09-04
@@ -669,7 +669,7 @@ To allow an easy update to the new version, please after the update, restart, wa
 - [package]: Updated dependencies.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="120">
 </a>
 
 ## [0.9.4] - 2024-09-03
@@ -685,7 +685,7 @@ To allow an easy update to the new version, please after the update, restart, wa
 - [package]: Updated dependencies.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="120">
 </a>
 
 ## [0.9.3] - 2024-08-29
@@ -701,7 +701,7 @@ To allow an easy update to the new version, please after the update, restart, wa
 - [shelly]: Fixed WindowCovering.MovementStatus for Gen. 1 rollers
 
 <a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="120">
 </a>
 
 ## [0.9.2] - 2024-08-28
@@ -716,7 +716,7 @@ To allow an easy update to the new version, please after the update, restart, wa
 - [package]: Fixed dependencies.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="120">
 </a>
 
 ## [0.9.1] - 2024-08-20
@@ -740,7 +740,7 @@ To allow an easy update to the new version, please after the update, restart, wa
 - [package]: Fixed dependencies.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="120">
 </a>
 
 ## [0.9.0] - 2024-08-14
@@ -760,7 +760,7 @@ To allow an easy update to the new version, please after the update, restart, wa
 - [shelly]: Added support for shellyhtg3 (beta).
 
 <a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="120">
 </a>
 
 ## [0.8.1] - 2024-08-12
@@ -784,7 +784,7 @@ To allow an easy update to the new version, please after the update, restart, wa
 - [shelly]: Added strict type checking to updates from devices to prevent validation errors caused by unsupported devices or firmware.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="120">
 </a>
 
 ## [0.8.0] - 2024-08-09
@@ -851,7 +851,7 @@ To allow an easy update to the new version, please after the update, restart, wa
 - [shelly]: Verified shellyddimmerg3 with firmware v. g55db545
 
 <a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="120">
 </a>
 
 ## [0.7.5] - 2024-07-28
@@ -869,7 +869,7 @@ To allow an easy update to the new version, please after the update, restart, wa
 - [shelly]: Fixed issue when Input.state is null.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="120">
 </a>
 
 ## [0.7.4] - 2024-07-23
@@ -879,7 +879,7 @@ To allow an easy update to the new version, please after the update, restart, wa
 - [imports]: Updated matterbridge imports.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="120">
 </a>
 
 ## [0.7.3] - 2024-07-10
@@ -890,7 +890,7 @@ To allow an easy update to the new version, please after the update, restart, wa
 - [package]: Updated dependencies.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="120">
 </a>
 
 ## [0.7.2] - 2024-07-09
@@ -905,7 +905,7 @@ To allow an easy update to the new version, please after the update, restart, wa
 - [shelly]: Fixed issue caused by a shelly with undefined data.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="120">
 </a>
 
 ## [0.7.1] - 2024-07-05
@@ -919,7 +919,7 @@ To allow an easy update to the new version, please after the update, restart, wa
 - [shelly]: Fixed issue caused by a shelly gen 1 when it sends a CoIoT message /cit/d without blk.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="120">
 </a>
 
 ## [0.7.0] - 2024-06-30
@@ -934,7 +934,7 @@ To allow an easy update to the new version, please after the update, restart, wa
 - [shelly]: Fixed authentication.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="120">
 </a>
 
 ## [0.6.1] - 2024-06-28
@@ -945,7 +945,7 @@ To allow an easy update to the new version, please after the update, restart, wa
 - [package]: Updated eslint to 9.6.0
 
 <a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="120">
 </a>
 
 ## [0.6.0] - 2024-06-26
@@ -960,7 +960,7 @@ To allow an easy update to the new version, please after the update, restart, wa
 - [package]: Updated dependencies
 
 <a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="120">
 </a>
 
 ## [0.5.1] - 2024-06-25
@@ -976,7 +976,7 @@ To allow an easy update to the new version, please after the update, restart, wa
 - [power]: Fix power value update.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="120">
 </a>
 
 ## [0.4.0] - 2024-06-23
@@ -991,7 +991,7 @@ To allow an easy update to the new version, please after the update, restart, wa
 - [deviceGen2]: Fix mdnsDiscovery for gen 2 pro devices. When you upgrade select resetStorageDiscover on the first start please.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="120">
 </a>
 
 ## [0.3.3] - 2024-06-21
@@ -1001,7 +1001,7 @@ To allow an easy update to the new version, please after the update, restart, wa
 - [deviceGen2]: Fix power meter update from gen. 2/3 devices.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="120">
 </a>
 
 ## [0.3.2] - 2024-06-21
@@ -1011,7 +1011,7 @@ To allow an easy update to the new version, please after the update, restart, wa
 - [Gen. 1]: PowerMeter and fix update from gen. 1 devices.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="120">
 </a>
 
 ## [0.3.1] - 2024-06-19
@@ -1019,7 +1019,7 @@ To allow an easy update to the new version, please after the update, restart, wa
 First published release.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="./yellow-button.png" alt="Buy me a coffee" width="120">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="120">
 </a>
 
 <!-- Commented out section

@@ -36,11 +36,15 @@ Features:
 - If the device's Outbound websocket settings is not correctly configured for the gen 2+ battery powered devices, a message is displayed.
 - If the device cover/roller component is not calibrated, a message is displayed.
 - If a device changes its ip address on the network, a message is displayed and the new address is stored.
-- A 1 hour timer checks if the device has reported within that time frame, and fetch un update.
+- A 1 hour timer checks if the device has reported within that time frame, fetch un update and save the cache file.
 
 If you like this project and find it useful, please consider giving it a star on GitHub at https://github.com/Luligu/matterbridge-shelly and sponsoring it.
 
-## Sponsor
+<a href="https://www.buymeacoffee.com/luligugithub">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="120">
+</a>
+
+## Sponsors
 
 This project is proudly sponsored by:
 
@@ -78,7 +82,7 @@ A shelly device gen. 1 or 2 or 3 or BLU.
 
 ## How to add a device
 
-Verify that enableMdnsDiscover and enableStorageDiscover are selected in the plugin configuration. Restart matterbridge (the mdns discovery is active for the first 10 minutes) and the devices will be discovered.
+Verify that enableMdnsDiscover and enableStorageDiscover are selected in the plugin configuration. Restart matterbridge in case these options were not flagged and the devices will be discovered.
 
 Follow these guidelines for specific devices.
 
