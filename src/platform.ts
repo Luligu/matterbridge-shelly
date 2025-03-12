@@ -1883,12 +1883,12 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     let loadFromCache = true;
     if (isValidArray(this.config.nocacheList, 1) && this.config.nocacheList.includes(deviceId)) {
       loadFromCache = false;
-      this.log.debug(`Loading nocache Shelly device ${hk}${deviceId}${db} host ${zb}${host}${db}`);
+      this.log.debug(`Adding with nocacheList Shelly device ${hk}${deviceId}${db} host ${zb}${host}${db}`);
     }
     if (this.changedDevices.has(deviceId)) {
       this.changedDevices.delete(deviceId);
       loadFromCache = false;
-      this.log.debug(`Loading changed Shelly device ${hk}${deviceId}${db} host ${zb}${host}${db}`);
+      this.log.debug(`Adding with changedDevices Shelly device ${hk}${deviceId}${db} host ${zb}${host}${db}`);
     }
 
     if (loadFromCache && fs.existsSync(cacheFileName)) {
