@@ -32,7 +32,7 @@ Expert mode:
 
 The expertMode option has been added to show an advanced or simplified config.
 
-## [2.0.4] - 2025-03-09
+## [2.0.4] - 2025-03-13
 
 ### Added
 
