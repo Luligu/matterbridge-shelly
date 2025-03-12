@@ -296,7 +296,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         const stored = this.storedDevices.get(discoveredDevice.id);
         if (stored?.host !== discoveredDevice.host) {
           this.log.warn(`Shelly device ${hk}${discoveredDevice.id}${wr} host ${zb}${discoveredDevice.host}${wr} has been discovered with a different host.`);
-          this.log.warn(`Set new address for shelly device ${hk}${discoveredDevice.id}${wr} from ${zb}${stored?.host}${wr} to ${zb}${discoveredDevice.host}${wr}`);
+          this.log.warn(`Setting the new address for shelly device ${hk}${discoveredDevice.id}${wr} from ${zb}${stored?.host}${wr} to ${zb}${discoveredDevice.host}${wr}...`);
           this.discoveredDevices.set(discoveredDevice.id, discoveredDevice);
           this.storedDevices.set(discoveredDevice.id, discoveredDevice);
           this.changedDevices.set(discoveredDevice.id, discoveredDevice.id);
@@ -304,7 +304,13 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           if (this.shelly.hasDevice(discoveredDevice.id)) {
             const device = this.shelly.getDevice(discoveredDevice.id) as ShellyDevice;
             device.host = discoveredDevice.host;
-            device.wsClient?.stop(); // It will be restarted by the ShellyDevice interval if gen > 1
+            if (device.gen === 1) {
+              this.shelly.coapServer.registerDevice(device.host, device.id, true);
+            } else {
+              device.wsClient?.stop();
+              device.wsClient?.setHost(device.host);
+              device.wsClient?.start();
+            }
             device.log.warn(`Shelly device ${hk}${discoveredDevice.id}${wr} host ${zb}${discoveredDevice.host}${wr} updated`);
           } else this.log.warn(`Please restart matterbridge for the change to take effect.`);
         } else {

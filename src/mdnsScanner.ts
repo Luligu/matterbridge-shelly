@@ -176,7 +176,7 @@ export class MdnsScanner extends EventEmitter {
           // const [name, mac] = a.name.replace('.local', '').split('-');
           // const deviceId = name.toLowerCase() + '-' + mac.toUpperCase();
           const deviceId = this.normalizeShellyId(a.name);
-          if (deviceId && !this.discoveredDevices.has(deviceId)) {
+          if (deviceId && (!this.discoveredDevices.has(deviceId) || this.discoveredDevices.get(deviceId)?.host !== a.data)) {
             this.log.debug(`MdnsScanner discovered shelly gen: ${CYAN}${gen}${nf} device id: ${hk}${deviceId}${nf} host: ${zb}${a.data}${nf} port: ${zb}${port}${nf}`);
             this.discoveredDevices.set(deviceId, { id: deviceId, host: a.data, port, gen });
             this.emit('discovered', { id: deviceId, host: a.data, port, gen });
@@ -221,7 +221,7 @@ export class MdnsScanner extends EventEmitter {
           // const [name, mac] = a.name.replace('.local', '').split('-');
           // const deviceId = name.toLowerCase() + '-' + mac.toUpperCase();
           const deviceId = this.normalizeShellyId(a.name);
-          if (deviceId && !this.discoveredDevices.has(deviceId)) {
+          if (deviceId && (!this.discoveredDevices.has(deviceId) || this.discoveredDevices.get(deviceId)?.host !== a.data)) {
             this.log.debug(`MdnsScanner discovered shelly gen: ${CYAN}${gen}${nf} device id: ${hk}${deviceId}${nf} host: ${zb}${a.data}${nf} port: ${zb}${port}${nf}`);
             this.discoveredDevices.set(deviceId, { id: deviceId, host: a.data, port, gen });
             this.emit('discovered', { id: deviceId, host: a.data, port, gen });
