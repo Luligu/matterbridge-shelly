@@ -21,16 +21,37 @@ Removed options:
 
 - exposePowerMeter: electrical sensors are enabled by default on existing setups. You can disable them globally or on a per-device basis adding "PowerMeter" to entityBlackList or deviceEntityBlackList, see [COMPONENTS.md documentation.](https://github.com/Luligu/matterbridge-shelly/blob/main/COMPONENTS.md). On new setups the "PowerMeter" components are already globally disabled by default.
 
+- enableConfigDiscover and deviceIp: replaced by a manually add a device with IP address in expert mode.
+
 New setups:
 
 - these components are blacklisted (with entityBlackList) by default: "PowerMeter", "Lux", "Illuminance", "Vibration", "Button". This allows to create simplified devices for the controllers that don't manage correctly composed devices (i.e. Alexa and SmartThings).
 - all switches are exposed like outlet (matter compliant).
 - shellyplusi4, shellyi4g3, shellyix3 and shellybutton1 are automatically added to inputMomentaryList when discovered.
-- expertMode is disabled. This makes the config showing only username, password and blackList.
+- expertMode is disabled. This makes the config showing only username, password, whitelist and blackList.
 
 Expert mode:
 
 The expertMode option has been added to show an advanced or simplified config.
+
+## [2.0.5] - 2025-03-17
+
+### Added
+
+- [config] Added action: manually add a device with IP address. This allows to add the devices that are not discovered on the network with the mdns.
+- [config] Added action: remove a device from the storage with its device id. This allows to remove from the storage a single device when it is no more on the network.
+- [config] Added action: scan network. This will send a mdns request on the network.
+
+### Changed
+
+- [config] Removed enableConfigDiscover and deviceIp. Replaced by a config action (manually add a device with IP address).
+- [package]: Updated package.
+- [package]: Updated dependencies.
+- [plugin]: Requires Matterbridge 2.2.5.
+
+<a href="https://www.buymeacoffee.com/luligugithub">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="120">
+</a>
 
 ## [2.0.4] - 2025-03-13
 
