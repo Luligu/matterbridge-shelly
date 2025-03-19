@@ -4,7 +4,7 @@
  * @file src\shelly.ts
  * @author Luca Liguori
  * @date 2024-05-01
- * @version 2.2.2
+ * @version 2.2.3
  *
  * Copyright 2024, 2025, 2026 Luca Liguori.
  *
@@ -50,6 +50,9 @@ export class Shelly extends EventEmitter {
   public username: string | undefined;
   public password: string | undefined;
   private _dataPath = '';
+  private _interfaceName: string | undefined;
+  private _ipv4Address: string | undefined;
+  private _ipv6Address: string | undefined;
 
   /**
    * Creates a new instance of the Shelly class.
@@ -224,6 +227,54 @@ export class Shelly extends EventEmitter {
    */
   get dataPath(): string {
     return this._dataPath;
+  }
+
+  /**
+   * Gets the network interface name.
+   * @returns {string | undefined} The network interface name.
+   */
+  get interfaceName(): string | undefined {
+    return this._interfaceName;
+  }
+
+  /**
+   * Sets the network interface name.
+   * @param {string | undefined} value - The network interface name.
+   */
+  set interfaceName(value: string | undefined) {
+    this._interfaceName = value;
+  }
+
+  /**
+   * Gets the IPv4 address.
+   * @returns {string | undefined} The IPv4 address.
+   */
+  get ipv4Address(): string | undefined {
+    return this._ipv4Address;
+  }
+
+  /**
+   * Sets the IPv4 address.
+   * @param {string | undefined} value - The IPv4 address.
+   */
+  set ipv4Address(value: string | undefined) {
+    this._ipv4Address = value;
+  }
+
+  /**
+   * Gets the IPv6 address.
+   * @returns {string | undefined} The IPv6 address.
+   */
+  get ipv6Address(): string | undefined {
+    return this._ipv6Address;
+  }
+
+  /**
+   * Sets the IPv6 address.
+   * @param {string | undefined} value - The IPv6 address.
+   */
+  set ipv6Address(value: string | undefined) {
+    this._ipv6Address = value;
   }
 
   /**
