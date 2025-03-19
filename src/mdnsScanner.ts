@@ -4,7 +4,7 @@
  * @file src\mdnsScanner.ts
  * @author Luca Liguori
  * @date 2024-05-01
- * @version 1.2.3
+ * @version 1.2.4
  *
  * Copyright 2024, 2025, 2026 Luca Liguori.
  *
@@ -41,6 +41,7 @@ export type DiscoveredDeviceListener = (data: DiscoveredDevice) => void;
 
 interface MdnsScannerEvent {
   discovered: [{ id: ShellyDeviceId; host: string; port: number; gen: number }];
+  query: [{ type: string; name: string; class?: string }];
 }
 
 /**
@@ -246,6 +247,7 @@ export class MdnsScanner extends EventEmitter {
       if (debug) this.log.debug(`--- query.questions[${query.questions.length}] ---`);
       for (const q of query.questions) {
         if (debug) this.log.debug(`[${ign}${q.type}${rs}${db}] Name: ${CYAN}${q.name}${db} class: ${CYAN}${q.class}${db}`);
+        this.emit('query', { type: q.type, name: q.name, class: q.class });
       }
       if (debug) this.log.debug(`--- query.answers[${query.answers.length}] ---`);
       if (debug) this.log.debug(`--- query.additionals[${query.additionals.length}] ---`);

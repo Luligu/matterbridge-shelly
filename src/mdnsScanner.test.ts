@@ -148,6 +148,71 @@ describe('Shellies MdnsScanner test', () => {
     }, 1000);
   }, 10000);
 
+  test('Generic response', async () => {
+    // Start the mdns scanner
+    mdns.start(undefined, 0, '127.0.0.1', 'udp4', true);
+    expect(mdns.isScanning).toBeTruthy();
+    expect(loggerLogSpy).toHaveBeenCalledWith(
+      LogLevel.INFO,
+      `Starting MdnsScanner for shelly devices (interface 127.0.0.1 bind 127.0.0.1 type udp4 ip 224.0.0.251) for shelly devices...`,
+    );
+
+    // Set up a promise that resolves when the listener is invoked.
+    const discoveredDeviceListener: jest.MockedFunction<DiscoveredDeviceListener> = jest.fn();
+    const discoveredPromise = new Promise<DiscoveredDevice>((resolve) => {
+      discoveredDeviceListener.mockImplementationOnce((device: DiscoveredDevice) => {
+        console.log(`Shellies MdnsScanner Jest Test: discovered shelly device: ${device.id} at ${device.host} port ${device.port} gen ${device.gen}`);
+        resolve(device);
+      });
+    });
+    mdns.once('discovered', discoveredDeviceListener);
+
+    // Emit the response packet
+    (mdns as any).scanner.emit('response', generic_ResponsePacket, generic_RemoteInfo);
+
+    // Wait for the discovered event to be processed.
+    expect(await discoveredPromise).toEqual({ id: 'shellyswitch25-3494546BBF7E', host: '192.168.1.1', port: 80, gen: 1 });
+
+    // Stop the mdns scanner
+    mdns.stop();
+    expect(mdns.isScanning).toBeFalsy();
+  }, 10000);
+
+  test('Generic query', async () => {
+    // Start the mdns scanner
+    mdns.start(undefined, 10, '127.0.0.1', 'udp4', true);
+    expect(mdns.isScanning).toBeTruthy();
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    expect(loggerLogSpy).toHaveBeenCalledWith(
+      LogLevel.INFO,
+      `Starting MdnsScanner for shelly devices (interface 127.0.0.1 bind 127.0.0.1 type udp4 ip 224.0.0.251) for shelly devices...`,
+    );
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Started MdnsScanner for shelly devices.`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Stopped MdnsScanner query service for shelly devices.`);
+
+    // Set up a promise that resolves when the listener is invoked.
+    const queryDeviceListener: jest.MockedFunction<DiscoveredDeviceListener> = jest.fn();
+    const queryPromise = new Promise<DiscoveredDevice>((resolve) => {
+      queryDeviceListener.mockImplementationOnce((device: DiscoveredDevice) => {
+        console.log(`Shellies MdnsScanner Jest Test: discovered shelly device: ${device.id} at ${device.host} port ${device.port} gen ${device.gen}`);
+        resolve(device);
+      });
+    });
+    mdns.once('query', queryDeviceListener);
+
+    // Emit the response packet
+    (mdns as any).scanner.emit('query', generic_QueryPacket, generic_RemoteInfo);
+
+    // Wait for the discovered event to be processed.
+    expect(await queryPromise).toEqual({ 'class': 'IN', 'name': '_http._tcp.local', 'type': 'PTR' });
+
+    // Stop the mdns scanner
+    mdns.stop();
+    expect(mdns.isScanning).toBeFalsy();
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Stopping MdnsScanner for shelly devices...`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Stopped MdnsScanner for shelly devices.`);
+  }, 10000);
+
   test('Shelly gen 1', async () => {
     // Start the mdns scanner
     mdns.start(undefined, 0, '127.0.0.1', 'udp4', true);
@@ -686,6 +751,93 @@ describe('Shellies MdnsScanner test', () => {
     );
   });
 });
+
+const generic_QueryPacket = {
+  id: 0,
+  type: 'query',
+  flags: 1024,
+  flag_qr: true,
+  opcode: 'QUERY',
+  flag_aa: true,
+  flag_tc: false,
+  flag_rd: false,
+  flag_ra: false,
+  flag_z: false,
+  flag_ad: false,
+  flag_cd: false,
+  rcode: 'NOERROR',
+  questions: [{ name: '_http._tcp.local', type: 'PTR', class: 'IN' }],
+  answers: [],
+  authorities: [],
+  additionals: [],
+};
+
+const generic_ResponsePacket = {
+  id: 0,
+  type: 'response',
+  flags: 1024,
+  flag_qr: true,
+  opcode: 'QUERY',
+  flag_aa: true,
+  flag_tc: false,
+  flag_rd: false,
+  flag_ra: false,
+  flag_z: false,
+  flag_ad: false,
+  flag_cd: false,
+  rcode: 'NOERROR',
+  questions: [{ name: '_http._tcp.local', type: 'PTR', class: 'IN' }],
+  answers: [
+    {
+      name: '_http._tcp.local',
+      type: 'PTR',
+      ttl: 4500,
+      class: 'IN',
+      flush: false,
+      data: 'shellyswitch25-3494546BBF7E._http._tcp.local',
+    },
+    {
+      name: 'shellyswitch25-3494546BBF7E._http._tcp.local',
+      type: 'SRV',
+      ttl: 120,
+      class: 'IN',
+      flush: true,
+      data: {
+        priority: 0,
+        weight: 0,
+        port: 80,
+        target: 'shellyswitch25-3494546BBF7E.local',
+      },
+    },
+    {
+      name: 'shellyswitch25-3494546BBF7E._http._tcp.local',
+      type: 'TXT',
+      ttl: 120,
+      class: 'IN',
+      flush: true,
+      data: [],
+    },
+    {
+      name: 'shellyswitch25-3494546BBF7E.local',
+      type: 'A',
+      ttl: 120,
+      class: 'IN',
+      flush: true,
+      data: '192.168.1.1',
+    },
+    {
+      name: 'shellyswitch25-3494546BBF7E.local',
+      type: 'NSEC',
+      ttl: 120,
+      class: 'IN',
+      flush: true,
+      data: { nextDomain: 'shellyswitch25-3494546BBF7E.local', rrtypes: ['A'] },
+    },
+  ],
+  authorities: [],
+  additionals: [],
+};
+const generic_RemoteInfo = { address: '192.168.1.1', family: 'IPv4', port: 5353, size: 501 };
 
 const gen1_ResponsePacket = {
   id: 0,
