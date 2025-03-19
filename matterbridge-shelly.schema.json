@@ -16,11 +16,11 @@
       "ui:widget": "hidden"
     },
     "username": {
-      "description": "Username for password protected shelly devices (used only for gen 1 devices)",
+      "description": "Username for password protected shelly devices (used only for gen 1 devices).",
       "type": "string"
     },
     "password": {
-      "description": "Password for password protected shelly devices (must be unique for all the devices)",
+      "description": "Password for password protected shelly devices (must be unique for all the devices).",
       "type": "string",
       "ui:widget": "password"
     },
@@ -69,8 +69,17 @@
       "uniqueItems": true,
       "selectFrom": "serial"
     },
+    "nocacheList": {
+      "description": "The devices in the list will not be loaded from the cache. Use the device id (e.g. shellyplus2pm-5443B23D81F8). If the list is empty, all the devices will be loaded from the cache.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true,
+      "selectFrom": "serial"
+    },
     "whiteList": {
-      "description": "Only the devices in the list will be exposed. Use the device id (e.g. shellyplus2pm-5443B23D81F8) or BLU addr (i.e. 7c:c6:b6:65:2d:87).",
+      "description": "Only the devices in the list will be exposed. Use the device id (e.g. shellyplus2pm-5443B23D81F8) or BLU addr (i.e. 7c:c6:b6:65:2d:87). If the list is empty, all the devices will be exposed.",
       "type": "array",
       "items": {
         "type": "string"
@@ -79,7 +88,7 @@
       "selectFrom": "serial"
     },
     "blackList": {
-      "description": "The devices in the list will not be exposed. Use the device id (e.g. shellyplus2pm-5443B23D81F8) or BLU addr (i.e. 7c:c6:b6:65:2d:87).",
+      "description": "The devices in the list will not be exposed. Use the device id (e.g. shellyplus2pm-5443B23D81F8) or BLU addr (i.e. 7c:c6:b6:65:2d:87). If the list is empty, no devices will be excluded.",
       "type": "array",
       "items": {
         "type": "string"
@@ -110,15 +119,6 @@
         "uniqueItems": true,
         "selectDeviceEntityFrom": "name"
       }
-    },
-    "nocacheList": {
-      "description": "The devices in the list will not be loaded from the cache. Use the device id (e.g. shellyplus2pm-5443B23D81F8).",
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "uniqueItems": true,
-      "selectFrom": "serial"
     },
     "enableMdnsDiscover": {
       "description": "Enable the mdns discovery for shelly devices. Once all the devices are discovered and stored, it is possible to disable this setting to reduce the network traffic.",
@@ -159,6 +159,8 @@
       "description": "Manually add a device that has not been discovered with mdns:",
       "type": "boolean",
       "buttonField": "ADD",
+      "buttonClose": false,
+      "buttonSave": false,
       "textPlaceholder": "Enter the device IP address",
       "default": false
     },
@@ -166,6 +168,8 @@
       "description": "Remove a device and its cache file from the storage:",
       "type": "boolean",
       "buttonField": "REMOVE",
+      "buttonClose": false,
+      "buttonSave": false,
       "textPlaceholder": "Enter the device id",
       "default": false
     },
@@ -173,6 +177,8 @@
       "description": "Scan the network with mdns for new devices:",
       "type": "boolean",
       "buttonText": "SCAN",
+      "buttonClose": false,
+      "buttonSave": false,
       "default": false
     },
     "debug": {

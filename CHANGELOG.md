@@ -21,7 +21,7 @@ Removed options:
 
 - exposePowerMeter: electrical sensors are enabled by default on existing setups. You can disable them globally or on a per-device basis adding "PowerMeter" to entityBlackList or deviceEntityBlackList, see [COMPONENTS.md documentation.](https://github.com/Luligu/matterbridge-shelly/blob/main/COMPONENTS.md). On new setups the "PowerMeter" components are already globally disabled by default.
 
-- enableConfigDiscover and deviceIp: replaced by a manually add a device with IP address in expert mode.
+- enableConfigDiscover and deviceIp: replaced by a config action in expert mode.
 
 New setups:
 
@@ -34,13 +34,18 @@ Expert mode:
 
 The expertMode option has been added to show an advanced or simplified config.
 
-## [2.0.5] - 2025-03-17
+## [2.0.5] - 2025-03-19
 
 ### Added
 
-- [config] Added action: manually add a device with IP address. This allows to add the devices that are not discovered on the network with the mdns.
-- [config] Added action: remove a device from the storage with its device id. This allows to remove from the storage a single device when it is no more on the network.
-- [config] Added action: scan network. This will send a mdns request on the network.
+- [config] Added action: manually add a device with IP address. It allows to add the devices that are not discovered on the network with the mdns.
+- [config] Added action: remove a device from the storage with its device id. It allows to remove from the storage a single device when it has been removed from the network.
+- [config] Added action: scan network. It will send a mdns request on the network.
+- [mdns] Added a fully automatic IP change detection when the device is discovered on a different IP (no need to restart).
+- [shelly] Verified AZ Plug Gen3.
+- [shelly] Verified PlugSG3 Matter Gen3.
+- [BLU]: Verified new BLU firmware 1.0.22 on all BLU devices.
+- [TRV]: Verified new BLU TRV firmware 1.2.1.
 
 ### Changed
 

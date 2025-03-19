@@ -4,7 +4,7 @@
  * @file src\shellyDevice.ts
  * @author Luca Liguori
  * @date 2024-05-01
- * @version 3.1.2
+ * @version 3.1.3
  *
  * Copyright 2024, 2025, 2026 Luca Liguori.
  *
