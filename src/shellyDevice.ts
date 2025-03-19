@@ -4,7 +4,7 @@
  * @file src\shellyDevice.ts
  * @author Luca Liguori
  * @date 2024-05-01
- * @version 3.1.3
+ * @version 3.1.4
  *
  * Copyright 2024, 2025, 2026 Luca Liguori.
  *
@@ -21,16 +21,18 @@
  * limitations under the License. *
  */
 
+// Matterbridge imports
 import { AnsiLogger, LogLevel, BLUE, CYAN, GREEN, GREY, MAGENTA, RESET, db, debugStringify, er, hk, nf, wr, zb, rs, YELLOW, idn, nt, rk, dn } from 'matterbridge/logger';
 import { getIpv4InterfaceAddress, isValidNumber, isValidObject, isValidString } from 'matterbridge/utils';
+
+// Node.js imports
 import { EventEmitter } from 'node:events';
-import fetch, { RequestInit } from 'node-fetch';
 import crypto from 'node:crypto';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 
+// Shellies imports
 import { parseDigestAuthenticateHeader, createDigestShellyAuth, createBasicShellyAuth, parseBasicAuthenticateHeader, getGen2BodyOptions, getGen1BodyOptions } from './auth.js';
-
 import { WsClient } from './wsClient.js';
 import { Shelly } from './shelly.js';
 import {
