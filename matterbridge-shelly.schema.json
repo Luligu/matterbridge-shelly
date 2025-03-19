@@ -6,20 +6,23 @@
     "name": {
       "description": "Plugin name",
       "type": "string",
-      "readOnly": true
+      "readOnly": true,
+      "ui:widget": "hidden"
     },
     "type": {
       "description": "Plugin type",
       "type": "string",
-      "readOnly": true
+      "readOnly": true,
+      "ui:widget": "hidden"
     },
     "username": {
-      "description": "Username for password protected shelly devices (used only for gen 1 devices)",
+      "description": "Username for password protected shelly devices (used only for gen 1 devices).",
       "type": "string"
     },
     "password": {
-      "description": "Password for password protected shelly devices (must be unique for all the devices)",
-      "type": "string"
+      "description": "Password for password protected shelly devices (must be unique for all the devices).",
+      "type": "string",
+      "ui:widget": "password"
     },
     "switchList": {
       "description": "The devices in the list will be exposed as switches (don't use it for Alexa).",
@@ -66,8 +69,8 @@
       "uniqueItems": true,
       "selectFrom": "serial"
     },
-    "blackList": {
-      "description": "The devices in the list will not be exposed. Use the device id (e.g. shellyplus2pm-5443B23D81F8) or BLU addr (i.e. 7c:c6:b6:65:2d:87)",
+    "nocacheList": {
+      "description": "The devices in the list will not be loaded from the cache. Use the device id (e.g. shellyplus2pm-5443B23D81F8). If the list is empty, all the devices will be loaded from the cache.",
       "type": "array",
       "items": {
         "type": "string"
@@ -76,7 +79,16 @@
       "selectFrom": "serial"
     },
     "whiteList": {
-      "description": "Only the devices in the list will be exposed. Use the device id (e.g. shellyplus2pm-5443B23D81F8) or BLU addr (i.e. 7c:c6:b6:65:2d:87).",
+      "description": "Only the devices in the list will be exposed. Use the device id (e.g. shellyplus2pm-5443B23D81F8) or BLU addr (i.e. 7c:c6:b6:65:2d:87). If the list is empty, all the devices will be exposed.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true,
+      "selectFrom": "serial"
+    },
+    "blackList": {
+      "description": "The devices in the list will not be exposed. Use the device id (e.g. shellyplus2pm-5443B23D81F8) or BLU addr (i.e. 7c:c6:b6:65:2d:87). If the list is empty, no devices will be excluded.",
       "type": "array",
       "items": {
         "type": "string"
@@ -85,7 +97,7 @@
       "selectFrom": "serial"
     },
     "entityBlackList": {
-      "description": "The components in the list will not be exposed for all devices. Use the component name (i.e. Temperature)",
+      "description": "The components in the list will not be exposed for all devices. Use the component name (i.e. Temperature).",
       "type": "array",
       "items": {
         "type": "string"
@@ -108,46 +120,23 @@
         "selectDeviceEntityFrom": "name"
       }
     },
-    "nocacheList": {
-      "description": "The devices in the list will not be loaded from the cache. Use the device id (e.g. shellyplus2pm-5443B23D81F8)",
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "uniqueItems": true,
-      "selectFrom": "serial"
-    },
-    "deviceIp": {
-      "description": "Set the IP address for each device that is not discovered automatically. Enter in the first field the shelly ID of the device and in the second field the IP address. (e.g. shelly1minig3-543204547478: 192.168.1.221). Enable enableConfigDiscover to load the devices from this setting.",
-      "type": "object",
-      "uniqueItems": true,
-      "selectFrom": "serial",
-      "additionalProperties": {
-        "type": "string"
-      }
-    },
     "enableMdnsDiscover": {
-      "description": "Enable the mdns discovery for shelly devices. Once all the devices are loaded and stored, it is possible to disable this setting to reduce the network traffic.",
+      "description": "Enable the mdns discovery for shelly devices. Once all the devices are discovered and stored, it is possible to disable this setting to reduce the network traffic.",
       "type": "boolean",
       "default": true
     },
     "enableStorageDiscover": {
-      "description": "Enable storage discovery for shelly devices (it will load from the storage the devices already discovered)",
+      "description": "Enable storage discovery for shelly devices (it will load from the storage the devices already discovered).",
       "type": "boolean",
       "default": true
     },
     "resetStorageDiscover": {
-      "description": "Reset the storage on the next restart (it will clear the storage and the cache files)",
-      "type": "boolean",
-      "default": false
-    },
-    "enableConfigDiscover": {
-      "description": "Enable config discovery for shelly devices (it will load the devices from deviceIp config setting). It is only needed if a device is not discovered on your network. Once they are loaded and stored, disable this setting.",
+      "description": "Reset the storage on the next restart (it will clear the storage and the cache files).",
       "type": "boolean",
       "default": false
     },
     "enableBleDiscover": {
-      "description": "Enable ble discovery for shelly BLU devices (it will register the BLU devices paired in each ble gateway, see the readme for more info)",
+      "description": "Enable ble discovery for shelly BLU devices (it will register the BLU devices paired in each ble gateway, see the readme for more info).",
       "type": "boolean",
       "default": true
     },
@@ -166,6 +155,32 @@
       "type": "boolean",
       "default": false
     },
+    "addDevice": {
+      "description": "Manually add a device that has not been discovered with mdns:",
+      "type": "boolean",
+      "buttonField": "ADD",
+      "buttonClose": false,
+      "buttonSave": false,
+      "textPlaceholder": "Enter the device IP address",
+      "default": false
+    },
+    "removeDevice": {
+      "description": "Remove a device and its cache file from the storage:",
+      "type": "boolean",
+      "buttonField": "REMOVE",
+      "buttonClose": false,
+      "buttonSave": false,
+      "textPlaceholder": "Enter the device id",
+      "default": false
+    },
+    "scanNetwork": {
+      "description": "Scan the network with mdns for new devices:",
+      "type": "boolean",
+      "buttonText": "SCAN",
+      "buttonClose": false,
+      "buttonSave": false,
+      "default": false
+    },
     "debug": {
       "description": "Enable the debug for the plugin (development only)",
       "type": "boolean",
@@ -182,14 +197,15 @@
       "default": false
     },
     "debugWs": {
-      "description": "Enable the debug for the shelly WsClient or WsServer (development only)",
+      "description": "Enable the debug for the shelly WsClient and WsServer (development only)",
       "type": "boolean",
       "default": false
     },
     "unregisterOnShutdown": {
       "description": "Unregister all devices on shutdown (development only)",
       "type": "boolean",
-      "default": false
+      "default": false,
+      "ui:widget": "hidden"
     }
   }
 }

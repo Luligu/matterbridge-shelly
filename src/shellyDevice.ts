@@ -4,7 +4,7 @@
  * @file src\shellyDevice.ts
  * @author Luca Liguori
  * @date 2024-05-01
- * @version 3.1.1
+ * @version 3.1.4
  *
  * Copyright 2024, 2025, 2026 Luca Liguori.
  *
@@ -21,16 +21,18 @@
  * limitations under the License. *
  */
 
+// Matterbridge imports
 import { AnsiLogger, LogLevel, BLUE, CYAN, GREEN, GREY, MAGENTA, RESET, db, debugStringify, er, hk, nf, wr, zb, rs, YELLOW, idn, nt, rk, dn } from 'matterbridge/logger';
 import { getIpv4InterfaceAddress, isValidNumber, isValidObject, isValidString } from 'matterbridge/utils';
+
+// Node.js imports
 import { EventEmitter } from 'node:events';
-import fetch, { RequestInit } from 'node-fetch';
 import crypto from 'node:crypto';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 
+// Shellies imports
 import { parseDigestAuthenticateHeader, createDigestShellyAuth, createBasicShellyAuth, parseBasicAuthenticateHeader, getGen2BodyOptions, getGen1BodyOptions } from './auth.js';
-
 import { WsClient } from './wsClient.js';
 import { Shelly } from './shelly.js';
 import {
@@ -51,7 +53,7 @@ interface ShellyDeviceEvent {
   offline: [];
   awake: [];
   update: [id: string, key: string, value: ShellyDataType];
-  bthome_event: [event: string];
+  bthome_event: [event: ShellyData];
   bthomedevice_update: [addr: string, rssi: number, packet_id: number, last_updated_ts: number];
   bthomesensor_update: [addr: string, sensorName: string, sensorIndex: number, value: ShellyDataType];
   bthomedevice_event: [addr: string, event: string];
@@ -863,7 +865,7 @@ export class ShellyDevice extends EventEmitter {
     for (const event of events) {
       if (isValidObject(event) && isValidString(event.event) && isValidNumber(event.ts) && isValidString(event.component) && event.component === 'bthome') {
         this.log.debug(`Device ${hk}${this.id}${db} has event ${YELLOW}${event.event}${db} at ${CYAN}${this.getLocalTimeFromLastUpdated(event.ts as number)}${db}`);
-        this.emit('bthome_event', event.event);
+        this.emit('bthome_event', event);
       } else if (isValidObject(event) && isValidString(event.event) && isValidNumber(event.ts) && isValidString(event.component) && event.component.startsWith('bthomedevice:')) {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const device = Array.from(this.bthomeDevices).find(([_addr, _device]) => _device.key === event.component)?.[1];

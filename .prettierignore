@@ -12,3 +12,5 @@ docker
 
 # Ignore all HTML files:
 **/*.html
+
+TODO.md

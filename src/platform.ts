@@ -164,9 +164,9 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     super(matterbridge, log, config as unknown as PlatformConfig);
 
     // Verify that Matterbridge is the correct version
-    if (this.verifyMatterbridgeVersion === undefined || typeof this.verifyMatterbridgeVersion !== 'function' || !this.verifyMatterbridgeVersion('2.2.4')) {
+    if (this.verifyMatterbridgeVersion === undefined || typeof this.verifyMatterbridgeVersion !== 'function' || !this.verifyMatterbridgeVersion('2.2.5')) {
       throw new Error(
-        `This plugin requires Matterbridge version >= "2.2.4". Please update Matterbridge from ${this.matterbridge.matterbridgeVersion} to the latest version in the frontend."`,
+        `This plugin requires Matterbridge version >= "2.2.5". Please update Matterbridge from ${this.matterbridge.matterbridgeVersion} to the latest version in the frontend."`,
       );
     }
 
@@ -190,6 +190,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         delete config.inputEventList;
       }
       if (config.exposePowerMeter !== undefined) delete config.exposePowerMeter;
+      if (config.enableConfigDiscover !== undefined) delete config.enableConfigDiscover;
+      if (config.deviceIp !== undefined) delete config.deviceIp;
     }
 
     // First config setup
@@ -213,7 +215,10 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         delete properties.inputLatchingList;
         delete properties.inputMomentaryList;
         delete properties.inputLatchingList;
-        delete properties.whiteList;
+        // delete properties.whiteList;
+        delete properties.addDevice;
+        delete properties.removeDevice;
+        delete properties.scanNetwork;
         delete properties.entityBlackList;
         delete properties.deviceEntityBlackList;
         delete properties.nocacheList;
@@ -279,6 +284,9 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     this.shelly = new Shelly(log, this.username, this.password);
     this.shelly.setLogLevel(log.logLevel, this.config.debugMdns as boolean, this.config.debugCoap as boolean, this.config.debugWs as boolean);
     this.shelly.dataPath = path.join(matterbridge.matterbridgePluginDirectory, 'matterbridge-shelly');
+    this.shelly.interfaceName = matterbridge.mdnsInterface;
+    this.shelly.ipv4Address = matterbridge.ipv4address;
+    this.shelly.ipv6Address = matterbridge.ipv6address;
 
     // handle Shelly discovered event (called from mDNS scanner)
     this.shelly.on('discovered', async (discoveredDevice: DiscoveredDevice) => {
@@ -296,7 +304,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         const stored = this.storedDevices.get(discoveredDevice.id);
         if (stored?.host !== discoveredDevice.host) {
           this.log.warn(`Shelly device ${hk}${discoveredDevice.id}${wr} host ${zb}${discoveredDevice.host}${wr} has been discovered with a different host.`);
-          this.log.warn(`Set new address for shelly device ${hk}${discoveredDevice.id}${wr} from ${zb}${stored?.host}${wr} to ${zb}${discoveredDevice.host}${wr}`);
+          this.log.warn(`Setting the new address for shelly device ${hk}${discoveredDevice.id}${wr} from ${zb}${stored?.host}${wr} to ${zb}${discoveredDevice.host}${wr}...`);
           this.discoveredDevices.set(discoveredDevice.id, discoveredDevice);
           this.storedDevices.set(discoveredDevice.id, discoveredDevice);
           this.changedDevices.set(discoveredDevice.id, discoveredDevice.id);
@@ -304,9 +312,17 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           if (this.shelly.hasDevice(discoveredDevice.id)) {
             const device = this.shelly.getDevice(discoveredDevice.id) as ShellyDevice;
             device.host = discoveredDevice.host;
-            device.wsClient?.stop(); // It will be restarted by the ShellyDevice interval if gen > 1
+            if (device.gen === 1) {
+              this.shelly.coapServer.registerDevice(device.host, device.id, true);
+            } else {
+              device.wsClient?.stop();
+              device.wsClient?.setHost(device.host);
+              device.wsClient?.start();
+            }
             device.log.warn(`Shelly device ${hk}${discoveredDevice.id}${wr} host ${zb}${discoveredDevice.host}${wr} updated`);
-          } else this.log.warn(`Please restart matterbridge for the change to take effect.`);
+          } else {
+            await this.addDevice(discoveredDevice.id, discoveredDevice.host);
+          }
         } else {
           this.log.info(`Shelly device ${hk}${discoveredDevice.id}${nf} host ${zb}${discoveredDevice.host}${nf} already discovered`);
         }
@@ -337,8 +353,9 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         const shelly = this.matterbridge.plugins.get('matterbridge-shelly');
         if (shelly) this.matterbridge.plugins.saveConfigFromJson(shelly, this.config);
       }
+      /*
       // On the first run or after if expertMode is false, add the trv gateway devices to the nocacheList
-      if ((this.firstRun === true || config.expertMode === false) && discoveredDevice.id.includes('xxxxxxxshellyblugwg3')) {
+      if ((this.firstRun === true || config.expertMode === false) && discoveredDevice.id.includes('shellyblugwg3')) {
         if (!config.nocacheList) config.nocacheList = [];
         if (!config.nocacheList.includes(discoveredDevice.id)) {
           config.nocacheList.push(discoveredDevice.id);
@@ -347,6 +364,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         const shelly = this.matterbridge.plugins.get('matterbridge-shelly');
         if (shelly) this.matterbridge.plugins.saveConfigFromJson(shelly, this.config);
       }
+      */
     });
 
     // handle Shelly add event
@@ -384,137 +402,16 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         if (device.bthomeDevices.size && device.bthomeSensors.size) {
           this.log.info(`Shelly device ${hk}${device.id}${nf} host ${zb}${device.host}${nf} is a ble gateway. Adding paired BLU devices...`);
           this.gatewayDevices.set(device.id, device.id);
+
           // Register the BLU devices
-          for (const [key, bthomeDevice] of device.bthomeDevices) {
+          for (const [, bthomeDevice] of device.bthomeDevices) {
             // Set the device in the selectDevice map for the frontend device selection
             this.setSelectDevice(bthomeDevice.addr, bthomeDevice.name, 'http://' + device.host, 'ble');
             if (!this.validateDevice([bthomeDevice.addr, bthomeDevice.name])) continue;
-            this.log.info(
-              `- ${idn}${bthomeDevice.name}${rs}${nf} address ${CYAN}${bthomeDevice.addr}${nf} id ${CYAN}${bthomeDevice.id}${nf} ` +
-                `model ${CYAN}${bthomeDevice.model}${nf} (${CYAN}${bthomeDevice.type}${nf})`,
-            );
-            let definition: AtLeastOne<DeviceTypeDefinition> | undefined;
-            if (bthomeDevice.model === 'Shelly BLU DoorWindow') definition = [bridgedNode, powerSource];
-            else if (bthomeDevice.model === 'Shelly BLU Motion') definition = [bridgedNode, powerSource];
-            else if (bthomeDevice.model === 'Shelly BLU Button1') definition = [genericSwitch, bridgedNode, powerSource];
-            else if (bthomeDevice.model === 'Shelly BLU HT') definition = [bridgedNode, powerSource];
-            else if (bthomeDevice.model === 'Shelly BLU RC Button 4') definition = [bridgedNode, powerSource];
-            else if (bthomeDevice.model === 'Shelly BLU Wall Switch 4') definition = [bridgedNode, powerSource];
-            else if (bthomeDevice.model === 'Shelly BLU Trv') definition = [thermostatDevice, bridgedNode, powerSource];
-            else this.log.error(`Shelly device ${hk}${device.id}${er} host ${zb}${device.host}${er} has an unknown BLU device model ${CYAN}${bthomeDevice.model}${nf}`);
-            // Check if the BLU device is already registered
-            this.bluBridgedDevices.forEach((blu) => {
-              if (blu.serialNumber === bthomeDevice.addr + (this.postfix ? '-' + this.postfix : '')) {
-                this.log.warn(`BLU device ${idn}${bthomeDevice.name}${rs}${wr} address ${CYAN}${bthomeDevice.addr}${wr} already registered with another ble gateway.`);
-                definition = undefined;
-              }
-            });
-            if (definition) {
-              const mbDevice = new MatterbridgeEndpoint(definition, { uniqueStorageKey: bthomeDevice.name }, config.debug as boolean);
-              mbDevice.configUrl = `http://${device.host}`;
-              mbDevice.createDefaultBridgedDeviceBasicInformationClusterServer(
-                bthomeDevice.name,
-                bthomeDevice.addr + (this.postfix ? '-' + this.postfix : ''),
-                0xfff1,
-                'Shelly',
-                bthomeDevice.model,
-              );
-              if (bthomeDevice.model === 'Shelly BLU DoorWindow') {
-                mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer();
-                mbDevice.addFixedLabel('composed', 'Sensor');
-                mbDevice.addChildDeviceTypeWithClusterServer('Contact', [contactSensor], [], undefined, config.debug as boolean);
-                if (this.validateEntity(bthomeDevice.addr, 'Illuminance'))
-                  mbDevice.addChildDeviceTypeWithClusterServer('Illuminance', [lightSensor], [], undefined, config.debug as boolean);
-              } else if (bthomeDevice.model === 'Shelly BLU Motion') {
-                mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer();
-                mbDevice.addFixedLabel('composed', 'Sensor');
-                mbDevice.addChildDeviceTypeWithClusterServer('Motion', [occupancySensor], [], undefined, config.debug as boolean);
-                if (this.validateEntity(bthomeDevice.addr, 'Illuminance'))
-                  mbDevice.addChildDeviceTypeWithClusterServer('Illuminance', [lightSensor], [], undefined, config.debug as boolean);
-                if (this.validateEntity(bthomeDevice.addr, 'Button'))
-                  mbDevice.addChildDeviceTypeWithClusterServer('Button', [genericSwitch], [], undefined, config.debug as boolean);
-              } else if (bthomeDevice.model === 'Shelly BLU Button1') {
-                mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer();
-                mbDevice.createDefaultSwitchClusterServer();
-              } else if (bthomeDevice.model === 'Shelly BLU HT') {
-                mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer();
-                mbDevice.addFixedLabel('composed', 'Sensor');
-                mbDevice.addChildDeviceTypeWithClusterServer('Temperature', [temperatureSensor], [], undefined, config.debug as boolean);
-                mbDevice.addChildDeviceTypeWithClusterServer('Humidity', [humiditySensor], [], undefined, config.debug as boolean);
-                if (this.validateEntity(bthomeDevice.addr, 'Button'))
-                  mbDevice.addChildDeviceTypeWithClusterServer('Button', [genericSwitch], [], undefined, config.debug as boolean);
-              } else if (bthomeDevice.model === 'Shelly BLU RC Button 4') {
-                mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer();
-                mbDevice.addFixedLabel('composed', 'Input');
-                mbDevice.addChildDeviceTypeWithClusterServer('Button0', [genericSwitch], [Switch.Cluster.id], undefined, config.debug as boolean);
-                mbDevice.addChildDeviceTypeWithClusterServer('Button1', [genericSwitch], [Switch.Cluster.id], undefined, config.debug as boolean);
-                mbDevice.addChildDeviceTypeWithClusterServer('Button2', [genericSwitch], [Switch.Cluster.id], undefined, config.debug as boolean);
-                mbDevice.addChildDeviceTypeWithClusterServer('Button3', [genericSwitch], [Switch.Cluster.id], undefined, config.debug as boolean);
-              } else if (bthomeDevice.model === 'Shelly BLU Wall Switch 4') {
-                mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer();
-                mbDevice.addFixedLabel('composed', 'Input');
-                mbDevice.addChildDeviceTypeWithClusterServer('Button0', [genericSwitch], [Switch.Cluster.id], undefined, config.debug as boolean);
-                mbDevice.addChildDeviceTypeWithClusterServer('Button1', [genericSwitch], [Switch.Cluster.id], undefined, config.debug as boolean);
-                mbDevice.addChildDeviceTypeWithClusterServer('Button2', [genericSwitch], [Switch.Cluster.id], undefined, config.debug as boolean);
-                mbDevice.addChildDeviceTypeWithClusterServer('Button3', [genericSwitch], [Switch.Cluster.id], undefined, config.debug as boolean);
-              } else if (bthomeDevice.model === 'Shelly BLU Trv') {
-                mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer(100, PowerSource.BatChargeLevel.Ok, 3000, 'Type AA', 2);
-                mbDevice.createDefaultIdentifyClusterServer();
-                mbDevice.createDefaultHeatingThermostatClusterServer(undefined, undefined, 4, 30);
-                mbDevice.subscribeAttribute(
-                  Thermostat.Cluster.id,
-                  'systemMode',
-                  (newValue: number, oldValue: number) => {
-                    if (
-                      isValidNumber(newValue, Thermostat.SystemMode.Off, Thermostat.SystemMode.Heat) &&
-                      isValidNumber(oldValue, Thermostat.SystemMode.Off, Thermostat.SystemMode.Heat) &&
-                      newValue !== oldValue
-                    ) {
-                      mbDevice.log.info(`Thermostat systemMode changed from ${oldValue} to ${newValue}`);
-                      if (oldValue === Thermostat.SystemMode.Heat && newValue === Thermostat.SystemMode.Off) {
-                        if (device.thermostatSystemModeTimeout) clearTimeout(device.thermostatSystemModeTimeout);
-                        device.thermostatSystemModeTimeout = setTimeout(() => {
-                          mbDevice.setAttribute(Thermostat.Cluster.id, 'systemMode', Thermostat.SystemMode.Heat, mbDevice.log);
-                        }, 5000);
-                      }
-                    }
-                  },
-                  mbDevice.log,
-                );
-                mbDevice.subscribeAttribute(
-                  Thermostat.Cluster.id,
-                  'occupiedHeatingSetpoint',
-                  (newValue: number, oldValue: number) => {
-                    if (isValidNumber(newValue, 4 * 100, 30 * 100) && isValidNumber(oldValue, 4 * 100, 30 * 100) && newValue !== oldValue) {
-                      mbDevice.log.info(`Thermostat occupiedHeatingSetpoint changed from ${oldValue / 100} to ${newValue / 100}`);
-                      if (device.thermostatSetpointTimeout) clearTimeout(device.thermostatSetpointTimeout);
-                      device.thermostatSetpointTimeout = setTimeout(() => {
-                        mbDevice.log.info(`Setting thermostat occupiedHeatingSetpoint to ${newValue / 100}`);
-                        // http://192.168.1.164/rpc/BluTrv.Call?id=201&method=Trv.SetTarget&params={id:0,target_C:19}
-                        ShellyDevice.fetch(this.shelly, mbDevice.log, device.host, 'BluTrv.Call', {
-                          id: bthomeDevice.blutrv_id,
-                          method: 'Trv.SetTarget',
-                          params: { id: 0, target_C: newValue / 100 },
-                        });
-                      }, 5000);
-                    }
-                  },
-                  mbDevice.log,
-                );
-              }
-              mbDevice.addRequiredClusterServers();
-              try {
-                await this.registerDevice(mbDevice);
-                this.bluBridgedDevices.set(key, mbDevice);
-                mbDevice.log.logName = `${bthomeDevice.name}`;
-              } catch (error) {
-                this.log.error(
-                  `Shelly device ${hk}${device.id}${er} host ${zb}${device.host}${er} failed to register BLU device ${idn}${bthomeDevice.name}${rs}${er}: ${error instanceof Error ? error.message : error}`,
-                );
-              }
-            }
+            await this.addBluDevice(device, bthomeDevice);
           }
-          // BLU observer device updates
+
+          // BLU observer bthome device updates
           device.on('bthomedevice_update', (addr: string, rssi: number, packet_id: number, last_updated_ts: number) => {
             if (!isValidString(addr, 11) || !isValidNumber(rssi, -100, 0) || !isValidNumber(packet_id, 0) || !isValidNumber(last_updated_ts)) return;
             const blu = this.bluBridgedDevices.get(addr);
@@ -528,7 +425,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               `${idn}BLU${rs}${db} observer device update message for BLU device ${idn}${blu.deviceName ?? addr}${rs}${db}: rssi ${YELLOW}${rssi}${db} packet_id ${YELLOW}${packet_id}${db} last_updated ${YELLOW}${device.getLocalTimeFromLastUpdated(last_updated_ts)}${db}`,
             );
           });
-          // BLU observer sensor updates
+
+          // BLU observer bthome sensor updates
           device.on('bthomesensor_update', (addr: string, sensorName: string, sensorIndex: number, value: ShellyDataType) => {
             if (!isValidString(addr, 11) || !isValidString(sensorName, 6) || !isValidNumber(sensorIndex, 0, 3)) return;
             const blu = this.bluBridgedDevices.get(addr);
@@ -574,22 +472,24 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             }
           });
 
-          // BLU observer sensor events
-          device.on('bthome_event', (event: string) => {
+          // BLU observer bthome events
+          device.on('bthome_event', (event: ShellyData) => {
             if (!isValidString(event)) return;
-            if (event === 'device_discovered') {
+            if (event.event === 'device_discovered') {
               this.changedDevices.set(device.id, device.id);
               device.log.notice(`Shelly device ${idn}${device.name}${rs}${nt} id ${hk}${device.id}${nt} host ${zb}${device.host}${nt} discovered a new BLU device`);
             }
-            if (event === 'discovery_done') {
+            if (event.event === 'discovery_done') {
               this.changedDevices.set(device.id, device.id);
               device.log.notice(`Shelly device ${idn}${device.name}${rs}${nt} id ${hk}${device.id}${nt} host ${zb}${device.host}${nt} discovery done`);
             }
-            if (event === 'associations_done') {
+            if (event.event === 'associations_done') {
               this.changedDevices.set(device.id, device.id);
               device.log.notice(`Shelly device ${idn}${device.name}${rs}${nt} id ${hk}${device.id}${nt} host ${zb}${device.host}${nt} paired a new BLU device`);
             }
           });
+
+          // BLU observer bthome device events
           device.on('bthomedevice_event', (addr: string, event: string) => {
             if (!isValidString(addr, 11) || !isValidString(event, 6)) return;
             const blu = this.bluBridgedDevices.get(addr);
@@ -612,6 +512,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               device.log.notice(`Shelly device ${idn}${device.name}${rs}${nt} id ${hk}${device.id}${nt} host ${zb}${device.host}${nt} finished succesfully OTA`);
             }
           });
+
+          // BLU observer bthome sensor events
           device.on('bthomesensor_event', (addr: string, sensorName: string, sensorIndex: number, event: string) => {
             if (!isValidString(addr, 11) || !isValidString(sensorName, 6) || !isValidNumber(sensorIndex, 0, 3) || !isValidString(event, 6)) return;
             const blu = this.bluBridgedDevices.get(addr);
@@ -760,6 +662,20 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           // Add event handler from Shelly
           component.on('event', (component: string, event: string, data: ShellyData) => {
             this.log.debug(`Received event ${event} from component ${component}`);
+            // component_added is triggered by a gateway when a component is added
+            if (event === 'component_added') {
+              if (!device.sleepMode) this.changedDevices.set(device.id, device.id);
+              device.log.notice(`Shelly device ${idn}${device.name}${rs}${nt} id ${hk}${device.id}${nt} host ${zb}${device.host}${nt} added a component.`);
+              device.log.notice(`Please restart matterbridge for the change to take effect.`);
+              this.matterbridge.frontend.wssSendRestartRequired();
+            }
+            // component_removed is triggered by a gateway when a component is removed
+            if (event === 'component_removed') {
+              if (!device.sleepMode) this.changedDevices.set(device.id, device.id);
+              device.log.notice(`Shelly device ${idn}${device.name}${rs}${nt} id ${hk}${device.id}${nt} host ${zb}${device.host}${nt} removed a component.`);
+              device.log.notice(`Please restart matterbridge for the change to take effect.`);
+              this.matterbridge.frontend.wssSendRestartRequired();
+            }
             // scheduled_restart is for restart and for reset
             if (event === 'scheduled_restart') {
               if (!device.sleepMode) this.changedDevices.set(device.id, device.id);
@@ -1479,38 +1395,16 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         this.log.debug(
           `Loading from storage Shelly device ${hk}${storedDevice.id}${db} host ${zb}${storedDevice.host}${db} port ${CYAN}${storedDevice.port}${db} gen ${CYAN}${storedDevice.gen}${db}`,
         );
-        // this.shelly.emit('discovered', storedDevice);
-        // add the device to the discoveredDevices map
+        // Add the device to the discoveredDevices map
         this.discoveredDevices.set(storedDevice.id, storedDevice);
-        await this.addDevice(storedDevice.id, storedDevice.host);
+        const device = await this.addDevice(storedDevice.id, storedDevice.host);
+        // Update the device generation in the storage
+        if (device) {
+          storedDevice.gen = device.gen;
+        }
       }
       this.log.info(`Loaded from storage ${this.storedDevices.size} Shelly devices`);
-    }
-
-    // Add all configured devices
-    if (this.config.enableConfigDiscover === true && isValidObject(this.config.deviceIp)) {
-      this.log.info(`Loading from config ${Object.entries(this.config.deviceIp as ConfigDeviceIp).length} Shelly devices`);
-      // eslint-disable-next-line prefer-const
-      for (let [id, host] of Object.entries(this.config.deviceIp as ConfigDeviceIp)) {
-        id = ShellyDevice.normalizeId(id).id;
-        const configDevice: DiscoveredDevice = { id, host, port: 0, gen: 0 };
-        if (configDevice.id === undefined || configDevice.host === undefined || !isValidIpv4Address(configDevice.host)) {
-          this.log.error(`Config Shelly device id ${hk}${configDevice.id}${er} host ${zb}${configDevice.host}${er} is not valid. Please check the plugin config and restart.`);
-          continue;
-        }
-        if (this.discoveredDevices.has(configDevice.id)) {
-          this.log.info(`Config Shelly device id ${hk}${configDevice.id}${nf} host ${zb}${configDevice.host}${nf} already loaded from storage. Skipping.`);
-          continue;
-        }
-        this.log.debug(`Loading from config Shelly device ${hk}${configDevice.id}${db} host ${zb}${configDevice.host}${db}`);
-        // this.shelly.emit('discovered', configDevice);
-        // add the device to the discoveredDevices map
-        this.discoveredDevices.set(configDevice.id, configDevice);
-        this.storedDevices.set(configDevice.id, configDevice);
-        await this.saveStoredDevices();
-        await this.addDevice(configDevice.id, configDevice.host);
-      }
-      this.log.info(`Loaded from config ${Object.entries(this.config.deviceIp as ConfigDeviceIp).length} Shelly devices`);
+      await this.saveStoredDevices();
     }
 
     // start Shelly mDNS device discoverer if enabled
@@ -1810,6 +1704,54 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     this.bluBridgedDevices.forEach((bluDevice) => (bluDevice.log.logLevel = logLevel));
   }
 
+  override async onAction(action: string, value?: string) {
+    if (action === 'addDevice' && value && isValidIpv4Address(value)) {
+      this.log.info(`Adding device on IP address ${zb}${value}${nf}`);
+      const device = await ShellyDevice.create(this.shelly, this.log, value);
+      if (device) {
+        this.discoveredDevices.set(device.id, { id: device.id, host: device.host, port: 80, gen: device.gen });
+        this.storedDevices.set(device.id, { id: device.id, host: device.host, port: 80, gen: device.gen });
+        await this.saveStoredDevices();
+        await this.addDevice(device.id, device.host);
+        device.destroy();
+      } else {
+        this.log.error(`Failed to add device on IP address ${zb}${value}${er}`);
+      }
+    }
+    if (action === 'removeDevice' && value && isValidString(value)) {
+      if (this.shelly.hasDevice(value)) {
+        this.log.warn(`Removing device id ${hk}${value}${wr} while it is still in use. Please blacklist the device first and restart before removing it.`);
+        (this.config as unknown as ShellyPlatformConfig).blackList.push(value);
+        this.shelly.getDevice(value)?.destroy();
+        this.shelly.removeDevice(value);
+        this.matterbridge.frontend.wssSendRestartRequired();
+      }
+      this.log.info(`Removing device id ${hk}${value}${nf}`);
+      this.storedDevices.delete(value);
+      this.changedDevices.delete(value);
+      this.gatewayDevices.delete(value);
+      if (this.nodeStorage) {
+        await this.nodeStorage.set<DiscoveredDevice[]>('DeviceIdentifiers', Array.from(this.storedDevices.values()));
+        await this.nodeStorage.set<string[]>('ChangedDevices', Array.from(this.changedDevices.values()));
+        await this.nodeStorage.set<string[]>('GatewayDevices', Array.from(this.gatewayDevices.values()));
+      }
+      const fileName = path.join(this.matterbridge.matterbridgePluginDirectory, 'matterbridge-shelly', `${value}.json`);
+      try {
+        this.log.debug(`Deleting cache file: ${fileName}`);
+        fs.unlinkSync(fileName);
+        this.log.debug(`Deleted cache file: ${fileName}`);
+        this.log.info(`Removed cache file for device id ${hk}${value}${nf}`);
+      } catch (error) {
+        this.log.debug(`****Failed to delete cache for device ${value} file ${fileName} error: ${error}`);
+      }
+      this.log.info(`Removed device id ${hk}${value}${nf}`);
+    }
+    if (action === 'scanNetwork') {
+      this.log.info(`Scanning the network for Shelly devices`);
+      this.shelly.mdnsScanner.sendQuery();
+    }
+  }
+
   private addTagList(component: ShellyComponent): Semtag[] | undefined {
     if (this.matterbridge.edge) return undefined;
     // Add the tagList to the descriptor cluster
@@ -1869,8 +1811,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     return true;
   }
 
-  // Called from onStart to add a device from storedDevice or configDevice and from discovered shelly event
-  private async addDevice(deviceId: string, host: string) {
+  // Called from onStart to add a device from storedDevice, from discovered shelly event and from onAction()
+  private async addDevice(deviceId: string, host: string): Promise<ShellyDevice | undefined> {
     if (this.shelly.hasDevice(deviceId) || this.shelly.hasDeviceHost(host)) {
       this.log.info(`Shelly device ${hk}${deviceId}${nf} host ${zb}${host}${nf} already added`);
       return;
@@ -1914,8 +1856,10 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       );
       return;
     }
+
     // Set the device in the selectDevice map for the frontend device selection
     this.setSelectDevice(device.id, device.name, 'http://' + host, 'wifi');
+
     // Destroy the device if it is not a gateway device and it is not validated
     if (!this.gatewayDevices.has(device.id) && !this.validateDevice([device.id, device.mac, device.name])) {
       device.destroy();
@@ -1924,5 +1868,145 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
 
     log.logName = device.name ?? device.id;
     await this.shelly.addDevice(device);
+    return device;
+  }
+
+  private async addBluDevice(
+    gateway: ShellyDevice,
+    bthomeDevice: {
+      id: number;
+      key: string;
+      name: string;
+      addr: string;
+      model: string;
+      type: string;
+      blutrv_id: number;
+      packet_id: number;
+      rssi: number;
+      last_updated_ts: number;
+    },
+  ): Promise<void> {
+    this.log.info(
+      `- ${idn}${bthomeDevice.name}${rs}${nf} address ${CYAN}${bthomeDevice.addr}${nf} id ${CYAN}${bthomeDevice.id}${nf} ` +
+        `model ${CYAN}${bthomeDevice.model}${nf} (${CYAN}${bthomeDevice.type}${nf})`,
+    );
+    let definition: AtLeastOne<DeviceTypeDefinition> | undefined;
+    if (bthomeDevice.model === 'Shelly BLU DoorWindow') definition = [bridgedNode, powerSource];
+    else if (bthomeDevice.model === 'Shelly BLU Motion') definition = [bridgedNode, powerSource];
+    else if (bthomeDevice.model === 'Shelly BLU Button1') definition = [genericSwitch, bridgedNode, powerSource];
+    else if (bthomeDevice.model === 'Shelly BLU HT') definition = [bridgedNode, powerSource];
+    else if (bthomeDevice.model === 'Shelly BLU RC Button 4') definition = [bridgedNode, powerSource];
+    else if (bthomeDevice.model === 'Shelly BLU Wall Switch 4') definition = [bridgedNode, powerSource];
+    else if (bthomeDevice.model === 'Shelly BLU Trv') definition = [thermostatDevice, bridgedNode, powerSource];
+    else this.log.error(`Shelly device ${hk}${gateway.id}${er} host ${zb}${gateway.host}${er} has an unknown BLU device model ${CYAN}${bthomeDevice.model}${nf}`);
+    // Check if the BLU device is already registered
+    this.bluBridgedDevices.forEach((blu) => {
+      if (blu.serialNumber === bthomeDevice.addr + (this.postfix ? '-' + this.postfix : '')) {
+        this.log.warn(`BLU device ${idn}${bthomeDevice.name}${rs}${wr} address ${CYAN}${bthomeDevice.addr}${wr} already registered with another ble gateway.`);
+        definition = undefined;
+      }
+    });
+    if (definition) {
+      const mbDevice = new MatterbridgeEndpoint(definition, { uniqueStorageKey: bthomeDevice.name }, this.config.debug as boolean);
+      mbDevice.configUrl = `http://${gateway.host}`;
+      mbDevice.createDefaultBridgedDeviceBasicInformationClusterServer(
+        bthomeDevice.name,
+        bthomeDevice.addr + (this.postfix ? '-' + this.postfix : ''),
+        0xfff1,
+        'Shelly',
+        bthomeDevice.model,
+      );
+      if (bthomeDevice.model === 'Shelly BLU DoorWindow') {
+        mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer();
+        mbDevice.addFixedLabel('composed', 'Sensor');
+        mbDevice.addChildDeviceTypeWithClusterServer('Contact', [contactSensor], [], undefined, this.config.debug as boolean);
+        if (this.validateEntity(bthomeDevice.addr, 'Illuminance'))
+          mbDevice.addChildDeviceTypeWithClusterServer('Illuminance', [lightSensor], [], undefined, this.config.debug as boolean);
+      } else if (bthomeDevice.model === 'Shelly BLU Motion') {
+        mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer();
+        mbDevice.addFixedLabel('composed', 'Sensor');
+        mbDevice.addChildDeviceTypeWithClusterServer('Motion', [occupancySensor], [], undefined, this.config.debug as boolean);
+        if (this.validateEntity(bthomeDevice.addr, 'Illuminance'))
+          mbDevice.addChildDeviceTypeWithClusterServer('Illuminance', [lightSensor], [], undefined, this.config.debug as boolean);
+        if (this.validateEntity(bthomeDevice.addr, 'Button')) mbDevice.addChildDeviceTypeWithClusterServer('Button', [genericSwitch], [], undefined, this.config.debug as boolean);
+      } else if (bthomeDevice.model === 'Shelly BLU Button1') {
+        mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer();
+        mbDevice.createDefaultSwitchClusterServer();
+      } else if (bthomeDevice.model === 'Shelly BLU HT') {
+        mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer();
+        mbDevice.addFixedLabel('composed', 'Sensor');
+        mbDevice.addChildDeviceTypeWithClusterServer('Temperature', [temperatureSensor], [], undefined, this.config.debug as boolean);
+        mbDevice.addChildDeviceTypeWithClusterServer('Humidity', [humiditySensor], [], undefined, this.config.debug as boolean);
+        if (this.validateEntity(bthomeDevice.addr, 'Button')) mbDevice.addChildDeviceTypeWithClusterServer('Button', [genericSwitch], [], undefined, this.config.debug as boolean);
+      } else if (bthomeDevice.model === 'Shelly BLU RC Button 4') {
+        mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer();
+        mbDevice.addFixedLabel('composed', 'Input');
+        mbDevice.addChildDeviceTypeWithClusterServer('Button0', [genericSwitch], [Switch.Cluster.id], undefined, this.config.debug as boolean);
+        mbDevice.addChildDeviceTypeWithClusterServer('Button1', [genericSwitch], [Switch.Cluster.id], undefined, this.config.debug as boolean);
+        mbDevice.addChildDeviceTypeWithClusterServer('Button2', [genericSwitch], [Switch.Cluster.id], undefined, this.config.debug as boolean);
+        mbDevice.addChildDeviceTypeWithClusterServer('Button3', [genericSwitch], [Switch.Cluster.id], undefined, this.config.debug as boolean);
+      } else if (bthomeDevice.model === 'Shelly BLU Wall Switch 4') {
+        mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer();
+        mbDevice.addFixedLabel('composed', 'Input');
+        mbDevice.addChildDeviceTypeWithClusterServer('Button0', [genericSwitch], [Switch.Cluster.id], undefined, this.config.debug as boolean);
+        mbDevice.addChildDeviceTypeWithClusterServer('Button1', [genericSwitch], [Switch.Cluster.id], undefined, this.config.debug as boolean);
+        mbDevice.addChildDeviceTypeWithClusterServer('Button2', [genericSwitch], [Switch.Cluster.id], undefined, this.config.debug as boolean);
+        mbDevice.addChildDeviceTypeWithClusterServer('Button3', [genericSwitch], [Switch.Cluster.id], undefined, this.config.debug as boolean);
+      } else if (bthomeDevice.model === 'Shelly BLU Trv') {
+        mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer(100, PowerSource.BatChargeLevel.Ok, 3000, 'Type AA', 2);
+        mbDevice.createDefaultIdentifyClusterServer();
+        mbDevice.createDefaultHeatingThermostatClusterServer(undefined, undefined, 4, 30);
+        mbDevice.subscribeAttribute(
+          Thermostat.Cluster.id,
+          'systemMode',
+          (newValue: number, oldValue: number) => {
+            if (
+              isValidNumber(newValue, Thermostat.SystemMode.Off, Thermostat.SystemMode.Heat) &&
+              isValidNumber(oldValue, Thermostat.SystemMode.Off, Thermostat.SystemMode.Heat) &&
+              newValue !== oldValue
+            ) {
+              mbDevice.log.info(`Thermostat systemMode changed from ${oldValue} to ${newValue}`);
+              if (oldValue === Thermostat.SystemMode.Heat && newValue === Thermostat.SystemMode.Off) {
+                if (gateway.thermostatSystemModeTimeout) clearTimeout(gateway.thermostatSystemModeTimeout);
+                gateway.thermostatSystemModeTimeout = setTimeout(() => {
+                  mbDevice.setAttribute(Thermostat.Cluster.id, 'systemMode', Thermostat.SystemMode.Heat, mbDevice.log);
+                }, 5000);
+              }
+            }
+          },
+          mbDevice.log,
+        );
+        mbDevice.subscribeAttribute(
+          Thermostat.Cluster.id,
+          'occupiedHeatingSetpoint',
+          (newValue: number, oldValue: number) => {
+            if (isValidNumber(newValue, 4 * 100, 30 * 100) && isValidNumber(oldValue, 4 * 100, 30 * 100) && newValue !== oldValue) {
+              mbDevice.log.info(`Thermostat occupiedHeatingSetpoint changed from ${oldValue / 100} to ${newValue / 100}`);
+              if (gateway.thermostatSetpointTimeout) clearTimeout(gateway.thermostatSetpointTimeout);
+              gateway.thermostatSetpointTimeout = setTimeout(() => {
+                mbDevice.log.info(`Setting thermostat occupiedHeatingSetpoint to ${newValue / 100}`);
+                // http://192.168.1.164/rpc/BluTrv.Call?id=201&method=Trv.SetTarget&params={id:0,target_C:19}
+                ShellyDevice.fetch(this.shelly, mbDevice.log, gateway.host, 'BluTrv.Call', {
+                  id: bthomeDevice.blutrv_id,
+                  method: 'Trv.SetTarget',
+                  params: { id: 0, target_C: newValue / 100 },
+                });
+              }, 5000);
+            }
+          },
+          mbDevice.log,
+        );
+      }
+      mbDevice.addRequiredClusterServers();
+      try {
+        await this.registerDevice(mbDevice);
+        this.bluBridgedDevices.set(bthomeDevice.addr, mbDevice);
+        mbDevice.log.logName = `${bthomeDevice.name}`;
+      } catch (error) {
+        this.log.error(
+          `Shelly device ${hk}${gateway.id}${er} host ${zb}${gateway.host}${er} failed to register BLU device ${idn}${bthomeDevice.name}${rs}${er}: ${error instanceof Error ? error.message : error}`,
+        );
+      }
+    }
   }
 }
