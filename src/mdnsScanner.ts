@@ -4,7 +4,7 @@
  * @file src\mdnsScanner.ts
  * @author Luca Liguori
  * @date 2024-05-01
- * @version 1.2.2
+ * @version 1.2.3
  *
  * Copyright 2024, 2025, 2026 Luca Liguori.
  *
@@ -22,7 +22,7 @@
  */
 
 import { AnsiLogger, BLUE, CYAN, LogLevel, TimestampFormat, db, debugStringify, er, hk, idn, ign, nf, rs, zb } from 'matterbridge/logger';
-import mdns, { ResponsePacket } from 'multicast-dns';
+import mdns, { QueryPacket, ResponsePacket } from 'multicast-dns';
 import EventEmitter from 'node:events';
 import { RemoteInfo, SocketType } from 'node:dgram';
 import { promises as fs } from 'node:fs';
@@ -98,6 +98,7 @@ export class MdnsScanner extends EventEmitter {
       { name: '_shelly._tcp.local', type: 'PTR' },
       { name: '_services._dns-sd._udp.local', type: 'PTR' },
     ]);
+    this.scanner?.query([{ name: '_shelly._tcp.local', type: 'PTR', class: 'IN' }]);
     this.log.debug('Sent mDNS query for shelly devices.');
   }
 
@@ -137,7 +138,12 @@ export class MdnsScanner extends EventEmitter {
       let port = 80; // shellymotionsensor, shellymotion2 send A record before SRV
       let gen = 1;
       this.devices.set(rinfo.address, rinfo.address);
-      if (debug) this.log.debug(`Mdns response from ${ign} ${rinfo.address} family ${rinfo.family} port ${rinfo.port} ${db}`);
+      if (debug) this.log.debug(`Mdns response from ${ign} ${rinfo.address} family ${rinfo.family} port ${rinfo.port} ${rs}${db} id ${response.id} flags ${response.flags}`);
+      if (debug) this.log.debug(`--- response.questions[${response.questions.length}] ---`);
+      for (const q of response.questions) {
+        if (debug) this.log.debug(`[${idn}${q.type}${rs}${db}] Name: ${CYAN}${q.name}${db} class: ${CYAN}${q.class}${db}`);
+      }
+
       if (debug) this.log.debug(`--- response.answers[${response.answers.length}] ---`);
       for (const a of response.answers) {
         if (a.type === 'SRV' && (a.name.startsWith('shelly') || a.name.startsWith('Shelly'))) {
@@ -231,6 +237,19 @@ export class MdnsScanner extends EventEmitter {
           }
         }
       }
+      if (debug) this.log.debug(`--- response.authorities[${response.authorities.length}] ---`);
+      if (debug) this.log.debug(`--- end ---\n`);
+    });
+
+    this.scanner.on('query', (query: QueryPacket, rinfo: RemoteInfo) => {
+      if (debug) this.log.debug(`Mdns query from ${idn} ${rinfo.address} family ${rinfo.family} port ${rinfo.port} ${rs}${db} id ${query.id} flags ${query.flags}`);
+      if (debug) this.log.debug(`--- query.questions[${query.questions.length}] ---`);
+      for (const q of query.questions) {
+        if (debug) this.log.debug(`[${ign}${q.type}${rs}${db}] Name: ${CYAN}${q.name}${db} class: ${CYAN}${q.class}${db}`);
+      }
+      if (debug) this.log.debug(`--- query.answers[${query.answers.length}] ---`);
+      if (debug) this.log.debug(`--- query.additionals[${query.additionals.length}] ---`);
+      if (debug) this.log.debug(`--- query.authorities[${query.authorities.length}] ---`);
       if (debug) this.log.debug(`--- end ---\n`);
     });
 
@@ -398,4 +417,41 @@ if (process.argv.includes('testMdnsScanner')) {
     mdnsScannerIpv6.stop();
   });
 }
+[12:58:57.941] [ShellyMdnsScanner] Mdns query from  192.168.1.40 family IPv4 port 5353
+[12:58:57.941] [ShellyMdnsScanner] --- query.questions[1] ---
+[12:58:57.941] [ShellyMdnsScanner] [PTR] Name: _shelly._tcp.local class: UNKNOWN_32769
+[12:58:57.941] [ShellyMdnsScanner] --- end ---
+
+[12:58:58.202] [ShellyMdnsScanner] Mdns query from  192.168.1.40 family IPv4 port 5353
+[12:58:58.203] [ShellyMdnsScanner] --- query.questions[1] ---
+[12:58:58.203] [ShellyMdnsScanner] [PTR] Name: _shelly._tcp.local class: IN
+[12:58:58.203] [ShellyMdnsScanner] --- end ---
+
+[12:58:59.228] [ShellyMdnsScanner] Mdns query from  192.168.1.40 family IPv4 port 5353
+[12:58:59.228] [ShellyMdnsScanner] --- query.questions[3] ---
+[12:58:59.228] [ShellyMdnsScanner] [PTR] Name: _shelly._tcp.local class: IN
+[12:58:59.228] [ShellyMdnsScanner] [AAAA] Name: ShellyPlus1PM-CC7B5C0AB624.local class: UNKNOWN_32769
+[12:58:59.229] [ShellyMdnsScanner] [AAAA] Name: ShellyPlus2PM-08F9E0FD173C.local class: UNKNOWN_32769
+[12:58:59.229] [ShellyMdnsScanner] --- end ---
+
+[12:58:59.231] [ShellyMdnsScanner] Mdns query from  192.168.1.40 family IPv4 port 5353
+[12:58:59.231] [ShellyMdnsScanner] --- query.questions[12] ---
+[12:58:59.231] [ShellyMdnsScanner] [AAAA] Name: ShellyPlusRGBWPM-ECC9FF4CEAF0.local class: UNKNOWN_32769
+[12:58:59.231] [ShellyMdnsScanner] [AAAA] Name: ShellyPlus010V-80646FE1FAC4.local class: UNKNOWN_32769
+[12:58:59.231] [ShellyMdnsScanner] [AAAA] Name: ShellyPlus2PM-1C692044F140.local class: UNKNOWN_32769
+[12:58:59.231] [ShellyMdnsScanner] [AAAA] Name: ShellyPlusI4-D48AFC41B6F4.local class: UNKNOWN_32769
+[12:58:59.231] [ShellyMdnsScanner] [AAAA] Name: ShellyBluGw-B0B21CFAAD18.local class: UNKNOWN_32769
+[12:58:59.231] [ShellyMdnsScanner] [AAAA] Name: ShellyPlusPlugS-E86BEAEAA000.local class: UNKNOWN_32769
+[12:58:59.231] [ShellyMdnsScanner] [AAAA] Name: ShellyPlus2PM-5443B23D81F8.local class: UNKNOWN_32769
+[12:58:59.231] [ShellyMdnsScanner] [AAAA] Name: ShellyPlus1PM-441793D69718.local class: UNKNOWN_32769
+[12:58:59.231] [ShellyMdnsScanner] [AAAA] Name: ShellyPlus2PM-30C922810DA0.local class: UNKNOWN_32769
+[12:58:59.231] [ShellyMdnsScanner] [AAAA] Name: Shelly2PMG3-34CDB0770C4C.local class: UNKNOWN_32769
+[12:58:59.231] [ShellyMdnsScanner] [AAAA] Name: Shelly1G3-DCDA0CDEEC20.local class: UNKNOWN_32769
+[12:58:59.232] [ShellyMdnsScanner] [AAAA] Name: ShellyPlus2PM-30C92286CB68.local class: UNKNOWN_32769
+[12:58:59.232] [ShellyMdnsScanner] --- end ---
+
+[12:58:59.739] [ShellyMdnsScanner] Mdns query from  192.168.1.40 family IPv4 port 5353
+[12:58:59.739] [ShellyMdnsScanner] --- query.questions[2] ---
+[12:58:59.739] [ShellyMdnsScanner] [AAAA] Name: ShellyPlus1-E465B8F3028C.local class: UNKNOWN_32769
+[12:58:59.740] [ShellyMdnsScanner] [AAAA] Name: ShellyBluGw-B0B21CFC5080.local class: UNKNOWN_32769
 */
