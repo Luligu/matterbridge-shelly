@@ -47,6 +47,10 @@ The expertMode option has been added to show an advanced or simplified config.
 - [BLU]: Verified new BLU firmware 1.0.22 on all BLU devices.
 - [TRV]: Verified new BLU TRV firmware 1.2.1.
 
+### Removed
+
+- [fetch]: Removed node-fetch package and use the global fetch.
+
 ### Changed
 
 - [config] Removed enableConfigDiscover and deviceIp. Replaced by a config action (manually add a device with IP address).

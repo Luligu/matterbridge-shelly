@@ -108,7 +108,6 @@
     "coap": "1.4.1",
     "multicast-dns": "7.2.5",
     "node-ansi-logger": "3.0.1",
-    "node-fetch": "3.3.2",
     "node-persist-manager": "1.0.8",
     "ws": "8.18.1"
   },
