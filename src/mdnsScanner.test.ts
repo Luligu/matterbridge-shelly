@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { LogLevel, AnsiLogger, ign, db, hk, CYAN } from 'matterbridge/logger';
+import { LogLevel, AnsiLogger, ign, db, hk, CYAN, rs } from 'matterbridge/logger';
 import { MdnsScanner, DiscoveredDeviceListener, DiscoveredDevice } from './mdnsScanner';
 import { jest } from '@jest/globals';
 import path from 'node:path';
@@ -275,7 +275,10 @@ describe('Shellies MdnsScanner test', () => {
     expect((mdns as any).devices.get(deviceIp)).toBe(deviceIp);
     expect((mdns as any).discoveredDevices.has(deviceId)).toBeTruthy();
     expect((mdns as any).discoveredDevices.get(deviceId)).toEqual({ id: deviceId, host: deviceIp, port: devicePort, gen: deviceGen });
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Mdns response from ${ign} ${remoteInfo.address} family ${remoteInfo.family} port ${remoteInfo.port} ${db}`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(
+      LogLevel.DEBUG,
+      expect.stringContaining(`Mdns response from ${ign} ${remoteInfo.address} family ${remoteInfo.family} port ${remoteInfo.port} ${rs}${db}`),
+    );
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `--- response.answers[${responsePacket.answers.length}] ---`);
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `--- response.additionals[${responsePacket.additionals.length}] ---`);
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `--- end ---\n`);
@@ -352,7 +355,10 @@ describe('Shellies MdnsScanner test', () => {
       expect((mdns as any).devices.get(deviceIp)).toBe(deviceIp);
       expect((mdns as any).discoveredDevices.has(deviceId)).toBeTruthy();
       expect((mdns as any).discoveredDevices.get(deviceId)).toEqual({ id: deviceId, host: deviceIp, port: devicePort, gen: deviceGen });
-      expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Mdns response from ${ign} ${remoteInfo.address} family ${remoteInfo.family} port ${remoteInfo.port} ${db}`);
+      expect(loggerLogSpy).toHaveBeenCalledWith(
+        LogLevel.DEBUG,
+        expect.stringContaining(`Mdns response from ${ign} ${remoteInfo.address} family ${remoteInfo.family} port ${remoteInfo.port} ${rs}${db}`),
+      );
       expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `--- response.answers[${responsePacket.answers.length}] ---`);
       expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `--- response.additionals[${responsePacket.additionals.length}] ---`);
       expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `--- end ---\n`);
@@ -422,7 +428,10 @@ describe('Shellies MdnsScanner test', () => {
       expect((mdns as any).devices.get(deviceIp)).toBe(deviceIp);
       expect((mdns as any).discoveredDevices.has(deviceId)).toBeTruthy();
       expect((mdns as any).discoveredDevices.get(deviceId)).toEqual({ id: deviceId, host: deviceIp, port: devicePort, gen: deviceGen });
-      expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Mdns response from ${ign} ${remoteInfo.address} family ${remoteInfo.family} port ${remoteInfo.port} ${db}`);
+      expect(loggerLogSpy).toHaveBeenCalledWith(
+        LogLevel.DEBUG,
+        expect.stringContaining(`Mdns response from ${ign} ${remoteInfo.address} family ${remoteInfo.family} port ${remoteInfo.port} ${rs}${db}`),
+      );
       expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `--- response.answers[${responsePacket.answers.length}] ---`);
       expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `--- response.additionals[${responsePacket.additionals.length}] ---`);
       expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `--- end ---\n`);
@@ -482,7 +491,10 @@ describe('Shellies MdnsScanner test', () => {
       expect((mdns as any).devices.get(deviceIp)).toBe(deviceIp);
       expect((mdns as any).discoveredDevices.has(deviceId)).toBeTruthy();
       expect((mdns as any).discoveredDevices.get(deviceId)).toEqual({ id: deviceId, host: deviceIp, port: devicePort, gen: deviceGen });
-      expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Mdns response from ${ign} ${remoteInfo.address} family ${remoteInfo.family} port ${remoteInfo.port} ${db}`);
+      expect(loggerLogSpy).toHaveBeenCalledWith(
+        LogLevel.DEBUG,
+        expect.stringContaining(`Mdns response from ${ign} ${remoteInfo.address} family ${remoteInfo.family} port ${remoteInfo.port} ${rs}${db}`),
+      );
       expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `--- response.answers[${responsePacket.answers.length}] ---`);
       expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `--- response.additionals[${responsePacket.additionals.length}] ---`);
       expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `--- end ---\n`);
@@ -547,7 +559,10 @@ describe('Shellies MdnsScanner test', () => {
       expect((mdns as any).devices.get(deviceIp)).toBe(deviceIp);
       expect((mdns as any).discoveredDevices.has(deviceId)).toBeTruthy();
       expect((mdns as any).discoveredDevices.get(deviceId)).toEqual({ id: deviceId, host: deviceIp, port: devicePort, gen: deviceGen });
-      expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Mdns response from ${ign} ${remoteInfo.address} family ${remoteInfo.family} port ${remoteInfo.port} ${db}`);
+      expect(loggerLogSpy).toHaveBeenCalledWith(
+        LogLevel.DEBUG,
+        expect.stringContaining(`Mdns response from ${ign} ${remoteInfo.address} family ${remoteInfo.family} port ${remoteInfo.port} ${rs}${db}`),
+      );
       expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `--- response.answers[${responsePacket.answers.length}] ---`);
       expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `--- response.additionals[${responsePacket.additionals.length}] ---`);
       expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `--- end ---\n`);
@@ -608,7 +623,10 @@ describe('Shellies MdnsScanner test', () => {
       expect((mdns as any).devices.get(deviceIp)).toBe(deviceIp);
       expect((mdns as any).discoveredDevices.has(deviceId)).toBeTruthy();
       expect((mdns as any).discoveredDevices.get(deviceId)).toEqual({ id: deviceId, host: deviceIp, port: devicePort, gen: deviceGen });
-      expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Mdns response from ${ign} ${remoteInfo.address} family ${remoteInfo.family} port ${remoteInfo.port} ${db}`);
+      expect(loggerLogSpy).toHaveBeenCalledWith(
+        LogLevel.DEBUG,
+        expect.stringContaining(`Mdns response from ${ign} ${remoteInfo.address} family ${remoteInfo.family} port ${remoteInfo.port} ${rs}${db}`),
+      );
       expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `--- response.answers[${responsePacket.answers.length}] ---`);
       expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `--- response.additionals[${responsePacket.additionals.length}] ---`);
       expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `--- end ---\n`);

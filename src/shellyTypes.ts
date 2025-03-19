@@ -21,6 +21,9 @@
  * limitations under the License. *
  */
 
+type AnyPrimitive = string | number | bigint | boolean | symbol | null | undefined;
+export type AnyValue = AnyPrimitive | AnyPrimitive[] | Record<string, AnyPrimitive>;
+
 export declare type ParamsTypes = boolean | number | string;
 
 export type ShellyDeviceId = string;

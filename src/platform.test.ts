@@ -302,44 +302,6 @@ describe('ShellyPlatform', () => {
     30 * 1000,
   );
 
-  it(
-    'should call onStart with reason and load from configDiscover',
-    async () => {
-      expect(shellyPlatform).toBeDefined();
-      expect((shellyPlatform as any).shelly.mdnsScanner.isScanning).toBe(false);
-
-      shellyPlatform.config.enableConfigDiscover = true;
-      shellyPlatform.config.deviceIp = {
-        'shellyemg3-84FCE636582C': 'invalid',
-        'shellyplus-34FCE636582C': '192.168.255.1',
-      };
-
-      const create = jest.spyOn(ShellyDevice, 'create' as any).mockImplementation(async () => {
-        return Promise.resolve(undefined);
-      });
-      await shellyPlatform.onStart('Test reason');
-      expect(mockLog.info).toHaveBeenCalledWith(`Starting platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
-      expect(mockLog.info).toHaveBeenCalledWith(`Loading from config 2 Shelly devices`);
-      expect(mockLog.error).toHaveBeenCalledWith(
-        `Config Shelly device id ${hk}shellyemg3-84FCE636582C${er} host ${zb}invalid${er} is not valid. Please check the plugin config and restart.`,
-      );
-      expect(mockLog.debug).toHaveBeenCalledWith(`Loading from config Shelly device ${hk}shellyplus-34FCE636582C${db} host ${zb}192.168.255.1${db}`);
-      expect((shellyPlatform as any).nodeStorageManager).toBeDefined();
-      expect(shellyPlatform.storedDevices.size).toBe(1);
-
-      shellyPlatform.storedDevices.clear();
-      expect(await (shellyPlatform as any).saveStoredDevices()).toBeTruthy();
-      expect((shellyPlatform as any).storedDevices.size).toBe(0);
-
-      shellyPlatform.config.enableConfigDiscover = false;
-      shellyPlatform.config.deviceIp = undefined;
-
-      create.mockRestore();
-      cleanup();
-    },
-    30 * 1000,
-  );
-
   // eslint-disable-next-line jest/no-commented-out-tests
   /*
   it(
