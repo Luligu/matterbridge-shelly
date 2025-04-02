@@ -1,0 +1,212 @@
+{
+  "shelly": {
+    "name": null,
+    "id": "shellyazplug-e4b3232dc0cc",
+    "mac": "E4B3232DC0CC",
+    "slot": 1,
+    "model": "S3PL-10112EU",
+    "gen": 3,
+    "fw_id": "20240401-123859/1.2.2-plugazprod0-gfef7812",
+    "ver": "1.2.2-plugazprod0",
+    "app": "PlugAZ",
+    "auth_en": false,
+    "auth_domain": null
+  },
+  "settings": {
+    "ble": {
+      "enable": false,
+      "rpc": {
+        "enable": true
+      },
+      "observer": {
+        "enable": false
+      }
+    },
+    "cloud": {
+      "enable": true,
+      "server": "repo.shelly.cloud:6022/jrpc"
+    },
+    "mqtt": {
+      "enable": false,
+      "server": null,
+      "client_id": "shellyazplug-e4b3232dc0cc",
+      "user": null,
+      "ssl_ca": null,
+      "topic_prefix": "shellyazplug-e4b3232dc0cc",
+      "rpc_ntf": true,
+      "status_ntf": false,
+      "enable_rpc": true,
+      "enable_control": true
+    },
+    "plugs_ui": {
+      "leds": {
+        "mode": "power",
+        "colors": {
+          "switch:0": {
+            "on": {
+              "rgb": [0, 100, 0],
+              "brightness": 100
+            },
+            "off": {
+              "rgb": [100, 0, 0],
+              "brightness": 100
+            }
+          },
+          "power": {
+            "brightness": 100
+          }
+        },
+        "night_mode": {
+          "enable": false,
+          "brightness": 100,
+          "active_between": []
+        }
+      },
+      "controls": {
+        "switch:0": {
+          "in_mode": "momentary"
+        }
+      }
+    },
+    "switch:0": {
+      "id": 0,
+      "name": null,
+      "initial_state": "off",
+      "auto_on": false,
+      "auto_on_delay": 60,
+      "auto_off": false,
+      "auto_off_delay": 60,
+      "power_limit": 2500,
+      "voltage_limit": 280,
+      "autorecover_voltage_errors": false,
+      "current_limit": 12
+    },
+    "sys": {
+      "device": {
+        "name": null,
+        "mac": "E4B3232DC0CC",
+        "fw_id": "20240401-123859/1.2.2-plugazprod0-gfef7812",
+        "discoverable": true,
+        "eco_mode": false
+      },
+      "location": null,
+      "debug": {
+        "level": 2,
+        "file_level": null,
+        "mqtt": {
+          "enable": false
+        },
+        "websocket": {
+          "enable": false
+        },
+        "udp": {
+          "addr": null
+        }
+      },
+      "ui_data": {},
+      "rpc_udp": {
+        "dst_addr": null,
+        "listen_port": null
+      },
+      "sntp": {
+        "server": "time.google.com"
+      },
+      "cfg_rev": 7
+    },
+    "wifi": {
+      "ap": {
+        "ssid": "",
+        "is_open": true,
+        "enable": false
+      },
+      "sta": {
+        "ssid": "",
+        "is_open": false,
+        "enable": true,
+        "ipv4mode": "dhcp",
+        "ip": null,
+        "netmask": null,
+        "gw": null,
+        "nameserver": null
+      },
+      "sta1": {
+        "ssid": "",
+        "is_open": true,
+        "enable": false,
+        "ipv4mode": "dhcp",
+        "ip": null,
+        "netmask": null,
+        "gw": null,
+        "nameserver": null
+      },
+      "roam": {
+        "rssi_thr": -80,
+        "interval": 60
+      }
+    }
+  },
+  "status": {
+    "ble": {},
+    "cloud": {
+      "connected": true
+    },
+    "mqtt": {
+      "connected": false
+    },
+    "plugs_ui": {},
+    "switch:0": {
+      "id": 0,
+      "source": "init",
+      "output": false,
+      "apower": 0,
+      "voltage": 237.5,
+      "freq": 50.1,
+      "current": 0,
+      "aenergy": {
+        "total": 3,
+        "by_minute": [0, 0, 0],
+        "minute_ts": 1741253580
+      },
+      "ret_aenergy": {
+        "total": 0,
+        "by_minute": [0, 0, 0],
+        "minute_ts": 1741253580
+      },
+      "temperature": {
+        "tC": 37.9,
+        "tF": 100.2
+      }
+    },
+    "sys": {
+      "mac": "E4B3232DC0CC",
+      "restart_required": false,
+      "time": "11:33",
+      "unixtime": 1741253606,
+      "uptime": 1908195,
+      "ram_size": 254688,
+      "ram_free": 143656,
+      "fs_size": 1048576,
+      "fs_free": 741376,
+      "cfg_rev": 7,
+      "kvs_rev": 0,
+      "schedule_rev": 0,
+      "webhook_rev": 0,
+      "available_updates": {
+        "stable": {
+          "version": "1.3.3"
+        }
+      },
+      "reset_reason": 1
+    },
+    "wifi": {
+      "sta_ip": "10.101.9.166",
+      "status": "got ip",
+      "ssid": "",
+      "rssi": -53
+    }
+  },
+  "components": [],
+  "cfg_rev": 7,
+  "offset": 0,
+  "total": 0
+}

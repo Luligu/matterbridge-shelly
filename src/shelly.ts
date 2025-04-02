@@ -32,7 +32,7 @@ import { DiscoveredDevice, MdnsScanner } from './mdnsScanner.js';
 import { CoapServer } from './coapServer.js';
 import { WsClient } from './wsClient.js';
 import { WsServer } from './wsServer.js';
-import { ShellyData, ShellyDataType, ShellyDeviceId } from './shellyTypes.js';
+import { ShellyData, ShellyDataType, ShellyDeviceId, ShellyEvent } from './shellyTypes.js';
 
 /**
  * Creates a new instance of the Shelly class.
@@ -66,7 +66,7 @@ export class Shelly extends EventEmitter {
     this.username = username;
     this.password = password;
     this.mdnsScanner = new MdnsScanner();
-    this.coapServer = new CoapServer();
+    this.coapServer = new CoapServer(this);
     this.wsServer = new WsServer();
 
     // Handle wssupdate from WsServer
@@ -110,7 +110,7 @@ export class Shelly extends EventEmitter {
         device.cached = false;
         this.log.debug(`Device ${hk}${device.id}${db} host ${zb}${device.host}${db} sent a WebSocket message: setting cached to false`);
       }
-      if (isValidObject(params, 1) && isValidArray(params.events, 1)) device.onEvent(params.events as ShellyData[]);
+      if (isValidObject(params, 1) && isValidArray(params.events, 1)) device.onEvent(params.events as ShellyEvent[]);
     });
 
     this.mdnsScanner.on('discovered', async (device: DiscoveredDevice) => {

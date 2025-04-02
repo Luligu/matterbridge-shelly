@@ -1,0 +1,111 @@
+{
+  "id": 0,
+  "type": "response",
+  "flags": 1024,
+  "flag_qr": true,
+  "opcode": "QUERY",
+  "flag_aa": true,
+  "flag_tc": false,
+  "flag_rd": false,
+  "flag_ra": false,
+  "flag_z": false,
+  "flag_ad": false,
+  "flag_cd": false,
+  "rcode": "NOERROR",
+  "questions": [],
+  "answers": [
+    {
+      "name": "_http._tcp.local",
+      "type": "PTR",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": "shelly3em63g3-84fce6367400._http._tcp.local"
+    },
+    {
+      "name": "_shelly._tcp.local",
+      "type": "PTR",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": "shelly3em63g3-84fce6367400._shelly._tcp.local"
+    },
+    {
+      "name": "_services._dns-sd._udp.local",
+      "type": "PTR",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": "_shelly._tcp.local"
+    },
+    {
+      "name": "_services._dns-sd._udp.local",
+      "type": "PTR",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": "_http._tcp.local"
+    }
+  ],
+  "authorities": [],
+  "additionals": [
+    {
+      "name": "shelly3em63g3-84fce6367400._http._tcp.local",
+      "type": "SRV",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": {
+        "priority": 0,
+        "weight": 0,
+        "port": 80,
+        "target": "Shelly3EM63G3-84FCE6367400.local"
+      }
+    },
+    {
+      "name": "shelly3em63g3-84fce6367400._http._tcp.local",
+      "type": "TXT",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": ["gen=3"]
+    },
+    {
+      "name": "Shelly3EM63G3-84FCE6367400.local",
+      "type": "A",
+      "ttl": 120,
+      "class": "IN",
+      "flush": true,
+      "data": "10.101.8.93"
+    },
+    {
+      "name": "shelly3em63g3-84fce6367400._shelly._tcp.local",
+      "type": "SRV",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": {
+        "priority": 0,
+        "weight": 0,
+        "port": 80,
+        "target": "Shelly3EM63G3-84FCE6367400.local"
+      }
+    },
+    {
+      "name": "shelly3em63g3-84fce6367400._shelly._tcp.local",
+      "type": "TXT",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": ["gen=3", "app=S3EMG3", "ver=1.4.99-dev111396"]
+    },
+    {
+      "name": "Shelly3EM63G3-84FCE6367400.local",
+      "type": "A",
+      "ttl": 120,
+      "class": "IN",
+      "flush": true,
+      "data": "10.101.8.93"
+    }
+  ]
+}

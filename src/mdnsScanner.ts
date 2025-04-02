@@ -28,7 +28,6 @@ import { RemoteInfo, SocketType } from 'node:dgram';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { ShellyDeviceId } from './shellyTypes.js';
-// import { getIpv4InterfaceAddress, getIpv6InterfaceAddress } from 'matterbridge/utils';
 
 export interface DiscoveredDevice {
   id: ShellyDeviceId;
@@ -410,8 +409,8 @@ if (process.argv.includes('testMdnsScanner')) {
   // mdnsScanner.start(0, 'fd78:cbf8:4939:746:d555:85a9:74f6:9c6', 'udp6', true);
   // mdnsScannerIpv6.start(0, '::', 'udp6', true);
   // mdnsScanner.start(0, '192.168.1.189', 'udp4', true);
-  mdnsScannerIpv4.start(0, getIpv4InterfaceAddress(), 'udp4', true);
-  mdnsScannerIpv6.start(0, getIpv6InterfaceAddress(), 'udp6', true);
+  mdnsScannerIpv4.start(0, 0, getIpv4InterfaceAddress(), 'udp4', true);
+  mdnsScannerIpv6.start(0, 0, getIpv6InterfaceAddress(), 'udp6', true);
   // mdnsScanner.start(0, undefined, undefined, true);
 
   process.on('SIGINT', async function () {
@@ -419,6 +418,8 @@ if (process.argv.includes('testMdnsScanner')) {
     mdnsScannerIpv6.stop();
   });
 }
+*/
+/*
 [12:58:57.941] [ShellyMdnsScanner] Mdns query from  192.168.1.40 family IPv4 port 5353
 [12:58:57.941] [ShellyMdnsScanner] --- query.questions[1] ---
 [12:58:57.941] [ShellyMdnsScanner] [PTR] Name: _shelly._tcp.local class: UNKNOWN_32769

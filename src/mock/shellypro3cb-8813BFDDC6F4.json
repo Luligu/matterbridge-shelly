@@ -1,0 +1,234 @@
+{
+  "shelly": {
+    "name": null,
+    "id": "shellypro3cb-8813bfddc6f4",
+    "mac": "8813BFDDC6F4",
+    "slot": 1,
+    "model": "SPCB-03VENEU",
+    "gen": 2,
+    "fw_id": "20240807-105613/r1.4-125-ga4449ff27-main",
+    "ver": "1.4.99",
+    "app": "ProCB",
+    "auth_en": false,
+    "auth_domain": null
+  },
+  "settings": {
+    "ble": {
+      "enable": true,
+      "rpc": {
+        "enable": true
+      },
+      "observer": {
+        "enable": false
+      }
+    },
+    "bthome": {},
+    "cb:0": {
+      "id": 0,
+      "name": null,
+      "undervoltage_limit": 200,
+      "voltage_limit": 250,
+      "reaction_delay": 0
+    },
+    "cloud": {
+      "enable": true,
+      "server": "repo.shelly.cloud:6022/jrpc"
+    },
+    "eth": {
+      "enable": true,
+      "server_mode": false,
+      "ipv4mode": "dhcp",
+      "ip": null,
+      "netmask": null,
+      "gw": null,
+      "nameserver": null
+    },
+    "mqtt": {
+      "enable": false,
+      "server": null,
+      "client_id": "shellypro3cb-8813bfddc6f4",
+      "user": null,
+      "ssl_ca": null,
+      "topic_prefix": "shellypro3cb-8813bfddc6f4",
+      "rpc_ntf": true,
+      "status_ntf": false,
+      "use_client_cert": false,
+      "enable_rpc": true,
+      "enable_control": true
+    },
+    "sys": {
+      "device": {
+        "name": null,
+        "mac": "8813BFDDC6F4",
+        "fw_id": "20240807-105613/r1.4-125-ga4449ff27-main",
+        "discoverable": true,
+        "eco_mode": false
+      },
+      "location": null,
+      "debug": {
+        "level": 2,
+        "file_level": null,
+        "mqtt": {
+          "enable": false
+        },
+        "websocket": {
+          "enable": false
+        },
+        "file_log": {
+          "enable": false
+        },
+        "udp": {
+          "addr": null
+        }
+      },
+      "ui_data": {},
+      "rpc_udp": {
+        "dst_addr": null,
+        "listen_port": null
+      },
+      "sntp": {
+        "server": "time.google.com"
+      },
+      "cfg_rev": 14
+    },
+    "voltmeter:0": {
+      "id": 0,
+      "name": null,
+      "report_thr": 5,
+      "xvoltage": {
+        "expr": "x*50",
+        "unit": "l"
+      }
+    },
+    "voltmeter:1": {
+      "id": 1,
+      "name": null,
+      "report_thr": 5,
+      "xvoltage": {
+        "expr": null,
+        "unit": null
+      }
+    },
+    "voltmeter:2": {
+      "id": 2,
+      "name": null,
+      "report_thr": 5,
+      "xvoltage": {
+        "expr": null,
+        "unit": null
+      }
+    },
+    "wifi": {
+      "ap": {
+        "ssid": "",
+        "is_open": true,
+        "enable": false,
+        "range_extender": {
+          "enable": false
+        }
+      },
+      "sta": {
+        "ssid": "",
+        "is_open": false,
+        "enable": true,
+        "ipv4mode": "dhcp",
+        "ip": null,
+        "netmask": null,
+        "gw": null,
+        "nameserver": null
+      },
+      "sta1": {
+        "ssid": "",
+        "is_open": true,
+        "enable": false,
+        "ipv4mode": "dhcp",
+        "ip": null,
+        "netmask": null,
+        "gw": null,
+        "nameserver": null
+      },
+      "roam": {
+        "rssi_thr": -80,
+        "interval": 60
+      }
+    },
+    "ws": {
+      "enable": false,
+      "server": null,
+      "ssl_ca": "ca.pem"
+    }
+  },
+  "status": {
+    "ble": {},
+    "bthome": {
+      "errors": ["observer_disabled"]
+    },
+    "cb:0": {
+      "id": 0,
+      "output": true,
+      "source": "local",
+      "total_cycles": 35,
+      "safety": true,
+      "temperature": {
+        "tC": 49.4,
+        "tF": 121
+      }
+    },
+    "cloud": {
+      "connected": true
+    },
+    "eth": {
+      "ip": null
+    },
+    "mqtt": {
+      "connected": false
+    },
+    "sys": {
+      "mac": "8813BFDDC6F4",
+      "restart_required": false,
+      "time": "11:35",
+      "unixtime": 1741253744,
+      "uptime": 1122549,
+      "ram_size": 266804,
+      "ram_free": 87960,
+      "fs_size": 524288,
+      "fs_free": 217088,
+      "cfg_rev": 14,
+      "kvs_rev": 0,
+      "schedule_rev": 0,
+      "webhook_rev": 4,
+      "available_updates": {
+        "test": {
+          "version": "1.5.99-dev114743"
+        }
+      },
+      "reset_reason": 1
+    },
+    "voltmeter:0": {
+      "id": 0,
+      "voltage": 242.05,
+      "xvoltage": 12102.26
+    },
+    "voltmeter:1": {
+      "id": 1,
+      "voltage": 240.15
+    },
+    "voltmeter:2": {
+      "id": 2,
+      "voltage": 240.08
+    },
+    "wifi": {
+      "sta_ip": "10.101.1.242",
+      "status": "got ip",
+      "ssid": "",
+      "rssi": -60
+    },
+    "ws": {
+      "connected": false
+    }
+  },
+  "components": [],
+  "cfg_rev": 14,
+  "offset": 0,
+  "total": 0
+}

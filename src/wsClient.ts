@@ -130,7 +130,6 @@ export class WsClient extends EventEmitter {
   // PingPong
   private pingInterval?: NodeJS.Timeout;
   private pongTimeout?: NodeJS.Timeout;
-  private stopTimeout?: NodeJS.Timeout;
 
   // Define the request frame without auth
   private requestFrame: RequestFrame = {
@@ -242,7 +241,7 @@ export class WsClient extends EventEmitter {
 
         // Set a timeout to wait for a pong response
         this.pongTimeout = setTimeout(() => {
-          this.log.error(`Pong not received from device ${hk}${this.wsDeviceId}${er} host ${zb}${this.wsHost}${er}, closing connection.`);
+          this.log.warn(`Pong not received from device ${hk}${this.wsDeviceId}${er} host ${zb}${this.wsHost}${er}, closing connection.`);
           this.wsClient?.terminate(); // Close the connection if pong is not received
         }, pingTimeout);
       }
@@ -302,7 +301,7 @@ export class WsClient extends EventEmitter {
 
     // Handle the open event
     this.wsClient.on('open', () => {
-      this.log.debug(`WebSocket connection opened with Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}`);
+      this.log.info(`WebSocket connection opened with Shelly device ${hk}${this.wsDeviceId}${nf} host ${zb}${this.wsHost}${nf}`);
       this._isConnecting = false;
       this._isConnected = true;
       if (this.wsClient?.readyState === WebSocket.OPEN) {

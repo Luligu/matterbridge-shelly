@@ -1,0 +1,187 @@
+{
+  "shelly": {
+    "name": null,
+    "id": "shellyplusht-08b61fcd36a8",
+    "mac": "08B61FCD36A8",
+    "model": "SNSN-0013A",
+    "gen": 2,
+    "fw_id": "20230308-091102/0.14.1-g22a4cb7",
+    "ver": "0.14.1",
+    "app": "PlusHT",
+    "auth_en": false,
+    "auth_domain": null
+  },
+  "settings": {
+    "ble": {
+      "enable": false,
+      "rpc": {
+        "enable": true
+      },
+      "observer": {
+        "enable": false
+      }
+    },
+    "cloud": {
+      "enable": true,
+      "server": "repo.shelly.cloud:6022/jrpc"
+    },
+    "devicepower:0": {},
+    "ht_ui": {
+      "temperature_unit": "C"
+    },
+    "humidity:0": {
+      "id": 0,
+      "name": null,
+      "report_thr": 5,
+      "offset": 0
+    },
+    "mqtt": {
+      "enable": false,
+      "server": null,
+      "client_id": "shellyplusht-08b61fcd36a8",
+      "user": null,
+      "topic_prefix": "shellyplusht-08b61fcd36a8",
+      "rpc_ntf": true,
+      "status_ntf": false,
+      "use_client_cert": false,
+      "enable_rpc": true,
+      "enable_control": true
+    },
+    "sys": {
+      "device": {
+        "name": null,
+        "mac": "08B61FCD36A8",
+        "fw_id": "20230308-091102/0.14.1-g22a4cb7",
+        "discoverable": true
+      },
+      "location": null,
+      "debug": {
+        "mqtt": {
+          "enable": false
+        },
+        "websocket": {
+          "enable": false
+        },
+        "udp": {
+          "addr": null
+        }
+      },
+      "ui_data": {},
+      "rpc_udp": {
+        "dst_addr": null,
+        "listen_port": null
+      },
+      "sntp": {
+        "server": "time.google.com"
+      },
+      "sleep": {
+        "wakeup_period": 7200
+      },
+      "cfg_rev": 13
+    },
+    "temperature:0": {
+      "id": 0,
+      "name": null,
+      "report_thr_C": 0.5,
+      "offset_C": 0
+    },
+    "wifi": {
+      "ap": {
+        "ssid": "",
+        "is_open": true,
+        "enable": false
+      },
+      "sta": {
+        "ssid": "",
+        "is_open": false,
+        "enable": true,
+        "ipv4mode": "dhcp",
+        "ip": null,
+        "netmask": null,
+        "gw": null,
+        "nameserver": null
+      },
+      "sta1": {
+        "ssid": "",
+        "is_open": true,
+        "enable": false,
+        "ipv4mode": "dhcp",
+        "ip": null,
+        "netmask": null,
+        "gw": null,
+        "nameserver": null
+      },
+      "roam": {
+        "rssi_thr": -80,
+        "interval": 60
+      }
+    },
+    "ws": {
+      "enable": false,
+      "server": null,
+      "ssl_ca": "ca.pem"
+    }
+  },
+  "status": {
+    "ble": {},
+    "cloud": {
+      "connected": false
+    },
+    "devicepower:0": {
+      "id": 0,
+      "battery": {
+        "V": 5.64,
+        "percent": 81
+      },
+      "external": {
+        "present": false
+      }
+    },
+    "ht_ui": {},
+    "humidity:0": {
+      "id": 0,
+      "rh": 19.1
+    },
+    "mqtt": {
+      "connected": false
+    },
+    "sys": {
+      "mac": "08B61FCD36A8",
+      "restart_required": false,
+      "time": null,
+      "unixtime": null,
+      "uptime": 1,
+      "ram_size": 235192,
+      "ram_free": 152748,
+      "fs_size": 458752,
+      "fs_free": 118784,
+      "cfg_rev": 13,
+      "kvs_rev": 0,
+      "webhook_rev": 0,
+      "available_updates": {},
+      "wakeup_reason": {
+        "boot": "deepsleep_wake",
+        "cause": "periodic"
+      },
+      "wakeup_period": 7200
+    },
+    "temperature:0": {
+      "id": 0,
+      "tC": 25.7,
+      "tF": 78.3
+    },
+    "wifi": {
+      "sta_ip": "10.101.1.135",
+      "status": "got ip",
+      "ssid": "",
+      "rssi": -43
+    },
+    "ws": {
+      "connected": false
+    }
+  },
+  "components": [],
+  "cfg_rev": 0,
+  "offset": 0,
+  "total": 0
+}

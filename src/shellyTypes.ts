@@ -21,8 +21,9 @@
  * limitations under the License. *
  */
 
-type AnyPrimitive = string | number | bigint | boolean | symbol | null | undefined;
-export type AnyValue = AnyPrimitive | AnyPrimitive[] | Record<string, AnyPrimitive>;
+export type AnyPrimitive = string | number | bigint | boolean | symbol | null | undefined;
+export type AnyValue = AnyPrimitive | AnyPrimitive[] | Record<string, AnyPrimitive | AnyPrimitive[] | Record<string, AnyPrimitive>>;
+export type AnyObject = Record<string, AnyValue>;
 
 export declare type ParamsTypes = boolean | number | string;
 
@@ -93,7 +94,7 @@ export interface BTHomeDeviceComponentConfig {
   };
 }
 
-// Define the interface for the BTHomeDeviceComponent config object
+// Define the interface for the BTHomeDeviceComponent attrs object
 export interface BTHomeDeviceComponentAttrs {
   flags: number;
   model_id: number;
@@ -107,12 +108,31 @@ export interface BTHomeDeviceComponent {
   attrs?: BTHomeDeviceComponentAttrs;
 }
 
-// Define the interface for the BTHomeDeviceComponent config object
+// Define the interface for the BTHomeBluTrv component status object
+export interface BTHomeBluTrvComponentStatus {
+  id: number;
+  target_C: number;
+  current_C: number;
+  pos: number;
+  rssi: number;
+  battery: number;
+  packet_id: number;
+  last_updated_ts: number;
+  paired?: boolean;
+  rpc: boolean;
+  rsv: number;
+}
+
+// Define the interface for the BTHomeBluTrv component config object
 export interface BTHomeBluTrvComponentConfig {
   id: number;
   addr: string;
   name: null | undefined | string;
   key: null | undefined | string;
+  trv: string;
+  temp_sensors: string[];
+  dw_sensors: string[];
+  override_delay: number;
   meta: {
     ui: {
       view: string;
@@ -120,17 +140,20 @@ export interface BTHomeBluTrvComponentConfig {
       icon: ShellyDataType;
     };
   };
-  trv: string;
-  temp_sensors: string[];
-  dw_sensors: string[];
 }
 
-// Define the main interface for the BTHomeDeviceComponent
+// Define the interface for the BTHomeBluTrv component attrs object
+export interface BTHomeBluTrvComponentAttrs {
+  flags: number;
+  model_id: number;
+}
+
+// Define the main interface for the BTHomeBluTrvComponent
 export interface BTHomeBluTrvComponent {
   key: string;
-  status: BTHomeDeviceComponentStatus;
+  status: BTHomeBluTrvComponentStatus;
   config: BTHomeBluTrvComponentConfig;
-  attrs?: BTHomeDeviceComponentAttrs;
+  attrs: BTHomeBluTrvComponentAttrs;
 }
 
 // Define the interface for the BTHomeSensorComponent status object
@@ -144,16 +167,19 @@ export interface BTHomeSensorComponentStatus {
 export interface BTHomeSensorComponentConfig {
   id: number;
   addr: string;
-  name: string;
+  name: null | undefined | string;
   obj_id: number;
   idx: number;
-  meta: {
-    ui: {
-      view: string;
-      local_name: string;
-      icon: ShellyDataType;
-    };
-  };
+  meta:
+    | null
+    | undefined
+    | {
+        ui: {
+          view: string;
+          local_name: string;
+          icon: ShellyDataType;
+        };
+      };
 }
 
 // Define the main interface for BTHomeSensorComponent
@@ -163,15 +189,15 @@ export interface BTHomeSensorComponent {
   config: BTHomeSensorComponentConfig;
 }
 
-// Define the generic interface for BTHomeDeviceComponent and BTHomeSensorComponent
+// Define the generic interface for the components of BTHomeComponentPayload Shelly.GetComponents
 export interface BTHomeComponent {
   key: string;
-  status: BTHomeDeviceComponentStatus | BTHomeSensorComponentStatus;
-  config: BTHomeDeviceComponentStatus | BTHomeSensorComponentConfig;
-  attrs?: BTHomeDeviceComponentAttrs;
+  status: BTHomeBluTrvComponentStatus | BTHomeDeviceComponentStatus | BTHomeSensorComponentStatus;
+  config: BTHomeBluTrvComponentConfig | BTHomeDeviceComponentConfig | BTHomeSensorComponentConfig;
+  attrs?: BTHomeBluTrvComponentAttrs | BTHomeDeviceComponentAttrs;
 }
 
-// Define the generic interface for BTHomeDeviceComponent and BTHomeSensorComponent
+// Define the generic interface for the BTHomeComponentPayload Shelly.GetComponents
 export interface BTHomeComponentPayload {
   components: BTHomeComponent[];
   cfg_rev: number;
@@ -179,26 +205,15 @@ export interface BTHomeComponentPayload {
   total: number;
 }
 
-// Define the interface for BTHomeEvent from the BTHomeDevice on WebSocket
-export interface BTHomeEvent {
+// Define the interface for ShellyEvent
+export interface ShellyEvent {
   component: string;
-  id: number;
   event: string;
   ts: number;
-  data?: ShellyData;
-}
-
-// Define the interface for WebSocket NotifyStatus from a BTHomeDevice
-export interface BTHomeStatusDevice {
-  id: number; // The BTHome device id: 200, 201 etc.
-  last_updated_ts: number;
-  packet_id: number;
-  rssi: number;
-}
-
-// Define the interface for WebSocket NotifyStatus from a BTHomeSensor
-export interface BTHomeStatusSensor {
-  id: number; // The BTHome device id: 200, 201 etc.
-  last_updated_ts: number;
-  value?: ShellyDataType;
+  id?: number;
+  target?: string;
+  restart_required?: boolean;
+  cfg_rev?: number;
+  time_ms?: number;
+  progress_percent?: number;
 }

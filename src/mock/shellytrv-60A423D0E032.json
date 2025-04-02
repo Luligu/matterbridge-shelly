@@ -1,0 +1,192 @@
+{
+  "shelly": {
+    "type": "SHTRV-01",
+    "mac": "60A423D0E032",
+    "auth": false,
+    "fw": "20240619-130912/v2.2.4@ee290818",
+    "longid": 1,
+    "discoverable": false
+  },
+  "settings": {
+    "device": {
+      "type": "SHTRV-01",
+      "mac": "60A423D0E032",
+      "hostname": "shellytrv-60A423D0E032",
+      "num_outputs": 0
+    },
+    "wifi_ap": {
+      "enabled": false,
+      "ssid": ""
+    },
+    "wifi_sta": {
+      "enabled": true,
+      "ssid": "",
+      "ipv4_method": "static",
+      "ip": "192.168.24.122",
+      "gw": "192.168.25.1",
+      "mask": "255.255.254.0",
+      "dns": "192.168.25.1"
+    },
+    "mqtt": {
+      "enable": true,
+      "server": "192.168.25.26:1883",
+      "user": "iotdev",
+      "id": "trv/ug-cz-heizkoerper",
+      "clean_session": true,
+      "max_qos": 1,
+      "retain": true,
+      "update_period": 60
+    },
+    "sntp": {
+      "server": "time.google.com",
+      "enabled": true
+    },
+    "login": {
+      "enabled": false,
+      "unprotected": false,
+      "username": "admin",
+      "default_username": "admin"
+    },
+    "pin_code": "",
+    "name": "Shelly-UG-CZ-Heizkoerper",
+    "fw": "20240619-130912/v2.2.4@ee290818",
+    "discoverable": false,
+    "build_info": {
+      "build_id": "20240619-130912/v2.2.4@ee290818",
+      "build_timestamp": "2024-06-19T13:09:12Z",
+      "build_version": "2024061913"
+    },
+    "cloud": {
+      "enabled": true
+    },
+    "coiot": {
+      "enabled": true,
+      "update_period": 3600,
+      "peer": "192.168.25.252:5683"
+    },
+    "timezone": null,
+    "lat": null,
+    "lng": null,
+    "tzautodetect": false,
+    "tz_utc_offset": 3600,
+    "tz_dst": false,
+    "tz_dst_auto": true,
+    "time": "13:32",
+    "child_lock": false,
+    "clog_prevention": true,
+    "display": {
+      "brightness": 7,
+      "flipped": true
+    },
+    "hwinfo": {
+      "hw_revision": "dev-prototype",
+      "batch_id": 0
+    },
+    "sleep_mode": {
+      "period": 60,
+      "unit": "m"
+    },
+    "thermostats": [
+      {
+        "target_t": {
+          "enabled": true,
+          "value": 5,
+          "value_op": 8,
+          "units": "C",
+          "accelerated_heating": true
+        },
+        "schedule": true,
+        "schedule_profile": 1,
+        "schedule_profile_names": ["Winter", "Livingroom 1", "Bedroom", "Bedroom 1", "Holiday"],
+        "schedule_rules": ["0000-0123456-5"],
+        "temperature_offset": 0,
+        "ext_t": {
+          "enabled": true,
+          "floor_heating": true
+        },
+        "t_auto": {
+          "enabled": true
+        },
+        "boost_minutes": 30,
+        "valve_min_percent": 0,
+        "valve_min_report": 1,
+        "force_close": true,
+        "calibration_correction": false,
+        "extra_pressure": true,
+        "open_window_report": false
+      }
+    ]
+  },
+  "status": {
+    "wifi_sta": {
+      "connected": true,
+      "ssid": "",
+      "ip": "192.168.24.122",
+      "rssi": -47
+    },
+    "cloud": {
+      "enabled": true,
+      "connected": true
+    },
+    "mqtt": {
+      "connected": true
+    },
+    "time": "13:32",
+    "unixtime": 1743078730,
+    "serial": 1550,
+    "has_update": false,
+    "mac": "60A423D0E032",
+    "cfg_changed_cnt": 7,
+    "actions_stats": {
+      "skipped": 0
+    },
+    "thermostats": [
+      {
+        "pos": 0,
+        "target_t": {
+          "enabled": true,
+          "value": 5,
+          "value_op": 8,
+          "units": "C"
+        },
+        "tmp": {
+          "value": 14.3,
+          "units": "C",
+          "is_valid": true
+        },
+        "schedule": true,
+        "schedule_profile": 1,
+        "boost_minutes": 0,
+        "window_open": false
+      }
+    ],
+    "calibrated": true,
+    "bat": {
+      "value": 52,
+      "voltage": 3.543
+    },
+    "charger": false,
+    "update": {
+      "status": "unknown",
+      "has_update": false,
+      "new_version": "20240619-130912/v2.2.4@ee290818",
+      "old_version": "20240619-130912/v2.2.4@ee290818",
+      "beta_version": null
+    },
+    "ram_total": 97280,
+    "ram_free": 30584,
+    "fs_size": 65536,
+    "fs_free": 59284,
+    "uptime": 678015,
+    "fw_info": {
+      "device": "shellytrv-60A423D0E032",
+      "fw": "20240619-130912/v2.2.4@ee290818"
+    },
+    "ps_mode": 0,
+    "dbg_flags": 0
+  },
+  "components": [],
+  "cfg_rev": 0,
+  "offset": 0,
+  "total": 0
+}

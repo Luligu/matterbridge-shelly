@@ -1,0 +1,111 @@
+{
+  "id": 0,
+  "type": "response",
+  "flags": 1024,
+  "flag_qr": true,
+  "opcode": "QUERY",
+  "flag_aa": true,
+  "flag_tc": false,
+  "flag_rd": false,
+  "flag_ra": false,
+  "flag_z": false,
+  "flag_ad": false,
+  "flag_cd": false,
+  "rcode": "NOERROR",
+  "questions": [],
+  "answers": [
+    {
+      "name": "_http._tcp.local",
+      "type": "PTR",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": "shellyshutter-84fce6364d5c._http._tcp.local"
+    },
+    {
+      "name": "_shelly._tcp.local",
+      "type": "PTR",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": "shellyshutter-84fce6364d5c._shelly._tcp.local"
+    },
+    {
+      "name": "_services._dns-sd._udp.local",
+      "type": "PTR",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": "_shelly._tcp.local"
+    },
+    {
+      "name": "_services._dns-sd._udp.local",
+      "type": "PTR",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": "_http._tcp.local"
+    }
+  ],
+  "authorities": [],
+  "additionals": [
+    {
+      "name": "shellyshutter-84fce6364d5c._http._tcp.local",
+      "type": "SRV",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": {
+        "priority": 0,
+        "weight": 0,
+        "port": 80,
+        "target": "ShellyShutter-84FCE6364D5C.local"
+      }
+    },
+    {
+      "name": "shellyshutter-84fce6364d5c._http._tcp.local",
+      "type": "TXT",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": ["gen=3"]
+    },
+    {
+      "name": "ShellyShutter-84FCE6364D5C.local",
+      "type": "A",
+      "ttl": 120,
+      "class": "IN",
+      "flush": true,
+      "data": "10.101.4.158"
+    },
+    {
+      "name": "shellyshutter-84fce6364d5c._shelly._tcp.local",
+      "type": "SRV",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": {
+        "priority": 0,
+        "weight": 0,
+        "port": 80,
+        "target": "ShellyShutter-84FCE6364D5C.local"
+      }
+    },
+    {
+      "name": "shellyshutter-84fce6364d5c._shelly._tcp.local",
+      "type": "TXT",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": ["gen=3", "app=S2PMG3Shutter", "ver=1.6.99-dev118717"]
+    },
+    {
+      "name": "ShellyShutter-84FCE6364D5C.local",
+      "type": "A",
+      "ttl": 120,
+      "class": "IN",
+      "flush": true,
+      "data": "10.101.4.158"
+    }
+  ]
+}

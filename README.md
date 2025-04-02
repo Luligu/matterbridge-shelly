@@ -12,7 +12,7 @@
 
 ---
 
-This plugin allows you to expose all Shelly Gen 1, Gen 2, Gen 3 and BLU devices to Matter.
+This plugin allows you to expose all Shelly Gen 1, Gen 2, Gen 3, Gen 4 and BLU devices to Matter.
 
 Features:
 

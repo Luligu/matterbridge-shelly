@@ -1,0 +1,242 @@
+{
+  "shelly": {
+    "name": null,
+    "id": "shellyoutdoorsg3-543204666278",
+    "mac": "543204666278",
+    "slot": 1,
+    "model": "S3PL-20112EU",
+    "gen": 3,
+    "fw_id": "20250106-164935/g01d7b19",
+    "ver": "1.5.99-dev114743",
+    "app": "OutdoorPlugSG3",
+    "auth_en": false,
+    "auth_domain": null,
+    "matter": true
+  },
+  "settings": {
+    "ble": {
+      "enable": true,
+      "rpc": {
+        "enable": true
+      }
+    },
+    "bthome": {},
+    "cloud": {
+      "enable": true,
+      "server": "repo.shelly.cloud:6022/jrpc"
+    },
+    "knx": {
+      "enable": false,
+      "ia": "15.15.255",
+      "routing": {
+        "addr": "224.0.23.12:3671"
+      }
+    },
+    "matter": {
+      "enable": true
+    },
+    "mqtt": {
+      "enable": false,
+      "server": null,
+      "client_id": "shellyoutdoorsg3-543204666278",
+      "user": null,
+      "ssl_ca": null,
+      "topic_prefix": "shellyoutdoorsg3-543204666278",
+      "rpc_ntf": true,
+      "status_ntf": false,
+      "use_client_cert": false,
+      "enable_rpc": true,
+      "enable_control": true
+    },
+    "plugs_ui": {
+      "leds": {
+        "mode": "switch",
+        "colors": {
+          "switch:0": {
+            "on": {
+              "rgb": [100, 11, 18],
+              "brightness": 63
+            },
+            "off": {
+              "rgb": [100, 90, 75],
+              "brightness": 100
+            }
+          },
+          "power": {
+            "brightness": 11
+          }
+        },
+        "night_mode": {
+          "enable": true,
+          "brightness": 38,
+          "active_between": ["00:00", "00:00"]
+        }
+      },
+      "controls": {
+        "switch:0": {
+          "in_mode": "momentary"
+        }
+      }
+    },
+    "switch:0": {
+      "id": 0,
+      "name": "6278-OutdoorPlugS",
+      "initial_state": "off",
+      "auto_on": false,
+      "auto_on_delay": 10,
+      "auto_off": false,
+      "auto_off_delay": 20,
+      "power_limit": 248,
+      "voltage_limit": 279,
+      "autorecover_voltage_errors": false,
+      "current_limit": 1.22,
+      "reverse": false
+    },
+    "sys": {
+      "device": {
+        "name": null,
+        "mac": "543204666278",
+        "fw_id": "20250106-164935/g01d7b19",
+        "discoverable": true,
+        "eco_mode": false
+      },
+      "location": null,
+      "debug": {
+        "level": 2,
+        "file_level": null,
+        "mqtt": {
+          "enable": false
+        },
+        "websocket": {
+          "enable": false
+        },
+        "file_log": {
+          "enable": false
+        },
+        "udp": {
+          "addr": "35.205.173.252:8910"
+        }
+      },
+      "ui_data": {},
+      "rpc_udp": {
+        "dst_addr": null,
+        "listen_port": null
+      },
+      "sntp": {
+        "server": "time.cloudflare.com"
+      },
+      "cfg_rev": 158
+    },
+    "wifi": {
+      "ap": {
+        "ssid": "",
+        "is_open": true,
+        "enable": false,
+        "range_extender": {
+          "enable": false
+        }
+      },
+      "sta": {
+        "ssid": "",
+        "is_open": false,
+        "enable": true,
+        "ipv4mode": "dhcp",
+        "ip": null,
+        "netmask": null,
+        "gw": null,
+        "nameserver": null
+      },
+      "sta1": {
+        "ssid": "",
+        "is_open": true,
+        "enable": false,
+        "ipv4mode": "dhcp",
+        "ip": null,
+        "netmask": null,
+        "gw": null,
+        "nameserver": null
+      },
+      "roam": {
+        "rssi_thr": -80,
+        "interval": 60
+      }
+    },
+    "ws": {
+      "enable": false,
+      "server": null,
+      "ssl_ca": "ca.pem"
+    }
+  },
+  "status": {
+    "ble": {},
+    "bthome": {},
+    "cloud": {
+      "connected": true
+    },
+    "knx": {},
+    "matter": {
+      "num_fabrics": 0,
+      "commissionable": false
+    },
+    "mqtt": {
+      "connected": false
+    },
+    "plugs_ui": {},
+    "switch:0": {
+      "id": 0,
+      "source": "SHC",
+      "output": false,
+      "apower": 0,
+      "voltage": 236.7,
+      "freq": 49.9,
+      "current": 0,
+      "aenergy": {
+        "total": 665,
+        "by_minute": [0, 0, 0],
+        "minute_ts": 1741251540
+      },
+      "ret_aenergy": {
+        "total": 0,
+        "by_minute": [0, 0, 0],
+        "minute_ts": 1741251540
+      },
+      "temperature": {
+        "tC": 46.5,
+        "tF": 115.6
+      }
+    },
+    "sys": {
+      "mac": "543204666278",
+      "restart_required": false,
+      "time": "10:59",
+      "unixtime": 1741251560,
+      "last_sync_ts": 1741249957,
+      "uptime": 90740,
+      "ram_size": 248020,
+      "ram_free": 37068,
+      "ram_min_free": 13724,
+      "fs_size": 1048576,
+      "fs_free": 565248,
+      "cfg_rev": 158,
+      "kvs_rev": 0,
+      "schedule_rev": 13,
+      "webhook_rev": 12,
+      "btrelay_rev": 16,
+      "available_updates": {},
+      "reset_reason": 4
+    },
+    "wifi": {
+      "sta_ip": "10.101.8.127",
+      "status": "got ip",
+      "ssid": "",
+      "rssi": -76
+    },
+    "ws": {
+      "connected": false
+    }
+  },
+  "components": [],
+  "cfg_rev": 0,
+  "offset": 0,
+  "total": 0
+}

@@ -169,8 +169,6 @@ temp
 rock-s0
 CODEOWNERS
 create-release.js
-mdnsDgram.ts
-mcastServer.ts
-mcastServer.test.ts
+src/net
 tsconfig.production.json
 jest

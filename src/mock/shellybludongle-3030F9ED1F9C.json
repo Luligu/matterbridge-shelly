@@ -1,0 +1,371 @@
+{
+  "shelly": {
+    "name": null,
+    "id": "shellybludongle-3030f9ed1f9c",
+    "mac": "3030F9ED1F9C",
+    "slot": 0,
+    "model": "S3GW-1DBT001",
+    "gen": 3,
+    "fw_id": "20250213-152158/g5039daf",
+    "ver": "1.5.99-dev117997",
+    "app": "BluDongle",
+    "auth_en": false,
+    "auth_domain": null,
+    "discoverable": false
+  },
+  "settings": {
+    "ble": {
+      "enable": true,
+      "rpc": {
+        "enable": false
+      }
+    },
+    "cloud": {
+      "enable": false,
+      "server": "iot.shelly.cloud:6012/jrpc"
+    },
+    "mqtt": {
+      "enable": false,
+      "server": null,
+      "client_id": "shellybludongle-3030f9ed1f9c",
+      "user": null,
+      "ssl_ca": null,
+      "topic_prefix": "shellybludongle-3030f9ed1f9c",
+      "rpc_ntf": true,
+      "status_ntf": false,
+      "use_client_cert": false,
+      "enable_rpc": true,
+      "enable_control": true
+    },
+    "script:1": {
+      "id": 1,
+      "name": "create-virt-compt",
+      "enable": false
+    },
+    "sys": {
+      "device": {
+        "name": null,
+        "mac": "3030F9ED1F9C",
+        "fw_id": "20250213-152158/g5039daf",
+        "discoverable": false,
+        "eco_mode": false
+      },
+      "location": null,
+      "debug": {
+        "level": 2,
+        "file_level": null,
+        "mqtt": {
+          "enable": false
+        },
+        "websocket": {
+          "enable": true
+        },
+        "udp": {
+          "addr": "35.205.173.252:8910"
+        }
+      },
+      "ui_data": {},
+      "rpc_udp": {
+        "dst_addr": null,
+        "listen_port": null
+      },
+      "sntp": {
+        "server": "time.cloudflare.com"
+      },
+      "cfg_rev": 295
+    },
+    "wifi": {
+      "ap": {
+        "ssid": "",
+        "is_open": true,
+        "enable": false,
+        "range_extender": {
+          "enable": false
+        }
+      },
+      "sta": {
+        "ssid": "",
+        "is_open": false,
+        "enable": true,
+        "ipv4mode": "dhcp",
+        "ip": null,
+        "netmask": null,
+        "gw": null,
+        "nameserver": null
+      },
+      "sta1": {
+        "ssid": "",
+        "is_open": true,
+        "enable": false,
+        "ipv4mode": "dhcp",
+        "ip": null,
+        "netmask": null,
+        "gw": null,
+        "nameserver": null
+      },
+      "roam": {
+        "rssi_thr": -80,
+        "interval": 60
+      }
+    },
+    "ws": {
+      "enable": false,
+      "server": null,
+      "ssl_ca": "ca.pem"
+    }
+  },
+  "status": {
+    "ble": {},
+    "cloud": {
+      "connected": false
+    },
+    "mqtt": {
+      "connected": false
+    },
+    "script:1": {
+      "id": 1,
+      "running": false,
+      "mem_free": 25200
+    },
+    "sys": {
+      "mac": "3030F9ED1F9C",
+      "restart_required": false,
+      "time": "11:38",
+      "unixtime": 1741253894,
+      "last_sync_ts": 1741252428,
+      "uptime": 89497,
+      "ram_size": 257212,
+      "ram_free": 90744,
+      "ram_min_free": 72872,
+      "fs_size": 1048576,
+      "fs_free": 626688,
+      "cfg_rev": 295,
+      "kvs_rev": 0,
+      "webhook_rev": 0,
+      "btrelay_rev": 0,
+      "available_updates": {},
+      "reset_reason": 1,
+      "utc_offset": 7200
+    },
+    "wifi": {
+      "sta_ip": "10.101.1.210",
+      "status": "got ip",
+      "ssid": "",
+      "rssi": -67
+    },
+    "ws": {
+      "connected": false
+    }
+  },
+  "components": [
+    {
+      "key": "button:200",
+      "status": {},
+      "config": {
+        "id": 200,
+        "name": "Pair",
+        "meta": {
+          "ui": {
+            "view": "button"
+          },
+          "cloud": []
+        },
+        "owner": "",
+        "access": "*"
+      }
+    },
+    {
+      "key": "button:201",
+      "status": {},
+      "config": {
+        "id": 201,
+        "name": "Reset",
+        "meta": {
+          "ui": {
+            "view": "button"
+          },
+          "cloud": []
+        },
+        "owner": "",
+        "access": "*"
+      }
+    },
+    {
+      "key": "button:202",
+      "status": {},
+      "config": {
+        "id": 202,
+        "name": "Print",
+        "meta": {
+          "ui": {
+            "view": "button"
+          },
+          "cloud": []
+        },
+        "owner": "",
+        "access": "*"
+      }
+    },
+    {
+      "key": "group:200",
+      "status": {
+        "value": ["text:200", "text:201", "text:202", "text:203", "button:200", "button:201"],
+        "source": "rpc",
+        "last_update_ts": 1740571097
+      },
+      "config": {
+        "id": 200,
+        "name": "Config Shelly Devices",
+        "meta": {
+          "ui": {
+            "view": "group"
+          }
+        },
+        "owner": "",
+        "access": "*"
+      }
+    },
+    {
+      "key": "group:201",
+      "status": {
+        "value": ["text:200", "text:203", "text:204", "button:202"],
+        "source": "rpc",
+        "last_update_ts": 1740571097
+      },
+      "config": {
+        "id": 201,
+        "name": "Print Label",
+        "meta": {
+          "ui": {
+            "view": "group"
+          }
+        },
+        "owner": "",
+        "access": "*"
+      }
+    },
+    {
+      "key": "text:200",
+      "status": {
+        "value": "",
+        "source": "",
+        "last_update_ts": 0
+      },
+      "config": {
+        "id": 200,
+        "name": "BLE ID",
+        "max_len": 255,
+        "meta": {
+          "ui": {
+            "view": "field",
+            "maxLength": 6
+          },
+          "cloud": ["log"]
+        },
+        "persisted": true,
+        "default_value": "",
+        "owner": "",
+        "access": "*"
+      }
+    },
+    {
+      "key": "text:201",
+      "status": {
+        "value": "",
+        "source": "",
+        "last_update_ts": 0
+      },
+      "config": {
+        "id": 201,
+        "name": "SSID",
+        "max_len": 255,
+        "meta": {
+          "ui": {
+            "view": "field",
+            "maxLength": 255
+          },
+          "cloud": ["log"]
+        },
+        "persisted": true,
+        "default_value": "",
+        "owner": "",
+        "access": "*"
+      }
+    },
+    {
+      "key": "text:202",
+      "status": {
+        "value": "",
+        "source": "",
+        "last_update_ts": 0
+      },
+      "config": {
+        "id": 202,
+        "name": "Pass",
+        "max_len": 255,
+        "meta": {
+          "ui": {
+            "view": "field",
+            "maxLength": 255
+          },
+          "cloud": ["log"]
+        },
+        "persisted": true,
+        "default_value": "",
+        "owner": "",
+        "access": "*"
+      }
+    },
+    {
+      "key": "text:203",
+      "status": {
+        "value": "",
+        "source": "",
+        "last_update_ts": 0
+      },
+      "config": {
+        "id": 203,
+        "name": "LOG",
+        "max_len": 255,
+        "meta": {
+          "ui": {
+            "view": "label",
+            "maxLength": 255
+          },
+          "cloud": ["log"]
+        },
+        "persisted": false,
+        "default_value": "",
+        "owner": "",
+        "access": "*"
+      }
+    },
+    {
+      "key": "text:204",
+      "status": {
+        "value": "",
+        "source": "",
+        "last_update_ts": 0
+      },
+      "config": {
+        "id": 204,
+        "name": "Printer URL",
+        "max_len": 255,
+        "meta": {
+          "ui": {
+            "view": "field",
+            "maxLength": 255
+          },
+          "cloud": ["log"]
+        },
+        "persisted": true,
+        "default_value": "",
+        "owner": "",
+        "access": "*"
+      }
+    }
+  ],
+  "cfg_rev": 295,
+  "offset": 0,
+  "total": 10
+}

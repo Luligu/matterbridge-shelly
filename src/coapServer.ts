@@ -21,12 +21,21 @@
  * limitations under the License. *
  */
 
+// Matterbridge imports
 import { AnsiLogger, BLUE, CYAN, LogLevel, MAGENTA, RESET, TimestampFormat, db, debugStringify, er, hk, nf, wr, zb } from 'matterbridge/logger';
+
+// CoAP imports
 import coap, { Server, IncomingMessage, OutgoingMessage, parameters } from 'coap';
+
+// Node.js imports
 import EventEmitter from 'node:events';
 import path from 'node:path';
 import { promises as fs } from 'node:fs';
+
+// Shelly imports
+import { Shelly } from './shelly.js';
 import { ShellyDataType } from './shellyTypes.js';
+import { ShellyDevice } from './shellyDevice.js';
 
 // 192.168.1.189:5683
 
@@ -82,6 +91,7 @@ interface CoapServerEvent {
 
 export class CoapServer extends EventEmitter {
   public readonly log;
+  private readonly shelly: Shelly;
   private coapServer: Server | undefined;
   private _isListening = false;
   private _isReady = false;
@@ -90,8 +100,9 @@ export class CoapServer extends EventEmitter {
   private readonly deviceId = new Map<string, string>(); // host, deviceId
   private _dataPath = 'temp';
 
-  constructor(logLevel: LogLevel = LogLevel.INFO) {
+  constructor(shelly: Shelly, logLevel: LogLevel = LogLevel.INFO) {
     super();
+    this.shelly = shelly;
     this.log = new AnsiLogger({ logName: 'ShellyCoapServer', logTimestampFormat: TimestampFormat.TIME_MILLIS, logLevel });
 
     // Set the CoAP parameters to minimum values
@@ -271,13 +282,13 @@ export class CoapServer extends EventEmitter {
         if (typeof str === 'string') {
           // Create a new Buffer and write the integer
           const buffer = Buffer.alloc(2); // Allocate buffer of 2 bytes
-          buffer.writeUInt16BE(parseInt(str, 10), 0); // Write to buffer
+          buffer.writeUInt16LE(parseInt(str, 10), 0); // Write to buffer
           return buffer; // Return the buffer
         }
         // Handle null or non-string types explicitly
         throw new TypeError('Expected a string for STATUS_VALIDITY');
       },
-      (buf) => buf.readUInt16BE(0),
+      (buf) => buf.readUInt16LE(0),
     );
 
     coap.registerOption(
@@ -288,13 +299,13 @@ export class CoapServer extends EventEmitter {
         if (typeof str === 'string') {
           // Create a new Buffer and write the integer
           const buffer = Buffer.alloc(2); // Allocate buffer of 2 bytes
-          buffer.writeUInt16BE(parseInt(str, 10), 0); // Write to buffer
+          buffer.writeUInt16LE(parseInt(str, 10), 0); // Write to buffer
           return buffer; // Return the buffer
         }
         // Handle null or non-string types explicitly
         throw new TypeError('Expected a string for STATUS_SERIAL');
       },
-      (buf) => buf.readUInt16BE(0),
+      (buf) => buf.readUInt16LE(0),
     );
   }
 
@@ -316,6 +327,7 @@ export class CoapServer extends EventEmitter {
     let deviceModel = '';
     let deviceMac = '';
     let protocolRevision = '';
+    let validity = 0;
     let validFor = 0;
     let serial = 0;
     let payload;
@@ -328,8 +340,8 @@ export class CoapServer extends EventEmitter {
     }
 
     if (headers[COIOT_OPTION_STATUS_VALIDITY]) {
-      const validity = headers[COIOT_OPTION_STATUS_VALIDITY];
-      if ((validity & 0x1) === 0) {
+      validity = headers[COIOT_OPTION_STATUS_VALIDITY];
+      if ((validity & 1) === 0) {
         validFor = Math.floor(validity / 10);
       } else {
         validFor = validity * 4;
@@ -358,7 +370,7 @@ export class CoapServer extends EventEmitter {
     this.log.debug(`deviceModel: ${CYAN}${deviceModel}${db}`);
     this.log.debug(`deviceMac: ${CYAN}${deviceMac}${db}`);
     this.log.debug(`protocolRevision: ${CYAN}${protocolRevision}${db}`);
-    this.log.debug(`validFor (${validFor}): ${CYAN}${Math.round(validFor / 60)}${db} minutes`);
+    this.log.debug(`validFor (${validity}): ${CYAN}${validFor}${db} seconds`);
     this.log.debug(`serial (${this.deviceSerial.get(host) === serial ? 'not changed' : 'updated'}): ${CYAN}${serial}${db}`);
     this.log.debug(`payload:${RESET}\n`, payload);
 
@@ -391,6 +403,7 @@ export class CoapServer extends EventEmitter {
             if (s.D === 'overtemp' && b.D === 'device') desc.push({ id: s.I, component: 'sys', property: 'overtemperature', range: s.R }); // SHSW-25
             if (s.D === 'voltage' && b.D === 'device') desc.push({ id: s.I, component: 'sys', property: 'voltage', range: s.R }); // SHSW-25
             if (s.D === 'cfgChanged' && b.D === 'device') desc.push({ id: s.I, component: 'sys', property: 'cfg_rev', range: s.R });
+            if (s.D === 'wakeupEvent' && b.D === 'device') desc.push({ id: s.I, component: 'sys', property: 'act_reasons', range: s.R });
 
             // light component
             if (s.D === 'output') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'state', range: s.R });
@@ -422,12 +435,14 @@ export class CoapServer extends EventEmitter {
             if (s.D === 'energy' && b.D.startsWith('emeter')) desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'total', range: s.R });
             if (s.D === 'current' && b.D.startsWith('emeter')) desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'current', range: s.R });
 
-            // sensor component
+            // sensor/input component
             if (s.D === 'inputEvent' && b.D.startsWith('sensor'))
               desc.push({ id: s.I, component: b.D.replace('_', ':').replace('sensor', 'input'), property: 'event', range: s.R }); // SHBTN-2
             if (s.D === 'inputEventCnt' && b.D.startsWith('sensor'))
               desc.push({ id: s.I, component: b.D.replace('_', ':').replace('sensor', 'input'), property: 'event_cnt', range: s.R }); // SHBTN-2
 
+            // mos component
+            if (s.D === 'motion' && b.D.startsWith('sensor')) desc.push({ id: s.I, component: 'sensor', property: 'motion', range: ['0/1', '-1'] }); // SHMOS-01 and SHMOS-02
             // dw component
             if (s.D === 'dwIsOpened' && b.D.startsWith('sensor')) desc.push({ id: s.I, component: 'sensor', property: 'contact_open', range: ['0/1', '-1'] }); // SHDW-1 and SHDW-2
             if (s.D === 'vibration' && b.D.startsWith('sensor')) desc.push({ id: s.I, component: 'vibration', property: 'vibration', range: ['0/1', '-1'] }); // SHDW-1 and SHDW-2
@@ -445,6 +460,9 @@ export class CoapServer extends EventEmitter {
             if (s.D === 'sensorOp' && b.D.startsWith('sensor')) desc.push({ id: s.I, component: 'gas', property: 'sensor_state', range: s.R }); // SHGS-1
             if (s.D === 'gas' && b.D.startsWith('sensor')) desc.push({ id: s.I, component: 'gas', property: 'alarm_state', range: s.R }); // SHGS-1
             if (s.D === 'concentration' && b.D.startsWith('sensor')) desc.push({ id: s.I, component: 'gas', property: 'ppm', range: s.R }); // SHGS-1
+
+            // generic sensor error
+            if (s.D === 'sensorError' && b.D.startsWith('sensor')) desc.push({ id: s.I, component: 'sys', property: 'sensor_error', range: s.R });
 
             // battery component
             if (s.D === 'battery' && b.D === 'device') desc.push({ id: s.I, component: 'battery', property: 'level', range: s.R }); // SHBTN-2
@@ -467,23 +485,39 @@ export class CoapServer extends EventEmitter {
       this.deviceSerial.set(host, serial);
       const descriptions: CoIoTDescription[] = this.devices.get(host) || [];
       if (!descriptions || descriptions.length === 0) {
-        // Bug on SHMOS-01 and SHMOS-02
+        // SHMOS-01, SHMOS-02 and SHTRV-01 don't answer to cit/d and cit/s on CoIot (but http://host/cit/d it's ok)
         if (deviceModel === 'SHDW-1' || deviceModel === 'SHDW-2') {
           this.log.debug(`*Set coap descriptions for host ${zb}${host}${db} deviceType ${CYAN}SHDW-1/SHDW-2${db}`);
+          // wakeup event
+          descriptions.push({ id: 9102, component: 'sys', property: 'act_reasons', range: ['battery/button/periodic/poweron/sensor/alarm', 'unknown'] });
+          // sys component cfg_rev property
+          descriptions.push({ id: 9103, component: 'sys', property: 'cfg_rev', range: 'U16' });
           // battery component
           descriptions.push({ id: 3111, component: 'battery', property: 'level', range: ['0/100', '-1'] }); // SHDW-1 and SHDW-2
           // contact component 1 = open, 0 = closed
           descriptions.push({ id: 3108, component: 'sensor', property: 'contact_open', range: ['0/1', '-1'] }); // SHDW-1 and SHDW-2
+          // vibration component
           descriptions.push({ id: 6110, component: 'vibration', property: 'vibration', range: ['0/1', '-1'] }); // SHDW-1 and SHDW-2
           // luminosity component
           descriptions.push({ id: 3106, component: 'lux', property: 'value', range: ['U32', '-1'] }); // SHDW-1 and SHDW-2
           // temperature component
           descriptions.push({ id: 3101, component: 'temperature', property: 'value', range: ['-55/125', '999'] }); // SHDW-1 and SHDW-2
           this.devices.set(host, descriptions);
+        } else if (deviceModel === 'SHTRV-01') {
+          this.log.debug(`*Set coap descriptions for host ${zb}${host}${db} deviceType ${CYAN}SHTRV-01${db}`);
+          // battery component
+          descriptions.push({ id: 3111, component: 'battery', property: 'level', range: ['0/100', '-1'] }); // SHTRV-01
+          // target temperature component
+          descriptions.push({ id: 3103, component: 'thermostat:0', property: 'target_t.value', range: ['4/31', '999'] }); // SHTRV-01
+          // temperature component
+          descriptions.push({ id: 3101, component: 'thermostat:0', property: 'tmp.value', range: ['-55/125', '999'] }); // SHTRV-01
+          // sys component cfg_rev property
+          descriptions.push({ id: 9103, component: 'sys', property: 'cfg_rev', range: 'U16' }); // SHTRV-01
+          this.devices.set(host, descriptions);
         } else if (deviceModel === 'SHBTN-1' || deviceModel === 'SHBTN-2') {
           this.log.debug(`*Set coap descriptions for host ${zb}${host}${db} deviceType ${CYAN}SHBTN-1/SHBTN-2${db}`);
           // battery component
-          descriptions.push({ id: 3111, component: 'battery', property: 'level', range: ['0/100', '-1'] }); // SHMOS-01
+          descriptions.push({ id: 3111, component: 'battery', property: 'level', range: ['0/100', '-1'] }); // SHBTN-2
           // input component
           descriptions.push({ id: 2102, component: 'input:0', property: 'event', range: ['S/L/SS/SSS', ''] }); // SHBTN-2
           descriptions.push({ id: 2103, component: 'input:0', property: 'event_cnt', range: 'U16' }); // SHBTN-2
@@ -498,6 +532,8 @@ export class CoapServer extends EventEmitter {
           descriptions.push({ id: 6110, component: 'vibration', property: 'vibration', range: ['0/1', '-1'] }); // SHMOS-01
           // luminosity component
           descriptions.push({ id: 3106, component: 'lux', property: 'value', range: ['U32', '-1'] }); // SHMOS-01
+          // sys component cfg_rev property
+          descriptions.push({ id: 9103, component: 'sys', property: 'cfg_rev', range: 'U16' }); // SHMOS-01
           this.devices.set(host, descriptions);
         } else if (deviceModel === 'SHMOS-02') {
           this.log.debug(`*Set coap descriptions for host ${zb}${host}${db} deviceType ${CYAN}SHMOS-02${db}`);
@@ -510,16 +546,35 @@ export class CoapServer extends EventEmitter {
           // luminosity component
           descriptions.push({ id: 3106, component: 'lux', property: 'value', range: ['U32', '-1'] }); // SHMOS-02
           // temperature component
-          descriptions.push({ id: 3101, component: 'temperature', property: 'value', range: ['-55/125', '999'] }); // SHDW-1 and SHDW-2
+          descriptions.push({ id: 3101, component: 'temperature', property: 'value', range: ['-55/125', '999'] }); // SHMOS-02
+          // sys component cfg_rev property
+          descriptions.push({ id: 9103, component: 'sys', property: 'cfg_rev', range: 'U16' }); // SHMOS-02
           this.devices.set(host, descriptions);
         } else if (deviceModel === 'SHWT-1') {
           this.log.debug(`*Set coap descriptions for host ${zb}${host}${db} deviceType ${CYAN}SHWT-1${db}`);
+          // wakeup event
+          descriptions.push({ id: 9102, component: 'sys', property: 'act_reasons', range: ['battery/button/periodic/poweron/sensor/alarm', 'unknown'] }); // SHWT-1
+          // sensor error component
+          descriptions.push({ id: 3115, component: 'sys', property: 'sensor_error', range: ['0/1'] }); // SHWT-1
           // battery component
           descriptions.push({ id: 3111, component: 'battery', property: 'level', range: ['0/100', '-1'] }); // SHWT-1
           // flood component
           descriptions.push({ id: 6106, component: 'flood', property: 'flood', range: ['0/1', '-1'] }); // SHWT-1
           // temperature component
           descriptions.push({ id: 3101, component: 'temperature', property: 'value', range: ['-55/125', '999'] }); // SHWT-1
+          this.devices.set(host, descriptions);
+        } else if (deviceModel === 'SHHT-1') {
+          this.log.debug(`*Set coap descriptions for host ${zb}${host}${db} deviceType ${CYAN}SHHT-1${db}`);
+          // wakeup event
+          descriptions.push({ id: 9102, component: 'sys', property: 'act_reasons', range: ['battery/button/periodic/poweron/sensor/alarm', 'unknown'] }); // SHHT-1
+          // sensor error component
+          descriptions.push({ id: 3115, component: 'sys', property: 'sensor_error', range: ['0/1'] }); // SHHT-1
+          // battery component
+          descriptions.push({ id: 3111, component: 'battery', property: 'level', range: ['0/100', '-1'] }); // SHHT-1
+          // temperature component
+          descriptions.push({ id: 3101, component: 'temperature', property: 'value', range: ['-55/125', '999'] }); // SHHT-1
+          // humidity component
+          descriptions.push({ id: 3103, component: 'humidity', property: 'value', range: ['0/100', '-1'] }); // SHHT-1
           this.devices.set(host, descriptions);
         } else {
           this.log.info(`No coap description found for ${hk}${deviceModel}${nf} id ${hk}${this.deviceId.get(host)}${nf} host ${zb}${host}${nf} fetching it...`);
@@ -550,7 +605,11 @@ export class CoapServer extends EventEmitter {
               this.emit('update', host, desc.component, desc.property, v.value === -1 ? null : v.value === 1);
             } else {
               this.log.debug(`sending update for component ${CYAN}${desc.component}${db} property ${CYAN}${desc.property}${db} value ${CYAN}${v.value}${db}`);
-              this.emit('update', host, desc.component, desc.property, v.value);
+              if (desc.property.includes('.')) {
+                // target_t#value
+                const [property, subproperty] = desc.property.split('.');
+                this.emit('update', host, desc.component, property, { [subproperty]: v.value });
+              } else this.emit('update', host, desc.component, desc.property, v.value);
             }
           } else this.log.debug(`No coap description found for id ${v.id}`);
         });
@@ -608,15 +667,33 @@ export class CoapServer extends EventEmitter {
   async registerDevice(host: string, id: string, registerOnly: boolean): Promise<void> {
     this.deviceId.set(host, id);
     if (registerOnly) return;
-    // Bug on SHMOS-01 and SHMOS-02. They don't answer to the /cit/d and /cit/s requests
-    if (id.includes('shellymotionsensor') || id.includes('shellymotion2')) return;
-    this.log.debug(`Registering device ${hk}${id}${db} host ${zb}${host}${db}...`);
+    // SHMOS-01, SHMOS-02, SHTRV-01 and SHRGBWW-01 don't answer to the /cit/d and /cit/s requests
+    this.log.debug(`*Registering device ${hk}${id}${db} host ${zb}${host}${db} with fetch...`);
+    ShellyDevice.fetch(this.shelly, this.log, host, 'cit/d').then((msg) => {
+      if (msg && msg.blk && msg.sen) {
+        // Simulate a CoAP message to use the same code
+        const coapMessage = {
+          rsinfo: { address: host, port: 5683, family: 'IPv4' },
+          headers: { [COIOT_OPTION_GLOBAL_DEVID]: `${id}#XXXXXXXXX#2`, [COIOT_OPTION_STATUS_VALIDITY]: 0, [COIOT_OPTION_STATUS_SERIAL]: 0 },
+          url: '/cit/d',
+          payload: Buffer.from(JSON.stringify(msg)),
+          code: '2.05',
+        };
+        this.parseShellyMessage(coapMessage as unknown as IncomingMessage);
+        this.log.debug(`*Registered CoIoT (coap) ${CYAN}/cit/d${db} for device ${hk}${id}${db} host ${zb}${host}${db} with fetch`);
+      } else {
+        this.log.debug(`****No response registering device ${hk}${id}${db} host ${zb}${host}${db} with fetch`);
+      }
+    });
+    /*
+    this.log.debug(`Registering device ${hk}${id}${db} host ${zb}${host}${db} with coap...`);
     this.getDeviceDescription(host, id).then((msg) => {
       if (msg) this.log.debug(`Registered CoIoT (coap) ${CYAN}/cit/d${db} for device ${hk}${id}${db} host ${zb}${host}${db}.`);
       this.getDeviceStatus(host, id).then((msg) => {
         if (msg) this.log.debug(`Registered CoIoT (coap) ${CYAN}/cit/s${db} for device ${hk}${id}${db} host ${zb}${host}${db}.`);
       });
     });
+    */
   }
 
   /**
@@ -742,316 +819,141 @@ if (
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const SHDW = {
   'blk': [
-    {
-      'I': 1,
-      'D': 'sensor_0',
-    },
-    {
-      'I': 2,
-      'D': 'device',
-    },
+    { 'I': 1, 'D': 'sensor_0' },
+    { 'I': 2, 'D': 'device' },
   ],
   'sen': [
-    {
-      'I': 9103,
-      'T': 'EVC',
-      'D': 'cfgChanged',
-      'R': 'U16',
-      'L': 2,
-    },
-    {
-      'I': 3108,
-      'T': 'S',
-      'D': 'dwIsOpened',
-      'R': ['0/1', '-1'],
-      'L': 1,
-    },
-    {
-      'I': 3119,
-      'T': 'S',
-      'D': 'dwStateChanged',
-      'R': ['0/1', '-1'],
-      'L': 1,
-    },
-    {
-      'I': 3109,
-      'T': 'S',
-      'D': 'tilt',
-      'U': 'deg',
-      'R': ['0/180', '-1'],
-      'L': 1,
-    },
-    {
-      'I': 6110,
-      'T': 'A',
-      'D': 'vibration',
-      'R': ['0/1', '-1'],
-      'L': 1,
-    },
-    {
-      'I': 3106,
-      'T': 'L',
-      'D': 'luminosity',
-      'U': 'lux',
-      'R': ['U32', '-1'],
-      'L': 1,
-    },
-    {
-      'I': 3110,
-      'T': 'S',
-      'D': 'luminosityLevel',
-      'R': ['dark/twilight/bright', 'unknown'],
-      'L': 1,
-    },
-    {
-      'I': 3101,
-      'T': 'T',
-      'D': 'extTemp',
-      'U': 'C',
-      'R': ['-55/125', '999'],
-      'L': 1,
-    },
-    {
-      'I': 3102,
-      'T': 'T',
-      'D': 'extTemp',
-      'U': 'F',
-      'R': ['-67/257', '999'],
-      'L': 1,
-    },
-    {
-      'I': 3115,
-      'T': 'S',
-      'D': 'sensorError',
-      'R': '0/1',
-      'L': 1,
-    },
-    {
-      'I': 3111,
-      'T': 'B',
-      'D': 'battery',
-      'R': ['0/100', '-1'],
-      'L': 2,
-    },
-    {
-      'I': 9102,
-      'T': 'EV',
-      'D': 'wakeupEvent',
-      'R': ['battery/button/periodic/poweron/sensor/alarm', 'unknown'],
-      'L': 2,
-    },
+    { 'I': 9103, 'T': 'EVC', 'D': 'cfgChanged', 'R': 'U16', 'L': 2 },
+    { 'I': 3108, 'T': 'S', 'D': 'dwIsOpened', 'R': ['0/1', '-1'], 'L': 1 },
+    { 'I': 3119, 'T': 'S', 'D': 'dwStateChanged', 'R': ['0/1', '-1'], 'L': 1 },
+    { 'I': 3109, 'T': 'S', 'D': 'tilt', 'U': 'deg', 'R': ['0/180', '-1'], 'L': 1 },
+    { 'I': 6110, 'T': 'A', 'D': 'vibration', 'R': ['0/1', '-1'], 'L': 1 },
+    { 'I': 3106, 'T': 'L', 'D': 'luminosity', 'U': 'lux', 'R': ['U32', '-1'], 'L': 1 },
+    { 'I': 3110, 'T': 'S', 'D': 'luminosityLevel', 'R': ['dark/twilight/bright', 'unknown'], 'L': 1 },
+    { 'I': 3101, 'T': 'T', 'D': 'extTemp', 'U': 'C', 'R': ['-55/125', '999'], 'L': 1 },
+    { 'I': 3102, 'T': 'T', 'D': 'extTemp', 'U': 'F', 'R': ['-67/257', '999'], 'L': 1 },
+    { 'I': 3115, 'T': 'S', 'D': 'sensorError', 'R': '0/1', 'L': 1 },
+    { 'I': 3111, 'T': 'B', 'D': 'battery', 'R': ['0/100', '-1'], 'L': 2 },
+    { 'I': 9102, 'T': 'EV', 'D': 'wakeupEvent', 'R': ['battery/button/periodic/poweron/sensor/alarm', 'unknown'], 'L': 2 },
   ],
 };
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const SHBTN2 = {
   'blk': [
-    {
-      'I': 1,
-      'D': 'sensor_0',
-    },
-    {
-      'I': 2,
-      'D': 'device',
-    },
+    { 'I': 1, 'D': 'sensor_0' },
+    { 'I': 2, 'D': 'device' },
   ],
   'sen': [
-    {
-      'I': 9103,
-      'T': 'EVC',
-      'D': 'cfgChanged',
-      'R': 'U16',
-      'L': 2,
-    },
-    {
-      'I': 2102,
-      'T': 'EV',
-      'D': 'inputEvent',
-      'R': ['S/L/SS/SSS', ''],
-      'L': 1,
-    },
-    {
-      'I': 2103,
-      'T': 'EVC',
-      'D': 'inputEventCnt',
-      'R': 'U16',
-      'L': 1,
-    },
-    {
-      'I': 3115,
-      'T': 'S',
-      'D': 'sensorError',
-      'R': '0/1',
-      'L': 1,
-    },
-    {
-      'I': 3112,
-      'T': 'S',
-      'D': 'charger',
-      'R': ['0/1', '-1'],
-      'L': 2,
-    },
-    {
-      'I': 3111,
-      'T': 'B',
-      'D': 'battery',
-      'R': ['0/100', '-1'],
-      'L': 2,
-    },
-    {
-      'I': 9102,
-      'T': 'EV',
-      'D': 'wakeupEvent',
-      'R': ['battery/button/periodic/poweron/sensor/ext_power', 'unknown'],
-      'L': 2,
-    },
+    { 'I': 9103, 'T': 'EVC', 'D': 'cfgChanged', 'R': 'U16', 'L': 2 },
+    { 'I': 2102, 'T': 'EV', 'D': 'inputEvent', 'R': ['S/L/SS/SSS', ''], 'L': 1 },
+    { 'I': 2103, 'T': 'EVC', 'D': 'inputEventCnt', 'R': 'U16', 'L': 1 },
+    { 'I': 3115, 'T': 'S', 'D': 'sensorError', 'R': '0/1', 'L': 1 },
+    { 'I': 3112, 'T': 'S', 'D': 'charger', 'R': ['0/1', '-1'], 'L': 2 },
+    { 'I': 3111, 'T': 'B', 'D': 'battery', 'R': ['0/100', '-1'], 'L': 2 },
+    { 'I': 9102, 'T': 'EV', 'D': 'wakeupEvent', 'R': ['battery/button/periodic/poweron/sensor/ext_power', 'unknown'], 'L': 2 },
   ],
 };
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const SHMOS01 = {
   'blk': [
-    {
-      'I': 1,
-      'D': 'sensor_0',
-    },
-    {
-      'I': 2,
-      'D': 'device',
-    },
+    { 'I': 1, 'D': 'sensor_0' },
+    { 'I': 2, 'D': 'device' },
   ],
   'sen': [
-    {
-      'I': 6107,
-      'T': 'A',
-      'D': 'motion',
-      'R': ['0/1', '-1'],
-      'L': 1,
-    },
-    {
-      'I': 3119,
-      'T': 'S',
-      'D': 'timestamp',
-      'U': 's',
-      'R': ['U32', '-1'],
-      'L': 1,
-    },
-    {
-      'I': 3120,
-      'T': 'S',
-      'D': 'motionActive',
-      'R': ['0/1', '-1'],
-      'L': 1,
-    },
-    {
-      'I': 6110,
-      'T': 'A',
-      'D': 'vibration',
-      'R': ['0/1', '-1'],
-      'L': 1,
-    },
-    {
-      'I': 3106,
-      'T': 'L',
-      'D': 'luminosity',
-      'R': ['U32', '-1'],
-      'L': 1,
-    },
-    {
-      'I': 3111,
-      'T': 'B',
-      'D': 'battery',
-      'R': ['0/100', '-1'],
-      'L': 2,
-    },
-    {
-      'I': 9103,
-      'T': 'EVC',
-      'D': 'cfgChanged',
-      'R': 'U16',
-      'L': 2,
-    },
+    { 'I': 6107, 'T': 'A', 'D': 'motion', 'R': ['0/1', '-1'], 'L': 1 },
+    { 'I': 3119, 'T': 'S', 'D': 'timestamp', 'U': 's', 'R': ['U32', '-1'], 'L': 1 },
+    { 'I': 3120, 'T': 'S', 'D': 'motionActive', 'R': ['0/1', '-1'], 'L': 1 },
+    { 'I': 6110, 'T': 'A', 'D': 'vibration', 'R': ['0/1', '-1'], 'L': 1 },
+    { 'I': 3106, 'T': 'L', 'D': 'luminosity', 'R': ['U32', '-1'], 'L': 1 },
+    { 'I': 3111, 'T': 'B', 'D': 'battery', 'R': ['0/100', '-1'], 'L': 2 },
+    { 'I': 9103, 'T': 'EVC', 'D': 'cfgChanged', 'R': 'U16', 'L': 2 },
   ],
 };
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const SHMOS02 = {
   'blk': [
-    {
-      'I': 1,
-      'D': 'sensor_0',
-    },
-    {
-      'I': 2,
-      'D': 'device',
-    },
+    { 'I': 1, 'D': 'sensor_0' },
+    { 'I': 2, 'D': 'device' },
   ],
   'sen': [
-    {
-      'I': 3101,
-      'T': 'T',
-      'D': 'temp',
-      'U': 'C',
-      'R': ['-55/125', '999'],
-      'L': 1,
-    },
-    {
-      'I': 3102,
-      'T': 'T',
-      'D': 'temp',
-      'U': 'F',
-      'R': ['-67/257', '999'],
-      'L': 1,
-    },
-    {
-      'I': 6107,
-      'T': 'A',
-      'D': 'motion',
-      'R': ['0/1', '-1'],
-      'L': 1,
-    },
-    {
-      'I': 3119,
-      'T': 'S',
-      'D': 'timestamp',
-      'U': 's',
-      'R': ['U32', '-1'],
-      'L': 1,
-    },
-    {
-      'I': 3120,
-      'T': 'A',
-      'D': 'motionActive',
-      'R': ['0/1', '-1'],
-      'L': 1,
-    },
-    {
-      'I': 6110,
-      'T': 'A',
-      'D': 'vibration',
-      'R': ['0/1', '-1'],
-      'L': 1,
-    },
-    {
-      'I': 3106,
-      'T': 'L',
-      'D': 'luminosity',
-      'R': ['U32', '-1'],
-      'L': 1,
-    },
-    {
-      'I': 3111,
-      'T': 'B',
-      'D': 'battery',
-      'R': ['0/100', '-1'],
-      'L': 2,
-    },
-    {
-      'I': 9103,
-      'T': 'EVC',
-      'D': 'cfgChanged',
-      'R': 'U16',
-      'L': 2,
-    },
+    { 'I': 3101, 'T': 'T', 'D': 'temp', 'U': 'C', 'R': ['-55/125', '999'], 'L': 1 },
+    { 'I': 3102, 'T': 'T', 'D': 'temp', 'U': 'F', 'R': ['-67/257', '999'], 'L': 1 },
+    { 'I': 6107, 'T': 'A', 'D': 'motion', 'R': ['0/1', '-1'], 'L': 1 },
+    { 'I': 3119, 'T': 'S', 'D': 'timestamp', 'U': 's', 'R': ['U32', '-1'], 'L': 1 },
+    { 'I': 3120, 'T': 'A', 'D': 'motionActive', 'R': ['0/1', '-1'], 'L': 1 },
+    { 'I': 6110, 'T': 'A', 'D': 'vibration', 'R': ['0/1', '-1'], 'L': 1 },
+    { 'I': 3106, 'T': 'L', 'D': 'luminosity', 'R': ['U32', '-1'], 'L': 1 },
+    { 'I': 3111, 'T': 'B', 'D': 'battery', 'R': ['0/100', '-1'], 'L': 2 },
+    { 'I': 9103, 'T': 'EVC', 'D': 'cfgChanged', 'R': 'U16', 'L': 2 },
+  ],
+};
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const SHRGBWW01 = {
+  'blk': [
+    { 'I': 1, 'D': 'light_0' },
+    { 'I': 2, 'D': 'device' },
+  ],
+  'sen': [
+    { 'I': 9103, 'T': 'EVC', 'D': 'cfgChanged', 'R': 'U16', 'L': 2 },
+    { 'I': 1101, 'T': 'S', 'D': 'output', 'R': '0/1', 'L': 1 },
+    { 'I': 5105, 'T': 'S', 'D': 'red', 'R': '0/255', 'L': 1 },
+    { 'I': 5106, 'T': 'S', 'D': 'green', 'R': '0/255', 'L': 1 },
+    { 'I': 5107, 'T': 'S', 'D': 'blue', 'R': '0/255', 'L': 1 },
+    { 'I': 5108, 'T': 'S', 'D': 'white', 'R': '0/255', 'L': 1 },
+    { 'I': 5102, 'T': 'S', 'D': 'gain', 'R': '0/100', 'L': 1 },
+    { 'I': 5109, 'T': 'S', 'D': 'effect', 'R': '0/3', 'L': 1 },
+    { 'I': 4101, 'T': 'P', 'D': 'power', 'U': 'W', 'R': ['0/288', '-1'], 'L': 1 },
+    { 'I': 4103, 'T': 'E', 'D': 'energy', 'U': 'Wmin', 'R': ['U32', '-1'], 'L': 1 },
+    { 'I': 6102, 'T': 'A', 'D': 'overpower', 'R': ['0/1', '-1'], 'L': 1 },
+    { 'I': 2101, 'T': 'S', 'D': 'input', 'R': '0/1', 'L': 2 },
+    { 'I': 2102, 'T': 'EV', 'D': 'inputEvent', 'R': ['S/L', ''], 'L': 2 },
+    { 'I': 2103, 'T': 'EVC', 'D': 'inputEventCnt', 'R': 'U16', 'L': 2 },
+    { 'I': 9101, 'T': 'S', 'D': 'mode', 'R': 'color/white', 'L': 2 },
+  ],
+};
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const SHRGBW2 = {
+  'blk': [
+    { 'I': 1, 'D': 'light_0' },
+    { 'I': 2, 'D': 'device' },
+  ],
+  'sen': [
+    { 'I': 9103, 'T': 'EVC', 'D': 'cfgChanged', 'R': 'U16', 'L': 2 },
+    { 'I': 1101, 'T': 'S', 'D': 'output', 'R': '0/1', 'L': 1 },
+    { 'I': 5105, 'T': 'S', 'D': 'red', 'R': '0/255', 'L': 1 },
+    { 'I': 5106, 'T': 'S', 'D': 'green', 'R': '0/255', 'L': 1 },
+    { 'I': 5107, 'T': 'S', 'D': 'blue', 'R': '0/255', 'L': 1 },
+    { 'I': 5108, 'T': 'S', 'D': 'white', 'R': '0/255', 'L': 1 },
+    { 'I': 5102, 'T': 'S', 'D': 'gain', 'R': '0/100', 'L': 1 },
+    { 'I': 5109, 'T': 'S', 'D': 'effect', 'R': '0/3', 'L': 1 },
+    { 'I': 4101, 'T': 'P', 'D': 'power', 'U': 'W', 'R': ['0/288', '-1'], 'L': 1 },
+    { 'I': 4103, 'T': 'E', 'D': 'energy', 'U': 'Wmin', 'R': ['U32', '-1'], 'L': 1 },
+    { 'I': 6102, 'T': 'A', 'D': 'overpower', 'R': ['0/1', '-1'], 'L': 1 },
+    { 'I': 2101, 'T': 'S', 'D': 'input', 'R': '0/1', 'L': 2 },
+    { 'I': 2102, 'T': 'EV', 'D': 'inputEvent', 'R': ['S/L', ''], 'L': 2 },
+    { 'I': 2103, 'T': 'EVC', 'D': 'inputEventCnt', 'R': 'U16', 'L': 2 },
+    { 'I': 9101, 'T': 'S', 'D': 'mode', 'R': 'color/white', 'L': 2 },
+  ],
+};
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const SHHT1 = {
+  'blk': [
+    { 'I': 1, 'D': 'sensor_0' },
+    { 'I': 2, 'D': 'device' },
+  ],
+  'sen': [
+    { 'I': 9103, 'T': 'EVC', 'D': 'cfgChanged', 'R': 'U16', 'L': 2 },
+    { 'I': 3101, 'T': 'T', 'D': 'extTemp', 'U': 'C', 'R': ['-55/125', '999'], 'L': 1 },
+    { 'I': 3102, 'T': 'T', 'D': 'extTemp', 'U': 'F', 'R': ['-67/257', '999'], 'L': 1 },
+    { 'I': 3103, 'T': 'H', 'D': 'humidity', 'R': ['0/100', '999'], 'L': 1 },
+    { 'I': 3115, 'T': 'S', 'D': 'sensorError', 'R': '0/1', 'L': 1 },
+    { 'I': 3111, 'T': 'B', 'D': 'battery', 'R': ['0/100', '-1'], 'L': 2 },
+    { 'I': 9102, 'T': 'EV', 'D': 'wakeupEvent', 'R': ['battery/button/periodic/poweron/sensor/alarm', 'unknown'], 'L': 2 },
   ],
 };

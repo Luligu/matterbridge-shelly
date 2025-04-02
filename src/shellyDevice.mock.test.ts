@@ -1148,6 +1148,50 @@ describe('Shelly devices test', () => {
 
       if (device) device.destroy();
     });
+
+    test('Create a gen 1 shellytrv-60A423D0E032 device', async () => {
+      id = 'shellytrv-60A423D0E032';
+      log.logName = id;
+
+      device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', id + '.json'));
+      expect(device).not.toBeUndefined();
+      if (!device) return;
+      expect(device.host).toBe(path.join('src', 'mock', id + '.json'));
+      expect(device.model).toBe('SHTRV-01');
+      expect(device.mac).toBe('60A423D0E032');
+      expect(device.id).toBe(id);
+      expect(device.firmware).toBe('v2.2.4@ee290818');
+      expect(device.auth).toBe(false);
+      expect(device.gen).toBe(1);
+      expect(device.profile).toBe(undefined);
+      expect(device.name).toBe('Shelly-UG-CZ-Heizkoerper');
+      expect(device.hasUpdate).toBe(false);
+      expect(device.lastseen).not.toBe(0);
+      expect(device.online).toBe(true);
+      expect(device.cached).toBe(false);
+      expect(device.sleepMode).toBe(false);
+
+      expect(device.components.length).toBe(9);
+      expect(device.getComponentNames()).toStrictEqual(['WiFi', 'MQTT', 'Sntp', 'Cloud', 'CoIoT', 'Thermostat', 'Battery', 'Sys']);
+      expect(device.getComponentIds()).toStrictEqual(['wifi_ap', 'wifi_sta', 'mqtt', 'sntp', 'cloud', 'coiot', 'thermostat:0', 'battery', 'sys']);
+
+      expect(device.getComponent('sys')?.getValue('temperature')).toBe(undefined);
+      expect(device.getComponent('sys')?.getValue('overtemperature')).toBe(undefined);
+
+      expect(device.getComponent('thermostat:0')?.hasProperty('target_t')).toBe(true);
+      expect(device.getComponent('thermostat:0')?.hasProperty('tmp')).toBe(true);
+
+      expect(await device.fetchUpdate()).not.toBeNull();
+
+      expect(device.getComponent('thermostat:0')?.getValue('target_t')).toEqual({ 'enabled': true, 'units': 'C', 'value': 5, 'value_op': 8 });
+      expect(device.getComponent('thermostat:0')?.getValue('tmp')).toEqual({ 'is_valid': true, 'units': 'C', 'value': 14.3 });
+      device.getComponent('thermostat:0')?.setValue('target_t', { value: 22 });
+      device.getComponent('thermostat:0')?.setValue('tmp', { value: 20 });
+      expect(device.getComponent('thermostat:0')?.getValue('target_t')).toEqual({ 'value': 22 });
+      expect(device.getComponent('thermostat:0')?.getValue('tmp')).toEqual({ 'value': 20 });
+
+      if (device) device.destroy();
+    });
   });
 
   describe('Test all gen 2 devices', () => {

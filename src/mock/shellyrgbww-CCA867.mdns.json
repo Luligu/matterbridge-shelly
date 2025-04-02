@@ -1,0 +1,76 @@
+{
+  "id": 0,
+  "type": "response",
+  "flags": 1152,
+  "flag_qr": true,
+  "opcode": "QUERY",
+  "flag_aa": true,
+  "flag_tc": false,
+  "flag_rd": false,
+  "flag_ra": true,
+  "flag_z": false,
+  "flag_ad": false,
+  "flag_cd": false,
+  "rcode": "NOERROR",
+  "questions": [],
+  "answers": [
+    {
+      "name": "_services._dns-sd._udp.local",
+      "type": "PTR",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": "_http._tcp"
+    },
+    {
+      "name": "_http._tcp.local",
+      "type": "PTR",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": "shellyrgbww-CCA867._http._tcp.local"
+    },
+    {
+      "name": "shellyrgbww-CCA867._http._tcp.local",
+      "type": "SRV",
+      "ttl": 120,
+      "class": "IN",
+      "flush": true,
+      "data": {
+        "priority": 0,
+        "weight": 0,
+        "port": 80,
+        "target": "shellyrgbww-CCA867.local"
+      }
+    },
+    {
+      "name": "shellyrgbww-CCA867._http._tcp.local",
+      "type": "TXT",
+      "ttl": 120,
+      "class": "IN",
+      "flush": true,
+      "data": ["id=shellyrgbww-CCA867", "fw_id=20200527-142209/v1.7.0-rc8@6f7ea363", "arch=esp8266"]
+    },
+    {
+      "name": "shellyrgbww-CCA867.local",
+      "type": "A",
+      "ttl": 120,
+      "class": "IN",
+      "flush": true,
+      "data": "192.168.0.27"
+    },
+    {
+      "name": "shellyrgbww-CCA867.local",
+      "type": "NSEC",
+      "ttl": 120,
+      "class": "IN",
+      "flush": true,
+      "data": {
+        "nextDomain": "shellyrgbww-CCA867.local",
+        "rrtypes": ["A"]
+      }
+    }
+  ],
+  "authorities": [],
+  "additionals": []
+}

@@ -1,0 +1,58 @@
+{
+  "id": 0,
+  "type": "response",
+  "flags": 1024,
+  "flag_qr": true,
+  "opcode": "QUERY",
+  "flag_aa": true,
+  "flag_tc": false,
+  "flag_rd": false,
+  "flag_ra": false,
+  "flag_z": false,
+  "flag_ad": false,
+  "flag_cd": false,
+  "rcode": "NOERROR",
+  "questions": [],
+  "answers": [
+    {
+      "name": "_shelly._tcp.local",
+      "type": "PTR",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": "shelly2lg3-543204668cd4._shelly._tcp.local"
+    }
+  ],
+  "authorities": [],
+  "additionals": [
+    {
+      "name": "shelly2lg3-543204668cd4._shelly._tcp.local",
+      "type": "SRV",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": {
+        "priority": 0,
+        "weight": 0,
+        "port": 80,
+        "target": "Shelly2LG3-543204668CD4.local"
+      }
+    },
+    {
+      "name": "shelly2lg3-543204668cd4._shelly._tcp.local",
+      "type": "TXT",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": ["gen=3", "app=S2LG3", "ver=1.6.99-dev119039"]
+    },
+    {
+      "name": "Shelly2LG3-543204668CD4.local",
+      "type": "A",
+      "ttl": 120,
+      "class": "IN",
+      "flush": true,
+      "data": "10.101.2.51"
+    }
+  ]
+}

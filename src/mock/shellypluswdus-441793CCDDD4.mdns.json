@@ -20,7 +20,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": "shelly1g4-a085e3bc987c._http._tcp.local"
+      "data": "shellypluswdus-441793ccddd4._http._tcp.local"
     },
     {
       "name": "_shelly._tcp.local",
@@ -28,7 +28,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": "shelly1g4-a085e3bc987c._shelly._tcp.local"
+      "data": "shellypluswdus-441793ccddd4._shelly._tcp.local"
     },
     {
       "name": "_services._dns-sd._udp.local",
@@ -50,7 +50,7 @@
   "authorities": [],
   "additionals": [
     {
-      "name": "shelly1g4-a085e3bc987c._http._tcp.local",
+      "name": "shellypluswdus-441793ccddd4._http._tcp.local",
       "type": "SRV",
       "ttl": 120,
       "class": "IN",
@@ -59,27 +59,27 @@
         "priority": 0,
         "weight": 0,
         "port": 80,
-        "target": "Shelly1G4-A085E3BC987C.local"
+        "target": "ShellyPlusWDUS-441793CCDDD4.local"
       }
     },
     {
-      "name": "shelly1g4-a085e3bc987c._http._tcp.local",
+      "name": "shellypluswdus-441793ccddd4._http._tcp.local",
       "type": "TXT",
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": ["gen=4"]
+      "data": ["gen=2"]
     },
     {
-      "name": "Shelly1G4-A085E3BC987C.local",
+      "name": "ShellyPlusWDUS-441793CCDDD4.local",
       "type": "A",
       "ttl": 120,
       "class": "IN",
       "flush": true,
-      "data": "10.101.4.205"
+      "data": "10.101.4.228"
     },
     {
-      "name": "shelly1g4-a085e3bc987c._shelly._tcp.local",
+      "name": "shellypluswdus-441793ccddd4._shelly._tcp.local",
       "type": "SRV",
       "ttl": 120,
       "class": "IN",
@@ -88,24 +88,24 @@
         "priority": 0,
         "weight": 0,
         "port": 80,
-        "target": "Shelly1G4-A085E3BC987C.local"
+        "target": "ShellyPlusWDUS-441793CCDDD4.local"
       }
     },
     {
-      "name": "shelly1g4-a085e3bc987c._shelly._tcp.local",
+      "name": "shellypluswdus-441793ccddd4._shelly._tcp.local",
       "type": "TXT",
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": ["gen=4", "app=S1G4", "ver=1.5.99-g4prod0"]
+      "data": ["gen=2", "app=PlusWallDimmer", "ver=1.4.4"]
     },
     {
-      "name": "Shelly1G4-A085E3BC987C.local",
+      "name": "ShellyPlusWDUS-441793CCDDD4.local",
       "type": "A",
       "ttl": 120,
       "class": "IN",
       "flush": true,
-      "data": "10.101.4.205"
+      "data": "10.101.4.228"
     }
   ]
 }
