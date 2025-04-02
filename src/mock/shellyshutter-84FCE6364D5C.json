@@ -1,0 +1,255 @@
+{
+  "shelly": {
+    "name": null,
+    "id": "shellyshutter-84fce6364d5c",
+    "mac": "84FCE6364D5C",
+    "slot": 0,
+    "model": "S3SH-0A2P4EU",
+    "gen": 3,
+    "fw_id": "20250221-135106/g43215ed",
+    "ver": "1.6.99-dev118717",
+    "app": "S2PMG3Shutter",
+    "auth_en": false,
+    "auth_domain": null
+  },
+  "settings": {
+    "ble": {
+      "enable": true,
+      "rpc": {
+        "enable": true
+      }
+    },
+    "bthome": {},
+    "cloud": {
+      "enable": true,
+      "server": "repo.shelly.cloud:6022/jrpc"
+    },
+    "cover:0": {
+      "id": 0,
+      "name": null,
+      "motor": {
+        "idle_power_thr": 2,
+        "idle_confirm_period": 0.25
+      },
+      "maxtime_open": 300,
+      "maxtime_close": 300,
+      "initial_state": "stopped",
+      "invert_directions": false,
+      "maintenance_mode": false,
+      "in_mode": "dual",
+      "in_locked": false,
+      "swap_inputs": false,
+      "safety_switch": {
+        "enable": false,
+        "direction": "both",
+        "action": "stop",
+        "allowed_move": null
+      },
+      "power_limit": 2800,
+      "voltage_limit": 280,
+      "undervoltage_limit": 0,
+      "current_limit": 10,
+      "obstruction_detection": {
+        "enable": false,
+        "direction": "both",
+        "action": "stop",
+        "power_thr": 100,
+        "holdoff": 1
+      },
+      "slat": {
+        "enable": false,
+        "open_time": 1.5,
+        "close_time": 1.5,
+        "step": 20,
+        "retain_pos": false,
+        "precise_ctl": false
+      }
+    },
+    "input:0": {
+      "id": 0,
+      "name": null,
+      "type": "switch",
+      "enable": true,
+      "invert": false,
+      "factory_reset": true
+    },
+    "input:1": {
+      "id": 1,
+      "name": null,
+      "type": "switch",
+      "enable": true,
+      "invert": false,
+      "factory_reset": true
+    },
+    "knx": {
+      "enable": false,
+      "ia": "15.15.255",
+      "routing": {
+        "addr": "224.0.23.12:3671"
+      }
+    },
+    "mqtt": {
+      "enable": false,
+      "server": null,
+      "client_id": "shellyshutter-84fce6364d5c",
+      "user": null,
+      "ssl_ca": null,
+      "topic_prefix": "shellyshutter-84fce6364d5c",
+      "rpc_ntf": true,
+      "status_ntf": false,
+      "use_client_cert": false,
+      "enable_rpc": true,
+      "enable_control": true
+    },
+    "sys": {
+      "device": {
+        "name": null,
+        "mac": "84FCE6364D5C",
+        "fw_id": "20250221-135106/g43215ed",
+        "discoverable": true,
+        "eco_mode": false,
+        "addon_type": null
+      },
+      "location": null,
+      "debug": {
+        "level": 2,
+        "file_level": null,
+        "mqtt": {
+          "enable": false
+        },
+        "websocket": {
+          "enable": false
+        },
+        "file_log": {
+          "enable": false
+        },
+        "udp": {
+          "addr": "35.205.173.252:8910"
+        }
+      },
+      "ui_data": {},
+      "rpc_udp": {
+        "dst_addr": null,
+        "listen_port": null
+      },
+      "sntp": {
+        "server": "time.cloudflare.com"
+      },
+      "cfg_rev": 9
+    },
+    "wifi": {
+      "ap": {
+        "ssid": "",
+        "is_open": true,
+        "enable": true,
+        "range_extender": {
+          "enable": false
+        }
+      },
+      "sta": {
+        "ssid": "",
+        "is_open": false,
+        "enable": true,
+        "ipv4mode": "dhcp",
+        "ip": null,
+        "netmask": null,
+        "gw": null,
+        "nameserver": null
+      },
+      "sta1": {
+        "ssid": "",
+        "is_open": true,
+        "enable": false,
+        "ipv4mode": "dhcp",
+        "ip": null,
+        "netmask": null,
+        "gw": null,
+        "nameserver": null
+      },
+      "roam": {
+        "rssi_thr": -80,
+        "interval": 60
+      }
+    },
+    "ws": {
+      "enable": false,
+      "server": null,
+      "ssl_ca": "ca.pem"
+    }
+  },
+  "status": {
+    "ble": {},
+    "bthome": {},
+    "cloud": {
+      "connected": true
+    },
+    "cover:0": {
+      "id": 0,
+      "source": "limit_switch",
+      "state": "open",
+      "apower": 0,
+      "voltage": 220.8,
+      "current": 0,
+      "pf": 0,
+      "freq": 49.9,
+      "aenergy": {
+        "total": 10.688,
+        "by_minute": [0, 0, 0],
+        "minute_ts": 1741188480
+      },
+      "temperature": {
+        "tC": 45.4,
+        "tF": 113.7
+      },
+      "pos_control": true,
+      "last_direction": "open",
+      "current_pos": 100
+    },
+    "input:0": {
+      "id": 0,
+      "state": false
+    },
+    "input:1": {
+      "id": 1,
+      "state": false
+    },
+    "knx": {},
+    "mqtt": {
+      "connected": false
+    },
+    "sys": {
+      "mac": "84FCE6364D5C",
+      "restart_required": false,
+      "time": "17:28",
+      "unixtime": 1741188534,
+      "last_sync_ts": 1741187700,
+      "uptime": 89470,
+      "ram_size": 251808,
+      "ram_free": 67820,
+      "ram_min_free": 29152,
+      "fs_size": 917504,
+      "fs_free": 442368,
+      "cfg_rev": 9,
+      "kvs_rev": 0,
+      "schedule_rev": 17,
+      "webhook_rev": 3,
+      "btrelay_rev": 0,
+      "available_updates": {},
+      "reset_reason": 3,
+      "utc_offset": 7200
+    },
+    "wifi": {
+      "sta_ip": "10.101.4.158",
+      "status": "got ip",
+      "ssid": "",
+      "rssi": -42
+    },
+    "ws": {
+      "connected": false
+    }
+  },
+  "components": [],
+  "cfg_rev": 9,
+  "offset": 0,
+  "total": 0
+}

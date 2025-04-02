@@ -1,0 +1,350 @@
+{
+  "shelly": {
+    "name": null,
+    "id": "shelly0110dimg3-34b7da90ef38",
+    "mac": "34B7DA90EF38",
+    "slot": 1,
+    "model": "S3DM-0010WW",
+    "gen": 3,
+    "fw_id": "20241011-114458/1.4.4-g6d2a586",
+    "ver": "1.4.4",
+    "app": "Dimmer0110VPMG3",
+    "auth_en": false,
+    "auth_domain": null
+  },
+  "settings": {
+    "ble": {
+      "enable": true,
+      "rpc": {
+        "enable": true
+      },
+      "observer": {
+        "enable": true
+      }
+    },
+    "bthome": {},
+    "cloud": {
+      "enable": true,
+      "server": "repo.shelly.cloud:6022/jrpc"
+    },
+    "input:0": {
+      "id": 0,
+      "name": null,
+      "type": "button",
+      "enable": true,
+      "invert": false
+    },
+    "input:1": {
+      "id": 1,
+      "name": null,
+      "type": "button",
+      "enable": true,
+      "invert": false
+    },
+    "knx": {
+      "enable": false,
+      "ia": "15.15.255",
+      "routing": {
+        "addr": "224.0.23.12:3671"
+      }
+    },
+    "light:0": {
+      "id": 0,
+      "name": null,
+      "initial_state": "restore_last",
+      "auto_on": false,
+      "auto_on_delay": 60,
+      "auto_off": false,
+      "auto_off_delay": 2145600,
+      "transition_duration": 3,
+      "min_brightness_on_toggle": 3,
+      "night_mode": {
+        "enable": true,
+        "brightness": 5,
+        "active_between": ["00:00", "00:00"]
+      },
+      "range_map": [0, 100],
+      "op_mode": 0,
+      "button_fade_rate": 3,
+      "button_presets": {
+        "button_doublepush": {
+          "brightness": 100
+        }
+      },
+      "in_mode": "dim",
+      "current_limit": 16,
+      "power_limit": 4480,
+      "voltage_limit": 280
+    },
+    "mqtt": {
+      "enable": false,
+      "server": null,
+      "client_id": "shelly0110dimg3-34b7da90ef38",
+      "user": null,
+      "ssl_ca": null,
+      "topic_prefix": "shelly0110dimg3-34b7da90ef38",
+      "rpc_ntf": true,
+      "status_ntf": false,
+      "use_client_cert": false,
+      "enable_rpc": true,
+      "enable_control": true
+    },
+    "sys": {
+      "device": {
+        "name": null,
+        "mac": "34B7DA90EF38",
+        "fw_id": "20241011-114458/1.4.4-g6d2a586",
+        "discoverable": true,
+        "addon_type": null
+      },
+      "location": null,
+      "debug": {
+        "level": 2,
+        "file_level": null,
+        "mqtt": {
+          "enable": false
+        },
+        "websocket": {
+          "enable": false
+        },
+        "udp": {
+          "addr": null
+        }
+      },
+      "ui_data": {},
+      "rpc_udp": {
+        "dst_addr": null,
+        "listen_port": null
+      },
+      "sntp": {
+        "server": "time.google.com"
+      },
+      "cfg_rev": 64
+    },
+    "wifi": {
+      "ap": {
+        "ssid": "",
+        "is_open": true,
+        "enable": false,
+        "range_extender": {
+          "enable": false
+        }
+      },
+      "sta": {
+        "ssid": "",
+        "is_open": false,
+        "enable": true,
+        "ipv4mode": "dhcp",
+        "ip": null,
+        "netmask": null,
+        "gw": null,
+        "nameserver": null
+      },
+      "sta1": {
+        "ssid": "",
+        "is_open": true,
+        "enable": false,
+        "ipv4mode": "dhcp",
+        "ip": null,
+        "netmask": null,
+        "gw": null,
+        "nameserver": null
+      },
+      "roam": {
+        "rssi_thr": -80,
+        "interval": 60
+      }
+    },
+    "ws": {
+      "enable": true,
+      "server": "wss://shellyfl-t1-eu.shelly.cloud/shelly",
+      "ssl_ca": "ca.pem"
+    }
+  },
+  "status": {
+    "ble": {},
+    "bthome": {},
+    "cloud": {
+      "connected": true
+    },
+    "input:0": {
+      "id": 0,
+      "state": null
+    },
+    "input:1": {
+      "id": 1,
+      "state": null
+    },
+    "knx": {},
+    "light:0": {
+      "id": 0,
+      "source": "night_mode_start_full_period",
+      "output": false,
+      "brightness": 5,
+      "temperature": {
+        "tC": 49.6,
+        "tF": 121.3
+      },
+      "aenergy": {
+        "total": 0,
+        "by_minute": [0, 0, 0],
+        "minute_ts": 1741254660
+      },
+      "apower": 0,
+      "current": 0,
+      "voltage": 235.9
+    },
+    "mqtt": {
+      "connected": false
+    },
+    "sys": {
+      "mac": "34B7DA90EF38",
+      "restart_required": false,
+      "time": "11:51",
+      "unixtime": 1741254691,
+      "uptime": 1110817,
+      "ram_size": 263328,
+      "ram_free": 75260,
+      "fs_size": 1048576,
+      "fs_free": 565248,
+      "cfg_rev": 64,
+      "kvs_rev": 0,
+      "schedule_rev": 0,
+      "webhook_rev": 4,
+      "available_updates": {
+        "beta": {
+          "version": "1.5.1-beta1"
+        }
+      },
+      "reset_reason": 1
+    },
+    "wifi": {
+      "sta_ip": "10.101.4.209",
+      "status": "got ip",
+      "ssid": "",
+      "rssi": -57
+    },
+    "ws": {
+      "connected": true
+    }
+  },
+  "components": [
+    {
+      "key": "boolean:200",
+      "status": {
+        "value": false,
+        "source": "",
+        "last_update_ts": 0
+      },
+      "config": {
+        "id": 200,
+        "name": "Neshto stranno",
+        "meta": {
+          "ui": {
+            "icon": "",
+            "view": "toggle"
+          }
+        },
+        "persisted": false,
+        "default_value": false,
+        "owner": "",
+        "access": "*"
+      }
+    },
+    {
+      "key": "group:200",
+      "status": {
+        "value": ["boolean:200"],
+        "source": "rpc",
+        "last_update_ts": 1720697258
+      },
+      "config": {
+        "id": 200,
+        "name": "shashavite oss",
+        "meta": {
+          "ui": {
+            "icon": "",
+            "view": "label"
+          }
+        },
+        "owner": "",
+        "access": ""
+      }
+    },
+    {
+      "key": "group:201",
+      "status": {
+        "value": ["text:200"],
+        "source": "rpc",
+        "last_update_ts": 1734092510
+      },
+      "config": {
+        "id": 201,
+        "name": "textTest",
+        "meta": {
+          "cloud": [],
+          "ui": {
+            "icon": "",
+            "view": "label"
+          }
+        },
+        "owner": "",
+        "access": ""
+      }
+    },
+    {
+      "key": "number:200",
+      "status": {
+        "value": 0,
+        "source": "",
+        "last_update_ts": 0
+      },
+      "config": {
+        "id": 200,
+        "name": "Num",
+        "min": 0,
+        "max": 100,
+        "meta": {
+          "cloud": [],
+          "ui": {
+            "icon": "",
+            "view": "label",
+            "step": 1,
+            "unit": ""
+          }
+        },
+        "persisted": false,
+        "default_value": 0,
+        "owner": "",
+        "access": "*"
+      }
+    },
+    {
+      "key": "text:200",
+      "status": {
+        "value": "",
+        "source": "",
+        "last_update_ts": 0
+      },
+      "config": {
+        "id": 200,
+        "name": null,
+        "max_len": 255,
+        "meta": {
+          "cloud": [],
+          "ui": {
+            "icon": "",
+            "view": "field"
+          }
+        },
+        "persisted": false,
+        "default_value": "",
+        "owner": "",
+        "access": ""
+      }
+    }
+  ],
+  "cfg_rev": 64,
+  "offset": 0,
+  "total": 5
+}

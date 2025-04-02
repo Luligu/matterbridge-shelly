@@ -1,0 +1,223 @@
+{
+  "shelly": {
+    "name": null,
+    "id": "shelly3em63g3-84fce6367400",
+    "mac": "84FCE6367400",
+    "slot": 0,
+    "model": "S3EM-003CXCEU63",
+    "gen": 3,
+    "fw_id": "20241112-225656/g5d24c46",
+    "ver": "1.4.99-dev111396",
+    "app": "S3EMG3",
+    "auth_en": false,
+    "auth_domain": null,
+    "profile": "triphase"
+  },
+  "settings": {
+    "ble": {
+      "enable": true,
+      "rpc": {
+        "enable": true
+      }
+    },
+    "bthome": {},
+    "cloud": {
+      "enable": true,
+      "server": "repo.shelly.cloud:6022/jrpc"
+    },
+    "em:0": {
+      "id": 0,
+      "name": null,
+      "blink_mode_selector": "active_energy",
+      "phase_selector": "all",
+      "monitor_phase_sequence": false,
+      "ct_type": "3EMG3",
+      "reverse": {}
+    },
+    "emdata:0": {},
+    "modbus": {
+      "enable": true
+    },
+    "mqtt": {
+      "enable": false,
+      "server": null,
+      "client_id": "shelly3em63g3-84fce6367400",
+      "user": null,
+      "ssl_ca": null,
+      "topic_prefix": "shelly3em63g3-84fce6367400",
+      "rpc_ntf": true,
+      "status_ntf": false,
+      "use_client_cert": false,
+      "enable_rpc": true,
+      "enable_control": true
+    },
+    "sys": {
+      "device": {
+        "name": null,
+        "mac": "84FCE6367400",
+        "fw_id": "20241112-225656/g5d24c46",
+        "discoverable": true,
+        "eco_mode": false,
+        "profile": "triphase"
+      },
+      "location": null,
+      "debug": {
+        "level": 2,
+        "file_level": null,
+        "mqtt": {
+          "enable": false
+        },
+        "websocket": {
+          "enable": false
+        },
+        "udp": {
+          "addr": "35.205.173.252:8910"
+        }
+      },
+      "ui_data": {},
+      "rpc_udp": {
+        "dst_addr": null,
+        "listen_port": null
+      },
+      "sntp": {
+        "server": "time.cloudflare.com"
+      },
+      "cfg_rev": 41
+    },
+    "temperature:0": {
+      "id": 0,
+      "name": null,
+      "report_thr_C": 5,
+      "offset_C": 0
+    },
+    "wifi": {
+      "ap": {
+        "ssid": "",
+        "is_open": true,
+        "enable": false,
+        "range_extender": {
+          "enable": false
+        }
+      },
+      "sta": {
+        "ssid": "",
+        "is_open": false,
+        "enable": true,
+        "ipv4mode": "dhcp",
+        "ip": null,
+        "netmask": null,
+        "gw": null,
+        "nameserver": null
+      },
+      "sta1": {
+        "ssid": "",
+        "is_open": true,
+        "enable": false,
+        "ipv4mode": "dhcp",
+        "ip": null,
+        "netmask": null,
+        "gw": null,
+        "nameserver": null
+      },
+      "roam": {
+        "rssi_thr": -80,
+        "interval": 60
+      }
+    },
+    "ws": {
+      "enable": false,
+      "server": null,
+      "ssl_ca": "ca.pem"
+    }
+  },
+  "status": {
+    "ble": {},
+    "bthome": {},
+    "cloud": {
+      "connected": true
+    },
+    "em:0": {
+      "id": 0,
+      "a_current": 0.03,
+      "a_voltage": 235.6,
+      "a_act_power": 2.1,
+      "a_aprt_power": 7,
+      "a_pf": 0.3,
+      "a_freq": 50,
+      "b_current": 0.03,
+      "b_voltage": 236.4,
+      "b_act_power": 2.1,
+      "b_aprt_power": 7.1,
+      "b_pf": 0.3,
+      "b_freq": 50,
+      "c_current": 0.029,
+      "c_voltage": 236.2,
+      "c_act_power": 1.8,
+      "c_aprt_power": 6.8,
+      "c_pf": 0.26,
+      "c_freq": 50,
+      "n_current": null,
+      "total_current": 0.089,
+      "total_act_power": 5.942,
+      "total_aprt_power": 21.007,
+      "user_calibrated_phase": []
+    },
+    "emdata:0": {
+      "id": 0,
+      "a_total_act_energy": 6966.05,
+      "a_total_act_ret_energy": 0,
+      "b_total_act_energy": 7108.03,
+      "b_total_act_ret_energy": 0,
+      "c_total_act_energy": 6453.25,
+      "c_total_act_ret_energy": 0,
+      "total_act": 20527.33,
+      "total_act_ret": 0
+    },
+    "modbus": {},
+    "mqtt": {
+      "connected": false
+    },
+    "sys": {
+      "mac": "84FCE6367400",
+      "restart_required": false,
+      "time": "11:52",
+      "unixtime": 1741254766,
+      "last_sync_ts": 1741254754,
+      "uptime": 525685,
+      "ram_size": 248196,
+      "ram_free": 53028,
+      "ram_min_free": 14980,
+      "fs_size": 786432,
+      "fs_free": 335872,
+      "cfg_rev": 41,
+      "kvs_rev": 0,
+      "schedule_rev": 4,
+      "webhook_rev": 4,
+      "btrelay_rev": 2242,
+      "available_updates": {
+        "beta": {
+          "version": "1.5.1-beta1"
+        }
+      },
+      "reset_reason": 4
+    },
+    "temperature:0": {
+      "id": 0,
+      "tC": 50,
+      "tF": 122
+    },
+    "wifi": {
+      "sta_ip": "10.101.8.93",
+      "status": "got ip",
+      "ssid": "",
+      "rssi": -61
+    },
+    "ws": {
+      "connected": false
+    }
+  },
+  "components": [],
+  "cfg_rev": 41,
+  "offset": 0,
+  "total": 0
+}

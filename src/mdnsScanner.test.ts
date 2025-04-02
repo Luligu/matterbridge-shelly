@@ -378,6 +378,7 @@ describe('Shellies MdnsScanner test', () => {
       { id: 'shellyrgbw2-EC64C9D3FFEF', host: '192.168.1.226', port: 80, gen: 1 },
       { id: 'shellyswitch25-3494546BBF7E', host: '192.168.1.222', port: 80, gen: 1 },
       { id: 'shellyswitch25-3494547BF36C', host: '192.168.1.236', port: 80, gen: 1 },
+      { id: 'shellytrv-60A423D0E032', host: '192.168.24.122', port: 80, gen: 1 },
     ];
 
     for (const test of tests) {
@@ -638,7 +639,6 @@ describe('Shellies MdnsScanner test', () => {
 
   test('Run multiple test gen 4', async () => {
     const tests = [
-      { id: 'shelly1g4-A085E3BC987C', host: '10.101.4.205', port: 80, gen: 4 },
       { id: 'shelly1minig4-7C2C67643858', host: '10.101.7.248', port: 80, gen: 4 },
       { id: 'shelly1pmminig4-7C2C67640B4C', host: '10.101.1.87', port: 80, gen: 4 },
       { id: 'shelly2pmg4-7C2C677A0110', host: '10.101.4.150', port: 80, gen: 4 },
@@ -646,6 +646,8 @@ describe('Shellies MdnsScanner test', () => {
       { id: 'shellyi4g4-F0F5BD287ACC', host: '10.101.5.95', port: 80, gen: 4 },
       { id: 'shellyplugusg4-7C2C67642A88', host: '10.101.6.97', port: 80, gen: 4 },
       { id: 'shellypstripg4-7C2C6763F7B0', host: '10.101.10.172', port: 80, gen: 4 },
+      { id: 'shelly1g4-A085E3BCA4C8', host: '192.168.1.190', port: 80, gen: 4 },
+      { id: 'shelly1pmg4-A085E3BD0544', host: '192.168.1.191', port: 80, gen: 4 },
     ];
 
     for (const test of tests) {

@@ -1,0 +1,113 @@
+{
+  "id": 0,
+  "type": "response",
+  "flags": 1152,
+  "flag_qr": true,
+  "opcode": "QUERY",
+  "flag_aa": true,
+  "flag_tc": false,
+  "flag_rd": false,
+  "flag_ra": true,
+  "flag_z": false,
+  "flag_ad": false,
+  "flag_cd": false,
+  "rcode": "NOERROR",
+  "questions": [],
+  "answers": [
+    {
+      "name": "_services._dns-sd._udp.local",
+      "type": "PTR",
+      "ttl": 4500,
+      "class": "IN",
+      "flush": false,
+      "data": "_shelly._tcp.local"
+    },
+    {
+      "name": "_services._dns-sd._udp.local",
+      "type": "PTR",
+      "ttl": 4500,
+      "class": "IN",
+      "flush": false,
+      "data": "_http._tcp.local"
+    },
+    {
+      "name": "_shelly._tcp.local",
+      "type": "PTR",
+      "ttl": 4500,
+      "class": "IN",
+      "flush": false,
+      "data": "shellyplusht-08b61fcd36a8._shelly._tcp.local"
+    },
+    {
+      "name": "shellyplusht-08b61fcd36a8._shelly._tcp.local",
+      "type": "SRV",
+      "ttl": 120,
+      "class": "IN",
+      "flush": true,
+      "data": {
+        "priority": 0,
+        "weight": 0,
+        "port": 80,
+        "target": "ShellyPlusHT-08B61FCD36A8.local"
+      }
+    },
+    {
+      "name": "shellyplusht-08b61fcd36a8._shelly._tcp.local",
+      "type": "TXT",
+      "ttl": 120,
+      "class": "IN",
+      "flush": true,
+      "data": ["app=PlusHT", "ver=0.14.1", "gen=2"]
+    },
+    {
+      "name": "_http._tcp.local",
+      "type": "PTR",
+      "ttl": 4500,
+      "class": "IN",
+      "flush": false,
+      "data": "ShellyPlusHT-08B61FCD36A8._http._tcp.local"
+    },
+    {
+      "name": "ShellyPlusHT-08B61FCD36A8._http._tcp.local",
+      "type": "SRV",
+      "ttl": 120,
+      "class": "IN",
+      "flush": true,
+      "data": {
+        "priority": 0,
+        "weight": 0,
+        "port": 80,
+        "target": "ShellyPlusHT-08B61FCD36A8.local"
+      }
+    },
+    {
+      "name": "ShellyPlusHT-08B61FCD36A8._http._tcp.local",
+      "type": "TXT",
+      "ttl": 120,
+      "class": "IN",
+      "flush": true,
+      "data": ["gen=2"]
+    },
+    {
+      "name": "ShellyPlusHT-08B61FCD36A8.local",
+      "type": "A",
+      "ttl": 120,
+      "class": "IN",
+      "flush": true,
+      "data": "10.101.1.135"
+    },
+    {
+      "name": "ShellyPlusHT-08B61FCD36A8.local",
+      "type": "NSEC",
+      "ttl": 120,
+      "class": "IN",
+      "flush": true,
+      "data": {
+        "nextDomain": "ShellyPlusHT-08B61FCD36A8.local",
+        "rrtypes": ["A"]
+      }
+    }
+  ],
+  "authorities": [],
+  "additionals": []
+}

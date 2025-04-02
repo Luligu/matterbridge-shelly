@@ -3,13 +3,16 @@
 
 import { jest } from '@jest/globals';
 import { CoapServer } from './coapServer';
-import { AnsiLogger, CYAN, db, hk, LogLevel, nf, zb } from 'matterbridge/logger';
+import { AnsiLogger, CYAN, db, hk, LogLevel, nf, TimestampFormat, zb } from 'matterbridge/logger';
 import { IncomingMessage, parameters } from 'coap';
+import { Shelly } from './shelly';
 
 // jest.useFakeTimers();
 
 describe('Coap scanner', () => {
-  const coapServer = new CoapServer(LogLevel.DEBUG);
+  const log = new AnsiLogger({ logName: 'ShellyMdnsScanner', logTimestampFormat: TimestampFormat.TIME_MILLIS });
+  const shelly = new Shelly(log);
+  const coapServer = new CoapServer(shelly, LogLevel.DEBUG);
 
   let loggerLogSpy: jest.SpiedFunction<typeof AnsiLogger.prototype.log>;
   let consoleLogSpy: jest.SpiedFunction<typeof console.log>;
@@ -78,6 +81,8 @@ describe('Coap scanner', () => {
   });
 
   afterAll(() => {
+    shelly.destroy();
+
     // Restore all mocks
     jest.restoreAllMocks();
   });

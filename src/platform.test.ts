@@ -282,7 +282,7 @@ describe('ShellyPlatform', () => {
       expect(mockLog.info).toHaveBeenCalledWith(`Starting platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
       expect(mockLog.info).toHaveBeenCalledWith(`Loading from storage 2 Shelly devices`);
       expect(mockLog.error).toHaveBeenCalledWith(
-        `Stored Shelly device id ${hk}shellyemg3-84FCE636582C${er} host ${zb}invalid${er} is not valid. Please enable resetStorageDiscover in plugin config and restart.`,
+        `Stored Shelly device id ${hk}shellyemg3-84FCE636582C${er} host ${zb}invalid${er} is not valid. Please remove it from the storage.`,
       );
       expect(mockLog.debug).toHaveBeenCalledWith(
         `Loading from storage Shelly device ${hk}shellyplus-34FCE636582C${db} host ${zb}192.168.255.1${db} port ${CYAN}80${db} gen ${CYAN}2${db}`,

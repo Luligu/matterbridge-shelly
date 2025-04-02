@@ -3,11 +3,11 @@
     "name": "H&T Gen3",
     "id": "shellyhtg3-3030f9ec8468",
     "mac": "3030F9EC8468",
-    "slot": 0,
+    "slot": 1,
     "model": "S3SN-0U12A",
     "gen": 3,
-    "fw_id": "20241011-121127/1.4.5-gbf870ca",
-    "ver": "1.4.5",
+    "fw_id": "20250318-152127/1.5.1-g01dd7ff",
+    "ver": "1.5.1",
     "app": "HTG3",
     "auth_en": false,
     "auth_domain": null
@@ -25,6 +25,7 @@
     },
     "devicepower:0": {},
     "ht_ui": {
+      "clock": "24",
       "temperature_unit": "C"
     },
     "humidity:0": {
@@ -50,8 +51,9 @@
       "device": {
         "name": "H&T Gen3",
         "mac": "3030F9EC8468",
-        "fw_id": "20241011-121127/1.4.5-gbf870ca",
-        "discoverable": true
+        "fw_id": "20250318-152127/1.5.1-g01dd7ff",
+        "discoverable": true,
+        "eco_mode": false
       },
       "location": null,
       "debug": {
@@ -73,9 +75,9 @@
         "listen_port": null
       },
       "sntp": {
-        "server": "time.google.com"
+        "server": "time.cloudflare.com"
       },
-      "cfg_rev": 23
+      "cfg_rev": 24
     },
     "temperature:0": {
       "id": 0,
@@ -128,8 +130,8 @@
     "devicepower:0": {
       "id": 0,
       "battery": {
-        "V": 5.28,
-        "percent": 64
+        "V": 5.06,
+        "percent": 52
       },
       "external": {
         "present": false
@@ -138,7 +140,7 @@
     "ht_ui": {},
     "humidity:0": {
       "id": 0,
-      "rh": 31.5
+      "rh": 40.3
     },
     "mqtt": {
       "connected": false
@@ -148,39 +150,41 @@
       "restart_required": false,
       "time": null,
       "unixtime": null,
+      "last_sync_ts": null,
       "uptime": 2,
-      "ram_size": 248716,
-      "ram_free": 139592,
+      "ram_size": 249608,
+      "ram_free": 143528,
+      "ram_min_free": 138144,
       "fs_size": 1048576,
-      "fs_free": 700416,
-      "cfg_rev": 23,
+      "fs_free": 704512,
+      "cfg_rev": 24,
       "kvs_rev": 0,
       "webhook_rev": 0,
       "available_updates": {},
       "wakeup_reason": {
         "boot": "deepsleep_wake",
-        "cause": "status_update"
+        "cause": "periodic"
       },
       "wakeup_period": 7200,
       "reset_reason": 8
     },
     "temperature:0": {
       "id": 0,
-      "tC": 23,
-      "tF": 73.4
+      "tC": 21.7,
+      "tF": 71.1
     },
     "wifi": {
       "sta_ip": "192.168.1.100",
       "status": "got ip",
       "ssid": "",
-      "rssi": -61
+      "rssi": -59
     },
     "ws": {
       "connected": true
     }
   },
   "components": [],
-  "cfg_rev": 23,
+  "cfg_rev": 24,
   "offset": 0,
   "total": 0
 }

@@ -1,0 +1,207 @@
+{
+  "shelly": {
+    "name": null,
+    "id": "shellypro2cb-8813bfddc328",
+    "mac": "8813BFDDC328",
+    "slot": 1,
+    "model": "SPCB-02VENEU",
+    "gen": 2,
+    "fw_id": "20241206-114536/g8a12877",
+    "ver": "1.5.99-dev113031",
+    "app": "ProCB",
+    "auth_en": false,
+    "auth_domain": null
+  },
+  "settings": {
+    "ble": {
+      "enable": false,
+      "rpc": {
+        "enable": true
+      }
+    },
+    "bthome": {},
+    "cb:0": {
+      "id": 0,
+      "name": null,
+      "undervoltage_limit": 200,
+      "voltage_limit": 250,
+      "reaction_delay": 0
+    },
+    "cloud": {
+      "enable": true,
+      "server": "repo.shelly.cloud:6022/jrpc"
+    },
+    "eth": {
+      "enable": true,
+      "server_mode": false,
+      "ipv4mode": "dhcp",
+      "ip": null,
+      "netmask": null,
+      "gw": null,
+      "nameserver": null
+    },
+    "mqtt": {
+      "enable": false,
+      "server": null,
+      "client_id": "shellypro2cb-8813bfddc328",
+      "user": null,
+      "ssl_ca": null,
+      "topic_prefix": "shellypro2cb-8813bfddc328",
+      "rpc_ntf": true,
+      "status_ntf": false,
+      "use_client_cert": false,
+      "enable_rpc": true,
+      "enable_control": true
+    },
+    "sys": {
+      "device": {
+        "name": null,
+        "mac": "8813BFDDC328",
+        "fw_id": "20241206-114536/g8a12877",
+        "discoverable": true,
+        "eco_mode": false
+      },
+      "location": null,
+      "debug": {
+        "level": 2,
+        "file_level": null,
+        "mqtt": {
+          "enable": false
+        },
+        "websocket": {
+          "enable": false
+        },
+        "file_log": {
+          "enable": false
+        },
+        "udp": {
+          "addr": "35.205.173.252:8910"
+        }
+      },
+      "ui_data": {},
+      "rpc_udp": {
+        "dst_addr": null,
+        "listen_port": null
+      },
+      "sntp": {
+        "server": "time.cloudflare.com"
+      },
+      "cfg_rev": 8
+    },
+    "voltmeter:0": {
+      "id": 0,
+      "name": null,
+      "report_thr": 5,
+      "xvoltage": {
+        "expr": null,
+        "unit": null
+      }
+    },
+    "wifi": {
+      "ap": {
+        "ssid": "",
+        "is_open": true,
+        "enable": false,
+        "range_extender": {
+          "enable": false
+        }
+      },
+      "sta": {
+        "ssid": "",
+        "is_open": false,
+        "enable": true,
+        "ipv4mode": "dhcp",
+        "ip": null,
+        "netmask": null,
+        "gw": null,
+        "nameserver": null
+      },
+      "sta1": {
+        "ssid": "",
+        "is_open": true,
+        "enable": false,
+        "ipv4mode": "dhcp",
+        "ip": null,
+        "netmask": null,
+        "gw": null,
+        "nameserver": null
+      },
+      "roam": {
+        "rssi_thr": -80,
+        "interval": 60
+      }
+    },
+    "ws": {
+      "enable": false,
+      "server": null,
+      "ssl_ca": "ca.pem"
+    }
+  },
+  "status": {
+    "ble": {},
+    "bthome": {
+      "errors": ["bluetooth_disabled"]
+    },
+    "cb:0": {
+      "id": 0,
+      "output": false,
+      "source": "local",
+      "total_cycles": 11,
+      "safety": false,
+      "temperature": {
+        "tC": 50.3,
+        "tF": 122.6
+      }
+    },
+    "cloud": {
+      "connected": true
+    },
+    "eth": {
+      "ip": null
+    },
+    "mqtt": {
+      "connected": false
+    },
+    "sys": {
+      "mac": "8813BFDDC328",
+      "restart_required": false,
+      "time": "11:32",
+      "unixtime": 1741253575,
+      "last_sync_ts": 1740471302,
+      "uptime": 1122365,
+      "ram_size": 251456,
+      "ram_free": 103716,
+      "ram_min_free": 58912,
+      "fs_size": 524288,
+      "fs_free": 217088,
+      "cfg_rev": 8,
+      "kvs_rev": 0,
+      "schedule_rev": 0,
+      "webhook_rev": 1,
+      "btrelay_rev": 0,
+      "available_updates": {
+        "test": {
+          "version": "1.5.99-dev114743"
+        }
+      },
+      "reset_reason": 1
+    },
+    "voltmeter:0": {
+      "id": 0,
+      "voltage": 243.91
+    },
+    "wifi": {
+      "sta_ip": "10.101.11.232",
+      "status": "got ip",
+      "ssid": "",
+      "rssi": -55
+    },
+    "ws": {
+      "connected": false
+    }
+  },
+  "components": [],
+  "cfg_rev": 8,
+  "offset": 0,
+  "total": 0
+}

@@ -1,0 +1,336 @@
+{
+  "shelly": {
+    "name": null,
+    "id": "shellyprodm2pm-08f9e0e4c138",
+    "mac": "08F9E0E4C138",
+    "slot": 0,
+    "model": "SPDM-002PE01EU",
+    "gen": 2,
+    "fw_id": "20250221-145347/1.5.1-beta1-g172c5bb",
+    "ver": "1.5.1-beta1",
+    "app": "ProDimmerx",
+    "auth_en": false,
+    "auth_domain": null
+  },
+  "settings": {
+    "ble": {
+      "enable": true,
+      "rpc": {
+        "enable": true
+      }
+    },
+    "bthome": {},
+    "cloud": {
+      "enable": true,
+      "server": "repo.shelly.cloud:6022/jrpc"
+    },
+    "eth": {
+      "enable": true,
+      "server_mode": false,
+      "ipv4mode": "dhcp",
+      "ip": null,
+      "netmask": null,
+      "gw": null,
+      "nameserver": null
+    },
+    "input:0": {
+      "id": 0,
+      "name": null,
+      "type": "button",
+      "enable": true,
+      "invert": false
+    },
+    "input:1": {
+      "id": 1,
+      "name": null,
+      "type": "button",
+      "enable": true,
+      "invert": false
+    },
+    "input:2": {
+      "id": 2,
+      "name": null,
+      "type": "button",
+      "enable": true,
+      "invert": false
+    },
+    "input:3": {
+      "id": 3,
+      "name": null,
+      "type": "button",
+      "enable": true,
+      "invert": false
+    },
+    "knx": {
+      "enable": false,
+      "ia": "15.15.255",
+      "routing": {
+        "addr": "224.0.23.12:3671"
+      }
+    },
+    "light:0": {
+      "id": 0,
+      "name": null,
+      "initial_state": "restore_last",
+      "auto_on": false,
+      "auto_on_delay": 60,
+      "auto_off": true,
+      "auto_off_delay": 7,
+      "transition_duration": 3,
+      "min_brightness_on_toggle": 3,
+      "night_mode": {
+        "enable": false,
+        "brightness": 50,
+        "active_between": []
+      },
+      "range_map": [0, 100],
+      "button_fade_rate": 3,
+      "button_presets": {
+        "button_doublepush": {
+          "brightness": 100
+        }
+      },
+      "in_mode": "dim",
+      "current_limit": 1.22,
+      "power_limit": 230,
+      "undervoltage_limit": 200,
+      "voltage_limit": 280
+    },
+    "light:1": {
+      "id": 1,
+      "name": null,
+      "initial_state": "restore_last",
+      "auto_on": false,
+      "auto_on_delay": 67,
+      "auto_off": false,
+      "auto_off_delay": 60,
+      "transition_duration": 3,
+      "min_brightness_on_toggle": 3,
+      "night_mode": {
+        "enable": false,
+        "brightness": 50,
+        "active_between": []
+      },
+      "range_map": [0, 100],
+      "button_fade_rate": 3,
+      "button_presets": {
+        "button_doublepush": {
+          "brightness": 100
+        }
+      },
+      "in_mode": "dim",
+      "current_limit": 1.22,
+      "power_limit": 230,
+      "undervoltage_limit": 179,
+      "voltage_limit": 280
+    },
+    "mqtt": {
+      "enable": false,
+      "server": null,
+      "client_id": "shellyprodm2pm-08f9e0e4c138",
+      "user": null,
+      "ssl_ca": null,
+      "topic_prefix": "shellyprodm2pm-08f9e0e4c138",
+      "rpc_ntf": true,
+      "status_ntf": false,
+      "use_client_cert": false,
+      "enable_rpc": true,
+      "enable_control": true
+    },
+    "sys": {
+      "device": {
+        "name": null,
+        "mac": "08F9E0E4C138",
+        "fw_id": "20250221-145347/1.5.1-beta1-g172c5bb",
+        "discoverable": true,
+        "eco_mode": false
+      },
+      "location": null,
+      "debug": {
+        "level": 2,
+        "file_level": null,
+        "mqtt": {
+          "enable": false
+        },
+        "websocket": {
+          "enable": false
+        },
+        "udp": {
+          "addr": null
+        }
+      },
+      "ui_data": {},
+      "rpc_udp": {
+        "dst_addr": null,
+        "listen_port": null
+      },
+      "sntp": {
+        "server": "time.cloudflare.com"
+      },
+      "cfg_rev": 32
+    },
+    "wifi": {
+      "ap": {
+        "ssid": "",
+        "is_open": true,
+        "enable": false,
+        "range_extender": {
+          "enable": false
+        }
+      },
+      "sta": {
+        "ssid": "",
+        "is_open": false,
+        "enable": true,
+        "ipv4mode": "dhcp",
+        "ip": null,
+        "netmask": null,
+        "gw": null,
+        "nameserver": null
+      },
+      "sta1": {
+        "ssid": "",
+        "is_open": true,
+        "enable": false,
+        "ipv4mode": "dhcp",
+        "ip": null,
+        "netmask": null,
+        "gw": null,
+        "nameserver": null
+      },
+      "roam": {
+        "rssi_thr": -80,
+        "interval": 60
+      }
+    },
+    "ws": {
+      "enable": false,
+      "server": null,
+      "ssl_ca": "ca.pem"
+    }
+  },
+  "status": {
+    "ble": {},
+    "bthome": {},
+    "cloud": {
+      "connected": true
+    },
+    "eth": {
+      "ip": null
+    },
+    "input:0": {
+      "id": 0,
+      "state": null
+    },
+    "input:1": {
+      "id": 1,
+      "state": null
+    },
+    "input:2": {
+      "id": 2,
+      "state": null
+    },
+    "input:3": {
+      "id": 3,
+      "state": null
+    },
+    "knx": {},
+    "light:0": {
+      "id": 0,
+      "source": "timer",
+      "output": false,
+      "brightness": 100,
+      "temperature": {
+        "tC": 43.1,
+        "tF": 109.5
+      },
+      "errors": ["cal_abort:no_load"],
+      "aenergy": {
+        "total": 10.004,
+        "by_minute": [0, 0, 0],
+        "minute_ts": 1741253700
+      },
+      "apower": 0,
+      "current": 0,
+      "voltage": 235.1,
+      "flags": ["uncalibrated"]
+    },
+    "light:1": {
+      "id": 1,
+      "source": "SHC",
+      "output": false,
+      "brightness": 100,
+      "temperature": {
+        "tC": 49.2,
+        "tF": 120.6
+      },
+      "aenergy": {
+        "total": 0.146,
+        "by_minute": [0, 0, 0],
+        "minute_ts": 1741253700
+      },
+      "apower": 0,
+      "current": 0,
+      "voltage": 235.1,
+      "flags": ["uncalibrated"]
+    },
+    "mqtt": {
+      "connected": false
+    },
+    "sys": {
+      "mac": "08F9E0E4C138",
+      "restart_required": false,
+      "time": "11:35",
+      "unixtime": 1741253703,
+      "last_sync_ts": 1740643881,
+      "uptime": 853707,
+      "ram_size": 265368,
+      "ram_free": 74952,
+      "ram_min_free": 36448,
+      "fs_size": 524288,
+      "fs_free": 188416,
+      "cfg_rev": 32,
+      "kvs_rev": 0,
+      "schedule_rev": 0,
+      "webhook_rev": 0,
+      "btrelay_rev": 4,
+      "available_updates": {
+        "stable": {
+          "version": "1.4.4"
+        }
+      },
+      "reset_reason": 3
+    },
+    "wifi": {
+      "sta_ip": "10.101.12.171",
+      "status": "got ip",
+      "ssid": "",
+      "rssi": -56
+    },
+    "ws": {
+      "connected": false
+    }
+  },
+  "components": [
+    {
+      "key": "button:200",
+      "status": {},
+      "config": {
+        "id": 200,
+        "name": "button",
+        "meta": {
+          "cloud": [],
+          "ui": {
+            "icon": "",
+            "view": "label"
+          }
+        },
+        "owner": "",
+        "access": "*"
+      }
+    }
+  ],
+  "cfg_rev": 32,
+  "offset": 0,
+  "total": 1
+}

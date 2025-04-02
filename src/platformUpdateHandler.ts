@@ -161,7 +161,7 @@ export function shellyUpdateHandler(
     else endpoint.setAttribute(PowerSource.Cluster.id, 'batChargeLevel', PowerSource.BatChargeLevel.Ok, shellyDevice.log);
   }
   if (shellyComponent.name === 'Battery' && property === 'voltage' && isValidNumber(value, 0)) {
-    endpoint.setAttribute(PowerSource.Cluster.id, 'batVoltage', value / 1000, shellyDevice.log);
+    endpoint.setAttribute(PowerSource.Cluster.id, 'batVoltage', value * 1000, shellyDevice.log);
   }
   if (shellyComponent.name === 'Battery' && property === 'charging' && isValidNumber(value)) {
     endpoint.setAttribute(
@@ -221,24 +221,40 @@ export function shellyUpdateHandler(
     const matterLux = Math.round(Math.max(Math.min(10000 * Math.log10(value), 0xfffe), 0));
     endpoint.setAttribute(IlluminanceMeasurement.Cluster.id, 'measuredValue', matterLux, shellyDevice.log);
   }
-  // Update for Thermostat enable
-  if (shellyComponent.name === 'Thermostat' && property === 'enable' && isValidBoolean(value)) {
-    if (value === false) endpoint.setAttribute(Thermostat.Cluster.id, 'systemMode', Thermostat.SystemMode.Off, shellyDevice.log);
-    else if (value === true && shellyComponent.hasProperty('type') && shellyComponent.getValue('type') === 'heating')
-      endpoint.setAttribute(Thermostat.Cluster.id, 'systemMode', Thermostat.SystemMode.Heat, shellyDevice.log);
-    else if (value === true && shellyComponent.hasProperty('type') && shellyComponent.getValue('type') === 'cooling')
-      endpoint.setAttribute(Thermostat.Cluster.id, 'systemMode', Thermostat.SystemMode.Cool, shellyDevice.log);
-  }
-  // Update for Thermostat current_C
-  if (shellyComponent.name === 'Thermostat' && property === 'current_C' && isValidNumber(value, -100, +100)) {
-    endpoint.setAttribute(Thermostat.Cluster.id, 'localTemperature', value * 100, shellyDevice.log);
-  }
-  // Update for Thermostat target_C
-  if (shellyComponent.name === 'Thermostat' && property === 'target_C' && isValidNumber(value, -100, +100)) {
-    if (shellyComponent.hasProperty('type') && shellyComponent.getValue('type') === 'heating')
-      endpoint.setAttribute(Thermostat.Cluster.id, 'occupiedHeatingSetpoint', value * 100, shellyDevice.log);
-    if (shellyComponent.hasProperty('type') && shellyComponent.getValue('type') === 'cooling')
-      endpoint.setAttribute(Thermostat.Cluster.id, 'occupiedCoolingSetpoint', value * 100, shellyDevice.log);
+  if (shellyDevice.gen === 1) {
+    // Update for Thermostat target_t.enabled (Gen1)
+    if (shellyComponent.name === 'Thermostat' && property === 'target_t' && isValidObject(value)) {
+      const target = value as { enabled: boolean; value: number; value_op: number; units: string };
+      if (target.enabled === false) endpoint.setAttribute(Thermostat.Cluster.id, 'systemMode', Thermostat.SystemMode.Off, shellyDevice.log);
+      else if (target.enabled === true) endpoint.setAttribute(Thermostat.Cluster.id, 'systemMode', Thermostat.SystemMode.Heat, shellyDevice.log);
+      if (isValidNumber(target.value, 4, 31)) endpoint.setAttribute(Thermostat.Cluster.id, 'occupiedHeatingSetpoint', target.value * 100, shellyDevice.log);
+    }
+    // Update for Thermostat tmp.value (Gen1)
+    if (shellyComponent.name === 'Thermostat' && property === 'tmp' && isValidObject(value)) {
+      const current = value as { value: number; units: string; is_valid: boolean };
+      if (isValidNumber(current.value, -55, +125) && current.is_valid === true)
+        endpoint.setAttribute(Thermostat.Cluster.id, 'localTemperature', current.value * 100, shellyDevice.log);
+    }
+  } else if (shellyDevice.gen > 1) {
+    // Update for Thermostat enable (Gen2+)
+    if (shellyComponent.name === 'Thermostat' && property === 'enable' && isValidBoolean(value)) {
+      if (value === false) endpoint.setAttribute(Thermostat.Cluster.id, 'systemMode', Thermostat.SystemMode.Off, shellyDevice.log);
+      else if (value === true && shellyComponent.hasProperty('type') && shellyComponent.getValue('type') === 'heating')
+        endpoint.setAttribute(Thermostat.Cluster.id, 'systemMode', Thermostat.SystemMode.Heat, shellyDevice.log);
+      else if (value === true && shellyComponent.hasProperty('type') && shellyComponent.getValue('type') === 'cooling')
+        endpoint.setAttribute(Thermostat.Cluster.id, 'systemMode', Thermostat.SystemMode.Cool, shellyDevice.log);
+    }
+    // Update for Thermostat current_C (Gen2+)
+    if (shellyComponent.name === 'Thermostat' && property === 'current_C' && isValidNumber(value, -100, +100)) {
+      endpoint.setAttribute(Thermostat.Cluster.id, 'localTemperature', value * 100, shellyDevice.log);
+    }
+    // Update for Thermostat target_C (Gen2+)
+    if (shellyComponent.name === 'Thermostat' && property === 'target_C' && isValidNumber(value, -100, +100)) {
+      if (shellyComponent.hasProperty('type') && shellyComponent.getValue('type') === 'heating')
+        endpoint.setAttribute(Thermostat.Cluster.id, 'occupiedHeatingSetpoint', value * 100, shellyDevice.log);
+      if (shellyComponent.hasProperty('type') && shellyComponent.getValue('type') === 'cooling')
+        endpoint.setAttribute(Thermostat.Cluster.id, 'occupiedCoolingSetpoint', value * 100, shellyDevice.log);
+    }
   }
   // Update for vibration
   if (shellyComponent.name === 'Vibration' && property === 'vibration' && isValidBoolean(value)) {

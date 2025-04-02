@@ -23,7 +23,7 @@
 
 import { BLUE, CYAN, GREEN, GREY, YELLOW, db, debugStringify, er } from 'matterbridge/logger';
 
-import { ShellyData, ShellyDataType } from './shellyTypes.js';
+import { ShellyData, ShellyDataType, ShellyEvent } from './shellyTypes.js';
 import { ShellyProperty } from './shellyProperty.js';
 import { ShellyDevice } from './shellyDevice.js';
 import { deepEqual, isValidArray, isValidNumber, isValidObject } from 'matterbridge/utils';
@@ -74,7 +74,7 @@ export function isCoverComponent(component: ShellyComponent | undefined): compon
 
 interface ShellyComponentEvent {
   update: [component: string, key: string, data: ShellyDataType];
-  event: [component: string, event: string, data: ShellyData];
+  event: [component: string, event: string, data: ShellyEvent];
 }
 
 /**

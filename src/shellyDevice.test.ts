@@ -323,6 +323,7 @@ describe('Shelly devices test', () => {
   });
 
   test('create gen 2+ battery should log wrong settings', async () => {
+    shelly.ipv4Address = '192.168.1.20';
     fetchSpy = jest
       .spyOn(ShellyDevice, 'fetch')
       .mockImplementation((shelly: Shelly, log: AnsiLogger, host: string, service: string, params?: Record<string, string | number | boolean | object>) => {
@@ -341,7 +342,7 @@ describe('Shelly devices test', () => {
           return Promise.resolve({
             ws: {
               enable: false,
-              server: 'ws://192.168.1.XXX:8485XXX',
+              server: 'ws://192.168.1.XXX:8486',
               ssl_ca: '*',
             },
             sys: {

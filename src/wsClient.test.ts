@@ -301,7 +301,7 @@ describe('ShellyWsClient', () => {
     expect((wsClient as any).pongTimeout).toBeDefined();
     await wait(500);
     expect(consoleDebugSpy).toHaveBeenCalledWith('Ping received');
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.ERROR, `Pong not received from device ${hk}Jest${er} host ${zb}localhost${er}, closing connection.`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.WARN, `Pong not received from device ${hk}Jest${er} host ${zb}localhost${er}, closing connection.`);
     sendPong = true;
   }, 10000);
 
