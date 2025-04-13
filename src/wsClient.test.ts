@@ -6,7 +6,7 @@ import { jest } from '@jest/globals';
 import { WebSocket, WebSocketServer } from 'ws';
 import { getMacAddress, wait, waiter } from 'matterbridge/utils';
 import { WsClient } from './wsClient';
-import { AnsiLogger, db, er, hk, LogLevel, nf, zb } from 'matterbridge/logger';
+import { AnsiLogger, db, er, hk, LogLevel, nf, wr, zb } from 'matterbridge/logger';
 
 describe('ShellyWsClient', () => {
   let loggerLogSpy: jest.SpiedFunction<(level: LogLevel, message: string, ...parameters: any[]) => void>;
@@ -144,6 +144,9 @@ describe('ShellyWsClient', () => {
   test('should fail with wrong address', async () => {
     if (!server) return;
     wsClient = new WsClient('Jest', 'xxxxxx');
+    wsClient.once('error', (error) => {
+      // console.error('Error event received:', error);
+    });
     expect(wsClient).toBeDefined();
     expect(wsClient).toBeInstanceOf(WsClient);
     expect(wsClient.isConnected).toBeFalsy();
@@ -268,6 +271,9 @@ describe('ShellyWsClient', () => {
 
   test('should respond to error event', async () => {
     if (!server) return;
+    wsClient.once('error', (error) => {
+      // console.error('Error event received:', error);
+    });
     (wsClient as any).wsClient?.emit('error', new Error('Test error'));
     expect(wsClient.isConnecting).toBeFalsy();
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.ERROR, expect.stringContaining(`WebSocket error with Shelly device ${hk}Jest${er} host ${zb}localhost${er}`));
@@ -275,9 +281,9 @@ describe('ShellyWsClient', () => {
 
   test('should respond to close event', async () => {
     if (!server) return;
-    (wsClient as any).wsClient?.emit('close');
+    (wsClient as any).wsClient?.emit('close', 1000, Buffer.from('Test close'));
     expect(wsClient.isConnected).toBeFalsy();
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `WebSocket connection closed with Shelly device ${hk}Jest${nf} host ${zb}localhost${nf}`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, expect.stringContaining(`WebSocket connection closed with Shelly device ${hk}Jest${nf} host ${zb}localhost${nf}`));
     (wsClient as any)._isConnected = true;
   }, 10000);
 
@@ -301,7 +307,7 @@ describe('ShellyWsClient', () => {
     expect((wsClient as any).pongTimeout).toBeDefined();
     await wait(500);
     expect(consoleDebugSpy).toHaveBeenCalledWith('Ping received');
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.WARN, `Pong not received from device ${hk}Jest${er} host ${zb}localhost${er}, closing connection.`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.WARN, `Pong not received from device ${hk}Jest${wr} host ${zb}localhost${wr}, closing connection.`);
     sendPong = true;
   }, 10000);
 

@@ -137,7 +137,7 @@ describe('Coap scanner', () => {
     expect(coapServer.isReady).toBeTruthy();
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, 'Starting CoIoT (coap) server for shelly devices...');
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, 'Started CoIoT (coap) server for shelly devices.');
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, expect.stringContaining('CoIoT (coap) server is listening...'));
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, expect.stringContaining('CoIoT (coap) server is listening on port'));
   }, 5000);
 
   test('Start receving', async () => {

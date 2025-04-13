@@ -21,7 +21,7 @@
  * limitations under the License. *
  */
 
-import { AnsiLogger, CYAN, LogLevel, TimestampFormat, db, er, hk, nf, rs, zb } from 'matterbridge/logger';
+import { AnsiLogger, CYAN, LogLevel, TimestampFormat, db, er, hk, nf, rs, wr, zb } from 'matterbridge/logger';
 import WebSocket from 'ws';
 import crypto from 'node:crypto';
 import EventEmitter from 'node:events';
@@ -96,6 +96,7 @@ interface WsClientEvent {
   update: [params: any];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   event: [events: any];
+  error: [message: string];
 }
 
 /**
@@ -241,7 +242,7 @@ export class WsClient extends EventEmitter {
 
         // Set a timeout to wait for a pong response
         this.pongTimeout = setTimeout(() => {
-          this.log.warn(`Pong not received from device ${hk}${this.wsDeviceId}${er} host ${zb}${this.wsHost}${er}, closing connection.`);
+          this.log.warn(`Pong not received from device ${hk}${this.wsDeviceId}${wr} host ${zb}${this.wsHost}${wr}, closing connection.`);
           this.wsClient?.terminate(); // Close the connection if pong is not received
         }, pingTimeout);
       }
@@ -317,11 +318,14 @@ export class WsClient extends EventEmitter {
     this.wsClient.on('error', (error: Error) => {
       this.log.error(`WebSocket error with Shelly device ${hk}${this.wsDeviceId}${er} host ${zb}${this.wsHost}${er}: ${error instanceof Error ? error.message : error}`);
       this._isConnecting = false;
+      this.emit('error', error.message);
     });
 
     // Handle the close event
-    this.wsClient.on('close', () => {
-      this.log.info(`WebSocket connection closed with Shelly device ${hk}${this.wsDeviceId}${nf} host ${zb}${this.wsHost}${nf}`);
+    this.wsClient.on('close', (code: number, reason: Buffer) => {
+      this.log.info(
+        `WebSocket connection closed with Shelly device ${hk}${this.wsDeviceId}${nf} host ${zb}${this.wsHost}${nf}: code ${code} ${reason.toString('utf-8') === '' ? '' : 'reason ' + reason.toString('utf-8')}`,
+      );
       this._isConnecting = false;
       this._isConnected = false;
       this.stopPingPong();

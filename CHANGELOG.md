@@ -19,6 +19,35 @@ New setups:
 - shellyplusi4, shellyi4g3, shellyix3 and shellybutton1 are automatically added to inputMomentaryList when discovered.
 - expertMode is disabled (the config shows only username, password, whitelist and blackList).
 
+New device types:
+
+- shellyflood device type has been updated from contact sensor to water leak sensor.
+- shellysmoke device type has been updated from contact sensor to smoke sensor.
+
+If your controller has issues detecting the new device type, blacklist the flood and smoke devices, restart, remove the blacklist and restarat again. This will create a new endpoint on the controller.
+For shellyflood, if you have SmartThings, blacklist the Temperature entity for each flood device with deviceEntityBlackList to allow the controller to setup the correct driver.
+
+## [2.0.7] - 2025-04-13
+
+### Added
+
+- [shelly]: Added more information on the log for disconnection events.
+- [ShellyWsClient]: Added immediate offline event in case of WebSocketClient errors.
+
+### Changed
+
+- [package]: Updated dependencies.
+- [shellyflood]: Updated the device type from contact sensor to water leak sensor.
+- [shellysmoke]: Updated the device type from contact sensor to smoke sensor.
+
+### Fixed
+
+- [restart]: Fixed case when device with sleep mode send config changed.
+
+<a href="https://www.buymeacoffee.com/luligugithub">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="80">
+</a>
+
 ## [2.0.6] - 2025-04-02
 
 ### Added

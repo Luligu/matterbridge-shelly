@@ -854,6 +854,16 @@ export class ShellyDevice extends EventEmitter {
         }
         device.onEvent(events);
       });
+
+      device.wsClient.on('error', (message: string) => {
+        log.debug(`WebSocket error from device ${hk}${device.id}${db} host ${zb}${device.host}${db}: ${message}`);
+        device.lastseen = Date.now();
+        if (device.online) {
+          device.online = false;
+          device.emit('offline');
+          log.debug(`Device ${hk}${device.id}${db} host ${zb}${device.host}${db} received a WebSocket error message: setting online to false`);
+        }
+      });
     }
 
     // Emitted when a sleepy device wakes up by WsServer and CoapServer (via Shelly.on('update')). We update the cache file and register the device with Coap.
