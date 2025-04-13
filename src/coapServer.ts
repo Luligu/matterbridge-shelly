@@ -95,8 +95,9 @@ export class CoapServer extends EventEmitter {
   private coapServer: Server | undefined;
   private _isListening = false;
   private _isReady = false;
-  private readonly devices = new Map<string, CoIoTDescription[]>(); // host, descriptions
+  private readonly deviceDescription = new Map<string, CoIoTDescription[]>(); // host, descriptions
   private readonly deviceSerial = new Map<string, number>(); // host, serial
+  private readonly deviceValidityTimeout = new Map<string, NodeJS.Timeout | undefined>(); // host, validity timeout
   private readonly deviceId = new Map<string, string>(); // host, deviceId
   private _dataPath = 'temp';
 
@@ -352,6 +353,27 @@ export class CoapServer extends EventEmitter {
       serial = headers[COIOT_OPTION_STATUS_SERIAL];
     }
 
+    /*
+    TODO: Uncomment this code when we have a list of Gen1 devices with sleep mode
+    if (url === '/cit/s') {
+      this.log.info(
+        `Device model ${hk}${deviceModel}${nf} id ${hk}${this.deviceId.get(msg.rsinfo.address)}${nf} host ${zb}${host}${nf} sent cit/s serial ${CYAN}${serial}${nf} valid for ${CYAN}${validFor}${nf} seconds`,
+      );
+      if (this.deviceValidityTimeout.get(host)) clearTimeout(this.deviceValidityTimeout.get(host));
+      this.deviceValidityTimeout.set(
+        host,
+        setTimeout(
+          () => {
+            this.log.warn(
+              `Device model ${hk}${deviceModel}${wr} id ${hk}${this.deviceId.get(msg.rsinfo.address)}${wr} host ${zb}${host}${wr} didn't update in ${zb}${validFor}${wr} seconds`,
+            );
+          },
+          (validFor + 10) * 1000,
+        ).unref(),
+      );
+    }
+    */
+
     if (url === '/cit/s' && this.deviceSerial.get(host) === serial && !['SHDW-1', 'SHDW-2'].includes(deviceModel)) {
       this.log.debug(`No updates (serial not changed) for device ${hk}${this.deviceId.get(host)}${db} host ${zb}${host}${db}`);
       return;
@@ -473,7 +495,7 @@ export class CoapServer extends EventEmitter {
       desc.forEach((d) => {
         this.log.debug(`- id ${CYAN}${d.id}${db} component ${CYAN}${d.component}${db} property ${CYAN}${d.property}${db} range ${CYAN}${d.range}${db}`);
       });
-      this.devices.set(host, desc);
+      this.deviceDescription.set(host, desc);
     }
 
     if (msg.url === '/cit/s') {
@@ -483,9 +505,9 @@ export class CoapServer extends EventEmitter {
         // Ignore cause the error is already logged
       }
       this.deviceSerial.set(host, serial);
-      const descriptions: CoIoTDescription[] = this.devices.get(host) || [];
+      const descriptions: CoIoTDescription[] = this.deviceDescription.get(host) || [];
       if (!descriptions || descriptions.length === 0) {
-        // SHMOS-01, SHMOS-02 and SHTRV-01 don't answer to cit/d and cit/s on CoIot (but http://host/cit/d it's ok)
+        // SHMOS-01, SHMOS-02, SHTRV-01 and first Gen1 don't answer to cit/d and cit/s on CoIot (they answer to fetch http://host/cit/d)
         if (deviceModel === 'SHDW-1' || deviceModel === 'SHDW-2') {
           this.log.debug(`*Set coap descriptions for host ${zb}${host}${db} deviceType ${CYAN}SHDW-1/SHDW-2${db}`);
           // wakeup event
@@ -502,7 +524,7 @@ export class CoapServer extends EventEmitter {
           descriptions.push({ id: 3106, component: 'lux', property: 'value', range: ['U32', '-1'] }); // SHDW-1 and SHDW-2
           // temperature component
           descriptions.push({ id: 3101, component: 'temperature', property: 'value', range: ['-55/125', '999'] }); // SHDW-1 and SHDW-2
-          this.devices.set(host, descriptions);
+          this.deviceDescription.set(host, descriptions);
         } else if (deviceModel === 'SHTRV-01') {
           this.log.debug(`*Set coap descriptions for host ${zb}${host}${db} deviceType ${CYAN}SHTRV-01${db}`);
           // battery component
@@ -513,7 +535,7 @@ export class CoapServer extends EventEmitter {
           descriptions.push({ id: 3101, component: 'thermostat:0', property: 'tmp.value', range: ['-55/125', '999'] }); // SHTRV-01
           // sys component cfg_rev property
           descriptions.push({ id: 9103, component: 'sys', property: 'cfg_rev', range: 'U16' }); // SHTRV-01
-          this.devices.set(host, descriptions);
+          this.deviceDescription.set(host, descriptions);
         } else if (deviceModel === 'SHBTN-1' || deviceModel === 'SHBTN-2') {
           this.log.debug(`*Set coap descriptions for host ${zb}${host}${db} deviceType ${CYAN}SHBTN-1/SHBTN-2${db}`);
           // battery component
@@ -521,7 +543,7 @@ export class CoapServer extends EventEmitter {
           // input component
           descriptions.push({ id: 2102, component: 'input:0', property: 'event', range: ['S/L/SS/SSS', ''] }); // SHBTN-2
           descriptions.push({ id: 2103, component: 'input:0', property: 'event_cnt', range: 'U16' }); // SHBTN-2
-          this.devices.set(host, descriptions);
+          this.deviceDescription.set(host, descriptions);
         } else if (deviceModel === 'SHMOS-01') {
           this.log.debug(`*Set coap descriptions for host ${zb}${host}${db} deviceType ${CYAN}SHMOS-01${db}`);
           // battery component
@@ -534,7 +556,7 @@ export class CoapServer extends EventEmitter {
           descriptions.push({ id: 3106, component: 'lux', property: 'value', range: ['U32', '-1'] }); // SHMOS-01
           // sys component cfg_rev property
           descriptions.push({ id: 9103, component: 'sys', property: 'cfg_rev', range: 'U16' }); // SHMOS-01
-          this.devices.set(host, descriptions);
+          this.deviceDescription.set(host, descriptions);
         } else if (deviceModel === 'SHMOS-02') {
           this.log.debug(`*Set coap descriptions for host ${zb}${host}${db} deviceType ${CYAN}SHMOS-02${db}`);
           // battery component
@@ -549,7 +571,7 @@ export class CoapServer extends EventEmitter {
           descriptions.push({ id: 3101, component: 'temperature', property: 'value', range: ['-55/125', '999'] }); // SHMOS-02
           // sys component cfg_rev property
           descriptions.push({ id: 9103, component: 'sys', property: 'cfg_rev', range: 'U16' }); // SHMOS-02
-          this.devices.set(host, descriptions);
+          this.deviceDescription.set(host, descriptions);
         } else if (deviceModel === 'SHWT-1') {
           this.log.debug(`*Set coap descriptions for host ${zb}${host}${db} deviceType ${CYAN}SHWT-1${db}`);
           // wakeup event
@@ -562,7 +584,7 @@ export class CoapServer extends EventEmitter {
           descriptions.push({ id: 6106, component: 'flood', property: 'flood', range: ['0/1', '-1'] }); // SHWT-1
           // temperature component
           descriptions.push({ id: 3101, component: 'temperature', property: 'value', range: ['-55/125', '999'] }); // SHWT-1
-          this.devices.set(host, descriptions);
+          this.deviceDescription.set(host, descriptions);
         } else if (deviceModel === 'SHHT-1') {
           this.log.debug(`*Set coap descriptions for host ${zb}${host}${db} deviceType ${CYAN}SHHT-1${db}`);
           // wakeup event
@@ -575,7 +597,7 @@ export class CoapServer extends EventEmitter {
           descriptions.push({ id: 3101, component: 'temperature', property: 'value', range: ['-55/125', '999'] }); // SHHT-1
           // humidity component
           descriptions.push({ id: 3103, component: 'humidity', property: 'value', range: ['0/100', '-1'] }); // SHHT-1
-          this.devices.set(host, descriptions);
+          this.deviceDescription.set(host, descriptions);
         } else {
           this.log.info(`No coap description found for ${hk}${deviceModel}${nf} id ${hk}${this.deviceId.get(host)}${nf} host ${zb}${host}${nf} fetching it...`);
           this.getDeviceDescription(host, deviceModel); // No await
@@ -651,7 +673,7 @@ export class CoapServer extends EventEmitter {
         this.log.error(`CoIoT (coap) server error: ${err instanceof Error ? err.message : err}`);
       } else {
         this._isReady = true;
-        this.log.info('CoIoT (coap) server is listening...');
+        this.log.info('CoIoT (coap) server is listening on port 5683...');
       }
     });
   }
@@ -730,7 +752,10 @@ export class CoapServer extends EventEmitter {
         this._isReady = false;
         this.log.debug(`CoIoT (coap) server closed${err ? ' with error ' + err.message : ''}.`);
       });
-    this.devices.clear();
+    this.deviceDescription.clear();
+    this.deviceId.clear();
+    this.deviceSerial.clear();
+    this.deviceValidityTimeout.clear();
     this.log.info('Stopped CoIoT (coap) server for shelly devices.');
   }
 

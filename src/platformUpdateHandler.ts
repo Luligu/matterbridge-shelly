@@ -22,6 +22,7 @@
  */
 
 import { MatterbridgeEndpoint } from 'matterbridge';
+import { SmokeCoAlarm } from 'matterbridge/matter/clusters';
 import { db, debugStringify, dn, er, hk, idn, or, rs, YELLOW, zb } from 'matterbridge/logger';
 import { isValidArray, isValidBoolean, isValidNumber, isValidObject, isValidString, rgbColorToHslColor } from 'matterbridge/utils';
 
@@ -193,7 +194,8 @@ export function shellyUpdateHandler(
   }
   // Update for Flood
   if (shellyComponent.name === 'Flood' && property === 'flood' && isValidBoolean(value)) {
-    endpoint.setAttribute(BooleanState.Cluster.id, 'stateValue', !value, shellyDevice.log);
+    // endpoint.setAttribute(BooleanState.Cluster.id, 'stateValue', !value, shellyDevice.log);
+    endpoint.setAttribute(BooleanState.Cluster.id, 'stateValue', value, shellyDevice.log); // Water Leak Detector: true = leak, false = no leak
   }
   // Update for Gas
   if (shellyComponent.name === 'Gas' && property === 'alarm_state' && isValidString(value)) {
@@ -201,7 +203,8 @@ export function shellyUpdateHandler(
   }
   // Update for Smoke
   if (shellyComponent.name === 'Smoke' && property === 'alarm' && isValidBoolean(value)) {
-    endpoint.setAttribute(BooleanState.Cluster.id, 'stateValue', !value, shellyDevice.log);
+    // endpoint.setAttribute(BooleanState.Cluster.id, 'stateValue', !value, shellyDevice.log);
+    endpoint.setAttribute(SmokeCoAlarm.Cluster.id, 'smokeState', value ? SmokeCoAlarm.AlarmState.Critical : SmokeCoAlarm.AlarmState.Normal, shellyDevice.log);
   }
   // Update for Lux
   if (shellyComponent.name === 'Lux' && property === 'value' && isValidNumber(value, 0)) {

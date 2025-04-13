@@ -112,7 +112,7 @@ export class WsServer extends EventEmitter {
     // Handle the open event
     this.wsServer.on('connection', (ws: WebSocket, req: IncomingMessage) => {
       const clientAddress = req.socket.remoteAddress;
-      this.log.debug(`WebSocketServer incoming client connection from ${zb}${clientAddress}${db}.`);
+      this.log.info(`WebSocketServer client connected host ${zb}${clientAddress}${db}.`);
 
       // Start the ping/pong mechanism
       this.log.debug(`Start WebSocketServer PingPong.`);
@@ -170,8 +170,8 @@ export class WsServer extends EventEmitter {
       });
 
       // Handle connection close
-      ws.on('close', () => {
-        this.log.debug('WebSocketServer client disconnected');
+      ws.on('close', (code: number, reason: Buffer) => {
+        this.log.info(`WebSocketServer client disconnected: code ${code} ${reason.toString('utf-8') === '' ? '' : 'reason ' + reason.toString('utf-8')}`);
         clearInterval(pingInterval);
         pingInterval = undefined;
         clearTimeout(pongTimeout);
@@ -201,6 +201,7 @@ export class WsServer extends EventEmitter {
       this._isListening = true;
       this.log.debug(`HttpServer for WebSocketServer is listening on port ${port}`);
       this.log.info(`Started WebSocket server for shelly devices.`);
+      this.log.info(`WebSocket server for shelly devices is listening on port ${port}...`);
     });
   }
 

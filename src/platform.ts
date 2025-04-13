@@ -45,6 +45,8 @@ import {
   dimmableLight,
   colorTemperatureLight,
   MatterbridgeEndpoint,
+  waterLeakDetector,
+  smokeCoAlarm,
 } from 'matterbridge';
 import {
   hslColorToRgbColor,
@@ -87,6 +89,7 @@ import {
   Thermostat,
   Switch,
   ModeSelect,
+  SmokeCoAlarm,
 } from 'matterbridge/matter/clusters';
 
 // Node.js imports
@@ -1273,9 +1276,11 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         } else if (component.name === 'Flood') {
           const floodComponent = device.getComponent(key);
           if (floodComponent?.hasProperty('flood') && isValidBoolean(floodComponent.getValue('flood'))) {
-            const child = mbDevice.addChildDeviceType(key, [contactSensor], undefined, config.debug as boolean);
+            // const child = mbDevice.addChildDeviceType(key, [contactSensor], undefined, config.debug as boolean);
+            const child = mbDevice.addChildDeviceType(key, [waterLeakDetector], undefined, config.debug as boolean);
             child.log.logName = `${device.name} ${key}`;
-            child.createDefaultBooleanStateClusterServer(!(floodComponent.getValue('flood') as boolean));
+            // child.createDefaultBooleanStateClusterServer(!(floodComponent.getValue('flood') as boolean));
+            child.createDefaultBooleanStateClusterServer(floodComponent.getValue('flood') as boolean); // Water Leak Detector: true = leak, false = no leak
             child.addRequiredClusterServers();
             // Add event handler
             floodComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
@@ -1297,9 +1302,11 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         } else if (component.name === 'Smoke') {
           const smokeComponent = device.getComponent(key);
           if (smokeComponent?.hasProperty('alarm') && isValidBoolean(smokeComponent.getValue('alarm'))) {
-            const child = mbDevice.addChildDeviceType(key, [contactSensor], undefined, config.debug as boolean);
+            // const child = mbDevice.addChildDeviceType(key, [contactSensor], undefined, config.debug as boolean);
+            const child = mbDevice.addChildDeviceType(key, [smokeCoAlarm], undefined, config.debug as boolean);
             child.log.logName = `${device.name} ${key}`;
-            child.createDefaultBooleanStateClusterServer(!smokeComponent.getValue('alarm') as boolean);
+            // child.createDefaultBooleanStateClusterServer(!smokeComponent.getValue('alarm') as boolean);
+            child.createSmokeOnlySmokeCOAlarmClusterServer(smokeComponent.getValue('alarm') ? SmokeCoAlarm.AlarmState.Critical : SmokeCoAlarm.AlarmState.Normal);
             child.addRequiredClusterServers();
             // Add event handler
             smokeComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
@@ -1870,6 +1877,17 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       if (device) {
         this.log.info(`Created Shelly device ${hk}${deviceId}${nf} host ${zb}${host}${nf}`);
         await device.saveDevicePayloads(this.shelly.dataPath);
+      } else {
+        // This fix when the device is not reachable but the cache file exist: like config changed from sleep mode devices
+        if (fs.existsSync(cacheFileName)) {
+          device = await ShellyDevice.create(this.shelly, log, cacheFileName);
+          if (device) {
+            this.log.info(`Loaded from cache (device unreachable) Shelly device ${hk}${deviceId}${nf} host ${zb}${host}${nf}`);
+            device.setHost(host); // Set the real host for device and wsClient
+            device.cached = true;
+            device.online = true;
+          }
+        }
       }
     }
     if (!device) {

@@ -264,6 +264,7 @@ export class MdnsScanner extends EventEmitter {
 
     this.scanner.on('ready', async () => {
       this.log.debug(`The mDNS socket is bound`);
+      this.log.info(`MdnsScanner for shelly devices is listening on port 5353...`);
     });
 
     // Send the query and set the timeout to send it again every 60 seconds

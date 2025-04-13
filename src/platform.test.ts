@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Matterbridge, MatterbridgeBehavior, MatterbridgeEndpoint, PlatformConfig } from 'matterbridge';
+import { Matterbridge, MatterbridgeBehavior, MatterbridgeEndpoint, PlatformConfig, PowerSource } from 'matterbridge';
 import {
   OnOffCluster,
   BindingCluster,
@@ -413,7 +413,7 @@ describe('ShellyPlatform', () => {
     expect(device.hasClusterServer(MatterbridgeBehavior)).toBeTruthy();
     expect(device.hasClusterServer(BridgedDeviceBasicInformationCluster)).toBeTruthy();
     expect(device.hasClusterServer(FixedLabelCluster)).toBeTruthy();
-    expect(device.hasClusterServer(PowerSourceCluster)).toBeTruthy();
+    expect(device.hasClusterServer(PowerSource.Cluster.id)).toBeTruthy();
     expect(device.getAllClusterServerNames()).toEqual(['descriptor', 'matterbridge', 'bridgedDeviceBasicInformation', 'powerSource', 'fixedLabel']);
     expect(device.getChildEndpoints()).toHaveLength(3);
     expect(device.getChildEndpointByName('PowerSource')).not.toBeDefined();
