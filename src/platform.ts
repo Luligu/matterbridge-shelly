@@ -847,7 +847,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           component.on('update', (component: string, property: string, value: ShellyDataType) => {
             shellyUpdateHandler(this, mbDevice, device, component, property, value);
           });
-        } else if (isSwitchComponent(component)) {
+        } else if (isSwitchComponent(component) && device.profile !== 'cover') {
           let deviceType = onOffOutlet;
           if (config.switchList && (config.switchList as string[]).includes(device.id)) deviceType = onOffSwitch;
           if (config.lightList && (config.lightList as string[]).includes(device.id)) deviceType = onOffLight;
@@ -885,7 +885,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           component.on('update', (component: string, property: string, value: ShellyDataType) => {
             shellyUpdateHandler(this, mbDevice, device, component, property, value);
           });
-        } else if (isCoverComponent(component)) {
+        } else if (isCoverComponent(component) && device.profile !== 'switch') {
           const tagList = this.addTagList(component);
           const child = mbDevice.addChildDeviceType(
             key,

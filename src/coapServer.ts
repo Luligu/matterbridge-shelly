@@ -34,7 +34,7 @@ import { promises as fs } from 'node:fs';
 
 // Shelly imports
 import { Shelly } from './shelly.js';
-import { ShellyDataType } from './shellyTypes.js';
+import { ShellyData, ShellyDataType } from './shellyTypes.js';
 import { ShellyDevice } from './shellyDevice.js';
 
 // 192.168.1.189:5683
@@ -87,6 +87,7 @@ interface CoIoTDescription {
 
 interface CoapServerEvent {
   update: [host: string, component: string, property: string, value: ShellyDataType];
+  coapupdate: [host: string, status: ShellyData];
 }
 
 export class CoapServer extends EventEmitter {
@@ -427,6 +428,14 @@ export class CoapServer extends EventEmitter {
             if (s.D === 'cfgChanged' && b.D === 'device') desc.push({ id: s.I, component: 'sys', property: 'cfg_rev', range: s.R });
             if (s.D === 'wakeupEvent' && b.D === 'device') desc.push({ id: s.I, component: 'sys', property: 'act_reasons', range: s.R });
 
+            // output component
+            if (s.D === 'overpower') desc.push({ id: s.I, component: b.D.replace('_', ':').replace('device', 'sys'), property: 'overpower', range: s.R });
+
+            // input component
+            if (s.D === 'input') desc.push({ id: s.I, component: b.D.replace('_', ':').replace('device', 'input:0'), property: 'input', range: s.R });
+            if (s.D === 'inputEvent') desc.push({ id: s.I, component: b.D.replace('_', ':').replace('device', 'input:0'), property: 'event', range: s.R });
+            if (s.D === 'inputEventCnt') desc.push({ id: s.I, component: b.D.replace('_', ':').replace('device', 'input:0'), property: 'event_cnt', range: s.R });
+
             // light component
             if (s.D === 'output') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'state', range: s.R });
             if (s.D === 'brightness') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'brightness', range: s.R }); // Used by white channels
@@ -437,6 +446,7 @@ export class CoapServer extends EventEmitter {
             if (s.D === 'white') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'white', range: s.R });
             if (s.D === 'whiteLevel') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'white', range: s.R });
             if (s.D === 'colorTemp') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'temp', range: s.R });
+            if (s.D === 'effect') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'effect', range: s.R });
             if (s.D === 'power' && b.D.startsWith('light')) desc.push({ id: s.I, component: 'meter:0', property: 'power', range: s.R });
             if (s.D === 'energy' && b.D.startsWith('light')) desc.push({ id: s.I, component: 'meter:0', property: 'total', range: s.R });
 
@@ -500,12 +510,13 @@ export class CoapServer extends EventEmitter {
 
     if (msg.url === '/cit/s') {
       try {
-        if (this.log.logLevel === LogLevel.DEBUG) this.saveResponse(deviceModel + '-' + deviceMac + '.coap.cits.json', payload);
+        if (this.log.logLevel === LogLevel.DEBUG) this.saveResponse(this.deviceId.get(host) + '.coap.cits.json', payload);
       } catch {
         // Ignore cause the error is already logged
       }
       this.deviceSerial.set(host, serial);
       const descriptions: CoIoTDescription[] = this.deviceDescription.get(host) || [];
+      // For sleep mode devices we don't have the device description at the first message
       if (!descriptions || descriptions.length === 0) {
         // SHMOS-01, SHMOS-02, SHTRV-01 and first Gen1 don't answer to cit/d and cit/s on CoIot (they answer to fetch http://host/cit/d)
         if (deviceModel === 'SHDW-1' || deviceModel === 'SHDW-2') {
@@ -600,10 +611,13 @@ export class CoapServer extends EventEmitter {
           this.deviceDescription.set(host, descriptions);
         } else {
           this.log.info(`No coap description found for ${hk}${deviceModel}${nf} id ${hk}${this.deviceId.get(host)}${nf} host ${zb}${host}${nf} fetching it...`);
-          this.getDeviceDescription(host, deviceModel); // No await
+          const id = this.deviceId.get(host);
+          if (id) this.registerDevice(host, id, false); // No await
+          // this.getDeviceDescription(host, deviceModel); // No await
         }
       }
       try {
+        const status: ShellyData = {};
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const values: CoIoTGValue[] = payload.G?.map((v: any[]) => ({
           channel: v[0],
@@ -615,26 +629,36 @@ export class CoapServer extends EventEmitter {
           const desc = descriptions.find((d) => d.id === v.id);
           if (desc) {
             this.log.debug(
-              `- channel ${CYAN}${v.channel}${db} id ${CYAN}${v.id}${db} value ${CYAN}${v.value}${db} => ${CYAN}${desc.component}${db} ${CYAN}${desc.property}${db} ${CYAN}${desc.range === '0/1' ? v.value === 1 : v.value}${db}`,
+              `- channel ${CYAN}${v.channel}${db} id ${CYAN}${v.id}${db} value ${CYAN}${v.value}${db} => component ${CYAN}${desc.component}${db} property ${CYAN}${desc.property}${db} value ${CYAN}${desc.range === '0/1' ? v.value === 1 : v.value}${db}`,
             );
-            if (typeof desc.range === 'string' && desc.range === '0/1') {
-              this.log.debug(`sending update for component ${CYAN}${desc.component}${db} property ${CYAN}${desc.property}${db} value ${CYAN}${v.value === 1}${db}`);
-              this.emit('update', host, desc.component, desc.property, v.value === 1);
-            } else if (Array.isArray(desc.range) && desc.range[0] === '0/1' && desc.range[1] === '-1') {
-              this.log.debug(
-                `sending update for component ${CYAN}${desc.component}${db} property ${CYAN}${desc.property}${db} value ${CYAN}${v.value === -1 ? null : v.value === 1}${db}`,
-              );
-              this.emit('update', host, desc.component, desc.property, v.value === -1 ? null : v.value === 1);
+            if (!desc.property.startsWith('input') && typeof desc.range === 'string' && desc.range === '0/1') {
+              // this.log.debug(`sending update for component ${CYAN}${desc.component}${db} property ${CYAN}${desc.property}${db} value ${CYAN}${v.value === 1}${db}`);
+              // this.emit('update', host, desc.component, desc.property, v.value === 1);
+              if (!status[desc.component]) status[desc.component] = {};
+              (status[desc.component] as ShellyData)[desc.property] = v.value === 1;
+            } else if (!desc.property.startsWith('input') && Array.isArray(desc.range) && desc.range[0] === '0/1' && desc.range[1] === '-1') {
+              // this.log.debug(`sending update for component ${CYAN}${desc.component}${db} property ${CYAN}${desc.property}${db} value ${CYAN}${v.value === -1 ? null : v.value === 1}${db}`);
+              // this.emit('update', host, desc.component, desc.property, v.value === -1 ? null : v.value === 1);
+              if (!status[desc.component]) status[desc.component] = {};
+              (status[desc.component] as ShellyData)[desc.property] = v.value === -1 ? null : v.value === 1;
             } else {
-              this.log.debug(`sending update for component ${CYAN}${desc.component}${db} property ${CYAN}${desc.property}${db} value ${CYAN}${v.value}${db}`);
+              // this.log.debug(`sending update for component ${CYAN}${desc.component}${db} property ${CYAN}${desc.property}${db} value ${CYAN}${v.value}${db}`);
               if (desc.property.includes('.')) {
                 // target_t#value
                 const [property, subproperty] = desc.property.split('.');
-                this.emit('update', host, desc.component, property, { [subproperty]: v.value });
-              } else this.emit('update', host, desc.component, desc.property, v.value);
+                // this.emit('update', host, desc.component, property, { [subproperty]: v.value });
+                if (!status[desc.component]) status[desc.component] = {};
+                (status[desc.component] as ShellyData)[property] = { [subproperty]: v.value };
+              } else {
+                // this.emit('update', host, desc.component, desc.property, v.value);
+                if (!status[desc.component]) status[desc.component] = {};
+                (status[desc.component] as ShellyData)[desc.property] = v.value;
+              }
             }
           } else this.log.debug(`No coap description found for id ${v.id}`);
         });
+        this.log.debug(`***Update status for device ${hk}${this.deviceId.get(host)}${db} host ${zb}${host}${db} payload:\n`, status);
+        this.emit('coapupdate', host, status);
       } catch {
         this.log.warn(`Error parsing values for host ${zb}${host}${wr}`);
       }
@@ -696,7 +720,11 @@ export class CoapServer extends EventEmitter {
         // Simulate a CoAP message to use the same code
         const coapMessage = {
           rsinfo: { address: host, port: 5683, family: 'IPv4' },
-          headers: { [COIOT_OPTION_GLOBAL_DEVID]: `${id}#XXXXXXXXX#2`, [COIOT_OPTION_STATUS_VALIDITY]: 0, [COIOT_OPTION_STATUS_SERIAL]: 0 },
+          headers: {
+            [COIOT_OPTION_GLOBAL_DEVID]: `${ShellyDevice.normalizeId(id).type}#${ShellyDevice.normalizeId(id).mac}#2`,
+            [COIOT_OPTION_STATUS_VALIDITY]: 0,
+            [COIOT_OPTION_STATUS_SERIAL]: 0,
+          },
           url: '/cit/d',
           payload: Buffer.from(JSON.stringify(msg)),
           code: '2.05',

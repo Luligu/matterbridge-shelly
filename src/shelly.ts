@@ -21,7 +21,7 @@
  * limitations under the License. *
  */
 
-import { AnsiLogger, CYAN, MAGENTA, BRIGHT, hk, db, nf, wr, zb, er, LogLevel } from 'matterbridge/logger';
+import { AnsiLogger, CYAN, MAGENTA, BRIGHT, hk, db, nf, wr, zb, LogLevel } from 'matterbridge/logger';
 import { isValidArray, isValidObject } from 'matterbridge/utils';
 
 import crypto from 'node:crypto';
@@ -32,7 +32,7 @@ import { DiscoveredDevice, MdnsScanner } from './mdnsScanner.js';
 import { CoapServer } from './coapServer.js';
 import { WsClient } from './wsClient.js';
 import { WsServer } from './wsServer.js';
-import { ShellyData, ShellyDataType, ShellyDeviceId, ShellyEvent } from './shellyTypes.js';
+import { ShellyData, ShellyDeviceId, ShellyEvent } from './shellyTypes.js';
 
 /**
  * Creates a new instance of the Shelly class.
@@ -118,6 +118,7 @@ export class Shelly extends EventEmitter {
       this.emit('discovered', device);
     });
 
+    /*
     this.coapServer.on('update', async (host: string, component: string, property: string, value: ShellyDataType) => {
       const device = this.getDeviceByHost(host);
       if (device) {
@@ -136,6 +137,30 @@ export class Shelly extends EventEmitter {
         if (device.cached) {
           device.cached = false;
           this.log.debug(`Device ${hk}${device.id}${db} host ${zb}${host}${db} received a CoIoT message: setting cached to false`);
+        }
+      }
+    });
+    */
+
+    this.coapServer.on('coapupdate', async (host: string, data: ShellyData) => {
+      const device = this.getDeviceByHost(host);
+      if (device) {
+        device.log.debug(`CoIoT coapupdate from device id ${hk}${device.id}${db} host ${zb}${host}${db}`);
+        device.lastseen = Date.now();
+        if (device.sleepMode) device.emit('awake');
+        if (!device.online) {
+          device.online = true;
+          device.emit('online');
+          this.log.debug(`Device ${hk}${device.id}${db} host ${zb}${host}${db} received a CoIoT message: setting online to true`);
+        }
+        if (device.cached) {
+          device.cached = false;
+          this.log.debug(`Device ${hk}${device.id}${db} host ${zb}${host}${db} received a CoIoT message: setting cached to false`);
+        }
+        if (isValidObject(data, 1)) {
+          for (const key in data) {
+            device.updateComponent(key, data[key] as ShellyData);
+          }
         }
       }
     });

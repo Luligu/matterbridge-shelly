@@ -558,13 +558,13 @@ export class ShellyDevice extends EventEmitter {
             device.addComponent(new ShellyComponent(device, `light:${index++}`, 'Light', light as ShellyData));
           }
         }
-        if (key === 'relays' && device.profile !== 'cover') {
+        if (key === 'relays' /* && device.profile !== 'cover'*/) {
           let index = 0;
           for (const relay of settingsPayload[key] as ShellyData[]) {
             device.addComponent(new ShellyComponent(device, `relay:${index++}`, 'Relay', relay as ShellyData));
           }
         }
-        if (key === 'rollers' && device.profile !== 'switch') {
+        if (key === 'rollers' /* && device.profile !== 'switch'*/) {
           let index = 0;
           for (const roller of settingsPayload[key] as ShellyData[]) {
             device.addComponent(new ShellyComponent(device, `roller:${index++}`, 'Roller', roller as ShellyData));
@@ -869,12 +869,13 @@ export class ShellyDevice extends EventEmitter {
     // Emitted when a sleepy device wakes up by WsServer and CoapServer (via Shelly.on('update')). We update the cache file and register the device with Coap.
     device.on('awake', async () => {
       log.debug(`Device ${hk}${device.id}${db} host ${zb}${device.host}${db} is awake (cached: ${device.cached}).`);
-      if (device.sleepMode && (device.cached || Date.now() - device.lastFetched > device.fetchInterval)) {
+      const cached = device.cached;
+      if (device.sleepMode) {
         try {
           device.lastFetched = Date.now();
           const awaken = await ShellyDevice.create(shelly, log, device.host);
           if (awaken) {
-            if (device.gen === 1) shelly.coapServer.registerDevice(device.host, device.id, false); // No await to register device for CoIoT updates
+            if (device.gen === 1 && cached) shelly.coapServer.registerDevice(device.host, device.id, false); // No await to register device for CoIoT updates
             await awaken.saveDevicePayloads(shelly.dataPath);
             awaken.destroy();
           }

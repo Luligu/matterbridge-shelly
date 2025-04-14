@@ -1,0 +1,358 @@
+{
+  "shelly": {
+    "name": null,
+    "id": "shellyprorgbwwpm-ac1518784844",
+    "mac": "AC1518784844",
+    "slot": 0,
+    "model": "SPDC-0D5PE16EU",
+    "gen": 2,
+    "fw_id": "20250318-152129/1.5.1-g01dd7ff",
+    "ver": "1.5.1",
+    "app": "ProRGBWWPM",
+    "auth_en": false,
+    "auth_domain": null,
+    "profile": "rgbcct"
+  },
+  "settings": {
+    "ble": {
+      "enable": false,
+      "rpc": {
+        "enable": true
+      }
+    },
+    "bthome": {},
+    "cct:0": {
+      "id": 0,
+      "name": null,
+      "initial_state": "restore_last",
+      "auto_on": false,
+      "auto_on_delay": 60,
+      "auto_off": false,
+      "auto_off_delay": 60,
+      "transition_duration": 3,
+      "min_brightness_on_toggle": 3,
+      "night_mode": {
+        "enable": false,
+        "brightness": 50,
+        "ct": 6150,
+        "active_between": []
+      },
+      "range_map": [
+        0,
+        100
+      ],
+      "ct_range": [
+        2700,
+        5000
+      ],
+      "button_fade_rate": 3,
+      "button_presets": {
+        "button_doublepush": {
+          "brightness": 100,
+          "ct": 3988
+        }
+      },
+      "in_mode": "dim",
+      "current_limit": 6,
+      "power_limit": 350,
+      "voltage_limit": 30
+    },
+    "cloud": {
+      "enable": true,
+      "server": "shelly-18-eu.shelly.cloud:6022/jrpc"
+    },
+    "eth": {
+      "enable": true,
+      "server_mode": false,
+      "ipv4mode": "dhcp",
+      "ip": null,
+      "netmask": null,
+      "gw": null,
+      "nameserver": null
+    },
+    "input:0": {
+      "id": 0,
+      "name": null,
+      "type": "button",
+      "enable": true,
+      "invert": false
+    },
+    "input:1": {
+      "id": 1,
+      "name": null,
+      "type": "button",
+      "enable": true,
+      "invert": false
+    },
+    "input:2": {
+      "id": 2,
+      "name": null,
+      "type": "button",
+      "enable": true,
+      "invert": false
+    },
+    "input:3": {
+      "id": 3,
+      "name": null,
+      "type": "button",
+      "enable": true,
+      "invert": false
+    },
+    "input:4": {
+      "id": 4,
+      "name": null,
+      "type": "button",
+      "enable": true,
+      "invert": false
+    },
+    "mqtt": {
+      "enable": false,
+      "server": null,
+      "client_id": "shellyprorgbwwpm-ac1518784844",
+      "user": null,
+      "ssl_ca": null,
+      "topic_prefix": "shellyprorgbwwpm-ac1518784844",
+      "rpc_ntf": true,
+      "status_ntf": false,
+      "use_client_cert": false,
+      "enable_rpc": true,
+      "enable_control": true
+    },
+    "rgb:0": {
+      "id": 0,
+      "name": null,
+      "initial_state": "restore_last",
+      "auto_on": false,
+      "auto_on_delay": 60,
+      "auto_off": false,
+      "auto_off_delay": 60,
+      "transition_duration": 3,
+      "min_brightness_on_toggle": 3,
+      "night_mode": {
+        "enable": false,
+        "brightness": 50,
+        "rgb": [
+          255,
+          255,
+          255
+        ],
+        "active_between": []
+      },
+      "button_fade_rate": 2,
+      "button_presets": {
+        "button_doublepush": {
+          "brightness": 100,
+          "rgb": [
+            255,
+            255,
+            255
+          ]
+        }
+      },
+      "in_mode": "dim",
+      "current_limit": 6,
+      "power_limit": 350,
+      "voltage_limit": 30
+    },
+    "sys": {
+      "device": {
+        "name": null,
+        "mac": "AC1518784844",
+        "fw_id": "20250318-152129/1.5.1-g01dd7ff",
+        "discoverable": true,
+        "eco_mode": false,
+        "profile": "rgbcct"
+      },
+      "location": null,
+      "debug": {
+        "level": 2,
+        "file_level": null,
+        "mqtt": {
+          "enable": false
+        },
+        "websocket": {
+          "enable": false
+        },
+        "udp": {
+          "addr": null
+        }
+      },
+      "ui_data": {},
+      "rpc_udp": {
+        "dst_addr": null,
+        "listen_port": null
+      },
+      "sntp": {
+        "server": "time.cloudflare.com"
+      },
+      "cfg_rev": 15
+    },
+    "wifi": {
+      "ap": {
+        "ssid": "",
+        "is_open": true,
+        "enable": false,
+        "range_extender": {
+          "enable": false
+        }
+      },
+      "sta": {
+        "ssid": "",
+        "is_open": true,
+        "enable": false,
+        "ipv4mode": "dhcp",
+        "ip": null,
+        "netmask": null,
+        "gw": null,
+        "nameserver": null
+      },
+      "sta1": {
+        "ssid": "",
+        "is_open": true,
+        "enable": false,
+        "ipv4mode": "dhcp",
+        "ip": null,
+        "netmask": null,
+        "gw": null,
+        "nameserver": null
+      },
+      "roam": {
+        "rssi_thr": -80,
+        "interval": 60
+      }
+    },
+    "ws": {
+      "enable": false,
+      "server": null,
+      "ssl_ca": "ca.pem"
+    }
+  },
+  "status": {
+    "ble": {},
+    "bthome": {
+      "errors": [
+        "bluetooth_disabled"
+      ]
+    },
+    "cct:0": {
+      "id": 0,
+      "source": "SHC",
+      "output": false,
+      "brightness": 3,
+      "ct": 3988,
+      "temperature": {
+        "tC": 38.7,
+        "tF": 101.7
+      },
+      "aenergy": {
+        "total": 39.554,
+        "by_minute": [
+          0,
+          0,
+          0
+        ],
+        "minute_ts": 1744628040
+      },
+      "apower": 0,
+      "current": 0,
+      "voltage": 24.8
+    },
+    "cloud": {
+      "connected": true
+    },
+    "eth": {
+      "ip": "192.168.4.219"
+    },
+    "input:0": {
+      "id": 0,
+      "state": null
+    },
+    "input:1": {
+      "id": 1,
+      "state": null
+    },
+    "input:2": {
+      "id": 2,
+      "state": null
+    },
+    "input:3": {
+      "id": 3,
+      "state": null
+    },
+    "input:4": {
+      "id": 4,
+      "state": null
+    },
+    "mqtt": {
+      "connected": false
+    },
+    "rgb:0": {
+      "id": 0,
+      "source": "WS_in",
+      "output": false,
+      "rgb": [
+        81,
+        42,
+        214
+      ],
+      "brightness": 100,
+      "temperature": {
+        "tC": 38.7,
+        "tF": 101.7
+      },
+      "aenergy": {
+        "total": 2.068,
+        "by_minute": [
+          0,
+          0,
+          0
+        ],
+        "minute_ts": 1744628040
+      },
+      "apower": 0,
+      "current": 0,
+      "voltage": 24.8
+    },
+    "sys": {
+      "mac": "AC1518784844",
+      "restart_required": false,
+      "time": "12:54",
+      "unixtime": 1744628057,
+      "last_sync_ts": 1744627573,
+      "uptime": 95983,
+      "ram_size": 249356,
+      "ram_free": 123224,
+      "ram_min_free": 105296,
+      "fs_size": 524288,
+      "fs_free": 196608,
+      "cfg_rev": 15,
+      "kvs_rev": 0,
+      "schedule_rev": 0,
+      "webhook_rev": 0,
+      "btrelay_rev": 0,
+      "available_updates": {
+        "beta": {
+          "version": "1.6.0-beta1"
+        }
+      },
+      "reset_reason": 1,
+      "ch": [
+        "rgb:0",
+        "cct:0"
+      ]
+    },
+    "wifi": {
+      "sta_ip": null,
+      "status": "disconnected",
+      "ssid": "",
+      "rssi": 0
+    },
+    "ws": {
+      "connected": false
+    }
+  },
+  "components": [],
+  "cfg_rev": 15,
+  "offset": 0,
+  "total": 0
+}
