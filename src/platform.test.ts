@@ -184,7 +184,7 @@ describe('ShellyPlatform', () => {
     matterbridge.environment.vars.set('path.root', 'matterstorage');
     matterbridge.environment.vars.set('runtime.signals', true);
     matterbridge.environment.vars.set('runtime.exitcode', true);
-    matterbridge.environment.vars.set('mdns.networkInterface', 'Wi-Fi');
+    // matterbridge.environment.vars.set('mdns.networkInterface', 'Wi-Fi');
 
     // Start the Matter storage
     await (matterbridge as any).startMatterStorage();
@@ -747,6 +747,126 @@ describe('ShellyPlatform', () => {
 
     cleanup();
     shellyPro.destroy();
+  }, 10000);
+
+  it('should add shelly2pmg3', async () => {
+    expect(shellyPlatform).toBeDefined();
+    shellyPlatform.config.enableMdnsDiscover = false;
+    shellyPlatform.config.inputMomentaryList = [];
+
+    await shellyPlatform.onStart('Test reason');
+    expect(mockLog.info).toHaveBeenCalledWith(`Starting platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
+
+    const shelly2PMGen3 = await ShellyDevice.create((shellyPlatform as any).shelly, (shellyPlatform as any).log, path.join('src', 'mock', 'shelly2pmg3-34CDB0770C4C.json'));
+    expect(shelly2PMGen3).not.toBeUndefined();
+    if (!shelly2PMGen3) return;
+
+    await shelly.addDevice(shelly2PMGen3);
+    await wait(250);
+    expect(mockLog.info).toHaveBeenCalledWith(`Shelly added ${idn}${shelly2PMGen3.name}${rs} device id ${hk}${shelly2PMGen3.id}${rs}${nf} host ${zb}${shelly2PMGen3.host}${nf}`);
+    expect(shellyPlatform.discoveredDevices.size).toBe(0);
+    expect(shellyPlatform.storedDevices.size).toBe(0);
+    expect(shelly.devices).toHaveLength(1);
+    expect(shellyPlatform.bridgedDevices.size).toBe(1);
+    expect(shellyPlatform.bridgedDevices.has('shelly2pmg3-34CDB0770C4C')).toBe(true);
+
+    const device = shellyPlatform.bridgedDevices.get('shelly2pmg3-34CDB0770C4C');
+    expect(device).toBeDefined();
+    if (!device) return;
+    await aggregator.add(device);
+
+    expect(device.getAllClusterServerNames()).toEqual(['descriptor', 'matterbridge', 'bridgedDeviceBasicInformation', 'powerSource', 'fixedLabel']);
+    expect(featuresFor(device, 'powerSource').wired).toBe(true);
+
+    expect(device.getChildEndpoints()).toHaveLength(1);
+    expect(device.getChildEndpointByName('input:0')).not.toBeDefined();
+    expect(device.getChildEndpointByName('input:1')).not.toBeDefined();
+
+    const coverEndpoint = device.getChildEndpointByName('cover:0');
+    expect(coverEndpoint).toBeDefined();
+    if (!coverEndpoint) return;
+    expect(coverEndpoint?.getAllClusterServerNames()).toEqual([
+      'descriptor',
+      'matterbridge',
+      'identify',
+      'windowCovering',
+      'powerTopology',
+      'electricalPowerMeasurement',
+      'electricalEnergyMeasurement',
+    ]);
+    expect(featuresFor(coverEndpoint as MatterbridgeEndpoint, 'windowCovering').lift).toBe(true);
+    expect(featuresFor(coverEndpoint as MatterbridgeEndpoint, 'windowCovering').positionAwareLift).toBe(true);
+
+    // Test updates on cover
+    // Matter uses 10000 = fully closed   0 = fully opened
+    // Shelly uses 0 = fully closed   100 = fully opened
+    await coverEndpoint.setAttribute('windowCovering', 'currentPositionLiftPercent100ths', 0);
+    await coverEndpoint.setAttribute('windowCovering', 'targetPositionLiftPercent100ths', 0); // Fully open
+    expect(coverEndpoint.getAttribute('windowCovering', 'currentPositionLiftPercent100ths')).toBe(0);
+    expect(coverEndpoint.getAttribute('windowCovering', 'targetPositionLiftPercent100ths')).toBe(0);
+    shelly = (shellyPlatform as any).shelly;
+
+    shelly2PMGen3.getComponent('cover:0')?.setValue('current_pos', 50);
+    shelly2PMGen3.getComponent('cover:0')?.setValue('target_pos', 50);
+
+    shelly.wsServer.emit('wssupdate', shelly2PMGen3.id, { 'cover:0': { current_pos: 0, target_pos: 0 } } as ShellyData); // Fully closed
+    await wait(250);
+    expect(coverEndpoint.getAttribute('windowCovering', 'currentPositionLiftPercent100ths')).toBe(10000);
+    expect(coverEndpoint.getAttribute('windowCovering', 'targetPositionLiftPercent100ths')).toBe(10000);
+
+    shelly.wsServer.emit('wssupdate', shelly2PMGen3.id, { 'cover:0': { current_pos: 50, target_pos: 50 } } as ShellyData); // Fully open
+    await wait(250);
+    expect(coverEndpoint.getAttribute('windowCovering', 'currentPositionLiftPercent100ths')).toBe(5000);
+    expect(coverEndpoint.getAttribute('windowCovering', 'targetPositionLiftPercent100ths')).toBe(5000);
+
+    shelly.wsServer.emit('wssupdate', shelly2PMGen3.id, { 'cover:0': { current_pos: 100, target_pos: 100 } } as ShellyData); // Fully open
+    await wait(250);
+    expect(coverEndpoint.getAttribute('windowCovering', 'currentPositionLiftPercent100ths')).toBe(0);
+    expect(coverEndpoint.getAttribute('windowCovering', 'targetPositionLiftPercent100ths')).toBe(0);
+
+    // Test commands for cover from Matter to Shelly
+    const fetch = jest.spyOn(ShellyDevice, 'fetch' as any).mockImplementation(async () => {
+      return Promise.resolve(undefined);
+    });
+
+    loggerLogSpy.mockClear();
+
+    coverEndpoint.executeCommandHandler('downOrClose', {});
+    await wait(250);
+    expect(loggerLogSpy).toHaveBeenCalledWith(
+      LogLevel.INFO,
+      `${db}Sent command ${hk}Cover${db}:${hk}cover:0${db}:${hk}Close()${db} to shelly device ${idn}${shelly2PMGen3.id}${rs}${db}`,
+    );
+    expect(fetch).toHaveBeenCalledWith(shelly2PMGen3.shelly, shelly2PMGen3.log, shelly2PMGen3.host, 'Cover.Close', { id: 0 });
+
+    coverEndpoint.executeCommandHandler('upOrOpen', {});
+    await wait(250);
+    expect(loggerLogSpy).toHaveBeenCalledWith(
+      LogLevel.INFO,
+      `${db}Sent command ${hk}Cover${db}:${hk}cover:0${db}:${hk}Open()${db} to shelly device ${idn}${shelly2PMGen3.id}${rs}${db}`,
+    );
+    expect(fetch).toHaveBeenCalledWith(shelly2PMGen3.shelly, shelly2PMGen3.log, shelly2PMGen3.host, 'Cover.Open', { id: 0 });
+
+    coverEndpoint.executeCommandHandler('stopMotion', {});
+    await wait(250);
+    expect(loggerLogSpy).toHaveBeenCalledWith(
+      LogLevel.INFO,
+      `${db}Sent command ${hk}Cover${db}:${hk}cover:0${db}:${hk}Stop()${db} to shelly device ${idn}${shelly2PMGen3.id}${rs}${db}`,
+    );
+    expect(fetch).toHaveBeenCalledWith(shelly2PMGen3.shelly, shelly2PMGen3.log, shelly2PMGen3.host, 'Cover.Stop', { id: 0 });
+
+    coverEndpoint.executeCommandHandler('goToLiftPercentage', { liftPercent100thsValue: 5000 });
+    await wait(250);
+    expect(loggerLogSpy).toHaveBeenCalledWith(
+      LogLevel.INFO,
+      `${db}Sent command ${hk}Cover${db}:${hk}cover:0${db}:${hk}GoToPosition(${YELLOW}50${hk})${db} to shelly device ${idn}${shelly2PMGen3.id}${rs}${db}`,
+    );
+    expect(fetch).toHaveBeenCalledWith(shelly2PMGen3.shelly, shelly2PMGen3.log, shelly2PMGen3.host, 'Cover.GoToPosition', { id: 0, pos: 50 });
+
+    fetch.mockRestore();
+
+    cleanup();
+    shelly2PMGen3.destroy();
   }, 10000);
 
   it('should load and save the stored devices', async () => {

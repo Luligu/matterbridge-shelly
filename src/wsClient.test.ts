@@ -176,19 +176,46 @@ describe('ShellyWsClient', () => {
     wsClient.stop();
   }, 10000);
 
+  test('should not connect when connected', async () => {
+    if (!server) return;
+    wsClient = new WsClient('Jest', 'localhost');
+    wsClient.start();
+    await wait(250);
+    wsClient.start();
+    wsClient.stop();
+    expect(wsClient.isConnected).toBeFalsy();
+    expect(wsClient.isConnecting).toBeFalsy();
+    await new Promise<void>((resolve) =>
+      setTimeout(() => {
+        resolve();
+      }, 2000),
+    );
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`WebSocket client is already connected`));
+  }, 10000);
+
   test('should terminate before connected', async () => {
     if (!server) return;
     wsClient = new WsClient('Jest', 'localhost');
     wsClient.start();
     wsClient.stop();
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Terminated ws client for Shelly device ${hk}Jest${db} host ${zb}localhost${db}`);
     expect(wsClient.isConnected).toBeFalsy();
     expect(wsClient.isConnecting).toBeFalsy();
-    await new Promise<void>((resolve) => {
+    await new Promise<void>((resolve) =>
       setTimeout(() => {
         resolve();
-      }, 2000);
-    });
+      }, 2000),
+    );
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Terminated ws client for Shelly device ${hk}Jest${db} host ${zb}localhost${db}`);
+  }, 10000);
+
+  test('should fail to create', async () => {
+    if (!server) return;
+    wsClient = new WsClient('Jest', 'invald - host');
+    wsClient.start();
+    wsClient.stop();
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.ERROR, expect.stringContaining(`Failed to create WebSocket connection to ${zb}ws://invald - host/rpc${er}:`));
+    expect(wsClient.isConnected).toBeFalsy();
+    expect(wsClient.isConnecting).toBeFalsy();
   }, 10000);
 
   test('create the wsClient', () => {

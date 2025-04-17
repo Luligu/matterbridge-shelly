@@ -98,10 +98,13 @@ export class WsServer extends EventEmitter {
   private async listenForStatusUpdates(port = 8485) {
     try {
       // Create an HTTP server
+      /*
       this.httpServer = createServer((req, res) => {
         res.writeHead(200, { 'Content-Type': 'text/plain' });
         res.end('WebSocketServer is running\n');
       });
+      */
+      this.httpServer = createServer();
       // Create a WebSocket server
       this.wsServer = new WebSocketServer({ server: this.httpServer });
     } catch (error) {
