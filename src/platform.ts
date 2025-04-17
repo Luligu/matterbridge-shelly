@@ -156,16 +156,16 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
   private username = '';
   private password = '';
   private postfix;
-  private failsafeCount;
+  private failsafeCountSeconds = 360;
   private firstRun = false;
 
   constructor(matterbridge: Matterbridge, log: AnsiLogger, config: ShellyPlatformConfig) {
     super(matterbridge, log, config as unknown as PlatformConfig);
 
     // Verify that Matterbridge is the correct version
-    if (this.verifyMatterbridgeVersion === undefined || typeof this.verifyMatterbridgeVersion !== 'function' || !this.verifyMatterbridgeVersion('2.2.5')) {
+    if (this.verifyMatterbridgeVersion === undefined || typeof this.verifyMatterbridgeVersion !== 'function' || !this.verifyMatterbridgeVersion('2.2.8')) {
       throw new Error(
-        `This plugin requires Matterbridge version >= "2.2.5". Please update Matterbridge from ${this.matterbridge.matterbridgeVersion} to the latest version in the frontend."`,
+        `This plugin requires Matterbridge version >= "2.2.8". Please update Matterbridge from ${this.matterbridge.matterbridgeVersion} to the latest version in the frontend."`,
       );
     }
 
@@ -174,8 +174,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     if (config.password) this.password = config.password as string;
     this.postfix = (config.postfix as string) ?? '';
     if (!isValidString(this.postfix, 0, 3)) this.postfix = '';
-    this.failsafeCount = (config.failsafeCount as number) ?? 0;
-    if (!isValidNumber(this.failsafeCount, 0)) this.failsafeCount = 0;
+    if (!isValidNumber(config.failsafeCount, 0)) config.failsafeCount = 0;
 
     // Cleanup the old config format
     {
@@ -759,7 +758,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           if (
             (component.hasProperty('red') && component.hasProperty('green') && component.hasProperty('blue') && device.profile !== 'white') ||
             (component.hasProperty('temp') && device.profile !== 'color') ||
-            component.hasProperty('rgb')
+            component.hasProperty('rgb') ||
+            component.hasProperty('ct')
           ) {
             deviceType = colorTemperatureLight;
           }
@@ -778,6 +778,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           if (deviceType.code === colorTemperatureLight.code) {
             if (component.hasProperty('temp') && component.hasProperty('mode')) child.createHsColorControlClusterServer();
             else if (component.hasProperty('temp') && !component.hasProperty('mode')) child.createCtColorControlClusterServer();
+            else if (component.hasProperty('ct')) child.createCtColorControlClusterServer();
             else child.createHsColorControlClusterServer();
           }
 
@@ -836,6 +837,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           child.addCommandHandler('moveToColorTemperature', async ({ request }) => {
             child.setAttribute(ColorControl.Cluster.id, 'colorMode', ColorControl.ColorMode.ColorTemperatureMireds, child.log);
             if (component.hasProperty('temp')) {
+              shellyLightCommandHandler(child, component, 'ColorTemp', undefined, undefined, request.colorTemperatureMireds);
+            } else if (component.hasProperty('ct')) {
               shellyLightCommandHandler(child, component, 'ColorTemp', undefined, undefined, request.colorTemperatureMireds);
             } else {
               const rgb = kelvinToRGB(miredToKelvin(request.colorTemperatureMireds));
@@ -1535,16 +1538,17 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     this.shelly.wsServer.start();
 
     // Wait for the failsafe count to be met
-    if (this.failsafeCount > 0 && this.bridgedDevices.size + this.bluBridgedDevices.size < this.failsafeCount) {
-      this.log.notice(`Waiting for the configured number of ${this.bridgedDevices.size + this.bluBridgedDevices.size}/${this.failsafeCount} devices to be loaded.`);
+    const config = this.config as unknown as ShellyPlatformConfig;
+    if (config.failsafeCount > 0 && this.bridgedDevices.size + this.bluBridgedDevices.size < config.failsafeCount) {
+      this.log.notice(`Waiting for the configured number of ${this.bridgedDevices.size + this.bluBridgedDevices.size}/${config.failsafeCount} devices to be loaded.`);
       /* prettier-ignore */
-      const isSafe = await waiter('failsafeCount', () => this.bridgedDevices.size + this.bluBridgedDevices.size >= this.failsafeCount, false, 55000, 1000, this.config.debug as boolean);
+      const isSafe = await waiter('failsafeCount', () => this.bridgedDevices.size + this.bluBridgedDevices.size >= config.failsafeCount, false, this.failsafeCountSeconds*1000, 1000, config.debug);
       if (!isSafe) {
         throw new Error(
-          `The plugin did not add the configured number of ${this.failsafeCount} devices. Registered ${this.bridgedDevices.size + this.bluBridgedDevices.size} devices.`,
+          `The plugin did not add the configured number of ${config.failsafeCount} devices. Registered ${this.bridgedDevices.size + this.bluBridgedDevices.size} devices.`,
         );
       } else {
-        this.log.notice(`The plugin added the configured number of ${this.failsafeCount} devices.`);
+        this.log.notice(`The plugin added the configured number of ${config.failsafeCount} devices.`);
       }
     }
 

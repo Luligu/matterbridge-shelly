@@ -37,14 +37,8 @@
         "ct": 6150,
         "active_between": []
       },
-      "range_map": [
-        0,
-        100
-      ],
-      "ct_range": [
-        2700,
-        5000
-      ],
+      "range_map": [0, 100],
+      "ct_range": [2700, 5000],
       "button_fade_rate": 3,
       "button_presets": {
         "button_doublepush": {
@@ -131,22 +125,14 @@
       "night_mode": {
         "enable": false,
         "brightness": 50,
-        "rgb": [
-          255,
-          255,
-          255
-        ],
+        "rgb": [255, 255, 255],
         "active_between": []
       },
       "button_fade_rate": 2,
       "button_presets": {
         "button_doublepush": {
           "brightness": 100,
-          "rgb": [
-            255,
-            255,
-            255
-          ]
+          "rgb": [255, 255, 255]
         }
       },
       "in_mode": "dim",
@@ -156,7 +142,7 @@
     },
     "sys": {
       "device": {
-        "name": null,
+        "name": "RGBWW PM Pro",
         "mac": "AC1518784844",
         "fw_id": "20250318-152129/1.5.1-g01dd7ff",
         "discoverable": true,
@@ -230,9 +216,7 @@
   "status": {
     "ble": {},
     "bthome": {
-      "errors": [
-        "bluetooth_disabled"
-      ]
+      "errors": ["bluetooth_disabled"]
     },
     "cct:0": {
       "id": 0,
@@ -246,11 +230,7 @@
       },
       "aenergy": {
         "total": 39.554,
-        "by_minute": [
-          0,
-          0,
-          0
-        ],
+        "by_minute": [0, 0, 0],
         "minute_ts": 1744628040
       },
       "apower": 0,
@@ -290,11 +270,7 @@
       "id": 0,
       "source": "WS_in",
       "output": false,
-      "rgb": [
-        81,
-        42,
-        214
-      ],
+      "rgb": [81, 42, 214],
       "brightness": 100,
       "temperature": {
         "tC": 38.7,
@@ -302,11 +278,7 @@
       },
       "aenergy": {
         "total": 2.068,
-        "by_minute": [
-          0,
-          0,
-          0
-        ],
+        "by_minute": [0, 0, 0],
         "minute_ts": 1744628040
       },
       "apower": 0,
@@ -336,10 +308,7 @@
         }
       },
       "reset_reason": 1,
-      "ch": [
-        "rgb:0",
-        "cct:0"
-      ]
+      "ch": ["rgb:0", "cct:0"]
     },
     "wifi": {
       "sta_ip": null,

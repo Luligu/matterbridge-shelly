@@ -31,6 +31,7 @@ For shellyflood, if you have SmartThings, blacklist the Temperature entity for e
 
 ### Added
 
+- [Cct]: Added support for Cct component of Shelly Pro RGBWW PM in rgbcct mode. Thanks https://github.com/ericdispencer.
 - [CoIoT]: Refactor decoding of cit/s to send a single event.
 - [CoIoT]: Added Inputs components decoding.
 - [CoIoT]: Added overpower decoding.
@@ -41,7 +42,7 @@ For shellyflood, if you have SmartThings, blacklist the Temperature entity for e
 
 ### Fixed
 
-- [restart]: Fixed the case when a device with sleep mode has not updated the cache file.
+- [restart]: Fixed the case when a device with sleep mode has not updated the cache file. Thanks Pasqualito.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
   <img src="bmc-button.svg" alt="Buy me a coffee" width="80">

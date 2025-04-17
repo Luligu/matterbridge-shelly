@@ -1,0 +1,63 @@
+{
+  "blk": [
+    {
+      "I": 1,
+      "D": "sensor_0"
+    },
+    {
+      "I": 2,
+      "D": "device"
+    }
+  ],
+  "sen": [
+    {
+      "I": 9103,
+      "T": "EVC",
+      "D": "cfgChanged",
+      "R": "U16",
+      "L": 2
+    },
+    {
+      "I": 2102,
+      "T": "EV",
+      "D": "inputEvent",
+      "R": ["S/L/SS/SSS", ""],
+      "L": 1
+    },
+    {
+      "I": 2103,
+      "T": "EVC",
+      "D": "inputEventCnt",
+      "R": "U16",
+      "L": 1
+    },
+    {
+      "I": 3115,
+      "T": "S",
+      "D": "sensorError",
+      "R": "0/1",
+      "L": 1
+    },
+    {
+      "I": 3112,
+      "T": "S",
+      "D": "charger",
+      "R": ["0/1", "-1"],
+      "L": 2
+    },
+    {
+      "I": 3111,
+      "T": "B",
+      "D": "battery",
+      "R": ["0/100", "-1"],
+      "L": 2
+    },
+    {
+      "I": 9102,
+      "T": "EV",
+      "D": "wakeupEvent",
+      "R": ["battery/button/periodic/poweron/sensor/ext_power", "unknown"],
+      "L": 2
+    }
+  ]
+}

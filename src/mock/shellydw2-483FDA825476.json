@@ -118,7 +118,7 @@
       "connected": true,
       "ssid": "",
       "ip": "192.168.1.247",
-      "rssi": -53
+      "rssi": -54
     },
     "cloud": {
       "enabled": true,
@@ -138,14 +138,14 @@
     },
     "is_valid": true,
     "tmp": {
-      "value": 22.6,
+      "value": 22.8,
       "units": "C",
-      "tC": 22.6,
-      "tF": 72.68,
+      "tC": 22.8,
+      "tF": 73.04,
       "is_valid": true
     },
     "lux": {
-      "value": 292,
+      "value": 172,
       "illumination": "twilight",
       "is_valid": true
     },
@@ -158,10 +158,10 @@
       "is_valid": true
     },
     "bat": {
-      "value": 100,
-      "voltage": 5.98
+      "value": 99,
+      "voltage": 5.93
     },
-    "act_reasons": ["sensor", "movement"],
+    "act_reasons": ["sensor"],
     "sensor_error": 0,
     "update": {
       "status": "unknown",
@@ -170,10 +170,10 @@
       "old_version": "20230913-112843/v1.14.0-gcb84623"
     },
     "ram_total": 52216,
-    "ram_free": 40988,
+    "ram_free": 39288,
     "fs_size": 233681,
     "fs_free": 154616,
-    "uptime": 2
+    "uptime": 3
   },
   "components": [],
   "cfg_rev": 0,

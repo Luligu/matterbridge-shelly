@@ -59,7 +59,7 @@ export type ShellyCoverComponent = ShellyComponent & CoverComponent;
 
 export function isLightComponent(component: ShellyComponent | undefined): component is ShellyLightComponent {
   if (component === undefined) return false;
-  return ['Light', 'Rgb', 'Rgbw'].includes(component.name);
+  return ['Light', 'Rgb', 'Rgbw', 'Cct'].includes(component.name);
 }
 
 export function isSwitchComponent(component: ShellyComponent | undefined): component is ShellySwitchComponent {
@@ -145,8 +145,10 @@ export class ShellyComponent extends EventEmitter {
           red = Math.min(Math.max(Math.round(red), 0), 255);
           green = Math.min(Math.max(Math.round(green), 0), 255);
           blue = Math.min(Math.max(Math.round(blue), 0), 255);
+          // SHCB-1
           if (device.gen === 1 && this.hasProperty('mode'))
             ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { red, green, blue, mode: 'color' });
+          // SHBDUO-1
           if (device.gen === 1 && !this.hasProperty('mode'))
             ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { red, green, blue });
           if (device.gen !== 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${this.name}.Set`, { id: this.index, red, green, blue });
@@ -161,14 +163,15 @@ export class ShellyComponent extends EventEmitter {
       };
 
       this.ColorTemp = function (temperature: number) {
-        if (this.hasProperty('temp') && isValidNumber(temperature, 2700, 6500)) {
+        if (isValidNumber(temperature, 2700, 6500)) {
           // SHCB-1
-          if (device.gen === 1 && this.hasProperty('mode'))
+          if (device.gen === 1 && this.hasProperty('temp') && this.hasProperty('mode'))
             ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { temp: temperature, mode: 'white' });
           // SHBDUO-1
-          if (device.gen === 1 && !this.hasProperty('mode'))
+          if (device.gen === 1 && this.hasProperty('temp') && !this.hasProperty('mode'))
             ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { temp: temperature });
-          // if (device.gen !== 1) Not in production yet
+          // shellyprorgbwwpm
+          if (device.gen !== 1 && this.hasProperty('ct')) ShellyDevice.fetch(device.shelly, device.log, device.host, `${this.name}.Set`, { id: this.index, ct: temperature });
         }
       };
     }

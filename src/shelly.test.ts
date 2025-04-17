@@ -189,7 +189,7 @@ describe('Shellies test', () => {
   });
 
   test('Check add device gen 1 with sleep mode', async () => {
-    const device1g = await ShellyDevice.create(shellies, log, path.join('src', 'mock', 'shellyht-CA969F.json'));
+    const device1g = await ShellyDevice.create(shellies, log, path.join('src', 'mock', 'shellyht-703523.json'));
     if (!device1g) return;
     expect(device1g.wsClient).toBeUndefined();
     expect(shellies.devices.length).toBe(4);

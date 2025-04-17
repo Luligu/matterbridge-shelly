@@ -603,6 +603,7 @@ export class ShellyDevice extends EventEmitter {
         if (key === 'charger') device.addComponent(new ShellyComponent(device, 'battery', 'Battery'));
         if (key === 'lux') device.addComponent(new ShellyComponent(device, 'lux', 'Lux'));
         if (key === 'flood') device.addComponent(new ShellyComponent(device, 'flood', 'Flood'));
+        if (key === 'smoke') device.addComponent(new ShellyComponent(device, 'smoke', 'Smoke'));
         if (key === 'gas_sensor') device.addComponent(new ShellyComponent(device, 'gas', 'Gas'));
         if (key === 'sensor') {
           device.addComponent(new ShellyComponent(device, 'sensor', 'Sensor'));
@@ -660,6 +661,7 @@ export class ShellyDevice extends EventEmitter {
       const available_updates = (statusPayload.sys as ShellyData).available_updates as ShellyData;
       device.hasUpdate = available_updates.stable !== undefined;
       for (const key in settingsPayload) {
+        // log.debug(`Parsing device ${hk}${device.id}${db} component ${CYAN}${key}${db}...`);
         if (key === 'wifi') {
           const wifi = settingsPayload[key] as ShellyData;
           if (wifi.ap) device.addComponent(new ShellyComponent(device, 'wifi_ap', 'WiFi', wifi.ap as ShellyData)); // Ok
@@ -687,6 +689,7 @@ export class ShellyDevice extends EventEmitter {
         if (key.startsWith('light:')) device.addComponent(new ShellyComponent(device, key, 'Light', settingsPayload[key] as ShellyData));
         if (key.startsWith('rgb:')) device.addComponent(new ShellyComponent(device, key, 'Rgb', settingsPayload[key] as ShellyData));
         if (key.startsWith('rgbw:')) device.addComponent(new ShellyComponent(device, key, 'Rgbw', settingsPayload[key] as ShellyData));
+        if (key.startsWith('cct:')) device.addComponent(new ShellyComponent(device, key, 'Cct', settingsPayload[key] as ShellyData));
         if (key.startsWith('input:')) device.addComponent(new ShellyComponent(device, key, 'Input', settingsPayload[key] as ShellyData));
         if (key.startsWith('pm1:')) device.addComponent(new ShellyComponent(device, key, 'PowerMeter', settingsPayload[key] as ShellyData));
         if (key.startsWith('em1:')) device.addComponent(new ShellyComponent(device, key, 'PowerMeter', settingsPayload[key] as ShellyData));
@@ -1138,6 +1141,7 @@ export class ShellyDevice extends EventEmitter {
         if (key.startsWith('light:')) this.updateComponent(key, data[key] as ShellyData);
         if (key.startsWith('rgb:')) this.updateComponent(key, data[key] as ShellyData);
         if (key.startsWith('rgbw:')) this.updateComponent(key, data[key] as ShellyData);
+        if (key.startsWith('cct:')) this.updateComponent(key, data[key] as ShellyData);
         if (key.startsWith('input:')) this.updateComponent(key, data[key] as ShellyData);
         if (key.startsWith('pm1:')) this.updateComponent(key, data[key] as ShellyData);
         if (key.startsWith('em1:')) this.updateComponent(key, data[key] as ShellyData);
@@ -1155,7 +1159,7 @@ export class ShellyDevice extends EventEmitter {
       }
       // Update state for active components with output
       for (const key in data) {
-        if (key.startsWith('light:') || key.startsWith('rgb:') || key.startsWith('rgbw:') || key.startsWith('switch:')) {
+        if (key.startsWith('light:') || key.startsWith('rgb:') || key.startsWith('rgbw:') || key.startsWith('cct:') || key.startsWith('switch:')) {
           const componentData = data[key] as ShellyData;
           const component = this.getComponent(key);
           if (component && componentData.output !== undefined && typeof componentData.output === 'boolean') component.setValue('state', componentData.output);

@@ -23,7 +23,7 @@
 
 import { MatterbridgeEndpoint } from 'matterbridge';
 import { db, debugStringify, hk, idn, nf, or, rs, YELLOW } from 'matterbridge/logger';
-import { isValidNumber, isValidObject } from 'matterbridge/utils';
+import { isValidArray, isValidNumber, isValidObject } from 'matterbridge/utils';
 
 import { ShellyComponent, ShellyCoverComponent, ShellyLightComponent, ShellySwitchComponent } from './shellyComponent.js';
 
@@ -110,12 +110,17 @@ export function shellyLightCommandHandler(
   if (command === 'ColorTemp' && isValidNumber(colorTemp, 147, 500)) {
     const minColorTemp = 147;
     const maxColorTemp = 500;
-    const minTemp = lightComponent.device.model === 'SHBDUO-1' ? 2700 : 3000;
-    const maxTemp = 6500;
+    let minTemp = lightComponent.device.model === 'SHBDUO-1' ? 2700 : 3000;
+    let maxTemp = 6500;
+    if (lightComponent.device.gen > 1 && isValidArray(lightComponent.getProperty('ct_range')?.value, 2, 2)) {
+      const range = lightComponent.getProperty('ct_range')?.value as unknown as number[];
+      minTemp = range[0];
+      maxTemp = range[1];
+    }
     const temp = Math.max(Math.min(Math.round(((colorTemp - minColorTemp) / (maxColorTemp - minColorTemp)) * (minTemp - maxTemp) + maxTemp), maxTemp), minTemp);
     lightComponent.ColorTemp(temp);
     endpoint.log.info(
-      `${db}Sent command ${hk}${lightComponent.name}${db}:${hk}${lightComponent.id}${db}:${hk}ColorTemp(for model ${lightComponent.device.model} ${YELLOW}${colorTemp}${hk}->${YELLOW}${temp}${hk})${db} to shelly device ${idn}${lightComponent.device.id}${rs}${db}`,
+      `${db}Sent command ${hk}${lightComponent.name}${db}:${hk}${lightComponent.id}${db}:${hk}ColorTemp(for model ${lightComponent.device.model} range ${minTemp}-${maxTemp} ${YELLOW}${colorTemp}${hk}->${YELLOW}${temp}${hk})${db} to shelly device ${idn}${lightComponent.device.id}${rs}${db}`,
     );
   }
 }

@@ -109,7 +109,24 @@ export function shellyUpdateHandler(
     endpoint.setAttribute(ColorControl.Cluster.id, 'enhancedColorMode', ColorControl.EnhancedColorMode.ColorTemperatureMireds, shellyDevice.log);
     endpoint.setAttribute(ColorControl.Cluster.id, 'colorTemperatureMireds', matterTemp, shellyDevice.log);
   }
-  // Update color gen 2/3
+  // Update colorTemp gen 2+
+  if (isLightComponent(shellyComponent) && property === 'ct' && isValidNumber(value, 2700, 6500)) {
+    let minValue = 2700;
+    let maxValue = 6500;
+    const range = shellyComponent.getProperty('ct_range')?.value;
+    if (isValidArray(range, 2, 2) && isValidNumber(range[0], 2700, 6500) && isValidNumber(range[1], 2700, 6500)) {
+      minValue = range[0];
+      maxValue = range[1];
+    }
+    const minMatterTemp = 147;
+    const maxMatterTemp = 500;
+    const matterTemp = Math.max(Math.min(Math.round(((value - minValue) / (maxValue - minValue)) * (minMatterTemp - maxMatterTemp) + maxMatterTemp), maxMatterTemp), minMatterTemp);
+    matterbridgeDevice.log.debug(`ColorTemp for ${shellyDevice.model}: colorTemperature:${value} => colorTemperatureMireds:${matterTemp}`);
+    endpoint.setAttribute(ColorControl.Cluster.id, 'colorMode', ColorControl.ColorMode.ColorTemperatureMireds, shellyDevice.log);
+    endpoint.setAttribute(ColorControl.Cluster.id, 'enhancedColorMode', ColorControl.EnhancedColorMode.ColorTemperatureMireds, shellyDevice.log);
+    endpoint.setAttribute(ColorControl.Cluster.id, 'colorTemperatureMireds', matterTemp, shellyDevice.log);
+  }
+  // Update color gen 2+
   if (
     isLightComponent(shellyComponent) &&
     property === 'rgb' &&

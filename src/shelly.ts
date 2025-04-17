@@ -21,7 +21,7 @@
  * limitations under the License. *
  */
 
-import { AnsiLogger, CYAN, MAGENTA, BRIGHT, hk, db, nf, wr, zb, LogLevel } from 'matterbridge/logger';
+import { AnsiLogger, CYAN, MAGENTA, BRIGHT, hk, db, nf, wr, zb, LogLevel, er } from 'matterbridge/logger';
 import { isValidArray, isValidObject } from 'matterbridge/utils';
 
 import crypto from 'node:crypto';
@@ -32,7 +32,7 @@ import { DiscoveredDevice, MdnsScanner } from './mdnsScanner.js';
 import { CoapServer } from './coapServer.js';
 import { WsClient } from './wsClient.js';
 import { WsServer } from './wsServer.js';
-import { ShellyData, ShellyDeviceId, ShellyEvent } from './shellyTypes.js';
+import { ShellyData, ShellyDataType, ShellyDeviceId, ShellyEvent } from './shellyTypes.js';
 
 /**
  * Creates a new instance of the Shelly class.
@@ -118,7 +118,6 @@ export class Shelly extends EventEmitter {
       this.emit('discovered', device);
     });
 
-    /*
     this.coapServer.on('update', async (host: string, component: string, property: string, value: ShellyDataType) => {
       const device = this.getDeviceByHost(host);
       if (device) {
@@ -140,7 +139,6 @@ export class Shelly extends EventEmitter {
         }
       }
     });
-    */
 
     this.coapServer.on('coapupdate', async (host: string, data: ShellyData) => {
       const device = this.getDeviceByHost(host);
