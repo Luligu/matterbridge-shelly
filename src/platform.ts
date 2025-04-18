@@ -47,6 +47,7 @@ import {
   MatterbridgeEndpoint,
   waterLeakDetector,
   smokeCoAlarm,
+  extendedColorLight,
 } from 'matterbridge';
 import {
   hslColorToRgbColor,
@@ -163,9 +164,9 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     super(matterbridge, log, config as unknown as PlatformConfig);
 
     // Verify that Matterbridge is the correct version
-    if (this.verifyMatterbridgeVersion === undefined || typeof this.verifyMatterbridgeVersion !== 'function' || !this.verifyMatterbridgeVersion('2.2.8')) {
+    if (this.verifyMatterbridgeVersion === undefined || typeof this.verifyMatterbridgeVersion !== 'function' || !this.verifyMatterbridgeVersion('2.2.9')) {
       throw new Error(
-        `This plugin requires Matterbridge version >= "2.2.8". Please update Matterbridge from ${this.matterbridge.matterbridgeVersion} to the latest version in the frontend."`,
+        `This plugin requires Matterbridge version >= "2.2.9". Please update Matterbridge from ${this.matterbridge.matterbridgeVersion} to the latest version in the frontend."`,
       );
     }
 
@@ -686,7 +687,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             );
             if (property === 'cfg_rev') {
               if (!device.sleepMode) this.changedDevices.set(device.id, device.id);
-              if (!device.id.startsWith('shellyblugwg3')) {
+              if (!device.id.startsWith('shellyblugwg3') && !device.id.startsWith('shellycolorbulb')) {
                 // Special case for BLU Gateway Gen 3 TRV that sends cfg_rev when the temperature is changed
                 device.log.notice(
                   `Shelly device ${idn}${device.name}${rs}${nt} id ${hk}${device.id}${nt} host ${zb}${device.host}${nt} sent config changed rev: ${CYAN}${value}${nt}`,
@@ -756,12 +757,15 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             deviceType = dimmableLight;
           }
           if (
-            (component.hasProperty('red') && component.hasProperty('green') && component.hasProperty('blue') && device.profile !== 'white') ||
+            // (component.hasProperty('red') && component.hasProperty('green') && component.hasProperty('blue') && device.profile !== 'white') ||
             (component.hasProperty('temp') && device.profile !== 'color') ||
-            component.hasProperty('rgb') ||
+            // component.hasProperty('rgb') ||
             component.hasProperty('ct')
           ) {
             deviceType = colorTemperatureLight;
+          }
+          if ((component.hasProperty('red') && component.hasProperty('green') && component.hasProperty('blue') && device.profile !== 'white') || component.hasProperty('rgb')) {
+            deviceType = extendedColorLight;
           }
           const tagList = this.addTagList(component);
           const child = mbDevice.addChildDeviceType(
@@ -774,12 +778,22 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           child.createDefaultIdentifyClusterServer();
           child.createDefaultGroupsClusterServer();
           child.createDefaultOnOffClusterServer();
-          if (deviceType.code === dimmableLight.code || deviceType.code === colorTemperatureLight.code) child.createDefaultLevelControlClusterServer();
+          if (deviceType.code === dimmableLight.code || deviceType.code === colorTemperatureLight.code || deviceType.code === extendedColorLight.code) {
+            child.createDefaultLevelControlClusterServer();
+          }
+          /*
           if (deviceType.code === colorTemperatureLight.code) {
             if (component.hasProperty('temp') && component.hasProperty('mode')) child.createHsColorControlClusterServer();
             else if (component.hasProperty('temp') && !component.hasProperty('mode')) child.createCtColorControlClusterServer();
             else if (component.hasProperty('ct')) child.createCtColorControlClusterServer();
             else child.createHsColorControlClusterServer();
+          }
+          */
+          if (deviceType.code === colorTemperatureLight.code) {
+            child.createCtColorControlClusterServer();
+          }
+          if (deviceType.code === extendedColorLight.code) {
+            child.createDefaultColorControlClusterServer();
           }
 
           // Add the electrical measurementa cluster on the same endpoint

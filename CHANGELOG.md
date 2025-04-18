@@ -27,7 +27,7 @@ New device types:
 If your controller has issues detecting the new device type, blacklist the flood and smoke devices, restart, remove the blacklist and restarat again. This will create a new endpoint on the controller.
 For shellyflood, if you have SmartThings, blacklist the Temperature entity for each flood device with deviceEntityBlackList to allow the controller to setup the correct driver.
 
-## [2.0.8] - 2025-04-??
+## [2.0.8] - 2025-04-19
 
 ### Added
 
@@ -35,10 +35,14 @@ For shellyflood, if you have SmartThings, blacklist the Temperature entity for e
 - [CoIoT]: Refactor decoding of cit/s to send a single event.
 - [CoIoT]: Added Inputs components decoding.
 - [CoIoT]: Added overpower decoding.
+- [ShellyWsServer]: Added check for ws:// in the settings of the device web ui.
 
 ### Changed
 
 - [CoIoT]: The cit/s and cit/d response file in debug mode are saved with the device id name.
+- [extenedColorLight]: Added extenedColorLight for rgb color device (solve SmartThings issues with color lights).
+- [package]: Updated dependencies.
+- [plugin]: Requires Matterbridge 2.2.9.
 
 ### Fixed
 

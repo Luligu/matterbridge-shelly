@@ -584,8 +584,8 @@ export class ShellyDevice extends EventEmitter {
         }
         // Fix for Shelly DUO RGBW that has mode in settings and not in shellyPayload
         if (key === 'mode' && device.model === 'SHCB-1') {
-          device.profile = settingsPayload[key] as 'color' | 'white';
-          device.addComponent(new ShellyComponent(device, 'sys', 'Sys'));
+          // device.profile = settingsPayload[key] as 'color' | 'white';
+          // device.addComponent(new ShellyComponent(device, 'sys', 'Sys'));
         }
       }
       for (const key in statusPayload) {
@@ -752,6 +752,11 @@ export class ShellyDevice extends EventEmitter {
         }
         const ipv4 = shelly.ipv4Address;
         const server = ws.getValue('server') as string | undefined;
+        if (!server || !server.startsWith('ws://')) {
+          log.warn(
+            `The Outbound websocket settings is not configured correctly for device ${dn}${device.name}${wr} id ${hk}${device.id}${wr}. The address must be ws:// (i.e. ws://${ipv4}:8485). Set it in the web ui settings to receive updates from the device.`,
+          );
+        }
         if (!server || !server.endsWith(':8485')) {
           log.warn(
             `The Outbound websocket settings is not configured correctly for device ${dn}${device.name}${wr} id ${hk}${device.id}${wr}. The port must be 8485 (i.e. ws://${ipv4}:8485). Set it in the web ui settings to receive updates from the device.`,

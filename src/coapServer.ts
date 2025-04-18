@@ -457,49 +457,6 @@ export class CoapServer extends EventEmitter {
       }
       try {
         const status: ShellyData = this.parseStatus(descriptions, payload);
-
-        /*
-        const values: CoIoTGValue[] =
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          payload.G?.map((v: any[]) => ({
-            channel: v[0],
-            id: v[1],
-            value: v[2],
-          })) || [];
-        this.log.debug(`Parsing ${MAGENTA}values${db} (${values.length}):`);
-        values.forEach((v) => {
-          const desc = descriptions.find((d) => d.id === v.id);
-          if (desc) {
-            this.log.debug(
-              `- channel ${CYAN}${v.channel}${db} id ${CYAN}${v.id}${db} value ${CYAN}${v.value}${db} => component ${CYAN}${desc.component}${db} property ${CYAN}${desc.property}${db} value ${CYAN}${desc.range === '0/1' ? v.value === 1 : v.value}${db}`,
-            );
-            if (!desc.property.startsWith('input') && typeof desc.range === 'string' && desc.range === '0/1') {
-              // this.log.debug(`sending update for component ${CYAN}${desc.component}${db} property ${CYAN}${desc.property}${db} value ${CYAN}${v.value === 1}${db}`);
-              // this.emit('update', host, desc.component, desc.property, v.value === 1);
-              if (!status[desc.component]) status[desc.component] = {};
-              (status[desc.component] as ShellyData)[desc.property] = v.value === 1;
-            } else if (!desc.property.startsWith('input') && Array.isArray(desc.range) && desc.range[0] === '0/1' && desc.range[1] === '-1') {
-              // this.log.debug(`sending update for component ${CYAN}${desc.component}${db} property ${CYAN}${desc.property}${db} value ${CYAN}${v.value === -1 ? null : v.value === 1}${db}`);
-              // this.emit('update', host, desc.component, desc.property, v.value === -1 ? null : v.value === 1);
-              if (!status[desc.component]) status[desc.component] = {};
-              (status[desc.component] as ShellyData)[desc.property] = v.value === -1 ? null : v.value === 1;
-            } else {
-              // this.log.debug(`sending update for component ${CYAN}${desc.component}${db} property ${CYAN}${desc.property}${db} value ${CYAN}${v.value}${db}`);
-              if (desc.property.includes('.')) {
-                // target_t#value
-                const [property, subproperty] = desc.property.split('.');
-                // this.emit('update', host, desc.component, property, { [subproperty]: v.value });
-                if (!status[desc.component]) status[desc.component] = {};
-                (status[desc.component] as ShellyData)[property] = { [subproperty]: v.value };
-              } else {
-                // this.emit('update', host, desc.component, desc.property, v.value);
-                if (!status[desc.component]) status[desc.component] = {};
-                (status[desc.component] as ShellyData)[desc.property] = v.value;
-              }
-            }
-          } else this.log.debug(`No coap description found for id ${v.id}`);
-        });
-        */
         this.log.debug(`***Update status for device ${hk}${this.deviceId.get(host)}${db} host ${zb}${host}${db} payload:\n`, status);
         this.emit('coapupdate', host, status);
         return status;
@@ -517,7 +474,6 @@ export class CoapServer extends EventEmitter {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   parseStatus(descriptions: CoIoTDescription[], payload: any): ShellyData {
     const status: ShellyData = {};
-
     const values: CoIoTGValue[] =
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       payload.G?.map((v: any[]) => ({
@@ -545,7 +501,6 @@ export class CoapServer extends EventEmitter {
         } else {
           // this.log.debug(`sending update for component ${CYAN}${desc.component}${db} property ${CYAN}${desc.property}${db} value ${CYAN}${v.value}${db}`);
           if (desc.property.includes('.')) {
-            // target_t#value
             const [property, subproperty] = desc.property.split('.');
             // this.emit('update', host, desc.component, property, { [subproperty]: v.value });
             if (!status[desc.component]) status[desc.component] = {};
@@ -585,7 +540,7 @@ export class CoapServer extends EventEmitter {
           );
 
           // sys component
-          if (s.D === 'mode') desc.push({ id: s.I, component: 'sys', property: 'profile', range: s.R });
+          // if (s.D === 'mode') desc.push({ id: s.I, component: 'sys', property: 'profile', range: s.R });
           if (s.D === 'deviceTemp' && s.U !== 'F' && b.D === 'device') desc.push({ id: s.I, component: 'sys', property: 'temperature', range: s.R }); // SHSW-25
           if (s.D === 'overtemp' && b.D === 'device') desc.push({ id: s.I, component: 'sys', property: 'overtemperature', range: s.R }); // SHSW-25
           if (s.D === 'voltage' && b.D === 'device') desc.push({ id: s.I, component: 'sys', property: 'voltage', range: s.R }); // SHSW-25
@@ -611,6 +566,7 @@ export class CoapServer extends EventEmitter {
           if (s.D === 'output') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'state', range: s.R });
           if (s.D === 'brightness') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'brightness', range: s.R }); // Used by white channels
           if (s.D === 'gain') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'gain', range: s.R }); // Used by color channels
+          if (s.D === 'mode') desc.push({ id: s.I, component: b.D.replace('_', ':').replace('device', 'sys'), property: 'mode', range: s.R }); // Used by colorbulb
           if (s.D === 'red') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'red', range: s.R });
           if (s.D === 'green') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'green', range: s.R });
           if (s.D === 'blue') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'blue', range: s.R });
@@ -639,7 +595,7 @@ export class CoapServer extends EventEmitter {
           if (s.D === 'current' && b.D.startsWith('emeter')) desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'current', range: s.R });
 
           // motion component
-          if (s.D === 'motion' && b.D.startsWith('sensor')) desc.push({ id: s.I, component: 'sensor', property: 'motion', range: ['0/1', '-1'] }); // SHMOS-01 and SHMOS-02
+          if (s.D === 'motion' && b.D.startsWith('sensor')) desc.push({ id: s.I, component: 'sensor', property: 'motion', range: s.R }); // SHMOS-01 and SHMOS-02
 
           // dw component
           if (s.D === 'dwIsOpened' && b.D.startsWith('sensor')) desc.push({ id: s.I, component: 'sensor', property: 'contact_open', range: s.R }); // SHDW-1 and SHDW-2
