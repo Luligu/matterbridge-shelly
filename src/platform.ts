@@ -689,6 +689,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               if (!device.sleepMode) this.changedDevices.set(device.id, device.id);
               if (!device.id.startsWith('shellyblugwg3') && !device.id.startsWith('shellycolorbulb')) {
                 // Special case for BLU Gateway Gen 3 TRV that sends cfg_rev when the temperature is changed
+                // and for color bulb that sends cfg_rev when the color mode is changed
                 device.log.notice(
                   `Shelly device ${idn}${device.name}${rs}${nt} id ${hk}${device.id}${nt} host ${zb}${device.host}${nt} sent config changed rev: ${CYAN}${value}${nt}`,
                 );
@@ -756,18 +757,15 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           if (component.hasProperty('brightness')) {
             deviceType = dimmableLight;
           }
-          if (
-            // (component.hasProperty('red') && component.hasProperty('green') && component.hasProperty('blue') && device.profile !== 'white') ||
-            (component.hasProperty('temp') && device.profile !== 'color') ||
-            // component.hasProperty('rgb') ||
-            component.hasProperty('ct')
-          ) {
+          if ((component.hasProperty('temp') && device.profile !== 'color') || component.hasProperty('ct')) {
             deviceType = colorTemperatureLight;
           }
           if ((component.hasProperty('red') && component.hasProperty('green') && component.hasProperty('blue') && device.profile !== 'white') || component.hasProperty('rgb')) {
             deviceType = extendedColorLight;
           }
           const tagList = this.addTagList(component);
+          if (tagList)
+            this.log.debug(`***Shelly device ${idn}${device.name}${rs}${nf} id ${hk}${device.id}${nf} host ${zb}${device.host}${nf} added tagList: ${debugStringify(tagList)}`);
           const child = mbDevice.addChildDeviceType(
             key,
             this.hasElectricalMeasurements(device, component) ? [deviceType, electricalSensor] : [deviceType],
@@ -1800,7 +1798,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
   }
 
   private addTagList(component: ShellyComponent): Semtag[] | undefined {
-    if (this.matterbridge.edge) return undefined;
+    // if (this.matterbridge.edge) return undefined;
     // Add the tagList to the descriptor cluster
     let tagList: Semtag | undefined;
     if (component.index === 0) tagList = { mfgCode: null, namespaceId: NumberTag.Zero.namespaceId, tag: NumberTag.Zero.tag, label: component.id };

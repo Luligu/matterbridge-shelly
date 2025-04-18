@@ -517,7 +517,7 @@ describe('Shelly devices test', () => {
       expect(device.getComponentNames()).toStrictEqual(['WiFi', 'MQTT', 'CoIoT', 'Sntp', 'Cloud', 'Relay', 'PowerMeter', 'Input', 'Sys']);
       expect(device.getComponentIds()).toStrictEqual(['wifi_ap', 'wifi_sta', 'wifi_sta1', 'mqtt', 'coiot', 'sntp', 'cloud', 'relay:0', 'meter:0', 'input:0', 'input:1', 'sys']);
 
-      expect(device.getComponent('sys')?.getValue('temperature')).toBe(53.59);
+      expect(device.getComponent('sys')?.getValue('temperature')).toBe(59.5);
       expect(device.getComponent('sys')?.getValue('overtemperature')).toBe(false);
 
       expect(await device.fetchUpdate()).not.toBeNull();
@@ -958,7 +958,7 @@ describe('Shelly devices test', () => {
       expect(device.firmware).toBe(firmwareGen1);
       expect(device.auth).toBe(false);
       expect(device.gen).toBe(1);
-      expect(device.profile).toBe('color');
+      expect(device.profile).toBe(undefined);
       expect(device.name).toBe('Bulb Gen1');
       expect(device.hasUpdate).toBe(false);
       expect(device.lastseen).not.toBe(0);
@@ -967,8 +967,8 @@ describe('Shelly devices test', () => {
       expect(device.sleepMode).toBe(false);
 
       expect(device.components.length).toBe(10);
-      expect(device.getComponentNames()).toStrictEqual(['WiFi', 'MQTT', 'CoIoT', 'Sntp', 'Cloud', 'Sys', 'Light', 'PowerMeter']);
-      expect(device.getComponentIds()).toStrictEqual(['wifi_ap', 'wifi_sta', 'wifi_sta1', 'mqtt', 'coiot', 'sntp', 'cloud', 'sys', 'light:0', 'meter:0']);
+      expect(device.getComponentNames()).toStrictEqual(['WiFi', 'MQTT', 'CoIoT', 'Sntp', 'Cloud', 'Light', 'PowerMeter', 'Sys']);
+      expect(device.getComponentIds()).toStrictEqual(['wifi_ap', 'wifi_sta', 'wifi_sta1', 'mqtt', 'coiot', 'sntp', 'cloud', 'light:0', 'meter:0', 'sys']);
 
       expect(device.getComponent('sys')?.getValue('temperature')).toBe(undefined);
       expect(device.getComponent('sys')?.getValue('overtemperature')).toBe(undefined);
@@ -1003,7 +1003,7 @@ describe('Shelly devices test', () => {
       expect(device.firmware).toBe(firmwareGen1);
       expect(device.auth).toBe(false);
       expect(device.gen).toBe(1);
-      expect(device.profile).toBe('white');
+      expect(device.profile).toBe(undefined);
       expect(device.name).toBe('Bulb Gen1');
       expect(device.hasUpdate).toBe(false);
       expect(device.lastseen).not.toBe(0);
@@ -1012,8 +1012,8 @@ describe('Shelly devices test', () => {
       expect(device.sleepMode).toBe(false);
 
       expect(device.components.length).toBe(10);
-      expect(device.getComponentNames()).toStrictEqual(['WiFi', 'MQTT', 'CoIoT', 'Sntp', 'Cloud', 'Sys', 'Light', 'PowerMeter']);
-      expect(device.getComponentIds()).toStrictEqual(['wifi_ap', 'wifi_sta', 'wifi_sta1', 'mqtt', 'coiot', 'sntp', 'cloud', 'sys', 'light:0', 'meter:0']);
+      expect(device.getComponentNames()).toStrictEqual(['WiFi', 'MQTT', 'CoIoT', 'Sntp', 'Cloud', 'Light', 'PowerMeter', 'Sys']);
+      expect(device.getComponentIds()).toStrictEqual(['wifi_ap', 'wifi_sta', 'wifi_sta1', 'mqtt', 'coiot', 'sntp', 'cloud', 'light:0', 'meter:0', 'sys']);
 
       expect(device.getComponent('sys')?.getValue('temperature')).toBe(undefined);
       expect(device.getComponent('sys')?.getValue('overtemperature')).toBe(undefined);

@@ -557,6 +557,8 @@ export class ShellyDevice extends EventEmitter {
           for (const light of settingsPayload[key] as ShellyData[]) {
             device.addComponent(new ShellyComponent(device, `light:${index++}`, 'Light', light as ShellyData));
           }
+          // Fix for Shelly SHRGBWW-01 that has no inputs in settings and status
+          if (device.model === 'SHRGBWW-01') device.addComponent(new ShellyComponent(device, 'input:0', 'Input'));
         }
         if (key === 'relays' /* && device.profile !== 'cover'*/) {
           let index = 0;
@@ -581,11 +583,6 @@ export class ShellyDevice extends EventEmitter {
           for (const thermostat of settingsPayload[key] as ShellyData[]) {
             device.addComponent(new ShellyComponent(device, `thermostat:${index++}`, 'Thermostat', thermostat as ShellyData));
           }
-        }
-        // Fix for Shelly DUO RGBW that has mode in settings and not in shellyPayload
-        if (key === 'mode' && device.model === 'SHCB-1') {
-          // device.profile = settingsPayload[key] as 'color' | 'white';
-          // device.addComponent(new ShellyComponent(device, 'sys', 'Sys'));
         }
       }
       for (const key in statusPayload) {

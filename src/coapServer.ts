@@ -540,7 +540,7 @@ export class CoapServer extends EventEmitter {
           );
 
           // sys component
-          // if (s.D === 'mode') desc.push({ id: s.I, component: 'sys', property: 'profile', range: s.R });
+          if (s.D === 'mode' && b.D === 'device') desc.push({ id: s.I, component: 'sys', property: 'profile', range: s.R }); // colorbulb has light
           if (s.D === 'deviceTemp' && s.U !== 'F' && b.D === 'device') desc.push({ id: s.I, component: 'sys', property: 'temperature', range: s.R }); // SHSW-25
           if (s.D === 'overtemp' && b.D === 'device') desc.push({ id: s.I, component: 'sys', property: 'overtemperature', range: s.R }); // SHSW-25
           if (s.D === 'voltage' && b.D === 'device') desc.push({ id: s.I, component: 'sys', property: 'voltage', range: s.R }); // SHSW-25
@@ -551,11 +551,12 @@ export class CoapServer extends EventEmitter {
           if (s.D === 'overpower') desc.push({ id: s.I, component: b.D.replace('_', ':').replace('device', 'sys'), property: 'overpower', range: s.R });
 
           // input component
-          if (s.D === 'input' && !b.D.startsWith('sensor')) desc.push({ id: s.I, component: b.D.replace('_', ':').replace('device', 'input:0'), property: 'input', range: s.R });
+          if (s.D === 'input' && !b.D.startsWith('sensor'))
+            desc.push({ id: s.I, component: b.D.replace('relay', 'input').replace('_', ':').replace('device', 'input:0'), property: 'input', range: s.R });
           if (s.D === 'inputEvent' && !b.D.startsWith('sensor'))
-            desc.push({ id: s.I, component: b.D.replace('_', ':').replace('device', 'input:0'), property: 'event', range: s.R });
+            desc.push({ id: s.I, component: b.D.replace('relay', 'input').replace('_', ':').replace('device', 'input:0'), property: 'event', range: s.R });
           if (s.D === 'inputEventCnt' && !b.D.startsWith('sensor'))
-            desc.push({ id: s.I, component: b.D.replace('_', ':').replace('device', 'input:0'), property: 'event_cnt', range: s.R });
+            desc.push({ id: s.I, component: b.D.replace('relay', 'input').replace('_', ':').replace('device', 'input:0'), property: 'event_cnt', range: s.R });
 
           // sensor/input component
           if (s.D === 'inputEvent' && b.D.startsWith('sensor')) desc.push({ id: s.I, component: b.D.replace('_', ':').replace('sensor', 'input'), property: 'event', range: s.R }); // SHBTN-2
@@ -566,7 +567,7 @@ export class CoapServer extends EventEmitter {
           if (s.D === 'output') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'state', range: s.R });
           if (s.D === 'brightness') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'brightness', range: s.R }); // Used by white channels
           if (s.D === 'gain') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'gain', range: s.R }); // Used by color channels
-          if (s.D === 'mode') desc.push({ id: s.I, component: b.D.replace('_', ':').replace('device', 'sys'), property: 'mode', range: s.R }); // Used by colorbulb
+          if (s.D === 'mode' && b.D !== 'device') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'mode', range: s.R }); // Used by colorbulb
           if (s.D === 'red') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'red', range: s.R });
           if (s.D === 'green') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'green', range: s.R });
           if (s.D === 'blue') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'blue', range: s.R });

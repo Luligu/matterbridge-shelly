@@ -486,9 +486,9 @@ describe('Coap scanner', () => {
     // console.error('desc', desc);
     expect(desc).toEqual([
       { id: 1101, component: 'relay:0', property: 'state', range: '0/1' },
-      { id: 2101, component: 'relay:0', property: 'input', range: '0/1' },
-      { id: 2102, component: 'relay:0', property: 'event', range: ['S/L', ''] },
-      { id: 2103, component: 'relay:0', property: 'event_cnt', range: 'U16' },
+      { id: 2101, component: 'input:0', property: 'input', range: '0/1' },
+      { id: 2102, component: 'input:0', property: 'event', range: ['S/L', ''] },
+      { id: 2103, component: 'input:0', property: 'event_cnt', range: 'U16' },
       { id: 3101, component: 'temperature', property: 'tC', range: ['-55/125', '999'] },
       { id: 3102, component: 'temperature', property: 'tF', range: ['-67/257', '999'] },
       { id: 3103, component: 'humidity', property: 'value', range: ['0/100', '999'] },
@@ -515,11 +515,360 @@ describe('Coap scanner', () => {
         'cfg_rev': 0,
       },
       'relay:0': {
+        'state': true,
+      },
+      'input:0': {
         'event': '',
         'event_cnt': 0,
         'input': 0,
-        'state': true,
       },
+    });
+  });
+
+  test('Parse status shelly1l', async () => {
+    const citd = loadResponse('shelly1l-E8DB84AAD781', 'citd');
+    expect(citd).not.toBeUndefined();
+    const desc = coapServer.parseDescription(citd);
+    // consoleErrorSpy.mockRestore();
+    // console.error('desc', desc);
+    expect(desc).toEqual([
+      { id: 1101, component: 'relay:0', property: 'state', range: '0/1' },
+      { id: 4101, component: 'meter:0', property: 'power', range: ['0/3500', '-1'] },
+      { id: 4103, component: 'meter:0', property: 'total', range: ['U32', '-1'] },
+      { id: 2101, component: 'input:0', property: 'input', range: '0/1' },
+      { id: 2102, component: 'input:0', property: 'event', range: ['S/L', ''] },
+      { id: 2103, component: 'input:0', property: 'event_cnt', range: 'U16' },
+      { id: 2201, component: 'input:1', property: 'input', range: '0/1' },
+      { id: 2202, component: 'input:1', property: 'event', range: ['S/L', ''] },
+      { id: 2203, component: 'input:1', property: 'event_cnt', range: 'U16' },
+      { id: 9103, component: 'sys', property: 'cfg_rev', range: 'U16' },
+      { id: 3104, component: 'sys', property: 'temperature', range: ['-40/300', '999'] },
+      { id: 6101, component: 'sys', property: 'overtemperature', range: ['0/1', '-1'] },
+    ]);
+
+    msg.payload = JSON.stringify(loadResponse('shelly1l-E8DB84AAD781', 'cits')) as any;
+    msg.headers[3332] = 'SHSW-L#E8DB84AAD781#2';
+    expect(msg.payload).not.toBeUndefined();
+
+    (coapServer as any).deviceDescription.set('192.168.1.100', desc);
+
+    const data_cits = (coapServer as any).parseShellyMessage(msg as unknown as IncomingMessage);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining('Parsing CoIoT (coap) response from device'));
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`url: ${CYAN}/cit/s${db}`));
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`code: ${CYAN}2.05${db}`));
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`host: ${CYAN}192.168.1.100${db}`));
+    // console.error('data_cits:', data_cits);
+    expect(data_cits).toEqual({
+      sys: { cfg_rev: 0, temperature: 59.11, overtemperature: false },
+      'relay:0': { state: true },
+      'input:0': { input: 0, event: '', event_cnt: 0 },
+      'input:1': { input: 0, event: '', event_cnt: 0 },
+    });
+  });
+
+  test('Parse status shellybulbduo', async () => {
+    const citd = loadResponse('shellybulbduo-34945479CFA4', 'citd');
+    expect(citd).not.toBeUndefined();
+    const desc = coapServer.parseDescription(citd);
+    // consoleErrorSpy.mockRestore();
+    // console.error('desc', desc);
+    expect(desc).toEqual([
+      { id: 1101, component: 'light:0', property: 'state', range: '0/1' },
+      { id: 5101, component: 'light:0', property: 'brightness', range: '0/100' },
+      { id: 5103, component: 'light:0', property: 'temp', range: '2700/6500' },
+      { id: 5104, component: 'light:0', property: 'white', range: '0/100' },
+      { id: 4101, component: 'meter:0', property: 'power', range: ['0/9', '-1'] },
+      { id: 4103, component: 'meter:0', property: 'total', range: ['U32', '-1'] },
+      { id: 9103, component: 'sys', property: 'cfg_rev', range: 'U16' },
+    ]);
+
+    msg.payload = JSON.stringify(loadResponse('shellybulbduo-34945479CFA4', 'cits')) as any;
+    msg.headers[3332] = 'SHBDUO-1#34945479CFA4#2';
+    expect(msg.payload).not.toBeUndefined();
+
+    (coapServer as any).deviceDescription.set('192.168.1.100', desc);
+
+    const data_cits = (coapServer as any).parseShellyMessage(msg as unknown as IncomingMessage);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining('Parsing CoIoT (coap) response from device'));
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`url: ${CYAN}/cit/s${db}`));
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`code: ${CYAN}2.05${db}`));
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`host: ${CYAN}192.168.1.100${db}`));
+    // console.error('data_cits:', data_cits);
+    expect(data_cits).toEqual({
+      sys: { cfg_rev: 0 },
+      'light:0': { state: false, brightness: 100, temp: 6500, white: 100 },
+      'meter:0': { power: 0, total: 1186 },
+    });
+  });
+
+  test('Parse status shellycolorbulb', async () => {
+    const citd = loadResponse('shellycolorbulb-485519EE12A7', 'citd');
+    expect(citd).not.toBeUndefined();
+    const desc = coapServer.parseDescription(citd);
+    // consoleErrorSpy.mockRestore();
+    // console.error('desc', desc);
+    expect(desc).toEqual([
+      { id: 1101, component: 'light:0', property: 'state', range: '0/1' },
+      { id: 5105, component: 'light:0', property: 'red', range: '0/255' },
+      { id: 5106, component: 'light:0', property: 'green', range: '0/255' },
+      { id: 5107, component: 'light:0', property: 'blue', range: '0/255' },
+      { id: 5108, component: 'light:0', property: 'white', range: '0/255' },
+      { id: 5102, component: 'light:0', property: 'gain', range: '0/100' },
+      { id: 5101, component: 'light:0', property: 'brightness', range: '0/100' },
+      { id: 5103, component: 'light:0', property: 'temp', range: '3000/6500' },
+      { id: 9101, component: 'light:0', property: 'mode', range: 'color/white' },
+      { id: 5109, component: 'light:0', property: 'effect', range: '0/3' },
+      { id: 4101, component: 'meter:0', property: 'power', range: ['0/9', '-1'] },
+      { id: 4103, component: 'meter:0', property: 'total', range: ['U32', '-1'] },
+      { id: 9103, component: 'sys', property: 'cfg_rev', range: 'U16' },
+    ]);
+
+    msg.payload = JSON.stringify(loadResponse('shellycolorbulb-485519EE12A7', 'cits')) as any;
+    msg.headers[3332] = 'SHCB-1#485519EE12A7#2';
+    expect(msg.payload).not.toBeUndefined();
+
+    (coapServer as any).deviceDescription.set('192.168.1.100', desc);
+
+    const data_cits = (coapServer as any).parseShellyMessage(msg as unknown as IncomingMessage);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining('Parsing CoIoT (coap) response from device'));
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`url: ${CYAN}/cit/s${db}`));
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`code: ${CYAN}2.05${db}`));
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`host: ${CYAN}192.168.1.100${db}`));
+    // console.error('data_cits:', data_cits);
+    expect(data_cits).toEqual({
+      sys: { cfg_rev: 25 },
+      'light:0': {
+        state: false,
+        red: 0,
+        green: 213,
+        blue: 255,
+        white: 0,
+        gain: 1,
+        brightness: 1,
+        temp: 6465,
+        mode: 'color',
+        effect: 0,
+      },
+      'meter:0': { power: 0, total: 143 },
+    });
+  });
+
+  test('Parse status shellyswitch25 mode relay', async () => {
+    const citd = loadResponse('shellyswitch25-3494547BF36C', 'citd');
+    expect(citd).not.toBeUndefined();
+    const desc = coapServer.parseDescription(citd);
+    // consoleErrorSpy.mockRestore();
+    // console.error('desc', desc);
+    expect(desc).toEqual([
+      { id: 1101, component: 'relay:0', property: 'state', range: '0/1' },
+      { id: 2101, component: 'input:0', property: 'input', range: '0/1' },
+      { id: 2102, component: 'input:0', property: 'event', range: ['S/L', ''] },
+      { id: 2103, component: 'input:0', property: 'event_cnt', range: 'U16' },
+      { id: 4101, component: 'meter:0', property: 'power', range: ['0/2300', '-1'] },
+      { id: 4103, component: 'meter:0', property: 'total', range: ['U32', '-1'] },
+      { id: 6102, component: 'relay:0', property: 'overpower', range: ['0/1', '-1'] },
+      { id: 1201, component: 'relay:1', property: 'state', range: '0/1' },
+      { id: 2201, component: 'input:1', property: 'input', range: '0/1' },
+      { id: 2202, component: 'input:1', property: 'event', range: ['S/L', ''] },
+      { id: 2203, component: 'input:1', property: 'event_cnt', range: 'U16' },
+      { id: 4201, component: 'meter:1', property: 'power', range: ['0/2300', '-1'] },
+      { id: 4203, component: 'meter:1', property: 'total', range: ['U32', '-1'] },
+      { id: 6202, component: 'relay:1', property: 'overpower', range: ['0/1', '-1'] },
+      { id: 9103, component: 'sys', property: 'cfg_rev', range: 'U16' },
+      { id: 3104, component: 'sys', property: 'temperature', range: ['-40/300', '999'] },
+      { id: 6101, component: 'sys', property: 'overtemperature', range: ['0/1', '-1'] },
+      { id: 9101, component: 'sys', property: 'profile', range: 'relay/roller' },
+      { id: 4108, component: 'sys', property: 'voltage', range: undefined },
+    ]);
+
+    msg.payload = JSON.stringify(loadResponse('shellyswitch25-3494547BF36C', 'cits')) as any;
+    msg.headers[3332] = 'SHSW-25#3494547BF36C#2';
+    expect(msg.payload).not.toBeUndefined();
+
+    (coapServer as any).deviceDescription.set('192.168.1.100', desc);
+
+    const data_cits = (coapServer as any).parseShellyMessage(msg as unknown as IncomingMessage);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining('Parsing CoIoT (coap) response from device'));
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`url: ${CYAN}/cit/s${db}`));
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`code: ${CYAN}2.05${db}`));
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`host: ${CYAN}192.168.1.100${db}`));
+    // console.error('data_cits:', data_cits);
+    expect(data_cits).toEqual({
+      sys: {
+        cfg_rev: 0,
+        temperature: 51.52,
+        overtemperature: false,
+        profile: 'relay',
+        voltage: 238.07,
+      },
+      'relay:0': { state: false, overpower: false },
+      'relay:1': { state: false, overpower: false },
+      'input:0': { input: 0, event: '', event_cnt: 0 },
+      'input:1': { input: 0, event: '', event_cnt: 0 },
+      'meter:0': { power: 0, total: 0 },
+      'meter:1': { power: 0, total: 0 },
+    });
+  });
+
+  test('Parse status shellyswitch25 mode roller', async () => {
+    const citd = loadResponse('shellyswitch25-3494546BBF7E', 'citd');
+    expect(citd).not.toBeUndefined();
+    const desc = coapServer.parseDescription(citd);
+    // consoleErrorSpy.mockRestore();
+    // console.error('desc', desc);
+    expect(desc).toEqual([
+      { id: 2101, component: 'input:0', property: 'input', range: '0/1' },
+      { id: 2102, component: 'input:0', property: 'event', range: ['S/L', ''] },
+      { id: 2103, component: 'input:0', property: 'event_cnt', range: 'U16' },
+      { id: 2201, component: 'input:1', property: 'input', range: '0/1' },
+      { id: 2202, component: 'input:1', property: 'event', range: ['S/L', ''] },
+      { id: 2203, component: 'input:1', property: 'event_cnt', range: 'U16' },
+      { id: 1102, component: 'roller:0', property: 'state', range: 'open/close/stop' },
+      { id: 1103, component: 'roller:0', property: 'current_pos', range: ['0/100', '-1'] },
+      { id: 4102, component: 'meter:0', property: 'power', range: ['0/2300', '-1'] },
+      { id: 4104, component: 'meter:0', property: 'total', range: ['U32', '-1'] },
+      { id: 6103, component: 'roller:0', property: 'stop_reason', range: 'normal/safety_switch/obstacle/overpower' },
+      { id: 9103, component: 'sys', property: 'cfg_rev', range: 'U16' },
+      { id: 3104, component: 'sys', property: 'temperature', range: ['-40/300', '999'] },
+      { id: 6101, component: 'sys', property: 'overtemperature', range: ['0/1', '-1'] },
+      { id: 9101, component: 'sys', property: 'profile', range: 'relay/roller' },
+      { id: 4108, component: 'sys', property: 'voltage', range: undefined },
+    ]);
+
+    msg.payload = JSON.stringify(loadResponse('shellyswitch25-3494546BBF7E', 'cits')) as any;
+    msg.headers[3332] = 'SHSW-25#3494546BBF7E#2';
+    expect(msg.payload).not.toBeUndefined();
+
+    (coapServer as any).deviceDescription.set('192.168.1.100', desc);
+
+    const data_cits = (coapServer as any).parseShellyMessage(msg as unknown as IncomingMessage);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining('Parsing CoIoT (coap) response from device'));
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`url: ${CYAN}/cit/s${db}`));
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`code: ${CYAN}2.05${db}`));
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`host: ${CYAN}192.168.1.100${db}`));
+    // console.error('data_cits:', data_cits);
+    expect(data_cits).toEqual({
+      sys: {
+        cfg_rev: 0,
+        temperature: 47.11,
+        overtemperature: false,
+        profile: 'roller',
+        voltage: 240.7,
+      },
+      'roller:0': { state: 'stop', current_pos: 100, stop_reason: 'normal' },
+      'input:0': { input: 0, event: '', event_cnt: 0 },
+      'input:1': { input: 0, event: '', event_cnt: 0 },
+      'meter:0': { power: 0, total: 0 },
+    });
+  });
+
+  test('Parse status shellyrgbw2 mode white', async () => {
+    const citd = loadResponse('shellyrgbw2-EC64C9D199AD', 'citd');
+    expect(citd).not.toBeUndefined();
+    const desc = coapServer.parseDescription(citd);
+    // consoleErrorSpy.mockRestore();
+    // console.error('desc', desc);
+    expect(desc).toEqual([
+      { id: 1101, component: 'light:0', property: 'state', range: '0/1' },
+      { id: 5101, component: 'light:0', property: 'brightness', range: '0/100' },
+      { id: 4101, component: 'meter:0', property: 'power', range: ['0/288', '-1'] },
+      { id: 4103, component: 'meter:0', property: 'total', range: ['U32', '-1'] },
+      { id: 1201, component: 'light:1', property: 'state', range: '0/1' },
+      { id: 5201, component: 'light:1', property: 'brightness', range: '0/100' },
+      { id: 4201, component: 'meter:1', property: 'power', range: ['0/288', '-1'] },
+      { id: 4203, component: 'meter:1', property: 'total', range: ['U32', '-1'] },
+      { id: 1301, component: 'light:2', property: 'state', range: '0/1' },
+      { id: 5301, component: 'light:2', property: 'brightness', range: '0/100' },
+      { id: 4301, component: 'meter:2', property: 'power', range: ['0/288', '-1'] },
+      { id: 4303, component: 'meter:2', property: 'total', range: ['U32', '-1'] },
+      { id: 1401, component: 'light:3', property: 'state', range: '0/1' },
+      { id: 5401, component: 'light:3', property: 'brightness', range: '0/100' },
+      { id: 4401, component: 'meter:3', property: 'power', range: ['0/288', '-1'] },
+      { id: 4403, component: 'meter:3', property: 'total', range: ['U32', '-1'] },
+      { id: 9103, component: 'sys', property: 'cfg_rev', range: 'U16' },
+      { id: 6102, component: 'sys', property: 'overpower', range: ['0/1', '-1'] },
+      { id: 2101, component: 'input:0', property: 'input', range: '0/1' },
+      { id: 2102, component: 'input:0', property: 'event', range: ['S/L', ''] },
+      { id: 2103, component: 'input:0', property: 'event_cnt', range: 'U16' },
+      { id: 9101, component: 'sys', property: 'profile', range: 'color/white' },
+    ]);
+
+    msg.payload = JSON.stringify(loadResponse('shellyrgbw2-EC64C9D199AD', 'cits')) as any;
+    msg.headers[3332] = 'SHRGBW2#EC64C9D199AD#2';
+    expect(msg.payload).not.toBeUndefined();
+
+    (coapServer as any).deviceDescription.set('192.168.1.100', desc);
+
+    const data_cits = (coapServer as any).parseShellyMessage(msg as unknown as IncomingMessage);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining('Parsing CoIoT (coap) response from device'));
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`url: ${CYAN}/cit/s${db}`));
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`code: ${CYAN}2.05${db}`));
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`host: ${CYAN}192.168.1.100${db}`));
+    // console.error('data_cits:', data_cits);
+    expect(data_cits).toEqual({
+      sys: { cfg_rev: 0, overpower: false, profile: 'white' },
+      'light:0': { state: false, brightness: 1 },
+      'light:1': { state: false, brightness: 100 },
+      'light:2': { state: false, brightness: 100 },
+      'light:3': { state: false, brightness: 100 },
+      'meter:0': { power: 0, total: 170 },
+      'meter:1': { power: 0, total: 0 },
+      'meter:2': { power: 0, total: 0 },
+      'meter:3': { power: 0, total: 0 },
+      'input:0': { input: 0, event: '', event_cnt: 0 },
+    });
+  });
+
+  test('Parse status shellyrgbw2 mode color', async () => {
+    const citd = loadResponse('shellyrgbw2-EC64C9D3FFEF', 'citd');
+    expect(citd).not.toBeUndefined();
+    const desc = coapServer.parseDescription(citd);
+    // consoleErrorSpy.mockRestore();
+    // console.error('desc', desc);
+    expect(desc).toEqual([
+      { id: 1101, component: 'light:0', property: 'state', range: '0/1' },
+      { id: 5105, component: 'light:0', property: 'red', range: '0/255' },
+      { id: 5106, component: 'light:0', property: 'green', range: '0/255' },
+      { id: 5107, component: 'light:0', property: 'blue', range: '0/255' },
+      { id: 5108, component: 'light:0', property: 'white', range: '0/255' },
+      { id: 5102, component: 'light:0', property: 'gain', range: '0/100' },
+      { id: 5109, component: 'light:0', property: 'effect', range: '0/3' },
+      { id: 4101, component: 'meter:0', property: 'power', range: ['0/288', '-1'] },
+      { id: 4103, component: 'meter:0', property: 'total', range: ['U32', '-1'] },
+      { id: 6102, component: 'light:0', property: 'overpower', range: ['0/1', '-1'] },
+      { id: 9103, component: 'sys', property: 'cfg_rev', range: 'U16' },
+      { id: 2101, component: 'input:0', property: 'input', range: '0/1' },
+      { id: 2102, component: 'input:0', property: 'event', range: ['S/L', ''] },
+      { id: 2103, component: 'input:0', property: 'event_cnt', range: 'U16' },
+      { id: 9101, component: 'sys', property: 'profile', range: 'color/white' },
+    ]);
+
+    msg.payload = JSON.stringify(loadResponse('shellyrgbw2-EC64C9D3FFEF', 'cits')) as any;
+    msg.headers[3332] = 'SHRGBW2#EC64C9D3FFEF#2';
+    expect(msg.payload).not.toBeUndefined();
+
+    (coapServer as any).deviceDescription.set('192.168.1.100', desc);
+
+    const data_cits = (coapServer as any).parseShellyMessage(msg as unknown as IncomingMessage);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining('Parsing CoIoT (coap) response from device'));
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`url: ${CYAN}/cit/s${db}`));
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`code: ${CYAN}2.05${db}`));
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`host: ${CYAN}192.168.1.100${db}`));
+    // console.error('data_cits:', data_cits);
+    expect(data_cits).toEqual({
+      sys: { cfg_rev: 0, profile: 'color' },
+      'light:0': {
+        state: true,
+        red: 38,
+        green: 45,
+        blue: 255,
+        white: 0,
+        gain: 100,
+        effect: 0,
+        overpower: false,
+      },
+      'meter:0': { power: 1.6, total: 106 },
+      'input:0': { input: 0, event: '', event_cnt: 0 },
     });
   });
 
