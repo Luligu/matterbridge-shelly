@@ -23,6 +23,7 @@ New device types:
 
 - shellyflood device type has been updated from contact sensor to water leak sensor.
 - shellysmoke device type has been updated from contact sensor to smoke sensor.
+- all rgb lights device type has been updated from colorTemperatureLight to extendedColorLight. This solves SmartThings issues with color lights.
 
 If your controller has issues detecting the new device type, blacklist the flood and smoke devices, restart, remove the blacklist and restarat again. This will create a new endpoint on the controller.
 For shellyflood, if you have SmartThings, blacklist the Temperature entity for each flood device with deviceEntityBlackList to allow the controller to setup the correct driver.
