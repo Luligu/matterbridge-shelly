@@ -47,7 +47,7 @@ For shellyflood, if you have SmartThings, blacklist the Temperature entity for e
 ### Fixed
 
 - [restart]: Fixed the case when a device with sleep mode has not updated the cache file. Thanks Pasqualito.
-- [entity]: Fixed the black list on PowerMeter in deviceEntityBlackList.
+- [entity]: Fixed the black list of PowerMeter in deviceEntityBlackList. Thanks Tamer.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
   <img src="bmc-button.svg" alt="Buy me a coffee" width="80">

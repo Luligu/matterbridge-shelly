@@ -76,7 +76,7 @@ describe('ShellyPlatform', () => {
   let consoleInfoSpy: jest.SpiedFunction<typeof console.log>;
   let consoleWarnSpy: jest.SpiedFunction<typeof console.log>;
   let consoleErrorSpy: jest.SpiedFunction<typeof console.log>;
-  const debug = false;
+  const debug = true;
 
   if (!debug) {
     // Spy on and mock AnsiLogger.log
@@ -851,7 +851,7 @@ describe('ShellyPlatform', () => {
     expect(rgbEndpoint.getAttribute('colorControl', 'currentHue')).toBe(100);
     expect(rgbEndpoint.getAttribute('colorControl', 'currentSaturation')).toBe(100);
     expect(rgbEndpoint.getAttribute('colorControl', 'colorTemperatureMireds')).toBe(250);
-    shelly.wsServer.emit('wssupdate', shellyPlusRgbwPm.id, { 'rgb:0': { state: true, brightness: 50, rgb: [255, 111, 128] } } as ShellyData);
+    shelly.wsServer.emit('wssupdate', shellyPlusRgbwPm.id, { 'rgb:0': { id: 0, state: true, brightness: 50, rgb: [255, 111, 128] } } as ShellyData);
     await wait(250);
     expect(rgbEndpoint.getAttribute('onOff', 'onOff')).toBe(true);
     expect(rgbEndpoint.getAttribute('levelControl', 'currentLevel')).toBe(127);
@@ -860,6 +860,15 @@ describe('ShellyPlatform', () => {
     expect(rgbEndpoint.getAttribute('colorControl', 'colorTemperatureMireds')).toBe(250);
     expect(rgbEndpoint.getAttribute('colorControl', 'colorMode')).toBe(ColorControl.ColorMode.CurrentHueAndCurrentSaturation);
     expect(rgbEndpoint.getAttribute('colorControl', 'enhancedColorMode')).toBe(ColorControl.ColorMode.CurrentHueAndCurrentSaturation);
+
+    shelly.wsServer.emit('wssupdate', shellyPlusRgbwPm.id, {
+      'rgb:0': { id: 0, aenergy: { total: 55.774, by_minute: [Array], minute_ts: 1745084640 }, apower: 12.85, current: 0.15, voltage: 12.8 },
+    } as ShellyData);
+    await wait(250);
+    expect(rgbEndpoint.getAttribute('ElectricalPowerMeasurement', 'voltage')).toBe(12800);
+    expect(rgbEndpoint.getAttribute('ElectricalPowerMeasurement', 'activeCurrent')).toBe(150);
+    expect(rgbEndpoint.getAttribute('ElectricalPowerMeasurement', 'activePower')).toBe(12850);
+    expect(rgbEndpoint.getAttribute('ElectricalEnergyMeasurement', 'cumulativeEnergyImported')?.energy).toBe(55774);
 
     const fetch = jest.spyOn(ShellyDevice, 'fetch' as any).mockImplementation(async () => {
       return Promise.resolve(undefined);
