@@ -344,7 +344,8 @@ export function shellyUpdateHandler(
   }
   // Update energy from main components (gen 2 devices send power total inside the component not with meter)
   if (['Light', 'Rgb', 'Relay', 'Switch', 'Cover', 'Roller', 'PowerMeter'].includes(shellyComponent.name)) {
-    if (isValidArray(platform.config.entityBlackList, 1) && platform.config.entityBlackList.includes('PowerMeter')) return;
+    // if (isValidArray(platform.config.entityBlackList, 1) && platform.config.entityBlackList.includes('PowerMeter')) return;
+    if (!platform.validateEntity(shellyDevice.id, 'PowerMeter')) return;
     // Gen. 1 devices have: power, total (not all) in PowerMeters and voltage in status (not all)
     // PRO devices have: apower, voltage, freq, current, aenergy.total (wh) and no PowerMeters
     if ((property === 'power' || property === 'apower' || property === 'act_power') && isValidNumber(value, 0)) {

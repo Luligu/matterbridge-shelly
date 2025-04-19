@@ -43,7 +43,7 @@ describe('ShellyComponent', () => {
 
     const mockDevice1 = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shellydimmer2-98CDAC0D01BB.json'));
     const mockDevice2 = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shellyplus1pm-441793D69718.json'));
-    const mockDevice3 = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shellyplusrgbwpm-A0A3B35C7024.rgb.json'));
+    const mockDevice3 = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shellyplusrgbwpm-A0A3B35C7024.json'));
     if (mockDevice1) device1 = mockDevice1;
     if (mockDevice2) device2 = mockDevice2;
     if (mockDevice3) device3 = mockDevice3;

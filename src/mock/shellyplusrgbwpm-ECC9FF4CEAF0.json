@@ -3,11 +3,11 @@
     "name": "RGBW PM Plus White",
     "id": "shellyplusrgbwpm-ecc9ff4ceaf0",
     "mac": "ECC9FF4CEAF0",
-    "slot": 0,
+    "slot": 1,
     "model": "SNDC-0D4P10WW",
     "gen": 2,
-    "fw_id": "20241011-114446/1.4.4-g6d2a586",
-    "ver": "1.4.4",
+    "fw_id": "20250318-152124/1.5.1-g01dd7ff",
+    "ver": "1.5.1",
     "app": "PlusRGBWPM",
     "auth_en": false,
     "auth_domain": null,
@@ -18,9 +18,6 @@
       "enable": false,
       "rpc": {
         "enable": true
-      },
-      "observer": {
-        "enable": false
       }
     },
     "cloud": {
@@ -175,8 +172,9 @@
       "device": {
         "name": "RGBW PM Plus White",
         "mac": "ECC9FF4CEAF0",
-        "fw_id": "20241011-114446/1.4.4-g6d2a586",
+        "fw_id": "20250318-152124/1.5.1-g01dd7ff",
         "discoverable": true,
+        "eco_mode": false,
         "profile": "light",
         "addon_type": null
       },
@@ -196,13 +194,13 @@
       },
       "ui_data": {},
       "rpc_udp": {
-        "dst_addr": null,
-        "listen_port": null
+        "dst_addr": "192.168.1.20:8585",
+        "listen_port": 8585
       },
       "sntp": {
-        "server": "time.google.com"
+        "server": "time.cloudflare.com"
       },
-      "cfg_rev": 21
+      "cfg_rev": 25
     },
     "wifi": {
       "ap": {
@@ -271,11 +269,11 @@
       "output": false,
       "brightness": 1,
       "temperature": {
-        "tC": 55.5,
-        "tF": 131.8
+        "tC": 57.4,
+        "tF": 135.2
       },
       "voltage": 12.4,
-      "flags": ["no_load"]
+      "flags": ["uncalibrated"]
     },
     "light:1": {
       "id": 1,
@@ -283,11 +281,11 @@
       "output": false,
       "brightness": 1,
       "temperature": {
-        "tC": 55.5,
-        "tF": 131.8
+        "tC": 57.4,
+        "tF": 135.2
       },
       "voltage": 12.4,
-      "flags": ["no_load"]
+      "flags": ["uncalibrated"]
     },
     "light:2": {
       "id": 2,
@@ -295,11 +293,11 @@
       "output": false,
       "brightness": 1,
       "temperature": {
-        "tC": 55.5,
-        "tF": 131.8
+        "tC": 57.4,
+        "tF": 135.2
       },
       "voltage": 12.4,
-      "flags": ["no_load"]
+      "flags": ["uncalibrated"]
     },
     "light:3": {
       "id": 3,
@@ -307,11 +305,11 @@
       "output": false,
       "brightness": 1,
       "temperature": {
-        "tC": 55.5,
-        "tF": 131.8
+        "tC": 57.4,
+        "tF": 135.2
       },
       "voltage": 12.4,
-      "flags": ["no_load"]
+      "flags": ["uncalibrated"]
     },
     "mqtt": {
       "connected": false
@@ -320,36 +318,39 @@
     "sys": {
       "mac": "ECC9FF4CEAF0",
       "restart_required": false,
-      "time": "14:49",
-      "unixtime": 1741441745,
-      "uptime": 788456,
-      "ram_size": 251832,
-      "ram_free": 118136,
+      "time": "17:16",
+      "unixtime": 1745075806,
+      "last_sync_ts": 1745075678,
+      "uptime": 130,
+      "ram_size": 251980,
+      "ram_free": 117412,
+      "ram_min_free": 99728,
       "fs_size": 393216,
-      "fs_free": 90112,
-      "cfg_rev": 21,
+      "fs_free": 94208,
+      "cfg_rev": 25,
       "kvs_rev": 0,
-      "schedule_rev": 2,
-      "webhook_rev": 1,
+      "schedule_rev": 4,
+      "webhook_rev": 3,
+      "btrelay_rev": 0,
       "available_updates": {
         "beta": {
-          "version": "1.5.1-beta1"
+          "version": "1.6.0-beta1"
         }
       },
-      "reset_reason": 1
+      "reset_reason": 3
     },
     "wifi": {
       "sta_ip": "192.168.1.171",
       "status": "got ip",
       "ssid": "",
-      "rssi": -54
+      "rssi": -50
     },
     "ws": {
       "connected": false
     }
   },
   "components": [],
-  "cfg_rev": 21,
+  "cfg_rev": 25,
   "offset": 0,
   "total": 0
 }

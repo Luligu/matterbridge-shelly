@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   Matterbridge,
-  MatterbridgeBehavior,
+  // MatterbridgeBehavior,
   MatterbridgeEndpoint,
   PlatformConfig,
   PowerSource,
@@ -214,7 +214,6 @@ describe('ShellyPlatform', () => {
       matterbridgePluginDirectory: './jest/plugins',
       systemInformation: { ipv4Address: undefined, osRelease: 'xx.xx.xx.xx.xx.xx', nodeVersion: '22.1.10' },
       matterbridgeVersion: '2.2.9',
-      edge: false,
       log: mockLog,
       getDevices: jest.fn(() => {
         // console.log('getDevices called');
@@ -454,7 +453,7 @@ describe('ShellyPlatform', () => {
     await aggregator.add(device);
 
     expect(device.hasClusterServer(DescriptorCluster)).toBeTruthy();
-    expect(device.hasClusterServer(MatterbridgeBehavior)).toBeTruthy();
+    // expect(device.hasClusterServer(MatterbridgeBehavior)).toBeTruthy();
     expect(device.hasClusterServer(BridgedDeviceBasicInformationCluster)).toBeTruthy();
     expect(device.hasClusterServer(FixedLabelCluster)).toBeTruthy();
     expect(device.hasClusterServer(PowerSource.Cluster.id)).toBeTruthy();
@@ -518,7 +517,7 @@ describe('ShellyPlatform', () => {
     shelly1.destroy();
   }, 10000);
 
-  it('should add shellyprorgbwwpm', async () => {
+  it('should add shellyprorgbwwpm mode rgbctt', async () => {
     expect(shellyPlatform).toBeDefined();
     shellyPlatform.config.enableMdnsDiscover = false;
     shellyPlatform.config.inputMomentaryList = ['shellyprorgbwwpm-AC1518784844'];
@@ -749,7 +748,180 @@ describe('ShellyPlatform', () => {
     shellyPro.destroy();
   }, 10000);
 
-  it('should add shelly2pmg3', async () => {
+  it('should add shellyplusrgbwpm mode rgb', async () => {
+    expect(shellyPlatform).toBeDefined();
+    shellyPlatform.config.enableMdnsDiscover = false;
+    shellyPlatform.config.inputMomentaryList = ['shellyplusrgbwpm-A0A3B35C7024'];
+
+    await shellyPlatform.onStart('Test reason');
+    expect(mockLog.info).toHaveBeenCalledWith(`Starting platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
+
+    const shellyPlusRgbwPm = await ShellyDevice.create((shellyPlatform as any).shelly, (shellyPlatform as any).log, path.join('src', 'mock', 'shellyplusrgbwpm-A0A3B35C7024.json'));
+    expect(shellyPlusRgbwPm).not.toBeUndefined();
+    if (!shellyPlusRgbwPm) return;
+
+    await shelly.addDevice(shellyPlusRgbwPm);
+    await wait(250);
+    expect(mockLog.info).toHaveBeenCalledWith(
+      `Shelly added ${idn}${shellyPlusRgbwPm.name}${rs} device id ${hk}${shellyPlusRgbwPm.id}${rs}${nf} host ${zb}${shellyPlusRgbwPm.host}${nf}`,
+    );
+    expect(shellyPlatform.discoveredDevices.size).toBe(0);
+    expect(shellyPlatform.storedDevices.size).toBe(0);
+    expect(shelly.devices).toHaveLength(1);
+    expect(shellyPlatform.bridgedDevices.size).toBe(1);
+    expect(shellyPlatform.bridgedDevices.has('shellyplusrgbwpm-A0A3B35C7024')).toBe(true);
+
+    const device = shellyPlatform.bridgedDevices.get('shellyplusrgbwpm-A0A3B35C7024');
+    expect(device).toBeDefined();
+    if (!device) return;
+    await aggregator.add(device);
+
+    expect(device.getAllClusterServerNames()).toEqual(['descriptor', 'matterbridge', 'bridgedDeviceBasicInformation', 'powerSource', 'fixedLabel']);
+    expect(featuresFor(device, 'powerSource')).toEqual({
+      'battery': false,
+      'rechargeable': false,
+      'replaceable': false,
+      'wired': true,
+    });
+
+    expect(device.getChildEndpoints()).toHaveLength(5);
+    expect(device.getChildEndpointByName('input:0')).toBeDefined();
+    expect(device.getChildEndpointByName('input:1')).toBeDefined();
+    expect(device.getChildEndpointByName('input:2')).toBeDefined();
+    expect(device.getChildEndpointByName('input:3')).toBeDefined();
+
+    const child = device.getChildEndpointByName('rgb:0');
+    expect(child?.getAllClusterServerNames()).toEqual([
+      'descriptor',
+      'matterbridge',
+      'identify',
+      'groups',
+      'onOff',
+      'levelControl',
+      'colorControl',
+      'powerTopology',
+      'electricalPowerMeasurement',
+      'electricalEnergyMeasurement',
+    ]);
+    expect(featuresFor(child as MatterbridgeEndpoint, 'descriptor')).toEqual({ tagList: true });
+    expect(featuresFor(child as MatterbridgeEndpoint, 'onOff')).toEqual({ lighting: true, deadFrontBehavior: false, offOnly: false });
+    expect(featuresFor(child as MatterbridgeEndpoint, 'levelControl')).toEqual({ onOff: true, lighting: true, frequency: false });
+    expect(featuresFor(child as MatterbridgeEndpoint, 'colorControl')).toEqual({
+      'colorLoop': false,
+      'colorTemperature': true,
+      'enhancedHue': false,
+      'hueSaturation': true,
+      'xy': true,
+    });
+    expect(featuresFor(child as MatterbridgeEndpoint, 'powerTopology')).toEqual({ nodeTopology: false, treeTopology: true, setTopology: false, dynamicPowerFlow: false });
+    expect(featuresFor(child as MatterbridgeEndpoint, 'electricalPowerMeasurement')).toEqual({
+      'alternatingCurrent': true,
+      'directCurrent': false,
+      'harmonics': false,
+      'polyphasePower': false,
+      'powerQuality': false,
+    });
+    expect(featuresFor(child as MatterbridgeEndpoint, 'electricalEnergyMeasurement')).toEqual({
+      'cumulativeEnergy': true,
+      'exportedEnergy': true,
+      'importedEnergy': true,
+      'periodicEnergy': false,
+    });
+    expect(child?.getAttribute('Descriptor', 'tagList')).toEqual([{ mfgCode: null, namespaceId: 7, tag: 0, label: 'rgb:0' }]);
+    expect(child?.getAttribute('Descriptor', 'deviceTypeList')).toEqual([
+      { deviceType: 269, revision: 4 },
+      { deviceType: 1296, revision: 1 },
+    ]);
+    expect(child?.getAttribute('Identify', 'acceptedCommandList')).toEqual([0, 64]);
+    expect(child?.getAttribute('OnOff', 'acceptedCommandList')).toEqual([0, 64, 65, 66, 1, 2]);
+    expect(child?.getAttribute('LevelControl', 'acceptedCommandList')).toEqual([0, 1, 2, 3, 4, 5, 6, 7]);
+    expect(child?.getAttribute('ColorControl', 'acceptedCommandList')).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 75, 76, 71]);
+
+    // Test updates on rgb
+    const rgbEndpoint = device.getChildEndpointByName('rgb:0') as MatterbridgeEndpoint;
+    expect(rgbEndpoint).toBeDefined();
+    if (!rgbEndpoint) return;
+    await rgbEndpoint.setAttribute('onOff', 'onOff', false);
+    await rgbEndpoint.setAttribute('levelControl', 'currentLevel', 100);
+    await rgbEndpoint.setAttribute('colorControl', 'currentHue', 100);
+    await rgbEndpoint.setAttribute('colorControl', 'currentSaturation', 100);
+    await rgbEndpoint.setAttribute('colorControl', 'colorTemperatureMireds', 250);
+    expect(rgbEndpoint.getAttribute('onOff', 'onOff')).toBe(false);
+    expect(rgbEndpoint.getAttribute('levelControl', 'currentLevel')).toBe(100);
+    expect(rgbEndpoint.getAttribute('colorControl', 'currentHue')).toBe(100);
+    expect(rgbEndpoint.getAttribute('colorControl', 'currentSaturation')).toBe(100);
+    expect(rgbEndpoint.getAttribute('colorControl', 'colorTemperatureMireds')).toBe(250);
+    shelly.wsServer.emit('wssupdate', shellyPlusRgbwPm.id, { 'rgb:0': { state: true, brightness: 50, rgb: [255, 111, 128] } } as ShellyData);
+    await wait(250);
+    expect(rgbEndpoint.getAttribute('onOff', 'onOff')).toBe(true);
+    expect(rgbEndpoint.getAttribute('levelControl', 'currentLevel')).toBe(127);
+    expect(rgbEndpoint.getAttribute('colorControl', 'currentHue')).toBe(249);
+    expect(rgbEndpoint.getAttribute('colorControl', 'currentSaturation')).toBe(254);
+    expect(rgbEndpoint.getAttribute('colorControl', 'colorTemperatureMireds')).toBe(250);
+    expect(rgbEndpoint.getAttribute('colorControl', 'colorMode')).toBe(ColorControl.ColorMode.CurrentHueAndCurrentSaturation);
+    expect(rgbEndpoint.getAttribute('colorControl', 'enhancedColorMode')).toBe(ColorControl.ColorMode.CurrentHueAndCurrentSaturation);
+
+    const fetch = jest.spyOn(ShellyDevice, 'fetch' as any).mockImplementation(async () => {
+      return Promise.resolve(undefined);
+    });
+
+    // Test commands for light from Matter to Shelly
+    loggerLogSpy.mockClear();
+    rgbEndpoint.executeCommandHandler('on', {});
+    await wait(250);
+    expect(loggerLogSpy).toHaveBeenCalledWith(
+      LogLevel.INFO,
+      `${db}Sent command ${hk}Rgb${db}:${hk}rgb:0${db}:${hk}On()${db} to shelly device ${idn}${shellyPlusRgbwPm.id}${rs}${db}`,
+    );
+    expect(fetch).toHaveBeenCalledWith(shellyPlusRgbwPm.shelly, shellyPlusRgbwPm.log, shellyPlusRgbwPm.host, 'Rgb.Set', { id: 0, on: true });
+
+    rgbEndpoint.executeCommandHandler('off', {});
+    await wait(250);
+    expect(loggerLogSpy).toHaveBeenCalledWith(
+      LogLevel.INFO,
+      `${db}Sent command ${hk}Rgb${db}:${hk}rgb:0${db}:${hk}Off()${db} to shelly device ${idn}${shellyPlusRgbwPm.id}${rs}${db}`,
+    );
+    expect(fetch).toHaveBeenCalledWith(shellyPlusRgbwPm.shelly, shellyPlusRgbwPm.log, shellyPlusRgbwPm.host, 'Rgb.Set', { id: 0, on: false });
+
+    rgbEndpoint.executeCommandHandler('toggle', {});
+    await wait(250);
+    expect(loggerLogSpy).toHaveBeenCalledWith(
+      LogLevel.INFO,
+      `${db}Sent command ${hk}Rgb${db}:${hk}rgb:0${db}:${hk}Toggle()${db} to shelly device ${idn}${shellyPlusRgbwPm.id}${rs}${db}`,
+    );
+    expect(fetch).toHaveBeenCalledWith(shellyPlusRgbwPm.shelly, shellyPlusRgbwPm.log, shellyPlusRgbwPm.host, 'Rgb.Toggle', { id: 0 });
+
+    rgbEndpoint.executeCommandHandler('moveToLevel', { level: 50 });
+    await wait(250);
+    expect(loggerLogSpy).toHaveBeenCalledWith(
+      LogLevel.INFO,
+      `${db}Sent command ${hk}Rgb${db}:${hk}rgb:0${db}:${hk}Level(${YELLOW}20${hk})${db} to shelly device ${idn}${shellyPlusRgbwPm.id}${rs}${db}`,
+    );
+    expect(fetch).toHaveBeenCalledWith(shellyPlusRgbwPm.shelly, shellyPlusRgbwPm.log, shellyPlusRgbwPm.host, 'Rgb.Set', { id: 0, brightness: 20 });
+
+    rgbEndpoint.executeCommandHandler('moveToHueAndSaturation', { hue: 50, saturation: 50 });
+    await wait(250);
+    expect(loggerLogSpy).toHaveBeenCalledWith(
+      LogLevel.INFO,
+      `${db}Sent command ${hk}Rgb${db}:${hk}rgb:0${db}:${hk}ColorRGB(${YELLOW}144${hk}, ${YELLOW}153${hk}, ${YELLOW}103${hk})${db} to shelly device ${idn}${shellyPlusRgbwPm.id}${rs}${db}`,
+    );
+    expect(fetch).toHaveBeenCalledWith(shellyPlusRgbwPm.shelly, shellyPlusRgbwPm.log, shellyPlusRgbwPm.host, 'Rgb.Set', { id: 0, rgb: [144, 153, 103] });
+
+    rgbEndpoint.executeCommandHandler('moveToColorTemperature', { colorTemperatureMireds: 250 });
+    await wait(250);
+    expect(loggerLogSpy).toHaveBeenCalledWith(
+      LogLevel.INFO,
+      `${db}Sent command ${hk}Rgb${db}:${hk}rgb:0${db}:${hk}ColorRGB(${YELLOW}255${hk}, ${YELLOW}206${hk}, ${YELLOW}166${hk})${db} to shelly device ${idn}${shellyPlusRgbwPm.id}${rs}${db}`,
+    );
+    expect(fetch).toHaveBeenCalledWith(shellyPlusRgbwPm.shelly, shellyPlusRgbwPm.log, shellyPlusRgbwPm.host, 'Rgb.Set', { id: 0, rgb: [255, 206, 166] });
+
+    fetch.mockRestore();
+
+    cleanup();
+    shellyPlusRgbwPm.destroy();
+  }, 10000);
+
+  it('should add shelly2pmg3 mode cover', async () => {
     expect(shellyPlatform).toBeDefined();
     shellyPlatform.config.enableMdnsDiscover = false;
     shellyPlatform.config.inputMomentaryList = [];

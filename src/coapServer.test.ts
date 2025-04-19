@@ -8,6 +8,7 @@ import { IncomingMessage, parameters } from 'coap';
 import { Shelly } from './shelly';
 import path from 'node:path';
 import { readFileSync } from 'node:fs';
+import { promises as fs } from 'node:fs';
 
 describe('Coap scanner', () => {
   const log = new AnsiLogger({ logName: 'ShellyMdnsScanner', logTimestampFormat: TimestampFormat.TIME_MILLIS });
@@ -119,10 +120,15 @@ describe('Coap scanner', () => {
     expect(coapServer.isListening).toBeFalsy();
   });
 
-  test('Data path', () => {
+  test('Data path', async () => {
     expect((coapServer as any)._dataPath).toBe('temp');
     coapServer.dataPath = 'temp';
     expect((coapServer as any)._dataPath).toBe('temp');
+    try {
+      await fs.mkdir((coapServer as any)._dataPath, { recursive: true });
+    } catch (err) {
+      //
+    }
   });
 
   test('Parse status message', async () => {

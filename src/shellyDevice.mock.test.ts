@@ -1222,19 +1222,19 @@ describe('Shelly devices test', () => {
       id = 'shellyplusrgbwpm-A0A3B35C7024';
       log.logName = id;
 
-      device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', id + '.rgb.json'));
+      device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', id + '.json'));
       expect(device).not.toBeUndefined();
       if (!device) return;
-      expect(device.host).toBe(path.join('src', 'mock', id + '.rgb.json'));
+      expect(device.host).toBe(path.join('src', 'mock', id + '.json'));
       expect(device.model).toBe('SNDC-0D4P10WW');
       expect(device.mac).toBe('A0A3B35C7024');
       expect(device.id).toBe(id);
-      expect(device.firmware).toBe('1.3.3-gbdfd9b3'); // firmwareGen2
+      expect(device.firmware).toBe('1.5.1-g01dd7ff'); // firmwareGen2
       expect(device.auth).toBe(false);
       expect(device.gen).toBe(2);
       expect(device.profile).toBe('rgb');
-      expect(device.name).toBe('My Shelly RGBW PM PLUS');
-      expect(device.hasUpdate).toBe(true);
+      expect(device.name).toBe('RGBW PM Plus Rgb');
+      expect(device.hasUpdate).toBe(false);
       expect(device.lastseen).not.toBe(0);
       expect(device.online).toBe(true);
       expect(device.cached).toBe(false);

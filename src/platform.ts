@@ -768,7 +768,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             this.log.debug(`***Shelly device ${idn}${device.name}${rs}${nf} id ${hk}${device.id}${nf} host ${zb}${device.host}${nf} added tagList: ${debugStringify(tagList)}`);
           const child = mbDevice.addChildDeviceType(
             key,
-            this.hasElectricalMeasurements(device, component) ? [deviceType, electricalSensor] : [deviceType],
+            this.hasElectricalMeasurements(device, component) && this.validateEntity(device.id, 'PowerMeter') ? [deviceType, electricalSensor] : [deviceType],
             tagList ? { tagList } : undefined,
             config.debug as boolean,
           );
@@ -870,7 +870,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           const tagList = this.addTagList(component);
           const child = mbDevice.addChildDeviceType(
             key,
-            this.hasElectricalMeasurements(device, component) ? [deviceType, electricalSensor] : [deviceType],
+            this.hasElectricalMeasurements(device, component) && this.validateEntity(device.id, 'PowerMeter') ? [deviceType, electricalSensor] : [deviceType],
             tagList ? { tagList } : undefined,
             config.debug as boolean,
           );
@@ -904,7 +904,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           const tagList = this.addTagList(component);
           const child = mbDevice.addChildDeviceType(
             key,
-            this.hasElectricalMeasurements(device, component) ? [coverDevice, electricalSensor] : [coverDevice],
+            this.hasElectricalMeasurements(device, component) && this.validateEntity(device.id, 'PowerMeter') ? [coverDevice, electricalSensor] : [coverDevice],
             tagList ? { tagList } : undefined,
             config.debug as boolean,
           );
@@ -1823,9 +1823,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
   // Add electrical measurements to the child endpoint of the switch light cover component
   private addElectricalMeasurements(device: MatterbridgeEndpoint, endpoint: MatterbridgeEndpoint, shelly: ShellyDevice, component: ShellyComponent) {
     // Check if PowerMetering is enabled
-    if (isValidArray(this.config.entityBlackList, 1) && this.config.entityBlackList.includes('PowerMeter')) {
-      return;
-    }
+    if (!this.validateEntity(shelly.id, 'PowerMeter')) return;
     // Add the Matter 1.3 electricalSensor device type and the PowerTopology, ElectricalPowerMeasurement and ElectricalEnergyMeasurement clusters on the same endpoint
     if (component.hasProperty('voltage') || component.hasProperty('current') || component.hasProperty('apower') || component.hasProperty('aenergy')) {
       shelly.log.debug(`Adding ElectricalPowerMeasurement and ElectricalEnergyMeasurement clusters to endpoint ${hk}${endpoint.name}${db} component ${hk}${component.id}${db}`);

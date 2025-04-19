@@ -450,7 +450,8 @@ describe('Shellies MdnsScanner test', () => {
       { id: 'shellyplusi4-CC7B5C8AEA2C', host: '192.168.1.224', port: 80, gen: 2 },
       { id: 'shellyplusi4-D48AFC41B6F4', host: '192.168.1.161', port: 80, gen: 2 },
       { id: 'shellyplusplugs-E86BEAEAA000', host: '192.168.1.153', port: 80, gen: 2 },
-      { id: 'shellyplusrgbwpm-A0A3B35C7024', host: '192.168.1.244', port: 80, gen: 2 },
+      { id: 'shellyplusrgbwpm-A0A3B35C7024', host: '192.168.1.180', port: 80, gen: 2 },
+      { id: 'shellyplusrgbwpm-ECC9FF4CEAF0', host: '192.168.1.171', port: 80, gen: 2 },
       { id: 'shellyplussmoke-A0A3B3B8AE48', host: '192.168.68.164', port: 80, gen: 2 },
     ];
 
