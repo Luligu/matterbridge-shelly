@@ -11,6 +11,8 @@ import {
   MatterbridgeColorControlServer,
   bridge,
   ColorControl,
+  TemperatureMeasurementCluster,
+  RelativeHumidityMeasurementCluster,
 } from 'matterbridge';
 import {
   OnOffCluster,
@@ -26,7 +28,7 @@ import {
   PowerTopology,
   Switch,
 } from 'matterbridge/matter/clusters';
-import { ColorControlBehavior, LevelControlBehavior, OnOffBehavior } from 'matterbridge/matter/behaviors';
+import { ColorControlBehavior, LevelControlBehavior, OnOffBehavior, RelativeHumidityMeasurementBehavior, TemperatureMeasurementBehavior } from 'matterbridge/matter/behaviors';
 import { AnsiLogger, db, er, hk, idn, LogLevel, nf, rs, wr, zb, CYAN, TimestampFormat, YELLOW, or, debugStringify } from 'matterbridge/logger';
 import { getMacAddress, isValidArray, isValidBoolean, isValidNull, isValidNumber, isValidObject, isValidString, isValidUndefined, wait } from 'matterbridge/utils';
 // Matter.js
@@ -76,7 +78,7 @@ describe('ShellyPlatform', () => {
   let consoleInfoSpy: jest.SpiedFunction<typeof console.log>;
   let consoleWarnSpy: jest.SpiedFunction<typeof console.log>;
   let consoleErrorSpy: jest.SpiedFunction<typeof console.log>;
-  const debug = true;
+  const debug = false;
 
   if (!debug) {
     // Spy on and mock AnsiLogger.log
@@ -517,6 +519,61 @@ describe('ShellyPlatform', () => {
     shelly1.destroy();
   }, 10000);
 
+  it('should add shellyht', async () => {
+    expect(shellyPlatform).toBeDefined();
+    shellyPlatform.config.enableMdnsDiscover = false;
+    shellyPlatform.config.inputMomentaryList = ['shellyht-703523'];
+
+    await shellyPlatform.onStart('Test reason');
+    expect(mockLog.info).toHaveBeenCalledWith(`Starting platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
+
+    const shellyHt = await ShellyDevice.create((shellyPlatform as any).shelly, (shellyPlatform as any).log, path.join('src', 'mock', 'shellyht-703523.json'));
+    expect(shellyHt).not.toBeUndefined();
+    if (!shellyHt) return;
+
+    await shelly.addDevice(shellyHt);
+    await wait(250);
+    expect(mockLog.info).toHaveBeenCalledWith(`Shelly added ${idn}${shellyHt.name}${rs} device id ${hk}${shellyHt.id}${rs}${nf} host ${zb}${shellyHt.host}${nf}`);
+    expect(shellyPlatform.discoveredDevices.size).toBe(0);
+    expect(shellyPlatform.storedDevices.size).toBe(0);
+    expect(shelly.devices).toHaveLength(1);
+    expect(shellyPlatform.bridgedDevices.size).toBe(1);
+    expect(shellyPlatform.bridgedDevices.has('shellyht-703523')).toBe(true);
+
+    const device = shellyPlatform.bridgedDevices.get('shellyht-703523');
+    expect(device).toBeDefined();
+    if (!device) return;
+    await aggregator.add(device);
+
+    expect(device.hasClusterServer(DescriptorCluster)).toBeTruthy();
+    // expect(device.hasClusterServer(MatterbridgeBehavior)).toBeTruthy();
+    expect(device.hasClusterServer(BridgedDeviceBasicInformationCluster)).toBeTruthy();
+    expect(device.hasClusterServer(FixedLabelCluster)).toBeTruthy();
+    expect(device.hasClusterServer(PowerSource.Cluster.id)).toBeTruthy();
+    expect(device.getAllClusterServerNames()).toEqual(['descriptor', 'matterbridge', 'bridgedDeviceBasicInformation', 'powerSource', 'fixedLabel']);
+    expect(device.getChildEndpoints()).toHaveLength(2);
+    expect(device.getChildEndpointByName('temperature')).toBeDefined();
+    expect(device.getChildEndpointByName('temperature')?.hasClusterServer(DescriptorCluster)).toBeTruthy();
+    expect(device.getChildEndpointByName('temperature')?.hasClusterServer(IdentifyCluster)).toBeTruthy();
+    expect(device.getChildEndpointByName('temperature')?.hasClusterServer(TemperatureMeasurementCluster)).toBeTruthy();
+    expect(device.getChildEndpointByName('humidity')).toBeDefined();
+    expect(device.getChildEndpointByName('humidity')?.hasClusterServer(DescriptorCluster)).toBeTruthy();
+    expect(device.getChildEndpointByName('humidity')?.hasClusterServer(IdentifyCluster)).toBeTruthy();
+    expect(device.getChildEndpointByName('humidity')?.hasClusterServer(RelativeHumidityMeasurementCluster)).toBeTruthy();
+
+    // Test updates on switch from Shelly to Matter
+    shelly = (shellyPlatform as any).shelly;
+    shelly.coapServer.emit('coapupdate', shellyHt.host, { 'temperature': { 'tC': 20.75, 'tF': 71.15 }, 'humidity': { 'value': 60.5 } } as ShellyData);
+    await wait(100);
+    const temperatureEndpoint = device.getChildEndpointByName('temperature') as MatterbridgeEndpoint;
+    expect(temperatureEndpoint.stateOf(TemperatureMeasurementBehavior).measuredValue).toBe(2075);
+    const humidityEndpoint = device.getChildEndpointByName('humidity') as MatterbridgeEndpoint;
+    expect(humidityEndpoint.stateOf(RelativeHumidityMeasurementBehavior).measuredValue).toBe(6050);
+
+    cleanup();
+    shellyHt.destroy();
+  }, 10000);
+
   it('should add shellyprorgbwwpm mode rgbctt', async () => {
     expect(shellyPlatform).toBeDefined();
     shellyPlatform.config.enableMdnsDiscover = false;
@@ -530,7 +587,7 @@ describe('ShellyPlatform', () => {
     if (!shellyPro) return;
 
     await shelly.addDevice(shellyPro);
-    await wait(250);
+    await wait(100);
     expect(mockLog.info).toHaveBeenCalledWith(`Shelly added ${idn}${shellyPro.name}${rs} device id ${hk}${shellyPro.id}${rs}${nf} host ${zb}${shellyPro.host}${nf}`);
     expect(shellyPlatform.discoveredDevices.size).toBe(0);
     expect(shellyPlatform.storedDevices.size).toBe(0);
@@ -597,32 +654,32 @@ describe('ShellyPlatform', () => {
     expect(cctEndpoint.getAttribute('colorControl', 'colorTemperatureMireds')).toBe(300);
     shelly = (shellyPlatform as any).shelly;
     shelly.wsServer.emit('wssupdate', shellyPro.id, { 'cct:0': { state: true, brightness: 50, ct: 3000 } } as ShellyData);
-    await wait(250);
+    await wait(100);
     expect(cctEndpoint.getAttribute('onOff', 'onOff')).toBe(true);
     expect(cctEndpoint.getAttribute('levelControl', 'currentLevel')).toBe(127);
     expect(cctEndpoint.getAttribute('colorControl', 'colorTemperatureMireds')).toBe(454);
     expect(cctEndpoint.getAttribute('colorControl', 'colorMode')).toBe(ColorControl.ColorMode.ColorTemperatureMireds);
     expect(cctEndpoint.getAttribute('colorControl', 'enhancedColorMode')).toBe(ColorControl.ColorMode.ColorTemperatureMireds);
     shelly.wsServer.emit('wssupdate', shellyPro.id, { 'cct:0': { ct: 2700 } } as ShellyData);
-    await wait(250);
+    await wait(100);
     expect(cctEndpoint.getAttribute('colorControl', 'colorTemperatureMireds')).toBe(500);
     shelly.wsServer.emit('wssupdate', shellyPro.id, { 'cct:0': { ct: 6500 } } as ShellyData);
-    await wait(250);
+    await wait(100);
     expect(cctEndpoint.getAttribute('colorControl', 'colorTemperatureMireds')).toBe(147);
     shelly.wsServer.emit('wssupdate', shellyPro.id, { 'cct:0': { ct: 6600 } } as ShellyData);
-    await wait(250);
+    await wait(100);
     expect(cctEndpoint.getAttribute('colorControl', 'colorTemperatureMireds')).toBe(147);
     shelly.wsServer.emit('wssupdate', shellyPro.id, { 'cct:0': { ct: 1600 } } as ShellyData);
-    await wait(250);
+    await wait(100);
     expect(cctEndpoint.getAttribute('colorControl', 'colorTemperatureMireds')).toBe(147);
     shelly.wsServer.emit('wssupdate', shellyPro.id, { 'cct:0': { ct: 1600 } } as ShellyData);
-    await wait(250);
+    await wait(100);
     expect(cctEndpoint.getAttribute('colorControl', 'colorTemperatureMireds')).toBe(147);
     shelly.wsServer.emit('wssupdate', shellyPro.id, { 'cct:0': { ct: 1600 } } as ShellyData);
-    await wait(250);
+    await wait(100);
     expect(cctEndpoint.getAttribute('colorControl', 'colorTemperatureMireds')).toBe(147);
     shelly.wsServer.emit('wssupdate', shellyPro.id, { 'cct:0': { ct: 4329 } } as ShellyData);
-    await wait(250);
+    await wait(100);
     expect(cctEndpoint.getAttribute('colorControl', 'colorTemperatureMireds')).toBe(250);
 
     // Test updates on rgb
@@ -638,7 +695,7 @@ describe('ShellyPlatform', () => {
     expect(rgbEndpoint.getAttribute('colorControl', 'currentHue')).toBe(100);
     expect(rgbEndpoint.getAttribute('colorControl', 'currentSaturation')).toBe(100);
     shelly.wsServer.emit('wssupdate', shellyPro.id, { 'rgb:0': { state: true, brightness: 50, rgb: [100, 200, 255] } } as ShellyData);
-    await wait(250);
+    await wait(100);
     expect(rgbEndpoint.getAttribute('onOff', 'onOff')).toBe(true);
     expect(rgbEndpoint.getAttribute('levelControl', 'currentLevel')).toBe(127);
     expect(rgbEndpoint.getAttribute('colorControl', 'currentHue')).toBe(142);
