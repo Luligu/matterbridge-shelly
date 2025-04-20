@@ -23,9 +23,36 @@ New device types:
 
 - shellyflood device type has been updated from contact sensor to water leak sensor.
 - shellysmoke device type has been updated from contact sensor to smoke sensor.
+- for all the rgb lights the device type has been updated from colorTemperatureLight to extendedColorLight. This solves SmartThings issues with color lights.
 
 If your controller has issues detecting the new device type, blacklist the flood and smoke devices, restart, remove the blacklist and restarat again. This will create a new endpoint on the controller.
 For shellyflood, if you have SmartThings, blacklist the Temperature entity for each flood device with deviceEntityBlackList to allow the controller to setup the correct driver.
+
+## [2.0.8] - 2025-04-19
+
+### Added
+
+- [Cct]: Added support for Cct component of Shelly Pro RGBWW PM in rgbcct mode. Thanks https://github.com/ericdispencer.
+- [CoIoT]: Refactor decoding of cit/s to send a single event.
+- [CoIoT]: Added Inputs components decoding.
+- [CoIoT]: Added overpower decoding.
+- [ShellyWsServer]: Added check for ws:// in the settings of the device web ui.
+
+### Changed
+
+- [CoIoT]: The cit/s and cit/d response file in debug mode are saved with the device id name.
+- [extenedColorLight]: Added extenedColorLight for rgb color device (solve SmartThings issues with color lights).
+- [package]: Updated dependencies.
+- [plugin]: Requires Matterbridge 2.2.9.
+
+### Fixed
+
+- [restart]: Fixed the case when a device with sleep mode has not updated the cache file. Thanks Pasqualito.
+- [entity]: Fixed the black list of PowerMeter in deviceEntityBlackList. Thanks Tamer.
+
+<a href="https://www.buymeacoffee.com/luligugithub">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="80">
+</a>
 
 ## [2.0.7] - 2025-04-13
 
@@ -42,7 +69,7 @@ For shellyflood, if you have SmartThings, blacklist the Temperature entity for e
 
 ### Fixed
 
-- [restart]: Fixed case when device with sleep mode send config changed.
+- [restart]: Fixed the case when a device with sleep mode sends config changed.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
   <img src="bmc-button.svg" alt="Buy me a coffee" width="80">

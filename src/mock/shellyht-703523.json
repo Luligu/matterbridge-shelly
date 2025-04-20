@@ -1,7 +1,7 @@
 {
   "shelly": {
     "type": "SHHT-1",
-    "mac": "485519CA969F",
+    "mac": "C8C9A3703523",
     "auth": false,
     "fw": "20230913-112531/v1.14.0-gcb84623",
     "discoverable": false,
@@ -10,27 +10,27 @@
   "settings": {
     "device": {
       "type": "SHHT-1",
-      "mac": "485519CA969F",
-      "hostname": "shellyht-CA969F",
+      "mac": "C8C9A3703523",
+      "hostname": "shellyht-703523",
       "sleep_mode": true
     },
     "wifi_ap": {
       "enabled": false,
-      "ssid": "shellyht-CA969F",
+      "ssid": "",
       "key": ""
     },
     "wifi_sta": {
       "enabled": true,
-      "ssid": "Tamer Umniah",
-      "ipv4_method": "static",
-      "ip": "192.168.68.40",
-      "gw": "192.168.68.1",
-      "mask": "255.255.255.0",
-      "dns": "192.168.1.1"
+      "ssid": "",
+      "ipv4_method": "dhcp",
+      "ip": null,
+      "gw": null,
+      "mask": null,
+      "dns": null
     },
     "wifi_sta1": {
       "enabled": false,
-      "ssid": null,
+      "ssid": "",
       "ipv4_method": "dhcp",
       "ip": null,
       "gw": null,
@@ -41,7 +41,7 @@
       "enable": false,
       "server": "192.168.33.3:1883",
       "user": "",
-      "id": "shellyht-CA969F",
+      "id": "shellyht-703523",
       "reconnect_timeout_max": 60,
       "reconnect_timeout_min": 2,
       "clean_session": true,
@@ -53,7 +53,7 @@
     "coiot": {
       "enabled": true,
       "update_period": 15,
-      "peer": ""
+      "peer": "192.168.1.20:5683"
     },
     "sntp": {
       "server": "time.google.com",
@@ -65,7 +65,7 @@
       "username": "admin"
     },
     "pin_code": "",
-    "name": "HT Gen1",
+    "name": "H&T Gen1",
     "fw": "20230913-112531/v1.14.0-gcb84623",
     "pon_wifi_reset": false,
     "discoverable": false,
@@ -82,13 +82,13 @@
     "lat": null,
     "lng": null,
     "tzautodetect": true,
-    "tz_utc_offset": 10800,
+    "tz_utc_offset": 7200,
     "tz_dst": false,
     "tz_dst_auto": true,
-    "time": "01:57",
-    "unixtime": 1729292250,
+    "time": "22:25",
+    "unixtime": 1744748717,
     "debug_enable": false,
-    "allow_cross_origin": false,
+    "allow_cross_origin": true,
     "actions": {
       "active": false,
       "names": ["report_url", "temp_over_url", "temp_under_url", "hum_over_url", "hum_under_url"]
@@ -109,9 +109,9 @@
   "status": {
     "wifi_sta": {
       "connected": true,
-      "ssid": "Tamer Umniah",
-      "ip": "192.168.68.40",
-      "rssi": -47
+      "ssid": "",
+      "ip": "192.168.1.176",
+      "rssi": -51
     },
     "cloud": {
       "enabled": true,
@@ -120,45 +120,46 @@
     "mqtt": {
       "connected": false
     },
-    "time": "01:57",
-    "unixtime": 1729292249,
-    "serial": 1,
+    "time": "22:25",
+    "unixtime": 1744748717,
+    "serial": 2,
     "has_update": false,
-    "mac": "485519CA969F",
+    "mac": "C8C9A3703523",
     "cfg_changed_cnt": 0,
     "actions_stats": {
       "skipped": 0
     },
     "is_valid": true,
     "tmp": {
-      "value": 23,
+      "value": 21.75,
       "units": "C",
-      "tC": 23,
-      "tF": 73.4,
+      "tC": 21.75,
+      "tF": 71.15,
       "is_valid": true
     },
     "hum": {
-      "value": 50.5,
+      "value": 62.5,
       "is_valid": true
     },
     "bat": {
       "value": 100,
-      "voltage": 2.99
+      "voltage": 2.98
     },
-    "act_reasons": ["button"],
+    "act_reasons": ["sensor"],
     "connect_retries": 0,
     "sensor_error": 0,
     "update": {
-      "status": "unknown",
+      "status": "idle",
       "has_update": false,
-      "new_version": "",
-      "old_version": "20230913-112531/v1.14.0-gcb84623"
+      "new_version": "20230913-112531/v1.14.0-gcb84623",
+      "old_version": "20230913-112531/v1.14.0-gcb84623",
+      "beta_version": "20231107-162243/v1.14.1-rc1-g0617c15"
     },
     "ram_total": 52384,
-    "ram_free": 38640,
+    "ram_free": 40868,
     "fs_size": 233681,
     "fs_free": 156122,
-    "uptime": 3
+    "uptime": 17
   },
   "components": [],
   "cfg_rev": 0,

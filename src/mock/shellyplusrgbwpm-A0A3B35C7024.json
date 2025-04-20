@@ -3,11 +3,11 @@
     "name": "RGBW PM Plus Rgb",
     "id": "shellyplusrgbwpm-a0a3b35c7024",
     "mac": "A0A3B35C7024",
-    "slot": 1,
+    "slot": 0,
     "model": "SNDC-0D4P10WW",
     "gen": 2,
-    "fw_id": "20241011-114446/1.4.4-g6d2a586",
-    "ver": "1.4.4",
+    "fw_id": "20250318-152124/1.5.1-g01dd7ff",
+    "ver": "1.5.1",
     "app": "PlusRGBWPM",
     "auth_en": false,
     "auth_domain": null,
@@ -18,9 +18,6 @@
       "enable": false,
       "rpc": {
         "enable": true
-      },
-      "observer": {
-        "enable": false
       }
     },
     "cloud": {
@@ -105,8 +102,9 @@
       "device": {
         "name": "RGBW PM Plus Rgb",
         "mac": "A0A3B35C7024",
-        "fw_id": "20241011-114446/1.4.4-g6d2a586",
+        "fw_id": "20250318-152124/1.5.1-g01dd7ff",
         "discoverable": true,
+        "eco_mode": false,
         "profile": "rgb",
         "addon_type": null
       },
@@ -126,13 +124,13 @@
       },
       "ui_data": {},
       "rpc_udp": {
-        "dst_addr": null,
-        "listen_port": null
+        "dst_addr": "192.168.1.20:8585",
+        "listen_port": 8585
       },
       "sntp": {
-        "server": "time.google.com"
+        "server": "time.cloudflare.com"
       },
-      "cfg_rev": 33
+      "cfg_rev": 35
     },
     "wifi": {
       "ap": {
@@ -203,54 +201,57 @@
       "id": 0,
       "source": "init",
       "output": false,
-      "rgb": [255, 211, 0],
+      "rgb": [252, 4, 227],
       "brightness": 100,
       "temperature": {
-        "tC": 49.1,
-        "tF": 120.4
+        "tC": 50.9,
+        "tF": 123.5
       },
       "aenergy": {
-        "total": 11,
-        "by_minute": [0, 0, 0],
-        "minute_ts": 1741442220
+        "total": 80.931,
+        "by_minute": [37.121, 39.051, 41.245],
+        "minute_ts": 1745075760
       },
-      "apower": 0,
-      "current": 0,
+      "apower": 2.2,
+      "current": 0.176,
       "voltage": 12.6
     },
     "sys": {
       "mac": "A0A3B35C7024",
       "restart_required": false,
-      "time": "14:57",
-      "unixtime": 1741442226,
-      "uptime": 788940,
-      "ram_size": 252064,
-      "ram_free": 122860,
+      "time": "17:16",
+      "unixtime": 1745075806,
+      "last_sync_ts": 1745075690,
+      "uptime": 119,
+      "ram_size": 252252,
+      "ram_free": 123012,
+      "ram_min_free": 106476,
       "fs_size": 393216,
       "fs_free": 90112,
-      "cfg_rev": 33,
+      "cfg_rev": 35,
       "kvs_rev": 0,
       "schedule_rev": 9,
       "webhook_rev": 7,
+      "btrelay_rev": 0,
       "available_updates": {
         "beta": {
-          "version": "1.5.1-beta1"
+          "version": "1.6.0-beta1"
         }
       },
-      "reset_reason": 1
+      "reset_reason": 3
     },
     "wifi": {
-      "sta_ip": "192.168.1.244",
+      "sta_ip": "192.168.1.180",
       "status": "got ip",
       "ssid": "",
-      "rssi": -53
+      "rssi": -52
     },
     "ws": {
       "connected": false
     }
   },
   "components": [],
-  "cfg_rev": 33,
+  "cfg_rev": 35,
   "offset": 0,
   "total": 0
 }

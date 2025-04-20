@@ -28,10 +28,10 @@
       "ttl": 4500,
       "class": "IN",
       "flush": false,
-      "data": "shellyht-CA969F._http._tcp.local"
+      "data": "shellyht-703523._http._tcp.local"
     },
     {
-      "name": "shellyht-CA969F._http._tcp.local",
+      "name": "shellyht-703523._http._tcp.local",
       "type": "SRV",
       "ttl": 120,
       "class": "IN",
@@ -40,33 +40,33 @@
         "priority": 0,
         "weight": 0,
         "port": 80,
-        "target": "shellyht-CA969F.local"
+        "target": "shellyht-703523.local"
       }
     },
     {
-      "name": "shellyht-CA969F._http._tcp.local",
+      "name": "shellyht-703523._http._tcp.local",
       "type": "TXT",
       "ttl": 120,
       "class": "IN",
       "flush": true,
-      "data": ["id=shellyht-CA969F", "arch=esp8266", "app=ht-sensor", "fw_version=1.0", "fw_id=20230913-112531/v1.14.0-gcb84623", "discoverable=false"]
+      "data": ["id=shellyht-703523", "arch=esp8266", "app=ht-sensor", "fw_version=1.0", "fw_id=20230913-112531/v1.14.0-gcb84623", "discoverable=false"]
     },
     {
-      "name": "shellyht-CA969F.local",
+      "name": "shellyht-703523.local",
       "type": "A",
       "ttl": 120,
       "class": "IN",
       "flush": true,
-      "data": "192.168.68.173"
+      "data": "192.168.1.176"
     },
     {
-      "name": "shellyht-CA969F.local",
+      "name": "shellyht-703523.local",
       "type": "NSEC",
       "ttl": 120,
       "class": "IN",
       "flush": true,
       "data": {
-        "nextDomain": "shellyht-CA969F.local",
+        "nextDomain": "shellyht-703523.local",
         "rrtypes": ["A"]
       }
     }

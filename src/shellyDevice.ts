@@ -557,14 +557,16 @@ export class ShellyDevice extends EventEmitter {
           for (const light of settingsPayload[key] as ShellyData[]) {
             device.addComponent(new ShellyComponent(device, `light:${index++}`, 'Light', light as ShellyData));
           }
+          // Fix for Shelly SHRGBWW-01 that has no inputs in settings and status
+          if (device.model === 'SHRGBWW-01') device.addComponent(new ShellyComponent(device, 'input:0', 'Input'));
         }
-        if (key === 'relays' && device.profile !== 'cover') {
+        if (key === 'relays' /* && device.profile !== 'cover'*/) {
           let index = 0;
           for (const relay of settingsPayload[key] as ShellyData[]) {
             device.addComponent(new ShellyComponent(device, `relay:${index++}`, 'Relay', relay as ShellyData));
           }
         }
-        if (key === 'rollers' && device.profile !== 'switch') {
+        if (key === 'rollers' /* && device.profile !== 'switch'*/) {
           let index = 0;
           for (const roller of settingsPayload[key] as ShellyData[]) {
             device.addComponent(new ShellyComponent(device, `roller:${index++}`, 'Roller', roller as ShellyData));
@@ -582,11 +584,6 @@ export class ShellyDevice extends EventEmitter {
             device.addComponent(new ShellyComponent(device, `thermostat:${index++}`, 'Thermostat', thermostat as ShellyData));
           }
         }
-        // Fix for Shelly DUO RGBW that has mode in settings and not in shellyPayload
-        if (key === 'mode' && device.model === 'SHCB-1') {
-          device.profile = settingsPayload[key] as 'color' | 'white';
-          device.addComponent(new ShellyComponent(device, 'sys', 'Sys'));
-        }
       }
       for (const key in statusPayload) {
         if (key === 'ext_temperature' && isValidObject(statusPayload[key], 1)) device.addComponent(new ShellyComponent(device, 'temperature', 'Temperature'));
@@ -603,6 +600,7 @@ export class ShellyDevice extends EventEmitter {
         if (key === 'charger') device.addComponent(new ShellyComponent(device, 'battery', 'Battery'));
         if (key === 'lux') device.addComponent(new ShellyComponent(device, 'lux', 'Lux'));
         if (key === 'flood') device.addComponent(new ShellyComponent(device, 'flood', 'Flood'));
+        if (key === 'smoke') device.addComponent(new ShellyComponent(device, 'smoke', 'Smoke'));
         if (key === 'gas_sensor') device.addComponent(new ShellyComponent(device, 'gas', 'Gas'));
         if (key === 'sensor') {
           device.addComponent(new ShellyComponent(device, 'sensor', 'Sensor'));
@@ -660,6 +658,7 @@ export class ShellyDevice extends EventEmitter {
       const available_updates = (statusPayload.sys as ShellyData).available_updates as ShellyData;
       device.hasUpdate = available_updates.stable !== undefined;
       for (const key in settingsPayload) {
+        // log.debug(`Parsing device ${hk}${device.id}${db} component ${CYAN}${key}${db}...`);
         if (key === 'wifi') {
           const wifi = settingsPayload[key] as ShellyData;
           if (wifi.ap) device.addComponent(new ShellyComponent(device, 'wifi_ap', 'WiFi', wifi.ap as ShellyData)); // Ok
@@ -687,6 +686,7 @@ export class ShellyDevice extends EventEmitter {
         if (key.startsWith('light:')) device.addComponent(new ShellyComponent(device, key, 'Light', settingsPayload[key] as ShellyData));
         if (key.startsWith('rgb:')) device.addComponent(new ShellyComponent(device, key, 'Rgb', settingsPayload[key] as ShellyData));
         if (key.startsWith('rgbw:')) device.addComponent(new ShellyComponent(device, key, 'Rgbw', settingsPayload[key] as ShellyData));
+        if (key.startsWith('cct:')) device.addComponent(new ShellyComponent(device, key, 'Cct', settingsPayload[key] as ShellyData));
         if (key.startsWith('input:')) device.addComponent(new ShellyComponent(device, key, 'Input', settingsPayload[key] as ShellyData));
         if (key.startsWith('pm1:')) device.addComponent(new ShellyComponent(device, key, 'PowerMeter', settingsPayload[key] as ShellyData));
         if (key.startsWith('em1:')) device.addComponent(new ShellyComponent(device, key, 'PowerMeter', settingsPayload[key] as ShellyData));
@@ -749,6 +749,11 @@ export class ShellyDevice extends EventEmitter {
         }
         const ipv4 = shelly.ipv4Address;
         const server = ws.getValue('server') as string | undefined;
+        if (!server || !server.startsWith('ws://')) {
+          log.warn(
+            `The Outbound websocket settings is not configured correctly for device ${dn}${device.name}${wr} id ${hk}${device.id}${wr}. The address must be ws:// (i.e. ws://${ipv4}:8485). Set it in the web ui settings to receive updates from the device.`,
+          );
+        }
         if (!server || !server.endsWith(':8485')) {
           log.warn(
             `The Outbound websocket settings is not configured correctly for device ${dn}${device.name}${wr} id ${hk}${device.id}${wr}. The port must be 8485 (i.e. ws://${ipv4}:8485). Set it in the web ui settings to receive updates from the device.`,
@@ -869,12 +874,13 @@ export class ShellyDevice extends EventEmitter {
     // Emitted when a sleepy device wakes up by WsServer and CoapServer (via Shelly.on('update')). We update the cache file and register the device with Coap.
     device.on('awake', async () => {
       log.debug(`Device ${hk}${device.id}${db} host ${zb}${device.host}${db} is awake (cached: ${device.cached}).`);
-      if (device.sleepMode && (device.cached || Date.now() - device.lastFetched > device.fetchInterval)) {
+      const cached = device.cached;
+      if (device.sleepMode) {
         try {
           device.lastFetched = Date.now();
           const awaken = await ShellyDevice.create(shelly, log, device.host);
           if (awaken) {
-            if (device.gen === 1) shelly.coapServer.registerDevice(device.host, device.id, false); // No await to register device for CoIoT updates
+            if (device.gen === 1 && cached) shelly.coapServer.registerDevice(device.host, device.id, false); // No await to register device for CoIoT updates
             await awaken.saveDevicePayloads(shelly.dataPath);
             awaken.destroy();
           }
@@ -1137,6 +1143,7 @@ export class ShellyDevice extends EventEmitter {
         if (key.startsWith('light:')) this.updateComponent(key, data[key] as ShellyData);
         if (key.startsWith('rgb:')) this.updateComponent(key, data[key] as ShellyData);
         if (key.startsWith('rgbw:')) this.updateComponent(key, data[key] as ShellyData);
+        if (key.startsWith('cct:')) this.updateComponent(key, data[key] as ShellyData);
         if (key.startsWith('input:')) this.updateComponent(key, data[key] as ShellyData);
         if (key.startsWith('pm1:')) this.updateComponent(key, data[key] as ShellyData);
         if (key.startsWith('em1:')) this.updateComponent(key, data[key] as ShellyData);
@@ -1154,7 +1161,7 @@ export class ShellyDevice extends EventEmitter {
       }
       // Update state for active components with output
       for (const key in data) {
-        if (key.startsWith('light:') || key.startsWith('rgb:') || key.startsWith('rgbw:') || key.startsWith('switch:')) {
+        if (key.startsWith('light:') || key.startsWith('rgb:') || key.startsWith('rgbw:') || key.startsWith('cct:') || key.startsWith('switch:')) {
           const componentData = data[key] as ShellyData;
           const component = this.getComponent(key);
           if (component && componentData.output !== undefined && typeof componentData.output === 'boolean') component.setValue('state', componentData.output);

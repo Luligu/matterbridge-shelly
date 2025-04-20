@@ -109,7 +109,24 @@ export function shellyUpdateHandler(
     endpoint.setAttribute(ColorControl.Cluster.id, 'enhancedColorMode', ColorControl.EnhancedColorMode.ColorTemperatureMireds, shellyDevice.log);
     endpoint.setAttribute(ColorControl.Cluster.id, 'colorTemperatureMireds', matterTemp, shellyDevice.log);
   }
-  // Update color gen 2/3
+  // Update colorTemp gen 2+
+  if (isLightComponent(shellyComponent) && property === 'ct' && isValidNumber(value, 2700, 6500)) {
+    let minValue = 2700;
+    let maxValue = 6500;
+    const range = shellyComponent.getProperty('ct_range')?.value;
+    if (isValidArray(range, 2, 2) && isValidNumber(range[0], 2700, 6500) && isValidNumber(range[1], 2700, 6500)) {
+      minValue = range[0];
+      maxValue = range[1];
+    }
+    const minMatterTemp = 147;
+    const maxMatterTemp = 500;
+    const matterTemp = Math.max(Math.min(Math.round(((value - minValue) / (maxValue - minValue)) * (minMatterTemp - maxMatterTemp) + maxMatterTemp), maxMatterTemp), minMatterTemp);
+    matterbridgeDevice.log.debug(`ColorTemp for ${shellyDevice.model}: colorTemperature:${value} => colorTemperatureMireds:${matterTemp}`);
+    endpoint.setAttribute(ColorControl.Cluster.id, 'colorMode', ColorControl.ColorMode.ColorTemperatureMireds, shellyDevice.log);
+    endpoint.setAttribute(ColorControl.Cluster.id, 'enhancedColorMode', ColorControl.EnhancedColorMode.ColorTemperatureMireds, shellyDevice.log);
+    endpoint.setAttribute(ColorControl.Cluster.id, 'colorTemperatureMireds', matterTemp, shellyDevice.log);
+  }
+  // Update color gen 2+
   if (
     isLightComponent(shellyComponent) &&
     property === 'rgb' &&
@@ -327,7 +344,7 @@ export function shellyUpdateHandler(
   }
   // Update energy from main components (gen 2 devices send power total inside the component not with meter)
   if (['Light', 'Rgb', 'Relay', 'Switch', 'Cover', 'Roller', 'PowerMeter'].includes(shellyComponent.name)) {
-    if (isValidArray(platform.config.entityBlackList, 1) && platform.config.entityBlackList.includes('PowerMeter')) return;
+    if (!platform.validateEntity(shellyDevice.id, 'PowerMeter')) return;
     // Gen. 1 devices have: power, total (not all) in PowerMeters and voltage in status (not all)
     // PRO devices have: apower, voltage, freq, current, aenergy.total (wh) and no PowerMeters
     if ((property === 'power' || property === 'apower' || property === 'act_power') && isValidNumber(value, 0)) {

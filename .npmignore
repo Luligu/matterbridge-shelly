@@ -172,3 +172,5 @@ create-release.js
 src/net
 tsconfig.production.json
 jest
+matterstorage
+matterstorage.backup

@@ -1,19 +1,27 @@
 {
   "id": 0,
   "type": "response",
-  "flags": 1024,
+  "flags": 1152,
   "flag_qr": true,
   "opcode": "QUERY",
   "flag_aa": true,
   "flag_tc": false,
   "flag_rd": false,
-  "flag_ra": false,
+  "flag_ra": true,
   "flag_z": false,
   "flag_ad": false,
   "flag_cd": false,
   "rcode": "NOERROR",
   "questions": [],
   "answers": [
+    {
+      "name": "_services._dns-sd._udp.local",
+      "type": "PTR",
+      "ttl": 4500,
+      "class": "IN",
+      "flush": false,
+      "data": "_http._tcp.local"
+    },
     {
       "name": "_http._tcp.local",
       "type": "PTR",
@@ -42,14 +50,6 @@
       "class": "IN",
       "flush": true,
       "data": ["id=shelly1l-E8DB84AAD781", "arch=esp8266", "app=switch1l", "fw_version=1.0", "fw_id=20230913-112054/v1.14.0-gcb84623", "discoverable=false"]
-    },
-    {
-      "name": "_services._dns-sd._udp.local",
-      "type": "PTR",
-      "ttl": 4500,
-      "class": "IN",
-      "flush": false,
-      "data": "_http._tcp.local"
     },
     {
       "name": "shelly1l-E8DB84AAD781.local",

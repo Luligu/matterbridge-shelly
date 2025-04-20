@@ -21,7 +21,7 @@
  * limitations under the License. *
  */
 
-import { AnsiLogger, CYAN, MAGENTA, BRIGHT, hk, db, nf, wr, zb, er, LogLevel } from 'matterbridge/logger';
+import { AnsiLogger, CYAN, MAGENTA, BRIGHT, hk, db, nf, wr, zb, LogLevel, er } from 'matterbridge/logger';
 import { isValidArray, isValidObject } from 'matterbridge/utils';
 
 import crypto from 'node:crypto';
@@ -136,6 +136,29 @@ export class Shelly extends EventEmitter {
         if (device.cached) {
           device.cached = false;
           this.log.debug(`Device ${hk}${device.id}${db} host ${zb}${host}${db} received a CoIoT message: setting cached to false`);
+        }
+      }
+    });
+
+    this.coapServer.on('coapupdate', async (host: string, data: ShellyData) => {
+      const device = this.getDeviceByHost(host);
+      if (device) {
+        device.log.debug(`CoIoT coapupdate from device id ${hk}${device.id}${db} host ${zb}${host}${db}`);
+        device.lastseen = Date.now();
+        if (device.sleepMode) device.emit('awake');
+        if (!device.online) {
+          device.online = true;
+          device.emit('online');
+          this.log.debug(`Device ${hk}${device.id}${db} host ${zb}${host}${db} received a CoIoT message: setting online to true`);
+        }
+        if (device.cached) {
+          device.cached = false;
+          this.log.debug(`Device ${hk}${device.id}${db} host ${zb}${host}${db} received a CoIoT message: setting cached to false`);
+        }
+        if (isValidObject(data, 1)) {
+          for (const key in data) {
+            device.updateComponent(key, data[key] as ShellyData);
+          }
         }
       }
     });

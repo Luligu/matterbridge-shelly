@@ -296,6 +296,7 @@ export class WsClient extends EventEmitter {
       this._isConnecting = true;
       this.wsClient = new WebSocket(this.wsUrl);
     } catch (error) {
+      this._isConnecting = false;
       this.log.error(`Failed to create WebSocket connection to ${zb}${this.wsUrl}${er}: ${error}`);
       return;
     }

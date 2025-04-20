@@ -83,17 +83,17 @@
     },
     "cloud": {
       "enabled": true,
-      "connected": false
+      "connected": true
     },
     "timezone": null,
     "lat": null,
     "lng": null,
     "tzautodetect": true,
-    "tz_utc_offset": 3600,
+    "tz_utc_offset": 7200,
     "tz_dst": false,
     "tz_dst_auto": true,
-    "time": "14:53",
-    "unixtime": 1741441985,
+    "time": "15:16",
+    "unixtime": 1744982193,
     "debug_enable": false,
     "allow_cross_origin": false,
     "actions": {
@@ -104,20 +104,20 @@
       "hw_revision": "prod-102020",
       "batch_id": 0
     },
-    "mode": "white",
+    "mode": "color",
     "lights": [
       {
         "ison": false,
-        "red": 255,
-        "green": 0,
-        "blue": 211,
+        "red": 0,
+        "green": 213,
+        "blue": 255,
         "white": 0,
-        "gain": 100,
-        "temp": 3000,
-        "brightness": 100,
+        "gain": 1,
+        "temp": 6465,
+        "brightness": 1,
         "transition": 1000,
         "effect": 0,
-        "default_state": "on",
+        "default_state": "last",
         "auto_on": 0,
         "auto_off": 0,
         "schedule": false,
@@ -143,21 +143,21 @@
       "connected": true,
       "ssid": "",
       "ip": "192.168.1.155",
-      "rssi": -57
+      "rssi": -59
     },
     "cloud": {
       "enabled": true,
-      "connected": false
+      "connected": true
     },
     "mqtt": {
       "connected": false
     },
-    "time": "14:53",
-    "unixtime": 1741441986,
-    "serial": 15,
+    "time": "15:16",
+    "unixtime": 1744982193,
+    "serial": 79,
     "has_update": false,
     "mac": "485519EE12A7",
-    "cfg_changed_cnt": 0,
+    "cfg_changed_cnt": 25,
     "actions_stats": {
       "skipped": 0
     },
@@ -169,14 +169,14 @@
         "timer_started": 0,
         "timer_duration": 0,
         "timer_remaining": 0,
-        "mode": "white",
-        "red": 255,
-        "green": 0,
-        "blue": 211,
+        "mode": "color",
+        "red": 0,
+        "green": 213,
+        "blue": 255,
         "white": 0,
-        "gain": 100,
-        "temp": 3000,
-        "brightness": 100,
+        "gain": 1,
+        "temp": 6465,
+        "brightness": 1,
         "effect": 0,
         "transition": 0
       }
@@ -185,9 +185,9 @@
       {
         "power": 0,
         "is_valid": true,
-        "timestamp": 1741445586,
+        "timestamp": 1744989393,
         "counters": [0, 0, 0],
-        "total": 1975
+        "total": 144
       }
     ],
     "update": {
@@ -198,10 +198,10 @@
       "beta_version": "20231107-162425/v1.14.1-rc1-g0617c15"
     },
     "ram_total": 51616,
-    "ram_free": 38204,
+    "ram_free": 39252,
     "fs_size": 233681,
     "fs_free": 158381,
-    "uptime": 593077
+    "uptime": 88338
   },
   "components": [],
   "cfg_rev": 0,

@@ -6,6 +6,7 @@ import { WsServer } from './wsServer';
 import { WebSocket, WebSocketServer } from 'ws';
 import { AnsiLogger, LogLevel } from 'matterbridge/logger';
 import { ShellyData } from './shellyTypes';
+import * as http from 'node:http';
 
 describe('ShellyWsServer', () => {
   let wsServer: WsServer;
@@ -42,6 +43,14 @@ describe('ShellyWsServer', () => {
     // prettier-ignore
     await waiter('wsServer not listening', () => { return !(wsServer as any)._isListening; }, true);
   }, 360000);
+
+  test('Should not fail to create the wsServer', async () => {
+    const wsServer = new WsServer(LogLevel.DEBUG);
+    wsServer.start(5050);
+    await wait(1000);
+    expect(wsServer.isListening).toBeTruthy();
+    wsServer.stop();
+  });
 
   test('Create the wsServer', () => {
     expect(wsServer).not.toBeUndefined();
@@ -80,7 +89,7 @@ describe('ShellyWsServer', () => {
     expect(wsServer.isListening).toBeTruthy();
   });
 
-  test('Should fail to create the wsServer', async () => {
+  test('Should fail to create the wsServer since the port is in use', async () => {
     const wsServer = new WsServer(LogLevel.DEBUG);
     wsServer.start();
     // prettier-ignore

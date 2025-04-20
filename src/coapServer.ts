@@ -4,7 +4,7 @@
  * @file src\coapServer.ts
  * @author Luca Liguori
  * @date 2024-05-01
- * @version 2.0.2
+ * @version 3.0.0
  *
  * Copyright 2024, 2025, 2026 Luca Liguori.
  *
@@ -34,7 +34,7 @@ import { promises as fs } from 'node:fs';
 
 // Shelly imports
 import { Shelly } from './shelly.js';
-import { ShellyDataType } from './shellyTypes.js';
+import { ShellyData, ShellyDataType } from './shellyTypes.js';
 import { ShellyDevice } from './shellyDevice.js';
 
 // 192.168.1.189:5683
@@ -45,7 +45,8 @@ const COIOT_OPTION_STATUS_SERIAL = '3420';
 
 const COAP_MULTICAST_ADDRESS = '224.0.1.187';
 
-export interface CoapMessage {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+interface CoIoTMessage {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   msg: any;
   host: string;
@@ -87,6 +88,7 @@ interface CoIoTDescription {
 
 interface CoapServerEvent {
   update: [host: string, component: string, property: string, value: ShellyDataType];
+  coapupdate: [host: string, status: ShellyData];
 }
 
 export class CoapServer extends EventEmitter {
@@ -264,7 +266,6 @@ export class CoapServer extends EventEmitter {
     coap.registerOption(
       COIOT_OPTION_GLOBAL_DEVID,
       (str) => {
-        this.log.debug('GLOBAL_DEVID str', str);
         // Ensure that 'str' is a string
         if (typeof str === 'string' || (str && typeof str.toString === 'function')) {
           return Buffer.from(str.toString());
@@ -278,7 +279,6 @@ export class CoapServer extends EventEmitter {
     coap.registerOption(
       COIOT_OPTION_STATUS_VALIDITY,
       (str) => {
-        this.log.debug('STATUS_VALIDITY str', str);
         // Convert to integer and then to Buffer
         if (typeof str === 'string') {
           // Create a new Buffer and write the integer
@@ -295,7 +295,6 @@ export class CoapServer extends EventEmitter {
     coap.registerOption(
       COIOT_OPTION_STATUS_SERIAL,
       (str) => {
-        this.log.debug('STATUS_SERIAL str', str);
         // Convert to integer and then to Buffer
         if (typeof str === 'string') {
           // Create a new Buffer and write the integer
@@ -315,7 +314,7 @@ export class CoapServer extends EventEmitter {
    *
    * @param {IncomingMessage} msg - The incoming message object.
    */
-  private parseShellyMessage(msg: IncomingMessage) {
+  private parseShellyMessage(msg: IncomingMessage): ShellyData | CoIoTDescription[] | undefined {
     if (!this.deviceId.get(msg.rsinfo.address)) return;
     this.log.debug(`Parsing CoIoT (coap) response from device ${hk}${this.deviceId.get(msg.rsinfo.address)}${db} host ${zb}${msg.rsinfo.address}${db}...`);
 
@@ -402,243 +401,248 @@ export class CoapServer extends EventEmitter {
       } catch {
         // Ignore cause the error is already logged
       }
-      const desc: CoIoTDescription[] = [];
-      this.log.debug(`parsing ${MAGENTA}blocks${db}:`);
-      const blk: CoIoTBlkComponent[] = payload.blk;
-      if (!blk) {
-        this.log.error(`No blk found for host ${zb}${host}${er} in ${msg.url}`);
-        return;
-      }
-      blk.forEach((b) => {
-        this.log.debug(`- block: ${CYAN}${b.I}${db} description ${CYAN}${b.D}${db}`);
-        const sen: CoIoTSenProperty[] = payload.sen;
-        sen
-          .filter((s) => s.L === b.I)
-          .forEach((s) => {
-            this.log.debug(
-              `  - id: ${CYAN}${s.I}${db} type ${CYAN}${s.T}${db} description ${CYAN}${s.D}${db} unit ${CYAN}${s.U}${db} range ${CYAN}${s.R}${db} block ${CYAN}${s.L}${db}`,
-            );
-
-            // sys component
-            if (s.D === 'mode') desc.push({ id: s.I, component: 'sys', property: 'profile', range: s.R });
-            if (s.D === 'deviceTemp' && s.U !== 'F' && b.D === 'device') desc.push({ id: s.I, component: 'sys', property: 'temperature', range: s.R }); // SHSW-25
-            if (s.D === 'overtemp' && b.D === 'device') desc.push({ id: s.I, component: 'sys', property: 'overtemperature', range: s.R }); // SHSW-25
-            if (s.D === 'voltage' && b.D === 'device') desc.push({ id: s.I, component: 'sys', property: 'voltage', range: s.R }); // SHSW-25
-            if (s.D === 'cfgChanged' && b.D === 'device') desc.push({ id: s.I, component: 'sys', property: 'cfg_rev', range: s.R });
-            if (s.D === 'wakeupEvent' && b.D === 'device') desc.push({ id: s.I, component: 'sys', property: 'act_reasons', range: s.R });
-
-            // light component
-            if (s.D === 'output') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'state', range: s.R });
-            if (s.D === 'brightness') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'brightness', range: s.R }); // Used by white channels
-            if (s.D === 'gain') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'gain', range: s.R }); // Used by color channels
-            if (s.D === 'red') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'red', range: s.R });
-            if (s.D === 'green') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'green', range: s.R });
-            if (s.D === 'blue') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'blue', range: s.R });
-            if (s.D === 'white') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'white', range: s.R });
-            if (s.D === 'whiteLevel') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'white', range: s.R });
-            if (s.D === 'colorTemp') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'temp', range: s.R });
-            if (s.D === 'power' && b.D.startsWith('light')) desc.push({ id: s.I, component: 'meter:0', property: 'power', range: s.R });
-            if (s.D === 'energy' && b.D.startsWith('light')) desc.push({ id: s.I, component: 'meter:0', property: 'total', range: s.R });
-
-            // relay component
-            if (s.D === 'power' && b.D.startsWith('relay')) desc.push({ id: s.I, component: b.D.replace('_', ':').replace('relay', 'meter'), property: 'power', range: s.R });
-            if (s.D === 'energy' && b.D.startsWith('relay')) desc.push({ id: s.I, component: b.D.replace('_', ':').replace('relay', 'meter'), property: 'total', range: s.R });
-
-            // roller component
-            if (s.D === 'roller') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'state', range: s.R });
-            if (s.D === 'rollerPos') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'current_pos', range: s.R });
-            if (s.D === 'rollerStopReason') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'stop_reason', range: s.R });
-            if (s.D === 'rollerPower') desc.push({ id: s.I, component: 'meter:0', property: 'power', range: s.R });
-            if (s.D === 'rollerEnergy') desc.push({ id: s.I, component: 'meter:0', property: 'total', range: s.R });
-
-            // emeter component
-            if (s.D === 'voltage' && b.D.startsWith('emeter')) desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'voltage', range: s.R }); // SHEM
-            if (s.D === 'power' && b.D.startsWith('emeter')) desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'power', range: s.R });
-            if (s.D === 'energy' && b.D.startsWith('emeter')) desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'total', range: s.R });
-            if (s.D === 'current' && b.D.startsWith('emeter')) desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'current', range: s.R });
-
-            // sensor/input component
-            if (s.D === 'inputEvent' && b.D.startsWith('sensor'))
-              desc.push({ id: s.I, component: b.D.replace('_', ':').replace('sensor', 'input'), property: 'event', range: s.R }); // SHBTN-2
-            if (s.D === 'inputEventCnt' && b.D.startsWith('sensor'))
-              desc.push({ id: s.I, component: b.D.replace('_', ':').replace('sensor', 'input'), property: 'event_cnt', range: s.R }); // SHBTN-2
-
-            // mos component
-            if (s.D === 'motion' && b.D.startsWith('sensor')) desc.push({ id: s.I, component: 'sensor', property: 'motion', range: ['0/1', '-1'] }); // SHMOS-01 and SHMOS-02
-            // dw component
-            if (s.D === 'dwIsOpened' && b.D.startsWith('sensor')) desc.push({ id: s.I, component: 'sensor', property: 'contact_open', range: ['0/1', '-1'] }); // SHDW-1 and SHDW-2
-            if (s.D === 'vibration' && b.D.startsWith('sensor')) desc.push({ id: s.I, component: 'vibration', property: 'vibration', range: ['0/1', '-1'] }); // SHDW-1 and SHDW-2
-            if (s.D === 'luminosity' && b.D.startsWith('sensor')) desc.push({ id: s.I, component: 'lux', property: 'value', range: ['U32', '-1'] }); // SHDW-1 and SHDW-2
-
-            // flood component
-            if (s.D === 'flood' && b.D.startsWith('sensor')) desc.push({ id: s.I, component: 'flood', property: 'flood', range: ['0/1', '-1'] }); // SHWT-1
-
-            // ht component
-            if (s.D === 'extTemp' && s.U === 'C' && b.D.startsWith('sensor')) desc.push({ id: s.I, component: 'temperature', property: 'tC', range: s.R }); // SHHT-1
-            if (s.D === 'extTemp' && s.U === 'F' && b.D.startsWith('sensor')) desc.push({ id: s.I, component: 'temperature', property: 'tF', range: s.R }); // SHHT-1
-            if (s.D === 'humidity' && b.D.startsWith('sensor')) desc.push({ id: s.I, component: 'humidity', property: 'value', range: s.R }); // SHHT-1
-
-            // gas_sensor component
-            if (s.D === 'sensorOp' && b.D.startsWith('sensor')) desc.push({ id: s.I, component: 'gas', property: 'sensor_state', range: s.R }); // SHGS-1
-            if (s.D === 'gas' && b.D.startsWith('sensor')) desc.push({ id: s.I, component: 'gas', property: 'alarm_state', range: s.R }); // SHGS-1
-            if (s.D === 'concentration' && b.D.startsWith('sensor')) desc.push({ id: s.I, component: 'gas', property: 'ppm', range: s.R }); // SHGS-1
-
-            // generic sensor error
-            if (s.D === 'sensorError' && b.D.startsWith('sensor')) desc.push({ id: s.I, component: 'sys', property: 'sensor_error', range: s.R });
-
-            // battery component
-            if (s.D === 'battery' && b.D === 'device') desc.push({ id: s.I, component: 'battery', property: 'level', range: s.R }); // SHBTN-2
-            if (s.D === 'charger' && b.D === 'device') desc.push({ id: s.I, component: 'battery', property: 'charging', range: s.R }); // SHBTN-2
-          });
-      });
-      this.log.debug(`parsing ${MAGENTA}decoding${db}:`);
-      desc.forEach((d) => {
-        this.log.debug(`- id ${CYAN}${d.id}${db} component ${CYAN}${d.component}${db} property ${CYAN}${d.property}${db} range ${CYAN}${d.range}${db}`);
-      });
+      const desc = this.parseDescription(payload);
       this.deviceDescription.set(host, desc);
+      return desc;
     }
 
     if (msg.url === '/cit/s') {
       try {
-        if (this.log.logLevel === LogLevel.DEBUG) this.saveResponse(deviceModel + '-' + deviceMac + '.coap.cits.json', payload);
+        if (this.log.logLevel === LogLevel.DEBUG) this.saveResponse(this.deviceId.get(host) + '.coap.cits.json', payload);
       } catch {
         // Ignore cause the error is already logged
       }
       this.deviceSerial.set(host, serial);
-      const descriptions: CoIoTDescription[] = this.deviceDescription.get(host) || [];
+      let descriptions: CoIoTDescription[] = this.deviceDescription.get(host) || [];
+      // For sleep mode devices we don't have the device description at the first message
       if (!descriptions || descriptions.length === 0) {
         // SHMOS-01, SHMOS-02, SHTRV-01 and first Gen1 don't answer to cit/d and cit/s on CoIot (they answer to fetch http://host/cit/d)
         if (deviceModel === 'SHDW-1' || deviceModel === 'SHDW-2') {
-          this.log.debug(`*Set coap descriptions for host ${zb}${host}${db} deviceType ${CYAN}SHDW-1/SHDW-2${db}`);
-          // wakeup event
-          descriptions.push({ id: 9102, component: 'sys', property: 'act_reasons', range: ['battery/button/periodic/poweron/sensor/alarm', 'unknown'] });
-          // sys component cfg_rev property
-          descriptions.push({ id: 9103, component: 'sys', property: 'cfg_rev', range: 'U16' });
-          // battery component
-          descriptions.push({ id: 3111, component: 'battery', property: 'level', range: ['0/100', '-1'] }); // SHDW-1 and SHDW-2
-          // contact component 1 = open, 0 = closed
-          descriptions.push({ id: 3108, component: 'sensor', property: 'contact_open', range: ['0/1', '-1'] }); // SHDW-1 and SHDW-2
-          // vibration component
-          descriptions.push({ id: 6110, component: 'vibration', property: 'vibration', range: ['0/1', '-1'] }); // SHDW-1 and SHDW-2
-          // luminosity component
-          descriptions.push({ id: 3106, component: 'lux', property: 'value', range: ['U32', '-1'] }); // SHDW-1 and SHDW-2
-          // temperature component
-          descriptions.push({ id: 3101, component: 'temperature', property: 'value', range: ['-55/125', '999'] }); // SHDW-1 and SHDW-2
+          this.log.debug(`*Set coap descriptions for host ${zb}${host}${db} deviceType ${CYAN}${deviceModel}${db}`);
+          descriptions = this.parseDescription(SHDW_CITD);
           this.deviceDescription.set(host, descriptions);
         } else if (deviceModel === 'SHTRV-01') {
-          this.log.debug(`*Set coap descriptions for host ${zb}${host}${db} deviceType ${CYAN}SHTRV-01${db}`);
-          // battery component
-          descriptions.push({ id: 3111, component: 'battery', property: 'level', range: ['0/100', '-1'] }); // SHTRV-01
-          // target temperature component
-          descriptions.push({ id: 3103, component: 'thermostat:0', property: 'target_t.value', range: ['4/31', '999'] }); // SHTRV-01
-          // temperature component
-          descriptions.push({ id: 3101, component: 'thermostat:0', property: 'tmp.value', range: ['-55/125', '999'] }); // SHTRV-01
-          // sys component cfg_rev property
-          descriptions.push({ id: 9103, component: 'sys', property: 'cfg_rev', range: 'U16' }); // SHTRV-01
+          this.log.debug(`*Set coap descriptions for host ${zb}${host}${db} deviceType ${CYAN}${deviceModel}${db}`);
+          descriptions = this.parseDescription(SHTRV01_CITD, deviceModel);
           this.deviceDescription.set(host, descriptions);
         } else if (deviceModel === 'SHBTN-1' || deviceModel === 'SHBTN-2') {
-          this.log.debug(`*Set coap descriptions for host ${zb}${host}${db} deviceType ${CYAN}SHBTN-1/SHBTN-2${db}`);
-          // battery component
-          descriptions.push({ id: 3111, component: 'battery', property: 'level', range: ['0/100', '-1'] }); // SHBTN-2
-          // input component
-          descriptions.push({ id: 2102, component: 'input:0', property: 'event', range: ['S/L/SS/SSS', ''] }); // SHBTN-2
-          descriptions.push({ id: 2103, component: 'input:0', property: 'event_cnt', range: 'U16' }); // SHBTN-2
+          this.log.debug(`*Set coap descriptions for host ${zb}${host}${db} deviceType ${CYAN}${deviceModel}${db}`);
+          descriptions = this.parseDescription(SHBTN_CITD);
           this.deviceDescription.set(host, descriptions);
         } else if (deviceModel === 'SHMOS-01') {
-          this.log.debug(`*Set coap descriptions for host ${zb}${host}${db} deviceType ${CYAN}SHMOS-01${db}`);
-          // battery component
-          descriptions.push({ id: 3111, component: 'battery', property: 'level', range: ['0/100', '-1'] }); // SHMOS-01
-          // motion component
-          descriptions.push({ id: 6107, component: 'sensor', property: 'motion', range: ['0/1', '-1'] }); // SHMOS-01
-          // vibration component
-          descriptions.push({ id: 6110, component: 'vibration', property: 'vibration', range: ['0/1', '-1'] }); // SHMOS-01
-          // luminosity component
-          descriptions.push({ id: 3106, component: 'lux', property: 'value', range: ['U32', '-1'] }); // SHMOS-01
-          // sys component cfg_rev property
-          descriptions.push({ id: 9103, component: 'sys', property: 'cfg_rev', range: 'U16' }); // SHMOS-01
+          this.log.debug(`*Set coap descriptions for host ${zb}${host}${db} deviceType ${CYAN}${deviceModel}${db}`);
+          descriptions = this.parseDescription(SHMOS01_CITD);
           this.deviceDescription.set(host, descriptions);
         } else if (deviceModel === 'SHMOS-02') {
-          this.log.debug(`*Set coap descriptions for host ${zb}${host}${db} deviceType ${CYAN}SHMOS-02${db}`);
-          // battery component
-          descriptions.push({ id: 3111, component: 'battery', property: 'level', range: ['0/100', '-1'] }); // SHMOS-02
-          // motion component
-          descriptions.push({ id: 6107, component: 'sensor', property: 'motion', range: ['0/1', '-1'] }); // SHMOS-02
-          // vibration component
-          descriptions.push({ id: 6110, component: 'vibration', property: 'vibration', range: ['0/1', '-1'] }); // SHMOS-02
-          // luminosity component
-          descriptions.push({ id: 3106, component: 'lux', property: 'value', range: ['U32', '-1'] }); // SHMOS-02
-          // temperature component
-          descriptions.push({ id: 3101, component: 'temperature', property: 'value', range: ['-55/125', '999'] }); // SHMOS-02
-          // sys component cfg_rev property
-          descriptions.push({ id: 9103, component: 'sys', property: 'cfg_rev', range: 'U16' }); // SHMOS-02
+          this.log.debug(`*Set coap descriptions for host ${zb}${host}${db} deviceType ${CYAN}${deviceModel}${db}`);
+          descriptions = this.parseDescription(SHMOS02_CITD);
           this.deviceDescription.set(host, descriptions);
         } else if (deviceModel === 'SHWT-1') {
-          this.log.debug(`*Set coap descriptions for host ${zb}${host}${db} deviceType ${CYAN}SHWT-1${db}`);
-          // wakeup event
-          descriptions.push({ id: 9102, component: 'sys', property: 'act_reasons', range: ['battery/button/periodic/poweron/sensor/alarm', 'unknown'] }); // SHWT-1
-          // sensor error component
-          descriptions.push({ id: 3115, component: 'sys', property: 'sensor_error', range: ['0/1'] }); // SHWT-1
-          // battery component
-          descriptions.push({ id: 3111, component: 'battery', property: 'level', range: ['0/100', '-1'] }); // SHWT-1
-          // flood component
-          descriptions.push({ id: 6106, component: 'flood', property: 'flood', range: ['0/1', '-1'] }); // SHWT-1
-          // temperature component
-          descriptions.push({ id: 3101, component: 'temperature', property: 'value', range: ['-55/125', '999'] }); // SHWT-1
+          this.log.debug(`*Set coap descriptions for host ${zb}${host}${db} deviceType ${CYAN}${deviceModel}${db}`);
+          descriptions = this.parseDescription(SHWT1_CITD);
           this.deviceDescription.set(host, descriptions);
         } else if (deviceModel === 'SHHT-1') {
-          this.log.debug(`*Set coap descriptions for host ${zb}${host}${db} deviceType ${CYAN}SHHT-1${db}`);
-          // wakeup event
-          descriptions.push({ id: 9102, component: 'sys', property: 'act_reasons', range: ['battery/button/periodic/poweron/sensor/alarm', 'unknown'] }); // SHHT-1
-          // sensor error component
-          descriptions.push({ id: 3115, component: 'sys', property: 'sensor_error', range: ['0/1'] }); // SHHT-1
-          // battery component
-          descriptions.push({ id: 3111, component: 'battery', property: 'level', range: ['0/100', '-1'] }); // SHHT-1
-          // temperature component
-          descriptions.push({ id: 3101, component: 'temperature', property: 'value', range: ['-55/125', '999'] }); // SHHT-1
-          // humidity component
-          descriptions.push({ id: 3103, component: 'humidity', property: 'value', range: ['0/100', '-1'] }); // SHHT-1
+          this.log.debug(`*Set coap descriptions for host ${zb}${host}${db} deviceType ${CYAN}${deviceModel}${db}`);
+          descriptions = this.parseDescription(SHHT1_CITD);
+          this.deviceDescription.set(host, descriptions);
+        } else if (deviceModel === 'SHSM-01') {
+          this.log.debug(`*Set coap descriptions for host ${zb}${host}${db} deviceType ${CYAN}${deviceModel}${db}`);
+          descriptions = this.parseDescription(SHSM1_CITD);
           this.deviceDescription.set(host, descriptions);
         } else {
           this.log.info(`No coap description found for ${hk}${deviceModel}${nf} id ${hk}${this.deviceId.get(host)}${nf} host ${zb}${host}${nf} fetching it...`);
-          this.getDeviceDescription(host, deviceModel); // No await
+          const id = this.deviceId.get(host);
+          if (id) this.registerDevice(host, id, false); // No await
         }
       }
       try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const values: CoIoTGValue[] = payload.G?.map((v: any[]) => ({
-          channel: v[0],
-          id: v[1],
-          value: v[2],
-        }));
-        this.log.debug(`parsing ${MAGENTA}values${db} (${values.length}):`);
-        values.forEach((v) => {
-          const desc = descriptions.find((d) => d.id === v.id);
-          if (desc) {
-            this.log.debug(
-              `- channel ${CYAN}${v.channel}${db} id ${CYAN}${v.id}${db} value ${CYAN}${v.value}${db} => ${CYAN}${desc.component}${db} ${CYAN}${desc.property}${db} ${CYAN}${desc.range === '0/1' ? v.value === 1 : v.value}${db}`,
-            );
-            if (typeof desc.range === 'string' && desc.range === '0/1') {
-              this.log.debug(`sending update for component ${CYAN}${desc.component}${db} property ${CYAN}${desc.property}${db} value ${CYAN}${v.value === 1}${db}`);
-              this.emit('update', host, desc.component, desc.property, v.value === 1);
-            } else if (Array.isArray(desc.range) && desc.range[0] === '0/1' && desc.range[1] === '-1') {
-              this.log.debug(
-                `sending update for component ${CYAN}${desc.component}${db} property ${CYAN}${desc.property}${db} value ${CYAN}${v.value === -1 ? null : v.value === 1}${db}`,
-              );
-              this.emit('update', host, desc.component, desc.property, v.value === -1 ? null : v.value === 1);
-            } else {
-              this.log.debug(`sending update for component ${CYAN}${desc.component}${db} property ${CYAN}${desc.property}${db} value ${CYAN}${v.value}${db}`);
-              if (desc.property.includes('.')) {
-                // target_t#value
-                const [property, subproperty] = desc.property.split('.');
-                this.emit('update', host, desc.component, property, { [subproperty]: v.value });
-              } else this.emit('update', host, desc.component, desc.property, v.value);
-            }
-          } else this.log.debug(`No coap description found for id ${v.id}`);
-        });
+        const status: ShellyData = this.parseStatus(descriptions, payload);
+        this.log.debug(`***Update status for device ${hk}${this.deviceId.get(host)}${db} host ${zb}${host}${db} payload:\n`, status);
+        this.emit('coapupdate', host, status);
+        return status;
       } catch {
         this.log.warn(`Error parsing values for host ${zb}${host}${wr}`);
       }
     }
+  }
+  /**
+   * Parse the status of the device
+   * @param payload - The payload of the message
+   *
+   * @returns The parsed staus of the device
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  parseStatus(descriptions: CoIoTDescription[], payload: any): ShellyData {
+    const status: ShellyData = {};
+    const values: CoIoTGValue[] =
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      payload.G?.map((v: any[]) => ({
+        channel: v[0],
+        id: v[1],
+        value: v[2],
+      })) || [];
+    this.log.debug(`Parsing ${MAGENTA}values${db} (${values.length}):`);
+    values.forEach((v) => {
+      const desc = descriptions.find((d) => d.id === v.id);
+      if (desc) {
+        this.log.debug(
+          `- channel ${CYAN}${v.channel}${db} id ${CYAN}${v.id}${db} value ${CYAN}${v.value}${db} => component ${CYAN}${desc.component}${db} property ${CYAN}${desc.property}${db} value ${CYAN}${desc.range === '0/1' ? v.value === 1 : v.value}${db}`,
+        );
+        if (!desc.property.startsWith('input') && typeof desc.range === 'string' && desc.range === '0/1') {
+          // this.log.debug(`sending update for component ${CYAN}${desc.component}${db} property ${CYAN}${desc.property}${db} value ${CYAN}${v.value === 1}${db}`);
+          // this.emit('update', host, desc.component, desc.property, v.value === 1);
+          if (!status[desc.component]) status[desc.component] = {};
+          (status[desc.component] as ShellyData)[desc.property] = v.value === 1;
+        } else if (!desc.property.startsWith('input') && Array.isArray(desc.range) && desc.range[0] === '0/1' && desc.range[1] === '-1') {
+          // this.log.debug(`sending update for component ${CYAN}${desc.component}${db} property ${CYAN}${desc.property}${db} value ${CYAN}${v.value === -1 ? null : v.value === 1}${db}`);
+          // this.emit('update', host, desc.component, desc.property, v.value === -1 ? null : v.value === 1);
+          if (!status[desc.component]) status[desc.component] = {};
+          (status[desc.component] as ShellyData)[desc.property] = v.value === -1 ? null : v.value === 1;
+        } else {
+          // this.log.debug(`sending update for component ${CYAN}${desc.component}${db} property ${CYAN}${desc.property}${db} value ${CYAN}${v.value}${db}`);
+          if (desc.property.includes('.')) {
+            const [property, subproperty] = desc.property.split('.');
+            // this.emit('update', host, desc.component, property, { [subproperty]: v.value });
+            if (!status[desc.component]) status[desc.component] = {};
+            (status[desc.component] as ShellyData)[property] = { [subproperty]: v.value };
+          } else {
+            // this.emit('update', host, desc.component, desc.property, v.value);
+            if (!status[desc.component]) status[desc.component] = {};
+            (status[desc.component] as ShellyData)[desc.property] = v.value;
+          }
+        }
+      } else this.log.debug(`No coap description found for id ${v.id}`);
+    });
+    return status;
+  }
+
+  /**
+   * Parse the description of the device
+   * @param payload - The payload of the message
+   *
+   * @returns The parsed description of the device
+   */
+  parseDescription(payload: Record<string, unknown>, model?: string): CoIoTDescription[] {
+    this.log.debug(`Parsing ${MAGENTA}blocks${db}:`);
+    const desc: CoIoTDescription[] = [];
+    const blk = payload.blk as CoIoTBlkComponent[];
+    const sen = payload.sen as CoIoTSenProperty[];
+    if (!blk || blk.length === 0 || !sen || sen.length === 0) {
+      return desc;
+    }
+    blk.forEach((b) => {
+      this.log.debug(`- block: ${CYAN}${b.I}${db} description ${CYAN}${b.D}${db}`);
+      sen
+        .filter((s) => s.L === b.I)
+        .forEach((s) => {
+          this.log.debug(
+            `  - id: ${CYAN}${s.I}${db} type ${CYAN}${s.T}${db} description ${CYAN}${s.D}${db} unit ${CYAN}${s.U}${db} range ${CYAN}${s.R}${db} block ${CYAN}${s.L}${db}`,
+          );
+
+          // sys component
+          if (s.D === 'mode' && b.D === 'device') desc.push({ id: s.I, component: 'sys', property: 'profile', range: s.R }); // colorbulb has light
+          if (s.D === 'deviceTemp' && s.U !== 'F' && b.D === 'device') desc.push({ id: s.I, component: 'sys', property: 'temperature', range: s.R }); // SHSW-25
+          if (s.D === 'overtemp' && b.D === 'device') desc.push({ id: s.I, component: 'sys', property: 'overtemperature', range: s.R }); // SHSW-25
+          if (s.D === 'voltage' && b.D === 'device') desc.push({ id: s.I, component: 'sys', property: 'voltage', range: s.R }); // SHSW-25
+          if (s.D === 'cfgChanged' && b.D === 'device') desc.push({ id: s.I, component: 'sys', property: 'cfg_rev', range: s.R });
+          if (s.D === 'wakeupEvent' && b.D === 'device') desc.push({ id: s.I, component: 'sys', property: 'act_reasons', range: s.R });
+
+          // output component
+          if (s.D === 'overpower') desc.push({ id: s.I, component: b.D.replace('_', ':').replace('device', 'sys'), property: 'overpower', range: s.R });
+
+          // input component
+          if (s.D === 'input' && !b.D.startsWith('sensor'))
+            desc.push({ id: s.I, component: b.D.replace('relay', 'input').replace('_', ':').replace('device', 'input:0'), property: 'input', range: s.R });
+          if (s.D === 'inputEvent' && !b.D.startsWith('sensor'))
+            desc.push({ id: s.I, component: b.D.replace('relay', 'input').replace('_', ':').replace('device', 'input:0'), property: 'event', range: s.R });
+          if (s.D === 'inputEventCnt' && !b.D.startsWith('sensor'))
+            desc.push({ id: s.I, component: b.D.replace('relay', 'input').replace('_', ':').replace('device', 'input:0'), property: 'event_cnt', range: s.R });
+
+          // sensor/input component
+          if (s.D === 'inputEvent' && b.D.startsWith('sensor')) desc.push({ id: s.I, component: b.D.replace('_', ':').replace('sensor', 'input'), property: 'event', range: s.R }); // SHBTN-2
+          if (s.D === 'inputEventCnt' && b.D.startsWith('sensor'))
+            desc.push({ id: s.I, component: b.D.replace('_', ':').replace('sensor', 'input'), property: 'event_cnt', range: s.R }); // SHBTN-2
+
+          // light component
+          if (s.D === 'output') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'state', range: s.R });
+          if (s.D === 'brightness') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'brightness', range: s.R }); // Used by white channels
+          if (s.D === 'gain') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'gain', range: s.R }); // Used by color channels
+          if (s.D === 'mode' && b.D !== 'device') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'mode', range: s.R }); // Used by colorbulb
+          if (s.D === 'red') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'red', range: s.R });
+          if (s.D === 'green') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'green', range: s.R });
+          if (s.D === 'blue') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'blue', range: s.R });
+          if (s.D === 'white') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'white', range: s.R });
+          if (s.D === 'whiteLevel') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'white', range: s.R });
+          if (s.D === 'colorTemp') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'temp', range: s.R });
+          if (s.D === 'effect') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'effect', range: s.R });
+          if (s.D === 'power' && b.D.startsWith('light')) desc.push({ id: s.I, component: b.D.replace('_', ':').replace('light', 'meter'), property: 'power', range: s.R });
+          if (s.D === 'energy' && b.D.startsWith('light')) desc.push({ id: s.I, component: b.D.replace('_', ':').replace('light', 'meter'), property: 'total', range: s.R });
+
+          // relay component
+          if (s.D === 'power' && b.D.startsWith('relay')) desc.push({ id: s.I, component: b.D.replace('_', ':').replace('relay', 'meter'), property: 'power', range: s.R });
+          if (s.D === 'energy' && b.D.startsWith('relay')) desc.push({ id: s.I, component: b.D.replace('_', ':').replace('relay', 'meter'), property: 'total', range: s.R });
+
+          // roller component
+          if (s.D === 'roller') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'state', range: s.R });
+          if (s.D === 'rollerPos') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'current_pos', range: s.R });
+          if (s.D === 'rollerStopReason') desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'stop_reason', range: s.R });
+          if (s.D === 'rollerPower') desc.push({ id: s.I, component: 'meter:0', property: 'power', range: s.R });
+          if (s.D === 'rollerEnergy') desc.push({ id: s.I, component: 'meter:0', property: 'total', range: s.R });
+
+          // emeter component
+          if (s.D === 'voltage' && b.D.startsWith('emeter')) desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'voltage', range: s.R }); // SHEM
+          if (s.D === 'power' && b.D.startsWith('emeter')) desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'power', range: s.R });
+          if (s.D === 'energy' && b.D.startsWith('emeter')) desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'total', range: s.R });
+          if (s.D === 'current' && b.D.startsWith('emeter')) desc.push({ id: s.I, component: b.D.replace('_', ':'), property: 'current', range: s.R });
+
+          // motion component
+          if (s.D === 'motion' && b.D.startsWith('sensor')) desc.push({ id: s.I, component: 'sensor', property: 'motion', range: s.R }); // SHMOS-01 and SHMOS-02
+
+          // dw component
+          if (s.D === 'dwIsOpened' && b.D.startsWith('sensor')) desc.push({ id: s.I, component: 'sensor', property: 'contact_open', range: s.R }); // SHDW-1 and SHDW-2
+          if (s.D === 'vibration' && b.D.startsWith('sensor')) desc.push({ id: s.I, component: 'vibration', property: 'vibration', range: s.R }); // SHDW-1 and SHDW-2
+          if (s.D === 'tilt' && b.D.startsWith('sensor')) desc.push({ id: s.I, component: 'vibration', property: 'tilt', range: s.R }); // SHDW-1 and SHDW-2
+          if (s.D === 'luminosity' && b.D.startsWith('sensor')) desc.push({ id: s.I, component: 'lux', property: 'value', range: s.R }); // SHDW-1 and SHDW-2
+          if (s.D === 'luminosityLevel' && b.D.startsWith('sensor')) desc.push({ id: s.I, component: 'lux', property: 'illumination', range: s.R }); // SHDW-1 and SHDW-2
+
+          // flood component
+          if (s.D === 'flood' && b.D.startsWith('sensor')) desc.push({ id: s.I, component: 'flood', property: 'flood', range: s.R }); // SHWT-1
+
+          // smoke component
+          if (s.D === 'smoke' && b.D.startsWith('sensor')) desc.push({ id: s.I, component: 'smoke', property: 'alarm', range: s.R }); // SHSM-01
+
+          // temperature component
+          if (s.D === 'extTemp' && s.U === 'C' && b.D.startsWith('sensor')) desc.push({ id: s.I, component: 'temperature', property: 'tC', range: s.R }); // SHHT-1
+          if (s.D === 'extTemp' && s.U === 'F' && b.D.startsWith('sensor')) desc.push({ id: s.I, component: 'temperature', property: 'tF', range: s.R }); // SHHT-1
+          if (s.D === 'temp' && s.U === 'C' && b.D.startsWith('sensor') && model !== 'SHTRV-01') desc.push({ id: s.I, component: 'temperature', property: 'tC', range: s.R }); // SHHT-1
+          if (s.D === 'temp' && s.U === 'F' && b.D.startsWith('sensor') && model !== 'SHTRV-01') desc.push({ id: s.I, component: 'temperature', property: 'tF', range: s.R }); // SHHT-1
+
+          // termostat component
+          if (s.D === 'temp' && s.U === 'C' && b.D.startsWith('sensor') && model === 'SHTRV-01')
+            desc.push({ id: s.I, component: 'thermostat:0', property: 'tmp.value', range: s.R }); // SHHT-1
+          if (s.D === 'targetTemp' && s.U === 'C' && b.D.startsWith('sensor')) desc.push({ id: s.I, component: 'thermostat:0', property: 'target_t.value', range: s.R }); // SHTRV-1
+
+          // humidity component
+          if (s.D === 'humidity' && b.D.startsWith('sensor')) desc.push({ id: s.I, component: 'humidity', property: 'value', range: s.R }); // SHHT-1
+
+          // gas_sensor component
+          if (s.D === 'sensorOp' && b.D.startsWith('sensor')) desc.push({ id: s.I, component: 'gas', property: 'sensor_state', range: s.R }); // SHGS-1
+          if (s.D === 'gas' && b.D.startsWith('sensor')) desc.push({ id: s.I, component: 'gas', property: 'alarm_state', range: s.R }); // SHGS-1
+          if (s.D === 'concentration' && b.D.startsWith('sensor')) desc.push({ id: s.I, component: 'gas', property: 'ppm', range: s.R }); // SHGS-1
+
+          // generic sensor error
+          if (s.D === 'sensorError' && b.D.startsWith('sensor')) desc.push({ id: s.I, component: 'sys', property: 'sensor_error', range: s.R });
+
+          // battery component
+          if (s.D === 'battery' && b.D === 'device') desc.push({ id: s.I, component: 'battery', property: 'level', range: s.R }); // SHBTN-2
+          if (s.D === 'charger' && b.D === 'device') desc.push({ id: s.I, component: 'battery', property: 'charging', range: s.R }); // SHBTN-2
+        });
+    });
+    this.log.debug(`Parsing ${MAGENTA}decoding${db}:`);
+    desc.forEach((d) => {
+      this.log.debug(`- id ${CYAN}${d.id}${db} component ${CYAN}${d.component}${db} property ${CYAN}${d.property}${db} range ${CYAN}${d.range}${db}`);
+    });
+    return desc;
   }
 
   /**
@@ -691,22 +695,30 @@ export class CoapServer extends EventEmitter {
     if (registerOnly) return;
     // SHMOS-01, SHMOS-02, SHTRV-01 and SHRGBWW-01 don't answer to the /cit/d and /cit/s requests
     this.log.debug(`*Registering device ${hk}${id}${db} host ${zb}${host}${db} with fetch...`);
-    ShellyDevice.fetch(this.shelly, this.log, host, 'cit/d').then((msg) => {
-      if (msg && msg.blk && msg.sen) {
-        // Simulate a CoAP message to use the same code
-        const coapMessage = {
-          rsinfo: { address: host, port: 5683, family: 'IPv4' },
-          headers: { [COIOT_OPTION_GLOBAL_DEVID]: `${id}#XXXXXXXXX#2`, [COIOT_OPTION_STATUS_VALIDITY]: 0, [COIOT_OPTION_STATUS_SERIAL]: 0 },
-          url: '/cit/d',
-          payload: Buffer.from(JSON.stringify(msg)),
-          code: '2.05',
-        };
-        this.parseShellyMessage(coapMessage as unknown as IncomingMessage);
-        this.log.debug(`*Registered CoIoT (coap) ${CYAN}/cit/d${db} for device ${hk}${id}${db} host ${zb}${host}${db} with fetch`);
-      } else {
-        this.log.debug(`****No response registering device ${hk}${id}${db} host ${zb}${host}${db} with fetch`);
-      }
-    });
+    ShellyDevice.fetch(this.shelly, this.log, host, 'cit/d')
+      .then((msg) => {
+        if (msg && msg.blk && msg.sen) {
+          // Simulate a CoAP message to use the same code
+          const coapMessage = {
+            rsinfo: { address: host, port: 5683, family: 'IPv4' },
+            headers: {
+              [COIOT_OPTION_GLOBAL_DEVID]: `${ShellyDevice.normalizeId(id).type}#${ShellyDevice.normalizeId(id).mac}#2`,
+              [COIOT_OPTION_STATUS_VALIDITY]: 0,
+              [COIOT_OPTION_STATUS_SERIAL]: 0,
+            },
+            url: '/cit/d',
+            payload: Buffer.from(JSON.stringify(msg)),
+            code: '2.05',
+          };
+          this.parseShellyMessage(coapMessage as unknown as IncomingMessage);
+          this.log.debug(`***Registered CoIoT (coap) ${CYAN}/cit/d${db} for device ${hk}${id}${db} host ${zb}${host}${db} with fetch`);
+        } else {
+          this.log.debug(`****Invalid response registering device ${hk}${id}${db} host ${zb}${host}${db} with fetch`);
+        }
+      })
+      .catch((err) => {
+        this.log.debug(`****Error registering device ${hk}${id}${db} host ${zb}${host}${db} with fetch: ${err instanceof Error ? err.message : err}`);
+      });
     /*
     this.log.debug(`Registering device ${hk}${id}${db} host ${zb}${host}${db} with coap...`);
     this.getDeviceDescription(host, id).then((msg) => {
@@ -841,8 +853,7 @@ if (
 }
 */
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const SHDW = {
+const SHDW_CITD = {
   'blk': [
     { 'I': 1, 'D': 'sensor_0' },
     { 'I': 2, 'D': 'device' },
@@ -863,8 +874,7 @@ const SHDW = {
   ],
 };
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const SHBTN2 = {
+const SHBTN_CITD = {
   'blk': [
     { 'I': 1, 'D': 'sensor_0' },
     { 'I': 2, 'D': 'device' },
@@ -880,8 +890,7 @@ const SHBTN2 = {
   ],
 };
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const SHMOS01 = {
+const SHMOS01_CITD = {
   'blk': [
     { 'I': 1, 'D': 'sensor_0' },
     { 'I': 2, 'D': 'device' },
@@ -897,8 +906,7 @@ const SHMOS01 = {
   ],
 };
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const SHMOS02 = {
+const SHMOS02_CITD = {
   'blk': [
     { 'I': 1, 'D': 'sensor_0' },
     { 'I': 2, 'D': 'device' },
@@ -913,6 +921,22 @@ const SHMOS02 = {
     { 'I': 3106, 'T': 'L', 'D': 'luminosity', 'R': ['U32', '-1'], 'L': 1 },
     { 'I': 3111, 'T': 'B', 'D': 'battery', 'R': ['0/100', '-1'], 'L': 2 },
     { 'I': 9103, 'T': 'EVC', 'D': 'cfgChanged', 'R': 'U16', 'L': 2 },
+  ],
+};
+
+const SHWT1_CITD = {
+  'blk': [
+    { 'I': 1, 'D': 'sensor_0' },
+    { 'I': 2, 'D': 'device' },
+  ],
+  'sen': [
+    { 'I': 9103, 'T': 'EVC', 'D': 'cfgChanged', 'R': 'U16', 'L': 2 },
+    { 'I': 3101, 'T': 'T', 'D': 'extTemp', 'U': 'C', 'R': ['-55/125', '999'], 'L': 1 },
+    { 'I': 3102, 'T': 'T', 'D': 'extTemp', 'U': 'F', 'R': ['-67/257', '999'], 'L': 1 },
+    { 'I': 6106, 'T': 'A', 'D': 'flood', 'R': ['0/1', '-1'], 'L': 1 },
+    { 'I': 3115, 'T': 'S', 'D': 'sensorError', 'R': '0/1', 'L': 1 },
+    { 'I': 3111, 'T': 'B', 'D': 'battery', 'R': ['0/100', '-1'], 'L': 2 },
+    { 'I': 9102, 'T': 'EV', 'D': 'wakeupEvent', 'R': ['battery/button/periodic/poweron/sensor/alarm', 'unknown'], 'L': 2 },
   ],
 };
 
@@ -941,6 +965,27 @@ const SHRGBWW01 = {
   ],
 };
 
+const SHTRV01_CITD = {
+  'blk': [
+    { 'I': 1, 'D': 'sensor_0' },
+    { 'I': 2, 'D': 'device' },
+  ],
+  'sen': [
+    { 'I': 3101, 'T': 'T', 'D': 'temp', 'U': 'C', 'R': ['-55/125', '999'], 'L': 1 },
+    { 'I': 3102, 'T': 'T', 'D': 'temp', 'U': 'F', 'R': ['-67/257', '999'], 'L': 1 },
+    { 'I': 3103, 'T': 'T', 'D': 'targetTemp', 'U': 'C', 'R': ['4/31', '999'], 'L': 1 },
+    { 'I': 3104, 'T': 'T', 'D': 'targetTemp', 'U': 'F', 'R': ['39/88', '999'], 'L': 1 },
+    { 'I': 3115, 'T': 'S', 'D': 'sensorError', 'R': '0/1', 'L': 2 },
+    { 'I': 3116, 'T': 'S', 'D': 'valveError', 'R': '0/1', 'L': 2 },
+    { 'I': 3117, 'T': 'S', 'D': 'mode', 'R': '0/5', 'L': 2 },
+    { 'I': 3118, 'T': 'S', 'D': 'status', 'R': '0/1', 'L': 2 },
+    { 'I': 3111, 'T': 'B', 'D': 'battery', 'R': ['0/100', '-1'], 'L': 2 },
+    { 'I': 3121, 'T': 'S', 'D': 'valvePos', 'U': '%', 'R': ['0/100', '-1'], 'L': 2 },
+    { 'I': 3122, 'T': 'S', 'D': 'boostMinutes', 'U': '%', 'R': ['0/1440', '-1'], 'L': 2 },
+    { 'I': 9103, 'T': 'EVC', 'D': 'cfgChanged', 'R': 'U16', 'L': 2 },
+  ],
+};
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const SHRGBW2 = {
   'blk': [
@@ -966,8 +1011,7 @@ const SHRGBW2 = {
   ],
 };
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const SHHT1 = {
+const SHHT1_CITD = {
   'blk': [
     { 'I': 1, 'D': 'sensor_0' },
     { 'I': 2, 'D': 'device' },
@@ -980,5 +1024,63 @@ const SHHT1 = {
     { 'I': 3115, 'T': 'S', 'D': 'sensorError', 'R': '0/1', 'L': 1 },
     { 'I': 3111, 'T': 'B', 'D': 'battery', 'R': ['0/100', '-1'], 'L': 2 },
     { 'I': 9102, 'T': 'EV', 'D': 'wakeupEvent', 'R': ['battery/button/periodic/poweron/sensor/alarm', 'unknown'], 'L': 2 },
+  ],
+};
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const SHSM1_CITS = {
+  'G': [
+    [0, 9103, 0],
+    [0, 3101, 999],
+    [0, 3102, 999],
+    [0, 6105, -1],
+    [0, 3115, 0],
+    [0, 3111, -1],
+    [0, 9102, ['unknown']],
+  ],
+};
+
+const SHSM1_CITD = {
+  'blk': [
+    { 'I': 1, 'D': 'sensor_0' },
+    { 'I': 2, 'D': 'device' },
+  ],
+  'sen': [
+    { 'I': 9103, 'T': 'EVC', 'D': 'cfgChanged', 'R': 'U16', 'L': 2 },
+    { 'I': 3101, 'T': 'T', 'D': 'extTemp', 'U': 'C', 'R': ['-55/125', '999'], 'L': 1 },
+    { 'I': 3102, 'T': 'T', 'D': 'extTemp', 'U': 'F', 'R': ['-67/257', '999'], 'L': 1 },
+    { 'I': 6105, 'T': 'A', 'D': 'smoke', 'R': ['0/1', '-1'], 'L': 1 },
+    { 'I': 3115, 'T': 'S', 'D': 'sensorError', 'R': '0/1', 'L': 1 },
+    { 'I': 3111, 'T': 'B', 'D': 'battery', 'R': ['0/100', '-1'], 'L': 2 },
+    { 'I': 9102, 'T': 'EV', 'D': 'wakeupEvent', 'R': ['battery/button/periodic/poweron/sensor/alarm', 'unknown'], 'L': 2 },
+  ],
+};
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const SHGS1_CITS = {
+  'G': [
+    [0, 9103, 0],
+    [0, 3113, 'normal'],
+    [0, 3114, 'not_completed'],
+    [0, 6108, 'none'],
+    [0, 3107, 0],
+    [0, 1105, 'closed'],
+  ],
+};
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const SHGS1_CITD = {
+  'blk': [
+    { 'I': 1, 'D': 'sensor_0' },
+    { 'I': 2, 'D': 'valve_0' },
+    { 'I': 3, 'D': 'device' },
+  ],
+  'sen': [
+    { 'I': 9103, 'T': 'EVC', 'D': 'cfgChanged', 'R': 'U16', 'L': 3 },
+    { 'I': 3113, 'T': 'S', 'D': 'sensorOp', 'R': ['warmup/normal/fault', 'unknown'], 'L': 1 },
+    { 'I': 3114, 'T': 'S', 'D': 'selfTest', 'R': 'not_completed/completed/running/pending', 'L': 1 },
+    { 'I': 6108, 'T': 'A', 'D': 'gas', 'R': ['none/mild/heavy/test', 'unknown'], 'L': 1 },
+    { 'I': 3107, 'T': 'C', 'D': 'concentration', 'U': 'ppm', 'R': ['U16', '-1'], 'L': 1 },
+    { 'I': 1105, 'T': 'S', 'D': 'valve', 'R': ['closed/opened/not_connected/failure/closing/opening/checking', 'unknown'], 'L': 2 },
   ],
 };

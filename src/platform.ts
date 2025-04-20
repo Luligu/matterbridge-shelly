@@ -47,6 +47,7 @@ import {
   MatterbridgeEndpoint,
   waterLeakDetector,
   smokeCoAlarm,
+  extendedColorLight,
 } from 'matterbridge';
 import {
   hslColorToRgbColor,
@@ -156,16 +157,16 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
   private username = '';
   private password = '';
   private postfix;
-  private failsafeCount;
+  private failsafeCountSeconds = 360;
   private firstRun = false;
 
   constructor(matterbridge: Matterbridge, log: AnsiLogger, config: ShellyPlatformConfig) {
     super(matterbridge, log, config as unknown as PlatformConfig);
 
     // Verify that Matterbridge is the correct version
-    if (this.verifyMatterbridgeVersion === undefined || typeof this.verifyMatterbridgeVersion !== 'function' || !this.verifyMatterbridgeVersion('2.2.5')) {
+    if (this.verifyMatterbridgeVersion === undefined || typeof this.verifyMatterbridgeVersion !== 'function' || !this.verifyMatterbridgeVersion('2.2.9')) {
       throw new Error(
-        `This plugin requires Matterbridge version >= "2.2.5". Please update Matterbridge from ${this.matterbridge.matterbridgeVersion} to the latest version in the frontend."`,
+        `This plugin requires Matterbridge version >= "2.2.9". Please update Matterbridge from ${this.matterbridge.matterbridgeVersion} to the latest version in the frontend."`,
       );
     }
 
@@ -174,8 +175,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     if (config.password) this.password = config.password as string;
     this.postfix = (config.postfix as string) ?? '';
     if (!isValidString(this.postfix, 0, 3)) this.postfix = '';
-    this.failsafeCount = (config.failsafeCount as number) ?? 0;
-    if (!isValidNumber(this.failsafeCount, 0)) this.failsafeCount = 0;
+    if (!isValidNumber(config.failsafeCount, 0)) config.failsafeCount = 0;
 
     // Cleanup the old config format
     {
@@ -687,8 +687,9 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             );
             if (property === 'cfg_rev') {
               if (!device.sleepMode) this.changedDevices.set(device.id, device.id);
-              if (!device.id.startsWith('shellyblugwg3')) {
+              if (!device.id.startsWith('shellyblugwg3') && !device.id.startsWith('shellycolorbulb')) {
                 // Special case for BLU Gateway Gen 3 TRV that sends cfg_rev when the temperature is changed
+                // and for color bulb that sends cfg_rev when the color mode is changed
                 device.log.notice(
                   `Shelly device ${idn}${device.name}${rs}${nt} id ${hk}${device.id}${nt} host ${zb}${device.host}${nt} sent config changed rev: ${CYAN}${value}${nt}`,
                 );
@@ -756,17 +757,18 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           if (component.hasProperty('brightness')) {
             deviceType = dimmableLight;
           }
-          if (
-            (component.hasProperty('red') && component.hasProperty('green') && component.hasProperty('blue') && device.profile !== 'white') ||
-            (component.hasProperty('temp') && device.profile !== 'color') ||
-            component.hasProperty('rgb')
-          ) {
+          if ((component.hasProperty('temp') && device.profile !== 'color') || component.hasProperty('ct')) {
             deviceType = colorTemperatureLight;
           }
+          if ((component.hasProperty('red') && component.hasProperty('green') && component.hasProperty('blue') && device.profile !== 'white') || component.hasProperty('rgb')) {
+            deviceType = extendedColorLight;
+          }
           const tagList = this.addTagList(component);
+          if (tagList)
+            this.log.debug(`***Shelly device ${idn}${device.name}${rs}${nf} id ${hk}${device.id}${nf} host ${zb}${device.host}${nf} added tagList: ${debugStringify(tagList)}`);
           const child = mbDevice.addChildDeviceType(
             key,
-            this.hasElectricalMeasurements(device, component) ? [deviceType, electricalSensor] : [deviceType],
+            this.hasElectricalMeasurements(device, component) && this.validateEntity(device.id, 'PowerMeter') ? [deviceType, electricalSensor] : [deviceType],
             tagList ? { tagList } : undefined,
             config.debug as boolean,
           );
@@ -774,11 +776,22 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           child.createDefaultIdentifyClusterServer();
           child.createDefaultGroupsClusterServer();
           child.createDefaultOnOffClusterServer();
-          if (deviceType.code === dimmableLight.code || deviceType.code === colorTemperatureLight.code) child.createDefaultLevelControlClusterServer();
+          if (deviceType.code === dimmableLight.code || deviceType.code === colorTemperatureLight.code || deviceType.code === extendedColorLight.code) {
+            child.createDefaultLevelControlClusterServer();
+          }
+          /*
           if (deviceType.code === colorTemperatureLight.code) {
             if (component.hasProperty('temp') && component.hasProperty('mode')) child.createHsColorControlClusterServer();
             else if (component.hasProperty('temp') && !component.hasProperty('mode')) child.createCtColorControlClusterServer();
+            else if (component.hasProperty('ct')) child.createCtColorControlClusterServer();
             else child.createHsColorControlClusterServer();
+          }
+          */
+          if (deviceType.code === colorTemperatureLight.code) {
+            child.createCtColorControlClusterServer();
+          }
+          if (deviceType.code === extendedColorLight.code) {
+            child.createDefaultColorControlClusterServer();
           }
 
           // Add the electrical measurementa cluster on the same endpoint
@@ -837,6 +850,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             child.setAttribute(ColorControl.Cluster.id, 'colorMode', ColorControl.ColorMode.ColorTemperatureMireds, child.log);
             if (component.hasProperty('temp')) {
               shellyLightCommandHandler(child, component, 'ColorTemp', undefined, undefined, request.colorTemperatureMireds);
+            } else if (component.hasProperty('ct')) {
+              shellyLightCommandHandler(child, component, 'ColorTemp', undefined, undefined, request.colorTemperatureMireds);
             } else {
               const rgb = kelvinToRGB(miredToKelvin(request.colorTemperatureMireds));
               shellyLightCommandHandler(child, component, 'ColorRGB', undefined, { r: rgb.r, g: rgb.g, b: rgb.b });
@@ -847,7 +862,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           component.on('update', (component: string, property: string, value: ShellyDataType) => {
             shellyUpdateHandler(this, mbDevice, device, component, property, value);
           });
-        } else if (isSwitchComponent(component)) {
+        } else if (isSwitchComponent(component) && device.profile !== 'cover') {
           let deviceType = onOffOutlet;
           if (config.switchList && (config.switchList as string[]).includes(device.id)) deviceType = onOffSwitch;
           if (config.lightList && (config.lightList as string[]).includes(device.id)) deviceType = onOffLight;
@@ -855,7 +870,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           const tagList = this.addTagList(component);
           const child = mbDevice.addChildDeviceType(
             key,
-            this.hasElectricalMeasurements(device, component) ? [deviceType, electricalSensor] : [deviceType],
+            this.hasElectricalMeasurements(device, component) && this.validateEntity(device.id, 'PowerMeter') ? [deviceType, electricalSensor] : [deviceType],
             tagList ? { tagList } : undefined,
             config.debug as boolean,
           );
@@ -885,11 +900,11 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           component.on('update', (component: string, property: string, value: ShellyDataType) => {
             shellyUpdateHandler(this, mbDevice, device, component, property, value);
           });
-        } else if (isCoverComponent(component)) {
+        } else if (isCoverComponent(component) && device.profile !== 'switch') {
           const tagList = this.addTagList(component);
           const child = mbDevice.addChildDeviceType(
             key,
-            this.hasElectricalMeasurements(device, component) ? [coverDevice, electricalSensor] : [coverDevice],
+            this.hasElectricalMeasurements(device, component) && this.validateEntity(device.id, 'PowerMeter') ? [coverDevice, electricalSensor] : [coverDevice],
             tagList ? { tagList } : undefined,
             config.debug as boolean,
           );
@@ -1535,16 +1550,17 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     this.shelly.wsServer.start();
 
     // Wait for the failsafe count to be met
-    if (this.failsafeCount > 0 && this.bridgedDevices.size + this.bluBridgedDevices.size < this.failsafeCount) {
-      this.log.notice(`Waiting for the configured number of ${this.bridgedDevices.size + this.bluBridgedDevices.size}/${this.failsafeCount} devices to be loaded.`);
+    const config = this.config as unknown as ShellyPlatformConfig;
+    if (config.failsafeCount > 0 && this.bridgedDevices.size + this.bluBridgedDevices.size < config.failsafeCount) {
+      this.log.notice(`Waiting for the configured number of ${this.bridgedDevices.size + this.bluBridgedDevices.size}/${config.failsafeCount} devices to be loaded.`);
       /* prettier-ignore */
-      const isSafe = await waiter('failsafeCount', () => this.bridgedDevices.size + this.bluBridgedDevices.size >= this.failsafeCount, false, 55000, 1000, this.config.debug as boolean);
+      const isSafe = await waiter('failsafeCount', () => this.bridgedDevices.size + this.bluBridgedDevices.size >= config.failsafeCount, false, this.failsafeCountSeconds*1000, 1000, config.debug);
       if (!isSafe) {
         throw new Error(
-          `The plugin did not add the configured number of ${this.failsafeCount} devices. Registered ${this.bridgedDevices.size + this.bluBridgedDevices.size} devices.`,
+          `The plugin did not add the configured number of ${config.failsafeCount} devices. Registered ${this.bridgedDevices.size + this.bluBridgedDevices.size} devices.`,
         );
       } else {
-        this.log.notice(`The plugin added the configured number of ${this.failsafeCount} devices.`);
+        this.log.notice(`The plugin added the configured number of ${config.failsafeCount} devices.`);
       }
     }
 
@@ -1782,7 +1798,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
   }
 
   private addTagList(component: ShellyComponent): Semtag[] | undefined {
-    if (this.matterbridge.edge) return undefined;
+    // if (this.matterbridge.edge) return undefined;
     // Add the tagList to the descriptor cluster
     let tagList: Semtag | undefined;
     if (component.index === 0) tagList = { mfgCode: null, namespaceId: NumberTag.Zero.namespaceId, tag: NumberTag.Zero.tag, label: component.id };
@@ -1807,9 +1823,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
   // Add electrical measurements to the child endpoint of the switch light cover component
   private addElectricalMeasurements(device: MatterbridgeEndpoint, endpoint: MatterbridgeEndpoint, shelly: ShellyDevice, component: ShellyComponent) {
     // Check if PowerMetering is enabled
-    if (isValidArray(this.config.entityBlackList, 1) && this.config.entityBlackList.includes('PowerMeter')) {
-      return;
-    }
+    if (!this.validateEntity(shelly.id, 'PowerMeter')) return;
     // Add the Matter 1.3 electricalSensor device type and the PowerTopology, ElectricalPowerMeasurement and ElectricalEnergyMeasurement clusters on the same endpoint
     if (component.hasProperty('voltage') || component.hasProperty('current') || component.hasProperty('apower') || component.hasProperty('aenergy')) {
       shelly.log.debug(`Adding ElectricalPowerMeasurement and ElectricalEnergyMeasurement clusters to endpoint ${hk}${endpoint.name}${db} component ${hk}${component.id}${db}`);
