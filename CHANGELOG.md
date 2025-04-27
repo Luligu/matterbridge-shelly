@@ -12,21 +12,32 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 
 ### Breaking Changes
 
-New setups:
-
-- these components are blacklisted (with entityBlackList) by default: "Lux", "Illuminance", "Vibration", "Button". This allows to create simplified devices for the controllers that don't manage correctly composed devices (i.e. Alexa and SmartThings).
-- all switches are exposed like outlet (matter compliant).
-- shellyplusi4, shellyi4g3, shellyix3 and shellybutton1 are automatically added to inputMomentaryList when discovered.
-- expertMode is disabled (the config shows only username, password, whitelist and blackList).
-
 New device types:
 
 - shellyflood device type has been updated from contact sensor to water leak sensor.
 - shellysmoke device type has been updated from contact sensor to smoke sensor.
-- for all the rgb lights the device type has been updated from colorTemperatureLight to extendedColorLight. This solves SmartThings issues with color lights.
+- the device type for all the rgb lights has been updated from colorTemperatureLight to extendedColorLight. This solves SmartThings issues with color lights.
 
-If your controller has issues detecting the new device type, blacklist the flood and smoke devices, restart, remove the blacklist and restarat again. This will create a new endpoint on the controller.
+If your controller has issues detecting the new device type, blacklist these devices, restart, remove the blacklist and restart again. This will create a new endpoint on the controller.
 For shellyflood, if you have SmartThings, blacklist the Temperature entity for each flood device with deviceEntityBlackList to allow the controller to setup the correct driver.
+
+## [2.0.9] - 2025-04-27
+
+### Added
+
+### Changed
+
+- [package]: Added tsconfig.jest.json with "isolatedModules": true for ts-jest.
+- [package]: Updated package.
+- [package]: Updated dependencies.
+
+### Fixed
+
+- [WallDisplay]: Fixed PowerSource component.
+
+<a href="https://www.buymeacoffee.com/luligugithub">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="80">
+</a>
 
 ## [2.0.8] - 2025-04-19
 

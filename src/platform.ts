@@ -635,6 +635,11 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
                 battery.V * 1000,
               );
             }
+          } else if (devicepowerComponent.hasProperty('external') && isValidObject(devicepowerComponent.getValue('external'), 1)) {
+            const external = devicepowerComponent.getValue('external') as { present: boolean };
+            if (isValidBoolean(external.present) && external.present === true) {
+              mbDevice.createDefaultPowerSourceWiredClusterServer();
+            }
           }
           devicepowerComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
             shellyUpdateHandler(this, mbDevice, device, component, property, value, 'PowerSource');

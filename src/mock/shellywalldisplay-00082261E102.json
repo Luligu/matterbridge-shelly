@@ -4,16 +4,16 @@
     "mac": "00082261E102",
     "model": "SAWD-0A1XX10EU1",
     "gen": 2,
-    "fw_id": "20250228-105335/2.3.5-be75436c",
-    "ver": "2.3.5",
+    "fw_id": "20250402-115011/2.3.6-66e97e33",
+    "ver": "2.3.6",
     "app": "WallDisplay",
     "auth_en": false,
-    "uptime": 285262,
-    "app_uptime": 285164,
+    "uptime": 1605745,
+    "app_uptime": 1605670,
     "ram_size": 134217728,
-    "ram_free": 39560416,
+    "ram_free": 40137288,
     "fs_size": 5009186816,
-    "fs_free": 4861382656,
+    "fs_free": 4863143936,
     "discoverable": false,
     "cfg_rev": 107,
     "schedule_rev": 0,
@@ -24,7 +24,7 @@
     "batch_date": 231211,
     "available_updates": {},
     "restart_required": false,
-    "unixtime": 1741441928,
+    "unixtime": 1745732710,
     "relay_in_thermostat": true,
     "sensor_in_thermostat": true,
     "awaiting_auth_code": false
@@ -110,7 +110,7 @@
     "sys": {
       "device": {
         "name": "Wall Display",
-        "fw_id": "20250228-105335/2.3.5-be75436c",
+        "fw_id": "20250402-115011/2.3.6-66e97e33",
         "mac": "00082261E102",
         "discoverable": false
       },
@@ -184,22 +184,22 @@
     },
     "temperature:0": {
       "id": 0,
-      "tC": 30.9,
-      "tF": 87.7
+      "tC": 27.3,
+      "tF": 81.2
     },
     "humidity:0": {
       "id": 0,
-      "rh": 25.9
+      "rh": 41.4
     },
     "illuminance:0": {
       "id": 0,
-      "lux": 90,
+      "lux": 30,
       "illumination": "twilight"
     },
     "switch:0": {
       "id": 0,
       "output": false,
-      "source": "Auto power on (off)"
+      "source": "THERMOSTAT"
     },
     "input:0": {
       "id": 0,
@@ -210,16 +210,16 @@
       "mac": "00082261E102",
       "model": "SAWD-0A1XX10EU1",
       "gen": 2,
-      "fw_id": "20250228-105335/2.3.5-be75436c",
-      "ver": "2.3.5",
+      "fw_id": "20250402-115011/2.3.6-66e97e33",
+      "ver": "2.3.6",
       "app": "WallDisplay",
       "auth_en": false,
-      "uptime": 285262,
-      "app_uptime": 285165,
+      "uptime": 1605745,
+      "app_uptime": 1605670,
       "ram_size": 134217728,
-      "ram_free": 39214488,
+      "ram_free": 40137288,
       "fs_size": 5009186816,
-      "fs_free": 4861378560,
+      "fs_free": 4863143936,
       "discoverable": false,
       "cfg_rev": 107,
       "schedule_rev": 0,
@@ -230,7 +230,7 @@
       "batch_date": 231211,
       "available_updates": {},
       "restart_required": false,
-      "unixtime": 1741441928,
+      "unixtime": 1745732710,
       "relay_in_thermostat": true,
       "sensor_in_thermostat": true,
       "awaiting_auth_code": false
@@ -240,23 +240,23 @@
       "status": "got ip",
       "mac": "00:08:22:61:E1:02",
       "ssid": "",
-      "rssi": -65,
+      "rssi": -55,
       "netmask": "255.255.255.0",
       "gw": "192.168.1.1",
       "nameserver": "208.67.222.222"
     },
     "media": {
+      "playback": {
+        "enable": false,
+        "buffering": false,
+        "volume": 5
+      },
       "total_size": 0,
       "total_size_h": "0.000 B",
       "item_counts": {
         "audio": 0,
         "photo": 0,
         "video": 0
-      },
-      "playback": {
-        "enable": false,
-        "buffering": false,
-        "volume": 10
       }
     },
     "devicepower:0": {
@@ -269,32 +269,15 @@
       "id": 0,
       "enable": true,
       "target_C": 19,
-      "current_C": 30.9,
+      "current_C": 27.3,
       "output": false,
       "schedules": {
         "enable": false
       }
     }
   },
-  "components": [
-    {
-      "key": "button:200",
-      "status": {},
-      "config": {
-        "name": "MyButton",
-        "id": 200
-      }
-    },
-    {
-      "key": "button:201",
-      "status": {},
-      "config": {
-        "name": "MyButton2",
-        "id": 201
-      }
-    }
-  ],
+  "components": [],
   "cfg_rev": 107,
   "offset": 0,
-  "total": 2
+  "total": 0
 }
