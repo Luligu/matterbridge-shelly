@@ -164,9 +164,9 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     super(matterbridge, log, config as unknown as PlatformConfig);
 
     // Verify that Matterbridge is the correct version
-    if (this.verifyMatterbridgeVersion === undefined || typeof this.verifyMatterbridgeVersion !== 'function' || !this.verifyMatterbridgeVersion('2.2.9')) {
+    if (this.verifyMatterbridgeVersion === undefined || typeof this.verifyMatterbridgeVersion !== 'function' || !this.verifyMatterbridgeVersion('3.0.0')) {
       throw new Error(
-        `This plugin requires Matterbridge version >= "2.2.9". Please update Matterbridge from ${this.matterbridge.matterbridgeVersion} to the latest version in the frontend."`,
+        `This plugin requires Matterbridge version >= "3.0.0". Please update Matterbridge from ${this.matterbridge.matterbridgeVersion} to the latest version in the frontend."`,
       );
     }
 
@@ -1959,14 +1959,21 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     else if (bthomeDevice.model === 'Shelly BLU Trv') definition = [thermostatDevice, bridgedNode, powerSource];
     else this.log.error(`Shelly device ${hk}${gateway.id}${er} host ${zb}${gateway.host}${er} has an unknown BLU device model ${CYAN}${bthomeDevice.model}${nf}`);
     // Check if the BLU device is already registered
+    if (this.bluBridgedDevices.has(bthomeDevice.addr)) {
+      this.log.warn(`BLU device ${idn}${bthomeDevice.name}${rs}${wr} address ${CYAN}${bthomeDevice.addr}${wr} already registered with another ble gateway.`);
+      return;
+    }
+    /*
     this.bluBridgedDevices.forEach((blu) => {
       if (blu.serialNumber === bthomeDevice.addr + (this.postfix ? '-' + this.postfix : '')) {
         this.log.warn(`BLU device ${idn}${bthomeDevice.name}${rs}${wr} address ${CYAN}${bthomeDevice.addr}${wr} already registered with another ble gateway.`);
         definition = undefined;
       }
     });
+    */
     if (definition) {
       const mbDevice = new MatterbridgeEndpoint(definition, { uniqueStorageKey: bthomeDevice.name }, this.config.debug as boolean);
+      this.bluBridgedDevices.set(bthomeDevice.addr, mbDevice);
       mbDevice.configUrl = `http://${gateway.host}`;
       mbDevice.createDefaultBridgedDeviceBasicInformationClusterServer(
         bthomeDevice.name,
@@ -2059,7 +2066,6 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       mbDevice.addRequiredClusterServers();
       try {
         await this.registerDevice(mbDevice);
-        this.bluBridgedDevices.set(bthomeDevice.addr, mbDevice);
         mbDevice.log.logName = `${bthomeDevice.name}`;
       } catch (error) {
         this.log.error(

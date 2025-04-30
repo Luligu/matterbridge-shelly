@@ -21,7 +21,7 @@ New device types:
 If your controller has issues detecting the new device type, blacklist these devices, restart, remove the blacklist and restart again. This will create a new endpoint on the controller.
 For shellyflood, if you have SmartThings, blacklist the Temperature entity for each flood device with deviceEntityBlackList to allow the controller to setup the correct driver.
 
-## [2.0.9] - 2025-04-27
+## [2.0.9] - 2025-04-30
 
 ### Added
 
@@ -30,6 +30,7 @@ For shellyflood, if you have SmartThings, blacklist the Temperature entity for e
 - [package]: Added tsconfig.jest.json with "isolatedModules": true for ts-jest.
 - [package]: Updated package.
 - [package]: Updated dependencies.
+- [plugin]: Requires Matterbridge 3.0.0.
 
 ### Fixed
 
