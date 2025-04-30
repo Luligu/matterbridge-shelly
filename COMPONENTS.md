@@ -2,6 +2,13 @@
 
 All components for all devices are exposed to Matter, but it is possible to exclude certain components globally or on a per-device basis.
 
+New setups only:
+
+- these components are blacklisted (with entityBlackList) by default: "Lux", "Illuminance", "Vibration", "Button". This allows to create simplified devices for the controllers that don't manage correctly composed devices (i.e. Alexa and SmartThings).
+- all switches are exposed like outlet (matter compliant).
+- shellyplusi4, shellyi4g3, shellyix3 and shellybutton1 are automatically added to inputMomentaryList when discovered.
+- expertMode is disabled (the config shows only username, password, whitelist and blackList).
+
 ## Example 1: How to Blacklist a Component on a shellyplusrgbwpm Device
 
 Given the components of a shellyplusrgbwpm device (as shown in the logs from the console or frontend):

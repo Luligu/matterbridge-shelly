@@ -1,14 +1,14 @@
 {
   "shelly": {
-    "name": "H&T Gen3",
-    "id": "shellyhtg3-3030f9ec8468",
-    "mac": "3030F9EC8468",
-    "slot": 1,
-    "model": "S3SN-0U12A",
-    "gen": 3,
-    "fw_id": "20250318-152127/1.5.1-g01dd7ff",
+    "name": "H&T Plus",
+    "id": "shellyplusht-fcb467261fd4",
+    "mac": "FCB467261FD4",
+    "slot": 0,
+    "model": "SNSN-0013A",
+    "gen": 2,
+    "fw_id": "20250318-152158/1.5.1-g01dd7ff",
     "ver": "1.5.1",
-    "app": "HTG3",
+    "app": "PlusHT",
     "auth_en": false,
     "auth_domain": null
   },
@@ -16,16 +16,15 @@
     "ble": {
       "enable": false,
       "rpc": {
-        "enable": true
+        "enable": false
       }
     },
     "cloud": {
-      "enable": true,
-      "server": "shelly-103-eu.shelly.cloud:6022/jrpc"
+      "enable": false,
+      "server": "iot.shelly.cloud:6012/jrpc"
     },
     "devicepower:0": {},
     "ht_ui": {
-      "clock": "24",
       "temperature_unit": "C"
     },
     "humidity:0": {
@@ -37,10 +36,10 @@
     "mqtt": {
       "enable": false,
       "server": null,
-      "client_id": "shellyhtg3-3030f9ec8468",
+      "client_id": "shellyplusht-fcb467261fd4",
       "user": null,
       "ssl_ca": null,
-      "topic_prefix": "shellyhtg3-3030f9ec8468",
+      "topic_prefix": "shellyplusht-fcb467261fd4",
       "rpc_ntf": true,
       "status_ntf": false,
       "use_client_cert": false,
@@ -49,9 +48,9 @@
     },
     "sys": {
       "device": {
-        "name": "H&T Gen3",
-        "mac": "3030F9EC8468",
-        "fw_id": "20250318-152127/1.5.1-g01dd7ff",
+        "name": "H&T Plus",
+        "mac": "FCB467261FD4",
+        "fw_id": "20250318-152158/1.5.1-g01dd7ff",
         "discoverable": true,
         "eco_mode": false
       },
@@ -77,7 +76,7 @@
       "sntp": {
         "server": "time.cloudflare.com"
       },
-      "cfg_rev": 25
+      "cfg_rev": 16
     },
     "temperature:0": {
       "id": 0,
@@ -103,8 +102,8 @@
       },
       "sta1": {
         "ssid": "",
-        "is_open": false,
-        "enable": true,
+        "is_open": true,
+        "enable": false,
         "ipv4mode": "dhcp",
         "ip": null,
         "netmask": null,
@@ -119,19 +118,19 @@
     "ws": {
       "enable": true,
       "server": "ws://192.168.1.20:8485",
-      "ssl_ca": "*"
+      "ssl_ca": "ca.pem"
     }
   },
   "status": {
     "ble": {},
     "cloud": {
-      "connected": true
+      "connected": false
     },
     "devicepower:0": {
       "id": 0,
       "battery": {
-        "V": 4.98,
-        "percent": 49
+        "V": 5.53,
+        "percent": 76
       },
       "external": {
         "present": false
@@ -140,25 +139,25 @@
     "ht_ui": {},
     "humidity:0": {
       "id": 0,
-      "rh": 53.7
+      "rh": 53
     },
     "mqtt": {
       "connected": false
     },
     "sys": {
-      "mac": "3030F9EC8468",
+      "mac": "FCB467261FD4",
       "restart_required": false,
-      "time": "06:27",
-      "unixtime": 1745728024,
-      "last_sync_ts": 1745728019,
+      "time": "07:23",
+      "unixtime": 1745731416,
+      "last_sync_ts": 1745731410,
       "uptime": 8,
-      "ram_size": 249540,
-      "ram_free": 140352,
-      "ram_min_free": 125840,
-      "fs_size": 1048576,
-      "fs_free": 704512,
-      "cfg_rev": 25,
-      "kvs_rev": 0,
+      "ram_size": 254532,
+      "ram_free": 157068,
+      "ram_min_free": 148168,
+      "fs_size": 393216,
+      "fs_free": 176128,
+      "cfg_rev": 16,
+      "kvs_rev": 1,
       "webhook_rev": 0,
       "available_updates": {},
       "wakeup_reason": {
@@ -170,21 +169,21 @@
     },
     "temperature:0": {
       "id": 0,
-      "tC": 22.2,
-      "tF": 72
+      "tC": 22.4,
+      "tF": 72.3
     },
     "wifi": {
-      "sta_ip": "192.168.1.100",
+      "sta_ip": "192.168.1.195",
       "status": "got ip",
       "ssid": "",
-      "rssi": -67
+      "rssi": -51
     },
     "ws": {
       "connected": true
     }
   },
   "components": [],
-  "cfg_rev": 25,
+  "cfg_rev": 16,
   "offset": 0,
   "total": 0
 }

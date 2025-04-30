@@ -1413,7 +1413,7 @@ describe('Shelly devices test', () => {
       expect(device.model).toBe('SAWD-0A1XX10EU1');
       expect(device.mac).toBe('00082261E102');
       expect(device.id).toBe(id);
-      expect(device.firmware).toBe('2.3.5-be75436c');
+      expect(device.firmware).toBe('2.3.6-66e97e33');
       expect(device.auth).toBe(false);
       expect(device.gen).toBe(2);
       expect(device.profile).toBe(undefined);
