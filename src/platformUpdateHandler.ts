@@ -350,7 +350,7 @@ export function shellyUpdateHandler(
     if ((property === 'power' || property === 'apower' || property === 'act_power') && isValidNumber(value, 0)) {
       if (property === 'power' && shellyComponent.id.startsWith('light') && shellyDevice.id.startsWith('shellyrgbw2')) return; // Skip the rest for shellyrgbw2 devices
       const power = Math.round(value * 1000) / 1000;
-      endpoint.setAttribute(ElectricalPowerMeasurement.Cluster.id, 'activePower', power * 1000, shellyDevice.log);
+      endpoint.setAttribute(ElectricalPowerMeasurement.Cluster.id, 'activePower', Math.round(power * 1000), shellyDevice.log);
       if (property === 'act_power') return; // Skip the rest for PRO devices
       if (shellyComponent.id.startsWith('emeter')) return; // Skip the rest for em3 devices
       if (shellyComponent.hasProperty('current')) return; // Skip if we have already current reading
@@ -358,35 +358,35 @@ export function shellyUpdateHandler(
       if (property === 'power' && shellyDevice.hasComponent('sys') && shellyDevice.getComponent('sys')?.hasProperty('voltage')) {
         const voltage = shellyDevice.getComponent('sys')?.getValue('voltage');
         if (isValidNumber(voltage, 10)) {
-          endpoint.setAttribute(ElectricalPowerMeasurement.Cluster.id, 'voltage', voltage * 1000, shellyDevice.log);
+          endpoint.setAttribute(ElectricalPowerMeasurement.Cluster.id, 'voltage', Math.round(voltage * 1000), shellyDevice.log);
           const current = Math.round((value / voltage) * 1000) / 1000;
-          endpoint.setAttribute(ElectricalPowerMeasurement.Cluster.id, 'activeCurrent', current * 1000, shellyDevice.log);
+          endpoint.setAttribute(ElectricalPowerMeasurement.Cluster.id, 'activeCurrent', Math.round(current * 1000), shellyDevice.log);
         }
       }
       // Calculate current from power and voltage
       const voltage = shellyComponent.hasProperty('voltage') ? (shellyComponent.getValue('voltage') as number) : undefined;
       if (isValidNumber(voltage, 10)) {
         const current = Math.round((value / voltage) * 1000) / 1000;
-        endpoint.setAttribute(ElectricalPowerMeasurement.Cluster.id, 'activeCurrent', current * 1000, shellyDevice.log);
+        endpoint.setAttribute(ElectricalPowerMeasurement.Cluster.id, 'activeCurrent', Math.round(current * 1000), shellyDevice.log);
       }
     }
     if (property === 'total' && isValidNumber(value, 0)) {
       const energy = Math.round(value * 1000) / 1000;
-      endpoint.setAttribute(ElectricalEnergyMeasurement.Cluster.id, 'cumulativeEnergyImported', { energy: energy * 1000 }, shellyDevice.log);
+      endpoint.setAttribute(ElectricalEnergyMeasurement.Cluster.id, 'cumulativeEnergyImported', { energy: Math.round(energy * 1000) }, shellyDevice.log);
     }
     if (property === 'aenergy' && isValidObject(value) && isValidNumber((value as ShellyData).total, 0)) {
       const energy = Math.round(((value as ShellyData).total as number) * 1000) / 1000;
-      endpoint.setAttribute(ElectricalEnergyMeasurement.Cluster.id, 'cumulativeEnergyImported', { energy: energy * 1000 }, shellyDevice.log);
+      endpoint.setAttribute(ElectricalEnergyMeasurement.Cluster.id, 'cumulativeEnergyImported', { energy: Math.round(energy * 1000) }, shellyDevice.log);
     }
     if (property === 'total_act_energy' && isValidNumber(value, 0)) {
       const energy = Math.round(value * 1000) / 1000;
-      endpoint.setAttribute(ElectricalEnergyMeasurement.Cluster.id, 'cumulativeEnergyImported', { energy: energy * 1000 }, shellyDevice.log);
+      endpoint.setAttribute(ElectricalEnergyMeasurement.Cluster.id, 'cumulativeEnergyImported', { energy: Math.round(energy * 1000) }, shellyDevice.log);
     }
     if (property === 'voltage' && isValidNumber(value, 0)) {
-      endpoint.setAttribute(ElectricalPowerMeasurement.Cluster.id, 'voltage', value * 1000, shellyDevice.log);
+      endpoint.setAttribute(ElectricalPowerMeasurement.Cluster.id, 'voltage', Math.round(value * 1000), shellyDevice.log);
     }
     if (property === 'current' && isValidNumber(value, 0)) {
-      endpoint.setAttribute(ElectricalPowerMeasurement.Cluster.id, 'activeCurrent', value * 1000, shellyDevice.log);
+      endpoint.setAttribute(ElectricalPowerMeasurement.Cluster.id, 'activeCurrent', Math.round(value * 1000), shellyDevice.log);
       if (shellyComponent.hasProperty('act_power')) return;
       if (shellyComponent.hasProperty('apower')) return;
       if (shellyComponent.hasProperty('power')) return;
@@ -395,7 +395,7 @@ export function shellyUpdateHandler(
       const voltage = shellyComponent.hasProperty('voltage') ? (shellyComponent.getValue('voltage') as number) : undefined;
       if (isValidNumber(voltage, 0)) {
         const power = Math.round(value * voltage * 1000) / 1000;
-        endpoint.setAttribute(ElectricalPowerMeasurement.Cluster.id, 'activePower', power * 1000, shellyDevice.log);
+        endpoint.setAttribute(ElectricalPowerMeasurement.Cluster.id, 'activePower', Math.round(power * 1000), shellyDevice.log);
       }
     }
   }
