@@ -1,12 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { jest } from '@jest/globals';
-import { getMacAddress, wait, waiter } from 'matterbridge/utils';
+import { wait, waiter } from 'matterbridge/utils';
 import { WsServer } from './wsServer';
-import { WebSocket, WebSocketServer } from 'ws';
+import { WebSocket } from 'ws';
 import { AnsiLogger, LogLevel } from 'matterbridge/logger';
 import { ShellyData } from './shellyTypes';
-import * as http from 'node:http';
 
 describe('ShellyWsServer', () => {
   let wsServer: WsServer;
@@ -139,6 +138,8 @@ describe('ShellyWsServer', () => {
           client.ping();
           await wait(3000);
           client.close();
+          wsServer.stop();
+          await wait(1000);
           resolve();
         } catch (error) {
           reject(error);
@@ -161,5 +162,5 @@ describe('ShellyWsServer', () => {
         reject(error);
       });
     });
-  });
+  }, 10000);
 });
