@@ -21,7 +21,7 @@ New device types:
 If your controller has issues detecting the new device type, blacklist these devices, restart, wait 5 minutes, remove the blacklist and restart again. This will create a new endpoint on the controller.
 For shellyflood, if you have SmartThings, blacklist the Temperature entity for each flood device with deviceEntityBlackList to allow the controller to setup the correct driver.
 
-## [2.0.10] - 2025-05-??
+## [2.0.10] - 2025-05-25
 
 ### Added
 
@@ -29,11 +29,12 @@ For shellyflood, if you have SmartThings, blacklist the Temperature entity for e
 
 - [package]: Updated package.
 - [package]: Updated dependencies.
-- [plugin]: Requires Matterbridge 3.0.0.
+- [plugin]: Requires Matterbridge 3.0.4.
 
 ### Fixed
 
-- [energy]: Fixed reading of energy component.
+- [energy]: Fixed reading of energy component coming not rounded from certain devices.
+- [mcast]: Fixed detection of coap setting in old gen1 devices.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
   <img src="bmc-button.svg" alt="Buy me a coffee" width="80">

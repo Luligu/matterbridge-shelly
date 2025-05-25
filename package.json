@@ -1,6 +1,6 @@
 {
   "name": "matterbridge-shelly",
-  "version": "2.0.10-dev.1",
+  "version": "2.0.10-rc.1",
   "description": "Matterbridge shelly plugin",
   "author": "https://github.com/Luligu",
   "homepage": "https://github.com/Luligu/matterbridge-shelly/blob/main/README.md",
