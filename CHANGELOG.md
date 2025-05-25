@@ -25,6 +25,9 @@ For shellyflood, if you have SmartThings, blacklist the Temperature entity for e
 
 ### Added
 
+- [shelly]: Verified firmware 1.6.2.
+- [shelly]: Verified firmware 1.6.1.
+
 ### Changed
 
 - [package]: Updated package.
