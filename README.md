@@ -77,7 +77,7 @@ See the complete guidelines on [Matterbridge](https://github.com/Luligu/matterbr
 
 ### Any shelly device
 
-A shelly device gen. 1 or 2 or 3 or BLU.
+A shelly device gen. 1 or 2 or 3 or 4 or BLU.
 
 ## How to add a device
 
@@ -109,6 +109,8 @@ There are two ways to have the wifi device IP stable:
 
 1. In your router configuration find, in the DHCP settings, the option to reserve an ip address for all your shelly wifi devices.
 2. In the device web UI (or Shelly app) go to Settings / WiFi and set a static IP for Wi-Fi 1 settings.
+
+A stable IP address is mandatory for battery powered devices. I suggest to set it for all the other devices too.
 
 ## How to install the plugin
 

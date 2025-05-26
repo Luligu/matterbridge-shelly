@@ -1,14 +1,14 @@
 {
   "shelly": {
-    "name": "1PM Gen4",
-    "id": "shelly1pmg4-a085e3bd0544",
-    "mac": "A085E3BD0544",
+    "name": "1 Mini Gen4",
+    "id": "shelly1minig4-a085e3bb944c",
+    "mac": "A085E3BB944C",
     "slot": 0,
-    "model": "S4SW-001P16EU",
+    "model": "S4SW-001X8EU",
     "gen": 4,
-    "fw_id": "20250520-083727/1.6.2-gc8a76e2",
+    "fw_id": "20250520-083709/1.6.2-gc8a76e2",
     "ver": "1.6.2",
-    "app": "S1PMG4",
+    "app": "Mini1G4",
     "auth_en": false,
     "auth_domain": null,
     "matter": true
@@ -49,10 +49,10 @@
     "mqtt": {
       "enable": false,
       "server": null,
-      "client_id": "shelly1pmg4-a085e3bd0544",
+      "client_id": "shelly1minig4-a085e3bb944c",
       "user": null,
       "ssl_ca": null,
-      "topic_prefix": "shelly1pmg4-a085e3bd0544",
+      "topic_prefix": "shelly1minig4-a085e3bb944c",
       "rpc_ntf": true,
       "status_ntf": false,
       "use_client_cert": false,
@@ -68,21 +68,15 @@
       "auto_on": false,
       "auto_on_delay": 60,
       "auto_off": false,
-      "auto_off_delay": 60,
-      "power_limit": 4480,
-      "voltage_limit": 280,
-      "autorecover_voltage_errors": false,
-      "current_limit": 16,
-      "reverse": false
+      "auto_off_delay": 60
     },
     "sys": {
       "device": {
-        "name": "1PM Gen4",
-        "mac": "A085E3BD0544",
-        "fw_id": "20250520-083727/1.6.2-gc8a76e2",
+        "name": "1 Mini Gen4",
+        "mac": "A085E3BB944C",
+        "fw_id": "20250520-083709/1.6.2-gc8a76e2",
         "discoverable": true,
-        "eco_mode": false,
-        "addon_type": null
+        "eco_mode": false
       },
       "location": null,
       "debug": {
@@ -106,7 +100,7 @@
       "sntp": {
         "server": "time.cloudflare.com"
       },
-      "cfg_rev": 20
+      "cfg_rev": 18
     },
     "wifi": {
       "ap": {
@@ -175,58 +169,36 @@
       "id": 0,
       "source": "init",
       "output": false,
-      "apower": 0,
-      "voltage": 234.2,
-      "freq": 49.9,
-      "current": 0,
-      "aenergy": {
-        "total": 0,
-        "by_minute": [
-          0,
-          0,
-          0
-        ],
-        "minute_ts": 1748257260
-      },
-      "ret_aenergy": {
-        "total": 0,
-        "by_minute": [
-          0,
-          0,
-          0
-        ],
-        "minute_ts": 1748257260
-      },
       "temperature": {
-        "tC": 46.2,
-        "tF": 115.2
+        "tC": 59.6,
+        "tF": 139.3
       }
     },
     "sys": {
-      "mac": "A085E3BD0544",
+      "mac": "A085E3BB944C",
       "restart_required": false,
-      "time": "13:01",
-      "unixtime": 1748257309,
-      "last_sync_ts": 1748256862,
-      "uptime": 412787,
-      "ram_size": 358736,
-      "ram_free": 182484,
-      "ram_min_free": 160804,
+      "time": "12:59",
+      "unixtime": 1748257189,
+      "last_sync_ts": 1748255602,
+      "uptime": 412667,
+      "ram_size": 361320,
+      "ram_free": 187808,
+      "ram_min_free": 169008,
       "fs_size": 917504,
-      "fs_free": 442368,
-      "cfg_rev": 20,
+      "fs_free": 458752,
+      "cfg_rev": 18,
       "kvs_rev": 0,
       "schedule_rev": 1,
       "webhook_rev": 0,
       "btrelay_rev": 0,
       "available_updates": {},
       "alt": {
-        "S1PMG4ZB": {
-          "name": "Shelly 1 PM Gen4",
-          "desc": "Shelly 1 PM Gen4 with Zigbee",
+        "Mini1G4ZB": {
+          "name": "Shelly Mini 1 Gen4",
+          "desc": "Shelly Mini 1 Gen4 with Zigbee",
           "stable": {
             "version": "1.6.2",
-            "build_id": "20250520-083719/1.6.2-gc8a76e2"
+            "build_id": "20250520-083722/1.6.2-gc8a76e2"
           }
         }
       },
@@ -234,13 +206,13 @@
       "utc_offset": 7200
     },
     "wifi": {
-      "sta_ip": "192.168.70.3",
+      "sta_ip": "192.168.70.2",
       "status": "got ip",
       "ssid": "",
-      "rssi": -51,
+      "rssi": -57,
       "sta_ip6": [
-        "fe80::a285:e3ff:febd:544",
-        "fd78:cbf8:4939:746:a285:e3ff:febd:544"
+        "fe80::a285:e3ff:febb:944c",
+        "fd78:cbf8:4939:746:a285:e3ff:febb:944c"
       ]
     },
     "ws": {
@@ -248,7 +220,7 @@
     }
   },
   "components": [],
-  "cfg_rev": 20,
+  "cfg_rev": 18,
   "offset": 0,
   "total": 0
 }
