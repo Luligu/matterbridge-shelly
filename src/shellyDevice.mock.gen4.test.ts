@@ -52,7 +52,7 @@ describe('Shelly gen 4 devices test', () => {
   });
 
   test('Create a gen 4 shelly1g4 device', async () => {
-    id = 'shelly1g4-a085e3bca4c8';
+    id = 'shelly1g4-A085E3BCA4C8';
     log.logName = id;
 
     device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', id + '.json'));
@@ -100,7 +100,7 @@ describe('Shelly gen 4 devices test', () => {
   });
 
   test('Create a gen 4 shelly1pmg4 device', async () => {
-    id = 'shelly1pmg4-a085e3bd0544';
+    id = 'shelly1pmg4-A085E3BD0544';
     log.logName = id;
 
     device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', id + '.json'));
@@ -148,7 +148,7 @@ describe('Shelly gen 4 devices test', () => {
   });
 
   test('Create a gen 4 shelly1minig4 device', async () => {
-    id = 'shelly1minig4-a085e3bb944c';
+    id = 'shelly1minig4-A085E3BB944C';
     log.logName = id;
 
     device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', id + '.json'));
@@ -196,7 +196,7 @@ describe('Shelly gen 4 devices test', () => {
   });
 
   test('Create a gen 4 shelly1pmminig4 device', async () => {
-    id = 'shelly1pmminig4-ccba97c64580';
+    id = 'shelly1pmminig4-CCBA97C64580';
     log.logName = id;
 
     device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', id + '.json'));
