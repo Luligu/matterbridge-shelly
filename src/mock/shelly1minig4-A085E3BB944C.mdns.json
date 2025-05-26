@@ -52,11 +52,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": [
-        "gen=4",
-        "app=Mini1G4",
-        "ver=1.6.2"
-      ]
+      "data": ["gen=4", "app=Mini1G4", "ver=1.6.2"]
     },
     {
       "name": "Shelly1MiniG4-A085E3BB944C.local",
@@ -85,11 +81,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": [
-        "gen=4",
-        "app=Mini1G4",
-        "ver=1.6.2"
-      ]
+      "data": ["gen=4", "app=Mini1G4", "ver=1.6.2"]
     },
     {
       "name": "1-Mini-Gen4.local",

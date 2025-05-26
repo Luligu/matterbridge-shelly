@@ -150,9 +150,7 @@
   "status": {
     "ble": {},
     "bthome": {
-      "errors": [
-        "bluetooth_disabled"
-      ]
+      "errors": ["bluetooth_disabled"]
     },
     "cloud": {
       "connected": true
@@ -180,20 +178,12 @@
       "current": 0,
       "aenergy": {
         "total": 0,
-        "by_minute": [
-          0,
-          0,
-          0
-        ],
+        "by_minute": [0, 0, 0],
         "minute_ts": 1748257020
       },
       "ret_aenergy": {
         "total": 0,
-        "by_minute": [
-          0,
-          0,
-          0
-        ],
+        "by_minute": [0, 0, 0],
         "minute_ts": 1748257020
       },
       "temperature": {
@@ -237,10 +227,7 @@
       "status": "got ip",
       "ssid": "",
       "rssi": -55,
-      "sta_ip6": [
-        "fe80::ceba:97ff:fec6:4580",
-        "fd78:cbf8:4939:746:ceba:97ff:fec6:4580"
-      ]
+      "sta_ip6": ["fe80::ceba:97ff:fec6:4580", "fd78:cbf8:4939:746:ceba:97ff:fec6:4580"]
     },
     "ws": {
       "connected": false

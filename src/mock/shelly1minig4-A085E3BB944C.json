@@ -145,9 +145,7 @@
   "status": {
     "ble": {},
     "bthome": {
-      "errors": [
-        "bluetooth_disabled"
-      ]
+      "errors": ["bluetooth_disabled"]
     },
     "cloud": {
       "connected": true
@@ -210,10 +208,7 @@
       "status": "got ip",
       "ssid": "",
       "rssi": -57,
-      "sta_ip6": [
-        "fe80::a285:e3ff:febb:944c",
-        "fd78:cbf8:4939:746:a285:e3ff:febb:944c"
-      ]
+      "sta_ip6": ["fe80::a285:e3ff:febb:944c", "fd78:cbf8:4939:746:a285:e3ff:febb:944c"]
     },
     "ws": {
       "connected": false

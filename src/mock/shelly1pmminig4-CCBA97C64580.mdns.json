@@ -52,11 +52,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": [
-        "gen=4",
-        "app=Mini1PMG4",
-        "ver=1.6.2"
-      ]
+      "data": ["gen=4", "app=Mini1PMG4", "ver=1.6.2"]
     },
     {
       "name": "Shelly1PMMiniG4-CCBA97C64580.local",
@@ -85,11 +81,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": [
-        "gen=4",
-        "app=Mini1PMG4",
-        "ver=1.6.2"
-      ]
+      "data": ["gen=4", "app=Mini1PMG4", "ver=1.6.2"]
     },
     {
       "name": "1PM-Mini-Gen4.local",
