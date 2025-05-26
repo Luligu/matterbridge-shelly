@@ -10,16 +10,27 @@ If you like this project and find it useful, please consider giving it a star on
 
 You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his invaluable contribution to this project.
 
-### Breaking Changes
+## [2.0.10] - 2025-05-26
 
-New device types:
+### Added
 
-- shellyflood device type has been updated from contact sensor to water leak sensor.
-- shellysmoke device type has been updated from contact sensor to smoke sensor.
-- the device type for all the rgb lights has been updated from colorTemperatureLight to extendedColorLight. This solves SmartThings issues with color lights.
+- [shelly]: Verified firmware 1.6.2.
+- [shelly]: Verified firmware 1.6.1.
 
-If your controller has issues detecting the new device type, blacklist these devices, restart, remove the blacklist and restart again. This will create a new endpoint on the controller.
-For shellyflood, if you have SmartThings, blacklist the Temperature entity for each flood device with deviceEntityBlackList to allow the controller to setup the correct driver.
+### Changed
+
+- [package]: Updated package.
+- [package]: Updated dependencies.
+- [plugin]: Requires Matterbridge 3.0.4.
+
+### Fixed
+
+- [energy]: Fixed reading of energy component coming not rounded from certain devices.
+- [mcast]: Fixed detection of coap setting in old gen1 devices.
+
+<a href="https://www.buymeacoffee.com/luligugithub">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="80">
+</a>
 
 ## [2.0.9] - 2025-04-30
 
@@ -41,6 +52,17 @@ For shellyflood, if you have SmartThings, blacklist the Temperature entity for e
 </a>
 
 ## [2.0.8] - 2025-04-19
+
+### Breaking Changes
+
+New device types:
+
+- shellyflood device type has been updated from contact sensor to water leak sensor.
+- shellysmoke device type has been updated from contact sensor to smoke sensor.
+- the device type for all the rgb lights has been updated from colorTemperatureLight to extendedColorLight. This solves SmartThings issues with color lights.
+
+If your controller has issues detecting the new device type, blacklist these devices, restart, wait 5 minutes, remove the blacklist and restart again. This will create a new endpoint on the controller.
+For shellyflood, if you have SmartThings, blacklist the Temperature entity for each flood device with deviceEntityBlackList to allow the controller to setup the correct driver.
 
 ### Added
 

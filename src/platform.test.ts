@@ -1,19 +1,7 @@
 /* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {
-  Matterbridge,
-  // MatterbridgeBehavior,
-  MatterbridgeEndpoint,
-  PlatformConfig,
-  PowerSource,
-  MatterbridgeLevelControlServer,
-  MatterbridgeColorControlServer,
-  bridge,
-  ColorControl,
-  TemperatureMeasurementCluster,
-  RelativeHumidityMeasurementCluster,
-} from 'matterbridge';
+import { Matterbridge, MatterbridgeEndpoint, PlatformConfig, MatterbridgeLevelControlServer, MatterbridgeColorControlServer, bridge } from 'matterbridge';
 import {
   OnOffCluster,
   BindingCluster,
@@ -27,6 +15,10 @@ import {
   PowerSourceCluster,
   PowerTopology,
   Switch,
+  PowerSource,
+  ColorControl,
+  TemperatureMeasurementCluster,
+  RelativeHumidityMeasurementCluster,
 } from 'matterbridge/matter/clusters';
 import { ColorControlBehavior, LevelControlBehavior, OnOffBehavior, RelativeHumidityMeasurementBehavior, TemperatureMeasurementBehavior } from 'matterbridge/matter/behaviors';
 import { AnsiLogger, db, er, hk, idn, LogLevel, nf, rs, wr, zb, CYAN, TimestampFormat, YELLOW, or, debugStringify } from 'matterbridge/logger';
@@ -36,8 +28,6 @@ import {
   MaybePromise,
   LogLevel as MatterLogLevel,
   LogFormat as MatterLogFormat,
-  EndpointServer,
-  logEndpoint,
   DeviceTypeId,
   VendorId,
   ServerNode,
@@ -215,7 +205,7 @@ describe('ShellyPlatform', () => {
       matterbridgeDirectory: './jest/matterbridge',
       matterbridgePluginDirectory: './jest/plugins',
       systemInformation: { ipv4Address: undefined, osRelease: 'xx.xx.xx.xx.xx.xx', nodeVersion: '22.1.10' },
-      matterbridgeVersion: '3.0.0',
+      matterbridgeVersion: '3.0.4',
       log: mockLog,
       getDevices: jest.fn(() => {
         // console.log('getDevices called');
@@ -333,7 +323,7 @@ describe('ShellyPlatform', () => {
   it('should throw because of version', () => {
     mockMatterbridge.matterbridgeVersion = '1.5.4';
     expect(() => new ShellyPlatform(mockMatterbridge, mockLog, mockConfig as any)).toThrow();
-    mockMatterbridge.matterbridgeVersion = '3.0.0';
+    mockMatterbridge.matterbridgeVersion = '3.0.4';
   });
 
   it('should call onStart with reason and start mDNS', async () => {

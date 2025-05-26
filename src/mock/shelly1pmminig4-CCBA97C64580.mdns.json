@@ -20,7 +20,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": "shelly1g4-a085e3bca4c8._shelly._tcp.local"
+      "data": "shelly1pmminig4-ccba97c64580._shelly._tcp.local"
     },
     {
       "name": "_shelly._tcp.local",
@@ -28,13 +28,13 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": "1 Gen4._shelly._tcp.local"
+      "data": "1PM Mini Gen4._shelly._tcp.local"
     }
   ],
   "authorities": [],
   "additionals": [
     {
-      "name": "shelly1g4-a085e3bca4c8._shelly._tcp.local",
+      "name": "shelly1pmminig4-ccba97c64580._shelly._tcp.local",
       "type": "SRV",
       "ttl": 120,
       "class": "IN",
@@ -43,27 +43,27 @@
         "priority": 0,
         "weight": 0,
         "port": 80,
-        "target": "Shelly1G4-A085E3BCA4C8.local"
+        "target": "Shelly1PMMiniG4-CCBA97C64580.local"
       }
     },
     {
-      "name": "shelly1g4-a085e3bca4c8._shelly._tcp.local",
+      "name": "shelly1pmminig4-ccba97c64580._shelly._tcp.local",
       "type": "TXT",
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": ["gen=4", "app=S1G4", "ver=1.6.2"]
+      "data": ["gen=4", "app=Mini1PMG4", "ver=1.6.2"]
     },
     {
-      "name": "Shelly1G4-A085E3BCA4C8.local",
+      "name": "Shelly1PMMiniG4-CCBA97C64580.local",
       "type": "A",
       "ttl": 120,
       "class": "IN",
       "flush": true,
-      "data": "192.168.70.1"
+      "data": "192.168.70.4"
     },
     {
-      "name": "1 Gen4._shelly._tcp.local",
+      "name": "1PM Mini Gen4._shelly._tcp.local",
       "type": "SRV",
       "ttl": 120,
       "class": "IN",
@@ -72,24 +72,24 @@
         "priority": 0,
         "weight": 0,
         "port": 80,
-        "target": "1-Gen4.local"
+        "target": "1PM-Mini-Gen4.local"
       }
     },
     {
-      "name": "1 Gen4._shelly._tcp.local",
+      "name": "1PM Mini Gen4._shelly._tcp.local",
       "type": "TXT",
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": ["gen=4", "app=S1G4", "ver=1.6.2"]
+      "data": ["gen=4", "app=Mini1PMG4", "ver=1.6.2"]
     },
     {
-      "name": "1-Gen4.local",
+      "name": "1PM-Mini-Gen4.local",
       "type": "A",
       "ttl": 120,
       "class": "IN",
       "flush": true,
-      "data": "192.168.70.1"
+      "data": "192.168.70.4"
     }
   ]
 }

@@ -717,6 +717,7 @@ export class ShellyDevice extends EventEmitter {
     if (statusPayload) device.onUpdate(statusPayload);
 
     // For gen 1 devices check if CoIoT is enabled and peer is set correctly. First devices do not have this property.
+    // Devices like motionsensor and motion2 use multicast:5683 instead of mcast in peer.
     if (device.gen === 1) {
       const CoIoT = device.getComponent('coiot');
       if (CoIoT) {
@@ -725,7 +726,7 @@ export class ShellyDevice extends EventEmitter {
             `The CoIoT service is not enabled for device ${dn}${device.name}${wr} id ${hk}${device.id}${wr}. Enable it in the web ui settings to receive updates from the device.`,
           );
         // When peer is mcast we get "" as value. First devices do not have this property.
-        if (CoIoT.hasProperty('peer') && (CoIoT.getValue('peer') as string) !== '') {
+        if (CoIoT.hasProperty('peer') && CoIoT.getValue('peer') !== '' && CoIoT.getValue('peer') !== 'multicast:5683') {
           const peer = CoIoT.getValue('peer') as string;
           const ipv4 = shelly.ipv4Address + ':5683';
           if (peer !== ipv4)

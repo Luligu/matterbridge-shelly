@@ -21,6 +21,14 @@
       "class": "IN",
       "flush": false,
       "data": "shelly1pmg4-a085e3bd0544._shelly._tcp.local"
+    },
+    {
+      "name": "_shelly._tcp.local",
+      "type": "PTR",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": "1PM Gen4._shelly._tcp.local"
     }
   ],
   "authorities": [],
@@ -44,7 +52,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": ["gen=4", "app=S1PMG4", "ver=1.5.99-g4prod1"]
+      "data": ["gen=4", "app=S1PMG4", "ver=1.6.2"]
     },
     {
       "name": "Shelly1PMG4-A085E3BD0544.local",
@@ -52,7 +60,36 @@
       "ttl": 120,
       "class": "IN",
       "flush": true,
-      "data": "192.168.1.191"
+      "data": "192.168.70.3"
+    },
+    {
+      "name": "1PM Gen4._shelly._tcp.local",
+      "type": "SRV",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": {
+        "priority": 0,
+        "weight": 0,
+        "port": 80,
+        "target": "1PM-Gen4.local"
+      }
+    },
+    {
+      "name": "1PM Gen4._shelly._tcp.local",
+      "type": "TXT",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": ["gen=4", "app=S1PMG4", "ver=1.6.2"]
+    },
+    {
+      "name": "1PM-Gen4.local",
+      "type": "A",
+      "ttl": 120,
+      "class": "IN",
+      "flush": true,
+      "data": "192.168.70.3"
     }
   ]
 }

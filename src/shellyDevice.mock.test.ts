@@ -30,6 +30,7 @@ describe('Shelly devices test', () => {
   const firmwareGen1 = 'v1.14.0-gcb84623';
   const firmwareGen2 = '1.4.4-g6d2a586';
   const firmwareGen3 = '1.5.0-g0087a06';
+  const firmwareGen4 = '1.6.2-gc8a76e2';
 
   beforeAll(() => {
     consoleLogSpy = jest.spyOn(console, 'log').mockImplementation((...args: any[]) => {

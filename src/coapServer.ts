@@ -25,7 +25,7 @@
 import { AnsiLogger, BLUE, CYAN, LogLevel, MAGENTA, RESET, TimestampFormat, db, debugStringify, er, hk, nf, wr, zb } from 'matterbridge/logger';
 
 // CoAP imports
-import coap, { Server, IncomingMessage, OutgoingMessage, parameters } from 'coap';
+import coap, { Server, IncomingMessage, OutgoingMessage, parameters, globalAgent } from 'coap';
 
 // Node.js imports
 import EventEmitter from 'node:events';
@@ -749,8 +749,8 @@ export class CoapServer extends EventEmitter {
    * This method stops the CoIoT server by performing the following actions:
    * - Logs a message indicating the server is being stopped.
    * - Removes all event listeners.
-   * - Closes the global agent.
    * - Closes the `coapServer` if it exists.
+   * - Closes the global agent.
    * - Clears the `devices` map.
    * - Logs a message indicating the server has been stopped.
    */
@@ -758,12 +758,12 @@ export class CoapServer extends EventEmitter {
     this.log.info('Stopping CoIoT (coap) server for shelly devices...');
     this.removeAllListeners();
     this._isListening = false;
-    // globalAgent.close((err?: Error) => this.log.debug(`CoIoT (coap) agent closed${err ? ' with error ' + err.message : ''}.`));
     if (this.coapServer)
       this.coapServer.close((err?: Error) => {
         this._isReady = false;
         this.log.debug(`CoIoT (coap) server closed${err ? ' with error ' + err.message : ''}.`);
       });
+    globalAgent.close((err?: Error) => this.log.debug(`CoIoT (coap) agent closed${err ? ' with error ' + err.message : ''}.`));
     this.deviceDescription.clear();
     this.deviceId.clear();
     this.deviceSerial.clear();
