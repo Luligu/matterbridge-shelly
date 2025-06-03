@@ -73,7 +73,7 @@ export class ShellyDevice extends EventEmitter {
   readonly log: AnsiLogger;
   readonly username: string | undefined;
   readonly password: string | undefined;
-  profile: 'switch' | 'cover' | 'rgb' | 'rgbw' | 'color' | 'white' | 'light' | undefined = undefined;
+  profile: 'switch' | 'cover' | 'rgb' | 'rgbw' | 'color' | 'white' | 'light' | 'triphase' | undefined = undefined;
   host: string;
   id = '';
   model = '';
@@ -522,12 +522,12 @@ export class ShellyDevice extends EventEmitter {
     device.sleepMode = (shellyPayload.sleep_mode as boolean) ?? false;
 
     // Gen 1 Shelly device can be mode relay or roller - color or white!
-    // Gen 2/3 Shelly device can be profile switch or cover - rgb or rgbw or white!
+    // Gen 2/3 Shelly device can be profile switch or cover - rgb or rgbw or white - monophase or triphase!
     if (shellyPayload.mode === 'relay') device.profile = 'switch';
     if (shellyPayload.mode === 'roller') device.profile = 'cover';
     if (shellyPayload.mode === 'color') device.profile = 'color';
     if (shellyPayload.mode === 'white') device.profile = 'white';
-    if (shellyPayload.profile !== undefined) device.profile = shellyPayload.profile as 'switch' | 'cover' | 'rgb' | 'rgbw' | 'color' | 'white' | 'light' | undefined;
+    if (shellyPayload.profile !== undefined) device.profile = shellyPayload.profile as 'switch' | 'cover' | 'rgb' | 'rgbw' | 'color' | 'white' | 'light' | 'triphase' | undefined;
 
     // Gen 1 Shelly device
     if (!shellyPayload.gen) {
@@ -690,7 +690,39 @@ export class ShellyDevice extends EventEmitter {
         if (key.startsWith('input:')) device.addComponent(new ShellyComponent(device, key, 'Input', settingsPayload[key] as ShellyData));
         if (key.startsWith('pm1:')) device.addComponent(new ShellyComponent(device, key, 'PowerMeter', settingsPayload[key] as ShellyData));
         if (key.startsWith('em1:')) device.addComponent(new ShellyComponent(device, key, 'PowerMeter', settingsPayload[key] as ShellyData));
-        if (key.startsWith('em:')) device.addComponent(new ShellyComponent(device, key, 'PowerMeter', settingsPayload[key] as ShellyData));
+        // if (key.startsWith('em:')) device.addComponent(new ShellyComponent(device, key, 'PowerMeter', settingsPayload[key] as ShellyData));
+        if (key.startsWith('em:')) {
+          if (device.profile === 'triphase') {
+            // Pro3EM case: single object, prefixed properties
+            if (settingsPayload && key in settingsPayload && typeof settingsPayload[key] === 'object' && settingsPayload[key] !== null) {
+              const prefixes = ['a_', 'b_', 'c_', 'total_'];
+              prefixes.forEach(phasePrefix => {
+                const phaseData: ShellyData = {};
+                for (const prop in settingsPayload![key] as Record<string, unknown>) {
+                  if (prop.startsWith(phasePrefix)) {
+                    phaseData[prop.replace(phasePrefix, '')] = (settingsPayload![key] as Record<string, unknown>)[prop] as ShellyDataType;
+                  }
+                }
+                // Only create the component if there is data
+                if (Object.keys(phaseData).length > 0) {
+                  // For total, name the component differently
+                  const phaseId = phasePrefix === 'total_' ? 'total' : phasePrefix[0];
+                  phaseData['phase'] = phaseId;
+                  device.addComponent(new ShellyComponent(device, `${key}:${phaseId}`, 'PowerMeter', phaseData));
+                }
+              });
+            }
+          } else if (Array.isArray(settingsPayload[key])) {
+            // Shelly 3EM case: array of phases
+            let index = 0;
+            for (const emeter of settingsPayload[key] as ShellyData[]) {
+              device.addComponent(new ShellyComponent(device, `em:${index++}`, 'PowerMeter', emeter as ShellyData));
+            }
+          } else {
+            // Generic case
+            device.addComponent(new ShellyComponent(device, key, 'PowerMeter', settingsPayload[key] as ShellyData));
+          }
+        } 
         if (key.startsWith('temperature:')) device.addComponent(new ShellyComponent(device, key, 'Temperature', settingsPayload[key] as ShellyData));
         if (key.startsWith('humidity:')) device.addComponent(new ShellyComponent(device, key, 'Humidity', settingsPayload[key] as ShellyData));
         if (key.startsWith('illuminance:')) device.addComponent(new ShellyComponent(device, key, 'Illuminance', settingsPayload[key] as ShellyData));
@@ -1149,8 +1181,88 @@ export class ShellyDevice extends EventEmitter {
         if (key.startsWith('pm1:')) this.updateComponent(key, data[key] as ShellyData);
         if (key.startsWith('em1:')) this.updateComponent(key, data[key] as ShellyData);
         if (key.startsWith('em1data:')) this.updateComponent(key.replace('em1data:', 'em1:'), data[key] as ShellyData);
-        if (key.startsWith('em:')) this.updateComponent(key, data[key] as ShellyData);
-        if (key.startsWith('emdata:')) this.updateComponent(key.replace('emdata:', 'em:'), data[key] as ShellyData);
+        // if (key.startsWith('em:')) this.updateComponent(key, data[key] as ShellyData);
+        // if (key.startsWith('emdata:')) this.updateComponent(key.replace('emdata:', 'em:'), data[key] as ShellyData);
+        if (key.startsWith('em:') || key.startsWith('emdata:')) {
+          // Determine the target prefix for the component
+          const baseKey = key.startsWith('emdata:') ? key.replace('emdata:', 'em:') : key;
+
+          if (this.profile === 'triphase' && data && key in data && typeof data[key] === 'object' && data[key] !== null) {
+            const prefixes = ['a_', 'b_', 'c_', 'total_'];
+            prefixes.forEach(phasePrefix => {
+              const phaseData: ShellyData = {};
+              for (const prop in data[key] as Record<string, unknown>) {
+                if (prop.startsWith(phasePrefix)) {
+                  phaseData[prop.replace(phasePrefix, '')] = (data[key] as Record<string, unknown>)[prop] as ShellyDataType;
+                }
+              }
+              if (Object.keys(phaseData).length > 0) {
+                const phaseId = phasePrefix === 'total_' ? 'total' : phasePrefix[0];
+                phaseData['phase'] = phaseId;
+                this.updateComponent(`${baseKey}:${phaseId}`, phaseData);
+              }
+            });
+          }
+          else if (Array.isArray(data[key])) {
+            let index = 0;
+            for (const emeter of data[key] as ShellyData[]) {
+              this.updateComponent(`${baseKey.split(':')[0]}:${index++}`, emeter as ShellyData);
+            }
+          }
+          else {
+            this.updateComponent(baseKey, data[key] as ShellyData);
+          }
+        }        
+        // if (key.startsWith('em:')) {
+        //   if (this.profile === 'triphase' && data && key in data && typeof data[key] === 'object' && data[key] !== null) {
+        //     const prefixes = ['a_', 'b_', 'c_', 'total_'];
+        //     prefixes.forEach(phasePrefix => {
+        //       const phaseData: ShellyData = {};
+        //       for (const prop in data[key] as Record<string, unknown>) {
+        //         if (prop.startsWith(phasePrefix)) {
+        //           phaseData[prop.replace(phasePrefix, '')] = (data[key] as Record<string, unknown>)[prop] as ShellyDataType;
+        //         }
+        //       }
+        //       if (Object.keys(phaseData).length > 0) {
+        //         const phaseId = phasePrefix === 'total_' ? 'total' : phasePrefix[0];
+        //         phaseData['phase'] = phaseId;
+        //         this.updateComponent(`${key}:${phaseId}`, phaseData);
+        //       }
+        //     });
+        //   }
+        //   else if (Array.isArray(data[key])) {
+        //     let index = 0;
+        //     for (const emeter of data[key] as ShellyData[]) {
+        //       this.updateComponent(`em:${index++}`, emeter as ShellyData);
+        //     }
+        //   }
+        //   else {
+        //     this.updateComponent(key, data[key] as ShellyData);
+        //   }
+        // } 
+        // if (key.startsWith('emdata:')) {
+        //   // Gestion spécifique Pro3EM triphasé
+        //   if (this.profile === 'triphase' && data && key in data && typeof data[key] === 'object' && data[key] !== null) {
+        //     const prefixes = ['a_', 'b_', 'c_', 'total_'];
+        //     prefixes.forEach(phasePrefix => {
+        //       const phaseData: ShellyData = {};
+        //       for (const prop in data[key] as Record<string, unknown>) {
+        //         if (prop.startsWith(phasePrefix)) {
+        //           phaseData[prop.replace(phasePrefix, '')] = (data[key] as Record<string, unknown>)[prop] as ShellyDataType;
+        //         }
+        //       }
+        //       if (Object.keys(phaseData).length > 0) {
+        //         const phaseId = phasePrefix === 'total_' ? 'total' : phasePrefix[0];
+        //         phaseData['phase'] = phaseId;
+        //         // On met à jour le composant virtuel correspondant
+        //         this.updateComponent(`${key.replace('emdata:', 'em:')}:${phaseId}`, phaseData);
+        //       }
+        //     });
+        //   } else {
+        //     // Cas générique (autres Shelly)
+        //     this.updateComponent(key.replace('emdata:', 'em:'), data[key] as ShellyData);
+        //   }
+        // }
         if (key.startsWith('temperature:')) this.updateComponent(key, data[key] as ShellyData);
         if (key.startsWith('humidity:')) this.updateComponent(key, data[key] as ShellyData);
         if (key.startsWith('illuminance:')) this.updateComponent(key, data[key] as ShellyData);
