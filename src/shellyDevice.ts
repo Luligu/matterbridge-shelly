@@ -697,9 +697,10 @@ export class ShellyDevice extends EventEmitter {
               const prefixes = ['total_', 'a_', 'b_', 'c_', 'n_'];
               prefixes.forEach((phasePrefix) => {
                 const phaseData: ShellyData = {};
-                for (const emeter in statusPayload![key] as Record<string, unknown>) {
-                  if (emeter.startsWith(phasePrefix)) {
-                    phaseData[emeter.replace(phasePrefix, '')] = statusPayload![key] as ShellyDataType;
+                const phaseSource = statusPayload && statusPayload[key] ? (statusPayload[key] as ShellyData) : {};
+                for (const em in phaseSource) {
+                  if (em.startsWith(phasePrefix)) {
+                    phaseData[em.replace(phasePrefix, '')] = phaseSource[em] as ShellyDataType;
                   }
                 }
                 // Only create the component if there is data
@@ -708,12 +709,6 @@ export class ShellyDevice extends EventEmitter {
                   device.addComponent(new ShellyComponent(device, `em:${phaseIndex}`, 'PowerMeter', phaseData));
                 }
               });
-            }
-          } else if (Array.isArray(settingsPayload[key])) {
-            // Shelly 3EM case: array of phases
-            let index = 0;
-            for (const emeter of settingsPayload[key] as ShellyData[]) {
-              device.addComponent(new ShellyComponent(device, `em:${index++}`, 'PowerMeter', emeter as ShellyData));
             }
           } else {
             // Generic case
