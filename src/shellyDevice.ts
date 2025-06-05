@@ -527,7 +527,8 @@ export class ShellyDevice extends EventEmitter {
     if (shellyPayload.mode === 'roller') device.profile = 'cover';
     if (shellyPayload.mode === 'color') device.profile = 'color';
     if (shellyPayload.mode === 'white') device.profile = 'white';
-    if (shellyPayload.profile !== undefined) device.profile = shellyPayload.profile as 'switch' | 'cover' | 'rgb' | 'rgbw' | 'color' | 'white' | 'light' | 'monophase' | 'triphase' | undefined;
+    if (shellyPayload.profile !== undefined)
+      device.profile = shellyPayload.profile as 'switch' | 'cover' | 'rgb' | 'rgbw' | 'color' | 'white' | 'light' | 'monophase' | 'triphase' | undefined;
 
     // Gen 1 Shelly device
     if (!shellyPayload.gen) {
