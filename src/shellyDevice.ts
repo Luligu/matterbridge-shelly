@@ -912,7 +912,6 @@ export class ShellyDevice extends EventEmitter {
         this.log.debug(`Device ${hk}${this.id}${db} has event ${YELLOW}${event.event}${db} at ${CYAN}${this.getLocalTimeFromLastUpdated(event.ts as number)}${db}`);
         this.emit('bthome_event', event);
       } else if (isValidObject(event) && isValidString(event.event) && isValidNumber(event.ts) && isValidString(event.component) && event.component.startsWith('bthomedevice:')) {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const device = Array.from(this.bthomeDevices).find(([_addr, _device]) => _device.key === event.component)?.[1];
         if (device) {
           this.log.debug(
