@@ -14,10 +14,13 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 
 ### Added
 
+- [npm]: The dev of matterbridge-shelly is published with tag **dev** on **npm** each day at 00:00 UTC if there is a new commit.
+
 ### Changed
 
 - [package]: Updated package.
 - [package]: Updated dependencies.
+- [package]: Updated workflows.
 
 ### Fixed
 
