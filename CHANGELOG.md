@@ -10,6 +10,21 @@ If you like this project and find it useful, please consider giving it a star on
 
 You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his invaluable contribution to this project.
 
+## [2.0.11] - 2025-06-??
+
+### Added
+
+### Changed
+
+- [package]: Updated package.
+- [package]: Updated dependencies.
+
+### Fixed
+
+<a href="https://www.buymeacoffee.com/luligugithub">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="80">
+</a>
+
 ## [2.0.10] - 2025-05-26
 
 ### Added

@@ -1,6 +1,6 @@
 {
   "name": "matterbridge-shelly",
-  "version": "2.0.10",
+  "version": "2.0.11",
   "description": "Matterbridge shelly plugin",
   "author": "https://github.com/Luligu",
   "homepage": "https://www.npmjs.com/package/matterbridge-shelly",
@@ -91,7 +91,9 @@
     "updateDependencies": "npx npm-check-updates -u && npm run deepCleanBuild",
     "runMeBeforePublish": "npm run lint && npm run format && npm run build && npm run test",
     "git:status": "git status && git branch -vv && git diff dev origin/dev",
-    "git:hardreset": "git fetch origin && git checkout dev && git reset --hard origin/dev",
+    "git:hardreset:main": "git fetch origin && git checkout main && git reset --hard origin/main",
+    "git:hardreset:dev": "git fetch origin && git checkout dev && git reset --hard origin/dev",
+    "git:hardreset:edge": "git fetch origin && git checkout edge && git reset --hard origin/edge",
     "prepublishOnly": "npm run cleanBuildProduction && npm pkg delete devDependencies scripts types && npx rimraf ./node_modules && npm install --omit=dev && npm shrinkwrap",
     "npmPack": "copy package.json package.log && npm run prepublishOnly && npm pack && copy package.log package.json && npm run deepCleanBuild",
     "npmPublishTagDev": "copy package.json package.log && npm run prepublishOnly && npm publish --tag dev && copy package.log package.json && npm run deepCleanBuild",
@@ -117,20 +119,20 @@
     "ws": "8.18.2"
   },
   "devDependencies": {
-    "@eslint/js": "^9.27.0",
+    "@eslint/js": "^9.28.0",
     "@types/jest": "29.5.14",
     "@types/multicast-dns": "7.2.4",
-    "@types/node": "22.15.21",
+    "@types/node": "22.15.30",
     "@types/ws": "8.18.1",
     "cross-env": "7.0.3",
     "eslint-config-prettier": "10.1.5",
-    "eslint-plugin-jest": "28.11.0",
-    "eslint-plugin-n": "17.18.0",
-    "eslint-plugin-prettier": "5.4.0",
+    "eslint-plugin-jest": "28.13.0",
+    "eslint-plugin-n": "17.19.0",
+    "eslint-plugin-prettier": "5.4.1",
     "jest": "29.7.0",
     "prettier": "3.5.3",
     "ts-jest": "29.3.4",
     "typescript": "5.8.3",
-    "typescript-eslint": "8.32.1"
+    "typescript-eslint": "8.33.1"
   }
 }
