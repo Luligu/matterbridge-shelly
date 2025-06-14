@@ -1182,9 +1182,9 @@ export class ShellyDevice extends EventEmitter {
             const prefixes = ['total_', 'a_', 'b_', 'c_', 'n_'];
             prefixes.forEach((phasePrefix) => {
               const phaseData: ShellyData = {};
-              for (const emeter in data[key] as Record<string, unknown>) {
-                if (emeter.startsWith(phasePrefix)) {
-                  phaseData[emeter.replace(phasePrefix, '')] = (data[key] as Record<string, unknown>)[emeter] as ShellyDataType;
+              for (const em in data[key] as Record<string, unknown>) {
+                if (em.startsWith(phasePrefix)) {
+                  phaseData[em.replace(phasePrefix, '')] = (data[key] as Record<string, unknown>)[em] as ShellyDataType;
                 }
               }
               if (Object.keys(phaseData).length > 0) {
@@ -1194,8 +1194,8 @@ export class ShellyDevice extends EventEmitter {
             });
           } else if (Array.isArray(data[key])) {
             let index = 0;
-            for (const emeter of data[key] as ShellyData[]) {
-              this.updateComponent(`em:${index++}`, emeter as ShellyData);
+            for (const em of data[key] as ShellyData[]) {
+              this.updateComponent(`em:${index++}`, em as ShellyData);
             }
           } else {
             this.updateComponent(baseKey, data[key] as ShellyData);
