@@ -96,6 +96,7 @@ interface WsClientEvent {
   update: [params: any];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   event: [events: any];
+  open: [];
   error: [message: string];
 }
 
@@ -313,6 +314,9 @@ export class WsClient extends EventEmitter {
 
       // Start the ping/pong mechanism
       this.startPingPong();
+
+      // Send the event that the WebSocket is open
+      this.emit('open');
     });
 
     // Handle errors
@@ -420,11 +424,10 @@ export class WsClient extends EventEmitter {
       this.log.debug(`Closed ws client for Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}`);
     } else if (this.wsClient.readyState === WebSocket.CONNECTING || this.wsClient.readyState === WebSocket.CLOSING) {
       const wsClient = this.wsClient;
-      const timeout = setTimeout(() => {
+      setTimeout(() => {
         if (wsClient.readyState === WebSocket.OPEN) wsClient.close();
         if (wsClient.readyState === WebSocket.CONNECTING || wsClient.readyState === WebSocket.CLOSING) wsClient.terminate();
-      }, 1000);
-      timeout.unref();
+      }, 1000).unref();
       this.log.debug(`Terminated ws client for Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}`);
     } else if (this.wsClient.readyState === WebSocket.CLOSED) {
       this.log.debug(`Ws client already closed for Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}`);

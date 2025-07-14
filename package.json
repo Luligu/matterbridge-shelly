@@ -1,6 +1,6 @@
 {
   "name": "matterbridge-shelly",
-  "version": "2.0.11",
+  "version": "2.1.0",
   "description": "Matterbridge shelly plugin",
   "author": "https://github.com/Luligu",
   "homepage": "https://www.npmjs.com/package/matterbridge-shelly",
