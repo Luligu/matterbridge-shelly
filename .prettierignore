@@ -7,19 +7,13 @@ coverage/
 dist/
 jest/
 node_modules/
+temp/
 
 # Ignore specific files
 **/*.html
 
 # Package specific directories and files that should be ignored
-matterbridge-shelly
-jest-shelly
 TODO.md
-temp
-rock-s0
-CODEOWNERS
-create-release.js
 src/net
-jest
 matterstorage
 matterstorage.backup
