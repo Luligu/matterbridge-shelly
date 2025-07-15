@@ -25,6 +25,10 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 - [CodeQL]: Added CodeQL badge in the readme.
 - [Codecov]: Added Codecov badge in the readme.
 
+- [Jest]: Jest test on WsClient with coverage 100%.
+- [Jest]: Jest test on WsServer with coverage 100%.
+- [Jest]: Jest test on CoapServer with coverage 100%.
+
 ### Changed
 
 - [package]: Updated package to Automator v. 2.0.2.

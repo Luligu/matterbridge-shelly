@@ -187,7 +187,7 @@ describe('Shellies test', () => {
   test('Log 6 devices', async () => {
     expect(shellies.devices.length).toBe(6);
     for (const [id, device] of shellies) {
-      if (device.gen > 1 && !device.sleepMode) device.wsClient = new WsClient(device.id, device.host, shellies.password);
+      if (device.gen > 1 && !device.sleepMode) device.wsClient = new WsClient(device.id, device.host, 80, shellies.password);
     }
     shellies.logDevices();
     shellies.setLogLevel(LogLevel.INFO, false, false, false);

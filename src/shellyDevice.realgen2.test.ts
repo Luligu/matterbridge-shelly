@@ -8,9 +8,31 @@ import { ShellyDevice } from './shellyDevice.js';
 import { Shelly } from './shelly.js';
 import { isCoverComponent, isLightComponent, isSwitchComponent, ShellyComponent } from './shellyComponent.js';
 
-describe('Shellies', () => {
-  let consoleLogSpy: jest.SpiedFunction<typeof console.log>;
+let loggerLogSpy: jest.SpiedFunction<typeof AnsiLogger.prototype.log>;
+let consoleLogSpy: jest.SpiedFunction<typeof console.log>;
+let consoleDebugSpy: jest.SpiedFunction<typeof console.log>;
+let consoleInfoSpy: jest.SpiedFunction<typeof console.log>;
+let consoleWarnSpy: jest.SpiedFunction<typeof console.log>;
+let consoleErrorSpy: jest.SpiedFunction<typeof console.log>;
+const debug = false; // Set to true to enable debug logging
 
+if (!debug) {
+  loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log').mockImplementation((level: string, message: string, ...parameters: any[]) => {});
+  consoleLogSpy = jest.spyOn(console, 'log').mockImplementation((...args: any[]) => {});
+  consoleDebugSpy = jest.spyOn(console, 'debug').mockImplementation((...args: any[]) => {});
+  consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation((...args: any[]) => {});
+  consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation((...args: any[]) => {});
+  consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation((...args: any[]) => {});
+} else {
+  loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log');
+  consoleLogSpy = jest.spyOn(console, 'log');
+  consoleDebugSpy = jest.spyOn(console, 'debug');
+  consoleInfoSpy = jest.spyOn(console, 'info');
+  consoleWarnSpy = jest.spyOn(console, 'warn');
+  consoleErrorSpy = jest.spyOn(console, 'error');
+}
+
+describe('Shellies', () => {
   const log = new AnsiLogger({ logName: 'ShellyDeviceRealTest', logTimestampFormat: TimestampFormat.TIME_MILLIS, logLevel: LogLevel.DEBUG });
   const shelly = new Shelly(log, 'admin', 'tango');
   let device: ShellyDevice | undefined;
@@ -19,13 +41,11 @@ describe('Shellies', () => {
   const address = 'c4:cb:76:b3:cd:1f';
 
   beforeAll(async () => {
+    shelly.dataPath = 'temp';
     shelly.setLogLevel(LogLevel.DEBUG, true, true, true);
-    // await wait(2000);
   });
 
   beforeEach(async () => {
-    await wait(1000);
-
     // Clear all mocks
     jest.clearAllMocks();
   });
@@ -36,12 +56,12 @@ describe('Shellies', () => {
       device.destroy();
       device = undefined;
     }
-    await wait(2000);
+    await wait(1000);
   });
 
   afterAll(async () => {
     shelly.destroy();
-    await wait(2000);
+    await wait(1000);
 
     // Restore all mocks
     jest.restoreAllMocks();

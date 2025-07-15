@@ -42,13 +42,11 @@ describe('Shellies', () => {
   const address = 'c4:cb:76:b3:cd:1f';
 
   beforeAll(async () => {
+    shelly.dataPath = 'temp';
     shelly.setLogLevel(LogLevel.DEBUG, true, true, true);
-    await wait(2000);
   });
 
   beforeEach(async () => {
-    await wait(1000);
-
     // Clear all mocks
     jest.clearAllMocks();
   });
@@ -59,12 +57,11 @@ describe('Shellies', () => {
       device.destroy();
       device = undefined;
     }
-    await wait(1000);
   });
 
   afterAll(async () => {
     shelly.destroy();
-    await wait(2000);
+    await wait(1000);
 
     // Restore all mocks
     jest.restoreAllMocks();

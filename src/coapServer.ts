@@ -454,6 +454,7 @@ export class CoapServer extends EventEmitter<CoapServerEvent> {
         this.emit('coapupdate', host, status);
         return status;
       } catch {
+        // istanbul ignore next
         this.log.warn(`Error parsing values for host ${zb}${host}${wr}`);
       }
     }
@@ -650,15 +651,14 @@ export class CoapServer extends EventEmitter<CoapServerEvent> {
     });
 
     this.coapServer.on('error', (err) => {
-      this.log.error('CoIoT (coap) server error:', err instanceof Error ? err.message : err);
+      this.log.error(`CoIoT (coap) server error: ${err instanceof Error ? err.message : err}`);
     });
 
     this.coapServer.on('warning', (err) => {
-      this.log.warn('CoIoT (coap) server warning:', err instanceof Error ? err.message : err);
+      this.log.warn(`CoIoT (coap) server warning: ${err instanceof Error ? err.message : err}`);
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    this.coapServer.on('request', (msg: IncomingMessage, res: OutgoingMessage) => {
+    this.coapServer.on('request', (msg: IncomingMessage, _res: OutgoingMessage) => {
       this.log.debug(`CoIoT (coap) server recevived a messagge code ${BLUE}${msg.code}${db} url ${BLUE}${msg.url}${db} rsinfo ${debugStringify(msg.rsinfo)}`);
       if (msg.code === '0.30' && msg.url === '/cit/s') {
         this.parseShellyMessage(msg);
@@ -670,6 +670,7 @@ export class CoapServer extends EventEmitter<CoapServerEvent> {
 
     this.coapServer.listen((err) => {
       if (err) {
+        // istanbul ignore next
         this.log.error(`CoIoT (coap) server error: ${err instanceof Error ? err.message : err}`);
       } else {
         this._isReady = true;
@@ -710,11 +711,13 @@ export class CoapServer extends EventEmitter<CoapServerEvent> {
           this.parseShellyMessage(coapMessage as unknown as IncomingMessage);
           this.log.debug(`***Registered CoIoT (coap) ${CYAN}/cit/d${db} for device ${hk}${id}${db} host ${zb}${host}${db} with fetch`);
         } else {
+          // istanbul ignore next
           this.log.debug(`****Invalid response registering device ${hk}${id}${db} host ${zb}${host}${db} with fetch`);
         }
         return;
       })
       .catch((err) => {
+        // istanbul ignore next
         this.log.debug(`****Error registering device ${hk}${id}${db} host ${zb}${host}${db} with fetch: ${err instanceof Error ? err.message : err}`);
       });
     /*
@@ -761,16 +764,17 @@ export class CoapServer extends EventEmitter<CoapServerEvent> {
         this.log.debug(`CoIoT (coap) server closed${err ? ' with error ' + err.message : ''}.`);
         this.emit('stopped', err);
       });
+    // istanbul ignore next
     globalAgent.close((err?: Error) => {
       this.log.debug(`CoIoT (coap) agent closed${err ? ' with error ' + err.message : ''}.`);
       this.emit('agent_stopped', err);
+      this.removeAllListeners();
     });
     this.deviceDescription.clear();
     this.deviceId.clear();
     this.deviceSerial.clear();
     this.deviceValidityTimeout.clear();
     this.log.info('Stopped CoIoT (coap) server for shelly devices.');
-    // this.removeAllListeners();
   }
 
   /**

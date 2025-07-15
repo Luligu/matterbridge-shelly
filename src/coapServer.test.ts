@@ -7,12 +7,10 @@ import path from 'node:path';
 import { readFileSync, promises as fs, rmSync } from 'node:fs';
 
 import { jest } from '@jest/globals';
-import { AnsiLogger, CYAN, db, hk, LogLevel, nf, TimestampFormat, zb } from 'matterbridge/logger';
+import { AnsiLogger, CYAN, db, hk, LogLevel, nf, zb } from 'matterbridge/logger';
 import { IncomingMessage, parameters } from 'coap';
-import { wait } from 'matterbridge/utils';
 
 import { CoapServer } from './coapServer.ts';
-import { Shelly } from './shelly.ts';
 
 let loggerLogSpy: jest.SpiedFunction<typeof AnsiLogger.prototype.log>;
 let consoleLogSpy: jest.SpiedFunction<typeof console.log>;
@@ -66,9 +64,7 @@ function setDebug(debug: boolean) {
 rmSync(HOMEDIR, { recursive: true, force: true });
 
 describe('Coap scanner', () => {
-  const log = new AnsiLogger({ logName: 'ShellyMdnsScanner', logTimestampFormat: TimestampFormat.TIME_MILLIS });
-  const shelly = new Shelly(log);
-  let coapServer = new CoapServer(shelly, LogLevel.DEBUG);
+  const coapServer = new CoapServer({ username: 'admin', password: 'tango' } as any, LogLevel.DEBUG);
 
   function loadResponse(shellyId: string, uri: 'citd' | 'cits') {
     (coapServer as any).deviceDescription.clear();
@@ -111,15 +107,11 @@ describe('Coap scanner', () => {
   });
 
   afterAll(() => {
-    // Destroy the shelly instance
-    shelly.destroy();
-
     // Restore all mocks
     jest.restoreAllMocks();
   });
 
   test('Create the coapServer', () => {
-    coapServer = new CoapServer(shelly, LogLevel.DEBUG);
     expect(coapServer).not.toBeUndefined();
     expect(coapServer).toBeInstanceOf(CoapServer);
   });
@@ -137,6 +129,14 @@ describe('Coap scanner', () => {
     } catch (err) {
       //
     }
+  });
+
+  test('saveResponse', async () => {
+    await expect((coapServer as any).saveResponse('test.json', {})).resolves.toBeUndefined();
+    jest.spyOn(JSON, 'stringify').mockImplementationOnce(() => {
+      throw new Error('Test error');
+    });
+    await expect((coapServer as any).saveResponse('test.json', {})).rejects.toThrow();
   });
 
   test('Parse status message', async () => {
@@ -158,6 +158,42 @@ describe('Coap scanner', () => {
       LogLevel.INFO,
       expect.stringContaining(`No coap description found for ${hk}SHDM-2${nf} id ${hk}shellydimmer2-98CDAC0D01BB${nf} host ${zb}192.168.68.68${nf} fetching it...`),
     );
+  });
+
+  test('Parse status message serial not changed', async () => {
+    (coapServer as any).deviceId.set('192.168.68.68', 'shellydimmer2-98CDAC0D01BB');
+    msg.rsinfo.address = '192.168.68.68';
+    msg.payload = JSON.stringify(msg.payloadS) as any;
+    msg.url = '/cit/s';
+    const data = (coapServer as any).parseShellyMessage(msg as unknown as IncomingMessage);
+    expect(data).toBeUndefined();
+    expect(loggerLogSpy).toHaveBeenCalledWith(
+      LogLevel.DEBUG,
+      expect.stringContaining(`No updates (serial not changed) for device ${hk}shellydimmer2-98CDAC0D01BB${db} host ${zb}192.168.68.68${db}`),
+    );
+  });
+
+  test('Parse status message serial changed', async () => {
+    (coapServer as any).deviceId.set('192.168.68.68', 'shellydimmer2-98CDAC0D01BB');
+    msg.headers[3420] = 123456789;
+    msg.rsinfo.address = '192.168.68.68';
+    msg.payload = 'not a json';
+    msg.url = '/cit/s';
+    const data = (coapServer as any).parseShellyMessage(msg as unknown as IncomingMessage);
+    expect(data).toBeDefined();
+    expect(loggerLogSpy).toHaveBeenCalledWith(
+      LogLevel.INFO,
+      expect.stringContaining(`No coap description found for ${hk}SHDM-2${nf} id ${hk}shellydimmer2-98CDAC0D01BB${nf} host ${zb}192.168.68.68${nf} fetching it...`),
+    );
+  });
+
+  test('Parse wrong description message', async () => {
+    (coapServer as any).deviceId.set('192.168.68.68', 'shellydimmer2-98CDAC0D01BB');
+    msg.rsinfo.address = '192.168.68.68';
+    msg.payload = 'not a json';
+    msg.url = '/cit/d';
+    const data = (coapServer as any).parseShellyMessage(msg as unknown as IncomingMessage);
+    expect(data).toEqual([]);
   });
 
   test('Parse description message', async () => {
@@ -885,7 +921,7 @@ describe('Coap scanner', () => {
     expect(coapServer.isListening).toBeFalsy();
   }, 30000);
 
-  test('Start scanner', async () => {
+  test('Start server', async () => {
     await new Promise((resolve) => {
       coapServer.on('started', () => {
         resolve(true);
@@ -900,7 +936,17 @@ describe('Coap scanner', () => {
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, expect.stringContaining('CoIoT (coap) server is listening on port'));
   }, 5000);
 
-  test('Start receving', async () => {
+  test('Log error, warning and request', () => {
+    (coapServer as any).coapServer.emit('error', new Error('Test error'));
+    (coapServer as any).coapServer.emit('warning', new Error('Test warning'));
+    (coapServer as any).coapServer.emit('request', msg as any, {} as any);
+    (coapServer as any).coapServer.emit('request', { ...(msg as any), code: '0.30', url: '/cit/s' }, {} as any);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.ERROR, expect.stringContaining('Test error'));
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.WARN, expect.stringContaining('Test warning'));
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining('Coap server got a wrong messagge code'));
+  });
+
+  test('Start receiving', async () => {
     expect(coapServer.isListening).toBeTruthy();
 
     await new Promise((resolve) => {
@@ -925,7 +971,7 @@ describe('Coap scanner', () => {
     });
   }, 30000);
 
-  test('Stop scanner', async () => {
+  test('Stop server', async () => {
     // setDebug(true);
     await new Promise((resolve) => {
       coapServer.on('stopped', (err) => {
@@ -934,6 +980,7 @@ describe('Coap scanner', () => {
       });
       coapServer.stop();
     });
+    // If the tests run together, the global agent is not stopped
     /*
     await new Promise((resolve) => {
       coapServer.on('agent_stopped', (err) => {

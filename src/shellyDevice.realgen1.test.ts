@@ -43,14 +43,9 @@ describe('Shellies', () => {
   beforeAll(async () => {
     shelly.dataPath = 'temp';
     shelly.setLogLevel(LogLevel.DEBUG, true, true, true);
-    // shelly.startCoap(0);
-    // shelly.startMdns(0, '192.168.1.189', 'udp4', true);
-    await wait(2000);
   });
 
   beforeEach(async () => {
-    await wait(1000);
-
     // Clear all mocks
     jest.clearAllMocks();
   });
@@ -66,7 +61,7 @@ describe('Shellies', () => {
 
   afterAll(async () => {
     shelly.destroy();
-    await wait(2000);
+    await wait(1000);
 
     // Restore all mocks
     jest.restoreAllMocks();
