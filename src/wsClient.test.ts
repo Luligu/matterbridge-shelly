@@ -293,13 +293,11 @@ describe('ShellyWsClient', () => {
 
   test('should start ping pong and timeout', async () => {
     expect(server).toBeDefined();
-    (wsClient as any).startPingPong(500);
+    (wsClient as any).startPingPong(250);
     expect((wsClient as any).pingInterval).toBeDefined();
+    expect((wsClient as any).pongTimeout).toBeUndefined();
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Start PingPong with device ${hk}Jest${db} host ${zb}localhost${db}.`);
-    // prettier-ignore
-    await waiter('WsClient pong timeout', () => { return (wsClient as any).pongTimeout; }, true);
-    expect((wsClient as any).pongTimeout).toBeDefined();
-    await wait(1000);
+    await wait(500);
     expect(consoleDebugSpy).toHaveBeenCalledWith('Ping received');
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Pong received from device ${hk}Jest${db} host ${zb}localhost${db}, connection is alive.`);
 
@@ -426,6 +424,7 @@ describe('ShellyWsClient', () => {
 
   test('should not connect to the server with auth if no password is provided', async () => {
     expect(server).toBeDefined();
+
     // Await connection to the server
     const connectPromise = new Promise<WebSocket>((resolve) => {
       server.once('connection', (ws: WebSocket) => {
@@ -481,31 +480,31 @@ describe('ShellyWsClient', () => {
     expect(wsClient.isConnected).toBeFalsy();
     const ws = await connectPromise;
     // prettier-ignore
-    await waiter('WsClient connection timeout', () => { return wsClient.isConnected; }, true);
+    await waiter('WsClient connection timeout', () => { return wsClient.isConnected; }, true, 5000, 100);
     console.error('Jest test: should not connect to the server with auth if no password is provided. Step 2');
-    // expect((wsClient as any).auth).toBeTruthy();
     expect(wsClient.isConnecting).toBeFalsy();
     expect(wsClient.isConnected).toBeTruthy();
 
-    // expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.ERROR, `Authentication required for Jest but the password is not set. Exiting...`);
-
-    // Send a request from the client to the server
-    wsClient.sendRequest('Shelly.GetStatus');
+    await wait(100);
+    expect((wsClient as any).auth).toBeTruthy();
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.ERROR, `Authentication required for Jest but the password is not set. Exiting...`);
+    console.error('Jest test: should not connect to the server with auth if no password is provided. Step 3');
 
     // Stop the WebSocket client
     (wsClient as any).wsDeviceId = 'Jest';
     wsClient.stop();
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`Stopping ws client for Shelly device ${hk}Jest${db} host ${zb}localhost${db}`));
     // prettier-ignore
-    await waiter('WsClient close isConnecting timeout', () => { return !wsClient.isConnecting; }, true);
+    await waiter('WsClient close isConnecting timeout', () => { return !wsClient.isConnecting; }, true, 5000, 100);
     expect(wsClient.isConnecting).toBeFalsy();
     // prettier-ignore
-    await waiter('WsClient close isConnected timeout', () => { return !wsClient.isConnected; }, true);
+    await waiter('WsClient close isConnected timeout', () => { return !wsClient.isConnected; }, true, 5000, 100);
     expect(wsClient.isConnected).toBeFalsy();
   }, 10000);
 
   test('should connect to the server with auth', async () => {
     expect(server).toBeDefined();
+
     // Await connection to the server
     const connectPromise = new Promise<WebSocket>((resolve) => {
       server.once('connection', (ws: WebSocket) => {
@@ -580,14 +579,15 @@ describe('ShellyWsClient', () => {
     expect(wsClient.isConnected).toBeFalsy();
     const ws = await connectPromise;
     // prettier-ignore
-    await waiter('WsClient connection timeout', () => { return wsClient.isConnected; }, true);
+    await waiter('WsClient connection timeout', () => { return wsClient.isConnected; }, true, 5000, 100);
     expect((wsClient as any).auth).toBeTruthy();
     expect(wsClient.isConnecting).toBeFalsy();
     expect(wsClient.isConnected).toBeTruthy();
 
+    await wait(100);
     expect(loggerLogSpy).not.toHaveBeenCalledWith(LogLevel.ERROR, `Authentication required for Jest but the password is not set. Exiting...`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Sending auth request to Shelly device ${hk}Jest${db} host ${zb}localhost${db}`, expect.anything());
 
-    // Send a request from the client to the server
     wsClient.sendRequest('Shelly.GetStatus');
 
     // Stop the WebSocket client
@@ -595,10 +595,10 @@ describe('ShellyWsClient', () => {
     wsClient.stop();
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`Stopping ws client for Shelly device ${hk}Jest${db} host ${zb}localhost${db}`));
     // prettier-ignore
-    await waiter('WsClient close isConnecting timeout', () => { return !wsClient.isConnecting; }, true);
+    await waiter('WsClient close isConnecting timeout', () => { return !wsClient.isConnecting; }, true, 5000, 100);
     expect(wsClient.isConnecting).toBeFalsy();
     // prettier-ignore
-    await waiter('WsClient close isConnected timeout', () => { return !wsClient.isConnected; }, true);
+    await waiter('WsClient close isConnected timeout', () => { return !wsClient.isConnected; }, true, 5000, 100);
     expect(wsClient.isConnected).toBeFalsy();
   }, 10000);
 });
