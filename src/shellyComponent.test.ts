@@ -1,18 +1,41 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { AnsiLogger, LogLevel, stringify, TimestampFormat } from 'matterbridge/logger';
-import { isCoverComponent, isLightComponent, isSwitchComponent, ShellyComponent, ShellyCoverComponent, ShellyLightComponent, ShellySwitchComponent } from './shellyComponent';
-import { ShellyDevice } from './shellyDevice';
-import { ShellyProperty } from './shellyProperty';
-import { ShellyData, ShellyDataType } from './shellyTypes';
-import { Shelly } from './shelly';
-import { jest } from '@jest/globals';
+// src/shellyComponent.test.ts
+
 import path from 'node:path';
-import exp from 'constants';
+
+import { AnsiLogger, LogLevel, stringify, TimestampFormat } from 'matterbridge/logger';
+import { jest } from '@jest/globals';
+
+import { isCoverComponent, isLightComponent, isSwitchComponent, ShellyComponent, ShellyCoverComponent, ShellyLightComponent, ShellySwitchComponent } from './shellyComponent.ts';
+import { ShellyDevice } from './shellyDevice.ts';
+import { ShellyProperty } from './shellyProperty.ts';
+import { ShellyData, ShellyDataType } from './shellyTypes.ts';
+import { Shelly } from './shelly.ts';
+
+let loggerLogSpy: jest.SpiedFunction<typeof AnsiLogger.prototype.log>;
+let consoleLogSpy: jest.SpiedFunction<typeof console.log>;
+let consoleDebugSpy: jest.SpiedFunction<typeof console.log>;
+let consoleInfoSpy: jest.SpiedFunction<typeof console.log>;
+let consoleWarnSpy: jest.SpiedFunction<typeof console.log>;
+let consoleErrorSpy: jest.SpiedFunction<typeof console.log>;
+const debug = false; // Set to true to enable debug logs
+
+if (!debug) {
+  loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log').mockImplementation((level: string, message: string, ...parameters: any[]) => {});
+  consoleLogSpy = jest.spyOn(console, 'log').mockImplementation((...args: any[]) => {});
+  consoleDebugSpy = jest.spyOn(console, 'debug').mockImplementation((...args: any[]) => {});
+  consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation((...args: any[]) => {});
+  consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation((...args: any[]) => {});
+  consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation((...args: any[]) => {});
+} else {
+  loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log');
+  consoleLogSpy = jest.spyOn(console, 'log');
+  consoleDebugSpy = jest.spyOn(console, 'debug');
+  consoleInfoSpy = jest.spyOn(console, 'info');
+  consoleWarnSpy = jest.spyOn(console, 'warn');
+  consoleErrorSpy = jest.spyOn(console, 'error');
+}
 
 describe('ShellyComponent', () => {
-  let consoleLogSpy: jest.SpiedFunction<typeof console.log>;
-  let loggerLogSpy: jest.SpiedFunction<(level: LogLevel, message: string, ...parameters: any[]) => void>;
   let fetchSpy: jest.SpiedFunction<typeof ShellyDevice.fetch>;
 
   const log = new AnsiLogger({ logName: 'shellyComponentTest', logTimestampFormat: TimestampFormat.TIME_MILLIS });
@@ -25,22 +48,11 @@ describe('ShellyComponent', () => {
   let name: string;
   let data: ShellyData;
 
-  const handleUpdate = jest.fn<(component: string, key: string, data: ShellyDataType) => void>().mockImplementation((component, key, data) => {
-    // console.error(`handleUpdate: component ${component} key ${key} data ${data}`);
-  });
+  const handleUpdate = jest.fn<(component: string, key: string, data: ShellyDataType) => void>().mockImplementation((component, key, data) => {});
 
-  const handleEvent = jest.fn<(component: string, key: string, data: ShellyDataType) => void>().mockImplementation((component, key, data) => {
-    // console.error(`handleEvent: component ${component} key ${key} data ${data}`);
-  });
+  const handleEvent = jest.fn<(component: string, key: string, data: ShellyDataType) => void>().mockImplementation((component, key, data) => {});
 
   beforeAll(async () => {
-    consoleLogSpy = jest.spyOn(console, 'log').mockImplementation((...args: any[]) => {
-      // console.error(`Mocked console.log: ${args.join(' ')}`);
-    });
-    loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log').mockImplementation((level: string, message: string, ...parameters: any[]) => {
-      // console.error(`Mocked log: ${level} - ${message}`, ...parameters);
-    });
-
     const mockDevice1 = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shellydimmer2-98CDAC0D01BB.json'));
     const mockDevice2 = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shellyplus1pm-441793D69718.json'));
     const mockDevice3 = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shellyplusrgbwpm-A0A3B35C7024.json'));
@@ -61,12 +73,9 @@ describe('ShellyComponent', () => {
     id = 'testId';
     name = 'testName';
     data = { key1: 'value', key2: 123, key3: true };
-    // mockFetch.mockClear();
-    consoleLogSpy.mockClear();
-    loggerLogSpy.mockClear();
-    fetchSpy.mockClear();
-    handleUpdate.mockClear();
-    handleEvent.mockClear();
+
+    // Clear all mocks
+    jest.clearAllMocks();
   });
 
   afterEach(() => {
@@ -79,8 +88,8 @@ describe('ShellyComponent', () => {
     device2.destroy();
     device3.destroy();
 
-    consoleLogSpy.mockRestore();
-    loggerLogSpy.mockRestore();
+    // Restore all mocks
+    jest.restoreAllMocks();
   });
 
   it('should have mock gen 1 and gen 2', () => {

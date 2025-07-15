@@ -1,13 +1,13 @@
-/* eslint-disable @typescript-eslint/no-empty-function */
-/* eslint-disable no-console */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { jest } from '@jest/globals';
+// src/wsClient.test.ts
 
+/* eslint-disable no-console */
+
+import { jest } from '@jest/globals';
 import { WebSocket, WebSocketServer } from 'ws';
 import { getMacAddress, wait, waiter } from 'matterbridge/utils';
-import { WsClient } from './wsClient';
 import { AnsiLogger, db, er, hk, LogLevel, nf, wr, zb } from 'matterbridge/logger';
+
+import { WsClient } from './wsClient.ts';
 
 let loggerLogSpy: jest.SpiedFunction<typeof AnsiLogger.prototype.log>;
 let consoleLogSpy: jest.SpiedFunction<typeof console.log>;

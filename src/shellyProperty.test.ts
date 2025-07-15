@@ -1,7 +1,9 @@
-import { ShellyProperty } from './shellyProperty';
-import { ShellyComponent } from './shellyComponent';
-import { ShellyDataType } from './shellyTypes';
-import { ShellyDevice } from './shellyDevice';
+// src/shellyProperty.test.ts
+
+import { ShellyProperty } from './shellyProperty.ts';
+import { ShellyComponent } from './shellyComponent.ts';
+import { ShellyDataType } from './shellyTypes.ts';
+import { ShellyDevice } from './shellyDevice.ts';
 
 describe('ShellyProperty', () => {
   const device: ShellyDevice = {} as ShellyDevice;

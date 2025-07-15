@@ -1,10 +1,10 @@
 /**
- * This file contains the shelly types.
- *
+ * @description This file contains the shelly types.
  * @file src\shellyTypes.ts
  * @author Luca Liguori
- * @date 2024-05-01
+ * @created 2024-05-01
  * @version 2.0.0
+ * @license Apache-2.0
  *
  * Copyright 2024, 2025 Luca Liguori.
  *
@@ -18,7 +18,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License. *
+ * limitations under the License.
  */
 
 export type AnyPrimitive = string | number | bigint | boolean | symbol | null | undefined;

@@ -1,10 +1,10 @@
 /**
- * This file contains the auth functions.
- *
+ * @description This file contains the auth functions.
  * @file src\auth.ts
  * @author Luca Liguori
- * @date 2024-05-01
+ * @created 2024-05-01
  * @version 1.0.0
+ * @license Apache-2.0
  *
  * Copyright 2024, 2025 Luca Liguori.
  *
@@ -18,7 +18,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License. *
+ * limitations under the License.
  */
 
 import crypto from 'node:crypto';
@@ -32,6 +32,12 @@ export interface AuthParams {
   algorithm: string; // SHA-256
 }
 
+/**
+ * Parses the Basic Authentication header.
+ *
+ * @param {string} authHeader - The Basic Authentication header.
+ * @returns {Record<string, string>} An object containing the parsed authentication parameters.
+ */
 export function parseBasicAuthenticateHeader(authHeader: string): Record<string, string> {
   // 'Digest qop="auth", realm="shelly1minig3-543204547478", nonce="1716556501", algorithm=SHA-256'
   authHeader = authHeader.replace('Basic ', '');
@@ -43,6 +49,12 @@ export function parseBasicAuthenticateHeader(authHeader: string): Record<string,
   return authParams;
 }
 
+/**
+ * Parses the Digest Authentication header.
+ *
+ * @param {string} authHeader - The Digest Authentication header.
+ * @returns {Record<string, string>} An object containing the parsed authentication parameters.
+ */
 export function parseDigestAuthenticateHeader(authHeader: string): Record<string, string> {
   // 'Digest qop="auth", realm="shelly1minig3-543204547478", nonce="1716556501", algorithm=SHA-256'
   authHeader = authHeader.replace('Digest ', '');
@@ -54,24 +66,29 @@ export function parseDigestAuthenticateHeader(authHeader: string): Record<string
   return authParams;
 }
 
-/* Should return 
-'YWRtaW46'
-*/
+/**
+ * Creates a Basic Authentication header.
+ *
+ * @param {string} username - The username for authentication.
+ * @param {string} password - The password for authentication.
+ * @returns {string} The Base64-encoded Basic Authentication header.
+ */
 export function createBasicShellyAuth(username: string, password: string): string {
   return Buffer.from(`${username}:${password}`).toString('base64');
 }
 
-/* Should return 
-{
-  realm: 'shelly1minig3-543204547478',
-  username: 'admin',
-  nonce: 1719662215,
-  cnonce: 253120865,
-  response: '73120c3efd8a023be249e3ba5703e871c9b99fec12d0188a9e13fd895d64f6be',
-  algorithm: 'SHA-256'
-}
-*/
-export function createDigestShellyAuth(username: string, password: string, nonce: number, cnonce: number, realm: string, nc = 1): AuthParams {
+/**
+ * Creates a Digest Authentication object.
+ *
+ * @param {string} username - The username for authentication.
+ * @param {string} password - The password for authentication.
+ * @param {number} nonce - The nonce value.
+ * @param {number} cnonce - The client nonce value.
+ * @param {string} realm - The realm value.
+ * @param {number} nc - The nonce count.
+ * @returns {AuthParams} The Digest Authentication object.
+ */
+export function createDigestShellyAuth(username: string, password: string, nonce: number, cnonce: number, realm: string, nc: number = 1): AuthParams {
   const auth: AuthParams = { realm, username, nonce, cnonce, response: '', algorithm: 'SHA-256' };
   const ha1 = crypto.createHash('sha256').update(`admin:${auth.realm}:${password}`).digest('hex');
   const ha2 = crypto.createHash('sha256').update('dummy_method:dummy_uri').digest('hex');
@@ -79,6 +96,23 @@ export function createDigestShellyAuth(username: string, password: string, nonce
   return auth;
 }
 
+/**
+ * Generates a random nonce value.
+ *
+ * @param {number} min - The minimum value for the nonce.
+ * @param {number} max - The maximum value for the nonce.
+ * @returns {number} The generated nonce value.
+ */
+export function generateNonce(min: number, max: number): number {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+/**
+ * Generates the body options for a Gen 1 request.
+ *
+ * @param {Record<string, string | number | boolean | object>} [params] - The parameters to include in the body.
+ * @returns {string} The URL-encoded body options as a string.
+ */
 export function getGen1BodyOptions(params?: Record<string, string | number | boolean | object>): string {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return new URLSearchParams(params as any).toString();
@@ -100,6 +134,17 @@ options: {
 }
 */
 
+/**
+ * Generates the body options for a Gen 2 request.
+ *
+ * @param {string} jsonrpc - The JSON-RPC version.
+ * @param {number} id - The request ID.
+ * @param {string} src - The source of the request.
+ * @param {string} method - The method to call.
+ * @param {Record<string, string | number | boolean | object>} [params] - The parameters to include in the body.
+ * @param {AuthParams} [auth] - The authentication parameters.
+ * @returns {string} The JSON-encoded body options as a string.
+ */
 export function getGen2BodyOptions(
   jsonrpc: string,
   id: number,
@@ -118,36 +163,3 @@ export function getGen2BodyOptions(
   // console.log(JSON.stringify(body));
   return JSON.stringify(body);
 }
-
-/*
-// node dist/auth.js startAuth debug
-if (process.argv.includes('startAuth')) {
-  const log = new AnsiLogger({ logName: 'shellyDevice', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: process.argv.includes('debug') ? true : false });
-  const shelly = new Shelly(log, 'admin', 'tango', process.argv.includes('debug') ? true : false);
-
-  const myRealDevices: { host: string; desc: string }[] = [
-    { host: '192.168.1.219', desc: 'Gen 1 Shelly Dimmer 2' },
-    { host: '192.168.1.222', desc: 'Gen 1 Shelly Switch 2.5' },
-    { host: '192.168.1.217', desc: 'Gen 2 Shelly Plus 1 PM' },
-    { host: '192.168.1.218', desc: 'Gen 2 Shelly Plus 2 PM' },
-    { host: '192.168.1.220', desc: 'Gen 3 Shelly PM mini' },
-    { host: '192.168.1.221', desc: 'Gen 3 Shelly 1 mini' },
-    { host: '192.168.1.224', desc: 'Gen 2 Shelly i4' },
-    { host: '192.168.1.225', desc: 'Gen 3 Shelly 1PM mini' },
-  ];
-
-  for (const device of myRealDevices) {
-    log.info(`Creating Shelly device ${idn}${device.desc}${rs}${db} host ${zb}${device.host}${db}`);
-    const shellyDevice = await ShellyDevice.create(shelly, log, device.host);
-    if (shellyDevice) {
-      shellyDevice.logDevice();
-      shellyDevice.destroy();
-    }
-  }
-
-  process.on('SIGINT', function () {
-    shelly.destroy();
-    // process.exit();
-  });
-}
-*/

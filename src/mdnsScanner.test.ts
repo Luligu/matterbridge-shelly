@@ -1,15 +1,20 @@
+// src/mdnsScanner.test.ts
+
 /* eslint-disable jest/no-done-callback */
 /* eslint-disable no-console */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { LogLevel, AnsiLogger, ign, db, hk, CYAN, rs } from 'matterbridge/logger';
-import { MdnsScanner, DiscoveredDeviceListener, DiscoveredDevice } from './mdnsScanner';
-import { jest } from '@jest/globals';
+const NAME = 'Mdns';
+const HOMEDIR = path.join('jest', NAME);
+
 import path from 'node:path';
-import { readFileSync } from 'node:fs';
+import { readFileSync, rmSync } from 'node:fs';
 import { RemoteInfo } from 'node:dgram';
+
+import { jest } from '@jest/globals';
+import { LogLevel, AnsiLogger, ign, db, hk, CYAN, rs } from 'matterbridge/logger';
 import { ResponsePacket } from 'multicast-dns';
+
+import { MdnsScanner, DiscoveredDeviceListener, DiscoveredDevice } from './mdnsScanner.ts';
 
 function loadResponse(shellyId: string) {
   const responseFile = path.join('src', 'mock', `${shellyId}.mdns.json`);
@@ -32,58 +37,33 @@ let consoleDebugSpy: jest.SpiedFunction<typeof console.log>;
 let consoleInfoSpy: jest.SpiedFunction<typeof console.log>;
 let consoleWarnSpy: jest.SpiedFunction<typeof console.log>;
 let consoleErrorSpy: jest.SpiedFunction<typeof console.log>;
-const debug = false;
+const debug = false; // Set to true to enable debug logs
 
 if (!debug) {
-  // Spy on and mock AnsiLogger.log
-  loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log').mockImplementation((level: string, message: string, ...parameters: any[]) => {
-    //
-  });
-  // Spy on and mock console.log
-  consoleLogSpy = jest.spyOn(console, 'log').mockImplementation((...args: any[]) => {
-    //
-  });
-  // Spy on and mock console.debug
-  consoleDebugSpy = jest.spyOn(console, 'debug').mockImplementation((...args: any[]) => {
-    //
-  });
-  // Spy on and mock console.info
-  consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation((...args: any[]) => {
-    //
-  });
-  // Spy on and mock console.warn
-  consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation((...args: any[]) => {
-    //
-  });
-  // Spy on and mock console.error
-  consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation((...args: any[]) => {
-    //
-  });
+  loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log').mockImplementation((level: string, message: string, ...parameters: any[]) => {});
+  consoleLogSpy = jest.spyOn(console, 'log').mockImplementation((...args: any[]) => {});
+  consoleDebugSpy = jest.spyOn(console, 'debug').mockImplementation((...args: any[]) => {});
+  consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation((...args: any[]) => {});
+  consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation((...args: any[]) => {});
+  consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation((...args: any[]) => {});
 } else {
-  // Spy on AnsiLogger.log
   loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log');
-  // Spy on console.log
   consoleLogSpy = jest.spyOn(console, 'log');
-  // Spy on console.debug
   consoleDebugSpy = jest.spyOn(console, 'debug');
-  // Spy on console.info
   consoleInfoSpy = jest.spyOn(console, 'info');
-  // Spy on console.warn
   consoleWarnSpy = jest.spyOn(console, 'warn');
-  // Spy on console.error
   consoleErrorSpy = jest.spyOn(console, 'error');
 }
+
+// Cleanup the test environment
+rmSync(HOMEDIR, { recursive: true, force: true });
 
 describe('Shellies MdnsScanner test', () => {
   const mdns = new MdnsScanner(LogLevel.DEBUG);
 
-  const sendQuerySpy = jest.spyOn(MdnsScanner.prototype, 'sendQuery').mockImplementation(() => {
-    //
-  });
+  const sendQuerySpy = jest.spyOn(MdnsScanner.prototype, 'sendQuery').mockImplementation(() => {});
 
-  const saveResponseSpy = jest.spyOn(MdnsScanner.prototype, 'saveResponse').mockImplementation(async () => {
-    //
-  });
+  const saveResponseSpy = jest.spyOn(MdnsScanner.prototype, 'saveResponse').mockImplementation(async () => {});
 
   beforeAll(() => {
     //
@@ -204,7 +184,7 @@ describe('Shellies MdnsScanner test', () => {
     (mdns as any).scanner.emit('query', generic_QueryPacket, generic_RemoteInfo);
 
     // Wait for the discovered event to be processed.
-    expect(await queryPromise).toEqual({ 'class': 'IN', 'name': '_http._tcp.local', 'type': 'PTR' });
+    expect(await queryPromise).toEqual({ class: 'IN', name: '_http._tcp.local', type: 'PTR' });
 
     // Stop the mdns scanner
     mdns.stop();

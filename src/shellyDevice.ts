@@ -1,10 +1,10 @@
 /**
- * This file contains the class ShellyDevice.
- *
+ * @description This file contains the class ShellyDevice.
  * @file src\shellyDevice.ts
  * @author Luca Liguori
- * @date 2024-05-01
+ * @created 2024-05-01
  * @version 3.1.4
+ * @license Apache-2.0
  *
  * Copyright 2024, 2025, 2026 Luca Liguori.
  *
@@ -18,18 +18,21 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License. *
+ * limitations under the License.
  */
 
-// Matterbridge imports
-import { AnsiLogger, LogLevel, BLUE, CYAN, GREEN, GREY, MAGENTA, RESET, db, debugStringify, er, hk, nf, wr, zb, rs, YELLOW, idn, nt, rk, dn } from 'matterbridge/logger';
-import { isValidNumber, isValidObject, isValidString } from 'matterbridge/utils';
+// Node 18.x: fetch is available, but flagged as “experimental” until Node 18.17.0.
+/* eslint-disable n/no-unsupported-features/node-builtins */
 
 // Node.js imports
 import { EventEmitter } from 'node:events';
 import crypto from 'node:crypto';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
+
+// Matterbridge imports
+import { isValidNumber, isValidObject, isValidString } from 'matterbridge/utils';
+import { AnsiLogger, LogLevel, BLUE, CYAN, GREEN, GREY, MAGENTA, RESET, db, debugStringify, er, hk, nf, wr, zb, rs, YELLOW, idn, nt, rk, dn } from 'matterbridge/logger';
 
 // Shellies imports
 import { parseDigestAuthenticateHeader, createDigestShellyAuth, createBasicShellyAuth, parseBasicAuthenticateHeader, getGen2BodyOptions, getGen1BodyOptions } from './auth.js';
@@ -179,6 +182,7 @@ export class ShellyDevice extends EventEmitter {
 
   /**
    * Sets the log level for the device.
+   *
    * @param {LogLevel} logLevel - The log level to set.
    */
   setLogLevel(logLevel: LogLevel) {
@@ -271,7 +275,8 @@ export class ShellyDevice extends EventEmitter {
 
   /**
    * Returns an iterator for the key-value pairs of the ShellyDevice's components.
-   * @returns {IterableIterator<[string, ShellyComponent]>} An iterator for the key-value pairs of the ShellyDevice's components.
+   *
+   * @yields {[string, ShellyComponent]} A key-value pair where the key is the component ID and the value is the ShellyComponent.
    */
   *[Symbol.iterator](): IterableIterator<[string, ShellyComponent]> {
     for (const [key, component] of this._components.entries()) {
@@ -283,7 +288,7 @@ export class ShellyDevice extends EventEmitter {
    * Normalizes the given hostname to extract the type, MAC address, and ID.
    *
    * @param {string} hostname - The hostname to normalize.
-   * @returns { type: string; mac: string; id: string } An object containing the normalized type, MAC address, and ID.
+   * @returns {{ type: string; mac: string; id: string }} An object containing the normalized type, MAC address, and ID.
    */
   static normalizeId(hostname: string): { type: string; mac: string; id: string } {
     const parts = hostname.split('-');
@@ -298,7 +303,7 @@ export class ShellyDevice extends EventEmitter {
    * Retrieves the name of a BTHome sensor based on its object ID.
    *
    * @param {number} objId - The object ID of the BTHome sensor.
-   * @returns The name of the Bluetooth home object.
+   * @returns {string} The name of the Bluetooth home object.
    */
   getBTHomeObjIdText(objId: number): string {
     const objIdsMap: Record<number, string> = {
@@ -330,7 +335,7 @@ export class ShellyDevice extends EventEmitter {
    * Retrieves the name of a BTHome device based on its model.
    *
    * @param {number} model - The object ID of the BTHome sensor.
-   * @returns The name of the Bluetooth home object.
+   * @returns {string} The name of the Bluetooth home object.
    */
   getBTHomeModelText(model: string): string {
     const modelsMap: Record<string, string> = {
@@ -1321,7 +1326,7 @@ export class ShellyDevice extends EventEmitter {
    * @param {string} host - The host to fetch the data from.
    * @param {string} service - The service to fetch the data from.
    * @param {Record<string, string | number | boolean>} params - Additional parameters for the request (default: {}).
-   * @returns A promise that resolves to the fetched device data or null if an error occurs.
+   * @returns {Promise<ShellyData | null>} A promise that resolves to the fetched device data or null if an error occurs.
    */
   static async fetch(shelly: Shelly, log: AnsiLogger, host: string, service: string, params: Record<string, string | number | boolean | object> = {}): Promise<ShellyData | null> {
     // Fetch device data from cache file if host is a json file
@@ -1426,8 +1431,10 @@ export class ShellyDevice extends EventEmitter {
 
   /**
    * Logs all components and properties of the Shelly device.
+   *
+   * @returns {number} - The number of components in the device.
    */
-  logDevice() {
+  logDevice(): number {
     // Log the device
     this.log.debug(
       `Shelly device ${MAGENTA}${this.id}${db} (${this.model}) gen ${BLUE}${this.gen}${db} name ${BLUE}${this.name}${db} mac ${BLUE}${this.mac}${db} host ${BLUE}${this.host}${db} profile ${BLUE}${this.profile}${db} firmware ${BLUE}${this.firmware}${db} auth ${BLUE}${this.auth}${db} online ${BLUE}${this.online}${db} lastseen ${BLUE}${this.lastseen}${db}`,
@@ -1443,6 +1450,7 @@ export class ShellyDevice extends EventEmitter {
 
   /**
    * Saves the device payloads (shelly, settings, status) to the specified data path.
+   *
    * @param {string} dataPath - The path where the device payloads will be saved.
    * @returns {Promise<boolean>} - A promise that resolves when the device payloads are successfully saved, or rejects with an error if there was an issue.
    */

@@ -1,11 +1,12 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { Shelly } from './shelly.js';
-import { ShellyDevice } from './shellyDevice.js';
+// src/shellyDevice.realgen2.test.ts
+
 import { AnsiLogger, LogLevel, TimestampFormat } from 'matterbridge/logger';
 import { getMacAddress, wait, waiter } from 'matterbridge/utils';
 import { jest } from '@jest/globals';
-import { isCoverComponent, isLightComponent, isSwitchComponent, ShellyComponent, ShellyCoverComponent, ShellySwitchComponent } from './shellyComponent.js';
+
+import { ShellyDevice } from './shellyDevice.js';
+import { Shelly } from './shelly.js';
+import { isCoverComponent, isLightComponent, isSwitchComponent, ShellyComponent } from './shellyComponent.js';
 
 describe('Shellies', () => {
   let consoleLogSpy: jest.SpiedFunction<typeof console.log>;
@@ -18,16 +19,15 @@ describe('Shellies', () => {
   const address = 'c4:cb:76:b3:cd:1f';
 
   beforeAll(async () => {
-    consoleLogSpy = jest.spyOn(console, 'log').mockImplementation((...args: any[]) => {
-      //
-    });
-    // consoleLogSpy.mockRestore();
     shelly.setLogLevel(LogLevel.DEBUG, true, true, true);
-    await wait(2000);
+    // await wait(2000);
   });
 
   beforeEach(async () => {
     await wait(1000);
+
+    // Clear all mocks
+    jest.clearAllMocks();
   });
 
   afterEach(async () => {
@@ -42,12 +42,17 @@ describe('Shellies', () => {
   afterAll(async () => {
     shelly.destroy();
     await wait(2000);
+
+    // Restore all mocks
+    jest.restoreAllMocks();
   });
 
   test('Create AnsiLogger and Shelly', () => {
     expect(log).toBeDefined();
     expect(shelly).toBeDefined();
   });
+
+  if (getMacAddress() !== 'address') return;
 
   test('Create a gen 2 shellyplusrgbwpm device color mode and send commands', async () => {
     if (getMacAddress() !== address) return;

@@ -1,10 +1,10 @@
 /**
- * This file contains the commandHandler for ShellyPlatform.
- *
+ * @description This file contains the commandHandler for ShellyPlatform.
  * @file src\platformUpdateHandler.ts
  * @author Luca Liguori
- * @date 2024-12-03
+ * @created 2024-12-03
  * @version 1.0.0
+ * @license Apache-2.0
  *
  * Copyright 2024, 2025, 2026 Luca Liguori.
  *
@@ -18,15 +18,12 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License. *
+ * limitations under the License.
  */
 
 import { MatterbridgeEndpoint } from 'matterbridge';
-import { SmokeCoAlarm } from 'matterbridge/matter/clusters';
-import { db, debugStringify, dn, er, hk, idn, or, rs, YELLOW, zb } from 'matterbridge/logger';
-import { isValidArray, isValidBoolean, isValidNumber, isValidObject, isValidString, rgbColorToHslColor } from 'matterbridge/utils';
-
 import {
+  SmokeCoAlarm,
   OnOff,
   PowerSource,
   WindowCovering,
@@ -41,12 +38,26 @@ import {
   ElectricalPowerMeasurement,
   ElectricalEnergyMeasurement,
 } from 'matterbridge/matter/clusters';
+import { db, debugStringify, dn, er, hk, idn, or, rs, YELLOW, zb } from 'matterbridge/logger';
+import { isValidArray, isValidBoolean, isValidNumber, isValidObject, isValidString, rgbColorToHslColor } from 'matterbridge/utils';
 
 import { ShellyDevice } from './shellyDevice.js';
 import { ShellyData, ShellyDataType } from './shellyTypes.js';
 import { isLightComponent, isSwitchComponent } from './shellyComponent.js';
 import { ShellyPlatform } from './platform.js';
 
+/**
+ * Handles updates from Shelly devices and updates the corresponding Matterbridge endpoint.
+ *
+ * @param {ShellyPlatform} platform - The Shelly platform instance.
+ * @param {MatterbridgeEndpoint} matterbridgeDevice - The Matterbridge endpoint for the device.
+ * @param {ShellyDevice} shellyDevice - The Shelly device instance.
+ * @param {string} component - The component name to update.
+ * @param {string} property - The property name to update.
+ * @param {ShellyDataType} value - The new value for the property.
+ * @param {string} [endpointName] - The name of the endpoint to update (optional).
+ * @returns {void}
+ */
 export function shellyUpdateHandler(
   platform: ShellyPlatform,
   matterbridgeDevice: MatterbridgeEndpoint,
@@ -55,7 +66,7 @@ export function shellyUpdateHandler(
   property: string,
   value: ShellyDataType,
   endpointName?: string,
-) {
+): void {
   let endpoint: MatterbridgeEndpoint | undefined;
   if (endpointName === 'PowerSource') endpoint = matterbridgeDevice;
   if (!endpoint) endpoint = matterbridgeDevice.getChildEndpointByName(endpointName ?? component);

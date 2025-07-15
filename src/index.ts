@@ -1,10 +1,10 @@
 /**
- * This file contains the main entryPoint for the plugin.
- *
+ * @description This file contains the main entryPoint for the plugin.
  * @file src\index.ts
  * @author Luca Liguori
- * @date 2024-05-01
+ * @created 2024-05-01
  * @version 1.0.0
+ * @license Apache-2.0
  *
  * Copyright 2024, 2025 Luca Liguori.
  *
@@ -18,11 +18,12 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License. *
+ * limitations under the License.
  */
 
 import { Matterbridge, PlatformConfig } from 'matterbridge';
 import { AnsiLogger } from 'matterbridge/logger';
+
 import { ShellyPlatform, ShellyPlatformConfig } from './platform.js';
 
 /**
@@ -33,7 +34,6 @@ import { ShellyPlatform, ShellyPlatformConfig } from './platform.js';
  * @param {AnsiLogger} log - An instance of AnsiLogger. This is used for logging messages in a format that can be displayed with ANSI color codes.
  * @param {PlatformConfig} config - The platform configuration.
  * @returns {ShellyPlatform} - An instance of the ShellyPlatform. This is the main interface for interacting with the Shellies.
- *
  */
 export default function initializePlugin(matterbridge: Matterbridge, log: AnsiLogger, config: PlatformConfig): ShellyPlatform {
   return new ShellyPlatform(matterbridge, log, config as unknown as ShellyPlatformConfig);

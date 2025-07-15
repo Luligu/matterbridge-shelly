@@ -1,10 +1,10 @@
 /**
- * This file contains the class MdnsScanner.
- *
+ * @description This file contains the class MdnsScanner.
  * @file src\mdnsScanner.ts
  * @author Luca Liguori
- * @date 2024-05-01
+ * @created 2024-05-01
  * @version 1.2.4
+ * @license Apache-2.0
  *
  * Copyright 2024, 2025, 2026 Luca Liguori.
  *
@@ -18,15 +18,17 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License. *
+ * limitations under the License.
  */
 
-import { AnsiLogger, BLUE, CYAN, LogLevel, TimestampFormat, db, debugStringify, er, hk, idn, ign, nf, rs, zb } from 'matterbridge/logger';
-import mdns, { QueryPacket, ResponsePacket } from 'multicast-dns';
 import EventEmitter from 'node:events';
 import { RemoteInfo, SocketType } from 'node:dgram';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
+
+import mdns, { QueryPacket, ResponsePacket } from 'multicast-dns';
+import { AnsiLogger, BLUE, CYAN, LogLevel, TimestampFormat, db, debugStringify, er, hk, idn, ign, nf, rs, zb } from 'matterbridge/logger';
+
 import { ShellyDeviceId } from './shellyTypes.js';
 
 export interface DiscoveredDevice {
@@ -45,6 +47,7 @@ interface MdnsScannerEvent {
 
 /**
  * Creates an instance of MdnsScanner.
+ *
  * @param {LogLevel} logLevel - The log level for the scanner. Defaults to LogLevel.INFO.
  */
 export class MdnsScanner extends EventEmitter {
@@ -293,8 +296,11 @@ export class MdnsScanner extends EventEmitter {
 
   /**
    * Stops the MdnsScanner query service.
+   *
+   * @param {boolean} keepAlive - If true, the scanner will not be destroyed and can be restarted later. Defaults to false.
+   * @returns {void}
    */
-  stop(keepAlive = false) {
+  stop(keepAlive: boolean = false): void {
     this.log.info('Stopping MdnsScanner for shelly devices...');
     if (this.scannerTimeout) clearTimeout(this.scannerTimeout);
     this.scannerTimeout = undefined;
@@ -314,6 +320,7 @@ export class MdnsScanner extends EventEmitter {
 
   /**
    * Normalizes a Shelly device ID by converting it to a standard format.
+   *
    * @param {string} shellyId - The Shelly device ID to normalize.
    * @returns {string | undefined} The normalized Shelly device ID, or undefined if the ID is invalid.
    * @example
@@ -332,9 +339,10 @@ export class MdnsScanner extends EventEmitter {
 
   /**
    * Logs information about discovered shelly devices and sort them.
-   * @returns The number of the discovered shelly devices.
+   *
+   * @returns {number} The number of discovered devices.
    */
-  logPeripheral() {
+  logPeripheral(): number {
     this.log.debug(`Discovered ${this.devices.size} devices:`);
     // Convert the Map to an array and sort by host
     const sortedDevices = Array.from(this.devices).sort((a, b) => {
@@ -397,65 +405,3 @@ export class MdnsScanner extends EventEmitter {
     }
   }
 }
-
-// Use with: node dist/mdnsScanner.js testMdnsScanner
-// Additional debug logging
-// const ipConfigCommand = isWindows ? 'ipconfig' : 'ip a';
-// const multicastCommand = isWindows ? 'netsh interface ipv4 show joins' : 'ip maddr show';
-/*
-if (process.argv.includes('testMdnsScanner')) {
-  console.log(`Starting MdnsScanner with host interface ipv4="${getIpv4InterfaceAddress()}" ipv6="${getIpv6InterfaceAddress()}" ...`);
-  const mdnsScannerIpv4 = new MdnsScanner(LogLevel.DEBUG);
-  const mdnsScannerIpv6 = new MdnsScanner(LogLevel.DEBUG);
-  // mdnsScanner.start(0, 'fd78:cbf8:4939:746:d555:85a9:74f6:9c6', 'udp6', true);
-  // mdnsScannerIpv6.start(0, '::', 'udp6', true);
-  // mdnsScanner.start(0, '192.168.1.189', 'udp4', true);
-  mdnsScannerIpv4.start(0, 0, getIpv4InterfaceAddress(), 'udp4', true);
-  mdnsScannerIpv6.start(0, 0, getIpv6InterfaceAddress(), 'udp6', true);
-  // mdnsScanner.start(0, undefined, undefined, true);
-
-  process.on('SIGINT', async function () {
-    mdnsScannerIpv4.stop();
-    mdnsScannerIpv6.stop();
-  });
-}
-*/
-/*
-[12:58:57.941] [ShellyMdnsScanner] Mdns query from  192.168.1.40 family IPv4 port 5353
-[12:58:57.941] [ShellyMdnsScanner] --- query.questions[1] ---
-[12:58:57.941] [ShellyMdnsScanner] [PTR] Name: _shelly._tcp.local class: UNKNOWN_32769
-[12:58:57.941] [ShellyMdnsScanner] --- end ---
-
-[12:58:58.202] [ShellyMdnsScanner] Mdns query from  192.168.1.40 family IPv4 port 5353
-[12:58:58.203] [ShellyMdnsScanner] --- query.questions[1] ---
-[12:58:58.203] [ShellyMdnsScanner] [PTR] Name: _shelly._tcp.local class: IN
-[12:58:58.203] [ShellyMdnsScanner] --- end ---
-
-[12:58:59.228] [ShellyMdnsScanner] Mdns query from  192.168.1.40 family IPv4 port 5353
-[12:58:59.228] [ShellyMdnsScanner] --- query.questions[3] ---
-[12:58:59.228] [ShellyMdnsScanner] [PTR] Name: _shelly._tcp.local class: IN
-[12:58:59.228] [ShellyMdnsScanner] [AAAA] Name: ShellyPlus1PM-CC7B5C0AB624.local class: UNKNOWN_32769
-[12:58:59.229] [ShellyMdnsScanner] [AAAA] Name: ShellyPlus2PM-08F9E0FD173C.local class: UNKNOWN_32769
-[12:58:59.229] [ShellyMdnsScanner] --- end ---
-
-[12:58:59.231] [ShellyMdnsScanner] Mdns query from  192.168.1.40 family IPv4 port 5353
-[12:58:59.231] [ShellyMdnsScanner] --- query.questions[12] ---
-[12:58:59.231] [ShellyMdnsScanner] [AAAA] Name: ShellyPlusRGBWPM-ECC9FF4CEAF0.local class: UNKNOWN_32769
-[12:58:59.231] [ShellyMdnsScanner] [AAAA] Name: ShellyPlus010V-80646FE1FAC4.local class: UNKNOWN_32769
-[12:58:59.231] [ShellyMdnsScanner] [AAAA] Name: ShellyPlus2PM-1C692044F140.local class: UNKNOWN_32769
-[12:58:59.231] [ShellyMdnsScanner] [AAAA] Name: ShellyPlusI4-D48AFC41B6F4.local class: UNKNOWN_32769
-[12:58:59.231] [ShellyMdnsScanner] [AAAA] Name: ShellyBluGw-B0B21CFAAD18.local class: UNKNOWN_32769
-[12:58:59.231] [ShellyMdnsScanner] [AAAA] Name: ShellyPlusPlugS-E86BEAEAA000.local class: UNKNOWN_32769
-[12:58:59.231] [ShellyMdnsScanner] [AAAA] Name: ShellyPlus2PM-5443B23D81F8.local class: UNKNOWN_32769
-[12:58:59.231] [ShellyMdnsScanner] [AAAA] Name: ShellyPlus1PM-441793D69718.local class: UNKNOWN_32769
-[12:58:59.231] [ShellyMdnsScanner] [AAAA] Name: ShellyPlus2PM-30C922810DA0.local class: UNKNOWN_32769
-[12:58:59.231] [ShellyMdnsScanner] [AAAA] Name: Shelly2PMG3-34CDB0770C4C.local class: UNKNOWN_32769
-[12:58:59.231] [ShellyMdnsScanner] [AAAA] Name: Shelly1G3-DCDA0CDEEC20.local class: UNKNOWN_32769
-[12:58:59.232] [ShellyMdnsScanner] [AAAA] Name: ShellyPlus2PM-30C92286CB68.local class: UNKNOWN_32769
-[12:58:59.232] [ShellyMdnsScanner] --- end ---
-
-[12:58:59.739] [ShellyMdnsScanner] Mdns query from  192.168.1.40 family IPv4 port 5353
-[12:58:59.739] [ShellyMdnsScanner] --- query.questions[2] ---
-[12:58:59.739] [ShellyMdnsScanner] [AAAA] Name: ShellyPlus1-E465B8F3028C.local class: UNKNOWN_32769
-[12:58:59.740] [ShellyMdnsScanner] [AAAA] Name: ShellyBluGw-B0B21CFC5080.local class: UNKNOWN_32769
-*/

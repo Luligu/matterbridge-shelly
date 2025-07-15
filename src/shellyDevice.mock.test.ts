@@ -1,28 +1,46 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { ShellyDevice } from './shellyDevice.js';
+// src/shellyDevice.mock.test.ts
+
+import path from 'node:path';
+
 import { AnsiLogger, TimestampFormat, LogLevel } from 'matterbridge/logger';
+import { jest } from '@jest/globals';
+import { wait } from 'matterbridge/utils';
+
+import { ShellyDevice } from './shellyDevice.js';
 import { Shelly } from './shelly.js';
 import { ShellyComponent } from './shellyComponent.js';
-import path from 'node:path';
-import { jest } from '@jest/globals';
 import { ShellyData } from './shellyTypes.js';
-import { wait } from 'matterbridge/utils';
 import { CoapServer } from './coapServer.js';
 import { WsServer } from './wsServer.js';
 
-// shellyDevice.ts    |   76.51 |    65.16 |   84.37 |    78.5 | ...5,633-635,638-639,645-656,675-691,705-721,726-736,759-761,794-798,802-804,807,882-885,889-892,896-899,903-905,908-910,965-968,1101-1106
+let loggerLogSpy: jest.SpiedFunction<typeof AnsiLogger.prototype.log>;
+let consoleLogSpy: jest.SpiedFunction<typeof console.log>;
+let consoleDebugSpy: jest.SpiedFunction<typeof console.log>;
+let consoleInfoSpy: jest.SpiedFunction<typeof console.log>;
+let consoleWarnSpy: jest.SpiedFunction<typeof console.log>;
+let consoleErrorSpy: jest.SpiedFunction<typeof console.log>;
+const debug = false; // Set to true to enable debug logs
+
+if (!debug) {
+  loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log').mockImplementation((level: string, message: string, ...parameters: any[]) => {});
+  consoleLogSpy = jest.spyOn(console, 'log').mockImplementation((...args: any[]) => {});
+  consoleDebugSpy = jest.spyOn(console, 'debug').mockImplementation((...args: any[]) => {});
+  consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation((...args: any[]) => {});
+  consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation((...args: any[]) => {});
+  consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation((...args: any[]) => {});
+} else {
+  loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log');
+  consoleLogSpy = jest.spyOn(console, 'log');
+  consoleDebugSpy = jest.spyOn(console, 'debug');
+  consoleInfoSpy = jest.spyOn(console, 'info');
+  consoleWarnSpy = jest.spyOn(console, 'warn');
+  consoleErrorSpy = jest.spyOn(console, 'error');
+}
 
 describe('Shelly devices test', () => {
-  let consoleLogSpy: jest.SpiedFunction<typeof console.log>;
+  jest.spyOn(CoapServer.prototype, 'start').mockImplementation(() => {});
 
-  jest.spyOn(CoapServer.prototype, 'start').mockImplementation(() => {
-    return;
-  });
-
-  jest.spyOn(WsServer.prototype, 'start').mockImplementation(() => {
-    return;
-  });
+  jest.spyOn(WsServer.prototype, 'start').mockImplementation(() => {});
 
   const log = new AnsiLogger({ logName: 'shellyDeviceTest', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: false });
   const shelly = new Shelly(log, 'admin', 'tango');
@@ -33,13 +51,12 @@ describe('Shelly devices test', () => {
   const firmwareGen4 = '1.6.2-gc8a76e2';
 
   beforeAll(() => {
-    consoleLogSpy = jest.spyOn(console, 'log').mockImplementation((...args: any[]) => {
-      // console.error(`Mocked console.log: ${args}`);
-    });
+    //
   });
 
   beforeEach(() => {
-    //
+    // Clear all mocks before each test
+    jest.clearAllMocks();
   });
 
   afterEach(() => {
@@ -48,7 +65,10 @@ describe('Shelly devices test', () => {
 
   afterAll(async () => {
     shelly.destroy();
-    await wait(2000);
+    await wait(1000);
+
+    // Restore all mocks after all tests
+    jest.restoreAllMocks();
   });
 
   describe('Test gen 1 shellydimmer2', () => {
@@ -1200,12 +1220,12 @@ describe('Shelly devices test', () => {
 
       expect(await device.fetchUpdate()).not.toBeNull();
 
-      expect(device.getComponent('thermostat:0')?.getValue('target_t')).toEqual({ 'enabled': true, 'units': 'C', 'value': 5, 'value_op': 8 });
-      expect(device.getComponent('thermostat:0')?.getValue('tmp')).toEqual({ 'is_valid': true, 'units': 'C', 'value': 14.3 });
+      expect(device.getComponent('thermostat:0')?.getValue('target_t')).toEqual({ enabled: true, units: 'C', value: 5, value_op: 8 });
+      expect(device.getComponent('thermostat:0')?.getValue('tmp')).toEqual({ is_valid: true, units: 'C', value: 14.3 });
       device.getComponent('thermostat:0')?.setValue('target_t', { value: 22 });
       device.getComponent('thermostat:0')?.setValue('tmp', { value: 20 });
-      expect(device.getComponent('thermostat:0')?.getValue('target_t')).toEqual({ 'value': 22 });
-      expect(device.getComponent('thermostat:0')?.getValue('tmp')).toEqual({ 'value': 20 });
+      expect(device.getComponent('thermostat:0')?.getValue('target_t')).toEqual({ value: 22 });
+      expect(device.getComponent('thermostat:0')?.getValue('tmp')).toEqual({ value: 20 });
 
       if (device) device.destroy();
     });

@@ -1,15 +1,38 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { Shelly } from './shelly.js';
-import { ShellyDevice } from './shellyDevice.js';
+// src/shellyDevice.real.test.ts
+
 import { AnsiLogger, LogLevel, TimestampFormat } from 'matterbridge/logger';
-import { getMacAddress, wait, waiter } from 'matterbridge/utils';
+import { getMacAddress, wait } from 'matterbridge/utils';
 import { jest } from '@jest/globals';
-import { isCoverComponent, isLightComponent, isSwitchComponent, ShellyCoverComponent, ShellySwitchComponent } from './shellyComponent.js';
+
+import { ShellyDevice } from './shellyDevice.ts';
+import { Shelly } from './shelly.ts';
+import { ShellyCoverComponent, ShellySwitchComponent } from './shellyComponent.ts';
+
+let loggerLogSpy: jest.SpiedFunction<typeof AnsiLogger.prototype.log>;
+let consoleLogSpy: jest.SpiedFunction<typeof console.log>;
+let consoleDebugSpy: jest.SpiedFunction<typeof console.log>;
+let consoleInfoSpy: jest.SpiedFunction<typeof console.log>;
+let consoleWarnSpy: jest.SpiedFunction<typeof console.log>;
+let consoleErrorSpy: jest.SpiedFunction<typeof console.log>;
+const debug = false; // Set to true to enable debug logging
+
+if (!debug) {
+  loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log').mockImplementation((level: string, message: string, ...parameters: any[]) => {});
+  consoleLogSpy = jest.spyOn(console, 'log').mockImplementation((...args: any[]) => {});
+  consoleDebugSpy = jest.spyOn(console, 'debug').mockImplementation((...args: any[]) => {});
+  consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation((...args: any[]) => {});
+  consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation((...args: any[]) => {});
+  consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation((...args: any[]) => {});
+} else {
+  loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log');
+  consoleLogSpy = jest.spyOn(console, 'log');
+  consoleDebugSpy = jest.spyOn(console, 'debug');
+  consoleInfoSpy = jest.spyOn(console, 'info');
+  consoleWarnSpy = jest.spyOn(console, 'warn');
+  consoleErrorSpy = jest.spyOn(console, 'error');
+}
 
 describe('Shellies', () => {
-  let consoleLogSpy: jest.SpiedFunction<typeof console.log>;
-
   const log = new AnsiLogger({ logName: 'ShellyDeviceRealTest', logTimestampFormat: TimestampFormat.TIME_MILLIS, logLevel: LogLevel.DEBUG });
   const shelly = new Shelly(log, 'admin', 'tango');
   let device: ShellyDevice | undefined;
@@ -19,16 +42,15 @@ describe('Shellies', () => {
   const address = 'c4:cb:76:b3:cd:1f';
 
   beforeAll(async () => {
-    consoleLogSpy = jest.spyOn(console, 'log').mockImplementation((...args: any[]) => {
-      //
-    });
-    // consoleLogSpy.mockRestore();
     shelly.setLogLevel(LogLevel.DEBUG, true, true, true);
     await wait(2000);
   });
 
   beforeEach(async () => {
     await wait(1000);
+
+    // Clear all mocks
+    jest.clearAllMocks();
   });
 
   afterEach(async () => {
@@ -43,12 +65,17 @@ describe('Shellies', () => {
   afterAll(async () => {
     shelly.destroy();
     await wait(2000);
+
+    // Restore all mocks
+    jest.restoreAllMocks();
   });
 
   test('Create AnsiLogger and Shelly', () => {
     expect(log).toBeDefined();
     expect(shelly).toBeDefined();
   });
+
+  if (getMacAddress() !== 'address') return;
 
   describe('new not existing ShellyDevice()', () => {
     test('Create a non existing device', async () => {
@@ -121,7 +148,7 @@ describe('Shellies', () => {
       const output = outputProp?.value;
       // console.log(`state: ${state} output: ${output}`);
       expect(state === output).toBeTruthy();
-      const response = await ShellyDevice.fetch(shelly, log, '192.168.1.217', 'relay/0', { 'turn': 'toggle' });
+      const response = await ShellyDevice.fetch(shelly, log, '192.168.1.217', 'relay/0', { turn: 'toggle' });
       expect(response).not.toBeUndefined();
       await device.fetchUpdate();
       const stateProp2 = component.getProperty('state');
@@ -145,16 +172,16 @@ describe('Shellies', () => {
       expect(component).not.toBeUndefined();
       if (!component) return;
 
-      let response = await ShellyDevice.fetch(shelly, log, '192.168.1.217', 'Switch.Toggle', { 'id': 0 });
+      let response = await ShellyDevice.fetch(shelly, log, '192.168.1.217', 'Switch.Toggle', { id: 0 });
       expect(response).not.toBeUndefined();
       await device.fetchUpdate();
-      response = await ShellyDevice.fetch(shelly, log, '192.168.1.217', 'Switch.Set', { 'id': 0, 'on': false });
+      response = await ShellyDevice.fetch(shelly, log, '192.168.1.217', 'Switch.Set', { id: 0, on: false });
       expect(response).not.toBeUndefined();
       await device.fetchUpdate();
-      response = await ShellyDevice.fetch(shelly, log, '192.168.1.217', 'Switch.Set', { 'id': 0, 'on': true });
+      response = await ShellyDevice.fetch(shelly, log, '192.168.1.217', 'Switch.Set', { id: 0, on: true });
       expect(response).not.toBeUndefined();
       await device.fetchUpdate();
-      response = await ShellyDevice.fetch(shelly, log, '192.168.1.217', 'Switch.Set', { 'id': 0, 'on': false });
+      response = await ShellyDevice.fetch(shelly, log, '192.168.1.217', 'Switch.Set', { id: 0, on: false });
       expect(response).not.toBeUndefined();
       await device.fetchUpdate();
       device.destroy();
@@ -169,13 +196,13 @@ describe('Shellies', () => {
       expect(component).not.toBeUndefined();
       if (!component) return;
 
-      let response = await ShellyDevice.fetch(shelly, log, '192.168.1.217', 'relay/0', { 'turn': 'toggle' });
+      let response = await ShellyDevice.fetch(shelly, log, '192.168.1.217', 'relay/0', { turn: 'toggle' });
       expect(response).not.toBeUndefined();
       await device.fetchUpdate();
-      response = await ShellyDevice.fetch(shelly, log, '192.168.1.217', 'relay/0', { 'turn': 'on' });
+      response = await ShellyDevice.fetch(shelly, log, '192.168.1.217', 'relay/0', { turn: 'on' });
       expect(response).not.toBeUndefined();
       await device.fetchUpdate();
-      response = await ShellyDevice.fetch(shelly, log, '192.168.1.217', 'relay/0', { 'turn': 'off' });
+      response = await ShellyDevice.fetch(shelly, log, '192.168.1.217', 'relay/0', { turn: 'off' });
       expect(response).not.toBeUndefined();
       await device.fetchUpdate();
       device.destroy();
@@ -239,7 +266,7 @@ describe('Shellies', () => {
       const output = outputP?.value;
       // console.log(`state: ${state} output: ${output}`);
       expect(state === output).toBeTruthy();
-      const res = await ShellyDevice.fetch(shelly, log, '192.168.1.218', 'relay/1', { 'turn': 'toggle' });
+      const res = await ShellyDevice.fetch(shelly, log, '192.168.1.218', 'relay/1', { turn: 'toggle' });
       expect(res).not.toBeUndefined();
       await device.fetchUpdate();
       const state2 = component.getProperty('state');
@@ -258,10 +285,10 @@ describe('Shellies', () => {
       if (!device) return;
 
       // console.log('send wrong command to a gen 2 device and update');
-      let res = await ShellyDevice.fetch(shelly, log, '192.168.1.218', 'relay/5', { 'turn': 'toggle' });
+      let res = await ShellyDevice.fetch(shelly, log, '192.168.1.218', 'relay/5', { turn: 'toggle' });
       expect(res).toBeNull();
       // console.log('send wrong command to a gen 2 device and update');
-      res = await ShellyDevice.fetch(shelly, log, '192.168.1.218', 'relay/0', { 'turn': 'toggle' });
+      res = await ShellyDevice.fetch(shelly, log, '192.168.1.218', 'relay/0', { turn: 'toggle' });
       expect(res).toBeNull();
       device.destroy();
     }, 60000);

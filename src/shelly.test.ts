@@ -1,84 +1,50 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
+// src/shelly.test.ts
+
+import path from 'node:path';
 
 import { AnsiLogger, CYAN, db, hk, LogLevel, MAGENTA, TimestampFormat, wr } from 'matterbridge/logger';
+import { jest } from '@jest/globals';
+
 import { Shelly } from './shelly.js';
 import { ShellyDevice } from './shellyDevice.js';
-import { jest } from '@jest/globals';
-import path from 'node:path';
 import { WsClient } from './wsClient.js';
 import { CoapServer } from './coapServer.js';
 import { WsServer } from './wsServer.js';
 
+let loggerLogSpy: jest.SpiedFunction<typeof AnsiLogger.prototype.log>;
+let consoleLogSpy: jest.SpiedFunction<typeof console.log>;
+let consoleDebugSpy: jest.SpiedFunction<typeof console.log>;
+let consoleInfoSpy: jest.SpiedFunction<typeof console.log>;
+let consoleWarnSpy: jest.SpiedFunction<typeof console.log>;
+let consoleErrorSpy: jest.SpiedFunction<typeof console.log>;
+const debug = false; // Set to true to enable debug logs
+
+if (!debug) {
+  loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log').mockImplementation((level: string, message: string, ...parameters: any[]) => {});
+  consoleLogSpy = jest.spyOn(console, 'log').mockImplementation((...args: any[]) => {});
+  consoleDebugSpy = jest.spyOn(console, 'debug').mockImplementation((...args: any[]) => {});
+  consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation((...args: any[]) => {});
+  consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation((...args: any[]) => {});
+  consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation((...args: any[]) => {});
+} else {
+  loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log');
+  consoleLogSpy = jest.spyOn(console, 'log');
+  consoleDebugSpy = jest.spyOn(console, 'debug');
+  consoleInfoSpy = jest.spyOn(console, 'info');
+  consoleWarnSpy = jest.spyOn(console, 'warn');
+  consoleErrorSpy = jest.spyOn(console, 'error');
+}
+
 describe('Shellies test', () => {
   jest.useFakeTimers();
 
-  const coapServerStartSpy = jest.spyOn(CoapServer.prototype, 'start').mockImplementation(() => {
-    return;
-  });
-
-  const coapServerRegisterDeviceSpy = jest.spyOn(CoapServer.prototype, 'registerDevice').mockImplementation(async () => {
-    return;
-  });
-
-  const wsServerStartSpy = jest.spyOn(WsServer.prototype, 'start').mockImplementation(() => {
-    return;
-  });
+  const coapServerStartSpy = jest.spyOn(CoapServer.prototype, 'start').mockImplementation(() => {});
+  const coapServerRegisterDeviceSpy = jest.spyOn(CoapServer.prototype, 'registerDevice').mockImplementation(async () => {});
+  const wsServerStartSpy = jest.spyOn(WsServer.prototype, 'start').mockImplementation(() => {});
+  const wsClientStartSpy = jest.spyOn(WsClient.prototype, 'start').mockImplementation(() => {});
 
   const log = new AnsiLogger({ logName: 'shellyDeviceTest', logTimestampFormat: TimestampFormat.TIME_MILLIS });
   const shellies = new Shelly(log, 'admin', 'tango');
-
-  let loggerLogSpy: jest.SpiedFunction<typeof AnsiLogger.prototype.log>;
-  let consoleLogSpy: jest.SpiedFunction<typeof console.log>;
-  let consoleDebugSpy: jest.SpiedFunction<typeof console.log>;
-  let consoleInfoSpy: jest.SpiedFunction<typeof console.log>;
-  let consoleWarnSpy: jest.SpiedFunction<typeof console.log>;
-  let consoleErrorSpy: jest.SpiedFunction<typeof console.log>;
-  const debug = false;
-
-  if (!debug) {
-    // Spy on and mock AnsiLogger.log
-    loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log').mockImplementation((level: string, message: string, ...parameters: any[]) => {
-      //
-    });
-    // Spy on and mock console.log
-    consoleLogSpy = jest.spyOn(console, 'log').mockImplementation((...args: any[]) => {
-      //
-    });
-    // Spy on and mock console.debug
-    consoleDebugSpy = jest.spyOn(console, 'debug').mockImplementation((...args: any[]) => {
-      //
-    });
-    // Spy on and mock console.info
-    consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation((...args: any[]) => {
-      //
-    });
-    // Spy on and mock console.warn
-    consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation((...args: any[]) => {
-      //
-    });
-    // Spy on and mock console.error
-    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation((...args: any[]) => {
-      //
-    });
-  } else {
-    // Spy on AnsiLogger.log
-    loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log');
-    // Spy on console.log
-    consoleLogSpy = jest.spyOn(console, 'log');
-    // Spy on console.debug
-    consoleDebugSpy = jest.spyOn(console, 'debug');
-    // Spy on console.info
-    consoleInfoSpy = jest.spyOn(console, 'info');
-    // Spy on console.warn
-    consoleWarnSpy = jest.spyOn(console, 'warn');
-    // Spy on console.error
-    consoleErrorSpy = jest.spyOn(console, 'error');
-  }
-
-  const wsClientStartSpy = jest.spyOn(WsClient.prototype, 'start').mockImplementation(() => {
-    //
-  });
 
   beforeAll(() => {
     //
@@ -298,7 +264,7 @@ describe('Shellies test', () => {
     const onOnline = jest.fn();
     device.on('awake', onAwake);
     device.on('online', onOnline);
-    (shellies as any).wsServer.emit('wssupdate', 'shelly1minig3-543204547478', { 'bthome': {} });
+    (shellies as any).wsServer.emit('wssupdate', 'shelly1minig3-543204547478', { bthome: {} });
     await new Promise((resolve) => setTimeout(resolve, 500));
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`setting online to true`));
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`setting cached to false`));

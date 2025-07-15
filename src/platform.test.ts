@@ -1,7 +1,14 @@
+// src/platform.test.ts
+
 /* eslint-disable no-console */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { Matterbridge, MatterbridgeEndpoint, PlatformConfig, MatterbridgeLevelControlServer, MatterbridgeColorControlServer, bridge } from 'matterbridge';
+
+const NAME = 'Platform';
+const HOMEDIR = path.join('jest', NAME);
+
+import path from 'node:path';
+import { rmSync } from 'node:fs';
+
+import { Matterbridge, MatterbridgeEndpoint, PlatformConfig, bridge } from 'matterbridge';
 import {
   OnOffCluster,
   BindingCluster,
@@ -12,7 +19,6 @@ import {
   FixedLabelCluster,
   GroupsCluster,
   IdentifyCluster,
-  PowerSourceCluster,
   PowerTopology,
   Switch,
   PowerSource,
@@ -20,35 +26,50 @@ import {
   TemperatureMeasurementCluster,
   RelativeHumidityMeasurementCluster,
 } from 'matterbridge/matter/clusters';
-import { ColorControlBehavior, LevelControlBehavior, OnOffBehavior, RelativeHumidityMeasurementBehavior, TemperatureMeasurementBehavior } from 'matterbridge/matter/behaviors';
-import { AnsiLogger, db, er, hk, idn, LogLevel, nf, rs, wr, zb, CYAN, TimestampFormat, YELLOW, or, debugStringify } from 'matterbridge/logger';
-import { getMacAddress, isValidArray, isValidBoolean, isValidNull, isValidNumber, isValidObject, isValidString, isValidUndefined, wait } from 'matterbridge/utils';
+import { OnOffBehavior, RelativeHumidityMeasurementBehavior, TemperatureMeasurementBehavior } from 'matterbridge/matter/behaviors';
+import { AnsiLogger, db, er, hk, idn, LogLevel, nf, rs, wr, zb, CYAN, TimestampFormat, YELLOW, or } from 'matterbridge/logger';
+import { wait } from 'matterbridge/utils';
 // Matter.js
-import {
-  MaybePromise,
-  LogLevel as MatterLogLevel,
-  LogFormat as MatterLogFormat,
-  DeviceTypeId,
-  VendorId,
-  ServerNode,
-  Endpoint,
-  MdnsService,
-  StorageContext,
-} from 'matterbridge/matter';
+import { LogLevel as MatterLogLevel, LogFormat as MatterLogFormat, DeviceTypeId, VendorId, ServerNode, Endpoint, MdnsService, StorageContext } from 'matterbridge/matter';
 import { AggregatorEndpoint } from 'matterbridge/matter/endpoints';
-
 import { jest } from '@jest/globals';
 
-import { Shelly } from './shelly';
-import { ShellyPlatform, ShellyPlatformConfig } from './platform';
-import { ShellyDevice } from './shellyDevice';
-import path from 'node:path';
-import { CoapServer } from './coapServer';
-import { WsServer } from './wsServer';
-import { WsClient } from './wsClient';
-import { ShellyData } from './shellyTypes';
+import { Shelly } from './shelly.ts';
+import { ShellyPlatform } from './platform.ts';
+import { ShellyDevice } from './shellyDevice.ts';
+import { CoapServer } from './coapServer.ts';
+import { WsServer } from './wsServer.ts';
+import { WsClient } from './wsClient.ts';
+import { ShellyData } from './shellyTypes.ts';
 
 const address = 'c4:cb:76:b3:cd:1f';
+
+let loggerLogSpy: jest.SpiedFunction<typeof AnsiLogger.prototype.log>;
+let consoleLogSpy: jest.SpiedFunction<typeof console.log>;
+let consoleDebugSpy: jest.SpiedFunction<typeof console.log>;
+let consoleInfoSpy: jest.SpiedFunction<typeof console.log>;
+let consoleWarnSpy: jest.SpiedFunction<typeof console.log>;
+let consoleErrorSpy: jest.SpiedFunction<typeof console.log>;
+const debug = false; // Set to true to enable debug logs
+
+if (!debug) {
+  loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log').mockImplementation((level: string, message: string, ...parameters: any[]) => {});
+  consoleLogSpy = jest.spyOn(console, 'log').mockImplementation((...args: any[]) => {});
+  consoleDebugSpy = jest.spyOn(console, 'debug').mockImplementation((...args: any[]) => {});
+  consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation((...args: any[]) => {});
+  consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation((...args: any[]) => {});
+  consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation((...args: any[]) => {});
+} else {
+  loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log');
+  consoleLogSpy = jest.spyOn(console, 'log');
+  consoleDebugSpy = jest.spyOn(console, 'debug');
+  consoleInfoSpy = jest.spyOn(console, 'info');
+  consoleWarnSpy = jest.spyOn(console, 'warn');
+  consoleErrorSpy = jest.spyOn(console, 'error');
+}
+
+// Cleanup the test environment
+rmSync(HOMEDIR, { recursive: true, force: true });
 
 describe('ShellyPlatform', () => {
   let matterbridge: Matterbridge;
@@ -62,82 +83,23 @@ describe('ShellyPlatform', () => {
   let shellyPlatform: ShellyPlatform;
   let shelly: Shelly;
 
-  let loggerLogSpy: jest.SpiedFunction<typeof AnsiLogger.prototype.log>;
-  let consoleLogSpy: jest.SpiedFunction<typeof console.log>;
-  let consoleDebugSpy: jest.SpiedFunction<typeof console.log>;
-  let consoleInfoSpy: jest.SpiedFunction<typeof console.log>;
-  let consoleWarnSpy: jest.SpiedFunction<typeof console.log>;
-  let consoleErrorSpy: jest.SpiedFunction<typeof console.log>;
-  const debug = false;
-
-  if (!debug) {
-    // Spy on and mock AnsiLogger.log
-    loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log').mockImplementation((level: string, message: string, ...parameters: any[]) => {
-      //
-    });
-    // Spy on and mock console.log
-    consoleLogSpy = jest.spyOn(console, 'log').mockImplementation((...args: any[]) => {
-      //
-    });
-    // Spy on and mock console.debug
-    consoleDebugSpy = jest.spyOn(console, 'debug').mockImplementation((...args: any[]) => {
-      //
-    });
-    // Spy on and mock console.info
-    consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation((...args: any[]) => {
-      //
-    });
-    // Spy on and mock console.warn
-    consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation((...args: any[]) => {
-      //
-    });
-    // Spy on and mock console.error
-    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation((...args: any[]) => {
-      //
-    });
-  } else {
-    // Spy on AnsiLogger.log
-    loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log');
-    // Spy on console.log
-    consoleLogSpy = jest.spyOn(console, 'log');
-    // Spy on console.debug
-    consoleDebugSpy = jest.spyOn(console, 'debug');
-    // Spy on console.info
-    consoleInfoSpy = jest.spyOn(console, 'info');
-    // Spy on console.warn
-    consoleWarnSpy = jest.spyOn(console, 'warn');
-    // Spy on console.error
-    consoleErrorSpy = jest.spyOn(console, 'error');
-  }
-
   jest.spyOn(Matterbridge.prototype, 'addBridgedEndpoint').mockImplementation((pluginName: string, device: MatterbridgeEndpoint) => {
-    // console.log(`Mocked addBridgedDevice: ${pluginName} ${device.name}`);
     return Promise.resolve();
   });
   jest.spyOn(Matterbridge.prototype, 'removeBridgedEndpoint').mockImplementation((pluginName: string, device: MatterbridgeEndpoint) => {
-    // console.log(`Mocked unregisterDevice: ${pluginName} ${device.name}`);
     return Promise.resolve();
   });
   jest.spyOn(Matterbridge.prototype, 'removeAllBridgedEndpoints').mockImplementation((pluginName: string) => {
-    // console.log(`Mocked removeAllBridgedDevices: ${pluginName}`);
     return Promise.resolve();
   });
 
-  const CoapServerStart = jest.spyOn(CoapServer.prototype, 'start').mockImplementation(() => {
-    return;
-  });
+  const CoapServerStart = jest.spyOn(CoapServer.prototype, 'start').mockImplementation(() => {});
 
-  const CoapServerRegisterDevice = jest.spyOn(CoapServer.prototype, 'registerDevice').mockImplementation(async (host: string, id: string, registerOnly: boolean) => {
-    return;
-  });
+  const CoapServerRegisterDevice = jest.spyOn(CoapServer.prototype, 'registerDevice').mockImplementation(async (host: string, id: string, registerOnly: boolean) => {});
 
-  const WsServerStart = jest.spyOn(WsServer.prototype, 'start').mockImplementation(() => {
-    return;
-  });
+  const WsServerStart = jest.spyOn(WsServer.prototype, 'start').mockImplementation(() => {});
 
-  const WsClientStart = jest.spyOn(WsClient.prototype, 'start').mockImplementation(() => {
-    return;
-  });
+  const WsClientStart = jest.spyOn(WsClient.prototype, 'start').mockImplementation(() => {});
 
   const cleanup = () => {
     // Clean up the platform
@@ -173,7 +135,7 @@ describe('ShellyPlatform', () => {
     // Setup matter environment
     matterbridge.environment.vars.set('log.level', MatterLogLevel.DEBUG);
     matterbridge.environment.vars.set('log.format', MatterLogFormat.ANSI);
-    matterbridge.environment.vars.set('path.root', 'matterstorage');
+    matterbridge.environment.vars.set('path.root', HOMEDIR);
     matterbridge.environment.vars.set('runtime.signals', true);
     matterbridge.environment.vars.set('runtime.exitcode', true);
     // matterbridge.environment.vars.set('mdns.networkInterface', 'Wi-Fi');
@@ -202,35 +164,17 @@ describe('ShellyPlatform', () => {
 
     // Creates the mocks for Matterbridge, AnsiLogger, and PlatformConfig
     mockMatterbridge = {
-      matterbridgeDirectory: './jest/matterbridge',
-      matterbridgePluginDirectory: './jest/plugins',
+      matterbridgeDirectory: HOMEDIR + '/.matterbridge',
+      matterbridgePluginDirectory: HOMEDIR + '/Matterbridge',
       systemInformation: { ipv4Address: undefined, osRelease: 'xx.xx.xx.xx.xx.xx', nodeVersion: '22.1.10' },
       matterbridgeVersion: '3.0.4',
       log: mockLog,
-      getDevices: jest.fn(() => {
-        // console.log('getDevices called');
-        return [];
-      }),
-      getPlugins: jest.fn(() => {
-        // console.log('getPlugins called');
-        return [];
-      }),
-      plugins: {
-        get: jest.fn((pluginName: string) => {
-          // console.log('plugins.get() called');
-          return undefined;
-        }),
-      },
-      addBridgedEndpoint: jest.fn(async (pluginName: string, device: MatterbridgeEndpoint) => {
-        // console.log('addBridgedEndpoint called');
-        // await aggregator.add(device);
-      }),
-      removeBridgedEndpoint: jest.fn(async (pluginName: string, device: MatterbridgeEndpoint) => {
-        // console.log('removeBridgedEndpoint called');
-      }),
-      removeAllBridgedEndpoints: jest.fn(async (pluginName: string) => {
-        // console.log('removeAllBridgedEndpoints called');
-      }),
+      getDevices: jest.fn(() => []),
+      getPlugins: jest.fn(() => []),
+      plugins: { get: jest.fn((pluginName: string) => undefined) },
+      addBridgedEndpoint: jest.fn(async (pluginName: string, device: MatterbridgeEndpoint) => {}),
+      removeBridgedEndpoint: jest.fn(async (pluginName: string, device: MatterbridgeEndpoint) => {}),
+      removeAllBridgedEndpoints: jest.fn(async (pluginName: string) => {}),
     } as unknown as Matterbridge;
     mockLog = {
       fatal: jest.fn((message) => {
@@ -253,38 +197,30 @@ describe('ShellyPlatform', () => {
       }),
     } as unknown as AnsiLogger;
     mockConfig = {
-      'name': 'matterbridge-shelly',
-      'type': 'DynamicPlatform',
-      'version': '1.1.2',
-      'username': 'admin',
-      'password': 'tango',
-      'blackList': [],
-      'whiteList': [],
-      'entityBlackList': [],
-      'deviceEntityBlackList': {},
-      'enableMdnsDiscover': false,
-      'enableStorageDiscover': false,
-      'resetStorageDiscover': false,
-      'enableBleDiscover': true,
-      'debug': true,
-      'debugMdns': true,
-      'debugCoap': true,
-      'debugWs': true,
-      'unregisterOnShutdown': false,
+      name: 'matterbridge-shelly',
+      type: 'DynamicPlatform',
+      version: '1.1.2',
+      username: 'admin',
+      password: 'tango',
+      blackList: [],
+      whiteList: [],
+      entityBlackList: [],
+      deviceEntityBlackList: {},
+      enableMdnsDiscover: false,
+      enableStorageDiscover: false,
+      resetStorageDiscover: false,
+      enableBleDiscover: true,
+      debug: true,
+      debugMdns: true,
+      debugCoap: true,
+      debugWs: true,
+      unregisterOnShutdown: false,
     } as PlatformConfig;
   });
 
   beforeEach(() => {
-    // Clears the call history of mockLog.* before each test
-    (mockLog.fatal as jest.Mock).mockClear();
-    (mockLog.error as jest.Mock).mockClear();
-    (mockLog.warn as jest.Mock).mockClear();
-    (mockLog.notice as jest.Mock).mockClear();
-    (mockLog.info as jest.Mock).mockClear();
-    (mockLog.debug as jest.Mock).mockClear();
-    // Clears the call history before each test
-    loggerLogSpy.mockClear();
-    consoleLogSpy.mockClear();
+    // Clear all mocks before each test
+    jest.clearAllMocks();
   });
 
   afterAll(async () => {
@@ -553,7 +489,7 @@ describe('ShellyPlatform', () => {
 
     // Test updates on switch from Shelly to Matter
     shelly = (shellyPlatform as any).shelly;
-    shelly.coapServer.emit('coapupdate', shellyHt.host, { 'temperature': { 'tC': 20.75, 'tF': 71.15 }, 'humidity': { 'value': 60.5 } } as ShellyData);
+    shelly.coapServer.emit('coapupdate', shellyHt.host, { temperature: { tC: 20.75, tF: 71.15 }, humidity: { value: 60.5 } } as ShellyData);
     await wait(100);
     const temperatureEndpoint = device.getChildEndpointByName('temperature') as MatterbridgeEndpoint;
     expect(temperatureEndpoint.stateOf(TemperatureMeasurementBehavior).measuredValue).toBe(2075);
@@ -825,10 +761,10 @@ describe('ShellyPlatform', () => {
 
     expect(device.getAllClusterServerNames()).toEqual(['descriptor', 'matterbridge', 'bridgedDeviceBasicInformation', 'powerSource', 'fixedLabel']);
     expect(featuresFor(device, 'powerSource')).toEqual({
-      'battery': false,
-      'rechargeable': false,
-      'replaceable': false,
-      'wired': true,
+      battery: false,
+      rechargeable: false,
+      replaceable: false,
+      wired: true,
     });
 
     expect(device.getChildEndpoints()).toHaveLength(5);
@@ -854,25 +790,25 @@ describe('ShellyPlatform', () => {
     expect(featuresFor(child as MatterbridgeEndpoint, 'onOff')).toEqual({ lighting: true, deadFrontBehavior: false, offOnly: false });
     expect(featuresFor(child as MatterbridgeEndpoint, 'levelControl')).toEqual({ onOff: true, lighting: true, frequency: false });
     expect(featuresFor(child as MatterbridgeEndpoint, 'colorControl')).toEqual({
-      'colorLoop': false,
-      'colorTemperature': true,
-      'enhancedHue': false,
-      'hueSaturation': true,
-      'xy': true,
+      colorLoop: false,
+      colorTemperature: true,
+      enhancedHue: false,
+      hueSaturation: true,
+      xy: true,
     });
     expect(featuresFor(child as MatterbridgeEndpoint, 'powerTopology')).toEqual({ nodeTopology: false, treeTopology: true, setTopology: false, dynamicPowerFlow: false });
     expect(featuresFor(child as MatterbridgeEndpoint, 'electricalPowerMeasurement')).toEqual({
-      'alternatingCurrent': true,
-      'directCurrent': false,
-      'harmonics': false,
-      'polyphasePower': false,
-      'powerQuality': false,
+      alternatingCurrent: true,
+      directCurrent: false,
+      harmonics: false,
+      polyphasePower: false,
+      powerQuality: false,
     });
     expect(featuresFor(child as MatterbridgeEndpoint, 'electricalEnergyMeasurement')).toEqual({
-      'cumulativeEnergy': true,
-      'exportedEnergy': true,
-      'importedEnergy': true,
-      'periodicEnergy': false,
+      cumulativeEnergy: true,
+      exportedEnergy: true,
+      importedEnergy: true,
+      periodicEnergy: false,
     });
     expect(child?.getAttribute('Descriptor', 'tagList')).toEqual([{ mfgCode: null, namespaceId: 7, tag: 0, label: 'rgb:0' }]);
     expect(child?.getAttribute('Descriptor', 'deviceTypeList')).toEqual([
