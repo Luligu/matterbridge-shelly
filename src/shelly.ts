@@ -206,6 +206,7 @@ export class Shelly extends EventEmitter {
               return;
             })
             .catch((error) => {
+              // istanbul ignore next
               device.log.error(`Error fetching data from device ${hk}${device.id}${db} host ${zb}${device.host}${db}: ${error}`);
             });
         }

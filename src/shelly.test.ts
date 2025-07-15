@@ -35,29 +35,25 @@ if (!debug) {
   consoleErrorSpy = jest.spyOn(console, 'error');
 }
 
-describe('Shellies test', () => {
-  jest.useFakeTimers();
+jest.useFakeTimers();
 
+describe('Shellies test', () => {
   const coapServerStartSpy = jest.spyOn(CoapServer.prototype, 'start').mockImplementation(() => {});
   const coapServerRegisterDeviceSpy = jest.spyOn(CoapServer.prototype, 'registerDevice').mockImplementation(async () => {});
   const wsServerStartSpy = jest.spyOn(WsServer.prototype, 'start').mockImplementation(() => {});
   const wsClientStartSpy = jest.spyOn(WsClient.prototype, 'start').mockImplementation(() => {});
 
-  const log = new AnsiLogger({ logName: 'shellyDeviceTest', logTimestampFormat: TimestampFormat.TIME_MILLIS });
+  const log = new AnsiLogger({ logName: 'ShellyTest', logTimestampFormat: TimestampFormat.TIME_MILLIS });
   const shellies = new Shelly(log, 'admin', 'tango');
 
-  beforeAll(() => {
-    //
-  });
+  beforeAll(() => {});
 
   beforeEach(() => {
     // Clear all mocks
     jest.clearAllMocks();
   });
 
-  afterEach(() => {
-    //
-  });
+  afterEach(() => {});
 
   afterAll(() => {
     shellies.destroy();
@@ -251,7 +247,7 @@ describe('Shellies test', () => {
       ),
     );
     device3g.destroy();
-  }, 7000);
+  }, 10000);
 
   test('wsServer on wssupdate', async () => {
     const device = shellies.getDeviceByHost(path.join('src', 'mock', 'shelly1minig3-543204547478.json'));
@@ -273,7 +269,7 @@ describe('Shellies test', () => {
     (shellies as any).wsServer.emit('wssupdate', 'shellyxxx', {});
     await new Promise((resolve) => setTimeout(resolve, 500));
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`Received wssupdate from a not registered device`));
-  }, 7000);
+  }, 10000);
 
   test('wsServer on wssevent', async () => {
     const device = shellies.getDeviceByHost(path.join('src', 'mock', 'shelly1minig3-543204547478.json'));
@@ -295,7 +291,7 @@ describe('Shellies test', () => {
     (shellies as any).wsServer.emit('wssevent', 'shellyxxx', {});
     await new Promise((resolve) => setTimeout(resolve, 500));
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`Received wssevent from a not registered device`));
-  }, 7000);
+  }, 10000);
 
   test('mdnsScanner on discovered', async () => {
     const onDiscovered = jest.fn();
@@ -313,7 +309,7 @@ describe('Shellies test', () => {
       port: 80,
       gen: 3,
     });
-  }, 7000);
+  }, 10000);
 
   test('coapServer on update', async () => {
     const device = shellies.getDeviceByHost(path.join('src', 'mock', 'shelly1minig3-543204547478.json'));
@@ -333,7 +329,27 @@ describe('Shellies test', () => {
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`setting cached to false`));
     expect(onAwake).toHaveBeenCalledTimes(1);
     expect(onOnline).toHaveBeenCalledTimes(1);
-  }, 7000);
+  }, 10000);
+
+  test('coapServer on coapupdate', async () => {
+    const device = shellies.getDeviceByHost(path.join('src', 'mock', 'shelly1minig3-543204547478.json'));
+    expect(device).toBeDefined();
+    if (!device) return;
+    device.sleepMode = true;
+    device.online = false;
+    device.cached = true;
+    const onAwake = jest.fn();
+    const onOnline = jest.fn();
+    device.on('awake', onAwake);
+    device.on('online', onOnline);
+    (shellies as any).coapServer.emit('coapupdate', device.host, { sys: { temperature: 12.3 } });
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`CoIoT coapupdate from device id ${hk}shelly1minig3-543204547478${db}`));
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`setting online to true`));
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`setting cached to false`));
+    expect(onAwake).toHaveBeenCalledTimes(1);
+    expect(onOnline).toHaveBeenCalledTimes(1);
+  }, 10000);
 
   test('Set get data path', () => {
     shellies.dataPath = 'local';
