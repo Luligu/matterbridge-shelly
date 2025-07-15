@@ -63,10 +63,10 @@ describe('ShellyWsClient', () => {
 
   let sendPong = true;
 
-  const address = 'c4:cb:76:b3:cd:1f';
+  // const address = 'c4:cb:76:b3:cd:1f';
 
   beforeAll(async () => {
-    if (getMacAddress() !== address) return; // Only run these tests on the correct machine
+    // if (getMacAddress() !== address) return; // Only run these tests on the correct machine
 
     // Create a WebSocket server and await its listening state
     await new Promise<void>((resolve) => {
@@ -122,7 +122,7 @@ describe('ShellyWsClient', () => {
   });
 
   afterAll(async () => {
-    if (getMacAddress() !== address) return;
+    // if (getMacAddress() !== address) return;
 
     console.log('Closing Jest test ws server');
 
@@ -147,7 +147,7 @@ describe('ShellyWsClient', () => {
   });
 
   test('should fail with wrong address', async () => {
-    if (!server) return;
+    expect(server).toBeDefined();
     wsClient = new WsClient('Jest', 'xxxxxx', 8080);
     wsClient.once('error', (error) => {
       console.error('Error event received:', error);
@@ -177,7 +177,7 @@ describe('ShellyWsClient', () => {
   }, 10000);
 
   test('should not connect when connected', async () => {
-    if (!server) return;
+    expect(server).toBeDefined();
     wsClient = new WsClient('Jest', 'localhost', 8080);
 
     await new Promise<void>((resolve) => {
@@ -207,7 +207,7 @@ describe('ShellyWsClient', () => {
   }, 10000);
 
   test('should terminate before connected', async () => {
-    if (!server) return;
+    expect(server).toBeDefined();
     wsClient = new WsClient('Jest', 'localhost', 8080);
     wsClient.start();
     wsClient.stop();
@@ -222,7 +222,7 @@ describe('ShellyWsClient', () => {
   }, 10000);
 
   test('should fail to create', async () => {
-    if (!server) return;
+    expect(server).toBeDefined();
     wsClient = new WsClient('Jest', 'invald - host', 8080);
     wsClient.start();
     wsClient.stop();
@@ -232,7 +232,7 @@ describe('ShellyWsClient', () => {
   }, 10000);
 
   test('create the wsClient', () => {
-    if (!server) return;
+    expect(server).toBeDefined();
     wsClient = new WsClient('Jest', 'localhost', 8080);
     expect(wsClient).toBeDefined();
     expect(wsClient).toBeInstanceOf(WsClient);
@@ -246,13 +246,13 @@ describe('ShellyWsClient', () => {
   });
 
   test('should log error if not connected', () => {
-    if (!server) return;
+    expect(server).toBeDefined();
     wsClient.sendRequest('Shelly.GetStatus');
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.ERROR, `SendRequest error: WebSocket client is not connected to device ${hk}Jest${er} host ${zb}localhost${er}`);
   });
 
   test('should connect to the server', async () => {
-    if (!server) return;
+    expect(server).toBeDefined();
     // Await connection to the server
     const connectPromise = new Promise<WebSocket>((resolve) => {
       server.once('connection', (ws: WebSocket) => {
@@ -292,7 +292,7 @@ describe('ShellyWsClient', () => {
   }, 10000);
 
   test('should start ping pong and timeout', async () => {
-    if (!server) return;
+    expect(server).toBeDefined();
     (wsClient as any).startPingPong(500);
     expect((wsClient as any).pingInterval).toBeDefined();
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Start PingPong with device ${hk}Jest${db} host ${zb}localhost${db}.`);
@@ -310,7 +310,7 @@ describe('ShellyWsClient', () => {
   }, 10000);
 
   test('should respond to error event', async () => {
-    if (!server) return;
+    expect(server).toBeDefined();
     wsClient.once('error', (error) => {
       // console.error('Error event received:', error);
     });
@@ -320,7 +320,7 @@ describe('ShellyWsClient', () => {
   }, 10000);
 
   test('should respond to close event', async () => {
-    if (!server) return;
+    expect(server).toBeDefined();
     (wsClient as any).wsClient?.emit('close', 1000, Buffer.from('Test close'));
     expect(wsClient.isConnected).toBeFalsy();
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, expect.stringContaining(`WebSocket connection closed with Shelly device ${hk}Jest${nf} host ${zb}localhost${nf}`));
@@ -328,14 +328,14 @@ describe('ShellyWsClient', () => {
   }, 10000);
 
   test('should be connected', async () => {
-    if (!server) return;
+    expect(server).toBeDefined();
     expect((wsClient as any).wsClient?.readyState).toBe(WebSocket.OPEN);
     expect((wsClient as any).pingInterval).toBeUndefined();
     expect((wsClient as any).pongTimeout).toBeUndefined();
   }, 10000);
 
   test('should react to ping pong error', async () => {
-    if (!server) return;
+    expect(server).toBeDefined();
     console.log('PingPong error test');
     sendPong = false;
     (wsClient as any).startPingPong(500);
@@ -352,7 +352,7 @@ describe('ShellyWsClient', () => {
   }, 10000);
 
   test('should close the connection', async () => {
-    if (!server) return;
+    expect(server).toBeDefined();
     wsClient.stop();
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`Stopping ws client for Shelly device ${hk}Jest${db} host ${zb}localhost${db}`));
     // prettier-ignore
@@ -364,7 +364,7 @@ describe('ShellyWsClient', () => {
   }, 10000);
 
   test('should connect to the server without auth', async () => {
-    if (!server) return;
+    expect(server).toBeDefined();
     // Await connection to the server
     const connectPromise = new Promise<WebSocket>((resolve) => {
       server.once('connection', (ws: WebSocket) => {
@@ -425,7 +425,7 @@ describe('ShellyWsClient', () => {
   }, 10000);
 
   test('should not connect to the server with auth if no password is provided', async () => {
-    if (!server) return;
+    expect(server).toBeDefined();
     // Await connection to the server
     const connectPromise = new Promise<WebSocket>((resolve) => {
       server.once('connection', (ws: WebSocket) => {
@@ -505,7 +505,7 @@ describe('ShellyWsClient', () => {
   }, 10000);
 
   test('should connect to the server with auth', async () => {
-    if (!server) return;
+    expect(server).toBeDefined();
     // Await connection to the server
     const connectPromise = new Promise<WebSocket>((resolve) => {
       server.once('connection', (ws: WebSocket) => {
