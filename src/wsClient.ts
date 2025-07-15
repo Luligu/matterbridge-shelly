@@ -98,8 +98,11 @@ interface WsClientEvent {
   update: [params: any];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   event: [events: any];
-  open: [];
-  error: [message: string];
+  started: []; // Event emitted when the WebSocket client starts listening for status updates
+  stopped: []; // Event emitted when the WebSocket client stops listening for status updates
+  open: []; // Event emitted when a WebSocket connection is opened
+  close: [code: number, reason: Buffer]; // Event emitted when the WebSocket connection is closed
+  error: [message: string]; // Event emitted when an error occurs in the WebSocket client
 }
 
 /**
@@ -117,7 +120,7 @@ interface WsClientEvent {
  * wsClient.sendRequest('Shelly.GetStatus');
  * ```
  */
-export class WsClient extends EventEmitter {
+export class WsClient extends EventEmitter<WsClientEvent> {
   public readonly log;
   public static logLevel = LogLevel.INFO;
   private wsClient: WebSocket | undefined;
@@ -127,6 +130,7 @@ export class WsClient extends EventEmitter {
   private wsHost;
   private wsDeviceId: string;
   private wsUrl;
+  private wsPort = 80; // Default port for WebSocket connections
   private auth = false;
   private password;
   private requestId;
@@ -157,28 +161,22 @@ export class WsClient extends EventEmitter {
    *
    * @param {string} wsDeviceId - The ID of the WebSocket device.
    * @param {string} wsHost - The host of the WebSocket server.
+   * @param {number} wsPort - The port of the WebSocket server. Defaults to 80.
    * @param {string} [password] - The optional password for authentication.
    */
-  constructor(wsDeviceId: string, wsHost: string, password?: string) {
+  constructor(wsDeviceId: string, wsHost: string, wsPort: number = 80, password?: string) {
     super();
     this.log = new AnsiLogger({ logName: 'ShellyWsClient', logTimestampFormat: TimestampFormat.TIME_MILLIS, logLevel: WsClient.logLevel });
     this.wsHost = wsHost;
+    this.wsPort = wsPort;
     this.wsDeviceId = wsDeviceId;
-    this.wsUrl = `ws://${this.wsHost}/rpc`;
+    this.wsUrl = `ws://${this.wsHost}:${this.wsPort}/rpc`;
     this.password = password;
     this.requestId = crypto.randomInt(0, 999999);
     this.requestFrame.id = this.requestId;
     this.requestFrame.src = 'Matterbridge' + this.requestId;
     this.requestFrameWithAuth.id = this.requestId;
     this.requestFrameWithAuth.src = 'Matterbridge' + this.requestId;
-  }
-
-  override emit<K extends keyof WsClientEvent>(eventName: K, ...args: WsClientEvent[K]): boolean {
-    return super.emit(eventName, ...args);
-  }
-
-  override on<K extends keyof WsClientEvent>(eventName: K, listener: (...args: WsClientEvent[K]) => void): this {
-    return super.on(eventName, listener);
   }
 
   /**
@@ -196,7 +194,7 @@ export class WsClient extends EventEmitter {
    *
    * @returns {boolean} The connection status of the WebSocket client.
    */
-  get isConnected() {
+  get isConnected(): boolean {
     return this._isConnected;
   }
 
@@ -205,7 +203,7 @@ export class WsClient extends EventEmitter {
    *
    * @returns {boolean} A boolean value indicating whether the client is currently connecting.
    */
-  get isConnecting() {
+  get isConnecting(): boolean {
     return this._isConnecting;
   }
 
@@ -330,11 +328,11 @@ export class WsClient extends EventEmitter {
       this._isConnecting = false;
       this._isConnected = false;
       this.stopPingPong();
+      this.emit('close', code, reason);
     });
 
     // Handle messages from the WebSocket
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    this.wsClient.on('message', (data: WebSocket.RawData, isBinary: boolean) => {
+    this.wsClient.on('message', (data: WebSocket.RawData, _isBinary: boolean) => {
       try {
         const response = JSON.parse(data.toString());
         this.id = ShellyDevice.normalizeId(response.src).id;
@@ -382,6 +380,9 @@ export class WsClient extends EventEmitter {
         this.log.error(`WebSocket client error parsing message from ${hk}${this.id}${er} host ${zb}${this.wsHost}${er}: ${error instanceof Error ? error.message : error}`);
       }
     });
+
+    // Emit started event
+    this.emit('started');
   }
 
   /**
@@ -432,6 +433,9 @@ export class WsClient extends EventEmitter {
     this.wsClient.removeAllListeners();
     this.wsClient = undefined;
     this.log.debug(`Stopped ws client for Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}`);
+
+    // Emit stopped event
+    this.emit('stopped');
     // }
   }
 }
