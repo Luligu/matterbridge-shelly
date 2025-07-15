@@ -7,7 +7,7 @@ import path from 'node:path';
 import { readFileSync, promises as fs, rmSync } from 'node:fs';
 
 import { jest } from '@jest/globals';
-import { AnsiLogger, CYAN, db, hk, LogLevel, MAGENTA, nf, TimestampFormat, zb } from 'matterbridge/logger';
+import { AnsiLogger, CYAN, db, hk, LogLevel, nf, TimestampFormat, zb } from 'matterbridge/logger';
 import { IncomingMessage, parameters } from 'coap';
 import { wait } from 'matterbridge/utils';
 
@@ -36,6 +36,30 @@ if (!debug) {
   consoleInfoSpy = jest.spyOn(console, 'info');
   consoleWarnSpy = jest.spyOn(console, 'warn');
   consoleErrorSpy = jest.spyOn(console, 'error');
+}
+
+function setDebug(debug: boolean) {
+  if (debug) {
+    loggerLogSpy.mockRestore();
+    consoleLogSpy.mockRestore();
+    consoleDebugSpy.mockRestore();
+    consoleInfoSpy.mockRestore();
+    consoleWarnSpy.mockRestore();
+    consoleErrorSpy.mockRestore();
+    loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log');
+    consoleLogSpy = jest.spyOn(console, 'log');
+    consoleDebugSpy = jest.spyOn(console, 'debug');
+    consoleInfoSpy = jest.spyOn(console, 'info');
+    consoleWarnSpy = jest.spyOn(console, 'warn');
+    consoleErrorSpy = jest.spyOn(console, 'error');
+  } else {
+    loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log').mockImplementation((level: string, message: string, ...parameters: any[]) => {});
+    consoleLogSpy = jest.spyOn(console, 'log').mockImplementation((...args: any[]) => {});
+    consoleDebugSpy = jest.spyOn(console, 'debug').mockImplementation((...args: any[]) => {});
+    consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation((...args: any[]) => {});
+    consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation((...args: any[]) => {});
+    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation((...args: any[]) => {});
+  }
 }
 
 // Cleanup the test environment
@@ -472,8 +496,6 @@ describe('Coap scanner', () => {
     const citd = loadResponse('shelly1-34945472A643', 'citd');
     expect(citd).not.toBeUndefined();
     const desc = coapServer.parseDescription(citd);
-    // consoleErrorSpy.mockRestore();
-    // console.error('desc', desc);
     expect(desc).toEqual([
       { id: 1101, component: 'relay:0', property: 'state', range: '0/1' },
       { id: 2101, component: 'input:0', property: 'input', range: '0/1' },
@@ -519,8 +541,6 @@ describe('Coap scanner', () => {
     const citd = loadResponse('shelly1l-E8DB84AAD781', 'citd');
     expect(citd).not.toBeUndefined();
     const desc = coapServer.parseDescription(citd);
-    // consoleErrorSpy.mockRestore();
-    // console.error('desc', desc);
     expect(desc).toEqual([
       { id: 1101, component: 'relay:0', property: 'state', range: '0/1' },
       { id: 4101, component: 'meter:0', property: 'power', range: ['0/3500', '-1'] },
@@ -560,8 +580,6 @@ describe('Coap scanner', () => {
     const citd = loadResponse('shellybulbduo-34945479CFA4', 'citd');
     expect(citd).not.toBeUndefined();
     const desc = coapServer.parseDescription(citd);
-    // consoleErrorSpy.mockRestore();
-    // console.error('desc', desc);
     expect(desc).toEqual([
       { id: 1101, component: 'light:0', property: 'state', range: '0/1' },
       { id: 5101, component: 'light:0', property: 'brightness', range: '0/100' },
@@ -595,8 +613,6 @@ describe('Coap scanner', () => {
     const citd = loadResponse('shellycolorbulb-485519EE12A7', 'citd');
     expect(citd).not.toBeUndefined();
     const desc = coapServer.parseDescription(citd);
-    // consoleErrorSpy.mockRestore();
-    // console.error('desc', desc);
     expect(desc).toEqual([
       { id: 1101, component: 'light:0', property: 'state', range: '0/1' },
       { id: 5105, component: 'light:0', property: 'red', range: '0/255' },
@@ -647,8 +663,6 @@ describe('Coap scanner', () => {
     const citd = loadResponse('shellyswitch25-3494547BF36C', 'citd');
     expect(citd).not.toBeUndefined();
     const desc = coapServer.parseDescription(citd);
-    // consoleErrorSpy.mockRestore();
-    // console.error('desc', desc);
     expect(desc).toEqual([
       { id: 1101, component: 'relay:0', property: 'state', range: '0/1' },
       { id: 2101, component: 'input:0', property: 'input', range: '0/1' },
@@ -704,8 +718,6 @@ describe('Coap scanner', () => {
     const citd = loadResponse('shellyswitch25-3494546BBF7E', 'citd');
     expect(citd).not.toBeUndefined();
     const desc = coapServer.parseDescription(citd);
-    // consoleErrorSpy.mockRestore();
-    // console.error('desc', desc);
     expect(desc).toEqual([
       { id: 2101, component: 'input:0', property: 'input', range: '0/1' },
       { id: 2102, component: 'input:0', property: 'event', range: ['S/L', ''] },
@@ -756,8 +768,6 @@ describe('Coap scanner', () => {
     const citd = loadResponse('shellyrgbw2-EC64C9D199AD', 'citd');
     expect(citd).not.toBeUndefined();
     const desc = coapServer.parseDescription(citd);
-    // consoleErrorSpy.mockRestore();
-    // console.error('desc', desc);
     expect(desc).toEqual([
       { id: 1101, component: 'light:0', property: 'state', range: '0/1' },
       { id: 5101, component: 'light:0', property: 'brightness', range: '0/100' },
@@ -813,8 +823,6 @@ describe('Coap scanner', () => {
     const citd = loadResponse('shellyrgbw2-EC64C9D3FFEF', 'citd');
     expect(citd).not.toBeUndefined();
     const desc = coapServer.parseDescription(citd);
-    // consoleErrorSpy.mockRestore();
-    // console.error('desc', desc);
     expect(desc).toEqual([
       { id: 1101, component: 'light:0', property: 'state', range: '0/1' },
       { id: 5105, component: 'light:0', property: 'red', range: '0/255' },
@@ -878,8 +886,13 @@ describe('Coap scanner', () => {
   }, 30000);
 
   test('Start scanner', async () => {
-    coapServer.start();
-    await wait(1000);
+    await new Promise((resolve) => {
+      coapServer.on('started', () => {
+        resolve(true);
+      });
+      coapServer.start();
+    });
+
     expect(coapServer.isListening).toBeTruthy();
     expect(coapServer.isReady).toBeTruthy();
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, 'Starting CoIoT (coap) server for shelly devices...');
@@ -891,23 +904,44 @@ describe('Coap scanner', () => {
     expect(coapServer.isListening).toBeTruthy();
 
     await new Promise((resolve) => {
-      coapServer.getDeviceDescription('192.168.68.68', 'shellydimmer2-98CDAC0D01BB');
-      coapServer.getDeviceStatus('192.168.68.68', 'shellydimmer2-98CDAC0D01BB');
+      const desc = coapServer.getDeviceDescription('192.168.68.68', 'shellydimmer2-98CDAC0D01BB');
+      const status = coapServer.getDeviceStatus('192.168.68.68', 'shellydimmer2-98CDAC0D01BB');
 
-      const interval = setInterval(() => {
-        if (parseShellyMessageSpy.mock.calls.length > 0) {
+      Promise.all([desc, status])
+        .then(() => {
+          clearTimeout(timeout);
           resolve(true);
-        }
-      }, 500).unref();
+          return;
+        })
+        .catch((err) => {
+          clearTimeout(timeout);
+          resolve(true);
+        });
+      // Not on network, so no response
       const timeout = setTimeout(() => {
+        // clearInterval(interval);
         resolve(true);
       }, 10000).unref();
     });
   }, 30000);
 
   test('Stop scanner', async () => {
-    coapServer.stop();
-    await wait(1000);
+    // setDebug(true);
+    await new Promise((resolve) => {
+      coapServer.on('stopped', (err) => {
+        expect(err).toBeUndefined();
+        resolve(true);
+      });
+      coapServer.stop();
+    });
+    /*
+    await new Promise((resolve) => {
+      coapServer.on('agent_stopped', (err) => {
+        expect(err).toBeUndefined();
+        resolve(true);
+      });
+    });
+    */
     expect(coapServer.isListening).toBeFalsy();
     expect(coapServer.isReady).toBeFalsy();
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, 'Stopping CoIoT (coap) server for shelly devices...');

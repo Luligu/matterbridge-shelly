@@ -84,11 +84,14 @@ interface CoIoTDescription {
 }
 
 interface CoapServerEvent {
+  started: [];
+  stopped: [Error | undefined];
+  agent_stopped: [Error | undefined];
   update: [host: string, component: string, property: string, value: ShellyDataType];
   coapupdate: [host: string, status: ShellyData];
 }
 
-export class CoapServer extends EventEmitter {
+export class CoapServer extends EventEmitter<CoapServerEvent> {
   public readonly log;
   private readonly shelly: Shelly;
   private coapServer: Server | undefined;
@@ -111,14 +114,6 @@ export class CoapServer extends EventEmitter {
     if (parameters.refreshTiming) parameters.refreshTiming();
 
     this.registerShellyOptions();
-  }
-
-  override emit<K extends keyof CoapServerEvent>(eventName: K, ...args: CoapServerEvent[K]): boolean {
-    return super.emit(eventName, ...args);
-  }
-
-  override on<K extends keyof CoapServerEvent>(eventName: K, listener: (...args: CoapServerEvent[K]) => void): this {
-    return super.on(eventName, listener);
   }
 
   /**
@@ -173,11 +168,15 @@ export class CoapServer extends EventEmitter {
           resolve(msg);
         })
         .on('timeout', (err) => {
+          /* istanbul ignore next */
           this.log.warn(`CoIoT (coap) timeout requesting device description ("/cit/d") from ${hk}${id}${wr} host ${zb}${host}${wr}: ${err instanceof Error ? err.message : err}`);
+          /* istanbul ignore next */
           resolve(null);
         })
         .on('error', (err) => {
+          /* istanbul ignore next */
           this.log.warn(`CoIoT (coap) error requesting device description ("/cit/d") from ${hk}${id}${wr} host ${zb}${host}${wr}: ${err instanceof Error ? err.message : err}`);
+          /* istanbul ignore next */
           resolve(null);
         })
         .end();
@@ -208,11 +207,15 @@ export class CoapServer extends EventEmitter {
           resolve(msg);
         })
         .on('timeout', (err) => {
+          /* istanbul ignore next */
           this.log.warn(`CoIoT (coap) timeout requesting device status ("/cit/s") from ${hk}${id}${wr} host ${zb}${host}${wr}: ${err instanceof Error ? err.message : err}`);
+          /* istanbul ignore next */
           resolve(null);
         })
         .on('error', (err) => {
+          /* istanbul ignore next */
           this.log.warn(`CoIoT (coap) error requesting device status ("/cit/s") from ${hk}${id}${wr} host ${zb}${host}${wr}: ${err instanceof Error ? err.message : err}`);
+          /* istanbul ignore next */
           resolve(null);
         })
         .end();
@@ -226,7 +229,7 @@ export class CoapServer extends EventEmitter {
    * @param {number} timeout The timeout value in seconds (default: 60)
    * @returns {Promise<IncomingMessage | null>} A Promise that resolves with the IncomingMessage object or null if an error occurs or the timeout is reached.
    */
-  async getMulticastDeviceStatus(timeout = 60): Promise<IncomingMessage | null> {
+  async getMulticastDeviceStatus(timeout: number = 60): Promise<IncomingMessage | null> {
     this.log.debug('Requesting CoIoT (coap) multicast device status...');
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -247,11 +250,15 @@ export class CoapServer extends EventEmitter {
           resolve(msg);
         })
         .on('timeout', (err) => {
+          /* istanbul ignore next */
           this.log.warn('CoIoT (coap) timeout requesting multicast device status ("/cit/s"):', err instanceof Error ? err.message : err);
+          /* istanbul ignore next */
           resolve(null);
         })
         .on('error', (err) => {
+          /* istanbul ignore next */
           this.log.warn('CoIoT (coap) error requesting multicast device status ("/cit/s"):', err instanceof Error ? err.message : err);
+          /* istanbul ignore next */
           resolve(null);
         })
         .end();
@@ -267,10 +274,12 @@ export class CoapServer extends EventEmitter {
       COIOT_OPTION_GLOBAL_DEVID,
       (str) => {
         // Ensure that 'str' is a string
+        /* istanbul ignore next if */
         if (typeof str === 'string' || (str && typeof str.toString === 'function')) {
           return Buffer.from(str.toString());
         }
         // Handle null or incompatible types explicitly
+        /* istanbul ignore next */
         throw new TypeError('Expected a string for GLOBAL_DEVID');
       },
       (buf) => buf.toString(),
@@ -280,6 +289,7 @@ export class CoapServer extends EventEmitter {
       COIOT_OPTION_STATUS_VALIDITY,
       (str) => {
         // Convert to integer and then to Buffer
+        /* istanbul ignore next if */
         if (typeof str === 'string') {
           // Create a new Buffer and write the integer
           const buffer = Buffer.alloc(2); // Allocate buffer of 2 bytes
@@ -287,6 +297,7 @@ export class CoapServer extends EventEmitter {
           return buffer; // Return the buffer
         }
         // Handle null or non-string types explicitly
+        /* istanbul ignore next */
         throw new TypeError('Expected a string for STATUS_VALIDITY');
       },
       (buf) => buf.readUInt16LE(0),
@@ -296,6 +307,7 @@ export class CoapServer extends EventEmitter {
       COIOT_OPTION_STATUS_SERIAL,
       (str) => {
         // Convert to integer and then to Buffer
+        /* istanbul ignore next if */
         if (typeof str === 'string') {
           // Create a new Buffer and write the integer
           const buffer = Buffer.alloc(2); // Allocate buffer of 2 bytes
@@ -303,6 +315,7 @@ export class CoapServer extends EventEmitter {
           return buffer; // Return the buffer
         }
         // Handle null or non-string types explicitly
+        /* istanbul ignore next */
         throw new TypeError('Expected a string for STATUS_SERIAL');
       },
       (buf) => buf.readUInt16LE(0),
@@ -661,6 +674,7 @@ export class CoapServer extends EventEmitter {
       } else {
         this._isReady = true;
         this.log.info('CoIoT (coap) server is listening on port 5683...');
+        this.emit('started');
       }
     });
   }
@@ -740,19 +754,23 @@ export class CoapServer extends EventEmitter {
    */
   stop() {
     this.log.info('Stopping CoIoT (coap) server for shelly devices...');
-    this.removeAllListeners();
     this._isListening = false;
     if (this.coapServer)
       this.coapServer.close((err?: Error) => {
         this._isReady = false;
         this.log.debug(`CoIoT (coap) server closed${err ? ' with error ' + err.message : ''}.`);
+        this.emit('stopped', err);
       });
-    globalAgent.close((err?: Error) => this.log.debug(`CoIoT (coap) agent closed${err ? ' with error ' + err.message : ''}.`));
+    globalAgent.close((err?: Error) => {
+      this.log.debug(`CoIoT (coap) agent closed${err ? ' with error ' + err.message : ''}.`);
+      this.emit('agent_stopped', err);
+    });
     this.deviceDescription.clear();
     this.deviceId.clear();
     this.deviceSerial.clear();
     this.deviceValidityTimeout.clear();
     this.log.info('Stopped CoIoT (coap) server for shelly devices.');
+    // this.removeAllListeners();
   }
 
   /**
@@ -774,68 +792,6 @@ export class CoapServer extends EventEmitter {
     }
   }
 }
-
-// Use with: node dist/coapServer.js coapStatus coapDescription
-/*
-if (
-  process.argv.includes('coapServer') ||
-  process.argv.includes('coapRegister') ||
-  process.argv.includes('coapDescription') ||
-  process.argv.includes('coapStatus') ||
-  process.argv.includes('coapMcast')
-) {
-  // Set the CoAP parameters to minimum values
-  const { parameters } = await import('coap');
-  parameters.maxRetransmit = 3;
-  // parameters.maxLatency = 1;
-  if (parameters.refreshTiming) parameters.refreshTiming();
-
-  const coapServer = new CoapServer(LogLevel.DEBUG);
-
-  const devices = [
-    { host: '192.168.1.219', id: 'shellydimmer2-98CDAC0D01BB' },
-    { host: '192.168.1.222', id: 'shellyswitch25-3494546BBF7E' },
-    { host: '192.168.1.236', id: 'shellyswitch25-3494547BF36C' },
-    { host: '192.168.1.249', id: 'shellyem3-485519D732F4' },
-    { host: '192.168.1.154', id: 'shellybulbduo-34945479CFA4' },
-    { host: '192.168.1.155', id: 'shellycolorbulb-485519EE12A7' },
-    { host: '192.168.1.240', id: 'shelly1-34945472A643' },
-    { host: '192.168.1.241', id: 'shelly1l-E8DB84AAD781' },
-    { host: '192.168.1.152', id: 'shellyrgbw2-EC64C9D199AD' },
-    { host: '192.168.1.226', id: 'shellyrgbw2-EC64C9D3FFEF' },
-    { host: '192.168.1.245', id: 'shellymotionsensor-60A42386E566' },
-    { host: '192.168.1.246', id: 'shellymotion2-8CF68108A6F5' },
-  ];
-  for (const device of devices) {
-    for (let i = 0; i < 5; i++) {
-      if (process.argv.includes('coapRegister')) await coapServer.registerDevice(device.host, device.id, false);
-      if (process.argv.includes('coapDescription')) await coapServer.getDeviceDescription(device.host, device.id);
-      if (process.argv.includes('coapStatus')) await coapServer.getDeviceStatus(device.host, device.id);
-      await new Promise((resolve) => setTimeout(resolve, 500));
-    }
-  }
-  // await coapServer.getDeviceDescription('192.168.1.246', 'shellymotion2-8CF68108A6F5');
-
-  if (process.argv.includes('coapDescription')) {
-    await coapServer.getDeviceDescription('192.168.1.219', 'shellydimmer2-98CDAC0D01BB');
-  }
-
-  if (process.argv.includes('coapStatus')) {
-    await coapServer.getDeviceStatus('192.168.1.219', 'shellydimmer2-98CDAC0D01BB');
-  }
-
-  if (process.argv.includes('coapMcast')) {
-    await coapServer.getMulticastDeviceStatus(30);
-  }
-
-  if (process.argv.includes('coapServer')) coapServer.start();
-
-  process.on('SIGINT', async function () {
-    coapServer.stop();
-    process.exit();
-  });
-}
-*/
 
 const SHDW_CITD = {
   blk: [
