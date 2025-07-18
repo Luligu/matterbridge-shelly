@@ -40,7 +40,7 @@ export interface DiscoveredDevice {
 
 export type DiscoveredDeviceListener = (data: DiscoveredDevice) => void;
 
-interface MdnsScannerEvent {
+interface MdnsScannerEvents {
   discovered: [{ id: ShellyDeviceId; host: string; port: number; gen: number }];
   query: [{ type: string; name: string; class?: string }];
 }
@@ -50,7 +50,7 @@ interface MdnsScannerEvent {
  *
  * @param {LogLevel} logLevel - The log level for the scanner. Defaults to LogLevel.INFO.
  */
-export class MdnsScanner extends EventEmitter {
+export class MdnsScanner extends EventEmitter<MdnsScannerEvents> {
   private devices = new Map<string, string>();
   private discoveredDevices = new Map<string, DiscoveredDevice>();
   public readonly log;
@@ -64,14 +64,6 @@ export class MdnsScanner extends EventEmitter {
   constructor(logLevel: LogLevel = LogLevel.INFO) {
     super();
     this.log = new AnsiLogger({ logName: 'ShellyMdnsScanner', logTimestampFormat: TimestampFormat.TIME_MILLIS, logLevel });
-  }
-
-  override emit<K extends keyof MdnsScannerEvent>(eventName: K, ...args: MdnsScannerEvent[K]): boolean {
-    return super.emit(eventName, ...args);
-  }
-
-  override on<K extends keyof MdnsScannerEvent>(eventName: K, listener: (...args: MdnsScannerEvent[K]) => void): this {
-    return super.on(eventName, listener);
   }
 
   /**
@@ -114,7 +106,7 @@ export class MdnsScanner extends EventEmitter {
    * @param {SocketType} type - Explicitly specify a socket type: "udp4" | "udp6". Default is "udp4".
    * @param {boolean} debug - Indicates whether to enable debug mode (default: false).
    */
-  start(scannerTimeout?: number, queryTimeout?: number, mdnsInterface?: string, type?: SocketType, debug = false) {
+  start(scannerTimeout?: number, queryTimeout?: number, mdnsInterface?: string, type?: SocketType, debug: boolean = false) {
     if (this._isScanning) return;
     this._isScanning = true;
 

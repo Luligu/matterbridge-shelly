@@ -52,7 +52,7 @@ import {
 } from './shellyTypes.js';
 import { isCoverComponent, isLightComponent, isSwitchComponent, ShellyComponent } from './shellyComponent.js';
 
-interface ShellyDeviceEvent {
+interface ShellyDeviceEvents {
   online: [];
   offline: [];
   awake: [];
@@ -71,7 +71,7 @@ interface ShellyDeviceEvent {
  * @param {AnsiLogger} log - The AnsiLogger object.
  * @param {string} host - The host string.
  */
-export class ShellyDevice extends EventEmitter {
+export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
   readonly shelly: Shelly;
   readonly log: AnsiLogger;
   readonly username: string | undefined;
@@ -124,14 +124,6 @@ export class ShellyDevice extends EventEmitter {
     this.host = host;
     this.username = shelly.username;
     this.password = shelly.password;
-  }
-
-  override emit<K extends keyof ShellyDeviceEvent>(eventName: K, ...args: ShellyDeviceEvent[K]): boolean {
-    return super.emit(eventName, ...args);
-  }
-
-  override on<K extends keyof ShellyDeviceEvent>(eventName: K, listener: (...args: ShellyDeviceEvent[K]) => void): this {
-    return super.on(eventName, listener);
   }
 
   /**
@@ -361,6 +353,9 @@ export class ShellyDevice extends EventEmitter {
     return modelsMap[model] || `Unknown Shelly BLU model ${model}`;
   }
 
+  /**
+   * Updates the BTHome components of the device.
+   */
   updateBTHomeComponents(): void {
     if (this.componentsPayload && this.componentsPayload.components) {
       this.bthomeTrvs.clear();
@@ -369,6 +364,7 @@ export class ShellyDevice extends EventEmitter {
       this.scanBTHomeComponents(this.componentsPayload.components as unknown as BTHomeComponent[]);
     }
   }
+
   /**
    * Scans the device for BTHome components.
    * It will also set the bthomeTrvs, bthomeDevices, and bthomeSensors maps.
@@ -1260,6 +1256,7 @@ export class ShellyDevice extends EventEmitter {
   // http://192.168.1.218/rpc/Switch.Toggle?id=0
 
   // Scan the gateway device for BLU devices (http://IP/rpc/Shelly.GetComponents?dynamic_only=true)
+
   /*
   Method: BluTrv.Call params: { id: 200, method: Trv.SetTarget, params: { id: 0 target_C: 15 } }
   http://192.168.1.164/rpc/BluTrv.Call?id=200&method=Trv.SetTarget&params={id:0,target_C:15}
@@ -1323,7 +1320,7 @@ export class ShellyDevice extends EventEmitter {
    *
    * @param {Shelly} shelly - The Shelly instance.
    * @param {AnsiLogger} log - The logger instance.
-   * @param {string} host - The host to fetch the data from.
+   * @param {string} host - The host to fetch the data from. It can be an IP address or the cache JSON file path.
    * @param {string} service - The service to fetch the data from.
    * @param {Record<string, string | number | boolean>} params - Additional parameters for the request (default: {}).
    * @returns {Promise<ShellyData | null>} A promise that resolves to the fetched device data or null if an error occurs.

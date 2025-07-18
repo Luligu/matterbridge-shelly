@@ -91,7 +91,7 @@ export function isCoverComponent(component: ShellyComponent | undefined): compon
   return ['Cover', 'Roller'].includes(component.name);
 }
 
-interface ShellyComponentEvent {
+interface ShellyComponentEvents {
   update: [component: string, key: string, data: ShellyDataType];
   event: [component: string, event: string, data: ShellyEvent];
 }
@@ -99,7 +99,7 @@ interface ShellyComponentEvent {
 /**
  * Rappresents the ShellyComponent class.
  */
-export class ShellyComponent extends EventEmitter {
+export class ShellyComponent extends EventEmitter<ShellyComponentEvents> {
   readonly device: ShellyDevice;
   readonly id: string;
   readonly index: number;
@@ -219,14 +219,6 @@ export class ShellyComponent extends EventEmitter {
         if (device.gen !== 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${this.name}.GoToPosition`, { id: this.index, pos: pos });
       };
     }
-  }
-
-  override emit<K extends keyof ShellyComponentEvent>(eventName: K, ...args: ShellyComponentEvent[K]): boolean {
-    return super.emit(eventName, ...args);
-  }
-
-  override on<K extends keyof ShellyComponentEvent>(eventName: K, listener: (...args: ShellyComponentEvent[K]) => void): this {
-    return super.on(eventName, listener);
   }
 
   /**

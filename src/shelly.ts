@@ -34,6 +34,11 @@ import { WsClient } from './wsClient.js';
 import { WsServer } from './wsServer.js';
 import { ShellyData, ShellyDataType, ShellyDeviceId, ShellyEvent } from './shellyTypes.js';
 
+interface ShellyEvents {
+  discovered: [device: DiscoveredDevice];
+  add: [device: ShellyDevice];
+}
+
 /**
  * Creates a new instance of the Shelly class.
  *
@@ -41,7 +46,7 @@ import { ShellyData, ShellyDataType, ShellyDeviceId, ShellyEvent } from './shell
  * @param {string} [username] - The username for authentication.
  * @param {string} [password] - The password for authentication.
  */
-export class Shelly extends EventEmitter {
+export class Shelly extends EventEmitter<ShellyEvents> {
   private readonly _devices = new Map<string, ShellyDevice>();
   private readonly log: AnsiLogger;
   private fetchInterval?: NodeJS.Timeout;
@@ -59,8 +64,8 @@ export class Shelly extends EventEmitter {
    * Creates a new instance of the Shelly class.
    *
    * @param {AnsiLogger} log - The logger instance.
-   * @param {string} [username] - The username for authentication.
-   * @param {string} [password] - The password for authentication.
+   * @param {string} [username] - The username for authentication or undefined if no authentication is needed.
+   * @param {string} [password] - The password for authentication or undefined if no authentication is needed.
    */
   constructor(log: AnsiLogger, username?: string, password?: string) {
     super();

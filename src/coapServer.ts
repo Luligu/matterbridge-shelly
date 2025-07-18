@@ -83,7 +83,7 @@ interface CoIoTDescription {
   range: string | string[];
 }
 
-interface CoapServerEvent {
+interface CoapServerEvents {
   started: [];
   stopped: [Error | undefined];
   agent_stopped: [Error | undefined];
@@ -91,7 +91,7 @@ interface CoapServerEvent {
   coapupdate: [host: string, status: ShellyData];
 }
 
-export class CoapServer extends EventEmitter<CoapServerEvent> {
+export class CoapServer extends EventEmitter<CoapServerEvents> {
   public readonly log;
   private readonly shelly: Shelly;
   private coapServer: Server | undefined;
