@@ -1,16 +1,38 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { Shelly } from './shelly.js';
-import { ShellyDevice } from './shellyDevice.js';
-import { isCoverComponent, isLightComponent, isSwitchComponent, ShellyCoverComponent, ShellySwitchComponent } from './shellyComponent.js';
+// src/shellyDevice.realgen1.test.ts
 
 import { AnsiLogger, LogLevel, TimestampFormat } from 'matterbridge/logger';
 import { getMacAddress, wait, waiter } from 'matterbridge/utils';
 import { jest } from '@jest/globals';
 
-describe('Shellies', () => {
-  let consoleLogSpy: jest.SpiedFunction<typeof console.log>;
+import { Shelly } from './shelly.ts';
+import { ShellyDevice } from './shellyDevice.ts';
+import { isCoverComponent, isLightComponent, isSwitchComponent, ShellyCoverComponent, ShellySwitchComponent } from './shellyComponent.ts';
 
+let loggerLogSpy: jest.SpiedFunction<typeof AnsiLogger.prototype.log>;
+let consoleLogSpy: jest.SpiedFunction<typeof console.log>;
+let consoleDebugSpy: jest.SpiedFunction<typeof console.log>;
+let consoleInfoSpy: jest.SpiedFunction<typeof console.log>;
+let consoleWarnSpy: jest.SpiedFunction<typeof console.log>;
+let consoleErrorSpy: jest.SpiedFunction<typeof console.log>;
+const debug = false; // Set to true to enable debug logging
+
+if (!debug) {
+  loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log').mockImplementation((level: string, message: string, ...parameters: any[]) => {});
+  consoleLogSpy = jest.spyOn(console, 'log').mockImplementation((...args: any[]) => {});
+  consoleDebugSpy = jest.spyOn(console, 'debug').mockImplementation((...args: any[]) => {});
+  consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation((...args: any[]) => {});
+  consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation((...args: any[]) => {});
+  consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation((...args: any[]) => {});
+} else {
+  loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log');
+  consoleLogSpy = jest.spyOn(console, 'log');
+  consoleDebugSpy = jest.spyOn(console, 'debug');
+  consoleInfoSpy = jest.spyOn(console, 'info');
+  consoleWarnSpy = jest.spyOn(console, 'warn');
+  consoleErrorSpy = jest.spyOn(console, 'error');
+}
+
+describe('Shellies', () => {
   const log = new AnsiLogger({ logName: 'ShellyDeviceRealTest', logTimestampFormat: TimestampFormat.TIME_MILLIS, logLevel: LogLevel.DEBUG });
   const shelly = new Shelly(log, 'admin', 'tango');
   let device: ShellyDevice | undefined;
@@ -19,18 +41,13 @@ describe('Shellies', () => {
   const address = 'c4:cb:76:b3:cd:1f';
 
   beforeAll(async () => {
-    consoleLogSpy = jest.spyOn(console, 'log').mockImplementation((...args: any[]) => {
-      //
-    });
     shelly.dataPath = 'temp';
     shelly.setLogLevel(LogLevel.DEBUG, true, true, true);
-    shelly.startCoap(0);
-    shelly.startMdns(0, '192.168.1.189', 'udp4', true);
-    await wait(2000);
   });
 
   beforeEach(async () => {
-    await wait(1000);
+    // Clear all mocks
+    jest.clearAllMocks();
   });
 
   afterEach(async () => {
@@ -44,13 +61,18 @@ describe('Shellies', () => {
 
   afterAll(async () => {
     shelly.destroy();
-    await wait(2000);
+    await wait(1000);
+
+    // Restore all mocks
+    jest.restoreAllMocks();
   });
 
   test('Create AnsiLogger and Shelly', () => {
     expect(log).toBeDefined();
     expect(shelly).toBeDefined();
   });
+
+  if (getMacAddress() !== 'address') return;
 
   // eslint-disable-next-line jest/no-commented-out-tests
   /*

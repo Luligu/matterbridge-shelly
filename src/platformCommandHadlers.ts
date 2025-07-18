@@ -1,10 +1,10 @@
 /**
- * This file contains the commandHandler for ShellyPlatform.
- *
+ * @description This file contains the commandHandler for ShellyPlatform.
  * @file src\platformCommandHandlers.ts
  * @author Luca Liguori
- * @date 2024-12-03
+ * @created 2024-12-03
  * @version 1.1.0
+ * @license Apache-2.0
  *
  * Copyright 2024, 2025, 2026 Luca Liguori.
  *
@@ -18,7 +18,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License. *
+ * limitations under the License.
  */
 
 import { MatterbridgeEndpoint } from 'matterbridge';
@@ -66,8 +66,10 @@ export function shellySwitchCommandHandler(endpoint: MatterbridgeEndpoint, switc
  * @param {string} command - The command to execute.
  * @param {number | null} [level] - The level for the command.
  * @param {{ r: number; g: number; b: number }} [color] - The color for the command.
+ * @param {number} [color.r] - The red component of the color.
+ * @param {number} [color.g] - The green component of the color.
+ * @param {number} [color.b] - The blue component of the color.
  * @param {number} [colorTemp] - The color temperature for the command.
- * @returns {boolean} - Returns true if the command was executed successfully, false otherwise.
  */
 export function shellyLightCommandHandler(
   endpoint: MatterbridgeEndpoint,

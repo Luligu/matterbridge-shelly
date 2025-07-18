@@ -1,10 +1,10 @@
 /**
- * This file contains the class SwitchComponent.
- *
+ * @description This file contains the class SwitchComponent.
  * @file src\shellyComponent.ts
  * @author Luca Liguori
- * @date 2024-05-01
+ * @created 2024-05-01
  * @version 2.1.0
+ * @license Apache-2.0
  *
  * Copyright 2024, 2025 Luca Liguori.
  *
@@ -18,16 +18,17 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License. *
+ * limitations under the License.
  */
 
+import EventEmitter from 'node:events';
+
 import { BLUE, CYAN, GREEN, GREY, YELLOW, db, debugStringify, er } from 'matterbridge/logger';
+import { deepEqual, isValidArray, isValidNumber, isValidObject } from 'matterbridge/utils';
 
 import { ShellyData, ShellyDataType, ShellyEvent } from './shellyTypes.js';
 import { ShellyProperty } from './shellyProperty.js';
 import { ShellyDevice } from './shellyDevice.js';
-import { deepEqual, isValidArray, isValidNumber, isValidObject } from 'matterbridge/utils';
-import EventEmitter from 'node:events';
 
 interface LightComponent {
   On(): void;
@@ -57,22 +58,40 @@ export type ShellySwitchComponent = ShellyComponent & SwitchComponent;
 
 export type ShellyCoverComponent = ShellyComponent & CoverComponent;
 
+/**
+ *  Checks if the given component is a light component.
+ *
+ * @param {ShellyComponent | undefined} component - The component to check.
+ * @returns {component is ShellyLightComponent} Returns true if the component is a light component, false otherwise.
+ */
 export function isLightComponent(component: ShellyComponent | undefined): component is ShellyLightComponent {
   if (component === undefined) return false;
   return ['Light', 'Rgb', 'Rgbw', 'Cct'].includes(component.name);
 }
 
+/**
+ * Checks if the given component is a switch component.
+ *
+ * @param {ShellyComponent | undefined} component - The component to check.
+ * @returns {component is ShellySwitchComponent} Returns true if the component is a switch component, false otherwise.
+ */
 export function isSwitchComponent(component: ShellyComponent | undefined): component is ShellySwitchComponent {
   if (component === undefined) return false;
   return ['Relay', 'Switch'].includes(component.name);
 }
 
+/**
+ * Checks if the given component is a cover component.
+ *
+ * @param {ShellyComponent | undefined} component - The component to check.
+ * @returns {component is ShellyCoverComponent} Returns true if the component is a cover component, false otherwise.
+ */
 export function isCoverComponent(component: ShellyComponent | undefined): component is ShellyCoverComponent {
   if (component === undefined) return false;
   return ['Cover', 'Roller'].includes(component.name);
 }
 
-interface ShellyComponentEvent {
+interface ShellyComponentEvents {
   update: [component: string, key: string, data: ShellyDataType];
   event: [component: string, event: string, data: ShellyEvent];
 }
@@ -80,7 +99,7 @@ interface ShellyComponentEvent {
 /**
  * Rappresents the ShellyComponent class.
  */
-export class ShellyComponent extends EventEmitter {
+export class ShellyComponent extends EventEmitter<ShellyComponentEvents> {
   readonly device: ShellyDevice;
   readonly id: string;
   readonly index: number;
@@ -89,6 +108,7 @@ export class ShellyComponent extends EventEmitter {
 
   /**
    * Creates a new instance of the ShellyComponent class.
+   *
    * @param {ShellyDevice} device - The Shelly device associated with the component.
    * @param {string} id - The ID of the component.
    * @param {string} name - The name of the component.
@@ -201,14 +221,6 @@ export class ShellyComponent extends EventEmitter {
     }
   }
 
-  override emit<K extends keyof ShellyComponentEvent>(eventName: K, ...args: ShellyComponentEvent[K]): boolean {
-    return super.emit(eventName, ...args);
-  }
-
-  override on<K extends keyof ShellyComponentEvent>(eventName: K, listener: (...args: ShellyComponentEvent[K]) => void): this {
-    return super.on(eventName, listener);
-  }
-
   /**
    * Checks if the component has a property with the specified key.
    *
@@ -292,10 +304,20 @@ export class ShellyComponent extends EventEmitter {
     }
   }
 
+  /**
+   * Retrieves all properties of the ShellyComponent.
+   *
+   * @returns {ShellyProperty[]} An array of ShellyProperty objects representing the properties of the component.
+   */
   get properties(): ShellyProperty[] {
     return Array.from(this._properties.values());
   }
 
+  /**
+   * Retrieves an iterator for the key-value pairs of the ShellyComponent's properties.
+   *
+   * @yields {[string, ShellyProperty]} A key-value pair where the key is the property key and the value is the ShellyProperty.
+   */
   *[Symbol.iterator](): IterableIterator<[string, ShellyProperty]> {
     for (const [key, property] of this._properties.entries()) {
       yield [key, property];
@@ -304,6 +326,7 @@ export class ShellyComponent extends EventEmitter {
 
   /**
    * Updates the component with the provided data.
+   *
    * @param {ShellyData} componentData - The data to update the component with.
    */
   update(componentData: ShellyData) {
@@ -325,9 +348,10 @@ export class ShellyComponent extends EventEmitter {
 
   /**
    * Logs the component details and properties.
-   * @returns The number of the properties.
+   *
+   * @returns {number} The number of the properties.
    */
-  logComponent() {
+  logComponent(): number {
     this.device.log.debug(`Component ${GREEN}${this.id}${db} (${BLUE}${this.name}${db}) has the following ${this._properties.size} properties:`);
     for (const [key, property] of this) {
       this.device.log.debug(`- ${key}: ${property.value && typeof property.value === 'object' ? debugStringify(property.value) : property.value}`);

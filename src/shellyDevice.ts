@@ -1,10 +1,10 @@
 /**
- * This file contains the class ShellyDevice.
- *
+ * @description This file contains the class ShellyDevice.
  * @file src\shellyDevice.ts
  * @author Luca Liguori
- * @date 2024-05-01
+ * @created 2024-05-01
  * @version 3.1.4
+ * @license Apache-2.0
  *
  * Copyright 2024, 2025, 2026 Luca Liguori.
  *
@@ -18,18 +18,21 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License. *
+ * limitations under the License.
  */
 
-// Matterbridge imports
-import { AnsiLogger, LogLevel, BLUE, CYAN, GREEN, GREY, MAGENTA, RESET, db, debugStringify, er, hk, nf, wr, zb, rs, YELLOW, idn, nt, rk, dn } from 'matterbridge/logger';
-import { isValidNumber, isValidObject, isValidString } from 'matterbridge/utils';
+// Node 18.x: fetch is available, but flagged as “experimental” until Node 18.17.0.
+/* eslint-disable n/no-unsupported-features/node-builtins */
 
 // Node.js imports
 import { EventEmitter } from 'node:events';
 import crypto from 'node:crypto';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
+
+// Matterbridge imports
+import { isValidNumber, isValidObject, isValidString } from 'matterbridge/utils';
+import { AnsiLogger, LogLevel, BLUE, CYAN, GREEN, GREY, MAGENTA, RESET, db, debugStringify, er, hk, nf, wr, zb, rs, YELLOW, idn, nt, rk, dn } from 'matterbridge/logger';
 
 // Shellies imports
 import { parseDigestAuthenticateHeader, createDigestShellyAuth, createBasicShellyAuth, parseBasicAuthenticateHeader, getGen2BodyOptions, getGen1BodyOptions } from './auth.js';
@@ -49,7 +52,7 @@ import {
 } from './shellyTypes.js';
 import { isCoverComponent, isLightComponent, isSwitchComponent, ShellyComponent } from './shellyComponent.js';
 
-interface ShellyDeviceEvent {
+interface ShellyDeviceEvents {
   online: [];
   offline: [];
   awake: [];
@@ -68,12 +71,12 @@ interface ShellyDeviceEvent {
  * @param {AnsiLogger} log - The AnsiLogger object.
  * @param {string} host - The host string.
  */
-export class ShellyDevice extends EventEmitter {
+export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
   readonly shelly: Shelly;
   readonly log: AnsiLogger;
   readonly username: string | undefined;
   readonly password: string | undefined;
-  profile: 'switch' | 'cover' | 'rgb' | 'rgbw' | 'color' | 'white' | 'light' | undefined = undefined;
+  profile: 'switch' | 'cover' | 'rgb' | 'rgbw' | 'color' | 'white' | 'light' | 'monophase' | 'triphase' | undefined = undefined;
   host: string;
   id = '';
   model = '';
@@ -121,14 +124,6 @@ export class ShellyDevice extends EventEmitter {
     this.host = host;
     this.username = shelly.username;
     this.password = shelly.password;
-  }
-
-  override emit<K extends keyof ShellyDeviceEvent>(eventName: K, ...args: ShellyDeviceEvent[K]): boolean {
-    return super.emit(eventName, ...args);
-  }
-
-  override on<K extends keyof ShellyDeviceEvent>(eventName: K, listener: (...args: ShellyDeviceEvent[K]) => void): this {
-    return super.on(eventName, listener);
   }
 
   /**
@@ -179,6 +174,7 @@ export class ShellyDevice extends EventEmitter {
 
   /**
    * Sets the log level for the device.
+   *
    * @param {LogLevel} logLevel - The log level to set.
    */
   setLogLevel(logLevel: LogLevel) {
@@ -271,7 +267,8 @@ export class ShellyDevice extends EventEmitter {
 
   /**
    * Returns an iterator for the key-value pairs of the ShellyDevice's components.
-   * @returns {IterableIterator<[string, ShellyComponent]>} An iterator for the key-value pairs of the ShellyDevice's components.
+   *
+   * @yields {[string, ShellyComponent]} A key-value pair where the key is the component ID and the value is the ShellyComponent.
    */
   *[Symbol.iterator](): IterableIterator<[string, ShellyComponent]> {
     for (const [key, component] of this._components.entries()) {
@@ -283,7 +280,7 @@ export class ShellyDevice extends EventEmitter {
    * Normalizes the given hostname to extract the type, MAC address, and ID.
    *
    * @param {string} hostname - The hostname to normalize.
-   * @returns { type: string; mac: string; id: string } An object containing the normalized type, MAC address, and ID.
+   * @returns {{ type: string; mac: string; id: string }} An object containing the normalized type, MAC address, and ID.
    */
   static normalizeId(hostname: string): { type: string; mac: string; id: string } {
     const parts = hostname.split('-');
@@ -298,7 +295,7 @@ export class ShellyDevice extends EventEmitter {
    * Retrieves the name of a BTHome sensor based on its object ID.
    *
    * @param {number} objId - The object ID of the BTHome sensor.
-   * @returns The name of the Bluetooth home object.
+   * @returns {string} The name of the Bluetooth home object.
    */
   getBTHomeObjIdText(objId: number): string {
     const objIdsMap: Record<number, string> = {
@@ -330,7 +327,7 @@ export class ShellyDevice extends EventEmitter {
    * Retrieves the name of a BTHome device based on its model.
    *
    * @param {number} model - The object ID of the BTHome sensor.
-   * @returns The name of the Bluetooth home object.
+   * @returns {string} The name of the Bluetooth home object.
    */
   getBTHomeModelText(model: string): string {
     const modelsMap: Record<string, string> = {
@@ -356,6 +353,9 @@ export class ShellyDevice extends EventEmitter {
     return modelsMap[model] || `Unknown Shelly BLU model ${model}`;
   }
 
+  /**
+   * Updates the BTHome components of the device.
+   */
   updateBTHomeComponents(): void {
     if (this.componentsPayload && this.componentsPayload.components) {
       this.bthomeTrvs.clear();
@@ -364,6 +364,7 @@ export class ShellyDevice extends EventEmitter {
       this.scanBTHomeComponents(this.componentsPayload.components as unknown as BTHomeComponent[]);
     }
   }
+
   /**
    * Scans the device for BTHome components.
    * It will also set the bthomeTrvs, bthomeDevices, and bthomeSensors maps.
@@ -501,7 +502,8 @@ export class ShellyDevice extends EventEmitter {
    *
    * @param {Shelly} shelly The Shelly instance.
    * @param {AnsiLogger} log The AnsiLogger instance.
-   * @param {string} host The host of the device.
+   * @param {string} host The host of the device. It can be an IP address or a cache JSON file path.
+   *
    * @returns {Promise<ShellyDevice | undefined>} A Promise that resolves to a ShellyDevice instance or undefined if an error occurs.
    */
   static async create(shelly: Shelly, log: AnsiLogger, host: string): Promise<ShellyDevice | undefined> {
@@ -527,7 +529,8 @@ export class ShellyDevice extends EventEmitter {
     if (shellyPayload.mode === 'roller') device.profile = 'cover';
     if (shellyPayload.mode === 'color') device.profile = 'color';
     if (shellyPayload.mode === 'white') device.profile = 'white';
-    if (shellyPayload.profile !== undefined) device.profile = shellyPayload.profile as 'switch' | 'cover' | 'rgb' | 'rgbw' | 'color' | 'white' | 'light' | undefined;
+    if (shellyPayload.profile !== undefined)
+      device.profile = shellyPayload.profile as 'switch' | 'cover' | 'rgb' | 'rgbw' | 'color' | 'white' | 'light' | 'monophase' | 'triphase' | undefined;
 
     // Gen 1 Shelly device
     if (!shellyPayload.gen) {
@@ -691,6 +694,12 @@ export class ShellyDevice extends EventEmitter {
         if (key.startsWith('pm1:')) device.addComponent(new ShellyComponent(device, key, 'PowerMeter', settingsPayload[key] as ShellyData));
         if (key.startsWith('em1:')) device.addComponent(new ShellyComponent(device, key, 'PowerMeter', settingsPayload[key] as ShellyData));
         if (key.startsWith('em:')) device.addComponent(new ShellyComponent(device, key, 'PowerMeter', settingsPayload[key] as ShellyData));
+        if (device.profile === 'triphase' && key === 'em:0') {
+          // For triphase devices (shellypro3em and shelly3em63g3) we have em:0 and emdata:0. We add phase A, B and C components as well and we use em:0 as total. The em:1, em:2 and em:3 need to be updated from the em:0 phases.
+          device.addComponent(new ShellyComponent(device, 'em:1', 'PowerMeter', settingsPayload[key] as ShellyData));
+          device.addComponent(new ShellyComponent(device, 'em:2', 'PowerMeter', settingsPayload[key] as ShellyData));
+          device.addComponent(new ShellyComponent(device, 'em:3', 'PowerMeter', settingsPayload[key] as ShellyData));
+        }
         if (key.startsWith('temperature:')) device.addComponent(new ShellyComponent(device, key, 'Temperature', settingsPayload[key] as ShellyData));
         if (key.startsWith('humidity:')) device.addComponent(new ShellyComponent(device, key, 'Humidity', settingsPayload[key] as ShellyData));
         if (key.startsWith('illuminance:')) device.addComponent(new ShellyComponent(device, key, 'Illuminance', settingsPayload[key] as ShellyData));
@@ -811,7 +820,7 @@ export class ShellyDevice extends EventEmitter {
 
     // Start WebSocket client for gen 2+ devices if not in sleep mode
     if (device.gen >= 2 && !device.sleepMode) {
-      device.wsClient = new WsClient(device.id, host, shelly.password);
+      device.wsClient = new WsClient(device.id, host, 80, shelly.password);
 
       // Start the WebSocket client for devices that are not a cache JSON file
       if (!host.endsWith('.json')) device.wsClient.start();
@@ -912,7 +921,6 @@ export class ShellyDevice extends EventEmitter {
         this.log.debug(`Device ${hk}${this.id}${db} has event ${YELLOW}${event.event}${db} at ${CYAN}${this.getLocalTimeFromLastUpdated(event.ts as number)}${db}`);
         this.emit('bthome_event', event);
       } else if (isValidObject(event) && isValidString(event.event) && isValidNumber(event.ts) && isValidString(event.component) && event.component.startsWith('bthomedevice:')) {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const device = Array.from(this.bthomeDevices).find(([_addr, _device]) => _device.key === event.component)?.[1];
         if (device) {
           this.log.debug(
@@ -947,7 +955,11 @@ export class ShellyDevice extends EventEmitter {
   }
 
   /**
-   * Updates handler from both WsClient (shellyDevice) and WsServer (shelly).
+   * Updates handler from both WsClient ('update' event in shellyDevice) and WsServer ('wssupdate' event in shelly).
+   *
+   * It is called when a device is created by ShellyDevice.create().
+   *
+   * It is also called from fetchUpdate().
    *
    * @param {ShellyData} data - The data to update the device with.
    *
@@ -1174,7 +1186,17 @@ export class ShellyDevice extends EventEmitter {
   }
 
   /**
-   * Fetches the update for the Shelly device.
+   * Fetches the update for the Shelly device:
+   * - 'shelly' data (Gen 1 and Gen 2+).
+   * - 'settings' or 'Shelly.GetConfig' data.
+   * - 'status' or 'Shelly.GetStatus' data.
+   * - 'Shelly.GetComponents' (with dynamic_only BTHome components) data for gen 2+ devices only.
+   *
+   * If the fetch is successful, it updates the device's payloads and emits an 'online' event if the device was previously offline.
+   * If the fetch is successful, it also updates the last seen timestamp and the cached state.
+   * If any of the fetches fail, it logs a warning and emits an 'offline' event if the device was previously online.
+   *
+   * Then it calls the `onUpdate` method with the status payload to update the device's components.
    *
    * @returns {Promise<ShellyData | null>} A Promise that resolves to the updated ShellyData or null if no data is found.
    */
@@ -1256,6 +1278,7 @@ export class ShellyDevice extends EventEmitter {
   // http://192.168.1.218/rpc/Switch.Toggle?id=0
 
   // Scan the gateway device for BLU devices (http://IP/rpc/Shelly.GetComponents?dynamic_only=true)
+
   /*
   Method: BluTrv.Call params: { id: 200, method: Trv.SetTarget, params: { id: 0 target_C: 15 } }
   http://192.168.1.164/rpc/BluTrv.Call?id=200&method=Trv.SetTarget&params={id:0,target_C:15}
@@ -1315,14 +1338,16 @@ export class ShellyDevice extends EventEmitter {
    * Fetches device data from the specified host and service.
    * If the host ends with '.json', it fetches the device data from a file.
    * Otherwise, it makes an HTTP request to the specified host and service.
-   * Supports both Gen 1 and Gen 2 devices.
+   * Supports both Gen 1 and Gen 2+ devices.
+   * Handles authentication for Gen 1 devices using Basic Auth and for Gen 2+ devices using Digest Auth.
+   * Features the AbortController to handle request timeouts. The request will be aborted after 20 seconds if no response is received.
    *
    * @param {Shelly} shelly - The Shelly instance.
    * @param {AnsiLogger} log - The logger instance.
-   * @param {string} host - The host to fetch the data from.
+   * @param {string} host - The host to fetch the data from. It can be an IP address or the cache JSON file path.
    * @param {string} service - The service to fetch the data from.
    * @param {Record<string, string | number | boolean>} params - Additional parameters for the request (default: {}).
-   * @returns A promise that resolves to the fetched device data or null if an error occurs.
+   * @returns {Promise<ShellyData | null>} A promise that resolves to the fetched device data or null if an error occurs.
    */
   static async fetch(shelly: Shelly, log: AnsiLogger, host: string, service: string, params: Record<string, string | number | boolean | object> = {}): Promise<ShellyData | null> {
     // Fetch device data from cache file if host is a json file
@@ -1427,8 +1452,10 @@ export class ShellyDevice extends EventEmitter {
 
   /**
    * Logs all components and properties of the Shelly device.
+   *
+   * @returns {number} - The number of components in the device.
    */
-  logDevice() {
+  logDevice(): number {
     // Log the device
     this.log.debug(
       `Shelly device ${MAGENTA}${this.id}${db} (${this.model}) gen ${BLUE}${this.gen}${db} name ${BLUE}${this.name}${db} mac ${BLUE}${this.mac}${db} host ${BLUE}${this.host}${db} profile ${BLUE}${this.profile}${db} firmware ${BLUE}${this.firmware}${db} auth ${BLUE}${this.auth}${db} online ${BLUE}${this.online}${db} lastseen ${BLUE}${this.lastseen}${db}`,
@@ -1444,6 +1471,7 @@ export class ShellyDevice extends EventEmitter {
 
   /**
    * Saves the device payloads (shelly, settings, status) to the specified data path.
+   *
    * @param {string} dataPath - The path where the device payloads will be saved.
    * @returns {Promise<boolean>} - A promise that resolves when the device payloads are successfully saved, or rejects with an error if there was an issue.
    */

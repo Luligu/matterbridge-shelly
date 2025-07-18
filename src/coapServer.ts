@@ -1,10 +1,10 @@
 /**
- * This file contains the class CoapServer.
- *
+ * @description This file contains the class CoapServer.
  * @file src\coapServer.ts
  * @author Luca Liguori
- * @date 2024-05-01
+ * @created 2024-05-01
  * @version 3.0.0
+ * @license Apache-2.0
  *
  * Copyright 2024, 2025, 2026 Luca Liguori.
  *
@@ -18,26 +18,23 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License. *
+ * limitations under the License.
  */
-
-// Matterbridge imports
-import { AnsiLogger, BLUE, CYAN, LogLevel, MAGENTA, RESET, TimestampFormat, db, debugStringify, er, hk, nf, wr, zb } from 'matterbridge/logger';
-
-// CoAP imports
-import coap, { Server, IncomingMessage, OutgoingMessage, parameters, globalAgent } from 'coap';
 
 // Node.js imports
 import EventEmitter from 'node:events';
 import path from 'node:path';
 import { promises as fs } from 'node:fs';
 
+// CoAP imports
+import coap, { Server, IncomingMessage, OutgoingMessage, parameters, globalAgent } from 'coap';
+// Matterbridge imports
+import { AnsiLogger, BLUE, CYAN, LogLevel, MAGENTA, RESET, TimestampFormat, db, debugStringify, er, hk, nf, wr, zb } from 'matterbridge/logger';
+
 // Shelly imports
 import { Shelly } from './shelly.js';
 import { ShellyData, ShellyDataType } from './shellyTypes.js';
 import { ShellyDevice } from './shellyDevice.js';
-
-// 192.168.1.189:5683
 
 const COIOT_OPTION_GLOBAL_DEVID = '3332';
 const COIOT_OPTION_STATUS_VALIDITY = '3412';
@@ -86,12 +83,15 @@ interface CoIoTDescription {
   range: string | string[];
 }
 
-interface CoapServerEvent {
+interface CoapServerEvents {
+  started: [];
+  stopped: [Error | undefined];
+  agent_stopped: [Error | undefined];
   update: [host: string, component: string, property: string, value: ShellyDataType];
   coapupdate: [host: string, status: ShellyData];
 }
 
-export class CoapServer extends EventEmitter {
+export class CoapServer extends EventEmitter<CoapServerEvents> {
   public readonly log;
   private readonly shelly: Shelly;
   private coapServer: Server | undefined;
@@ -114,14 +114,6 @@ export class CoapServer extends EventEmitter {
     if (parameters.refreshTiming) parameters.refreshTiming();
 
     this.registerShellyOptions();
-  }
-
-  override emit<K extends keyof CoapServerEvent>(eventName: K, ...args: CoapServerEvent[K]): boolean {
-    return super.emit(eventName, ...args);
-  }
-
-  override on<K extends keyof CoapServerEvent>(eventName: K, listener: (...args: CoapServerEvent[K]) => void): this {
-    return super.on(eventName, listener);
   }
 
   /**
@@ -153,6 +145,7 @@ export class CoapServer extends EventEmitter {
 
   /**
    * Retrieves the device description from the specified host using CoAP protocol.
+   *
    * @param {string} host The host from which to retrieve the device description.
    * @param {string} id - The id to request the device description from.
    * @returns {Promise<IncomingMessage | null>} A Promise that resolves with the IncomingMessage object representing the response, or null if the request times out.
@@ -175,11 +168,15 @@ export class CoapServer extends EventEmitter {
           resolve(msg);
         })
         .on('timeout', (err) => {
+          /* istanbul ignore next */
           this.log.warn(`CoIoT (coap) timeout requesting device description ("/cit/d") from ${hk}${id}${wr} host ${zb}${host}${wr}: ${err instanceof Error ? err.message : err}`);
+          /* istanbul ignore next */
           resolve(null);
         })
         .on('error', (err) => {
+          /* istanbul ignore next */
           this.log.warn(`CoIoT (coap) error requesting device description ("/cit/d") from ${hk}${id}${wr} host ${zb}${host}${wr}: ${err instanceof Error ? err.message : err}`);
+          /* istanbul ignore next */
           resolve(null);
         })
         .end();
@@ -189,6 +186,7 @@ export class CoapServer extends EventEmitter {
 
   /**
    * Retrieves the device status from the specified host.
+   *
    * @param {string} host - The host to request the device status from.
    * @param {string} id - The id to request the device status from.
    * @returns {Promise<IncomingMessage | null>} A Promise that resolves with the IncomingMessage containing the device status, or null if the request times out.
@@ -209,11 +207,15 @@ export class CoapServer extends EventEmitter {
           resolve(msg);
         })
         .on('timeout', (err) => {
+          /* istanbul ignore next */
           this.log.warn(`CoIoT (coap) timeout requesting device status ("/cit/s") from ${hk}${id}${wr} host ${zb}${host}${wr}: ${err instanceof Error ? err.message : err}`);
+          /* istanbul ignore next */
           resolve(null);
         })
         .on('error', (err) => {
+          /* istanbul ignore next */
           this.log.warn(`CoIoT (coap) error requesting device status ("/cit/s") from ${hk}${id}${wr} host ${zb}${host}${wr}: ${err instanceof Error ? err.message : err}`);
+          /* istanbul ignore next */
           resolve(null);
         })
         .end();
@@ -223,10 +225,11 @@ export class CoapServer extends EventEmitter {
 
   /**
    * Retrieves the multicast device status using CoIoT (coap) protocol.
+   *
    * @param {number} timeout The timeout value in seconds (default: 60)
    * @returns {Promise<IncomingMessage | null>} A Promise that resolves with the IncomingMessage object or null if an error occurs or the timeout is reached.
    */
-  async getMulticastDeviceStatus(timeout = 60): Promise<IncomingMessage | null> {
+  async getMulticastDeviceStatus(timeout: number = 60): Promise<IncomingMessage | null> {
     this.log.debug('Requesting CoIoT (coap) multicast device status...');
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -247,11 +250,15 @@ export class CoapServer extends EventEmitter {
           resolve(msg);
         })
         .on('timeout', (err) => {
+          /* istanbul ignore next */
           this.log.warn('CoIoT (coap) timeout requesting multicast device status ("/cit/s"):', err instanceof Error ? err.message : err);
+          /* istanbul ignore next */
           resolve(null);
         })
         .on('error', (err) => {
+          /* istanbul ignore next */
           this.log.warn('CoIoT (coap) error requesting multicast device status ("/cit/s"):', err instanceof Error ? err.message : err);
+          /* istanbul ignore next */
           resolve(null);
         })
         .end();
@@ -267,10 +274,12 @@ export class CoapServer extends EventEmitter {
       COIOT_OPTION_GLOBAL_DEVID,
       (str) => {
         // Ensure that 'str' is a string
+        /* istanbul ignore next if */
         if (typeof str === 'string' || (str && typeof str.toString === 'function')) {
           return Buffer.from(str.toString());
         }
         // Handle null or incompatible types explicitly
+        /* istanbul ignore next */
         throw new TypeError('Expected a string for GLOBAL_DEVID');
       },
       (buf) => buf.toString(),
@@ -280,6 +289,7 @@ export class CoapServer extends EventEmitter {
       COIOT_OPTION_STATUS_VALIDITY,
       (str) => {
         // Convert to integer and then to Buffer
+        /* istanbul ignore next if */
         if (typeof str === 'string') {
           // Create a new Buffer and write the integer
           const buffer = Buffer.alloc(2); // Allocate buffer of 2 bytes
@@ -287,6 +297,7 @@ export class CoapServer extends EventEmitter {
           return buffer; // Return the buffer
         }
         // Handle null or non-string types explicitly
+        /* istanbul ignore next */
         throw new TypeError('Expected a string for STATUS_VALIDITY');
       },
       (buf) => buf.readUInt16LE(0),
@@ -296,6 +307,7 @@ export class CoapServer extends EventEmitter {
       COIOT_OPTION_STATUS_SERIAL,
       (str) => {
         // Convert to integer and then to Buffer
+        /* istanbul ignore next if */
         if (typeof str === 'string') {
           // Create a new Buffer and write the integer
           const buffer = Buffer.alloc(2); // Allocate buffer of 2 bytes
@@ -303,6 +315,7 @@ export class CoapServer extends EventEmitter {
           return buffer; // Return the buffer
         }
         // Handle null or non-string types explicitly
+        /* istanbul ignore next */
         throw new TypeError('Expected a string for STATUS_SERIAL');
       },
       (buf) => buf.readUInt16LE(0),
@@ -313,6 +326,7 @@ export class CoapServer extends EventEmitter {
    * Parses the Shelly message received from the CoIoT (coap) response.
    *
    * @param {IncomingMessage} msg - The incoming message object.
+   * @returns {ShellyData | CoIoTDescription[] | undefined} The parsed Shelly data or CoIoT description, or undefined if the device ID is not found.
    */
   private parseShellyMessage(msg: IncomingMessage): ShellyData | CoIoTDescription[] | undefined {
     if (!this.deviceId.get(msg.rsinfo.address)) return;
@@ -351,27 +365,6 @@ export class CoapServer extends EventEmitter {
     if (headers[COIOT_OPTION_STATUS_SERIAL]) {
       serial = headers[COIOT_OPTION_STATUS_SERIAL];
     }
-
-    /*
-    TODO: Uncomment this code when we have a list of Gen1 devices with sleep mode
-    if (url === '/cit/s') {
-      this.log.info(
-        `Device model ${hk}${deviceModel}${nf} id ${hk}${this.deviceId.get(msg.rsinfo.address)}${nf} host ${zb}${host}${nf} sent cit/s serial ${CYAN}${serial}${nf} valid for ${CYAN}${validFor}${nf} seconds`,
-      );
-      if (this.deviceValidityTimeout.get(host)) clearTimeout(this.deviceValidityTimeout.get(host));
-      this.deviceValidityTimeout.set(
-        host,
-        setTimeout(
-          () => {
-            this.log.warn(
-              `Device model ${hk}${deviceModel}${wr} id ${hk}${this.deviceId.get(msg.rsinfo.address)}${wr} host ${zb}${host}${wr} didn't update in ${zb}${validFor}${wr} seconds`,
-            );
-          },
-          (validFor + 10) * 1000,
-        ).unref(),
-      );
-    }
-    */
 
     if (url === '/cit/s' && this.deviceSerial.get(host) === serial && !['SHDW-1', 'SHDW-2'].includes(deviceModel)) {
       this.log.debug(`No updates (serial not changed) for device ${hk}${this.deviceId.get(host)}${db} host ${zb}${host}${db}`);
@@ -461,15 +454,18 @@ export class CoapServer extends EventEmitter {
         this.emit('coapupdate', host, status);
         return status;
       } catch {
+        // istanbul ignore next
         this.log.warn(`Error parsing values for host ${zb}${host}${wr}`);
       }
     }
   }
+
   /**
    * Parse the status of the device
-   * @param payload - The payload of the message
    *
-   * @returns The parsed staus of the device
+   * @param {CoIoTDescription[]} descriptions - The descriptions of the device
+   * @param {any} payload - The payload of the message
+   * @returns {ShellyData} The parsed status of the device
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   parseStatus(descriptions: CoIoTDescription[], payload: any): ShellyData {
@@ -518,9 +514,10 @@ export class CoapServer extends EventEmitter {
 
   /**
    * Parse the description of the device
-   * @param payload - The payload of the message
    *
-   * @returns The parsed description of the device
+   * @param {Record<string, unknown>} payload - The payload of the message
+   * @param {string} [model] - The model of the device
+   * @returns {CoIoTDescription[]} The parsed description of the device
    */
   parseDescription(payload: Record<string, unknown>, model?: string): CoIoTDescription[] {
     this.log.debug(`Parsing ${MAGENTA}blocks${db}:`);
@@ -654,15 +651,14 @@ export class CoapServer extends EventEmitter {
     });
 
     this.coapServer.on('error', (err) => {
-      this.log.error('CoIoT (coap) server error:', err instanceof Error ? err.message : err);
+      this.log.error(`CoIoT (coap) server error: ${err instanceof Error ? err.message : err}`);
     });
 
     this.coapServer.on('warning', (err) => {
-      this.log.warn('CoIoT (coap) server warning:', err instanceof Error ? err.message : err);
+      this.log.warn(`CoIoT (coap) server warning: ${err instanceof Error ? err.message : err}`);
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    this.coapServer.on('request', (msg: IncomingMessage, res: OutgoingMessage) => {
+    this.coapServer.on('request', (msg: IncomingMessage, _res: OutgoingMessage) => {
       this.log.debug(`CoIoT (coap) server recevived a messagge code ${BLUE}${msg.code}${db} url ${BLUE}${msg.url}${db} rsinfo ${debugStringify(msg.rsinfo)}`);
       if (msg.code === '0.30' && msg.url === '/cit/s') {
         this.parseShellyMessage(msg);
@@ -674,10 +670,12 @@ export class CoapServer extends EventEmitter {
 
     this.coapServer.listen((err) => {
       if (err) {
+        // istanbul ignore next
         this.log.error(`CoIoT (coap) server error: ${err instanceof Error ? err.message : err}`);
       } else {
         this._isReady = true;
         this.log.info('CoIoT (coap) server is listening on port 5683...');
+        this.emit('started');
       }
     });
   }
@@ -713,10 +711,13 @@ export class CoapServer extends EventEmitter {
           this.parseShellyMessage(coapMessage as unknown as IncomingMessage);
           this.log.debug(`***Registered CoIoT (coap) ${CYAN}/cit/d${db} for device ${hk}${id}${db} host ${zb}${host}${db} with fetch`);
         } else {
+          // istanbul ignore next
           this.log.debug(`****Invalid response registering device ${hk}${id}${db} host ${zb}${host}${db} with fetch`);
         }
+        return;
       })
       .catch((err) => {
+        // istanbul ignore next
         this.log.debug(`****Error registering device ${hk}${id}${db} host ${zb}${host}${db} with fetch: ${err instanceof Error ? err.message : err}`);
       });
     /*
@@ -756,14 +757,19 @@ export class CoapServer extends EventEmitter {
    */
   stop() {
     this.log.info('Stopping CoIoT (coap) server for shelly devices...');
-    this.removeAllListeners();
     this._isListening = false;
     if (this.coapServer)
       this.coapServer.close((err?: Error) => {
         this._isReady = false;
         this.log.debug(`CoIoT (coap) server closed${err ? ' with error ' + err.message : ''}.`);
+        this.emit('stopped', err);
       });
-    globalAgent.close((err?: Error) => this.log.debug(`CoIoT (coap) agent closed${err ? ' with error ' + err.message : ''}.`));
+    // istanbul ignore next
+    globalAgent.close((err?: Error) => {
+      this.log.debug(`CoIoT (coap) agent closed${err ? ' with error ' + err.message : ''}.`);
+      this.emit('agent_stopped', err);
+      this.removeAllListeners();
+    });
     this.deviceDescription.clear();
     this.deviceId.clear();
     this.deviceSerial.clear();
@@ -791,245 +797,183 @@ export class CoapServer extends EventEmitter {
   }
 }
 
-// Use with: node dist/coapServer.js coapStatus coapDescription
-/*
-if (
-  process.argv.includes('coapServer') ||
-  process.argv.includes('coapRegister') ||
-  process.argv.includes('coapDescription') ||
-  process.argv.includes('coapStatus') ||
-  process.argv.includes('coapMcast')
-) {
-  // Set the CoAP parameters to minimum values
-  const { parameters } = await import('coap');
-  parameters.maxRetransmit = 3;
-  // parameters.maxLatency = 1;
-  if (parameters.refreshTiming) parameters.refreshTiming();
-
-  const coapServer = new CoapServer(LogLevel.DEBUG);
-
-  const devices = [
-    { host: '192.168.1.219', id: 'shellydimmer2-98CDAC0D01BB' },
-    { host: '192.168.1.222', id: 'shellyswitch25-3494546BBF7E' },
-    { host: '192.168.1.236', id: 'shellyswitch25-3494547BF36C' },
-    { host: '192.168.1.249', id: 'shellyem3-485519D732F4' },
-    { host: '192.168.1.154', id: 'shellybulbduo-34945479CFA4' },
-    { host: '192.168.1.155', id: 'shellycolorbulb-485519EE12A7' },
-    { host: '192.168.1.240', id: 'shelly1-34945472A643' },
-    { host: '192.168.1.241', id: 'shelly1l-E8DB84AAD781' },
-    { host: '192.168.1.152', id: 'shellyrgbw2-EC64C9D199AD' },
-    { host: '192.168.1.226', id: 'shellyrgbw2-EC64C9D3FFEF' },
-    { host: '192.168.1.245', id: 'shellymotionsensor-60A42386E566' },
-    { host: '192.168.1.246', id: 'shellymotion2-8CF68108A6F5' },
-  ];
-  for (const device of devices) {
-    for (let i = 0; i < 5; i++) {
-      if (process.argv.includes('coapRegister')) await coapServer.registerDevice(device.host, device.id, false);
-      if (process.argv.includes('coapDescription')) await coapServer.getDeviceDescription(device.host, device.id);
-      if (process.argv.includes('coapStatus')) await coapServer.getDeviceStatus(device.host, device.id);
-      await new Promise((resolve) => setTimeout(resolve, 500));
-    }
-  }
-  // await coapServer.getDeviceDescription('192.168.1.246', 'shellymotion2-8CF68108A6F5');
-
-  if (process.argv.includes('coapDescription')) {
-    await coapServer.getDeviceDescription('192.168.1.219', 'shellydimmer2-98CDAC0D01BB');
-  }
-
-  if (process.argv.includes('coapStatus')) {
-    await coapServer.getDeviceStatus('192.168.1.219', 'shellydimmer2-98CDAC0D01BB');
-  }
-
-  if (process.argv.includes('coapMcast')) {
-    await coapServer.getMulticastDeviceStatus(30);
-  }
-
-  if (process.argv.includes('coapServer')) coapServer.start();
-
-  process.on('SIGINT', async function () {
-    coapServer.stop();
-    process.exit();
-  });
-}
-*/
-
 const SHDW_CITD = {
-  'blk': [
-    { 'I': 1, 'D': 'sensor_0' },
-    { 'I': 2, 'D': 'device' },
+  blk: [
+    { I: 1, D: 'sensor_0' },
+    { I: 2, D: 'device' },
   ],
-  'sen': [
-    { 'I': 9103, 'T': 'EVC', 'D': 'cfgChanged', 'R': 'U16', 'L': 2 },
-    { 'I': 3108, 'T': 'S', 'D': 'dwIsOpened', 'R': ['0/1', '-1'], 'L': 1 },
-    { 'I': 3119, 'T': 'S', 'D': 'dwStateChanged', 'R': ['0/1', '-1'], 'L': 1 },
-    { 'I': 3109, 'T': 'S', 'D': 'tilt', 'U': 'deg', 'R': ['0/180', '-1'], 'L': 1 },
-    { 'I': 6110, 'T': 'A', 'D': 'vibration', 'R': ['0/1', '-1'], 'L': 1 },
-    { 'I': 3106, 'T': 'L', 'D': 'luminosity', 'U': 'lux', 'R': ['U32', '-1'], 'L': 1 },
-    { 'I': 3110, 'T': 'S', 'D': 'luminosityLevel', 'R': ['dark/twilight/bright', 'unknown'], 'L': 1 },
-    { 'I': 3101, 'T': 'T', 'D': 'extTemp', 'U': 'C', 'R': ['-55/125', '999'], 'L': 1 },
-    { 'I': 3102, 'T': 'T', 'D': 'extTemp', 'U': 'F', 'R': ['-67/257', '999'], 'L': 1 },
-    { 'I': 3115, 'T': 'S', 'D': 'sensorError', 'R': '0/1', 'L': 1 },
-    { 'I': 3111, 'T': 'B', 'D': 'battery', 'R': ['0/100', '-1'], 'L': 2 },
-    { 'I': 9102, 'T': 'EV', 'D': 'wakeupEvent', 'R': ['battery/button/periodic/poweron/sensor/alarm', 'unknown'], 'L': 2 },
+  sen: [
+    { I: 9103, T: 'EVC', D: 'cfgChanged', R: 'U16', L: 2 },
+    { I: 3108, T: 'S', D: 'dwIsOpened', R: ['0/1', '-1'], L: 1 },
+    { I: 3119, T: 'S', D: 'dwStateChanged', R: ['0/1', '-1'], L: 1 },
+    { I: 3109, T: 'S', D: 'tilt', U: 'deg', R: ['0/180', '-1'], L: 1 },
+    { I: 6110, T: 'A', D: 'vibration', R: ['0/1', '-1'], L: 1 },
+    { I: 3106, T: 'L', D: 'luminosity', U: 'lux', R: ['U32', '-1'], L: 1 },
+    { I: 3110, T: 'S', D: 'luminosityLevel', R: ['dark/twilight/bright', 'unknown'], L: 1 },
+    { I: 3101, T: 'T', D: 'extTemp', U: 'C', R: ['-55/125', '999'], L: 1 },
+    { I: 3102, T: 'T', D: 'extTemp', U: 'F', R: ['-67/257', '999'], L: 1 },
+    { I: 3115, T: 'S', D: 'sensorError', R: '0/1', L: 1 },
+    { I: 3111, T: 'B', D: 'battery', R: ['0/100', '-1'], L: 2 },
+    { I: 9102, T: 'EV', D: 'wakeupEvent', R: ['battery/button/periodic/poweron/sensor/alarm', 'unknown'], L: 2 },
   ],
 };
 
 const SHBTN_CITD = {
-  'blk': [
-    { 'I': 1, 'D': 'sensor_0' },
-    { 'I': 2, 'D': 'device' },
+  blk: [
+    { I: 1, D: 'sensor_0' },
+    { I: 2, D: 'device' },
   ],
-  'sen': [
-    { 'I': 9103, 'T': 'EVC', 'D': 'cfgChanged', 'R': 'U16', 'L': 2 },
-    { 'I': 2102, 'T': 'EV', 'D': 'inputEvent', 'R': ['S/L/SS/SSS', ''], 'L': 1 },
-    { 'I': 2103, 'T': 'EVC', 'D': 'inputEventCnt', 'R': 'U16', 'L': 1 },
-    { 'I': 3115, 'T': 'S', 'D': 'sensorError', 'R': '0/1', 'L': 1 },
-    { 'I': 3112, 'T': 'S', 'D': 'charger', 'R': ['0/1', '-1'], 'L': 2 },
-    { 'I': 3111, 'T': 'B', 'D': 'battery', 'R': ['0/100', '-1'], 'L': 2 },
-    { 'I': 9102, 'T': 'EV', 'D': 'wakeupEvent', 'R': ['battery/button/periodic/poweron/sensor/ext_power', 'unknown'], 'L': 2 },
+  sen: [
+    { I: 9103, T: 'EVC', D: 'cfgChanged', R: 'U16', L: 2 },
+    { I: 2102, T: 'EV', D: 'inputEvent', R: ['S/L/SS/SSS', ''], L: 1 },
+    { I: 2103, T: 'EVC', D: 'inputEventCnt', R: 'U16', L: 1 },
+    { I: 3115, T: 'S', D: 'sensorError', R: '0/1', L: 1 },
+    { I: 3112, T: 'S', D: 'charger', R: ['0/1', '-1'], L: 2 },
+    { I: 3111, T: 'B', D: 'battery', R: ['0/100', '-1'], L: 2 },
+    { I: 9102, T: 'EV', D: 'wakeupEvent', R: ['battery/button/periodic/poweron/sensor/ext_power', 'unknown'], L: 2 },
   ],
 };
 
 const SHMOS01_CITD = {
-  'blk': [
-    { 'I': 1, 'D': 'sensor_0' },
-    { 'I': 2, 'D': 'device' },
+  blk: [
+    { I: 1, D: 'sensor_0' },
+    { I: 2, D: 'device' },
   ],
-  'sen': [
-    { 'I': 6107, 'T': 'A', 'D': 'motion', 'R': ['0/1', '-1'], 'L': 1 },
-    { 'I': 3119, 'T': 'S', 'D': 'timestamp', 'U': 's', 'R': ['U32', '-1'], 'L': 1 },
-    { 'I': 3120, 'T': 'S', 'D': 'motionActive', 'R': ['0/1', '-1'], 'L': 1 },
-    { 'I': 6110, 'T': 'A', 'D': 'vibration', 'R': ['0/1', '-1'], 'L': 1 },
-    { 'I': 3106, 'T': 'L', 'D': 'luminosity', 'R': ['U32', '-1'], 'L': 1 },
-    { 'I': 3111, 'T': 'B', 'D': 'battery', 'R': ['0/100', '-1'], 'L': 2 },
-    { 'I': 9103, 'T': 'EVC', 'D': 'cfgChanged', 'R': 'U16', 'L': 2 },
+  sen: [
+    { I: 6107, T: 'A', D: 'motion', R: ['0/1', '-1'], L: 1 },
+    { I: 3119, T: 'S', D: 'timestamp', U: 's', R: ['U32', '-1'], L: 1 },
+    { I: 3120, T: 'S', D: 'motionActive', R: ['0/1', '-1'], L: 1 },
+    { I: 6110, T: 'A', D: 'vibration', R: ['0/1', '-1'], L: 1 },
+    { I: 3106, T: 'L', D: 'luminosity', R: ['U32', '-1'], L: 1 },
+    { I: 3111, T: 'B', D: 'battery', R: ['0/100', '-1'], L: 2 },
+    { I: 9103, T: 'EVC', D: 'cfgChanged', R: 'U16', L: 2 },
   ],
 };
 
 const SHMOS02_CITD = {
-  'blk': [
-    { 'I': 1, 'D': 'sensor_0' },
-    { 'I': 2, 'D': 'device' },
+  blk: [
+    { I: 1, D: 'sensor_0' },
+    { I: 2, D: 'device' },
   ],
-  'sen': [
-    { 'I': 3101, 'T': 'T', 'D': 'temp', 'U': 'C', 'R': ['-55/125', '999'], 'L': 1 },
-    { 'I': 3102, 'T': 'T', 'D': 'temp', 'U': 'F', 'R': ['-67/257', '999'], 'L': 1 },
-    { 'I': 6107, 'T': 'A', 'D': 'motion', 'R': ['0/1', '-1'], 'L': 1 },
-    { 'I': 3119, 'T': 'S', 'D': 'timestamp', 'U': 's', 'R': ['U32', '-1'], 'L': 1 },
-    { 'I': 3120, 'T': 'A', 'D': 'motionActive', 'R': ['0/1', '-1'], 'L': 1 },
-    { 'I': 6110, 'T': 'A', 'D': 'vibration', 'R': ['0/1', '-1'], 'L': 1 },
-    { 'I': 3106, 'T': 'L', 'D': 'luminosity', 'R': ['U32', '-1'], 'L': 1 },
-    { 'I': 3111, 'T': 'B', 'D': 'battery', 'R': ['0/100', '-1'], 'L': 2 },
-    { 'I': 9103, 'T': 'EVC', 'D': 'cfgChanged', 'R': 'U16', 'L': 2 },
+  sen: [
+    { I: 3101, T: 'T', D: 'temp', U: 'C', R: ['-55/125', '999'], L: 1 },
+    { I: 3102, T: 'T', D: 'temp', U: 'F', R: ['-67/257', '999'], L: 1 },
+    { I: 6107, T: 'A', D: 'motion', R: ['0/1', '-1'], L: 1 },
+    { I: 3119, T: 'S', D: 'timestamp', U: 's', R: ['U32', '-1'], L: 1 },
+    { I: 3120, T: 'A', D: 'motionActive', R: ['0/1', '-1'], L: 1 },
+    { I: 6110, T: 'A', D: 'vibration', R: ['0/1', '-1'], L: 1 },
+    { I: 3106, T: 'L', D: 'luminosity', R: ['U32', '-1'], L: 1 },
+    { I: 3111, T: 'B', D: 'battery', R: ['0/100', '-1'], L: 2 },
+    { I: 9103, T: 'EVC', D: 'cfgChanged', R: 'U16', L: 2 },
   ],
 };
 
 const SHWT1_CITD = {
-  'blk': [
-    { 'I': 1, 'D': 'sensor_0' },
-    { 'I': 2, 'D': 'device' },
+  blk: [
+    { I: 1, D: 'sensor_0' },
+    { I: 2, D: 'device' },
   ],
-  'sen': [
-    { 'I': 9103, 'T': 'EVC', 'D': 'cfgChanged', 'R': 'U16', 'L': 2 },
-    { 'I': 3101, 'T': 'T', 'D': 'extTemp', 'U': 'C', 'R': ['-55/125', '999'], 'L': 1 },
-    { 'I': 3102, 'T': 'T', 'D': 'extTemp', 'U': 'F', 'R': ['-67/257', '999'], 'L': 1 },
-    { 'I': 6106, 'T': 'A', 'D': 'flood', 'R': ['0/1', '-1'], 'L': 1 },
-    { 'I': 3115, 'T': 'S', 'D': 'sensorError', 'R': '0/1', 'L': 1 },
-    { 'I': 3111, 'T': 'B', 'D': 'battery', 'R': ['0/100', '-1'], 'L': 2 },
-    { 'I': 9102, 'T': 'EV', 'D': 'wakeupEvent', 'R': ['battery/button/periodic/poweron/sensor/alarm', 'unknown'], 'L': 2 },
+  sen: [
+    { I: 9103, T: 'EVC', D: 'cfgChanged', R: 'U16', L: 2 },
+    { I: 3101, T: 'T', D: 'extTemp', U: 'C', R: ['-55/125', '999'], L: 1 },
+    { I: 3102, T: 'T', D: 'extTemp', U: 'F', R: ['-67/257', '999'], L: 1 },
+    { I: 6106, T: 'A', D: 'flood', R: ['0/1', '-1'], L: 1 },
+    { I: 3115, T: 'S', D: 'sensorError', R: '0/1', L: 1 },
+    { I: 3111, T: 'B', D: 'battery', R: ['0/100', '-1'], L: 2 },
+    { I: 9102, T: 'EV', D: 'wakeupEvent', R: ['battery/button/periodic/poweron/sensor/alarm', 'unknown'], L: 2 },
   ],
 };
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const SHRGBWW01 = {
-  'blk': [
-    { 'I': 1, 'D': 'light_0' },
-    { 'I': 2, 'D': 'device' },
+  blk: [
+    { I: 1, D: 'light_0' },
+    { I: 2, D: 'device' },
   ],
-  'sen': [
-    { 'I': 9103, 'T': 'EVC', 'D': 'cfgChanged', 'R': 'U16', 'L': 2 },
-    { 'I': 1101, 'T': 'S', 'D': 'output', 'R': '0/1', 'L': 1 },
-    { 'I': 5105, 'T': 'S', 'D': 'red', 'R': '0/255', 'L': 1 },
-    { 'I': 5106, 'T': 'S', 'D': 'green', 'R': '0/255', 'L': 1 },
-    { 'I': 5107, 'T': 'S', 'D': 'blue', 'R': '0/255', 'L': 1 },
-    { 'I': 5108, 'T': 'S', 'D': 'white', 'R': '0/255', 'L': 1 },
-    { 'I': 5102, 'T': 'S', 'D': 'gain', 'R': '0/100', 'L': 1 },
-    { 'I': 5109, 'T': 'S', 'D': 'effect', 'R': '0/3', 'L': 1 },
-    { 'I': 4101, 'T': 'P', 'D': 'power', 'U': 'W', 'R': ['0/288', '-1'], 'L': 1 },
-    { 'I': 4103, 'T': 'E', 'D': 'energy', 'U': 'Wmin', 'R': ['U32', '-1'], 'L': 1 },
-    { 'I': 6102, 'T': 'A', 'D': 'overpower', 'R': ['0/1', '-1'], 'L': 1 },
-    { 'I': 2101, 'T': 'S', 'D': 'input', 'R': '0/1', 'L': 2 },
-    { 'I': 2102, 'T': 'EV', 'D': 'inputEvent', 'R': ['S/L', ''], 'L': 2 },
-    { 'I': 2103, 'T': 'EVC', 'D': 'inputEventCnt', 'R': 'U16', 'L': 2 },
-    { 'I': 9101, 'T': 'S', 'D': 'mode', 'R': 'color/white', 'L': 2 },
+  sen: [
+    { I: 9103, T: 'EVC', D: 'cfgChanged', R: 'U16', L: 2 },
+    { I: 1101, T: 'S', D: 'output', R: '0/1', L: 1 },
+    { I: 5105, T: 'S', D: 'red', R: '0/255', L: 1 },
+    { I: 5106, T: 'S', D: 'green', R: '0/255', L: 1 },
+    { I: 5107, T: 'S', D: 'blue', R: '0/255', L: 1 },
+    { I: 5108, T: 'S', D: 'white', R: '0/255', L: 1 },
+    { I: 5102, T: 'S', D: 'gain', R: '0/100', L: 1 },
+    { I: 5109, T: 'S', D: 'effect', R: '0/3', L: 1 },
+    { I: 4101, T: 'P', D: 'power', U: 'W', R: ['0/288', '-1'], L: 1 },
+    { I: 4103, T: 'E', D: 'energy', U: 'Wmin', R: ['U32', '-1'], L: 1 },
+    { I: 6102, T: 'A', D: 'overpower', R: ['0/1', '-1'], L: 1 },
+    { I: 2101, T: 'S', D: 'input', R: '0/1', L: 2 },
+    { I: 2102, T: 'EV', D: 'inputEvent', R: ['S/L', ''], L: 2 },
+    { I: 2103, T: 'EVC', D: 'inputEventCnt', R: 'U16', L: 2 },
+    { I: 9101, T: 'S', D: 'mode', R: 'color/white', L: 2 },
   ],
 };
 
 const SHTRV01_CITD = {
-  'blk': [
-    { 'I': 1, 'D': 'sensor_0' },
-    { 'I': 2, 'D': 'device' },
+  blk: [
+    { I: 1, D: 'sensor_0' },
+    { I: 2, D: 'device' },
   ],
-  'sen': [
-    { 'I': 3101, 'T': 'T', 'D': 'temp', 'U': 'C', 'R': ['-55/125', '999'], 'L': 1 },
-    { 'I': 3102, 'T': 'T', 'D': 'temp', 'U': 'F', 'R': ['-67/257', '999'], 'L': 1 },
-    { 'I': 3103, 'T': 'T', 'D': 'targetTemp', 'U': 'C', 'R': ['4/31', '999'], 'L': 1 },
-    { 'I': 3104, 'T': 'T', 'D': 'targetTemp', 'U': 'F', 'R': ['39/88', '999'], 'L': 1 },
-    { 'I': 3115, 'T': 'S', 'D': 'sensorError', 'R': '0/1', 'L': 2 },
-    { 'I': 3116, 'T': 'S', 'D': 'valveError', 'R': '0/1', 'L': 2 },
-    { 'I': 3117, 'T': 'S', 'D': 'mode', 'R': '0/5', 'L': 2 },
-    { 'I': 3118, 'T': 'S', 'D': 'status', 'R': '0/1', 'L': 2 },
-    { 'I': 3111, 'T': 'B', 'D': 'battery', 'R': ['0/100', '-1'], 'L': 2 },
-    { 'I': 3121, 'T': 'S', 'D': 'valvePos', 'U': '%', 'R': ['0/100', '-1'], 'L': 2 },
-    { 'I': 3122, 'T': 'S', 'D': 'boostMinutes', 'U': '%', 'R': ['0/1440', '-1'], 'L': 2 },
-    { 'I': 9103, 'T': 'EVC', 'D': 'cfgChanged', 'R': 'U16', 'L': 2 },
+  sen: [
+    { I: 3101, T: 'T', D: 'temp', U: 'C', R: ['-55/125', '999'], L: 1 },
+    { I: 3102, T: 'T', D: 'temp', U: 'F', R: ['-67/257', '999'], L: 1 },
+    { I: 3103, T: 'T', D: 'targetTemp', U: 'C', R: ['4/31', '999'], L: 1 },
+    { I: 3104, T: 'T', D: 'targetTemp', U: 'F', R: ['39/88', '999'], L: 1 },
+    { I: 3115, T: 'S', D: 'sensorError', R: '0/1', L: 2 },
+    { I: 3116, T: 'S', D: 'valveError', R: '0/1', L: 2 },
+    { I: 3117, T: 'S', D: 'mode', R: '0/5', L: 2 },
+    { I: 3118, T: 'S', D: 'status', R: '0/1', L: 2 },
+    { I: 3111, T: 'B', D: 'battery', R: ['0/100', '-1'], L: 2 },
+    { I: 3121, T: 'S', D: 'valvePos', U: '%', R: ['0/100', '-1'], L: 2 },
+    { I: 3122, T: 'S', D: 'boostMinutes', U: '%', R: ['0/1440', '-1'], L: 2 },
+    { I: 9103, T: 'EVC', D: 'cfgChanged', R: 'U16', L: 2 },
   ],
 };
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const SHRGBW2 = {
-  'blk': [
-    { 'I': 1, 'D': 'light_0' },
-    { 'I': 2, 'D': 'device' },
+  blk: [
+    { I: 1, D: 'light_0' },
+    { I: 2, D: 'device' },
   ],
-  'sen': [
-    { 'I': 9103, 'T': 'EVC', 'D': 'cfgChanged', 'R': 'U16', 'L': 2 },
-    { 'I': 1101, 'T': 'S', 'D': 'output', 'R': '0/1', 'L': 1 },
-    { 'I': 5105, 'T': 'S', 'D': 'red', 'R': '0/255', 'L': 1 },
-    { 'I': 5106, 'T': 'S', 'D': 'green', 'R': '0/255', 'L': 1 },
-    { 'I': 5107, 'T': 'S', 'D': 'blue', 'R': '0/255', 'L': 1 },
-    { 'I': 5108, 'T': 'S', 'D': 'white', 'R': '0/255', 'L': 1 },
-    { 'I': 5102, 'T': 'S', 'D': 'gain', 'R': '0/100', 'L': 1 },
-    { 'I': 5109, 'T': 'S', 'D': 'effect', 'R': '0/3', 'L': 1 },
-    { 'I': 4101, 'T': 'P', 'D': 'power', 'U': 'W', 'R': ['0/288', '-1'], 'L': 1 },
-    { 'I': 4103, 'T': 'E', 'D': 'energy', 'U': 'Wmin', 'R': ['U32', '-1'], 'L': 1 },
-    { 'I': 6102, 'T': 'A', 'D': 'overpower', 'R': ['0/1', '-1'], 'L': 1 },
-    { 'I': 2101, 'T': 'S', 'D': 'input', 'R': '0/1', 'L': 2 },
-    { 'I': 2102, 'T': 'EV', 'D': 'inputEvent', 'R': ['S/L', ''], 'L': 2 },
-    { 'I': 2103, 'T': 'EVC', 'D': 'inputEventCnt', 'R': 'U16', 'L': 2 },
-    { 'I': 9101, 'T': 'S', 'D': 'mode', 'R': 'color/white', 'L': 2 },
+  sen: [
+    { I: 9103, T: 'EVC', D: 'cfgChanged', R: 'U16', L: 2 },
+    { I: 1101, T: 'S', D: 'output', R: '0/1', L: 1 },
+    { I: 5105, T: 'S', D: 'red', R: '0/255', L: 1 },
+    { I: 5106, T: 'S', D: 'green', R: '0/255', L: 1 },
+    { I: 5107, T: 'S', D: 'blue', R: '0/255', L: 1 },
+    { I: 5108, T: 'S', D: 'white', R: '0/255', L: 1 },
+    { I: 5102, T: 'S', D: 'gain', R: '0/100', L: 1 },
+    { I: 5109, T: 'S', D: 'effect', R: '0/3', L: 1 },
+    { I: 4101, T: 'P', D: 'power', U: 'W', R: ['0/288', '-1'], L: 1 },
+    { I: 4103, T: 'E', D: 'energy', U: 'Wmin', R: ['U32', '-1'], L: 1 },
+    { I: 6102, T: 'A', D: 'overpower', R: ['0/1', '-1'], L: 1 },
+    { I: 2101, T: 'S', D: 'input', R: '0/1', L: 2 },
+    { I: 2102, T: 'EV', D: 'inputEvent', R: ['S/L', ''], L: 2 },
+    { I: 2103, T: 'EVC', D: 'inputEventCnt', R: 'U16', L: 2 },
+    { I: 9101, T: 'S', D: 'mode', R: 'color/white', L: 2 },
   ],
 };
 
 const SHHT1_CITD = {
-  'blk': [
-    { 'I': 1, 'D': 'sensor_0' },
-    { 'I': 2, 'D': 'device' },
+  blk: [
+    { I: 1, D: 'sensor_0' },
+    { I: 2, D: 'device' },
   ],
-  'sen': [
-    { 'I': 9103, 'T': 'EVC', 'D': 'cfgChanged', 'R': 'U16', 'L': 2 },
-    { 'I': 3101, 'T': 'T', 'D': 'extTemp', 'U': 'C', 'R': ['-55/125', '999'], 'L': 1 },
-    { 'I': 3102, 'T': 'T', 'D': 'extTemp', 'U': 'F', 'R': ['-67/257', '999'], 'L': 1 },
-    { 'I': 3103, 'T': 'H', 'D': 'humidity', 'R': ['0/100', '999'], 'L': 1 },
-    { 'I': 3115, 'T': 'S', 'D': 'sensorError', 'R': '0/1', 'L': 1 },
-    { 'I': 3111, 'T': 'B', 'D': 'battery', 'R': ['0/100', '-1'], 'L': 2 },
-    { 'I': 9102, 'T': 'EV', 'D': 'wakeupEvent', 'R': ['battery/button/periodic/poweron/sensor/alarm', 'unknown'], 'L': 2 },
+  sen: [
+    { I: 9103, T: 'EVC', D: 'cfgChanged', R: 'U16', L: 2 },
+    { I: 3101, T: 'T', D: 'extTemp', U: 'C', R: ['-55/125', '999'], L: 1 },
+    { I: 3102, T: 'T', D: 'extTemp', U: 'F', R: ['-67/257', '999'], L: 1 },
+    { I: 3103, T: 'H', D: 'humidity', R: ['0/100', '999'], L: 1 },
+    { I: 3115, T: 'S', D: 'sensorError', R: '0/1', L: 1 },
+    { I: 3111, T: 'B', D: 'battery', R: ['0/100', '-1'], L: 2 },
+    { I: 9102, T: 'EV', D: 'wakeupEvent', R: ['battery/button/periodic/poweron/sensor/alarm', 'unknown'], L: 2 },
   ],
 };
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const SHSM1_CITS = {
-  'G': [
+  G: [
     [0, 9103, 0],
     [0, 3101, 999],
     [0, 3102, 999],
@@ -1041,24 +985,24 @@ const SHSM1_CITS = {
 };
 
 const SHSM1_CITD = {
-  'blk': [
-    { 'I': 1, 'D': 'sensor_0' },
-    { 'I': 2, 'D': 'device' },
+  blk: [
+    { I: 1, D: 'sensor_0' },
+    { I: 2, D: 'device' },
   ],
-  'sen': [
-    { 'I': 9103, 'T': 'EVC', 'D': 'cfgChanged', 'R': 'U16', 'L': 2 },
-    { 'I': 3101, 'T': 'T', 'D': 'extTemp', 'U': 'C', 'R': ['-55/125', '999'], 'L': 1 },
-    { 'I': 3102, 'T': 'T', 'D': 'extTemp', 'U': 'F', 'R': ['-67/257', '999'], 'L': 1 },
-    { 'I': 6105, 'T': 'A', 'D': 'smoke', 'R': ['0/1', '-1'], 'L': 1 },
-    { 'I': 3115, 'T': 'S', 'D': 'sensorError', 'R': '0/1', 'L': 1 },
-    { 'I': 3111, 'T': 'B', 'D': 'battery', 'R': ['0/100', '-1'], 'L': 2 },
-    { 'I': 9102, 'T': 'EV', 'D': 'wakeupEvent', 'R': ['battery/button/periodic/poweron/sensor/alarm', 'unknown'], 'L': 2 },
+  sen: [
+    { I: 9103, T: 'EVC', D: 'cfgChanged', R: 'U16', L: 2 },
+    { I: 3101, T: 'T', D: 'extTemp', U: 'C', R: ['-55/125', '999'], L: 1 },
+    { I: 3102, T: 'T', D: 'extTemp', U: 'F', R: ['-67/257', '999'], L: 1 },
+    { I: 6105, T: 'A', D: 'smoke', R: ['0/1', '-1'], L: 1 },
+    { I: 3115, T: 'S', D: 'sensorError', R: '0/1', L: 1 },
+    { I: 3111, T: 'B', D: 'battery', R: ['0/100', '-1'], L: 2 },
+    { I: 9102, T: 'EV', D: 'wakeupEvent', R: ['battery/button/periodic/poweron/sensor/alarm', 'unknown'], L: 2 },
   ],
 };
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const SHGS1_CITS = {
-  'G': [
+  G: [
     [0, 9103, 0],
     [0, 3113, 'normal'],
     [0, 3114, 'not_completed'],
@@ -1070,17 +1014,17 @@ const SHGS1_CITS = {
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const SHGS1_CITD = {
-  'blk': [
-    { 'I': 1, 'D': 'sensor_0' },
-    { 'I': 2, 'D': 'valve_0' },
-    { 'I': 3, 'D': 'device' },
+  blk: [
+    { I: 1, D: 'sensor_0' },
+    { I: 2, D: 'valve_0' },
+    { I: 3, D: 'device' },
   ],
-  'sen': [
-    { 'I': 9103, 'T': 'EVC', 'D': 'cfgChanged', 'R': 'U16', 'L': 3 },
-    { 'I': 3113, 'T': 'S', 'D': 'sensorOp', 'R': ['warmup/normal/fault', 'unknown'], 'L': 1 },
-    { 'I': 3114, 'T': 'S', 'D': 'selfTest', 'R': 'not_completed/completed/running/pending', 'L': 1 },
-    { 'I': 6108, 'T': 'A', 'D': 'gas', 'R': ['none/mild/heavy/test', 'unknown'], 'L': 1 },
-    { 'I': 3107, 'T': 'C', 'D': 'concentration', 'U': 'ppm', 'R': ['U16', '-1'], 'L': 1 },
-    { 'I': 1105, 'T': 'S', 'D': 'valve', 'R': ['closed/opened/not_connected/failure/closing/opening/checking', 'unknown'], 'L': 2 },
+  sen: [
+    { I: 9103, T: 'EVC', D: 'cfgChanged', R: 'U16', L: 3 },
+    { I: 3113, T: 'S', D: 'sensorOp', R: ['warmup/normal/fault', 'unknown'], L: 1 },
+    { I: 3114, T: 'S', D: 'selfTest', R: 'not_completed/completed/running/pending', L: 1 },
+    { I: 6108, T: 'A', D: 'gas', R: ['none/mild/heavy/test', 'unknown'], L: 1 },
+    { I: 3107, T: 'C', D: 'concentration', U: 'ppm', R: ['U16', '-1'], L: 1 },
+    { I: 1105, T: 'S', D: 'valve', R: ['closed/opened/not_connected/failure/closing/opening/checking', 'unknown'], L: 2 },
   ],
 };

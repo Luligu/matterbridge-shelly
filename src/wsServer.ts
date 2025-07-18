@@ -1,11 +1,10 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /**
- * This file contains the class WsServer.
- *
+ * @description This file contains the class WsServer.
  * @file src\wsServer.ts
  * @author Luca Liguori
- * @date 2024-08-13
+ * @created 2024-08-13
  * @version 1.3.1
+ * @license Apache-2.0
  *
  * Copyright 2024, 2025 Luca Liguori.
  *
@@ -19,13 +18,15 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License. *
+ * limitations under the License.
  */
 
-import { AnsiLogger, CYAN, LogLevel, TimestampFormat, db, er, hk, nf, rs, wr, zb } from 'matterbridge/logger';
-import WebSocket, { WebSocketServer } from 'ws';
 import EventEmitter from 'node:events';
 import { createServer, IncomingMessage, Server } from 'node:http';
+
+import { AnsiLogger, CYAN, LogLevel, TimestampFormat, db, er, hk, rs, wr, zb } from 'matterbridge/logger';
+import WebSocket, { WebSocketServer } from 'ws';
+
 import { ShellyDevice } from './shellyDevice.js';
 import { ShellyData } from './shellyTypes.js';
 
@@ -37,6 +38,9 @@ interface WsMessage {
 }
 
 interface WsServerEvent {
+  started: [];
+  stopped: [Error | undefined];
+  error: [Error];
   wssupdate: [shellyId: string, params: ShellyData];
   wssevent: [shellyId: string, params: ShellyData];
 }
@@ -49,7 +53,7 @@ interface WsServerEvent {
  * receiving status updates and events from the device.
  * It also includes functionality for handling ping/pong messages to ensure the connection is alive.
  */
-export class WsServer extends EventEmitter {
+export class WsServer extends EventEmitter<WsServerEvent> {
   public readonly log;
   private httpServer: Server | undefined;
   private wsServer: WebSocketServer | undefined;
@@ -60,18 +64,11 @@ export class WsServer extends EventEmitter {
   /**
    * Constructs a new instance of the WsServer class.
    *
+   * @param {LogLevel} logLevel - The log level for the logger. Defaults to LogLevel.INFO.
    */
   constructor(logLevel: LogLevel = LogLevel.INFO) {
     super();
     this.log = new AnsiLogger({ logName: 'ShellyWsServer', logTimestampFormat: TimestampFormat.TIME_MILLIS, logLevel });
-  }
-
-  override emit<K extends keyof WsServerEvent>(eventName: K, ...args: WsServerEvent[K]): boolean {
-    return super.emit(eventName, ...args);
-  }
-
-  override on<K extends keyof WsServerEvent>(eventName: K, listener: (...args: WsServerEvent[K]) => void): this {
-    return super.on(eventName, listener);
   }
 
   /**
@@ -86,29 +83,23 @@ export class WsServer extends EventEmitter {
   /**
    * Listens for status updates from the WebSocket connection.
    *
+   * @param {number} port - The port number on which the WebSocket server will listen. Defaults to 8485.
+   *
    * @remarks
    * This method listens to a WebSocket connection and handles various events such as open, error, close, and message.
    * It receives updates and events from the WebSocket server.
    * The received responses are parsed and appropriate actions are taken based on the response type.
-   *
-   * @param port - The port number on which the WebSocket server will listen. Defaults to 8485.
-   *
-   * @returns void
    */
-  private async listenForStatusUpdates(port = 8485) {
+  private async listenForStatusUpdates(port: number = 8485) {
     try {
       // Create an HTTP server
-      /*
-      this.httpServer = createServer((req, res) => {
-        res.writeHead(200, { 'Content-Type': 'text/plain' });
-        res.end('WebSocketServer is running\n');
-      });
-      */
       this.httpServer = createServer();
-      // Create a WebSocket server
+      // Create a WebSocket server and attach it to the HTTP server
       this.wsServer = new WebSocketServer({ server: this.httpServer });
     } catch (error) {
+      // istanbul ignore next
       this.log.error(`Failed to create the HttpServer and WebSocketServer: ${error}`);
+      // istanbul ignore next
       return;
     }
 
@@ -129,6 +120,7 @@ export class WsServer extends EventEmitter {
           ws.ping();
           // Set a timeout to wait for a pong response
           pongTimeout = setTimeout(() => {
+            // istanbul ignore next
             this.log.error(`WebSocketServer pong not received.`);
           }, this.pongPeriod);
         }
@@ -160,14 +152,14 @@ export class WsServer extends EventEmitter {
       });
 
       // Handle pong messages
-      ws.on('pong', (data: Buffer) => {
+      ws.on('pong', (_data: Buffer) => {
         this.log.debug('WebSocketServer client sent a pong');
         clearTimeout(pongTimeout);
         pongTimeout = undefined;
       });
 
       // Handle ping messages
-      ws.on('ping', (data: Buffer) => {
+      ws.on('ping', (_data: Buffer) => {
         this.log.debug('WebSocketServer client sent a ping');
         ws.pong();
       });
@@ -183,6 +175,7 @@ export class WsServer extends EventEmitter {
 
       // Handle errors
       ws.on('error', (error) => {
+        // istanbul ignore next
         this.log.error('WebSocketServer client error:', error);
       });
     });
@@ -199,26 +192,31 @@ export class WsServer extends EventEmitter {
       this._isListening = false;
     });
 
+    this.httpServer.on('error', (error: Error) => {
+      this.log.error(`HttpServer error: ${error instanceof Error ? error.message : error}`);
+      this.emit('error', error);
+      this._isListening = false;
+    });
+
     // Start the server
     this.httpServer.listen(port, () => {
       this._isListening = true;
       this.log.debug(`HttpServer for WebSocketServer is listening on port ${port}`);
       this.log.info(`Started WebSocket server for shelly devices.`);
       this.log.info(`WebSocket server for shelly devices is listening on port ${port}...`);
+      this.emit('started');
     });
   }
 
   /**
    * Starts the WebSocket server for the Shelly devices.
    *
+   * @param {number} port - The port number on which the WebSocket server will listen. Defaults to 8485.
+   *
    * @remarks
    * This method initializes the WebSocket server and starts listening for status updates.
-   *
-   * @param port - The port number on which the WebSocket server will listen. Defaults to 8485.
-   *
-   * @returns void
    */
-  start(port = 8485) {
+  start(port: number = 8485) {
     if (this._isListening) {
       this.log.debug(`WebSocketServer is already listening.`);
       return;
@@ -233,33 +231,27 @@ export class WsServer extends EventEmitter {
    * @remarks
    * This method stops the WebSocket client and performs necessary cleanup operations.
    * If the client is currently connecting, it will wait for a maximum of 5 seconds before forcefully terminating the connection.
-   *
-   * @returns void
    */
   stop() {
     this.log.info(`Stopping WebSocket server (listening ${this._isListening}) for shelly devices...`);
     for (const client of this.wsServer?.clients || []) {
-      client?.terminate();
+      client.terminate();
     }
+
+    this.wsServer?.close((err?: Error) => {
+      this.log.debug(`WebSocket server for shelly devices stopped${err ? ' with error ' + err.message : ''}.`);
+      this.wsServer?.removeAllListeners();
+      this.wsServer = undefined;
+    });
+
+    this.httpServer?.close((err?: Error) => {
+      this.log.debug(`HttpServer for WebSocketServer stopped${err ? ' with error ' + err.message : ''}.`);
+      this.httpServer?.removeAllListeners();
+      this.httpServer = undefined;
+    });
+
     this._isListening = false;
-    this.wsServer?.close();
-    this.wsServer?.removeAllListeners();
-    this.wsServer = undefined;
-    this.httpServer?.close();
-    this.httpServer?.removeAllListeners();
-    this.httpServer = undefined;
     this.log.info(`Stopped WebSocket server for shelly devices...`);
+    this.emit('stopped', undefined);
   }
 }
-
-// Start the WebSocket server with the following command: node dist/wsServer.js startWsServer
-/*
-if (process.argv.includes('startWsServer')) {
-  const wss = new WsServer(LogLevel.DEBUG);
-  wss.start();
-
-  process.on('SIGINT', async function () {
-    wss.stop();
-  });
-}
-*/

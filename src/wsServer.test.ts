@@ -1,35 +1,71 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
+// src/wsServer.test.ts
+
 import { jest } from '@jest/globals';
 import { wait, waiter } from 'matterbridge/utils';
-import { WsServer } from './wsServer';
 import { WebSocket } from 'ws';
 import { AnsiLogger, LogLevel } from 'matterbridge/logger';
-import { ShellyData } from './shellyTypes';
+
+import { WsServer } from './wsServer.ts';
+import { ShellyData } from './shellyTypes.ts';
+
+let loggerLogSpy: jest.SpiedFunction<typeof AnsiLogger.prototype.log>;
+let consoleLogSpy: jest.SpiedFunction<typeof console.log>;
+let consoleDebugSpy: jest.SpiedFunction<typeof console.log>;
+let consoleInfoSpy: jest.SpiedFunction<typeof console.log>;
+let consoleWarnSpy: jest.SpiedFunction<typeof console.log>;
+let consoleErrorSpy: jest.SpiedFunction<typeof console.log>;
+const debug = false; // Set to true to enable debug logging
+
+if (!debug) {
+  loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log').mockImplementation((level: string, message: string, ...parameters: any[]) => {});
+  consoleLogSpy = jest.spyOn(console, 'log').mockImplementation((...args: any[]) => {});
+  consoleDebugSpy = jest.spyOn(console, 'debug').mockImplementation((...args: any[]) => {});
+  consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation((...args: any[]) => {});
+  consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation((...args: any[]) => {});
+  consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation((...args: any[]) => {});
+} else {
+  loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log');
+  consoleLogSpy = jest.spyOn(console, 'log');
+  consoleDebugSpy = jest.spyOn(console, 'debug');
+  consoleInfoSpy = jest.spyOn(console, 'info');
+  consoleWarnSpy = jest.spyOn(console, 'warn');
+  consoleErrorSpy = jest.spyOn(console, 'error');
+}
+
+function setDebug(debug: boolean) {
+  if (debug) {
+    loggerLogSpy.mockRestore();
+    consoleLogSpy.mockRestore();
+    consoleDebugSpy.mockRestore();
+    consoleInfoSpy.mockRestore();
+    consoleWarnSpy.mockRestore();
+    consoleErrorSpy.mockRestore();
+    loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log');
+    consoleLogSpy = jest.spyOn(console, 'log');
+    consoleDebugSpy = jest.spyOn(console, 'debug');
+    consoleInfoSpy = jest.spyOn(console, 'info');
+    consoleWarnSpy = jest.spyOn(console, 'warn');
+    consoleErrorSpy = jest.spyOn(console, 'error');
+  } else {
+    loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log').mockImplementation((level: string, message: string, ...parameters: any[]) => {});
+    consoleLogSpy = jest.spyOn(console, 'log').mockImplementation((...args: any[]) => {});
+    consoleDebugSpy = jest.spyOn(console, 'debug').mockImplementation((...args: any[]) => {});
+    consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation((...args: any[]) => {});
+    consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation((...args: any[]) => {});
+    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation((...args: any[]) => {});
+  }
+}
 
 describe('ShellyWsServer', () => {
   let wsServer: WsServer;
-  const address = '30:f6:ef:69:2b:c5';
 
   beforeAll(async () => {
-    // Mock the AnsiLogger.log method
-    jest.spyOn(AnsiLogger.prototype, 'log').mockImplementation((level: string, message: string, ...parameters: any[]) => {
-      // console.log(`Mocked log: ${level} - ${message}`, ...parameters);
-    });
-
-    wsServer = new WsServer(LogLevel.DEBUG);
-
-    wsServer.on('wssupdate', (shellyId: string, params: ShellyData) => {
-      // console.error(`Received wssupdate from ${shellyId}:`, params);
-    });
-
-    wsServer.on('wssevent', (shellyId: string, params: ShellyData) => {
-      // console.error(`Received wssevent from ${shellyId}:`, params);
-    });
-  }, 360000);
+    //
+  });
 
   beforeEach(() => {
-    //
+    // Clear all mocks before each test
+    jest.clearAllMocks();
   });
 
   afterEach(() => {
@@ -41,17 +77,32 @@ describe('ShellyWsServer', () => {
     wsServer.stop();
     // prettier-ignore
     await waiter('wsServer not listening', () => { return !(wsServer as any)._isListening; }, true);
+
+    // Restore all mocks
+    jest.restoreAllMocks();
   }, 360000);
 
-  test('Should not fail to create the wsServer', async () => {
+  test('Should emit events on start and stop', async () => {
     const wsServer = new WsServer(LogLevel.DEBUG);
-    wsServer.start(5050);
-    await wait(1000);
+    await new Promise<void>((resolve) => {
+      wsServer.on('started', () => {
+        resolve();
+      });
+      wsServer.start(5050);
+    });
     expect(wsServer.isListening).toBeTruthy();
-    wsServer.stop();
+
+    await new Promise<void>((resolve) => {
+      wsServer.on('stopped', () => {
+        resolve();
+      });
+      wsServer.stop();
+    });
+    expect(wsServer.isListening).toBeFalsy();
   });
 
   test('Create the wsServer', () => {
+    wsServer = new WsServer(LogLevel.DEBUG);
     expect(wsServer).not.toBeUndefined();
     expect(wsServer).toBeInstanceOf(WsServer);
     expect((wsServer as any).httpServer).toBeUndefined();
@@ -80,9 +131,12 @@ describe('ShellyWsServer', () => {
   });
 
   test('Start the wsServer', async () => {
-    wsServer.start();
-    // prettier-ignore
-    await waiter('wsServer listening', () => { return wsServer.isListening; }, true);
+    await new Promise<void>((resolve) => {
+      wsServer.on('started', () => {
+        resolve();
+      });
+      wsServer.start();
+    });
     expect((wsServer as any).httpServer).toBeDefined();
     expect((wsServer as any).wsServer).toBeDefined();
     expect(wsServer.isListening).toBeTruthy();
@@ -90,28 +144,44 @@ describe('ShellyWsServer', () => {
 
   test('Should fail to create the wsServer since the port is in use', async () => {
     const wsServer = new WsServer(LogLevel.DEBUG);
-    wsServer.start();
-    // prettier-ignore
-    await wait(1000);
+    await new Promise<void>((resolve) => {
+      wsServer.on('error', (error) => {
+        expect(error.message).toContain('EADDRINUSE');
+        resolve();
+      });
+      wsServer.start();
+    });
     expect((wsServer as any).httpServer).toBeDefined();
     expect((wsServer as any).wsServer).toBeDefined();
     expect(wsServer.isListening).toBeFalsy();
     (wsServer as any).wsServer.emit('error', new Error('Test error'));
     (wsServer as any).wsServer.emit('close');
-    wsServer.stop();
-    await wait(1000);
+    await new Promise<void>((resolve) => {
+      wsServer.on('stopped', () => {
+        resolve();
+      });
+      wsServer.stop();
+    });
   });
 
   test('Stop the wsServer', async () => {
-    wsServer.stop();
+    await new Promise<void>((resolve) => {
+      wsServer.on('stopped', () => {
+        resolve();
+      });
+      wsServer.stop();
+    });
     // prettier-ignore
-    await waiter('wsServer not listening', () => { return !wsServer.isListening; }, true);
+    await waiter('wsServer closed', () => { return (wsServer as any).wsServer === undefined }, true, 5000, 100);
+    // prettier-ignore
+    await waiter('httpServer closed', () => { return (wsServer as any).httpServer === undefined }, true, 5000, 100);
     expect((wsServer as any).httpServer).toBeUndefined();
     expect((wsServer as any).wsServer).toBeUndefined();
     expect(wsServer.isListening).toBeFalsy();
   });
 
   test('Client should connect to the wsServer', async () => {
+    // setDebug(true);
     (wsServer as any).pingPeriod = 500;
     (wsServer as any).pongPeriod = 600;
     wsServer.start(8989);

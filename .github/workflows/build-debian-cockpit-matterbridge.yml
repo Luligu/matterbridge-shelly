@@ -17,7 +17,7 @@ jobs:
           # Create the directory structure
           mkdir -p package/usr/share/cockpit/matterbridge
           mkdir -p package/DEBIAN
-          
+
           # Copy plugin files from rock-s0/cockpit to the correct directory
           cp -r rock-s0/cockpit/* package/usr/share/cockpit/matterbridge
             

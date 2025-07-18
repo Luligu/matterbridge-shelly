@@ -1,10 +1,10 @@
 /**
- * This file contains the class ShellyProperty.
- *
+ * @description This file contains the class ShellyProperty.
  * @file src\shellyProperty.ts
  * @author Luca Liguori
- * @date 2024-05-01
+ * @created 2024-05-01
  * @version 1.0.0
+ * @license Apache-2.0
  *
  * Copyright 2024, 2025 Luca Liguori.
  *
@@ -18,7 +18,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License. *
+ * limitations under the License.
  */
 
 import { ShellyComponent } from './shellyComponent.js';
@@ -26,6 +26,7 @@ import { ShellyDataType } from './shellyTypes.js';
 
 /**
  * Creates a new instance of the ShellyProperty class.
+ *
  * @param {ShellyComponent} component - The component that the property belongs to.
  * @param {string} key - The name of the property.
  * @param {ShellyDataType} value - The initial value of the property.
@@ -52,6 +53,7 @@ export class ShellyProperty {
 
   /**
    * Setter for the value property.
+   *
    * @param {ShellyDataType} value - The new value for the property.
    */
   set value(value: ShellyDataType) {

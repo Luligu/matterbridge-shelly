@@ -1,10 +1,10 @@
 /**
- * This file contains the class ShellyPlatform.
- *
+ * @description This file contains the class ShellyPlatform.
  * @file src\platform.ts
  * @author Luca Liguori
- * @date 2024-05-01
+ * @created 2024-05-01
  * @version 2.0.4
+ * @license Apache-2.0
  *
  * Copyright 2024, 2025, 2026 Luca Liguori.
  *
@@ -18,8 +18,13 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License. *
+ * limitations under the License.
  */
+
+// Node.js imports
+import path from 'node:path';
+import * as fs from 'node:fs';
+import os from 'node:os';
 
 // Matterbridge imports
 import {
@@ -63,13 +68,10 @@ import {
   miredToKelvin,
   kelvinToRGB,
 } from 'matterbridge/utils';
-
 // Logger imports
 import { AnsiLogger, CYAN, GREEN, LogLevel, TimestampFormat, YELLOW, db, debugStringify, dn, er, hk, idn, nf, nt, rs, wr, zb } from 'matterbridge/logger';
-
 // Storage imports
 import { NodeStorage, NodeStorageManager } from 'matterbridge/storage';
-
 // @matter imports
 import { AtLeastOne, NumberTag } from 'matterbridge/matter';
 import { VendorId, Semtag } from 'matterbridge/matter/types';
@@ -92,11 +94,6 @@ import {
   ModeSelect,
   SmokeCoAlarm,
 } from 'matterbridge/matter/clusters';
-
-// Node.js imports
-import path from 'node:path';
-import * as fs from 'node:fs';
-import os from 'node:os';
 
 // Shelly imports
 import { Shelly } from './shelly.js';
@@ -164,9 +161,9 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     super(matterbridge, log, config as unknown as PlatformConfig);
 
     // Verify that Matterbridge is the correct version
-    if (this.verifyMatterbridgeVersion === undefined || typeof this.verifyMatterbridgeVersion !== 'function' || !this.verifyMatterbridgeVersion('3.0.4')) {
+    if (this.verifyMatterbridgeVersion === undefined || typeof this.verifyMatterbridgeVersion !== 'function' || !this.verifyMatterbridgeVersion('3.1.4')) {
       throw new Error(
-        `This plugin requires Matterbridge version >= "3.0.4". Please update Matterbridge from ${this.matterbridge.matterbridgeVersion} to the latest version in the frontend."`,
+        `This plugin requires Matterbridge version >= "3.1.4". Please update Matterbridge from ${this.matterbridge.matterbridgeVersion} to the latest version in the frontend."`,
       );
     }
 
@@ -534,10 +531,42 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             if (event.event === 'config_changed') {
               this.changedDevices.set(device.id, device.id);
               device.log.notice(`Shelly device ${idn}${device.name}${rs}${nt} id ${hk}${device.id}${nt} host ${zb}${device.host}${nt} changed BTHome device configuration`);
-              device.fetchUpdate().then(() => {
-                device.updateBTHomeComponents();
-                device.saveDevicePayloads(this.shelly.dataPath);
-              });
+              device
+                .fetchUpdate()
+                .then(() => {
+                  device.updateBTHomeComponents();
+                  device.saveDevicePayloads(this.shelly.dataPath);
+                  return;
+                })
+                .catch((err) => {
+                  device.log.error(
+                    `Shelly device ${idn}${device.name}${rs}${er} id ${hk}${device.id}${er} host ${zb}${device.host}${er} failed to fetch update: ${CYAN}${err}${er}`,
+                  );
+                });
+            }
+            if (['single_push', 'double_push', 'long_push'].includes(event.event)) {
+              let buttonEndpoint: MatterbridgeEndpoint | undefined;
+              if (bthomeDevice.model === 'Shelly BLU RC Button 4') {
+                buttonEndpoint = blu.getChildEndpointByName('Button' + event.idx);
+              } else if (bthomeDevice.model === 'Shelly BLU Wall Switch 4') {
+                buttonEndpoint = blu.getChildEndpointByName('Button' + event.idx);
+              } else if (bthomeDevice.model === 'Shelly BLU Button1') {
+                buttonEndpoint = blu;
+              } else {
+                buttonEndpoint = blu.getChildEndpointByName('Button');
+              }
+              if (!buttonEndpoint) {
+                if (['Shelly BLU Button1', 'Shelly BLU RC Button 4', 'Shelly BLU Wall Switch 4'].includes(bthomeDevice.model))
+                  blu.log.warn(`Shelly device ${idn}${blu?.deviceName ?? addr}${rs}${wr} child endpoint for button not found`);
+                return;
+              }
+              if (event.event === 'single_push') {
+                buttonEndpoint?.triggerSwitchEvent('Single', blu.log);
+              } else if (event.event === 'double_push') {
+                buttonEndpoint?.triggerSwitchEvent('Double', blu.log);
+              } else if (event.event === 'long_push') {
+                buttonEndpoint?.triggerSwitchEvent('Long', blu.log);
+              }
             }
           });
 

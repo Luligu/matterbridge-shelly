@@ -1,10 +1,10 @@
 /**
- * This file contains the class Shelly.
- *
+ * @description This file contains the class Shelly.
  * @file src\shelly.ts
  * @author Luca Liguori
- * @date 2024-05-01
+ * @created 2024-05-01
  * @version 2.2.3
+ * @license Apache-2.0
  *
  * Copyright 2024, 2025, 2026 Luca Liguori.
  *
@@ -18,14 +18,14 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License. *
+ * limitations under the License.
  */
-
-import { AnsiLogger, CYAN, MAGENTA, BRIGHT, hk, db, nf, wr, zb, LogLevel, er } from 'matterbridge/logger';
-import { isValidArray, isValidObject } from 'matterbridge/utils';
 
 import crypto from 'node:crypto';
 import EventEmitter from 'node:events';
+
+import { AnsiLogger, CYAN, MAGENTA, BRIGHT, hk, db, nf, wr, zb, LogLevel, er } from 'matterbridge/logger';
+import { isValidArray, isValidObject } from 'matterbridge/utils';
 
 import { ShellyDevice } from './shellyDevice.js';
 import { DiscoveredDevice, MdnsScanner } from './mdnsScanner.js';
@@ -34,13 +34,19 @@ import { WsClient } from './wsClient.js';
 import { WsServer } from './wsServer.js';
 import { ShellyData, ShellyDataType, ShellyDeviceId, ShellyEvent } from './shellyTypes.js';
 
+interface ShellyEvents {
+  discovered: [device: DiscoveredDevice];
+  add: [device: ShellyDevice];
+}
+
 /**
  * Creates a new instance of the Shelly class.
+ *
  * @param {AnsiLogger} log - The logger instance.
  * @param {string} [username] - The username for authentication.
  * @param {string} [password] - The password for authentication.
  */
-export class Shelly extends EventEmitter {
+export class Shelly extends EventEmitter<ShellyEvents> {
   private readonly _devices = new Map<string, ShellyDevice>();
   private readonly log: AnsiLogger;
   private fetchInterval?: NodeJS.Timeout;
@@ -56,9 +62,10 @@ export class Shelly extends EventEmitter {
 
   /**
    * Creates a new instance of the Shelly class.
+   *
    * @param {AnsiLogger} log - The logger instance.
-   * @param {string} [username] - The username for authentication.
-   * @param {string} [password] - The password for authentication.
+   * @param {string} [username] - The username for authentication or undefined if no authentication is needed.
+   * @param {string} [password] - The password for authentication or undefined if no authentication is needed.
    */
   constructor(log: AnsiLogger, username?: string, password?: string) {
     super();
@@ -196,10 +203,17 @@ export class Shelly extends EventEmitter {
           this.log.debug(
             `Fetching data from device ${hk}${device.id}${db} host ${zb}${device.host}${db} (fetch interval ${CYAN}${fetchIntervalMinutes}${db} minutes and ${CYAN}${fetchIntervalSeconds}${db} seconds)`,
           );
-          device.fetchUpdate().then((data) => {
-            device.lastFetched = Date.now(); // Update lastFetched timestamp even if no data is fetched to avoid multiple fetches
-            if (data) device.saveDevicePayloads(this._dataPath);
-          });
+          device
+            .fetchUpdate()
+            .then((data) => {
+              device.lastFetched = Date.now(); // Update lastFetched timestamp even if no data is fetched to avoid multiple fetches
+              if (data) device.saveDevicePayloads(this._dataPath);
+              return;
+            })
+            .catch((error) => {
+              // istanbul ignore next
+              device.log.error(`Error fetching data from device ${hk}${device.id}${db} host ${zb}${device.host}${db}: ${error}`);
+            });
         }
       });
     }, 10 * 1000);
@@ -254,6 +268,7 @@ export class Shelly extends EventEmitter {
 
   /**
    * Gets the network interface name.
+   *
    * @returns {string | undefined} The network interface name.
    */
   get interfaceName(): string | undefined {
@@ -262,6 +277,7 @@ export class Shelly extends EventEmitter {
 
   /**
    * Sets the network interface name.
+   *
    * @param {string | undefined} value - The network interface name.
    */
   set interfaceName(value: string | undefined) {
@@ -270,6 +286,7 @@ export class Shelly extends EventEmitter {
 
   /**
    * Gets the IPv4 address.
+   *
    * @returns {string | undefined} The IPv4 address.
    */
   get ipv4Address(): string | undefined {
@@ -278,6 +295,7 @@ export class Shelly extends EventEmitter {
 
   /**
    * Sets the IPv4 address.
+   *
    * @param {string | undefined} value - The IPv4 address.
    */
   set ipv4Address(value: string | undefined) {
@@ -286,6 +304,7 @@ export class Shelly extends EventEmitter {
 
   /**
    * Gets the IPv6 address.
+   *
    * @returns {string | undefined} The IPv6 address.
    */
   get ipv6Address(): string | undefined {
@@ -294,6 +313,7 @@ export class Shelly extends EventEmitter {
 
   /**
    * Sets the IPv6 address.
+   *
    * @param {string | undefined} value - The IPv6 address.
    */
   set ipv6Address(value: string | undefined) {
@@ -382,7 +402,7 @@ export class Shelly extends EventEmitter {
   /**
    * Gets the array of Shelly devices.
    *
-   * @returns An array of ShellyDevice objects.
+   * @returns {ShellyDevice[]} An array of ShellyDevice objects.
    */
   get devices(): ShellyDevice[] {
     return Array.from(this._devices.values());
@@ -391,7 +411,7 @@ export class Shelly extends EventEmitter {
   /**
    * Returns an iterable iterator for the ShellyDevice objects in the Shelly class.
    *
-   * @returns {IterableIterator<[string, ShellyDevice]>} An iterable iterator that yields key-value pairs of device IDs and ShellyDevice objects.
+   * @yields {[string, ShellyDevice]} A key-value pair where the key is the device ID and the value is the ShellyDevice object.
    */
   *[Symbol.iterator](): IterableIterator<[string, ShellyDevice]> {
     for (const [id, device] of this._devices.entries()) {

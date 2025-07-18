@@ -1,10 +1,10 @@
 /**
- * This file contains the commandHandler for ShellyPlatform.
- *
+ * @description This file contains the commandHandler for ShellyPlatform.
  * @file src\platformUpdateHandler.ts
  * @author Luca Liguori
- * @date 2024-12-03
+ * @created 2024-12-03
  * @version 1.0.0
+ * @license Apache-2.0
  *
  * Copyright 2024, 2025, 2026 Luca Liguori.
  *
@@ -18,15 +18,12 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License. *
+ * limitations under the License.
  */
 
 import { MatterbridgeEndpoint } from 'matterbridge';
-import { SmokeCoAlarm } from 'matterbridge/matter/clusters';
-import { db, debugStringify, dn, er, hk, idn, or, rs, YELLOW, zb } from 'matterbridge/logger';
-import { isValidArray, isValidBoolean, isValidNumber, isValidObject, isValidString, rgbColorToHslColor } from 'matterbridge/utils';
-
 import {
+  SmokeCoAlarm,
   OnOff,
   PowerSource,
   WindowCovering,
@@ -41,12 +38,26 @@ import {
   ElectricalPowerMeasurement,
   ElectricalEnergyMeasurement,
 } from 'matterbridge/matter/clusters';
+import { db, debugStringify, dn, er, hk, idn, or, rs, YELLOW, zb } from 'matterbridge/logger';
+import { isValidArray, isValidBoolean, isValidNumber, isValidObject, isValidString, rgbColorToHslColor } from 'matterbridge/utils';
 
 import { ShellyDevice } from './shellyDevice.js';
 import { ShellyData, ShellyDataType } from './shellyTypes.js';
 import { isLightComponent, isSwitchComponent } from './shellyComponent.js';
 import { ShellyPlatform } from './platform.js';
 
+/**
+ * Handles updates from Shelly devices and updates the corresponding Matterbridge endpoint.
+ *
+ * @param {ShellyPlatform} platform - The Shelly platform instance.
+ * @param {MatterbridgeEndpoint} matterbridgeDevice - The Matterbridge endpoint for the device.
+ * @param {ShellyDevice} shellyDevice - The Shelly device instance.
+ * @param {string} component - The component name to update.
+ * @param {string} property - The property name to update.
+ * @param {ShellyDataType} value - The new value for the property.
+ * @param {string} [endpointName] - The name of the endpoint to update (optional).
+ * @returns {void}
+ */
 export function shellyUpdateHandler(
   platform: ShellyPlatform,
   matterbridgeDevice: MatterbridgeEndpoint,
@@ -55,7 +66,7 @@ export function shellyUpdateHandler(
   property: string,
   value: ShellyDataType,
   endpointName?: string,
-) {
+): void {
   let endpoint: MatterbridgeEndpoint | undefined;
   if (endpointName === 'PowerSource') endpoint = matterbridgeDevice;
   if (!endpoint) endpoint = matterbridgeDevice.getChildEndpointByName(endpointName ?? component);
@@ -92,9 +103,9 @@ export function shellyUpdateHandler(
     shellyDevice.colorUpdateTimeout = setTimeout(() => {
       const hue = Math.max(Math.min(Math.round((hsl.h / 360) * 254), 254), 0);
       const saturation = Math.max(Math.min(Math.round((hsl.s / 100) * 254), 254), 0);
-      if (isValidNumber(hue, 0, 254)) endpoint.setAttribute(ColorControl.Cluster.id, 'currentHue', hue, shellyDevice.log);
-      if (isValidNumber(saturation, 0, 254)) endpoint.setAttribute(ColorControl.Cluster.id, 'currentSaturation', saturation, shellyDevice.log);
-      endpoint.setAttribute(ColorControl.Cluster.id, 'colorMode', ColorControl.ColorMode.CurrentHueAndCurrentSaturation, shellyDevice.log);
+      if (isValidNumber(hue, 0, 254)) endpoint?.setAttribute(ColorControl.Cluster.id, 'currentHue', hue, shellyDevice.log);
+      if (isValidNumber(saturation, 0, 254)) endpoint?.setAttribute(ColorControl.Cluster.id, 'currentSaturation', saturation, shellyDevice.log);
+      endpoint?.setAttribute(ColorControl.Cluster.id, 'colorMode', ColorControl.ColorMode.CurrentHueAndCurrentSaturation, shellyDevice.log);
     }, 200);
   }
   // Update colorTemp gen 1
@@ -302,13 +313,13 @@ export function shellyUpdateHandler(
         const status = WindowCovering.MovementStatus.Stopped;
         endpoint.setAttribute(WindowCovering.Cluster.id, 'operationalStatus', { global: status, lift: status, tilt: status }, shellyDevice.log);
         setTimeout(() => {
-          shellyDevice.log.debug(`Setting target position to current position on endpoint ${or}${endpoint.name}:${endpoint.number}${db}`);
-          const current = endpoint.getAttribute(WindowCovering.Cluster.id, 'currentPositionLiftPercent100ths', shellyDevice.log);
+          shellyDevice.log.debug(`Setting target position to current position on endpoint ${or}${endpoint?.name}:${endpoint?.number}${db}`);
+          const current = endpoint?.getAttribute(WindowCovering.Cluster.id, 'currentPositionLiftPercent100ths', shellyDevice.log);
           if (!isValidNumber(current, 0, 10000)) {
-            matterbridgeDevice.log.error(`Error: current position not found on endpoint ${or}${endpoint.name}:${endpoint.number}${er}`);
+            matterbridgeDevice.log.error(`Error: current position not found on endpoint ${or}${endpoint?.name}:${endpoint?.number}${er}`);
             return;
           }
-          endpoint.setAttribute(WindowCovering.Cluster.id, 'targetPositionLiftPercent100ths', current, shellyDevice.log);
+          endpoint?.setAttribute(WindowCovering.Cluster.id, 'targetPositionLiftPercent100ths', current, shellyDevice.log);
         }, 1000);
       }
       // Gen 2 devices send open for fully open
@@ -345,6 +356,28 @@ export function shellyUpdateHandler(
   // Update energy from main components (gen 2 devices send power total inside the component not with meter)
   if (['Light', 'Rgb', 'Relay', 'Switch', 'Cover', 'Roller', 'PowerMeter'].includes(shellyComponent.name)) {
     if (!platform.validateEntity(shellyDevice.id, 'PowerMeter')) return;
+
+    // For triphase devices (shellypro3em and shelly3em63g3) we have em:0 and emdata:0. We add phase A, B and C components as well and we use em:0 as total. The em:1, em:2 and em:3 need to be updated from the em:0 phases.
+    if (shellyDevice.profile === 'triphase' && shellyComponent.id === 'em:0') {
+      // Set the total current and active power and energy for triphase devices (no voltage on total)
+      if (property === 'total_current') property = 'current';
+      if (property === 'total_act_power') property = 'act_power';
+      if (property === 'total_act') property = 'total_act_energy';
+      if (property === 'total_act_ret') property = 'total_act_ret_energy';
+      // Set the voltage, current, active power and energy for phase A, B and C for triphase devices
+      if (property.startsWith('a_') || property.startsWith('b_') || property.startsWith('c_')) {
+        if (property.startsWith('a_')) endpoint = matterbridgeDevice.getChildEndpointByName('em:1');
+        if (property.startsWith('b_')) endpoint = matterbridgeDevice.getChildEndpointByName('em:2');
+        if (property.startsWith('c_')) endpoint = matterbridgeDevice.getChildEndpointByName('em:3');
+        if (!endpoint) {
+          shellyDevice.log.debug(`****shellyUpdateHandler error: endpoint not found for triphase shelly device ${dn}${shellyDevice?.id}${db}`);
+          return;
+        }
+        property = property.replace(/^a_/, '').replace(/^b_/, '').replace(/^c_/, '');
+        shellyDevice.log.debug(`***shellyUpdateHandler property remapped to ${property} for triphase shelly device ${dn}${shellyDevice?.id}${db}`);
+      }
+    }
+
     // Gen. 1 devices have: power, total (not all) in PowerMeters and voltage in status (not all)
     // PRO devices have: apower, voltage, freq, current, aenergy.total (wh) and no PowerMeters
     if ((property === 'power' || property === 'apower' || property === 'act_power') && isValidNumber(value, 0)) {
@@ -381,6 +414,10 @@ export function shellyUpdateHandler(
     if (property === 'total_act_energy' && isValidNumber(value, 0)) {
       const energy = Math.round(value * 1000) / 1000;
       endpoint.setAttribute(ElectricalEnergyMeasurement.Cluster.id, 'cumulativeEnergyImported', { energy: Math.round(energy * 1000) }, shellyDevice.log);
+    }
+    if (property === 'total_act_ret_energy' && isValidNumber(value, 0)) {
+      const energy = Math.round(value * 1000) / 1000;
+      endpoint.setAttribute(ElectricalEnergyMeasurement.Cluster.id, 'cumulativeEnergyExported', { energy: Math.round(energy * 1000) }, shellyDevice.log);
     }
     if (property === 'voltage' && isValidNumber(value, 0)) {
       endpoint.setAttribute(ElectricalPowerMeasurement.Cluster.id, 'voltage', Math.round(value * 1000), shellyDevice.log);

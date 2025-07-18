@@ -1,76 +1,76 @@
-/* eslint-disable no-console */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { jest } from '@jest/globals';
+// src/wsClient.test.ts
 
+/* eslint-disable no-console */
+
+import { jest } from '@jest/globals';
 import { WebSocket, WebSocketServer } from 'ws';
 import { getMacAddress, wait, waiter } from 'matterbridge/utils';
-import { WsClient } from './wsClient';
 import { AnsiLogger, db, er, hk, LogLevel, nf, wr, zb } from 'matterbridge/logger';
 
-describe('ShellyWsClient', () => {
-  let loggerLogSpy: jest.SpiedFunction<(level: LogLevel, message: string, ...parameters: any[]) => void>;
-  let consoleLogSpy: jest.SpiedFunction<typeof console.log>;
-  let consoleDebugSpy: jest.SpiedFunction<typeof console.log>;
-  let consoleInfoSpy: jest.SpiedFunction<typeof console.log>;
-  let consoleWarnSpy: jest.SpiedFunction<typeof console.log>;
-  let consoleErrorSpy: jest.SpiedFunction<typeof console.log>;
+import { WsClient } from './wsClient.ts';
 
+let loggerLogSpy: jest.SpiedFunction<typeof AnsiLogger.prototype.log>;
+let consoleLogSpy: jest.SpiedFunction<typeof console.log>;
+let consoleDebugSpy: jest.SpiedFunction<typeof console.log>;
+let consoleInfoSpy: jest.SpiedFunction<typeof console.log>;
+let consoleWarnSpy: jest.SpiedFunction<typeof console.log>;
+let consoleErrorSpy: jest.SpiedFunction<typeof console.log>;
+const debug = false; // Set to true to enable debug logging
+
+if (!debug) {
+  loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log').mockImplementation((level: string, message: string, ...parameters: any[]) => {});
+  consoleLogSpy = jest.spyOn(console, 'log').mockImplementation((...args: any[]) => {});
+  consoleDebugSpy = jest.spyOn(console, 'debug').mockImplementation((...args: any[]) => {});
+  consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation((...args: any[]) => {});
+  consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation((...args: any[]) => {});
+  consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation((...args: any[]) => {});
+} else {
+  loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log');
+  consoleLogSpy = jest.spyOn(console, 'log');
+  consoleDebugSpy = jest.spyOn(console, 'debug');
+  consoleInfoSpy = jest.spyOn(console, 'info');
+  consoleWarnSpy = jest.spyOn(console, 'warn');
+  consoleErrorSpy = jest.spyOn(console, 'error');
+}
+
+function setDebug(debug: boolean) {
+  if (debug) {
+    loggerLogSpy.mockRestore();
+    consoleLogSpy.mockRestore();
+    consoleDebugSpy.mockRestore();
+    consoleInfoSpy.mockRestore();
+    consoleWarnSpy.mockRestore();
+    consoleErrorSpy.mockRestore();
+    loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log');
+    consoleLogSpy = jest.spyOn(console, 'log');
+    consoleDebugSpy = jest.spyOn(console, 'debug');
+    consoleInfoSpy = jest.spyOn(console, 'info');
+    consoleWarnSpy = jest.spyOn(console, 'warn');
+    consoleErrorSpy = jest.spyOn(console, 'error');
+  } else {
+    loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log').mockImplementation((level: string, message: string, ...parameters: any[]) => {});
+    consoleLogSpy = jest.spyOn(console, 'log').mockImplementation((...args: any[]) => {});
+    consoleDebugSpy = jest.spyOn(console, 'debug').mockImplementation((...args: any[]) => {});
+    consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation((...args: any[]) => {});
+    consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation((...args: any[]) => {});
+    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation((...args: any[]) => {});
+  }
+}
+
+describe('ShellyWsClient', () => {
   let wsClient: WsClient;
   let server: WebSocketServer;
 
   let sendPong = true;
 
-  const address = 'c4:cb:76:b3:cd:1f';
-
-  const debug = false;
-
-  if (!debug) {
-    // Spy on and mock AnsiLogger.log
-    loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log').mockImplementation((level: string, message: string, ...parameters: any[]) => {
-      //
-    });
-    // Spy on and mock console.log
-    consoleLogSpy = jest.spyOn(console, 'log').mockImplementation((...args: any[]) => {
-      //
-    });
-    // Spy on and mock console.debug
-    consoleDebugSpy = jest.spyOn(console, 'debug').mockImplementation((...args: any[]) => {
-      //
-    });
-    // Spy on and mock console.info
-    consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation((...args: any[]) => {
-      //
-    });
-    // Spy on and mock console.warn
-    consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation((...args: any[]) => {
-      //
-    });
-    // Spy on and mock console.error
-    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation((...args: any[]) => {
-      //
-    });
-  } else {
-    // Spy on AnsiLogger.log
-    loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log');
-    // Spy on console.log
-    consoleLogSpy = jest.spyOn(console, 'log');
-    // Spy on console.debug
-    consoleDebugSpy = jest.spyOn(console, 'debug');
-    // Spy on console.info
-    consoleInfoSpy = jest.spyOn(console, 'info');
-    // Spy on console.warn
-    consoleWarnSpy = jest.spyOn(console, 'warn');
-    // Spy on console.error
-    consoleErrorSpy = jest.spyOn(console, 'error');
-  }
+  // const address = 'c4:cb:76:b3:cd:1f';
 
   beforeAll(async () => {
-    if (getMacAddress() !== address) return; // Only run these tests on the correct machine
+    // if (getMacAddress() !== address) return; // Only run these tests on the correct machine
 
     // Create a WebSocket server and await its listening state
     await new Promise<void>((resolve) => {
-      server = new WebSocketServer({ port: 80 }, () => {
+      server = new WebSocketServer({ port: 8080 }, () => {
         const address = server.address() as { address: string; family: string; port: number };
         console.log('Jest ws server is up and listening on port:', address.port, 'address:', address.address, 'family:', address.family);
         resolve();
@@ -79,9 +79,11 @@ describe('ShellyWsClient', () => {
 
     server.on('connection', (ws) => {
       console.info(`New client connected: ${ws.url}`);
+      server.emit('client_connected');
 
       ws.on('close', () => {
         console.info('Client disconnected');
+        server.emit('client_disconnected');
       });
       ws.on('error', (error) => {
         console.error(`Error: ${error}`);
@@ -108,7 +110,7 @@ describe('ShellyWsClient', () => {
     server.on('close', () => {
       console.info('Server closed');
     });
-  }, 360000);
+  });
 
   beforeEach(async () => {
     // Clear all mocks
@@ -120,7 +122,7 @@ describe('ShellyWsClient', () => {
   });
 
   afterAll(async () => {
-    if (getMacAddress() !== address) return;
+    // if (getMacAddress() !== address) return;
 
     console.log('Closing Jest test ws server');
 
@@ -137,15 +139,18 @@ describe('ShellyWsClient', () => {
       });
     });
 
+    // Wait 1 seconds
+    await wait(1000);
+
     // Restore all mocks
     jest.restoreAllMocks();
   });
 
   test('should fail with wrong address', async () => {
-    if (!server) return;
-    wsClient = new WsClient('Jest', 'xxxxxx');
+    expect(server).toBeDefined();
+    wsClient = new WsClient('Jest', 'xxxxxx', 8080);
     wsClient.once('error', (error) => {
-      // console.error('Error event received:', error);
+      console.error('Error event received:', error);
     });
     expect(wsClient).toBeDefined();
     expect(wsClient).toBeInstanceOf(WsClient);
@@ -153,22 +158,17 @@ describe('ShellyWsClient', () => {
     expect(wsClient.isConnecting).toBeFalsy();
 
     // Await connection to the server
-    const connectPromise = new Promise<WebSocket | undefined>((resolve) => {
+    await new Promise<void>((resolve) => {
       wsClient.start();
-      server.once('connection', (ws: WebSocket) => {
-        console.info('Server received connection');
-        resolve(ws);
-      });
       const interval = setInterval(() => {
         console.info('Waiting for server to receive connection');
         if (wsClient.isConnecting === false && wsClient.isConnected === false) {
           console.info('Server did not receive connection');
           clearInterval(interval);
-          resolve(undefined);
+          resolve();
         }
-      }, 1000);
+      }, 100).unref();
     });
-    await connectPromise;
 
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Starting ws client for Shelly device ${hk}Jest${db} host ${zb}xxxxxx${db}`);
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Started ws client for Shelly device ${hk}Jest${db} host ${zb}xxxxxx${db}`);
@@ -177,25 +177,38 @@ describe('ShellyWsClient', () => {
   }, 10000);
 
   test('should not connect when connected', async () => {
-    if (!server) return;
-    wsClient = new WsClient('Jest', 'localhost');
+    expect(server).toBeDefined();
+    wsClient = new WsClient('Jest', 'localhost', 8080);
+
+    await new Promise<void>((resolve) => {
+      wsClient.once('open', () => {
+        console.info('Client connected');
+        resolve();
+      });
+      wsClient.start();
+    });
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, expect.stringContaining(`WebSocket connection opened with Shelly device ${hk}Jest${nf} host ${zb}localhost${nf}`));
+
+    jest.clearAllMocks();
     wsClient.start();
-    await wait(250);
-    wsClient.start();
-    wsClient.stop();
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`WebSocket client is already connected`));
+
+    jest.clearAllMocks();
+    await new Promise<void>((resolve) => {
+      server.once('client_disconnected', () => {
+        console.info('Client disconnected');
+        resolve();
+      });
+      wsClient.stop();
+    });
     expect(wsClient.isConnected).toBeFalsy();
     expect(wsClient.isConnecting).toBeFalsy();
-    await new Promise<void>((resolve) =>
-      setTimeout(() => {
-        resolve();
-      }, 2000),
-    );
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`WebSocket client is already connected`));
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`Closed ws client for Shelly device ${hk}Jest${db} host ${zb}localhost${db}`));
   }, 10000);
 
   test('should terminate before connected', async () => {
-    if (!server) return;
-    wsClient = new WsClient('Jest', 'localhost');
+    expect(server).toBeDefined();
+    wsClient = new WsClient('Jest', 'localhost', 8080);
     wsClient.start();
     wsClient.stop();
     expect(wsClient.isConnected).toBeFalsy();
@@ -209,18 +222,18 @@ describe('ShellyWsClient', () => {
   }, 10000);
 
   test('should fail to create', async () => {
-    if (!server) return;
-    wsClient = new WsClient('Jest', 'invald - host');
+    expect(server).toBeDefined();
+    wsClient = new WsClient('Jest', 'invald - host', 8080);
     wsClient.start();
     wsClient.stop();
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.ERROR, expect.stringContaining(`Failed to create WebSocket connection to ${zb}ws://invald - host/rpc${er}:`));
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.ERROR, expect.stringContaining(`Failed to create WebSocket connection to ${zb}ws://invald - host:8080/rpc${er}:`));
     expect(wsClient.isConnected).toBeFalsy();
     expect(wsClient.isConnecting).toBeFalsy();
   }, 10000);
 
   test('create the wsClient', () => {
-    if (!server) return;
-    wsClient = new WsClient('Jest', 'localhost');
+    expect(server).toBeDefined();
+    wsClient = new WsClient('Jest', 'localhost', 8080);
     expect(wsClient).toBeDefined();
     expect(wsClient).toBeInstanceOf(WsClient);
 
@@ -233,13 +246,13 @@ describe('ShellyWsClient', () => {
   });
 
   test('should log error if not connected', () => {
-    if (!server) return;
+    expect(server).toBeDefined();
     wsClient.sendRequest('Shelly.GetStatus');
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.ERROR, `SendRequest error: WebSocket client is not connected to device ${hk}Jest${er} host ${zb}localhost${er}`);
   });
 
   test('should connect to the server', async () => {
-    if (!server) return;
+    expect(server).toBeDefined();
     // Await connection to the server
     const connectPromise = new Promise<WebSocket>((resolve) => {
       server.once('connection', (ws: WebSocket) => {
@@ -259,7 +272,7 @@ describe('ShellyWsClient', () => {
     });
 
     // Create a WebSocket client and connect to the server and await its connection
-    wsClient = new WsClient('Jest', 'localhost');
+    wsClient = new WsClient('Jest', 'localhost', 8080);
     wsClient.log.logLevel = LogLevel.DEBUG;
     wsClient.start();
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Starting ws client for Shelly device ${hk}Jest${db} host ${zb}localhost${db}`);
@@ -279,14 +292,12 @@ describe('ShellyWsClient', () => {
   }, 10000);
 
   test('should start ping pong and timeout', async () => {
-    if (!server) return;
-    (wsClient as any).startPingPong(500);
+    expect(server).toBeDefined();
+    (wsClient as any).startPingPong(250);
     expect((wsClient as any).pingInterval).toBeDefined();
+    expect((wsClient as any).pongTimeout).toBeUndefined();
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Start PingPong with device ${hk}Jest${db} host ${zb}localhost${db}.`);
-    // prettier-ignore
-    await waiter('WsClient pong timeout', () => { return (wsClient as any).pongTimeout; }, true);
-    expect((wsClient as any).pongTimeout).toBeDefined();
-    await wait(1000);
+    await wait(500);
     expect(consoleDebugSpy).toHaveBeenCalledWith('Ping received');
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Pong received from device ${hk}Jest${db} host ${zb}localhost${db}, connection is alive.`);
 
@@ -297,7 +308,7 @@ describe('ShellyWsClient', () => {
   }, 10000);
 
   test('should respond to error event', async () => {
-    if (!server) return;
+    expect(server).toBeDefined();
     wsClient.once('error', (error) => {
       // console.error('Error event received:', error);
     });
@@ -307,7 +318,7 @@ describe('ShellyWsClient', () => {
   }, 10000);
 
   test('should respond to close event', async () => {
-    if (!server) return;
+    expect(server).toBeDefined();
     (wsClient as any).wsClient?.emit('close', 1000, Buffer.from('Test close'));
     expect(wsClient.isConnected).toBeFalsy();
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, expect.stringContaining(`WebSocket connection closed with Shelly device ${hk}Jest${nf} host ${zb}localhost${nf}`));
@@ -315,14 +326,14 @@ describe('ShellyWsClient', () => {
   }, 10000);
 
   test('should be connected', async () => {
-    if (!server) return;
+    expect(server).toBeDefined();
     expect((wsClient as any).wsClient?.readyState).toBe(WebSocket.OPEN);
     expect((wsClient as any).pingInterval).toBeUndefined();
     expect((wsClient as any).pongTimeout).toBeUndefined();
   }, 10000);
 
   test('should react to ping pong error', async () => {
-    if (!server) return;
+    expect(server).toBeDefined();
     console.log('PingPong error test');
     sendPong = false;
     (wsClient as any).startPingPong(500);
@@ -339,7 +350,7 @@ describe('ShellyWsClient', () => {
   }, 10000);
 
   test('should close the connection', async () => {
-    if (!server) return;
+    expect(server).toBeDefined();
     wsClient.stop();
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`Stopping ws client for Shelly device ${hk}Jest${db} host ${zb}localhost${db}`));
     // prettier-ignore
@@ -351,7 +362,7 @@ describe('ShellyWsClient', () => {
   }, 10000);
 
   test('should connect to the server without auth', async () => {
-    if (!server) return;
+    expect(server).toBeDefined();
     // Await connection to the server
     const connectPromise = new Promise<WebSocket>((resolve) => {
       server.once('connection', (ws: WebSocket) => {
@@ -378,7 +389,7 @@ describe('ShellyWsClient', () => {
     });
 
     // Create a WebSocket client and connect to the server and await its connection
-    wsClient = new WsClient('Jest', 'localhost');
+    wsClient = new WsClient('Jest', 'localhost', 8080);
     wsClient.on('response', (response) => {
       //
     });
@@ -412,7 +423,8 @@ describe('ShellyWsClient', () => {
   }, 10000);
 
   test('should not connect to the server with auth if no password is provided', async () => {
-    if (!server) return;
+    expect(server).toBeDefined();
+
     // Await connection to the server
     const connectPromise = new Promise<WebSocket>((resolve) => {
       server.once('connection', (ws: WebSocket) => {
@@ -458,7 +470,7 @@ describe('ShellyWsClient', () => {
 
     // Create a WebSocket client and connect to the server and await its connection
     console.error('Jest test: should not connect to the server with auth if no password is provided');
-    wsClient = new WsClient('Jest', 'localhost');
+    wsClient = new WsClient('Jest', 'localhost', 8080);
     wsClient.log.logLevel = LogLevel.DEBUG;
     wsClient.start();
     console.error('Jest test: should not connect to the server with auth if no password is provided. Step 1');
@@ -468,31 +480,31 @@ describe('ShellyWsClient', () => {
     expect(wsClient.isConnected).toBeFalsy();
     const ws = await connectPromise;
     // prettier-ignore
-    await waiter('WsClient connection timeout', () => { return wsClient.isConnected; }, true);
+    await waiter('WsClient connection timeout', () => { return wsClient.isConnected; }, true, 5000, 100);
     console.error('Jest test: should not connect to the server with auth if no password is provided. Step 2');
-    // expect((wsClient as any).auth).toBeTruthy();
     expect(wsClient.isConnecting).toBeFalsy();
     expect(wsClient.isConnected).toBeTruthy();
 
-    // expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.ERROR, `Authentication required for Jest but the password is not set. Exiting...`);
-
-    // Send a request from the client to the server
-    wsClient.sendRequest('Shelly.GetStatus');
+    await wait(100);
+    expect((wsClient as any).auth).toBeTruthy();
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.ERROR, `Authentication required for Jest but the password is not set. Exiting...`);
+    console.error('Jest test: should not connect to the server with auth if no password is provided. Step 3');
 
     // Stop the WebSocket client
     (wsClient as any).wsDeviceId = 'Jest';
     wsClient.stop();
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`Stopping ws client for Shelly device ${hk}Jest${db} host ${zb}localhost${db}`));
     // prettier-ignore
-    await waiter('WsClient close isConnecting timeout', () => { return !wsClient.isConnecting; }, true);
+    await waiter('WsClient close isConnecting timeout', () => { return !wsClient.isConnecting; }, true, 5000, 100);
     expect(wsClient.isConnecting).toBeFalsy();
     // prettier-ignore
-    await waiter('WsClient close isConnected timeout', () => { return !wsClient.isConnected; }, true);
+    await waiter('WsClient close isConnected timeout', () => { return !wsClient.isConnected; }, true, 5000, 100);
     expect(wsClient.isConnected).toBeFalsy();
   }, 10000);
 
   test('should connect to the server with auth', async () => {
-    if (!server) return;
+    expect(server).toBeDefined();
+
     // Await connection to the server
     const connectPromise = new Promise<WebSocket>((resolve) => {
       server.once('connection', (ws: WebSocket) => {
@@ -558,7 +570,7 @@ describe('ShellyWsClient', () => {
     });
 
     // Create a WebSocket client and connect to the server and await its connection
-    wsClient = new WsClient('Jest', 'localhost', 'password');
+    wsClient = new WsClient('Jest', 'localhost', 8080, 'password');
     wsClient.log.logLevel = LogLevel.DEBUG;
     wsClient.start();
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Starting ws client for Shelly device ${hk}Jest${db} host ${zb}localhost${db}`);
@@ -567,14 +579,15 @@ describe('ShellyWsClient', () => {
     expect(wsClient.isConnected).toBeFalsy();
     const ws = await connectPromise;
     // prettier-ignore
-    await waiter('WsClient connection timeout', () => { return wsClient.isConnected; }, true);
+    await waiter('WsClient connection timeout', () => { return wsClient.isConnected; }, true, 5000, 100);
     expect((wsClient as any).auth).toBeTruthy();
     expect(wsClient.isConnecting).toBeFalsy();
     expect(wsClient.isConnected).toBeTruthy();
 
+    await wait(100);
     expect(loggerLogSpy).not.toHaveBeenCalledWith(LogLevel.ERROR, `Authentication required for Jest but the password is not set. Exiting...`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Sending auth request to Shelly device ${hk}Jest${db} host ${zb}localhost${db}`, expect.anything());
 
-    // Send a request from the client to the server
     wsClient.sendRequest('Shelly.GetStatus');
 
     // Stop the WebSocket client
@@ -582,10 +595,10 @@ describe('ShellyWsClient', () => {
     wsClient.stop();
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`Stopping ws client for Shelly device ${hk}Jest${db} host ${zb}localhost${db}`));
     // prettier-ignore
-    await waiter('WsClient close isConnecting timeout', () => { return !wsClient.isConnecting; }, true);
+    await waiter('WsClient close isConnecting timeout', () => { return !wsClient.isConnecting; }, true, 5000, 100);
     expect(wsClient.isConnecting).toBeFalsy();
     // prettier-ignore
-    await waiter('WsClient close isConnected timeout', () => { return !wsClient.isConnected; }, true);
+    await waiter('WsClient close isConnected timeout', () => { return !wsClient.isConnected; }, true, 5000, 100);
     expect(wsClient.isConnected).toBeFalsy();
   }, 10000);
 });
