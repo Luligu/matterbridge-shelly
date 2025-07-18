@@ -211,6 +211,8 @@ export interface ShellyEvent {
   event: string;
   ts: number;
   id?: number;
+  idx?: number;
+  channel?: number;
   target?: string;
   restart_required?: boolean;
   cfg_rev?: number;

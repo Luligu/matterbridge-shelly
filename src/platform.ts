@@ -544,6 +544,30 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
                   );
                 });
             }
+            if (['single_push', 'double_push', 'long_push'].includes(event.event)) {
+              let buttonEndpoint: MatterbridgeEndpoint | undefined;
+              if (bthomeDevice.model === 'Shelly BLU RC Button 4') {
+                buttonEndpoint = blu.getChildEndpointByName('Button' + event.idx);
+              } else if (bthomeDevice.model === 'Shelly BLU Wall Switch 4') {
+                buttonEndpoint = blu.getChildEndpointByName('Button' + event.idx);
+              } else if (bthomeDevice.model === 'Shelly BLU Button1') {
+                buttonEndpoint = blu;
+              } else {
+                buttonEndpoint = blu.getChildEndpointByName('Button');
+              }
+              if (!buttonEndpoint) {
+                if (['Shelly BLU Button1', 'Shelly BLU RC Button 4', 'Shelly BLU Wall Switch 4'].includes(bthomeDevice.model))
+                  blu.log.warn(`Shelly device ${idn}${blu?.deviceName ?? addr}${rs}${wr} child endpoint for button not found`);
+                return;
+              }
+              if (event.event === 'single_push') {
+                buttonEndpoint?.triggerSwitchEvent('Single', blu.log);
+              } else if (event.event === 'double_push') {
+                buttonEndpoint?.triggerSwitchEvent('Double', blu.log);
+              } else if (event.event === 'long_push') {
+                buttonEndpoint?.triggerSwitchEvent('Long', blu.log);
+              }
+            }
           });
 
           // BLU observer bthome sensor events
