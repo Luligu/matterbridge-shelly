@@ -76,7 +76,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
   readonly log: AnsiLogger;
   readonly username: string | undefined;
   readonly password: string | undefined;
-  profile: 'switch' | 'cover' | 'rgb' | 'rgbw' | 'color' | 'white' | 'light' | undefined = undefined;
+  profile: 'switch' | 'cover' | 'rgb' | 'rgbw' | 'color' | 'white' | 'light' | 'monophase' | 'triphase' | undefined = undefined;
   host: string;
   id = '';
   model = '';
@@ -502,7 +502,8 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
    *
    * @param {Shelly} shelly The Shelly instance.
    * @param {AnsiLogger} log The AnsiLogger instance.
-   * @param {string} host The host of the device.
+   * @param {string} host The host of the device. It can be an IP address or a cache JSON file path.
+   *
    * @returns {Promise<ShellyDevice | undefined>} A Promise that resolves to a ShellyDevice instance or undefined if an error occurs.
    */
   static async create(shelly: Shelly, log: AnsiLogger, host: string): Promise<ShellyDevice | undefined> {
@@ -528,7 +529,8 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
     if (shellyPayload.mode === 'roller') device.profile = 'cover';
     if (shellyPayload.mode === 'color') device.profile = 'color';
     if (shellyPayload.mode === 'white') device.profile = 'white';
-    if (shellyPayload.profile !== undefined) device.profile = shellyPayload.profile as 'switch' | 'cover' | 'rgb' | 'rgbw' | 'color' | 'white' | 'light' | undefined;
+    if (shellyPayload.profile !== undefined)
+      device.profile = shellyPayload.profile as 'switch' | 'cover' | 'rgb' | 'rgbw' | 'color' | 'white' | 'light' | 'monophase' | 'triphase' | undefined;
 
     // Gen 1 Shelly device
     if (!shellyPayload.gen) {
@@ -692,6 +694,12 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
         if (key.startsWith('pm1:')) device.addComponent(new ShellyComponent(device, key, 'PowerMeter', settingsPayload[key] as ShellyData));
         if (key.startsWith('em1:')) device.addComponent(new ShellyComponent(device, key, 'PowerMeter', settingsPayload[key] as ShellyData));
         if (key.startsWith('em:')) device.addComponent(new ShellyComponent(device, key, 'PowerMeter', settingsPayload[key] as ShellyData));
+        if (device.profile === 'triphase' && key === 'em:0') {
+          // For triphase devices (shellypro3em and shelly3em63g3) we have em:0 and emdata:0. We add phase A, B and C components as well and we use em:0 as total. The em:1, em:2 and em:3 need to be updated from the em:0 phases.
+          device.addComponent(new ShellyComponent(device, 'em:1', 'PowerMeter', settingsPayload[key] as ShellyData));
+          device.addComponent(new ShellyComponent(device, 'em:2', 'PowerMeter', settingsPayload[key] as ShellyData));
+          device.addComponent(new ShellyComponent(device, 'em:3', 'PowerMeter', settingsPayload[key] as ShellyData));
+        }
         if (key.startsWith('temperature:')) device.addComponent(new ShellyComponent(device, key, 'Temperature', settingsPayload[key] as ShellyData));
         if (key.startsWith('humidity:')) device.addComponent(new ShellyComponent(device, key, 'Humidity', settingsPayload[key] as ShellyData));
         if (key.startsWith('illuminance:')) device.addComponent(new ShellyComponent(device, key, 'Illuminance', settingsPayload[key] as ShellyData));
@@ -947,7 +955,11 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
   }
 
   /**
-   * Updates handler from both WsClient (shellyDevice) and WsServer (shelly).
+   * Updates handler from both WsClient ('update' event in shellyDevice) and WsServer ('wssupdate' event in shelly).
+   *
+   * It is called when a device is created by ShellyDevice.create().
+   *
+   * It is also called from fetchUpdate().
    *
    * @param {ShellyData} data - The data to update the device with.
    *
@@ -1174,7 +1186,17 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
   }
 
   /**
-   * Fetches the update for the Shelly device.
+   * Fetches the update for the Shelly device:
+   * - 'shelly' data (Gen 1 and Gen 2+).
+   * - 'settings' or 'Shelly.GetConfig' data.
+   * - 'status' or 'Shelly.GetStatus' data.
+   * - 'Shelly.GetComponents' (with dynamic_only BTHome components) data for gen 2+ devices only.
+   *
+   * If the fetch is successful, it updates the device's payloads and emits an 'online' event if the device was previously offline.
+   * If the fetch is successful, it also updates the last seen timestamp and the cached state.
+   * If any of the fetches fail, it logs a warning and emits an 'offline' event if the device was previously online.
+   *
+   * Then it calls the `onUpdate` method with the status payload to update the device's components.
    *
    * @returns {Promise<ShellyData | null>} A Promise that resolves to the updated ShellyData or null if no data is found.
    */
@@ -1316,7 +1338,9 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
    * Fetches device data from the specified host and service.
    * If the host ends with '.json', it fetches the device data from a file.
    * Otherwise, it makes an HTTP request to the specified host and service.
-   * Supports both Gen 1 and Gen 2 devices.
+   * Supports both Gen 1 and Gen 2+ devices.
+   * Handles authentication for Gen 1 devices using Basic Auth and for Gen 2+ devices using Digest Auth.
+   * Features the AbortController to handle request timeouts. The request will be aborted after 20 seconds if no response is received.
    *
    * @param {Shelly} shelly - The Shelly instance.
    * @param {AnsiLogger} log - The logger instance.

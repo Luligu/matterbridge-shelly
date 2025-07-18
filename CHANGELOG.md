@@ -10,7 +10,7 @@ If you like this project and find it useful, please consider giving it a star on
 
 You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his invaluable contribution to this project.
 
-## [2.1.0] - 2025-07-16
+## [2.1.0] - 2025-07-18
 
 ### Added
 
@@ -29,13 +29,17 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 - [Jest]: Jest test on WsServer with coverage 100%.
 - [Jest]: Jest test on CoapServer with coverage 100%.
 
+- [triphase]: Added support for shellypro3em with profile triphase. Four PowerMeters are created: the first is the total, then phase A, B and C.
+- [pro]: Added support for returned energy.
+- [BLU]: Added bthomedevice_event for BLU buttons.
+
 ### Changed
 
 - [package]: Updated package to Automator v. 2.0.2.
-- [package]: Update dependencies.
+- [package]: Updated dependencies.
 - [storage]: Bumped `node-storage-manager` to 2.0.0.
 - [logger]: Bumped `node-ansi-logger` to 3.1.1.
-- [package]: Requires matterbridge 3.1.0.
+- [package]: Required matterbridge 3.1.4.
 - [package]: Updated workflows.
 - [worflows]: Removed workflows running on node 18 since it reached the end-of-life in April 2025.
 
