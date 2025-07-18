@@ -167,7 +167,7 @@ describe('ShellyPlatform', () => {
       matterbridgeDirectory: HOMEDIR + '/.matterbridge',
       matterbridgePluginDirectory: HOMEDIR + '/Matterbridge',
       systemInformation: { ipv4Address: undefined, osRelease: 'xx.xx.xx.xx.xx.xx', nodeVersion: '22.1.10' },
-      matterbridgeVersion: '3.0.4',
+      matterbridgeVersion: '3.1.4',
       log: mockLog,
       getDevices: jest.fn(() => []),
       getPlugins: jest.fn(() => []),
@@ -259,7 +259,7 @@ describe('ShellyPlatform', () => {
   it('should throw because of version', () => {
     mockMatterbridge.matterbridgeVersion = '1.5.4';
     expect(() => new ShellyPlatform(mockMatterbridge, mockLog, mockConfig as any)).toThrow();
-    mockMatterbridge.matterbridgeVersion = '3.0.4';
+    mockMatterbridge.matterbridgeVersion = '3.1.4';
   });
 
   it('should call onStart with reason and start mDNS', async () => {
