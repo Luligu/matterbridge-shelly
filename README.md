@@ -5,6 +5,8 @@
 [![Docker Version](https://img.shields.io/docker/v/luligu/matterbridge?label=docker%20version&sort=semver)](https://hub.docker.com/r/luligu/matterbridge)
 [![Docker Pulls](https://img.shields.io/docker/pulls/luligu/matterbridge.svg)](https://hub.docker.com/r/luligu/matterbridge)
 ![Node.js CI](https://github.com/Luligu/matterbridge-shelly/actions/workflows/build-matterbridge-plugin.yml/badge.svg)
+![CodeQL](https://github.com/Luligu/matterbridge-shelly/actions/workflows/codeql.yml/badge.svg)
+[![codecov](https://codecov.io/gh/Luligu/matterbridge-shelly/branch/main/graph/badge.svg)](https://codecov.io/gh/Luligu/matterbridge-shelly)
 
 [![power by](https://img.shields.io/badge/powered%20by-matterbridge-blue)](https://www.npmjs.com/package/matterbridge)
 [![power by](https://img.shields.io/badge/powered%20by-node--ansi--logger-blue)](https://www.npmjs.com/package/node-ansi-logger)
@@ -22,12 +24,12 @@ Features:
 - Shelly BLU devices are supported through local devices configured as ble gateway.
 - Discovered shellies are stored in local storage and cached for fast loading on startup.
 - The components exposed are Light (with brightness and RGB color), Switch, Relay, Roller, Cover, PowerMeter, Temperature, Humidity, Illuminance, Thermostat, Button and Input.
-- PowerMeters expose the electrical measurements with the electricalSensor device type (suppoerted by Home Assistant and partially by SmartThings), waiting for the other controllers to upgrade to the Matter 1.3 specs.
+- PowerMeters expose the electrical measurements with the electricalSensor device type (supported by Home Assistant and partially by SmartThings), waiting for the other controllers to upgrade to the Matter 1.3 specs.
 - Shellies are controlled locally, eliminating the need for cloud or MQTT (which can both be disabled).
 - Shelly Gen 1 devices are controlled using the CoIoT protocol (see the note below).
-- Shelly Gen 2 and Gen 3 devices are controlled using WebSocket.
+- Shelly Gen 2, Gen 3 and Gen 4 devices are controlled using WebSocket.
 - The Matter device takes the name configured in the Shelly device's web page (each Shelly device must have a different name).
-- Each device can be blacklisted or whitelisted using its name, id or mac address. Refer to the [COMPONENTS.md documentation.](https://github.com/Luligu/matterbridge-shelly/blob/main/COMPONENTS.md)
+- Each device can be excluded or included using its name, id or mac address. Refer to the [COMPONENTS.md documentation.](https://github.com/Luligu/matterbridge-shelly/blob/main/COMPONENTS.md)
 - Device components can be blacklisted globally or on a per-device basis. Refer to the [COMPONENTS.md documentation.](https://github.com/Luligu/matterbridge-shelly/blob/main/COMPONENTS.md)
 - Devices ids can be selected from a list in the config editor or in the Devices panel on the Home page.
 - If the device has a firmware update available, a message is displayed.
@@ -35,7 +37,7 @@ Features:
 - If the device's Outbound websocket settings is not correctly configured for the gen 2+ battery powered devices, a message is displayed.
 - If the device cover/roller component is not calibrated, a message is displayed.
 - If a device changes its ip address on the network, a message is displayed and the new address is stored.
-- A 1 hour timer checks if the device has reported within that time frame, fetch un update and save the cache file.
+- A 1 hour timer checks if the device has reported within that time frame, fetch an update and save the cache file.
 
 If you like this project and find it useful, please consider giving it a star on GitHub at https://github.com/Luligu/matterbridge-shelly and sponsoring it.
 
@@ -67,7 +69,7 @@ Follow these steps to install or update Matterbridge if it is not already instal
 npm install -g matterbridge --omit=dev
 ```
 
-on Linux you may need the necessary permissions:
+on Linux and macOS you may need the necessary permissions:
 
 ```
 sudo npm install -g matterbridge --omit=dev
@@ -98,6 +100,10 @@ Follow these guidelines for specific devices.
 ### Add Gen. 2 or 3 battery-powered devices
 
 - First check that enableMdnsDiscover and enableStorageDiscover are flagged in the plugin configuration. If they are not, enable them and restart matterbridge. Then awake the device you want to register pressing the device button and in the device web page go to "Settings", then "Outbound websocket" and enable it, select "TLS no validation" and put in the server field `ws://<matterbridge-ipv4>:8485` (where `<matterbridge-ipv4>` is the ipv4 address of Matterbridge e.g. ws://192.168.1.100:8485). You can find the matterbridge ipv4Address address in the frontend or in the log. It is also possible, when "Outbound websocket" is configured correctly, to just wait for the device to awake and it will be registered automatically.
+
+### Add Gen. 4 devices
+
+- Matter: the integrated Matter component should be disabled to save network bandwidth and device resources (memory and energy consumption). Gen 4 devices are supported like any other Shelly device. The Matter component serves no purpose when you add them to Matterbridge.
 
 ### Add BLU devices
 
