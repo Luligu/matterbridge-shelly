@@ -89,6 +89,7 @@ describe('Coap scanner', () => {
   }
 
   const parseShellyMessageSpy = jest.spyOn(CoapServer.prototype as any, 'parseShellyMessage');
+  const dimmerIp = '192.168.70.26';
 
   beforeAll(() => {
     // Set the CoAP parameters to minimum values
@@ -140,8 +141,8 @@ describe('Coap scanner', () => {
   });
 
   test('Parse status message', async () => {
-    (coapServer as any).deviceId.set('192.168.68.68', 'shellydimmer2-98CDAC0D01BB');
-    msg.rsinfo.address = '192.168.68.68';
+    (coapServer as any).deviceId.set(dimmerIp, 'shellydimmer2-98CDAC0D01BB');
+    msg.rsinfo.address = dimmerIp;
     msg.payload = JSON.stringify(msg.payloadS) as any;
     msg.url = '/cit/s';
     const data = (coapServer as any).parseShellyMessage(msg as unknown as IncomingMessage);
@@ -149,47 +150,47 @@ describe('Coap scanner', () => {
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining('Parsing CoIoT (coap) response from device'));
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`url: ${CYAN}/cit/s${db}`));
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`code: ${CYAN}2.05${db}`));
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`host: ${CYAN}192.168.68.68${db}`));
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`host: ${CYAN}${dimmerIp}${db}`));
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`deviceId: ${CYAN}shellydimmer2-98CDAC0D01BB${db}`));
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`deviceModel: ${CYAN}SHDM-2${db}`));
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`deviceMac: ${CYAN}98CDAC0D01BB${db}`));
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`protocolRevision: ${CYAN}2${db}`));
     expect(loggerLogSpy).toHaveBeenCalledWith(
       LogLevel.INFO,
-      expect.stringContaining(`No coap description found for ${hk}SHDM-2${nf} id ${hk}shellydimmer2-98CDAC0D01BB${nf} host ${zb}192.168.68.68${nf} fetching it...`),
+      expect.stringContaining(`No coap description found for ${hk}SHDM-2${nf} id ${hk}shellydimmer2-98CDAC0D01BB${nf} host ${zb}${dimmerIp}${nf} fetching it...`),
     );
   });
 
   test('Parse status message serial not changed', async () => {
-    (coapServer as any).deviceId.set('192.168.68.68', 'shellydimmer2-98CDAC0D01BB');
-    msg.rsinfo.address = '192.168.68.68';
+    (coapServer as any).deviceId.set(dimmerIp, 'shellydimmer2-98CDAC0D01BB');
+    msg.rsinfo.address = dimmerIp;
     msg.payload = JSON.stringify(msg.payloadS) as any;
     msg.url = '/cit/s';
     const data = (coapServer as any).parseShellyMessage(msg as unknown as IncomingMessage);
     expect(data).toBeUndefined();
     expect(loggerLogSpy).toHaveBeenCalledWith(
       LogLevel.DEBUG,
-      expect.stringContaining(`No updates (serial not changed) for device ${hk}shellydimmer2-98CDAC0D01BB${db} host ${zb}192.168.68.68${db}`),
+      expect.stringContaining(`No updates (serial not changed) for device ${hk}shellydimmer2-98CDAC0D01BB${db} host ${zb}${dimmerIp}${db}`),
     );
   });
 
   test('Parse status message serial changed', async () => {
-    (coapServer as any).deviceId.set('192.168.68.68', 'shellydimmer2-98CDAC0D01BB');
+    (coapServer as any).deviceId.set(dimmerIp, 'shellydimmer2-98CDAC0D01BB');
     msg.headers[3420] = 123456789;
-    msg.rsinfo.address = '192.168.68.68';
+    msg.rsinfo.address = dimmerIp;
     msg.payload = 'not a json';
     msg.url = '/cit/s';
     const data = (coapServer as any).parseShellyMessage(msg as unknown as IncomingMessage);
     expect(data).toBeDefined();
     expect(loggerLogSpy).toHaveBeenCalledWith(
       LogLevel.INFO,
-      expect.stringContaining(`No coap description found for ${hk}SHDM-2${nf} id ${hk}shellydimmer2-98CDAC0D01BB${nf} host ${zb}192.168.68.68${nf} fetching it...`),
+      expect.stringContaining(`No coap description found for ${hk}SHDM-2${nf} id ${hk}shellydimmer2-98CDAC0D01BB${nf} host ${zb}${dimmerIp}${nf} fetching it...`),
     );
   });
 
   test('Parse wrong description message', async () => {
-    (coapServer as any).deviceId.set('192.168.68.68', 'shellydimmer2-98CDAC0D01BB');
-    msg.rsinfo.address = '192.168.68.68';
+    (coapServer as any).deviceId.set(dimmerIp, 'shellydimmer2-98CDAC0D01BB');
+    msg.rsinfo.address = dimmerIp;
     msg.payload = 'not a json';
     msg.url = '/cit/d';
     const data = (coapServer as any).parseShellyMessage(msg as unknown as IncomingMessage);
@@ -197,8 +198,8 @@ describe('Coap scanner', () => {
   });
 
   test('Parse description message', async () => {
-    (coapServer as any).deviceId.set('192.168.68.68', 'shellydimmer2-98CDAC0D01BB');
-    msg.rsinfo.address = '192.168.68.68';
+    (coapServer as any).deviceId.set(dimmerIp, 'shellydimmer2-98CDAC0D01BB');
+    msg.rsinfo.address = dimmerIp;
     msg.payload = JSON.stringify(msg.payloadD) as any;
     msg.url = '/cit/d';
     const data = (coapServer as any).parseShellyMessage(msg as unknown as IncomingMessage);
@@ -223,7 +224,7 @@ describe('Coap scanner', () => {
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining('Parsing CoIoT (coap) response from device'));
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`url: ${CYAN}/cit/d${db}`));
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`code: ${CYAN}2.05${db}`));
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`host: ${CYAN}192.168.68.68${db}`));
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`host: ${CYAN}${dimmerIp}${db}`));
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`deviceId: ${CYAN}shellydimmer2-98CDAC0D01BB${db}`));
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`deviceModel: ${CYAN}SHDM-2${db}`));
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`deviceMac: ${CYAN}98CDAC0D01BB${db}`));
@@ -231,8 +232,8 @@ describe('Coap scanner', () => {
   });
 
   test('Parse status message after description', async () => {
-    (coapServer as any).deviceId.set('192.168.68.68', 'shellydimmer2-98CDAC0D01BB');
-    msg.rsinfo.address = '192.168.68.68';
+    (coapServer as any).deviceId.set(dimmerIp, 'shellydimmer2-98CDAC0D01BB');
+    msg.rsinfo.address = dimmerIp;
     msg.payload = JSON.stringify(msg.payloadS) as any;
     msg.url = '/cit/s';
     msg.headers = { '3332': 'SHDM-2#98CDAC0D01BB#2', '3412': 123, '3420': 456 };
@@ -252,7 +253,7 @@ describe('Coap scanner', () => {
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining('Parsing CoIoT (coap) response from device'));
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`url: ${CYAN}/cit/s${db}`));
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`code: ${CYAN}2.05${db}`));
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`host: ${CYAN}192.168.68.68${db}`));
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`host: ${CYAN}${dimmerIp}${db}`));
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`deviceId: ${CYAN}shellydimmer2-98CDAC0D01BB${db}`));
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`deviceModel: ${CYAN}SHDM-2${db}`));
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`deviceMac: ${CYAN}98CDAC0D01BB${db}`));
@@ -907,12 +908,12 @@ describe('Coap scanner', () => {
   });
 
   test('Getting device description', async () => {
-    await coapServer.getDeviceDescription('192.168.68.68', 'shellydimmer2-98CDAC0D01BB');
+    await coapServer.getDeviceDescription(dimmerIp, 'shellydimmer2-98CDAC0D01BB');
     expect(coapServer.isListening).toBeFalsy();
   }, 30000);
 
   test('Getting device status', async () => {
-    await coapServer.getDeviceStatus('192.168.68.68', 'shellydimmer2-98CDAC0D01BB');
+    await coapServer.getDeviceStatus(dimmerIp, 'shellydimmer2-98CDAC0D01BB');
     expect(coapServer?.isListening).toBeFalsy();
   }, 30000);
 
@@ -950,8 +951,8 @@ describe('Coap scanner', () => {
     expect(coapServer.isListening).toBeTruthy();
 
     await new Promise((resolve) => {
-      const desc = coapServer.getDeviceDescription('192.168.68.68', 'shellydimmer2-98CDAC0D01BB');
-      const status = coapServer.getDeviceStatus('192.168.68.68', 'shellydimmer2-98CDAC0D01BB');
+      const desc = coapServer.getDeviceDescription(dimmerIp, 'shellydimmer2-98CDAC0D01BB');
+      const status = coapServer.getDeviceStatus(dimmerIp, 'shellydimmer2-98CDAC0D01BB');
 
       Promise.all([desc, status])
         .then(() => {
