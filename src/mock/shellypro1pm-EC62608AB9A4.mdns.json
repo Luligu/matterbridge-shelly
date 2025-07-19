@@ -23,28 +23,12 @@
       "data": "shellypro1pm-ec62608ab9a4._http._tcp.local"
     },
     {
-      "name": "_shelly._tcp.local",
+      "name": "_http._tcp.local",
       "type": "PTR",
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": "shellypro1pm-ec62608ab9a4._shelly._tcp.local"
-    },
-    {
-      "name": "_services._dns-sd._udp.local",
-      "type": "PTR",
-      "ttl": 120,
-      "class": "IN",
-      "flush": false,
-      "data": "_shelly._tcp.local"
-    },
-    {
-      "name": "_services._dns-sd._udp.local",
-      "type": "PTR",
-      "ttl": 120,
-      "class": "IN",
-      "flush": false,
-      "data": "_http._tcp.local"
+      "data": "1PM Pro._http._tcp.local"
     }
   ],
   "authorities": [],
@@ -68,7 +52,9 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": ["gen=2"]
+      "data": [
+        "gen=2"
+      ]
     },
     {
       "name": "ShellyPro1PM-EC62608AB9A4.local",
@@ -76,10 +62,10 @@
       "ttl": 120,
       "class": "IN",
       "flush": true,
-      "data": "192.168.1.227"
+      "data": "192.168.68.67"
     },
     {
-      "name": "shellypro1pm-ec62608ab9a4._shelly._tcp.local",
+      "name": "1PM Pro._http._tcp.local",
       "type": "SRV",
       "ttl": 120,
       "class": "IN",
@@ -88,24 +74,28 @@
         "priority": 0,
         "weight": 0,
         "port": 80,
-        "target": "ShellyPro1PM-EC62608AB9A4.local"
+        "target": "1PM-Pro.local"
       }
     },
     {
-      "name": "shellypro1pm-ec62608ab9a4._shelly._tcp.local",
+      "name": "1PM Pro._http._tcp.local",
       "type": "TXT",
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": ["gen=2", "app=Pro1PM", "ver=1.4.4"]
+      "data": [
+        "gen=2",
+        "app=Pro1PM",
+        "ver=1.6.2"
+      ]
     },
     {
-      "name": "ShellyPro1PM-EC62608AB9A4.local",
+      "name": "1PM-Pro.local",
       "type": "A",
       "ttl": 120,
       "class": "IN",
       "flush": true,
-      "data": "192.168.1.227"
+      "data": "192.168.68.67"
     }
   ]
 }

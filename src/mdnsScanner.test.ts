@@ -178,7 +178,7 @@ describe('Shellies MdnsScanner test', () => {
         resolve(device);
       });
     });
-    mdns.once('query', queryDeviceListener);
+    mdns.once('query', queryDeviceListener as any);
 
     // Emit the response packet
     (mdns as any).scanner.emit('query', generic_QueryPacket, generic_RemoteInfo);
@@ -489,13 +489,13 @@ describe('Shellies MdnsScanner test', () => {
 
   test('Run multiple test gen 2 pro', async () => {
     const tests = [
-      { id: 'shellypro1pm-EC6260927F7C', host: '192.168.1.151', port: 80, gen: 2 },
+      { id: 'shellypro1pm-EC6260927F7C', host: '192.168.68.56', port: 80, gen: 2 },
       { id: 'shellypro2cover-0CB815FC11B4', host: '192.168.68.104', port: 80, gen: 2 },
-      { id: 'shellypro2pm-EC62608C9C00', host: '192.168.1.235', port: 80, gen: 2 },
-      { id: 'shellypro3em-A0DD6CA0C27C', host: '192.168.1.80', port: 80, gen: 2 },
-      { id: 'shellypro4pm-34987A67D7D0', host: '192.168.1.234', port: 80, gen: 2 },
-      { id: 'shellyprodm1pm-34987A4957C4', host: '192.168.1.156', port: 80, gen: 2 },
-      { id: 'shellyproem50-A0DD6CA09158', host: '192.168.1.81', port: 80, gen: 2 },
+      { id: 'shellypro2pm-EC62608C9C00', host: '192.168.68.95', port: 80, gen: 2 },
+      { id: 'shellypro3em-A0DD6CA0C27C', host: '192.168.68.93', port: 80, gen: 2 },
+      { id: 'shellypro4pm-34987A67D7D0', host: '192.168.68.54', port: 80, gen: 2 },
+      { id: 'shellyprodm1pm-34987A4957C4', host: '192.168.68.57', port: 80, gen: 2 },
+      { id: 'shellyproem50-A0DD6CA09158', host: '192.168.70.24', port: 80, gen: 2 },
     ];
 
     for (const test of tests) {

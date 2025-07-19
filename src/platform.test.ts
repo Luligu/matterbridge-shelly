@@ -73,7 +73,6 @@ rmSync(HOMEDIR, { recursive: true, force: true });
 
 describe('ShellyPlatform', () => {
   let matterbridge: Matterbridge;
-  let context: StorageContext;
   let server: ServerNode<ServerNode.RootEndpoint>;
   let aggregator: Endpoint<AggregatorEndpoint>;
 
@@ -115,8 +114,8 @@ describe('ShellyPlatform', () => {
     // Clean up the shelly instance
     const shelly = (shellyPlatform as any).shelly as Shelly;
     shelly.devices.forEach((device: ShellyDevice) => {
-      device.destroy();
       shelly.removeDevice(device);
+      device.destroy();
     });
     (shelly as any)._devices.clear();
     clearInterval((shelly as any).fetchInterval);
