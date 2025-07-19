@@ -2,7 +2,7 @@
 
 import path from 'node:path';
 
-import { AnsiLogger, TimestampFormat } from 'matterbridge/logger';
+import { AnsiLogger, LogLevel, TimestampFormat } from 'matterbridge/logger';
 import { jest } from '@jest/globals';
 import { wait } from 'matterbridge/utils';
 
@@ -74,7 +74,7 @@ const mdnsScannerStopSpy = jest.spyOn(MdnsScanner.prototype, 'stop').mockImpleme
 const fetchSpy = jest.spyOn(ShellyDevice, 'fetch');
 
 describe('Shelly pro devices test', () => {
-  const log = new AnsiLogger({ logName: 'shellyDeviceTest', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: false });
+  const log = new AnsiLogger({ logName: 'shellyDeviceTest', logTimestampFormat: TimestampFormat.TIME_MILLIS, logLevel: LogLevel.DEBUG });
   const shelly = new Shelly(log, 'admin', 'tango');
   let device: ShellyDevice | undefined = undefined;
   let id: string;
@@ -498,6 +498,7 @@ describe('Shelly pro devices test', () => {
     log.logName = id;
 
     device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', id + '.json'));
+
     expect(device).not.toBeUndefined();
     if (!device) return;
     expect(device.host).toBe(path.join('src', 'mock', id + '.json'));
@@ -538,12 +539,12 @@ describe('Shelly pro devices test', () => {
     expect(device.getComponent('sys')?.getValue('temperature')).toBe(undefined);
     expect(device.getComponent('sys')?.getValue('overtemperature')).toBe(undefined);
 
-    expect(device.getComponent('em:0')?.hasProperty('voltage')).toBe(false);
-    expect(device.getComponent('em:0')?.hasProperty('current')).toBe(false);
-    expect(device.getComponent('em:0')?.hasProperty('act_power')).toBe(false);
+    expect(device.getComponent('em:0')?.hasProperty('voltage')).toBe(true);
+    expect(device.getComponent('em:0')?.hasProperty('current')).toBe(true);
+    expect(device.getComponent('em:0')?.hasProperty('act_power')).toBe(true);
     expect(device.getComponent('em:0')?.hasProperty('total')).toBe(false);
-    expect(device.getComponent('em:0')?.hasProperty('total_act_energy')).toBe(false);
-    expect(device.getComponent('em:0')?.hasProperty('total_act_ret_energy')).toBe(false);
+    expect(device.getComponent('em:0')?.hasProperty('total_act_energy')).toBe(true);
+    expect(device.getComponent('em:0')?.hasProperty('total_act_ret_energy')).toBe(true);
 
     expect(device.getComponent('em:1')?.hasProperty('voltage')).toBe(true);
     expect(device.getComponent('em:1')?.hasProperty('current')).toBe(true);
@@ -566,38 +567,71 @@ describe('Shelly pro devices test', () => {
     expect(device.getComponent('em:1')?.hasProperty('total_act_energy')).toBe(true);
     expect(device.getComponent('em:1')?.hasProperty('total_act_ret_energy')).toBe(true);
 
-    device.updateComponent('em:0', {
-      id: 0,
-      a_current: 1,
-      a_voltage: 221,
-      a_act_power: 221,
-      a_aprt_power: 321,
-      a_freq: 51,
-      b_current: 2,
-      b_voltage: 222,
-      b_act_power: 444,
-      b_aprt_power: 322,
-      b_freq: 52,
-      c_current: 3,
-      c_voltage: 223,
-      c_act_power: 669,
-      c_aprt_power: 323,
-      c_freq: 53,
-      n_current: null,
-      total_current: 10,
-      total_act_power: 2200,
-      total_aprt_power: 3300,
-      a_total_act_energy: 101,
-      a_total_act_ret_energy: 51,
-      b_total_act_energy: 102,
-      b_total_act_ret_energy: 52,
-      c_total_act_energy: 103,
-      c_total_act_ret_energy: 53,
-      total_act: 0.31,
-      total_act_ret: 0,
-    });
-
     expect(await device.fetchUpdate()).not.toBeNull();
+
+    device.log.logLevel = LogLevel.DEBUG;
+    device.onUpdate({
+      'em:0': {
+        id: 0,
+        a_current: 1,
+        a_voltage: 221,
+        a_act_power: 221,
+        a_aprt_power: 321,
+        a_freq: 51,
+        b_current: 2,
+        b_voltage: 222,
+        b_act_power: 444,
+        b_aprt_power: 322,
+        b_freq: 52,
+        c_current: 3,
+        c_voltage: 223,
+        c_act_power: 669,
+        c_aprt_power: 323,
+        c_freq: 53,
+        n_current: null,
+        total_current: 10,
+        total_act_power: 2200,
+        total_aprt_power: 3300,
+      },
+      'emdata:0': {
+        a_total_act_energy: 101,
+        a_total_act_ret_energy: 51,
+        b_total_act_energy: 102,
+        b_total_act_ret_energy: 52,
+        c_total_act_energy: 103,
+        c_total_act_ret_energy: 53,
+        total_act: 234,
+        total_act_ret: 255,
+      },
+    });
+    // device.getComponent('em:0')?.logComponent();
+    // device.getComponent('em:1')?.logComponent();
+    // device.getComponent('em:2')?.logComponent();
+    // device.getComponent('em:3')?.logComponent();
+
+    expect(device.getComponent('em:0')?.getValue('voltage')).toBe(null);
+    expect(device.getComponent('em:0')?.getValue('current')).toBe(10);
+    expect(device.getComponent('em:0')?.getValue('act_power')).toBe(2200);
+    expect(device.getComponent('em:0')?.getValue('total_act_energy')).toBe(234);
+    expect(device.getComponent('em:0')?.getValue('total_act_ret_energy')).toBe(255);
+
+    expect(device.getComponent('em:1')?.getValue('voltage')).toBe(221);
+    expect(device.getComponent('em:1')?.getValue('current')).toBe(1);
+    expect(device.getComponent('em:1')?.getValue('act_power')).toBe(221);
+    expect(device.getComponent('em:1')?.getValue('total_act_energy')).toBe(101);
+    expect(device.getComponent('em:1')?.getValue('total_act_ret_energy')).toBe(51);
+
+    expect(device.getComponent('em:2')?.getValue('voltage')).toBe(222);
+    expect(device.getComponent('em:2')?.getValue('current')).toBe(2);
+    expect(device.getComponent('em:2')?.getValue('act_power')).toBe(444);
+    expect(device.getComponent('em:2')?.getValue('total_act_energy')).toBe(102);
+    expect(device.getComponent('em:2')?.getValue('total_act_ret_energy')).toBe(52);
+
+    expect(device.getComponent('em:3')?.getValue('voltage')).toBe(223);
+    expect(device.getComponent('em:3')?.getValue('current')).toBe(3);
+    expect(device.getComponent('em:3')?.getValue('act_power')).toBe(669);
+    expect(device.getComponent('em:3')?.getValue('total_act_energy')).toBe(103);
+    expect(device.getComponent('em:3')?.getValue('total_act_ret_energy')).toBe(53);
 
     if (device) device.destroy();
   });

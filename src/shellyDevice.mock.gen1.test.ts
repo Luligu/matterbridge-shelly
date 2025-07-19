@@ -386,6 +386,61 @@ describe('Shelly gen 1 devices test', () => {
     if (device) device.destroy();
   });
 
+  test('Create a gen 1 shellymotion2 device', async () => {
+    id = 'shellymotion2-8CF68108A6F5';
+    log.logName = id;
+
+    device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', id + '.json'));
+    expect(device).not.toBeUndefined();
+    if (!device) return;
+    expect(device.host).toBe(path.join('src', 'mock', id + '.json'));
+    expect(device.model).toBe('SHMOS-02');
+    expect(device.mac).toBe('8CF68108A6F5');
+    expect(device.id).toBe(id);
+    expect(device.firmware).toBe('v2.2.4@ee290818');
+    expect(device.auth).toBe(false);
+    expect(device.gen).toBe(1);
+    expect(device.profile).toBe(undefined);
+    expect(device.name).toBe('Motion2 Gen1');
+    expect(device.hasUpdate).toBe(false);
+    expect(device.lastseen).not.toBe(0);
+    expect(device.online).toBe(true);
+    expect(device.cached).toBe(false);
+    expect(device.sleepMode).toBe(false);
+
+    expect(device.components.length).toBe(13);
+    expect(device.getComponentNames()).toStrictEqual(['WiFi', 'MQTT', 'Sntp', 'Cloud', 'CoIoT', 'Lux', 'Temperature', 'Sensor', 'Vibration', 'Motion', 'Battery', 'Sys']);
+    expect(device.getComponentIds()).toStrictEqual([
+      'wifi_ap',
+      'wifi_sta',
+      'mqtt',
+      'sntp',
+      'cloud',
+      'coiot',
+      'lux',
+      'temperature',
+      'sensor',
+      'vibration',
+      'motion',
+      'battery',
+      'sys',
+    ]);
+
+    expect(device.getComponent('sensor')?.getValue('vibration')).toBe(false);
+    expect(device.getComponent('sensor')?.getValue('motion')).toBe(false);
+    expect(device.getComponent('lux')?.getValue('value')).toBe(93);
+    expect(device.getComponent('battery')?.getValue('level')).toBe(99);
+    expect(device.getComponent('battery')?.getValue('voltage')).toBe(4.088);
+    expect(device.getComponent('battery')?.getValue('charging')).toBe(false);
+
+    expect(device.getComponent('sys')?.getValue('temperature')).toBe(undefined);
+    expect(device.getComponent('sys')?.getValue('overtemperature')).toBe(undefined);
+
+    expect(await device.fetchUpdate()).not.toBeNull();
+
+    if (device) device.destroy();
+  });
+
   test('Create a gen 1 shellyht device', async () => {
     id = 'shellyht-703523';
     log.logName = id;

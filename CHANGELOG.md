@@ -28,6 +28,7 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 - [Jest]: Jest test on WsClient with coverage 100%.
 - [Jest]: Jest test on WsServer with coverage 100%.
 - [Jest]: Jest test on CoapServer with coverage 100%.
+- [Jest]: Jest test on ShellyDevice with coverage 100%.
 
 - [triphase]: Added support for shellypro3em with profile triphase. Four PowerMeters are created: the first is the total, then phase A, B and C.
 - [pro]: Added support for returned energy.

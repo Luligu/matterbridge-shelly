@@ -700,9 +700,16 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
         // prettier-ignore
         if (device.profile === 'triphase' && key === 'em:0') {
           // For triphase devices (shellypro3em and shelly3em63g3) we have em:0 and emdata:0. We add phase A, B and C components as well and we use em:0 as total. The em:1, em:2 and em:3 need to be updated from the em:0 phases.
-          device.addComponent(new ShellyComponent(device, 'em:1', 'PowerMeter', { voltage: 0, current: 0, power: 0, act_power: 0, aprt_power: 0, freq: 0, total_act_energy: 0, total_act_ret_energy: 0 } as ShellyData));
-          device.addComponent(new ShellyComponent(device, 'em:2', 'PowerMeter', { voltage: 0, current: 0, power: 0, act_power: 0, aprt_power: 0, freq: 0, total_act_energy: 0, total_act_ret_energy: 0 } as ShellyData));
-          device.addComponent(new ShellyComponent(device, 'em:3', 'PowerMeter', { voltage: 0, current: 0, power: 0, act_power: 0, aprt_power: 0, freq: 0, total_act_energy: 0, total_act_ret_energy: 0 } as ShellyData));
+          device.addComponent(new ShellyComponent(device, 'em:0', 'PowerMeter', { voltage: null, current: 0, act_power: 0, aprt_power: 0, freq: 0, total_act_energy: 0, total_act_ret_energy: 0 } as ShellyData));
+          device.addComponent(new ShellyComponent(device, 'em:1', 'PowerMeter', { voltage: 0, current: 0, act_power: 0, aprt_power: 0, freq: 0, total_act_energy: 0, total_act_ret_energy: 0 } as ShellyData));
+          device.addComponent(new ShellyComponent(device, 'em:2', 'PowerMeter', { voltage: 0, current: 0, act_power: 0, aprt_power: 0, freq: 0, total_act_energy: 0, total_act_ret_energy: 0 } as ShellyData));
+          device.addComponent(new ShellyComponent(device, 'em:3', 'PowerMeter', { voltage: 0, current: 0, act_power: 0, aprt_power: 0, freq: 0, total_act_energy: 0, total_act_ret_energy: 0 } as ShellyData));
+          /*
+          device.getComponent('em:0')?.logComponent();
+          device.getComponent('em:1')?.logComponent();
+          device.getComponent('em:2')?.logComponent();
+          device.getComponent('em:3')?.logComponent();
+          */
         }
         if (key.startsWith('temperature:')) device.addComponent(new ShellyComponent(device, key, 'Temperature', settingsPayload[key] as ShellyData));
         if (key.startsWith('humidity:')) device.addComponent(new ShellyComponent(device, key, 'Humidity', settingsPayload[key] as ShellyData));
@@ -964,7 +971,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
    *
    * It is also called from fetchUpdate().
    *
-   * @param {ShellyData} data - The data to update the device with.
+   * @param {ShellyData} data - The data to update the device with. Example: { sys: { ... }, lights: [ ... ], relays: [ ... ], rollers: [ ... ], inputs: [ ... ], thermostats: [ ... ], meters: [ ... ] }
    *
    * @returns {void}
    */
@@ -1173,16 +1180,18 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
         // prettier-ignore
         if (this.profile === 'triphase' && key === 'em:0') {
           const em0 = data[key] as ShellyData;
-          this.updateComponent('em:1', { voltage: em0.a_voltage, current: em0.a_current, power: em0.a_power, act_power: em0.a_act_power, aprt_power: em0.a_aprt_power, freq: em0.a_freq });
-          this.updateComponent('em:2', { voltage: em0.b_voltage, current: em0.b_current, power: em0.b_power, act_power: em0.b_act_power, aprt_power: em0.b_aprt_power, freq: em0.b_freq });
-          this.updateComponent('em:3', { voltage: em0.c_voltage, current: em0.c_current, power: em0.c_power, act_power: em0.c_act_power, aprt_power: em0.c_aprt_power, freq: em0.c_freq });
+          this.updateComponent('em:0', { voltage: null, current: em0.total_current, act_power: em0.total_act_power, aprt_power: em0.total_aprt_power, freq: null });
+          this.updateComponent('em:1', { voltage: em0.a_voltage, current: em0.a_current, act_power: em0.a_act_power, aprt_power: em0.a_aprt_power, freq: em0.a_freq });
+          this.updateComponent('em:2', { voltage: em0.b_voltage, current: em0.b_current, act_power: em0.b_act_power, aprt_power: em0.b_aprt_power, freq: em0.b_freq });
+          this.updateComponent('em:3', { voltage: em0.c_voltage, current: em0.c_current, act_power: em0.c_act_power, aprt_power: em0.c_aprt_power, freq: em0.c_freq });
         }
         // prettier-ignore
         if (this.profile === 'triphase' && key === 'emdata:0') {
-          const em0 = data[key] as ShellyData;
-          this.updateComponent('em:1', { total_act_energy: em0.a_total_act_energy, total_act_ret_energy: em0.a_total_ret_energy });
-          this.updateComponent('em:2', { total_act_energy: em0.b_total_act_energy, total_act_ret_energy: em0.b_total_ret_energy });
-          this.updateComponent('em:3', { total_act_energy: em0.c_total_act_energy, total_act_ret_energy: em0.c_total_ret_energy });
+          const emdata0 = data[key] as ShellyData;
+          this.updateComponent('em:0', { total_act_energy: emdata0.total_act, total_act_ret_energy: emdata0.total_act_ret });
+          this.updateComponent('em:1', { total_act_energy: emdata0.a_total_act_energy, total_act_ret_energy: emdata0.a_total_act_ret_energy });
+          this.updateComponent('em:2', { total_act_energy: emdata0.b_total_act_energy, total_act_ret_energy: emdata0.b_total_act_ret_energy });
+          this.updateComponent('em:3', { total_act_energy: emdata0.c_total_act_energy, total_act_ret_energy: emdata0.c_total_act_ret_energy });
         }
         if (key.startsWith('temperature:')) this.updateComponent(key, data[key] as ShellyData);
         if (key.startsWith('humidity:')) this.updateComponent(key, data[key] as ShellyData);
@@ -1385,6 +1394,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
         if (service === 'Shelly.GetConfig') return deviceData.settings;
         if (service === 'Shelly.GetComponents') return deviceData;
         log.error(`Error fetching device payloads from file ${host}: no service ${service} found`);
+        return null;
       } catch (error) {
         log.error(`Error reading device payloads from file ${host}:`, error instanceof Error ? error.message : error);
         return null;
@@ -1422,6 +1432,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
         if (response.status === 401) {
           const authHeader = response.headers.get('www-authenticate');
           log.debug(`${GREY}authHeader: ${authHeader}${RESET}`);
+          // istanbul ignore next if
           if (authHeader === null) throw new Error('No www-authenticate header found');
           if (shelly.username === undefined || shelly.username === '') log.error(`Device at host ${host} requires authentication but no username has been provided in the config`);
           if (shelly.password === undefined || shelly.password === '') log.error(`Device at host ${host} requires authentication but no password has been provided in the config`);
@@ -1429,6 +1440,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
             // Gen 1 devices require basic authentication
             const authParams = parseBasicAuthenticateHeader(authHeader); // Get nonce and realm
             log.debug(`${GREY}authparams: ${JSON.stringify(authParams)}${RESET}`);
+            // istanbul ignore next if
             if (!authParams.realm) throw new Error('No authenticate realm parameter found in header');
             const auth = createBasicShellyAuth(shelly.username ?? '', shelly.password ?? '');
             headers.Authorization = `Basic ${auth}`;
@@ -1436,7 +1448,9 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
             // Gen 2 and 3 devices require digest authentication
             const authParams = parseDigestAuthenticateHeader(authHeader); // Get nonce and realm
             log.debug(`${GREY}authparams: ${JSON.stringify(authParams)}${RESET}`);
+            // istanbul ignore next if
             if (!authParams.nonce) throw new Error('No authenticate nonce parameter found in header');
+            // istanbul ignore next if
             if (!authParams.realm) throw new Error('No authenticate realm parameter found in header');
             const auth = createDigestShellyAuth('admin', shelly.password ?? '', parseInt(authParams.nonce), crypto.randomInt(0, 999999999), authParams.realm);
             options.body = getGen2BodyOptions('2.0', 10, 'Matterbridge', service, params, auth);

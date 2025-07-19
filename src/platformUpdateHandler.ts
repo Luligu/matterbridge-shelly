@@ -241,11 +241,11 @@ export function shellyUpdateHandler(
   }
   // Update for Temperature when has value or tC
   if (shellyComponent.name === 'Temperature' && (property === 'value' || property === 'tC') && isValidNumber(value, -100, +100)) {
-    endpoint.setAttribute(TemperatureMeasurement.Cluster.id, 'measuredValue', value * 100, shellyDevice.log);
+    endpoint.setAttribute(TemperatureMeasurement.Cluster.id, 'measuredValue', Math.round(value * 100), shellyDevice.log);
   }
   // Update for Humidity when has value or rh
   if (shellyComponent.name === 'Humidity' && (property === 'value' || property === 'rh') && isValidNumber(value, 0, 100)) {
-    endpoint.setAttribute(RelativeHumidityMeasurement.Cluster.id, 'measuredValue', value * 100, shellyDevice.log);
+    endpoint.setAttribute(RelativeHumidityMeasurement.Cluster.id, 'measuredValue', Math.round(value * 100), shellyDevice.log);
   }
   // Update for Illuminance when has lux
   if (shellyComponent.name === 'Illuminance' && property === 'lux' && isValidNumber(value, 0)) {
@@ -373,8 +373,11 @@ export function shellyUpdateHandler(
           shellyDevice.log.debug(`****shellyUpdateHandler error: endpoint not found for triphase shelly device ${dn}${shellyDevice?.id}${db}`);
           return;
         }
+        const originalProperty = property;
         property = property.replace(/^a_/, '').replace(/^b_/, '').replace(/^c_/, '');
-        shellyDevice.log.debug(`***shellyUpdateHandler property remapped to ${property} for triphase shelly device ${dn}${shellyDevice?.id}${db}`);
+        shellyDevice.log.debug(
+          `***shellyUpdateHandler property ${originalProperty} remapped to ${endpoint?.id}:${property} for triphase shelly device ${dn}${shellyDevice?.id}${db}`,
+        );
       }
     }
 
