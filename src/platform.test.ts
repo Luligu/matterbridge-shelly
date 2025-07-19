@@ -981,7 +981,6 @@ describe('ShellyPlatform', () => {
   });
 
   it('should add shelly2pmg3 mode cover', async () => {
-    setDebug(true);
     expect(shellyPlatform).toBeDefined();
     shellyPlatform.config.enableMdnsDiscover = false;
     shellyPlatform.config.inputMomentaryList = [];
@@ -1095,8 +1094,6 @@ describe('ShellyPlatform', () => {
 
     cleanup();
     shelly2PMGen3.destroy();
-
-    setDebug(false);
   });
 
   it('should load and save the stored devices', async () => {
