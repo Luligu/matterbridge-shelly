@@ -399,6 +399,8 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
       for (const component of components as unknown as BTHomeDeviceComponent[]) {
         if (component.key.startsWith('bthomedevice:')) {
           // Shelly BLU gateway doesn't have config.meta.ui.local_name!
+          // New paired BTHome devices don't have attrs.model_id
+          // istanbul ignore next if cause new paired devices don't have attrs.model_id
           if (component.attrs?.model_id === 1) {
             component.config.meta = { ui: { view: 'regular', local_name: 'SBBT-002C', icon: null } };
           } else if (component.attrs?.model_id === 2) {
@@ -490,6 +492,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
         }
       }
     } catch (error) {
+      // istanbul ignore next cause is just a precaution
       this.log.error(`Error scanning the device ${hk}${this.id}${db} host ${zb}${this.host}${db} for BTHome devices and sensors: ${error}`);
     }
     // if (this.bthomeTrvs.size > 0) this.log.debug(`BTHome devices map:${rs}\n`, this.bthomeTrvs);
@@ -694,11 +697,12 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
         if (key.startsWith('pm1:')) device.addComponent(new ShellyComponent(device, key, 'PowerMeter', settingsPayload[key] as ShellyData));
         if (key.startsWith('em1:')) device.addComponent(new ShellyComponent(device, key, 'PowerMeter', settingsPayload[key] as ShellyData));
         if (key.startsWith('em:')) device.addComponent(new ShellyComponent(device, key, 'PowerMeter', settingsPayload[key] as ShellyData));
+        // prettier-ignore
         if (device.profile === 'triphase' && key === 'em:0') {
           // For triphase devices (shellypro3em and shelly3em63g3) we have em:0 and emdata:0. We add phase A, B and C components as well and we use em:0 as total. The em:1, em:2 and em:3 need to be updated from the em:0 phases.
-          device.addComponent(new ShellyComponent(device, 'em:1', 'PowerMeter', settingsPayload[key] as ShellyData));
-          device.addComponent(new ShellyComponent(device, 'em:2', 'PowerMeter', settingsPayload[key] as ShellyData));
-          device.addComponent(new ShellyComponent(device, 'em:3', 'PowerMeter', settingsPayload[key] as ShellyData));
+          device.addComponent(new ShellyComponent(device, 'em:1', 'PowerMeter', { voltage: 0, current: 0, power: 0, act_power: 0, aprt_power: 0, freq: 0, total_act_energy: 0, total_act_ret_energy: 0 } as ShellyData));
+          device.addComponent(new ShellyComponent(device, 'em:2', 'PowerMeter', { voltage: 0, current: 0, power: 0, act_power: 0, aprt_power: 0, freq: 0, total_act_energy: 0, total_act_ret_energy: 0 } as ShellyData));
+          device.addComponent(new ShellyComponent(device, 'em:3', 'PowerMeter', { voltage: 0, current: 0, power: 0, act_power: 0, aprt_power: 0, freq: 0, total_act_energy: 0, total_act_ret_energy: 0 } as ShellyData));
         }
         if (key.startsWith('temperature:')) device.addComponent(new ShellyComponent(device, key, 'Temperature', settingsPayload[key] as ShellyData));
         if (key.startsWith('humidity:')) device.addComponent(new ShellyComponent(device, key, 'Humidity', settingsPayload[key] as ShellyData));
@@ -825,8 +829,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
       // Start the WebSocket client for devices that are not a cache JSON file
       if (!host.endsWith('.json')) device.wsClient.start();
 
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      device.wsClient.on('response', (message) => {
+      device.wsClient.on('response', (_message) => {
         log.debug(`WebSocket response from device ${hk}${device.id}${db} host ${zb}${device.host}${db}`);
         device.lastseen = Date.now();
         if (!device.online) {
@@ -1076,6 +1079,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
           const sensor = data.sensor as ShellyData;
           if (sensor.is_valid === true && sensor.state !== undefined) this.getComponent('sensor')?.setValue('contact_open', sensor.state !== 'close');
           if (sensor.vibration !== undefined) this.getComponent('vibration')?.setValue('vibration', sensor.vibration);
+          if (sensor.motion !== undefined) this.getComponent('motion')?.setValue('motion', sensor.motion);
           // console.log('sensor', sensor);
         }
         if (key === 'accel') {
@@ -1088,6 +1092,9 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
         }
         if (key === 'flood') {
           if (typeof data[key] === 'boolean') this.getComponent('flood')?.setValue('flood', data[key]);
+        }
+        if (key === 'smoke') {
+          if (typeof data[key] === 'boolean') this.getComponent('smoke')?.setValue('smoke', data[key]);
         }
         if (key === 'gas_sensor') {
           this.updateComponent('gas', data[key] as ShellyData);
@@ -1163,6 +1170,20 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
         if (key.startsWith('em1data:')) this.updateComponent(key.replace('em1data:', 'em1:'), data[key] as ShellyData);
         if (key.startsWith('em:')) this.updateComponent(key, data[key] as ShellyData);
         if (key.startsWith('emdata:')) this.updateComponent(key.replace('emdata:', 'em:'), data[key] as ShellyData);
+        // prettier-ignore
+        if (this.profile === 'triphase' && key === 'em:0') {
+          const em0 = data[key] as ShellyData;
+          this.updateComponent('em:1', { voltage: em0.a_voltage, current: em0.a_current, power: em0.a_power, act_power: em0.a_act_power, aprt_power: em0.a_aprt_power, freq: em0.a_freq });
+          this.updateComponent('em:2', { voltage: em0.b_voltage, current: em0.b_current, power: em0.b_power, act_power: em0.b_act_power, aprt_power: em0.b_aprt_power, freq: em0.b_freq });
+          this.updateComponent('em:3', { voltage: em0.c_voltage, current: em0.c_current, power: em0.c_power, act_power: em0.c_act_power, aprt_power: em0.c_aprt_power, freq: em0.c_freq });
+        }
+        // prettier-ignore
+        if (this.profile === 'triphase' && key === 'emdata:0') {
+          const em0 = data[key] as ShellyData;
+          this.updateComponent('em:1', { total_act_energy: em0.a_total_act_energy, total_act_ret_energy: em0.a_total_ret_energy });
+          this.updateComponent('em:2', { total_act_energy: em0.b_total_act_energy, total_act_ret_energy: em0.b_total_ret_energy });
+          this.updateComponent('em:3', { total_act_energy: em0.c_total_act_energy, total_act_ret_energy: em0.c_total_ret_energy });
+        }
         if (key.startsWith('temperature:')) this.updateComponent(key, data[key] as ShellyData);
         if (key.startsWith('humidity:')) this.updateComponent(key, data[key] as ShellyData);
         if (key.startsWith('illuminance:')) this.updateComponent(key, data[key] as ShellyData);

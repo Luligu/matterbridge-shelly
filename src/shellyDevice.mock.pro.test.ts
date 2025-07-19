@@ -423,6 +423,185 @@ describe('Shelly pro devices test', () => {
     if (device) device.destroy();
   });
 
+  test('Create a pro shellypro3em device monophase', async () => {
+    id = 'shellypro3em-A0DD6CA0C27C.monophase';
+    log.logName = id;
+
+    device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', id + '.json'));
+    expect(device).not.toBeUndefined();
+    if (!device) return;
+    expect(device.host).toBe(path.join('src', 'mock', id + '.json'));
+    expect(device.model).toBe('SPEM-003CEBEU');
+    expect(device.mac).toBe('A0DD6CA0C27C');
+    expect(device.id).toBe(id.replace('.monophase', ''));
+    expect(device.firmware).toBe(firmwareGen2);
+    expect(device.auth).toBe(false);
+    expect(device.gen).toBe(2);
+    expect(device.profile).toBe('monophase');
+    expect(device.name).toBe('3EM Pro');
+    expect(device.hasUpdate).toBe(false);
+    expect(device.lastseen).not.toBe(0);
+    expect(device.online).toBe(true);
+    expect(device.cached).toBe(false);
+    expect(device.sleepMode).toBe(false);
+
+    expect(device.components.length).toBe(14);
+    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'PowerMeter', 'Eth', 'MQTT', 'Sys', 'Sntp', 'Temperature', 'WiFi', 'WS']);
+    expect(device.getComponentIds()).toStrictEqual([
+      'ble',
+      'cloud',
+      'em1:0',
+      'em1:1',
+      'em1:2',
+      'eth',
+      'mqtt',
+      'sys',
+      'sntp',
+      'temperature:0',
+      'wifi_ap',
+      'wifi_sta',
+      'wifi_sta1',
+      'ws',
+    ]);
+
+    expect(device.getComponent('sys')?.getValue('temperature')).toBe(undefined);
+    expect(device.getComponent('sys')?.getValue('overtemperature')).toBe(undefined);
+
+    expect(device.getComponent('em1:0')?.hasProperty('voltage')).toBe(true);
+    expect(device.getComponent('em1:0')?.hasProperty('current')).toBe(true);
+    expect(device.getComponent('em1:0')?.hasProperty('act_power')).toBe(true);
+    expect(device.getComponent('em1:0')?.hasProperty('total')).toBe(false);
+    expect(device.getComponent('em1:0')?.hasProperty('total_act_energy')).toBe(true);
+    expect(device.getComponent('em1:0')?.hasProperty('total_act_ret_energy')).toBe(true);
+
+    expect(device.getComponent('em1:1')?.hasProperty('voltage')).toBe(true);
+    expect(device.getComponent('em1:1')?.hasProperty('current')).toBe(true);
+    expect(device.getComponent('em1:1')?.hasProperty('act_power')).toBe(true);
+    expect(device.getComponent('em1:1')?.hasProperty('total')).toBe(false);
+    expect(device.getComponent('em1:1')?.hasProperty('total_act_energy')).toBe(true);
+    expect(device.getComponent('em1:1')?.hasProperty('total_act_ret_energy')).toBe(true);
+
+    expect(device.getComponent('em1:2')?.hasProperty('voltage')).toBe(true);
+    expect(device.getComponent('em1:2')?.hasProperty('current')).toBe(true);
+    expect(device.getComponent('em1:2')?.hasProperty('act_power')).toBe(true);
+    expect(device.getComponent('em1:2')?.hasProperty('total')).toBe(false);
+    expect(device.getComponent('em1:2')?.hasProperty('total_act_energy')).toBe(true);
+    expect(device.getComponent('em1:2')?.hasProperty('total_act_ret_energy')).toBe(true);
+
+    expect(await device.fetchUpdate()).not.toBeNull();
+
+    if (device) device.destroy();
+  });
+
+  test('Create a pro shellypro3em device triphase', async () => {
+    id = 'shellypro3em-A0DD6CA0C27C.triphase';
+    log.logName = id;
+
+    device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', id + '.json'));
+    expect(device).not.toBeUndefined();
+    if (!device) return;
+    expect(device.host).toBe(path.join('src', 'mock', id + '.json'));
+    expect(device.model).toBe('SPEM-003CEBEU');
+    expect(device.mac).toBe('A0DD6CA0C27C');
+    expect(device.id).toBe(id.replace('.triphase', ''));
+    expect(device.firmware).toBe(firmwareGen2);
+    expect(device.auth).toBe(false);
+    expect(device.gen).toBe(2);
+    expect(device.profile).toBe('triphase');
+    expect(device.name).toBe('3EM Pro');
+    expect(device.hasUpdate).toBe(false);
+    expect(device.lastseen).not.toBe(0);
+    expect(device.online).toBe(true);
+    expect(device.cached).toBe(false);
+    expect(device.sleepMode).toBe(false);
+
+    expect(device.components.length).toBe(15);
+    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'PowerMeter', 'Eth', 'MQTT', 'Sys', 'Sntp', 'Temperature', 'WiFi', 'WS']);
+    expect(device.getComponentIds()).toStrictEqual([
+      'ble',
+      'cloud',
+      'em:0',
+      'em:1',
+      'em:2',
+      'em:3',
+      'eth',
+      'mqtt',
+      'sys',
+      'sntp',
+      'temperature:0',
+      'wifi_ap',
+      'wifi_sta',
+      'wifi_sta1',
+      'ws',
+    ]);
+
+    expect(device.getComponent('sys')?.getValue('temperature')).toBe(undefined);
+    expect(device.getComponent('sys')?.getValue('overtemperature')).toBe(undefined);
+
+    expect(device.getComponent('em:0')?.hasProperty('voltage')).toBe(false);
+    expect(device.getComponent('em:0')?.hasProperty('current')).toBe(false);
+    expect(device.getComponent('em:0')?.hasProperty('act_power')).toBe(false);
+    expect(device.getComponent('em:0')?.hasProperty('total')).toBe(false);
+    expect(device.getComponent('em:0')?.hasProperty('total_act_energy')).toBe(false);
+    expect(device.getComponent('em:0')?.hasProperty('total_act_ret_energy')).toBe(false);
+
+    expect(device.getComponent('em:1')?.hasProperty('voltage')).toBe(true);
+    expect(device.getComponent('em:1')?.hasProperty('current')).toBe(true);
+    expect(device.getComponent('em:1')?.hasProperty('act_power')).toBe(true);
+    expect(device.getComponent('em:1')?.hasProperty('total')).toBe(false);
+    expect(device.getComponent('em:1')?.hasProperty('total_act_energy')).toBe(true);
+    expect(device.getComponent('em:1')?.hasProperty('total_act_ret_energy')).toBe(true);
+
+    expect(device.getComponent('em:2')?.hasProperty('voltage')).toBe(true);
+    expect(device.getComponent('em:2')?.hasProperty('current')).toBe(true);
+    expect(device.getComponent('em:2')?.hasProperty('act_power')).toBe(true);
+    expect(device.getComponent('em:2')?.hasProperty('total')).toBe(false);
+    expect(device.getComponent('em:1')?.hasProperty('total_act_energy')).toBe(true);
+    expect(device.getComponent('em:1')?.hasProperty('total_act_ret_energy')).toBe(true);
+
+    expect(device.getComponent('em:3')?.hasProperty('voltage')).toBe(true);
+    expect(device.getComponent('em:3')?.hasProperty('current')).toBe(true);
+    expect(device.getComponent('em:3')?.hasProperty('act_power')).toBe(true);
+    expect(device.getComponent('em:3')?.hasProperty('total')).toBe(false);
+    expect(device.getComponent('em:1')?.hasProperty('total_act_energy')).toBe(true);
+    expect(device.getComponent('em:1')?.hasProperty('total_act_ret_energy')).toBe(true);
+
+    device.updateComponent('em:0', {
+      id: 0,
+      a_current: 1,
+      a_voltage: 221,
+      a_act_power: 221,
+      a_aprt_power: 321,
+      a_freq: 51,
+      b_current: 2,
+      b_voltage: 222,
+      b_act_power: 444,
+      b_aprt_power: 322,
+      b_freq: 52,
+      c_current: 3,
+      c_voltage: 223,
+      c_act_power: 669,
+      c_aprt_power: 323,
+      c_freq: 53,
+      n_current: null,
+      total_current: 10,
+      total_act_power: 2200,
+      total_aprt_power: 3300,
+      a_total_act_energy: 101,
+      a_total_act_ret_energy: 51,
+      b_total_act_energy: 102,
+      b_total_act_ret_energy: 52,
+      c_total_act_energy: 103,
+      c_total_act_ret_energy: 53,
+      total_act: 0.31,
+      total_act_ret: 0,
+    });
+
+    expect(await device.fetchUpdate()).not.toBeNull();
+
+    if (device) device.destroy();
+  });
+
   test('Create a pro shellyprodm1pm device', async () => {
     id = 'shellyprodm1pm-34987A4957C4';
     log.logName = id;

@@ -467,7 +467,7 @@ describe('Coap scanner', () => {
   });
 
   test('Parse status shellysmoke', async () => {
-    msg.payload = JSON.stringify(loadResponse('shellysmoke-XXXXXXXX', 'cits')) as any;
+    msg.payload = JSON.stringify(loadResponse('shellysmoke-XXXXXXXXXXXX', 'cits')) as any;
     msg.headers[3332] = 'SHSM-01#XXXXXXXX#2';
     expect(msg.payload).not.toBeUndefined();
     const data_cits = (coapServer as any).parseShellyMessage(msg as unknown as IncomingMessage);

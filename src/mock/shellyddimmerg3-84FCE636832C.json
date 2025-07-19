@@ -3,20 +3,20 @@
     "name": "DALI Dimmer Gen3",
     "id": "shellyddimmerg3-84fce636832c",
     "mac": "84FCE636832C",
-    "slot": 1,
+    "slot": 0,
     "model": "S3DM-0A1WW",
     "gen": 3,
-    "fw_id": "20250220-082110/1.5.0-g0087a06",
-    "ver": "1.5.0",
+    "fw_id": "20250520-083657/1.6.2-gc8a76e2",
+    "ver": "1.6.2",
     "app": "DDimmerG3",
     "auth_en": false,
     "auth_domain": null
   },
   "settings": {
     "ble": {
-      "enable": true,
+      "enable": false,
       "rpc": {
-        "enable": true
+        "enable": false
       }
     },
     "bthome": {},
@@ -87,7 +87,7 @@
       "device": {
         "name": "DALI Dimmer Gen3",
         "mac": "84FCE636832C",
-        "fw_id": "20250220-082110/1.5.0-g0087a06",
+        "fw_id": "20250520-083657/1.6.2-gc8a76e2",
         "discoverable": true,
         "eco_mode": false,
         "addon_type": null
@@ -114,7 +114,7 @@
       "sntp": {
         "server": "time.cloudflare.com"
       },
-      "cfg_rev": 15
+      "cfg_rev": 21
     },
     "wifi": {
       "ap": {
@@ -158,7 +158,11 @@
   },
   "status": {
     "ble": {},
-    "bthome": {},
+    "bthome": {
+      "errors": [
+        "bluetooth_disabled"
+      ]
+    },
     "cloud": {
       "connected": true
     },
@@ -176,12 +180,12 @@
     "knx": {},
     "light:0": {
       "id": 0,
-      "source": "HTTP_in",
+      "source": "init",
       "output": false,
       "brightness": 100,
       "temperature": {
-        "tC": 62,
-        "tF": 143.6
+        "tC": 65.3,
+        "tF": 149.6
       }
     },
     "mqtt": {
@@ -190,39 +194,44 @@
     "sys": {
       "mac": "84FCE636832C",
       "restart_required": false,
-      "time": "14:58",
-      "unixtime": 1741442306,
-      "last_sync_ts": 1741441499,
-      "uptime": 789057,
-      "ram_size": 248356,
-      "ram_free": 67828,
-      "ram_min_free": 52416,
+      "time": "14:02",
+      "unixtime": 1752840134,
+      "last_sync_ts": 1752839112,
+      "uptime": 92895,
+      "ram_size": 248744,
+      "ram_free": 114980,
+      "ram_min_free": 88040,
       "fs_size": 1048576,
-      "fs_free": 577536,
-      "cfg_rev": 15,
+      "fs_free": 573440,
+      "cfg_rev": 21,
       "kvs_rev": 0,
       "schedule_rev": 1,
       "webhook_rev": 0,
       "btrelay_rev": 106,
       "available_updates": {
         "beta": {
-          "version": "1.5.1-beta1"
+          "version": "1.7.0-beta3"
         }
       },
-      "reset_reason": 1
+      "reset_reason": 6,
+      "utc_offset": 7200
     },
     "wifi": {
-      "sta_ip": "192.168.1.242",
+      "sta_ip": "192.168.68.80",
       "status": "got ip",
       "ssid": "",
-      "rssi": -55
+      "rssi": -61,
+      "sta_ip6": [
+        "fe80::86fc:e6ff:fe36:832c",
+        "fd78:cbf8:4939:746:86fc:e6ff:fe36:832c"
+      ]
     },
     "ws": {
       "connected": false
     }
   },
   "components": [],
-  "cfg_rev": 15,
+  "cfg_rev": 21,
   "offset": 0,
   "total": 0
 }

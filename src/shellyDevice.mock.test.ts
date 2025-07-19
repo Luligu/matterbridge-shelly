@@ -299,41 +299,6 @@ describe('Shelly devices test', () => {
     });
   });
 
-  describe('Test gen 3 shellypmminig3', () => {
-    test('Create a gen 2 shellypmminig3 device', async () => {
-      const device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shellypmminig3-84FCE63957F4.json'));
-      expect(device).not.toBeUndefined();
-      if (!device) return;
-      expect(device?.host).toBe(path.join('src', 'mock', 'shellypmminig3-84FCE63957F4.json'));
-      expect(device?.model).toBe('S3PM-001PCEU16');
-      expect(device?.id).toBe('shellypmminig3-84FCE63957F4');
-      expect(device?.firmware).toBe(firmwareGen2);
-      expect(device?.auth).toBe(false);
-      expect(device?.gen).toBe(3);
-      if (device) device.destroy();
-      expect(device?.lastseen).toBe(0);
-    });
-  });
-
-  describe('Test gen 3 shelly1minig3', () => {
-    test('Create a gen 2 shelly1minig3 device', async () => {
-      const device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shelly1minig3-543204547478.json'));
-      expect(device).not.toBeUndefined();
-      if (!device) return;
-      expect(device?.host).toBe(path.join('src', 'mock', 'shelly1minig3-543204547478.json'));
-      expect(device?.model).toBe('S3SW-001X8EU');
-      expect(device?.id).toBe('shelly1minig3-543204547478');
-      expect(device?.firmware).toBe(firmwareGen2);
-      expect(device?.auth).toBe(true);
-      expect(device?.gen).toBe(3);
-      expect(device?.lastseen).not.toBe(0);
-      expect(device.online).toBe(true);
-      expect(device.sleepMode).toBe(false);
-      device?.fetchUpdate();
-      if (device) device.destroy();
-    });
-  });
-
   describe('Test gen 1 shellybutton1', () => {
     test('Create a gen 1 shellybutton1 device', async () => {
       const device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shellybutton1-485519F31EA3.json'));

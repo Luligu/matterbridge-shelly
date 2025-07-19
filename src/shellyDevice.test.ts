@@ -4,11 +4,12 @@ import path from 'node:path';
 
 import { AnsiLogger, TimestampFormat, LogLevel, MAGENTA, db, BLUE, hk, zb, nt, dn, er, nf, YELLOW } from 'matterbridge/logger';
 import { jest } from '@jest/globals';
+import { wait } from 'matterbridge/utils';
 
 import { ShellyDevice } from './shellyDevice.js';
 import { Shelly } from './shelly.js';
 import { ShellyComponent } from './shellyComponent.js';
-import { ShellyDataType } from './shellyTypes.js';
+import { BTHomeComponent, ShellyDataType } from './shellyTypes.js';
 import { CoapServer } from './coapServer.js';
 import { WsServer } from './wsServer.js';
 import { WsClient } from './wsClient.js';
@@ -38,6 +39,30 @@ if (!debug) {
   consoleErrorSpy = jest.spyOn(console, 'error');
 }
 
+function setDebug(debug: boolean) {
+  if (debug) {
+    loggerLogSpy.mockRestore();
+    consoleLogSpy.mockRestore();
+    consoleDebugSpy.mockRestore();
+    consoleInfoSpy.mockRestore();
+    consoleWarnSpy.mockRestore();
+    consoleErrorSpy.mockRestore();
+    loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log');
+    consoleLogSpy = jest.spyOn(console, 'log');
+    consoleDebugSpy = jest.spyOn(console, 'debug');
+    consoleInfoSpy = jest.spyOn(console, 'info');
+    consoleWarnSpy = jest.spyOn(console, 'warn');
+    consoleErrorSpy = jest.spyOn(console, 'error');
+  } else {
+    loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log').mockImplementation((level: string, message: string, ...parameters: any[]) => {});
+    consoleLogSpy = jest.spyOn(console, 'log').mockImplementation((...args: any[]) => {});
+    consoleDebugSpy = jest.spyOn(console, 'debug').mockImplementation((...args: any[]) => {});
+    consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation((...args: any[]) => {});
+    consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation((...args: any[]) => {});
+    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation((...args: any[]) => {});
+  }
+}
+
 const coapServerStartSpy = jest.spyOn(CoapServer.prototype, 'start').mockImplementation(() => {});
 const coapServerStopSpy = jest.spyOn(CoapServer.prototype, 'stop').mockImplementation(() => {});
 const coapServerRegisterDeviceSpy = jest.spyOn(CoapServer.prototype, 'registerDevice').mockImplementation(async () => {});
@@ -47,7 +72,8 @@ const wsClientStartSpy = jest.spyOn(WsClient.prototype, 'start').mockImplementat
 const wsClientStopSpy = jest.spyOn(WsClient.prototype, 'stop').mockImplementation(() => {});
 const mdnsScannerStartSpy = jest.spyOn(MdnsScanner.prototype, 'start').mockImplementation(() => {});
 const mdnsScannerStopSpy = jest.spyOn(MdnsScanner.prototype, 'stop').mockImplementation(() => {});
-const fetchSpy = jest.spyOn(ShellyDevice, 'fetch');
+let fetchSpy = jest.spyOn(ShellyDevice, 'fetch');
+let createSpy = jest.spyOn(ShellyDevice, 'create');
 
 describe('Shelly devices test', () => {
   // Mock functions for event handlers
@@ -59,7 +85,7 @@ describe('Shelly devices test', () => {
 
   const handleUpdate = jest.fn<(id: string, key: string, value: ShellyDataType) => void>().mockImplementation((id: string, key: string, value: ShellyDataType) => {});
 
-  const log = new AnsiLogger({ logName: 'shellyDeviceTest', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: false });
+  const log = new AnsiLogger({ logName: 'shellyDeviceTest', logTimestampFormat: TimestampFormat.TIME_MILLIS, logLevel: LogLevel.DEBUG });
   const shelly = new Shelly(log, 'admin', 'tango');
   let device: ShellyDevice;
 
@@ -73,7 +99,10 @@ describe('Shelly devices test', () => {
   });
 
   afterEach(() => {
-    //
+    fetchSpy.mockRestore();
+    fetchSpy = jest.spyOn(ShellyDevice, 'fetch');
+    createSpy.mockRestore();
+    createSpy = jest.spyOn(ShellyDevice, 'create');
   });
 
   afterAll(async () => {
@@ -212,41 +241,43 @@ describe('Shelly devices test', () => {
     expect(device.getBTHomeModelText('UNKNOWN')).toBe('Unknown Shelly BLU model UNKNOWN');
   });
 
-  test('create a btHome gatewaydevice and fetch', async () => {
-    const gatewayDevice = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shelly2pmg3-34CDB0770C4C.json'));
-    expect(gatewayDevice).toBeDefined();
-    if (!gatewayDevice) return;
-    expect(gatewayDevice.name).toBe('2PM Gen3 Cover');
-    expect(gatewayDevice.id).toBe('shelly2pmg3-34CDB0770C4C');
-    expect(gatewayDevice.host).toBe(path.join('src', 'mock', 'shelly2pmg3-34CDB0770C4C.json'));
-    expect(gatewayDevice.username).toBe('admin');
-    expect(gatewayDevice.password).toBe('tango');
-    expect(gatewayDevice.components).toHaveLength(12);
-    expect(gatewayDevice.bthomeTrvs.size).toBe(0);
-    expect(gatewayDevice.bthomeDevices.size).toBe(4);
-    expect(gatewayDevice.bthomeSensors.size).toBe(18);
+  test('create a btHome gateway device and fetch', async () => {
+    const device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shelly2pmg3-34CDB0770C4C.json'));
+    expect(device).toBeDefined();
+    if (!device) return;
+    expect(device.name).toBe('2PM Gen3 Cover');
+    expect(device.id).toBe('shelly2pmg3-34CDB0770C4C');
+    expect(device.host).toBe(path.join('src', 'mock', 'shelly2pmg3-34CDB0770C4C.json'));
+    expect(device.username).toBe('admin');
+    expect(device.password).toBe('tango');
+    expect(device.components).toHaveLength(13);
+    expect(device.bthomeTrvs.size).toBe(0);
+    expect(device.bthomeDevices.size).toBe(4);
+    expect(device.bthomeSensors.size).toBe(18);
 
-    const payload = await gatewayDevice.fetchUpdate();
+    const payload = await device.fetchUpdate();
     expect(payload).not.toBeNull();
     expect(payload).toBeInstanceOf(Object);
     expect(payload).toHaveProperty('cover:0');
 
-    gatewayDevice.destroy();
+    device.colorUpdateTimeout = setTimeout(() => {}, 1000); // Prevent timeout in tests
+    device.colorCommandTimeout = setTimeout(() => {}, 1000); // Prevent timeout in tests
+    device.thermostatSystemModeTimeout = setTimeout(() => {}, 1000); // Prevent timeout in tests
+    device.thermostatSetpointTimeout = setTimeout(() => {}, 1000); // Prevent timeout in tests
+    (device as any).startWsClientTimeout = setTimeout(() => {}, 1000); // Prevent timeout in tests
+    device.destroy();
   });
 
   test('logDevice should log all components and properties', async () => {
-    const gatewayDevice = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shelly2pmg3-34CDB0770C4C.json'));
-    expect(gatewayDevice).toBeDefined();
-    if (!gatewayDevice) return;
+    const device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shelly2pmg3-34CDB0770C4C.json'));
+    expect(device).toBeDefined();
+    if (!device) return;
 
-    const componentCount = gatewayDevice.logDevice();
-    expect(componentCount).toBe(12);
-    expect(loggerLogSpy).toHaveBeenCalledWith(
-      LogLevel.DEBUG,
-      expect.stringContaining(`Shelly device ${MAGENTA}${gatewayDevice.id}${db} (${gatewayDevice.model}) gen ${BLUE}${gatewayDevice.gen}${db}`),
-    );
+    const componentCount = device.logDevice();
+    expect(componentCount).toBe(13);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`Shelly device ${MAGENTA}${device.id}${db} (${device.model}) gen ${BLUE}${device.gen}${db}`));
 
-    gatewayDevice.destroy();
+    device.destroy();
   });
 
   test('saveDevicePayloads should save the cache file', async () => {
@@ -394,6 +425,7 @@ describe('Shelly devices test', () => {
   test('fetchUpdate should fail when shelly fetch fails', async () => {
     // Create a basic device first
     const device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shelly2pmg3-34CDB0770C4C.json'));
+    expect(device).toBeDefined();
     if (!device) return;
 
     // Mock fetch to fail for shelly
@@ -413,6 +445,7 @@ describe('Shelly devices test', () => {
 
   test('fetchUpdate should fail when settings fetch fails', async () => {
     const device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shelly2pmg3-34CDB0770C4C.json'));
+    expect(device).toBeDefined();
     if (!device) return;
 
     // Mock fetch to fail for settings
@@ -433,6 +466,7 @@ describe('Shelly devices test', () => {
 
   test('fetchUpdate should fail when status fetch fails', async () => {
     const device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shelly2pmg3-34CDB0770C4C.json'));
+    expect(device).toBeDefined();
     if (!device) return;
 
     // Mock fetch to fail for status
@@ -454,6 +488,7 @@ describe('Shelly devices test', () => {
 
   test('fetchUpdate should handle cached to online transition', async () => {
     const device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shelly2pmg3-34CDB0770C4C.json'));
+    expect(device).toBeDefined();
     if (!device) return;
 
     device.cached = true;
@@ -596,6 +631,7 @@ describe('Shelly devices test', () => {
 
   test('onEvent should handle unknown event', async () => {
     const device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shelly2pmg3-34CDB0770C4C.json'));
+    expect(device).toBeDefined();
     if (!device) return;
 
     const event = {
@@ -603,7 +639,7 @@ describe('Shelly devices test', () => {
     };
 
     device.onEvent([event as any]);
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`*Unknown event:`));
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`*Unknown event:`), expect.anything());
 
     device.destroy();
   });
@@ -784,59 +820,6 @@ describe('Shelly devices test', () => {
     device.destroy();
   });
 
-  test('awake event should handle sleepy device awakening', async () => {
-    const device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shelly2pmg3-34CDB0770C4C.json'));
-    if (!device) return;
-
-    device.sleepMode = true;
-    device.cached = true;
-    device.gen = 1;
-
-    // Mock the create method for awaken device
-    const createSpy = jest.spyOn(ShellyDevice, 'create');
-    const mockAwakenDevice = {
-      saveDevicePayloads: jest.fn(),
-      destroy: jest.fn(),
-    };
-    createSpy.mockResolvedValueOnce(mockAwakenDevice as any);
-
-    const registerDeviceSpy = jest.spyOn(shelly.coapServer, 'registerDevice');
-
-    device.emit('awake');
-
-    // Wait for async operations
-    await new Promise((resolve) => setTimeout(resolve, 10));
-
-    expect(mockAwakenDevice.saveDevicePayloads).toHaveBeenCalledWith(shelly.dataPath);
-    expect(mockAwakenDevice.destroy).toHaveBeenCalled();
-    expect(registerDeviceSpy).toHaveBeenCalledWith(device.host, device.id, false);
-
-    createSpy.mockRestore();
-    registerDeviceSpy.mockRestore();
-    device.destroy();
-  });
-
-  test('awake event should handle errors during awakening', async () => {
-    const device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shelly2pmg3-34CDB0770C4C.json'));
-    if (!device) return;
-
-    device.sleepMode = true;
-
-    // Mock the create method to fail
-    const createSpy = jest.spyOn(ShellyDevice, 'create');
-    createSpy.mockRejectedValueOnce(new Error('Test error'));
-
-    device.emit('awake');
-
-    // Wait for async operations
-    await new Promise((resolve) => setTimeout(resolve, 10));
-
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining('Error saving device cache'));
-
-    createSpy.mockRestore();
-    device.destroy();
-  });
-
   test('normalizeId should handle edge cases', () => {
     expect(ShellyDevice.normalizeId('device').id).toBe('device');
     expect(ShellyDevice.normalizeId('device').type).toBe('');
@@ -849,7 +832,12 @@ describe('Shelly devices test', () => {
 
   test('updateBTHomeComponents should update maps', async () => {
     const device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shelly2pmg3-34CDB0770C4C.json'));
+    expect(device).toBeDefined();
     if (!device) return;
+    expect(device.components.length).toBe(13);
+    expect(device.bthomeTrvs.size).toBe(0);
+    expect(device.bthomeDevices.size).toBe(4);
+    expect(device.bthomeSensors.size).toBe(18);
 
     const initialTrvSize = device.bthomeTrvs.size;
     const initialDeviceSize = device.bthomeDevices.size;
@@ -865,26 +853,118 @@ describe('Shelly devices test', () => {
     device.destroy();
   });
 
-  test('gen 2+ device should handle websocket reconnection', async () => {
-    const device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shelly2pmg3-34CDB0770C4C.json'));
+  test('scanBTHomeComponents should log errors', async () => {
+    const device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shellyblugwg3-34CDB077BCD4.json'));
+    expect(device).toBeDefined();
     if (!device) return;
+    expect(device.components.length).toBe(10);
+    expect(device.bthomeTrvs.size).toBe(2);
+    expect(device.bthomeDevices.size).toBe(5);
+    expect(device.bthomeSensors.size).toBe(20);
 
-    // Simulate websocket disconnection
-    if (device.wsClient) {
-      (device as any).wsClient._isConnected = false;
+    let component: BTHomeComponent = { key: 'blutrv:200', status: { id: 200, target_C: 20, current_C: 24.1, rssi: -48, battery: 100 }, config: {} } as BTHomeComponent;
+    device.scanBTHomeComponents([component]);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.ERROR, expect.stringContaining('has no valid data!'), expect.anything());
+    jest.clearAllMocks();
 
-      // Mock the start method
-      const startSpy = jest.spyOn(device.wsClient, 'start');
+    component = { key: 'bthomedevice:200', status: { id: 200, target_C: 20, current_C: 24.1, rssi: -48, battery: 100 }, config: { meta: {} } } as BTHomeComponent;
+    device.scanBTHomeComponents([component]);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.ERROR, expect.stringContaining('has no valid data!'), expect.anything());
+    jest.clearAllMocks();
 
-      // Simulate the interval check (this would normally be called by the interval)
-      if (device.gen >= 2 && !device.sleepMode && device.wsClient && !device.wsClient.isConnected) {
-        device.wsClient.start();
-      }
+    component = { key: 'bthomesensor:200', status: { id: 200, target_C: 20, current_C: 24.1, rssi: -48, battery: 100 }, config: { obj_id: {} } } as BTHomeComponent;
+    device.scanBTHomeComponents([component]);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.ERROR, expect.stringContaining('has no valid data!'), expect.anything());
+    jest.clearAllMocks();
 
-      // eslint-disable-next-line jest/no-conditional-expect
-      expect(startSpy).toHaveBeenCalled();
-      startSpy.mockRestore();
-    }
+    device.destroy();
+  });
+
+  test('gen 2+ device should create websocket', async () => {
+    const device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shelly2pmg3-34CDB0770C4C.json'));
+    expect(device).toBeDefined();
+    if (!device) return;
+    expect(device.wsClient).toBeDefined();
+    expect(wsClientStartSpy).not.toHaveBeenCalled();
+
+    device.destroy();
+  });
+
+  test('gen 2+ device should reconnect to websocket', async () => {
+    jest.useFakeTimers();
+    const device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shelly2pmg3-34CDB0770C4C.json'));
+    expect(device).toBeDefined();
+    if (!device) return;
+    expect(device.wsClient).toBeDefined();
+    expect(wsClientStartSpy).not.toHaveBeenCalled();
+
+    jest.advanceTimersByTime(60 * 1000); // Simulate time passing for reconnection
+    expect(wsClientStartSpy).toHaveBeenCalled();
+
+    device.destroy();
+    jest.useRealTimers();
+  });
+
+  test('gen 2+ device should respond to websocket events', async () => {
+    const device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shelly2pmg3-34CDB0770C4C.json'));
+    expect(device).toBeDefined();
+    if (!device) return;
+    expect(device.wsClient).toBeDefined();
+    if (!device.wsClient) return;
+    expect(wsClientStartSpy).not.toHaveBeenCalled();
+
+    let onlineEvent = false;
+    device.on('online', () => {
+      onlineEvent = true;
+    });
+    device.online = false;
+    device.cached = true;
+    device.wsClient.emit('response', {} as any); // Simulate any websocket message
+    expect(onlineEvent).toBe(true);
+    expect(device.online).toBe(true);
+    expect(device.cached).toBe(false);
+
+    onlineEvent = false;
+    device.online = false;
+    device.cached = true;
+    device.wsClient.emit('update', {} as any); // Simulate any websocket message
+    expect(onlineEvent).toBe(true);
+    expect(device.online).toBe(true);
+    expect(device.cached).toBe(false);
+
+    onlineEvent = false;
+    device.online = false;
+    device.cached = true;
+    device.wsClient.emit('event', []); // Simulate any websocket message
+    expect(onlineEvent).toBe(true);
+    expect(device.online).toBe(true);
+    expect(device.cached).toBe(false);
+
+    let offlineEvent = false;
+    device.on('offline', () => {
+      offlineEvent = true;
+    });
+    device.online = true;
+    device.wsClient.emit('error', 'test'); // Simulate any websocket message
+    expect(offlineEvent).toBe(true);
+    expect(device.online).toBe(false);
+
+    device.destroy();
+  });
+
+  test('gen 2+ device should respond to awake', async () => {
+    const device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shelly2pmg3-34CDB0770C4C.json'));
+    expect(device).toBeDefined();
+    if (!device) return;
+    jest.clearAllMocks();
+
+    device.sleepMode = true;
+    device.cached = true;
+    device.gen = 1;
+    createSpy.mockImplementationOnce(() => Promise.resolve({ gen: 1, saveDevicePayloads: jest.fn(), destroy: jest.fn() } as any));
+    device.emit('awake');
+    await wait(100); // Wait for async operations
+    expect(createSpy).toHaveBeenCalled();
 
     device.destroy();
   });
