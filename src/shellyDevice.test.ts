@@ -935,39 +935,6 @@ describe('Shelly devices test', () => {
     device.destroy();
   });
 
-  test('saveDevicePayloads should handle errors', async () => {
-    fetchSpy.mockImplementation((shelly: Shelly, log: AnsiLogger, host: string, service: string, params?: Record<string, string | number | boolean | object>) => {
-      if (service === 'shelly') return Promise.resolve({ type: 'SHSW-1', fw: '20210608-073743/v1.11.0@7b3d8b7d', auth: false });
-      if (service === 'status')
-        return Promise.resolve({
-          has_update: false,
-          wifi_ap: { ssid: 'secret_ap' },
-          wifi_sta: { ssid: 'secret_sta' },
-          wifi_sta1: { ssid: 'secret_sta1' },
-        });
-      if (service === 'settings')
-        return Promise.resolve({
-          device: { hostname: 'shellydevice-123456789' },
-          name: 'Shelly device',
-          timezone: 'Europe/Rome',
-          lat: 45.123,
-          lng: 9.456,
-          wifi_ap: { ssid: 'secret_ap_settings' },
-          wifi_sta: { ssid: 'secret_sta_settings' },
-          wifi_sta1: { ssid: 'secret_sta1_settings' },
-        });
-      return Promise.resolve({});
-    });
-
-    const device = await ShellyDevice.create(shelly, log, '192.168.1.100');
-    if (!device) return;
-
-    const result = await device.saveDevicePayloads('temp<><<++"""');
-    expect(result).toBe(false);
-
-    device.destroy();
-  });
-
   test('saveDevicePayloads should handle gen 2+ device data sanitization', async () => {
     const device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shelly2pmg3-34CDB0770C4C.json'));
     if (!device) return;
@@ -1001,6 +968,39 @@ describe('Shelly devices test', () => {
     const result = await device.saveDevicePayloads('temp');
     expect(result).toBe(false);
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.ERROR, expect.stringContaining('no data'));
+
+    device.destroy();
+  });
+
+  test('saveDevicePayloads should handle errors', async () => {
+    fetchSpy.mockImplementation((shelly: Shelly, log: AnsiLogger, host: string, service: string, params?: Record<string, string | number | boolean | object>) => {
+      if (service === 'shelly') return Promise.resolve({ type: 'SHSW-1', fw: '20210608-073743/v1.11.0@7b3d8b7d', auth: false });
+      if (service === 'status')
+        return Promise.resolve({
+          has_update: false,
+          wifi_ap: { ssid: 'secret_ap' },
+          wifi_sta: { ssid: 'secret_sta' },
+          wifi_sta1: { ssid: 'secret_sta1' },
+        });
+      if (service === 'settings')
+        return Promise.resolve({
+          device: { hostname: 'shellydevice-123456789' },
+          name: 'Shelly device',
+          timezone: 'Europe/Rome',
+          lat: 45.123,
+          lng: 9.456,
+          wifi_ap: { ssid: 'secret_ap_settings' },
+          wifi_sta: { ssid: 'secret_sta_settings' },
+          wifi_sta1: { ssid: 'secret_sta1_settings' },
+        });
+      return Promise.resolve({});
+    });
+
+    const device = await ShellyDevice.create(shelly, log, '192.168.1.100');
+    if (!device) return;
+
+    const result = await device.saveDevicePayloads(undefined as any);
+    expect(result).toBe(false);
 
     device.destroy();
   });

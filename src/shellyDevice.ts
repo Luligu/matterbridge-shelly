@@ -1554,7 +1554,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
         this.log.debug(`Successfully wrote to ${path.join(dataPath, `${this.id}.json`)}`);
         return true;
       } catch (error) {
-        this.log.error(`Error saving device payloads in the directory ${dataPath} file ${path.join(dataPath, `${this.id}.json`)}:`, error);
+        this.log.error(`Error saving device payloads in the directory ${dataPath} file ${this.id}:`, error);
         return false;
       }
     }
