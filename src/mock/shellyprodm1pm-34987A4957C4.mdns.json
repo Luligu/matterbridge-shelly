@@ -23,28 +23,12 @@
       "data": "shellyprodm1pm-34987a4957c4._http._tcp.local"
     },
     {
-      "name": "_shelly._tcp.local",
+      "name": "_http._tcp.local",
       "type": "PTR",
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": "shellyprodm1pm-34987a4957c4._shelly._tcp.local"
-    },
-    {
-      "name": "_services._dns-sd._udp.local",
-      "type": "PTR",
-      "ttl": 120,
-      "class": "IN",
-      "flush": false,
-      "data": "_shelly._tcp.local"
-    },
-    {
-      "name": "_services._dns-sd._udp.local",
-      "type": "PTR",
-      "ttl": 120,
-      "class": "IN",
-      "flush": false,
-      "data": "_http._tcp.local"
+      "data": "Dimmer 1PM Pro._http._tcp.local"
     }
   ],
   "authorities": [],
@@ -68,7 +52,9 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": ["gen=2"]
+      "data": [
+        "gen=2"
+      ]
     },
     {
       "name": "ShellyProDM1PM-34987A4957C4.local",
@@ -76,10 +62,10 @@
       "ttl": 120,
       "class": "IN",
       "flush": true,
-      "data": "192.168.1.156"
+      "data": "192.168.68.57"
     },
     {
-      "name": "shellyprodm1pm-34987a4957c4._shelly._tcp.local",
+      "name": "Dimmer 1PM Pro._http._tcp.local",
       "type": "SRV",
       "ttl": 120,
       "class": "IN",
@@ -88,24 +74,28 @@
         "priority": 0,
         "weight": 0,
         "port": 80,
-        "target": "ShellyProDM1PM-34987A4957C4.local"
+        "target": "Dimmer-1PM-Pro.local"
       }
     },
     {
-      "name": "shellyprodm1pm-34987a4957c4._shelly._tcp.local",
+      "name": "Dimmer 1PM Pro._http._tcp.local",
       "type": "TXT",
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": ["gen=2", "app=ProDimmerx", "ver=1.4.4"]
+      "data": [
+        "gen=2",
+        "app=ProDimmerx",
+        "ver=1.6.2"
+      ]
     },
     {
-      "name": "ShellyProDM1PM-34987A4957C4.local",
+      "name": "Dimmer-1PM-Pro.local",
       "type": "A",
       "ttl": 120,
       "class": "IN",
       "flush": true,
-      "data": "192.168.1.156"
+      "data": "192.168.68.57"
     }
   ]
 }

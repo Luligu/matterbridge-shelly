@@ -6,8 +6,8 @@
     "slot": 0,
     "model": "SPDM-001PE01EU",
     "gen": 2,
-    "fw_id": "20241011-114452/1.4.4-g6d2a586",
-    "ver": "1.4.4",
+    "fw_id": "20250520-083724/1.6.2-gc8a76e2",
+    "ver": "1.6.2",
     "app": "ProDimmerx",
     "auth_en": false,
     "auth_domain": null
@@ -16,9 +16,6 @@
     "ble": {
       "enable": true,
       "rpc": {
-        "enable": true
-      },
-      "observer": {
         "enable": true
       }
     },
@@ -29,6 +26,7 @@
     },
     "eth": {
       "enable": true,
+      "server_mode": false,
       "ipv4mode": "dhcp",
       "ip": null,
       "netmask": null,
@@ -71,6 +69,10 @@
         "brightness": 50,
         "active_between": []
       },
+      "range_map": [
+        0,
+        100
+      ],
       "button_fade_rate": 3,
       "button_presets": {
         "button_doublepush": {
@@ -100,8 +102,9 @@
       "device": {
         "name": "Dimmer 1PM Pro",
         "mac": "34987A4957C4",
-        "fw_id": "20241011-114452/1.4.4-g6d2a586",
-        "discoverable": true
+        "fw_id": "20250520-083724/1.6.2-gc8a76e2",
+        "discoverable": true,
+        "eco_mode": false
       },
       "location": null,
       "debug": {
@@ -123,9 +126,9 @@
         "listen_port": null
       },
       "sntp": {
-        "server": "time.google.com"
+        "server": "time.cloudflare.com"
       },
-      "cfg_rev": 54
+      "cfg_rev": 58
     },
     "wifi": {
       "ap": {
@@ -174,7 +177,8 @@
       "connected": true
     },
     "eth": {
-      "ip": null
+      "ip": null,
+      "ip6": null
     },
     "input:0": {
       "id": 0,
@@ -187,21 +191,25 @@
     "knx": {},
     "light:0": {
       "id": 0,
-      "source": "HTTP_in",
+      "source": "undervoltage",
       "output": false,
-      "brightness": 100,
+      "brightness": 4,
       "temperature": {
-        "tC": 41.8,
-        "tF": 107.3
+        "tC": 46.9,
+        "tF": 116.5
       },
       "aenergy": {
-        "total": 394,
-        "by_minute": [0, 0, 0],
-        "minute_ts": 1741442400
+        "total": 398,
+        "by_minute": [
+          0,
+          0,
+          0
+        ],
+        "minute_ts": 1752852480
       },
       "apower": 0,
       "current": 0,
-      "voltage": 236.1
+      "voltage": 231.8
     },
     "mqtt": {
       "connected": false
@@ -209,29 +217,37 @@
     "sys": {
       "mac": "34987A4957C4",
       "restart_required": false,
-      "time": "15:00",
-      "unixtime": 1741442425,
-      "uptime": 593542,
-      "ram_size": 265284,
-      "ram_free": 76316,
+      "time": "17:28",
+      "unixtime": 1752852510,
+      "last_sync_ts": 1752852118,
+      "uptime": 1414256,
+      "ram_size": 264840,
+      "ram_free": 66076,
+      "ram_min_free": 40948,
       "fs_size": 524288,
-      "fs_free": 180224,
-      "cfg_rev": 54,
+      "fs_free": 172032,
+      "cfg_rev": 58,
       "kvs_rev": 0,
       "schedule_rev": 2,
-      "webhook_rev": 0,
+      "webhook_rev": 1,
+      "btrelay_rev": 138,
       "available_updates": {
         "beta": {
-          "version": "1.5.1-beta1"
+          "version": "1.7.0-beta3"
         }
       },
-      "reset_reason": 1
+      "reset_reason": 1,
+      "utc_offset": 7200
     },
     "wifi": {
-      "sta_ip": "192.168.1.156",
+      "sta_ip": "192.168.68.57",
       "status": "got ip",
       "ssid": "",
-      "rssi": -57
+      "rssi": -62,
+      "sta_ip6": [
+        "fe80::3698:7aff:fe49:57c4",
+        "fd78:cbf8:4939:746:3698:7aff:fe49:57c4"
+      ]
     },
     "ws": {
       "connected": false
@@ -242,10 +258,13 @@
       "key": "bthomedevice:200",
       "status": {
         "id": 200,
-        "rssi": null,
-        "battery": null,
-        "packet_id": null,
-        "last_updated_ts": 0
+        "rssi": -54,
+        "battery": 100,
+        "packet_id": 146,
+        "last_updated_ts": 1752851312,
+        "paired": false,
+        "rpc": false,
+        "rsv": -1
       },
       "config": {
         "id": 200,
@@ -259,16 +278,23 @@
             "icon": null
           }
         }
+      },
+      "attrs": {
+        "flags": 0,
+        "model_id": 0
       }
     },
     {
       "key": "bthomedevice:201",
       "status": {
         "id": 201,
-        "rssi": -61,
+        "rssi": -52,
         "battery": 100,
-        "packet_id": 54,
-        "last_updated_ts": 1741442376
+        "packet_id": 131,
+        "last_updated_ts": 1752852475,
+        "paired": false,
+        "rpc": false,
+        "rsv": -1
       },
       "config": {
         "id": 201,
@@ -282,14 +308,18 @@
             "icon": null
           }
         }
+      },
+      "attrs": {
+        "flags": 0,
+        "model_id": 0
       }
     },
     {
       "key": "bthomesensor:200",
       "status": {
         "id": 200,
-        "value": null,
-        "last_updated_ts": 0
+        "value": 100,
+        "last_updated_ts": 1752851312
       },
       "config": {
         "id": 200,
@@ -365,7 +395,7 @@
       "status": {
         "id": 205,
         "value": 100,
-        "last_updated_ts": 1741442376
+        "last_updated_ts": 1752852475
       },
       "config": {
         "id": 205,
@@ -380,8 +410,8 @@
       "key": "bthomesensor:206",
       "status": {
         "id": 206,
-        "value": 36,
-        "last_updated_ts": 1741442376
+        "value": 65,
+        "last_updated_ts": 1752852475
       },
       "config": {
         "id": 206,
@@ -396,8 +426,8 @@
       "key": "bthomesensor:207",
       "status": {
         "id": 207,
-        "value": 22.9,
-        "last_updated_ts": 1741442376
+        "value": 24.9,
+        "last_updated_ts": 1752852475
       },
       "config": {
         "id": 207,
@@ -428,7 +458,7 @@
       }
     }
   ],
-  "cfg_rev": 54,
+  "cfg_rev": 58,
   "offset": 0,
   "total": 11
 }

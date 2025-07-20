@@ -23,28 +23,12 @@
       "data": "shellyi4g3-5432045661b4._http._tcp.local"
     },
     {
-      "name": "_shelly._tcp.local",
+      "name": "_http._tcp.local",
       "type": "PTR",
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": "shellyi4g3-5432045661b4._shelly._tcp.local"
-    },
-    {
-      "name": "_services._dns-sd._udp.local",
-      "type": "PTR",
-      "ttl": 120,
-      "class": "IN",
-      "flush": false,
-      "data": "_shelly._tcp.local"
-    },
-    {
-      "name": "_services._dns-sd._udp.local",
-      "type": "PTR",
-      "ttl": 120,
-      "class": "IN",
-      "flush": false,
-      "data": "_http._tcp.local"
+      "data": "i4 Gen3._http._tcp.local"
     }
   ],
   "authorities": [],
@@ -68,7 +52,9 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": ["gen=3"]
+      "data": [
+        "gen=3"
+      ]
     },
     {
       "name": "ShellyI4G3-5432045661B4.local",
@@ -76,10 +62,10 @@
       "ttl": 120,
       "class": "IN",
       "flush": true,
-      "data": "192.168.1.159"
+      "data": "192.168.68.76"
     },
     {
-      "name": "shellyi4g3-5432045661b4._shelly._tcp.local",
+      "name": "i4 Gen3._http._tcp.local",
       "type": "SRV",
       "ttl": 120,
       "class": "IN",
@@ -88,24 +74,28 @@
         "priority": 0,
         "weight": 0,
         "port": 80,
-        "target": "ShellyI4G3-5432045661B4.local"
+        "target": "i4-Gen3.local"
       }
     },
     {
-      "name": "shellyi4g3-5432045661b4._shelly._tcp.local",
+      "name": "i4 Gen3._http._tcp.local",
       "type": "TXT",
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": ["gen=3", "app=I4G3", "ver=1.4.4"]
+      "data": [
+        "gen=3",
+        "app=I4G3",
+        "ver=1.6.2"
+      ]
     },
     {
-      "name": "ShellyI4G3-5432045661B4.local",
+      "name": "i4-Gen3.local",
       "type": "A",
       "ttl": 120,
       "class": "IN",
       "flush": true,
-      "data": "192.168.1.159"
+      "data": "192.168.68.76"
     }
   ]
 }

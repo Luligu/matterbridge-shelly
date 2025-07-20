@@ -6,8 +6,8 @@
     "slot": 1,
     "model": "SPSW-104PE16EU",
     "gen": 2,
-    "fw_id": "20241011-114451/1.4.4-g6d2a586",
-    "ver": "1.4.4",
+    "fw_id": "20250520-083721/1.6.2-gc8a76e2",
+    "ver": "1.6.2",
     "app": "Pro4PM",
     "auth_en": false,
     "auth_domain": null
@@ -17,9 +17,6 @@
       "enable": false,
       "rpc": {
         "enable": true
-      },
-      "observer": {
-        "enable": false
       }
     },
     "bthome": {},
@@ -29,6 +26,7 @@
     },
     "eth": {
       "enable": true,
+      "server_mode": false,
       "ipv4mode": "dhcp",
       "ip": null,
       "netmask": null,
@@ -87,6 +85,7 @@
       "id": 0,
       "name": null,
       "in_mode": "follow",
+      "in_locked": false,
       "initial_state": "match_input",
       "auto_on": false,
       "auto_on_delay": 60,
@@ -96,12 +95,14 @@
       "voltage_limit": 280,
       "undervoltage_limit": 0,
       "autorecover_voltage_errors": false,
-      "current_limit": 16
+      "current_limit": 16,
+      "reverse": false
     },
     "switch:1": {
       "id": 1,
       "name": null,
       "in_mode": "follow",
+      "in_locked": false,
       "initial_state": "match_input",
       "auto_on": false,
       "auto_on_delay": 60,
@@ -111,12 +112,14 @@
       "voltage_limit": 280,
       "undervoltage_limit": 0,
       "autorecover_voltage_errors": false,
-      "current_limit": 16
+      "current_limit": 16,
+      "reverse": false
     },
     "switch:2": {
       "id": 2,
       "name": null,
       "in_mode": "follow",
+      "in_locked": false,
       "initial_state": "match_input",
       "auto_on": false,
       "auto_on_delay": 60,
@@ -126,12 +129,14 @@
       "voltage_limit": 280,
       "undervoltage_limit": 0,
       "autorecover_voltage_errors": false,
-      "current_limit": 16
+      "current_limit": 16,
+      "reverse": false
     },
     "switch:3": {
       "id": 3,
       "name": "DC line",
       "in_mode": "follow",
+      "in_locked": false,
       "initial_state": "match_input",
       "auto_on": false,
       "auto_on_delay": 60,
@@ -141,13 +146,14 @@
       "voltage_limit": 280,
       "undervoltage_limit": 0,
       "autorecover_voltage_errors": false,
-      "current_limit": 16
+      "current_limit": 16,
+      "reverse": false
     },
     "sys": {
       "device": {
         "name": "4PM Pro",
         "mac": "34987A67D7D0",
-        "fw_id": "20241011-114451/1.4.4-g6d2a586",
+        "fw_id": "20250520-083721/1.6.2-gc8a76e2",
         "discoverable": true,
         "eco_mode": false
       },
@@ -171,9 +177,9 @@
         "listen_port": null
       },
       "sntp": {
-        "server": "time.google.com"
+        "server": "time.cloudflare.com"
       },
-      "cfg_rev": 23
+      "cfg_rev": 27
     },
     "ui": {
       "idle_brightness": 100
@@ -221,13 +227,16 @@
   "status": {
     "ble": {},
     "bthome": {
-      "errors": ["bluetooth_disabled"]
+      "errors": [
+        "bluetooth_disabled"
+      ]
     },
     "cloud": {
       "connected": true
     },
     "eth": {
-      "ip": null
+      "ip": null,
+      "ip6": null
     },
     "input:0": {
       "id": 0,
@@ -251,134 +260,174 @@
     },
     "switch:0": {
       "id": 0,
-      "source": "HTTP_in",
+      "source": "SHC",
       "output": true,
-      "apower": 20.6,
-      "voltage": 238,
+      "apower": 20.7,
+      "voltage": 233.9,
       "freq": 50,
-      "current": 0.184,
-      "pf": 0.47,
+      "current": 0.18,
+      "pf": 0.49,
       "aenergy": {
-        "total": 73809.18,
-        "by_minute": [349.383, 348.999, 348.91],
-        "minute_ts": 1741442580
+        "total": 137275.399,
+        "by_minute": [
+          359.896,
+          359.57,
+          359.629
+        ],
+        "minute_ts": 1752839820
       },
       "ret_aenergy": {
         "total": 0,
-        "by_minute": [0, 0, 0],
-        "minute_ts": 1741442580
+        "by_minute": [
+          0,
+          0,
+          0
+        ],
+        "minute_ts": 1752839820
       },
       "temperature": {
-        "tC": 54,
-        "tF": 129.3
+        "tC": 56.3,
+        "tF": 133.3
       }
     },
     "switch:1": {
       "id": 1,
-      "source": "HTTP_in",
+      "source": "SHC",
       "output": true,
-      "apower": 6.7,
-      "voltage": 237.9,
+      "apower": 6.3,
+      "voltage": 233.8,
       "freq": 50,
-      "current": 0.073,
-      "pf": 0.62,
+      "current": 0.065,
+      "pf": 0.63,
       "aenergy": {
-        "total": 33922.922,
-        "by_minute": [112.002, 112.12, 111.958],
-        "minute_ts": 1741442580
+        "total": 53235.821,
+        "by_minute": [
+          109.843,
+          107.479,
+          107.669
+        ],
+        "minute_ts": 1752839820
       },
       "ret_aenergy": {
         "total": 0,
-        "by_minute": [0, 0, 0],
-        "minute_ts": 1741442580
+        "by_minute": [
+          0,
+          0,
+          0
+        ],
+        "minute_ts": 1752839820
       },
       "temperature": {
-        "tC": 54,
-        "tF": 129.3
+        "tC": 56.3,
+        "tF": 133.3
       }
     },
     "switch:2": {
       "id": 2,
-      "source": "HTTP_in",
+      "source": "SHC",
       "output": true,
-      "apower": 4.6,
-      "voltage": 235.9,
+      "apower": 3.8,
+      "voltage": 231.9,
       "freq": 50,
       "current": 0.053,
       "pf": 0.6,
       "aenergy": {
-        "total": 19051,
-        "by_minute": [70.843, 71.05, 70.799],
-        "minute_ts": 1741442580
+        "total": 32031.71,
+        "by_minute": [
+          71.006,
+          71.08,
+          70.858
+        ],
+        "minute_ts": 1752839820
       },
       "ret_aenergy": {
         "total": 0,
-        "by_minute": [0, 0, 0],
-        "minute_ts": 1741442580
+        "by_minute": [
+          0,
+          0,
+          0
+        ],
+        "minute_ts": 1752839820
       },
       "temperature": {
-        "tC": 54,
-        "tF": 129.3
+        "tC": 56.3,
+        "tF": 133.3
       }
     },
     "switch:3": {
       "id": 3,
-      "source": "HTTP_in",
+      "source": "SHC",
       "output": true,
-      "apower": 2.9,
-      "voltage": 235.9,
+      "apower": 2.5,
+      "voltage": 231.9,
       "freq": 50,
-      "current": 0.045,
-      "pf": 0.25,
+      "current": 0.044,
+      "pf": 0.27,
       "aenergy": {
-        "total": 11013.763,
-        "by_minute": [43.244, 43.301, 43.416],
-        "minute_ts": 1741442580
+        "total": 18818.836,
+        "by_minute": [
+          44.547,
+          44.834,
+          43.774
+        ],
+        "minute_ts": 1752839820
       },
       "ret_aenergy": {
         "total": 0,
-        "by_minute": [0, 0, 0],
-        "minute_ts": 1741442580
+        "by_minute": [
+          0,
+          0,
+          0
+        ],
+        "minute_ts": 1752839820
       },
       "temperature": {
-        "tC": 54,
-        "tF": 129.3
+        "tC": 56.3,
+        "tF": 133.3
       }
     },
     "sys": {
       "mac": "34987A67D7D0",
       "restart_required": false,
-      "time": "15:03",
-      "unixtime": 1741442606,
-      "uptime": 789359,
-      "ram_size": 248080,
-      "ram_free": 88712,
+      "time": "13:57",
+      "unixtime": 1752839854,
+      "last_sync_ts": 1752838261,
+      "uptime": 1401625,
+      "ram_size": 248504,
+      "ram_free": 91180,
+      "ram_min_free": 57408,
       "fs_size": 524288,
-      "fs_free": 180224,
-      "cfg_rev": 23,
+      "fs_free": 176128,
+      "cfg_rev": 27,
       "kvs_rev": 0,
       "schedule_rev": 1,
       "webhook_rev": 0,
+      "btrelay_rev": 0,
       "available_updates": {
         "beta": {
-          "version": "1.5.1-beta1"
+          "version": "1.7.0-beta3"
         }
       },
-      "reset_reason": 1
+      "reset_reason": 1,
+      "utc_offset": 7200
     },
     "ui": {},
     "wifi": {
-      "sta_ip": "192.168.1.234",
+      "sta_ip": "192.168.68.54",
       "status": "got ip",
       "ssid": "",
-      "rssi": -50
+      "rssi": -60,
+      "sta_ip6": [
+        "fe80::3698:7aff:fe67:d7d0",
+        "fd78:cbf8:4939:746:3698:7aff:fe67:d7d0"
+      ]
     },
     "ws": {
       "connected": false
     }
   },
   "components": [],
-  "cfg_rev": 23,
+  "cfg_rev": 27,
   "offset": 0,
   "total": 0
 }

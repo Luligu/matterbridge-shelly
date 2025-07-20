@@ -20,7 +20,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": true,
-      "data": "192.168.1.100"
+      "data": "192.168.70.12"
     },
     {
       "name": "_services._dns-sd._udp.local",
@@ -57,7 +57,11 @@
       "ttl": 120,
       "class": "IN",
       "flush": true,
-      "data": ["gen=3", "app=HTG3", "ver=1.4.5"]
+      "data": [
+        "gen=3",
+        "app=HTG3",
+        "ver=1.6.2"
+      ]
     },
     {
       "name": "_services._dns-sd._udp.local",
@@ -94,7 +98,9 @@
       "ttl": 120,
       "class": "IN",
       "flush": true,
-      "data": ["gen=3"]
+      "data": [
+        "gen=3"
+      ]
     }
   ],
   "authorities": [],
@@ -107,7 +113,10 @@
       "flush": true,
       "data": {
         "nextDomain": "ShellyHTG3-3030F9EC8468.local",
-        "rrtypes": ["A", "AAAA"]
+        "rrtypes": [
+          "A",
+          "AAAA"
+        ]
       }
     }
   ]

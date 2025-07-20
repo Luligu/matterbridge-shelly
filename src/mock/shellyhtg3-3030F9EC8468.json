@@ -6,8 +6,8 @@
     "slot": 1,
     "model": "S3SN-0U12A",
     "gen": 3,
-    "fw_id": "20250318-152127/1.5.1-g01dd7ff",
-    "ver": "1.5.1",
+    "fw_id": "20250520-083721/1.6.2-gc8a76e2",
+    "ver": "1.6.2",
     "app": "HTG3",
     "auth_en": false,
     "auth_domain": null
@@ -51,7 +51,7 @@
       "device": {
         "name": "H&T Gen3",
         "mac": "3030F9EC8468",
-        "fw_id": "20250318-152127/1.5.1-g01dd7ff",
+        "fw_id": "20250520-083721/1.6.2-gc8a76e2",
         "discoverable": true,
         "eco_mode": false
       },
@@ -71,13 +71,13 @@
       },
       "ui_data": {},
       "rpc_udp": {
-        "dst_addr": "192.168.1.20:8585",
+        "dst_addr": "192.168.1.100:8585",
         "listen_port": 8585
       },
       "sntp": {
         "server": "time.cloudflare.com"
       },
-      "cfg_rev": 25
+      "cfg_rev": 31
     },
     "temperature:0": {
       "id": 0,
@@ -118,7 +118,7 @@
     },
     "ws": {
       "enable": true,
-      "server": "ws://192.168.1.20:8485",
+      "server": "ws://192.168.69.100:8485",
       "ssl_ca": "*"
     }
   },
@@ -130,8 +130,8 @@
     "devicepower:0": {
       "id": 0,
       "battery": {
-        "V": 4.98,
-        "percent": 49
+        "V": 4.35,
+        "percent": 17
       },
       "external": {
         "present": false
@@ -140,7 +140,7 @@
     "ht_ui": {},
     "humidity:0": {
       "id": 0,
-      "rh": 53.7
+      "rh": 63.8
     },
     "mqtt": {
       "connected": false
@@ -148,43 +148,52 @@
     "sys": {
       "mac": "3030F9EC8468",
       "restart_required": false,
-      "time": "06:27",
-      "unixtime": 1745728024,
-      "last_sync_ts": 1745728019,
-      "uptime": 8,
-      "ram_size": 249540,
-      "ram_free": 140352,
-      "ram_min_free": 125840,
+      "time": "14:20",
+      "unixtime": 1752841257,
+      "last_sync_ts": 1752841079,
+      "uptime": 181,
+      "ram_size": 249428,
+      "ram_free": 136232,
+      "ram_min_free": 120928,
       "fs_size": 1048576,
-      "fs_free": 704512,
-      "cfg_rev": 25,
+      "fs_free": 712704,
+      "cfg_rev": 31,
       "kvs_rev": 0,
       "webhook_rev": 0,
-      "available_updates": {},
+      "available_updates": {
+        "beta": {
+          "version": "1.7.0-beta3"
+        }
+      },
       "wakeup_reason": {
         "boot": "deepsleep_wake",
-        "cause": "periodic"
+        "cause": "button"
       },
       "wakeup_period": 7200,
-      "reset_reason": 8
+      "reset_reason": 8,
+      "utc_offset": 7200
     },
     "temperature:0": {
       "id": 0,
-      "tC": 22.2,
-      "tF": 72
+      "tC": 25.5,
+      "tF": 77.8
     },
     "wifi": {
-      "sta_ip": "192.168.1.100",
+      "sta_ip": "192.168.70.12",
       "status": "got ip",
       "ssid": "",
-      "rssi": -67
+      "rssi": -68,
+      "sta_ip6": [
+        "fe80::3230:f9ff:feec:8468",
+        "fd78:cbf8:4939:746:3230:f9ff:feec:8468"
+      ]
     },
     "ws": {
       "connected": true
     }
   },
   "components": [],
-  "cfg_rev": 25,
+  "cfg_rev": 31,
   "offset": 0,
   "total": 0
 }

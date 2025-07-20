@@ -115,11 +115,11 @@ export interface ShellyPlatformConfig {
   inputContactList: string[];
   inputMomentaryList: string[];
   inputLatchingList: string[];
+  nocacheList: string[];
   blackList: string[];
   whiteList: string[];
   entityBlackList: string[];
   deviceEntityBlackList: Record<string, string[]>;
-  nocacheList: string[];
   enableMdnsDiscover: boolean;
   enableStorageDiscover: boolean;
   resetStorageDiscover: boolean;
@@ -181,10 +181,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       if (config.outletList !== undefined) delete config.outletList;
       if (config.exposeInput !== undefined) delete config.exposeInput;
       if (config.exposeInputEvent !== undefined) delete config.exposeInputEvent;
-      if (config.inputEventList !== undefined) {
-        if (isValidArray(config.inputEventList, 1)) config.inputMomentaryList = config.inputEventList;
-        delete config.inputEventList;
-      }
+      if (config.inputEventList !== undefined) delete config.inputEventList;
       if (config.exposePowerMeter !== undefined) delete config.exposePowerMeter;
       if (config.enableConfigDiscover !== undefined) delete config.enableConfigDiscover;
       if (config.deviceIp !== undefined) delete config.deviceIp;
