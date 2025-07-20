@@ -33,6 +33,7 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 - [triphase]: Added support for shellypro3em with profile triphase. Four PowerMeters are created: the first is the total, then phase A, B and C.
 - [pro]: Added support for returned energy.
 - [BLU]: Added bthomedevice_event for BLU buttons.
+- [config]: Added the default config file for new setups (requires Matterbridge 3.1.5).
 
 ### Changed
 

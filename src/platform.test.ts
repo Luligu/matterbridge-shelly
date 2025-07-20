@@ -666,32 +666,32 @@ describe('ShellyPlatform', () => {
     expect(cctEndpoint.getAttribute('colorControl', 'colorTemperatureMireds')).toBe(300);
     shelly = (shellyPlatform as any).shelly;
     shelly.wsServer.emit('wssupdate', shellyPro.id, { 'cct:0': { state: true, brightness: 50, ct: 3000 } } as ShellyData);
-    await wait(10);
+    await wait(100);
     expect(cctEndpoint.getAttribute('onOff', 'onOff')).toBe(true);
     expect(cctEndpoint.getAttribute('levelControl', 'currentLevel')).toBe(127);
     expect(cctEndpoint.getAttribute('colorControl', 'colorTemperatureMireds')).toBe(454);
     expect(cctEndpoint.getAttribute('colorControl', 'colorMode')).toBe(ColorControl.ColorMode.ColorTemperatureMireds);
     expect(cctEndpoint.getAttribute('colorControl', 'enhancedColorMode')).toBe(ColorControl.ColorMode.ColorTemperatureMireds);
     shelly.wsServer.emit('wssupdate', shellyPro.id, { 'cct:0': { ct: 2700 } } as ShellyData);
-    await wait(10);
+    await wait(100);
     expect(cctEndpoint.getAttribute('colorControl', 'colorTemperatureMireds')).toBe(500);
     shelly.wsServer.emit('wssupdate', shellyPro.id, { 'cct:0': { ct: 6500 } } as ShellyData);
-    await wait(10);
+    await wait(100);
     expect(cctEndpoint.getAttribute('colorControl', 'colorTemperatureMireds')).toBe(147);
     shelly.wsServer.emit('wssupdate', shellyPro.id, { 'cct:0': { ct: 6600 } } as ShellyData);
-    await wait(10);
+    await wait(100);
     expect(cctEndpoint.getAttribute('colorControl', 'colorTemperatureMireds')).toBe(147);
     shelly.wsServer.emit('wssupdate', shellyPro.id, { 'cct:0': { ct: 1600 } } as ShellyData);
-    await wait(10);
+    await wait(100);
     expect(cctEndpoint.getAttribute('colorControl', 'colorTemperatureMireds')).toBe(147);
     shelly.wsServer.emit('wssupdate', shellyPro.id, { 'cct:0': { ct: 1600 } } as ShellyData);
-    await wait(10);
+    await wait(100);
     expect(cctEndpoint.getAttribute('colorControl', 'colorTemperatureMireds')).toBe(147);
     shelly.wsServer.emit('wssupdate', shellyPro.id, { 'cct:0': { ct: 1600 } } as ShellyData);
-    await wait(10);
+    await wait(100);
     expect(cctEndpoint.getAttribute('colorControl', 'colorTemperatureMireds')).toBe(147);
     shelly.wsServer.emit('wssupdate', shellyPro.id, { 'cct:0': { ct: 4329 } } as ShellyData);
-    await wait(10);
+    await wait(100);
     expect(cctEndpoint.getAttribute('colorControl', 'colorTemperatureMireds')).toBe(250);
 
     // Test updates on rgb
@@ -908,7 +908,7 @@ describe('ShellyPlatform', () => {
     expect(rgbEndpoint.getAttribute('colorControl', 'currentSaturation')).toBe(100);
     expect(rgbEndpoint.getAttribute('colorControl', 'colorTemperatureMireds')).toBe(250);
     shelly.wsServer.emit('wssupdate', shellyPlusRgbwPm.id, { 'rgb:0': { id: 0, state: true, brightness: 50, rgb: [255, 111, 128] } } as ShellyData);
-    await wait(10);
+    await wait(100);
     expect(rgbEndpoint.getAttribute('onOff', 'onOff')).toBe(true);
     expect(rgbEndpoint.getAttribute('levelControl', 'currentLevel')).toBe(127);
     expect(rgbEndpoint.getAttribute('colorControl', 'currentHue')).toBe(249);
@@ -920,7 +920,7 @@ describe('ShellyPlatform', () => {
     shelly.wsServer.emit('wssupdate', shellyPlusRgbwPm.id, {
       'rgb:0': { id: 0, aenergy: { total: 55.774, by_minute: [Array], minute_ts: 1745084640 }, apower: 12.85, current: 0.15, voltage: 12.8 },
     } as ShellyData);
-    await wait(10);
+    await wait(100);
     expect(rgbEndpoint.getAttribute('ElectricalPowerMeasurement', 'voltage')).toBe(12800);
     expect(rgbEndpoint.getAttribute('ElectricalPowerMeasurement', 'activeCurrent')).toBe(150);
     expect(rgbEndpoint.getAttribute('ElectricalPowerMeasurement', 'activePower')).toBe(12850);
@@ -1160,7 +1160,6 @@ describe('ShellyPlatform', () => {
     expect(mockLog.info).toHaveBeenCalledWith(`Shutting down platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
     expect(mockMatterbridge.removeAllBridgedEndpoints).not.toHaveBeenCalled();
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, 'Stopped MdnsScanner for shelly devices.');
-    // await wait(1000);
   });
 
   it('should call onShutdown with reason and unregister', async () => {
@@ -1168,7 +1167,6 @@ describe('ShellyPlatform', () => {
     await shellyPlatform.onShutdown('Test reason');
     expect(mockLog.info).toHaveBeenCalledWith(`Shutting down platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
     expect(mockMatterbridge.removeAllBridgedEndpoints).toHaveBeenCalled();
-    // await wait(1000);
   });
 
   it('should destroy shelly', async () => {
