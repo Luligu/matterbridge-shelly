@@ -227,9 +227,7 @@
   "status": {
     "ble": {},
     "bthome": {
-      "errors": [
-        "bluetooth_disabled"
-      ]
+      "errors": ["bluetooth_disabled"]
     },
     "cloud": {
       "connected": true
@@ -269,20 +267,12 @@
       "pf": 0.49,
       "aenergy": {
         "total": 137275.399,
-        "by_minute": [
-          359.896,
-          359.57,
-          359.629
-        ],
+        "by_minute": [359.896, 359.57, 359.629],
         "minute_ts": 1752839820
       },
       "ret_aenergy": {
         "total": 0,
-        "by_minute": [
-          0,
-          0,
-          0
-        ],
+        "by_minute": [0, 0, 0],
         "minute_ts": 1752839820
       },
       "temperature": {
@@ -301,20 +291,12 @@
       "pf": 0.63,
       "aenergy": {
         "total": 53235.821,
-        "by_minute": [
-          109.843,
-          107.479,
-          107.669
-        ],
+        "by_minute": [109.843, 107.479, 107.669],
         "minute_ts": 1752839820
       },
       "ret_aenergy": {
         "total": 0,
-        "by_minute": [
-          0,
-          0,
-          0
-        ],
+        "by_minute": [0, 0, 0],
         "minute_ts": 1752839820
       },
       "temperature": {
@@ -333,20 +315,12 @@
       "pf": 0.6,
       "aenergy": {
         "total": 32031.71,
-        "by_minute": [
-          71.006,
-          71.08,
-          70.858
-        ],
+        "by_minute": [71.006, 71.08, 70.858],
         "minute_ts": 1752839820
       },
       "ret_aenergy": {
         "total": 0,
-        "by_minute": [
-          0,
-          0,
-          0
-        ],
+        "by_minute": [0, 0, 0],
         "minute_ts": 1752839820
       },
       "temperature": {
@@ -365,20 +339,12 @@
       "pf": 0.27,
       "aenergy": {
         "total": 18818.836,
-        "by_minute": [
-          44.547,
-          44.834,
-          43.774
-        ],
+        "by_minute": [44.547, 44.834, 43.774],
         "minute_ts": 1752839820
       },
       "ret_aenergy": {
         "total": 0,
-        "by_minute": [
-          0,
-          0,
-          0
-        ],
+        "by_minute": [0, 0, 0],
         "minute_ts": 1752839820
       },
       "temperature": {
@@ -417,10 +383,7 @@
       "status": "got ip",
       "ssid": "",
       "rssi": -60,
-      "sta_ip6": [
-        "fe80::3698:7aff:fe67:d7d0",
-        "fd78:cbf8:4939:746:3698:7aff:fe67:d7d0"
-      ]
+      "sta_ip6": ["fe80::3698:7aff:fe67:d7d0", "fd78:cbf8:4939:746:3698:7aff:fe67:d7d0"]
     },
     "ws": {
       "connected": false

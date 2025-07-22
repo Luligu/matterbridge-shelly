@@ -46,19 +46,11 @@
         "colors": {
           "switch:0": {
             "on": {
-              "rgb": [
-                0,
-                100,
-                0
-              ],
+              "rgb": [0, 100, 0],
               "brightness": 100
             },
             "off": {
-              "rgb": [
-                100,
-                0,
-                0
-              ],
+              "rgb": [100, 0, 0],
               "brightness": 100
             }
           },
@@ -69,10 +61,7 @@
         "night_mode": {
           "enable": true,
           "brightness": 5,
-          "active_between": [
-            "22:00",
-            "08:00"
-          ]
+          "active_between": ["22:00", "08:00"]
         }
       },
       "controls": {
@@ -185,20 +174,12 @@
       "current": 0,
       "aenergy": {
         "total": 452,
-        "by_minute": [
-          0,
-          0,
-          0
-        ],
+        "by_minute": [0, 0, 0],
         "minute_ts": 1752840000
       },
       "ret_aenergy": {
         "total": 0,
-        "by_minute": [
-          0,
-          0,
-          0
-        ],
+        "by_minute": [0, 0, 0],
         "minute_ts": 1752840000
       },
       "temperature": {

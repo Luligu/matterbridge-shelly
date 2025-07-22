@@ -196,10 +196,7 @@
       "status": "got ip",
       "ssid": "",
       "rssi": -58,
-      "sta_ip6": [
-        "fe80::5632:4ff:fe54:7478",
-        "fd78:cbf8:4939:746:5632:4ff:fe54:7478"
-      ]
+      "sta_ip6": ["fe80::5632:4ff:fe54:7478", "fd78:cbf8:4939:746:5632:4ff:fe54:7478"]
     },
     "ws": {
       "connected": false

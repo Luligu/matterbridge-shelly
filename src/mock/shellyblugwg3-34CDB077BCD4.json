@@ -152,10 +152,7 @@
       "status": "got ip",
       "ssid": "",
       "rssi": -57,
-      "sta_ip6": [
-        "fe80::36cd:b0ff:fe77:bcd4",
-        "fd78:cbf8:4939:746:36cd:b0ff:fe77:bcd4"
-      ]
+      "sta_ip6": ["fe80::36cd:b0ff:fe77:bcd4", "fd78:cbf8:4939:746:36cd:b0ff:fe77:bcd4"]
     },
     "ws": {
       "connected": false
@@ -169,9 +166,7 @@
         "target_C": 20,
         "current_C": 24.1,
         "pos": 0,
-        "errors": [
-          "not_calibrated"
-        ],
+        "errors": ["not_calibrated"],
         "connected": true,
         "rssi": -48,
         "battery": 100,
@@ -187,12 +182,8 @@
         "name": "BluTrv 200",
         "key": null,
         "trv": "bthomedevice:200",
-        "temp_sensors": [
-          "bthomesensor:207"
-        ],
-        "dw_sensors": [
-          "bthomesensor:210"
-        ],
+        "temp_sensors": ["bthomesensor:207"],
+        "dw_sensors": ["bthomesensor:210"],
         "override_delay": 5,
         "meta": {}
       },
@@ -208,9 +199,7 @@
         "target_C": 21.1,
         "current_C": 24.1,
         "pos": 0,
-        "errors": [
-          "not_calibrated"
-        ],
+        "errors": ["not_calibrated"],
         "connected": true,
         "rssi": -42,
         "battery": 100,
@@ -226,12 +215,8 @@
         "name": "BluTrv 201",
         "key": null,
         "trv": "bthomedevice:203",
-        "temp_sensors": [
-          "bthomesensor:219"
-        ],
-        "dw_sensors": [
-          "bthomesensor:210"
-        ],
+        "temp_sensors": ["bthomesensor:219"],
+        "dw_sensors": ["bthomesensor:210"],
         "override_delay": 5,
         "meta": {}
       },

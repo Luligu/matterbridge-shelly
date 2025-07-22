@@ -231,10 +231,7 @@
       "status": "got ip",
       "ssid": "",
       "rssi": -57,
-      "sta_ip6": [
-        "fe80::deda:cff:fede:ec20",
-        "fd78:cbf8:4939:746:deda:cff:fede:ec20"
-      ]
+      "sta_ip6": ["fe80::deda:cff:fede:ec20", "fd78:cbf8:4939:746:deda:cff:fede:ec20"]
     },
     "ws": {
       "connected": false

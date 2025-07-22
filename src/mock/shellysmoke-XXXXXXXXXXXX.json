@@ -5,7 +5,7 @@
     "auth": false,
     "fw": "20230913-131259/v1.14.0-gcb84623"
   },
-    "settings": {
+  "settings": {
     "device": {
       "type": "SHSM-01",
       "mac": "XXXXXXXXXXXX",
@@ -87,9 +87,9 @@
     "unixtime": 0,
     "debug_enable": false,
     "allow_cross_origin": false,
-     "actions": {
-        "active": false,
-        "names": ["fire_detected_url", "fire_gone_url"]
+    "actions": {
+      "active": false,
+      "names": ["fire_detected_url", "fire_gone_url"]
     },
     "sensors": {
       "temperature_threshold": 1,

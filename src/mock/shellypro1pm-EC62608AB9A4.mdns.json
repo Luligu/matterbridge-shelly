@@ -52,9 +52,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": [
-        "gen=2"
-      ]
+      "data": ["gen=2"]
     },
     {
       "name": "ShellyPro1PM-EC62608AB9A4.local",
@@ -83,11 +81,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": [
-        "gen=2",
-        "app=Pro1PM",
-        "ver=1.6.2"
-      ]
+      "data": ["gen=2", "app=Pro1PM", "ver=1.6.2"]
     },
     {
       "name": "1PM-Pro.local",

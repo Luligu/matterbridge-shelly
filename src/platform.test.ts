@@ -131,8 +131,10 @@ const mockLog = {
 } as unknown as AnsiLogger;
 
 const mockMatterbridge = {
-  matterbridgeDirectory: HOMEDIR + '/.matterbridge',
-  matterbridgePluginDirectory: HOMEDIR + '/Matterbridge',
+  homeDirectory: HOMEDIR,
+  rootDirectory: HOMEDIR,
+  matterbridgeDirectory: HOMEDIR + '.matterbridge',
+  matterbridgePluginDirectory: HOMEDIR + 'Matterbridge',
   systemInformation: {
     ipv4Address: undefined,
     ipv6Address: undefined,

@@ -69,10 +69,7 @@
         "brightness": 50,
         "active_between": []
       },
-      "range_map": [
-        0,
-        100
-      ],
+      "range_map": [0, 100],
       "button_fade_rate": 3,
       "button_presets": {
         "button_doublepush": {
@@ -200,11 +197,7 @@
       },
       "aenergy": {
         "total": 398,
-        "by_minute": [
-          0,
-          0,
-          0
-        ],
+        "by_minute": [0, 0, 0],
         "minute_ts": 1752852480
       },
       "apower": 0,
@@ -244,10 +237,7 @@
       "status": "got ip",
       "ssid": "",
       "rssi": -62,
-      "sta_ip6": [
-        "fe80::3698:7aff:fe49:57c4",
-        "fd78:cbf8:4939:746:3698:7aff:fe49:57c4"
-      ]
+      "sta_ip6": ["fe80::3698:7aff:fe49:57c4", "fd78:cbf8:4939:746:3698:7aff:fe49:57c4"]
     },
     "ws": {
       "connected": false

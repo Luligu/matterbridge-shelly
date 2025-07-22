@@ -173,20 +173,12 @@
       "current": 0,
       "aenergy": {
         "total": 0,
-        "by_minute": [
-          0,
-          0,
-          0
-        ],
+        "by_minute": [0, 0, 0],
         "minute_ts": 1752852660
       },
       "ret_aenergy": {
         "total": 0,
-        "by_minute": [
-          0,
-          0,
-          0
-        ],
+        "by_minute": [0, 0, 0],
         "minute_ts": 1752852660
       },
       "temperature": {
@@ -224,10 +216,7 @@
       "status": "got ip",
       "ssid": "",
       "rssi": -53,
-      "sta_ip6": [
-        "fe80::36b7:daff:fec6:8344",
-        "fd78:cbf8:4939:746:36b7:daff:fec6:8344"
-      ]
+      "sta_ip6": ["fe80::36b7:daff:fec6:8344", "fd78:cbf8:4939:746:36b7:daff:fec6:8344"]
     },
     "ws": {
       "connected": false

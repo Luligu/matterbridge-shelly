@@ -211,20 +211,12 @@
       "pf": 0.43,
       "aenergy": {
         "total": 21392.491,
-        "by_minute": [
-          60.61,
-          60.46,
-          61.017
-        ],
+        "by_minute": [60.61, 60.46, 61.017],
         "minute_ts": 1752840000
       },
       "ret_aenergy": {
         "total": 21392.491,
-        "by_minute": [
-          60.61,
-          60.46,
-          61.017
-        ],
+        "by_minute": [60.61, 60.46, 61.017],
         "minute_ts": 1752840000
       },
       "temperature": {
@@ -243,20 +235,12 @@
       "pf": 0.43,
       "aenergy": {
         "total": 12742.424,
-        "by_minute": [
-          61.349,
-          61.184,
-          61.5
-        ],
+        "by_minute": [61.349, 61.184, 61.5],
         "minute_ts": 1752840000
       },
       "ret_aenergy": {
         "total": 12742.424,
-        "by_minute": [
-          61.349,
-          61.184,
-          61.5
-        ],
+        "by_minute": [61.349, 61.184, 61.5],
         "minute_ts": 1752840000
       },
       "temperature": {
@@ -294,10 +278,7 @@
       "status": "got ip",
       "ssid": "",
       "rssi": -64,
-      "sta_ip6": [
-        "fe80::ee62:60ff:fe8c:9c00",
-        "fd78:cbf8:4939:746:ee62:60ff:fe8c:9c00"
-      ]
+      "sta_ip6": ["fe80::ee62:60ff:fe8c:9c00", "fd78:cbf8:4939:746:ee62:60ff:fe8c:9c00"]
     },
     "ws": {
       "connected": false

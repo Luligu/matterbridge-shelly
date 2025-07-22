@@ -197,10 +197,7 @@
       "status": "got ip",
       "ssid": "",
       "rssi": -55,
-      "sta_ip6": [
-        "fe80::36b7:daff:feca:c830",
-        "fd78:cbf8:4939:746:36b7:daff:feca:c830"
-      ]
+      "sta_ip6": ["fe80::36b7:daff:feca:c830", "fd78:cbf8:4939:746:36b7:daff:feca:c830"]
     },
     "ws": {
       "connected": false
@@ -233,10 +230,7 @@
       "config": {
         "id": 200,
         "name": "Enum1",
-        "options": [
-          "Led ON",
-          "Led OFF"
-        ],
+        "options": ["Led ON", "Led OFF"],
         "meta": {
           "ui": {
             "view": "dropdown",
@@ -260,12 +254,7 @@
     {
       "key": "group:200",
       "status": {
-        "value": [
-          "button:200",
-          "number:200",
-          "text:200",
-          "enum:200"
-        ],
+        "value": ["button:200", "number:200", "text:200", "enum:200"],
         "source": "sys",
         "last_update_ts": 1743001149
       },

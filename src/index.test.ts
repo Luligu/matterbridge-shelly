@@ -57,7 +57,7 @@ describe('initializePlugin', () => {
     matterbridgeDirectory: HOMEDIR + '/.matterbridge',
     matterbridgePluginDirectory: HOMEDIR + '/Matterbridge',
     systemInformation: { ipv4Address: undefined, osRelease: 'xx.xx.xx.xx.xx.xx', nodeVersion: '22.1.10' },
-    matterbridgeVersion: '3.1.4',
+    matterbridgeVersion: '3.1.6',
     log: mockLog,
     getDevices: jest.fn(() => []),
     getPlugins: jest.fn(() => []),

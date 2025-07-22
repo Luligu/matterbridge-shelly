@@ -52,9 +52,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": [
-        "gen=3"
-      ]
+      "data": ["gen=3"]
     },
     {
       "name": "Shelly1G3-DCDA0CDEEC20.local",
@@ -83,11 +81,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": [
-        "gen=3",
-        "app=S1G3",
-        "ver=1.6.2"
-      ]
+      "data": ["gen=3", "app=S1G3", "ver=1.6.2"]
     },
     {
       "name": "1-Gen3-II.local",
