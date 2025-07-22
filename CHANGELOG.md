@@ -10,7 +10,7 @@ If you like this project and find it useful, please consider giving it a star on
 
 You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his invaluable contribution to this project.
 
-## [2.1.0] - 2025-07-22
+## [2.1.1] - 2025-07-22
 
 ### Added
 
