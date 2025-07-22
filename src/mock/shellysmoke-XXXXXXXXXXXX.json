@@ -1,0 +1,160 @@
+{
+  "shelly": {
+    "type": "SHSM-01",
+    "mac": "XXXXXXXXXXXX",
+    "auth": false,
+    "fw": "20230913-131259/v1.14.0-gcb84623"
+  },
+  "settings": {
+    "device": {
+      "type": "SHSM-01",
+      "mac": "XXXXXXXXXXXX",
+      "hostname": "shellysmoke-XXXXXXXXXXXX",
+      "sleep_mode": true
+    },
+    "wifi_ap": {
+      "enabled": false,
+      "ssid": "",
+      "key": ""
+    },
+    "wifi_sta": {
+      "enabled": true,
+      "ssid": "",
+      "ipv4_method": "dhcp",
+      "ip": null,
+      "gw": null,
+      "mask": null,
+      "dns": null
+    },
+    "wifi_sta1": {
+      "enabled": true,
+      "ssid": "",
+      "ipv4_method": "dhcp",
+      "ip": null,
+      "gw": null,
+      "mask": null,
+      "dns": null
+    },
+    "mqtt": {
+      "enable": false,
+      "server": "192.168.33.3:1883",
+      "user": "",
+      "id": "shellysmoke-XXXXXXXXXXXX",
+      "reconnect_timeout_max": 60,
+      "reconnect_timeout_min": 2,
+      "clean_session": true,
+      "keep_alive": 60,
+      "max_qos": 0,
+      "retain": false,
+      "update_period": 30
+    },
+    "coiot": {
+      "enabled": true,
+      "update_period": 15,
+      "peer": "192.168.1.20:5683"
+    },
+    "sntp": {
+      "server": "time.google.com",
+      "enabled": true
+    },
+    "login": {
+      "enabled": false,
+      "unprotected": false,
+      "username": "admin"
+    },
+    "pin_code": "",
+    "name": "Smoke Gen1",
+    "fw": "20230913-131259/v1.14.0-gcb84623",
+    "pon_wifi_reset": false,
+    "discoverable": false,
+    "build_info": {
+      "build_id": "20230913-131259/v1.14.0-gcb84623",
+      "build_timestamp": "2023-09-13T11:26:32Z",
+      "build_version": "1.0"
+    },
+    "cloud": {
+      "enabled": true,
+      "connected": false
+    },
+    "timezone": null,
+    "lat": null,
+    "lng": null,
+    "tzautodetect": true,
+    "tz_utc_offset": 3600,
+    "tz_dst": false,
+    "tz_dst_auto": true,
+    "time": "",
+    "unixtime": 0,
+    "debug_enable": false,
+    "allow_cross_origin": false,
+    "actions": {
+      "active": false,
+      "names": ["fire_detected_url", "fire_gone_url"]
+    },
+    "sensors": {
+      "temperature_threshold": 1,
+      "temperature_unit": "C"
+    },
+    "sleep_mode": {
+      "period": 12,
+      "unit": "h"
+    },
+    "rain_sensor": false,
+    "temperature_offset": 0
+  },
+  "status": {
+    "wifi_sta": {
+      "connected": true,
+      "ssid": "",
+      "ip": "192.168.1.248",
+      "rssi": -48
+    },
+    "cloud": {
+      "enabled": true,
+      "connected": false
+    },
+    "mqtt": {
+      "connected": false
+    },
+    "time": "",
+    "unixtime": 0,
+    "serial": 1,
+    "has_update": false,
+    "mac": "XXXXXXXXXXXX",
+    "cfg_changed_cnt": 0,
+    "actions_stats": {
+      "skipped": 0
+    },
+    "is_valid": true,
+    "smoke": false,
+    "tmp": {
+      "value": 22.12,
+      "units": "C",
+      "tC": 22.12,
+      "tF": 71.82,
+      "is_valid": true
+    },
+    "bat": {
+      "value": 94,
+      "voltage": 2.91
+    },
+    "act_reasons": ["button"],
+    "rain_sensor": false,
+    "sensor_error": 0,
+    "update": {
+      "status": "unknown",
+      "has_update": false,
+      "new_version": "",
+      "old_version": "20230913-112632/v1.14.0-gcb84623"
+    },
+    "ram_total": 52392,
+    "ram_free": 39364,
+    "fs_size": 233681,
+    "fs_free": 146333,
+    "uptime": 2
+  },
+  "components": [],
+  "cfg_rev": 0,
+  "offset": 0,
+  "total": 0
+}

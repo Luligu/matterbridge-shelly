@@ -1,25 +1,22 @@
 {
   "shelly": {
-    "name": "Breaker box PRO-3EM",
+    "name": "3EM Pro",
     "id": "shellypro3em-a0dd6ca0c27c",
     "mac": "A0DD6CA0C27C",
-    "slot": 0,
+    "slot": 1,
     "model": "SPEM-003CEBEU",
     "gen": 2,
-    "fw_id": "20241011-114455/1.4.4-g6d2a586",
-    "ver": "1.4.4",
+    "fw_id": "20250520-083714/1.6.2-gc8a76e2",
+    "ver": "1.6.2",
     "app": "Pro3EM",
     "auth_en": false,
     "auth_domain": null,
-    "profile": "monophase"
+    "profile": "triphase"
   },
   "settings": {
     "ble": {
       "enable": false,
       "rpc": {
-        "enable": false
-      },
-      "observer": {
         "enable": false
       }
     },
@@ -28,29 +25,19 @@
       "enable": false,
       "server": "iot.shelly.cloud:6012/jrpc"
     },
-    "em1:0": {
+    "em:0": {
       "id": 0,
       "name": null,
-      "reverse": false,
-      "ct_type": "120A"
+      "blink_mode_selector": "active_energy",
+      "phase_selector": "all",
+      "monitor_phase_sequence": false,
+      "ct_type": "120A",
+      "reverse": {}
     },
-    "em1:1": {
-      "id": 1,
-      "name": null,
-      "reverse": false,
-      "ct_type": "120A"
-    },
-    "em1:2": {
-      "id": 2,
-      "name": null,
-      "reverse": false,
-      "ct_type": "120A"
-    },
-    "em1data:0": {},
-    "em1data:1": {},
-    "em1data:2": {},
+    "emdata:0": {},
     "eth": {
       "enable": false,
+      "server_mode": false,
       "ipv4mode": "dhcp",
       "ip": null,
       "netmask": null,
@@ -75,12 +62,12 @@
     },
     "sys": {
       "device": {
-        "name": "Breaker box PRO-3EM",
+        "name": "3EM Pro",
         "mac": "A0DD6CA0C27C",
-        "fw_id": "20241011-114455/1.4.4-g6d2a586",
+        "fw_id": "20250520-083714/1.6.2-gc8a76e2",
         "discoverable": true,
         "eco_mode": false,
-        "profile": "monophase",
+        "profile": "triphase",
         "addon_type": null,
         "sys_btn_toggle": true
       },
@@ -104,9 +91,9 @@
         "listen_port": null
       },
       "sntp": {
-        "server": "time.google.com"
+        "server": "time.cloudflare.com"
       },
-      "cfg_rev": 21
+      "cfg_rev": 28
     },
     "temperature:0": {
       "id": 0,
@@ -162,53 +149,46 @@
     "cloud": {
       "connected": false
     },
-    "em1:0": {
+    "em:0": {
       "id": 0,
-      "current": 0.028,
-      "voltage": 0,
-      "act_power": 0,
-      "aprt_power": 0,
-      "pf": 0,
-      "freq": 0,
-      "calibration": "factory"
+      "a_current": 0.029,
+      "a_voltage": 0,
+      "a_act_power": 0,
+      "a_aprt_power": 0,
+      "a_pf": 0,
+      "a_freq": 0,
+      "b_current": 0.027,
+      "b_voltage": 0,
+      "b_act_power": 0,
+      "b_aprt_power": 0,
+      "b_pf": 0,
+      "b_freq": 0,
+      "c_current": 0.07,
+      "c_voltage": 233.5,
+      "c_act_power": 7.2,
+      "c_aprt_power": 16.3,
+      "c_pf": 0.44,
+      "c_freq": 50,
+      "n_current": null,
+      "total_current": 0.126,
+      "total_act_power": 7.183,
+      "total_aprt_power": 16.251,
+      "user_calibrated_phase": []
     },
-    "em1:1": {
-      "id": 1,
-      "current": 0.027,
-      "voltage": 0,
-      "act_power": 0,
-      "aprt_power": 0,
-      "pf": 0,
-      "freq": 0,
-      "calibration": "factory"
-    },
-    "em1:2": {
-      "id": 2,
-      "current": 0.07,
-      "voltage": 237.8,
-      "act_power": 7,
-      "aprt_power": 16.6,
-      "pf": 0.41,
-      "freq": 50,
-      "calibration": "factory"
-    },
-    "em1data:0": {
+    "emdata:0": {
       "id": 0,
-      "total_act_energy": 0.07,
-      "total_act_ret_energy": 0
-    },
-    "em1data:1": {
-      "id": 1,
-      "total_act_energy": 0.08,
-      "total_act_ret_energy": 0
-    },
-    "em1data:2": {
-      "id": 2,
-      "total_act_energy": 8434.24,
-      "total_act_ret_energy": 18.35
+      "a_total_act_energy": 0.01,
+      "a_total_act_ret_energy": 0,
+      "b_total_act_energy": 0.01,
+      "b_total_act_ret_energy": 0,
+      "c_total_act_energy": 11.83,
+      "c_total_act_ret_energy": 0,
+      "total_act": 11.85,
+      "total_act_ret": 0
     },
     "eth": {
-      "ip": null
+      "ip": null,
+      "ip6": null
     },
     "modbus": {},
     "mqtt": {
@@ -217,41 +197,46 @@
     "sys": {
       "mac": "A0DD6CA0C27C",
       "restart_required": false,
-      "time": "14:47",
-      "unixtime": 1741441625,
-      "uptime": 788360,
-      "ram_size": 247192,
-      "ram_free": 115636,
+      "time": "17:29",
+      "unixtime": 1752852590,
+      "last_sync_ts": 1752851857,
+      "uptime": 6091,
+      "ram_size": 247588,
+      "ram_free": 118152,
+      "ram_min_free": 96540,
       "fs_size": 524288,
-      "fs_free": 176128,
-      "cfg_rev": 21,
+      "fs_free": 184320,
+      "cfg_rev": 28,
       "kvs_rev": 0,
-      "schedule_rev": 4,
-      "webhook_rev": 3,
+      "schedule_rev": 7,
+      "webhook_rev": 6,
+      "btrelay_rev": 0,
       "available_updates": {
         "beta": {
-          "version": "1.5.1-beta1"
+          "version": "1.7.0-beta3"
         }
       },
-      "reset_reason": 1
+      "reset_reason": 3,
+      "utc_offset": 7200
     },
     "temperature:0": {
       "id": 0,
-      "tC": 47.6,
-      "tF": 117.7
+      "tC": 48,
+      "tF": 118.3
     },
     "wifi": {
-      "sta_ip": "192.168.1.80",
+      "sta_ip": "192.168.68.93",
       "status": "got ip",
       "ssid": "",
-      "rssi": -54
+      "rssi": -61,
+      "sta_ip6": ["fe80::a2dd:6cff:fea0:c27c", "fd78:cbf8:4939:746:a2dd:6cff:fea0:c27c"]
     },
     "ws": {
       "connected": false
     }
   },
   "components": [],
-  "cfg_rev": 21,
+  "cfg_rev": 28,
   "offset": 0,
   "total": 0
 }

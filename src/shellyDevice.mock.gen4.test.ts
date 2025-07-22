@@ -10,6 +10,9 @@ import { ShellyDevice } from './shellyDevice.js';
 import { Shelly } from './shelly.js';
 import { CoapServer } from './coapServer.js';
 import { WsServer } from './wsServer.js';
+import { ShellyData } from './shellyTypes.js';
+import { WsClient } from './wsClient.js';
+import { MdnsScanner } from './mdnsScanner.js';
 
 let loggerLogSpy: jest.SpiedFunction<typeof AnsiLogger.prototype.log>;
 let consoleLogSpy: jest.SpiedFunction<typeof console.log>;
@@ -35,11 +38,42 @@ if (!debug) {
   consoleErrorSpy = jest.spyOn(console, 'error');
 }
 
+function setDebug(debug: boolean) {
+  if (debug) {
+    loggerLogSpy.mockRestore();
+    consoleLogSpy.mockRestore();
+    consoleDebugSpy.mockRestore();
+    consoleInfoSpy.mockRestore();
+    consoleWarnSpy.mockRestore();
+    consoleErrorSpy.mockRestore();
+    loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log');
+    consoleLogSpy = jest.spyOn(console, 'log');
+    consoleDebugSpy = jest.spyOn(console, 'debug');
+    consoleInfoSpy = jest.spyOn(console, 'info');
+    consoleWarnSpy = jest.spyOn(console, 'warn');
+    consoleErrorSpy = jest.spyOn(console, 'error');
+  } else {
+    loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log').mockImplementation((level: string, message: string, ...parameters: any[]) => {});
+    consoleLogSpy = jest.spyOn(console, 'log').mockImplementation((...args: any[]) => {});
+    consoleDebugSpy = jest.spyOn(console, 'debug').mockImplementation((...args: any[]) => {});
+    consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation((...args: any[]) => {});
+    consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation((...args: any[]) => {});
+    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation((...args: any[]) => {});
+  }
+}
+
+const coapServerStartSpy = jest.spyOn(CoapServer.prototype, 'start').mockImplementation(() => {});
+const coapServerStopSpy = jest.spyOn(CoapServer.prototype, 'stop').mockImplementation(() => {});
+const coapServerRegisterDeviceSpy = jest.spyOn(CoapServer.prototype, 'registerDevice').mockImplementation(async () => {});
+const wsServerStartSpy = jest.spyOn(WsServer.prototype, 'start').mockImplementation(() => {});
+const wsServerStopSpy = jest.spyOn(WsServer.prototype, 'stop').mockImplementation(() => {});
+const wsClientStartSpy = jest.spyOn(WsClient.prototype, 'start').mockImplementation(() => {});
+const wsClientStopSpy = jest.spyOn(WsClient.prototype, 'stop').mockImplementation(() => {});
+const mdnsScannerStartSpy = jest.spyOn(MdnsScanner.prototype, 'start').mockImplementation(() => {});
+const mdnsScannerStopSpy = jest.spyOn(MdnsScanner.prototype, 'stop').mockImplementation(() => {});
+const fetchSpy = jest.spyOn(ShellyDevice, 'fetch');
+
 describe('Shelly gen 4 devices test', () => {
-  jest.spyOn(CoapServer.prototype, 'start').mockImplementation(() => {});
-
-  jest.spyOn(WsServer.prototype, 'start').mockImplementation(() => {});
-
   const log = new AnsiLogger({ logName: 'shellyDeviceTest', logTimestampFormat: TimestampFormat.TIME_MILLIS, logDebug: false });
   const shelly = new Shelly(log, 'admin', 'tango');
   let device: ShellyDevice | undefined = undefined;
@@ -253,6 +287,54 @@ describe('Shelly gen 4 devices test', () => {
     expect(device.getComponent('switch:0')?.hasProperty('current')).toBe(true);
     expect(device.getComponent('switch:0')?.hasProperty('apower')).toBe(true);
     expect(device.getComponent('switch:0')?.hasProperty('aenergy')).toBe(true);
+
+    expect(device.bthomeTrvs.size).toBe(0);
+    expect(device.bthomeDevices.size).toBe(0);
+    expect(device.bthomeSensors.size).toBe(0);
+
+    expect(await device.fetchUpdate()).not.toBeNull();
+
+    if (device) device.destroy();
+  });
+
+  test('Create a gen 4 shelly2pmg4 device mode cover', async () => {
+    id = 'shelly2pmg4-7C2C677A0110';
+    log.logName = id;
+
+    device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', id + '.json'));
+    expect(device).not.toBeUndefined();
+    if (!device) return;
+    expect(device.host).toBe(path.join('src', 'mock', id + '.json'));
+    expect(device.model).toBe('S4SW-002P16EU');
+    expect(device.mac).toBe('7C2C677A0110');
+    expect(device.id).toBe(id);
+    expect(device.firmware).toBe('r1.4-389-ge55943de7-main');
+    expect(device.auth).toBe(false);
+    expect(device.gen).toBe(4);
+    expect(device.profile).toBe('cover');
+    expect(device.name).toBe('shelly2pmg4-7C2C677A0110');
+    expect(device.hasUpdate).toBe(false);
+    expect(device.lastseen).not.toBe(0);
+    expect(device.online).toBe(true);
+    expect(device.cached).toBe(false);
+    expect(device.sleepMode).toBe(false);
+
+    expect(device.components.length).toBe(12);
+    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Cover', 'Input', 'MQTT', 'Sys', 'Sntp', 'WiFi', 'WS']);
+    expect(device.getComponentIds()).toStrictEqual(['ble', 'cloud', 'cover:0', 'input:0', 'input:1', 'mqtt', 'sys', 'sntp', 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws']);
+
+    expect(device.getComponent('sys')?.getValue('temperature')).toBe(undefined);
+    expect(device.getComponent('sys')?.getValue('overtemperature')).toBe(undefined);
+
+    expect(device.getComponent('input:0')?.hasProperty('state')).toBe(true);
+    expect(device.getComponent('input:1')?.hasProperty('state')).toBe(true);
+
+    expect(device.getComponent('cover:0')?.hasProperty('state')).toBe(true);
+    expect(device.getComponent('cover:0')?.hasProperty('voltage')).toBe(true);
+    expect(device.getComponent('cover:0')?.hasProperty('current')).toBe(true);
+    expect(device.getComponent('cover:0')?.hasProperty('apower')).toBe(true);
+    expect(device.getComponent('cover:0')?.hasProperty('aenergy')).toBe(true);
+    expect((device.getComponent('cover:0')?.getValue('aenergy') as ShellyData).total).toBeGreaterThanOrEqual(0);
 
     expect(device.bthomeTrvs.size).toBe(0);
     expect(device.bthomeDevices.size).toBe(0);

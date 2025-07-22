@@ -115,11 +115,11 @@ export interface ShellyPlatformConfig {
   inputContactList: string[];
   inputMomentaryList: string[];
   inputLatchingList: string[];
+  nocacheList: string[];
   blackList: string[];
   whiteList: string[];
   entityBlackList: string[];
   deviceEntityBlackList: Record<string, string[]>;
-  nocacheList: string[];
   enableMdnsDiscover: boolean;
   enableStorageDiscover: boolean;
   resetStorageDiscover: boolean;
@@ -161,9 +161,9 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     super(matterbridge, log, config as unknown as PlatformConfig);
 
     // Verify that Matterbridge is the correct version
-    if (this.verifyMatterbridgeVersion === undefined || typeof this.verifyMatterbridgeVersion !== 'function' || !this.verifyMatterbridgeVersion('3.1.4')) {
+    if (this.verifyMatterbridgeVersion === undefined || typeof this.verifyMatterbridgeVersion !== 'function' || !this.verifyMatterbridgeVersion('3.1.6')) {
       throw new Error(
-        `This plugin requires Matterbridge version >= "3.1.4". Please update Matterbridge from ${this.matterbridge.matterbridgeVersion} to the latest version in the frontend."`,
+        `This plugin requires Matterbridge version >= "3.1.6". Please update Matterbridge from ${this.matterbridge.matterbridgeVersion} to the latest version in the frontend."`,
       );
     }
 
@@ -181,10 +181,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       if (config.outletList !== undefined) delete config.outletList;
       if (config.exposeInput !== undefined) delete config.exposeInput;
       if (config.exposeInputEvent !== undefined) delete config.exposeInputEvent;
-      if (config.inputEventList !== undefined) {
-        if (isValidArray(config.inputEventList, 1)) config.inputMomentaryList = config.inputEventList;
-        delete config.inputEventList;
-      }
+      if (config.inputEventList !== undefined) delete config.inputEventList;
       if (config.exposePowerMeter !== undefined) delete config.exposePowerMeter;
       if (config.enableConfigDiscover !== undefined) delete config.enableConfigDiscover;
       if (config.deviceIp !== undefined) delete config.deviceIp;

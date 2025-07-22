@@ -1,84 +1,95 @@
 {
   "shelly": {
-    "name": "1PMmini Gen3",
-    "id": "shelly1pmminig3-543204519264",
-    "mac": "543204519264",
+    "name": "PlugSG3 Gen3",
+    "id": "shellyplugsg3-8cbfeaa133f0",
+    "mac": "8CBFEAA133F0",
     "slot": 1,
-    "model": "S3SW-001P8EU",
+    "model": "S3PL-00112EU",
     "gen": 3,
-    "fw_id": "20250520-083740/1.6.2-gc8a76e2",
-    "ver": "1.6.2",
-    "app": "Mini1PMG3",
+    "fw_id": "20240820-134301/1.2.3-plugsg3prod0-gec79607",
+    "ver": "1.2.3-matter22",
+    "app": "PlugSG3",
     "auth_en": false,
     "auth_domain": null,
-    "matter": false
+    "matter": true
   },
   "settings": {
     "ble": {
       "enable": false,
       "rpc": {
-        "enable": true
+        "enable": false
+      },
+      "observer": {
+        "enable": false
       }
     },
-    "bthome": {},
     "cloud": {
       "enable": true,
       "server": "shelly-103-eu.shelly.cloud:6022/jrpc"
     },
-    "input:0": {
-      "id": 0,
-      "name": null,
-      "type": "switch",
-      "enable": true,
-      "invert": false,
-      "factory_reset": true
-    },
-    "knx": {
-      "enable": false,
-      "ia": "15.15.255",
-      "routing": {
-        "addr": "224.0.23.12:3671"
-      }
-    },
-    "matter": {
-      "enable": false
-    },
     "mqtt": {
       "enable": false,
       "server": null,
-      "client_id": "shelly1pmminig3-543204519264",
+      "client_id": "shellyplugsg3-8cbfeaa133f0",
       "user": null,
       "ssl_ca": null,
-      "topic_prefix": "shelly1pmminig3-543204519264",
+      "topic_prefix": "shellyplugsg3-8cbfeaa133f0",
       "rpc_ntf": true,
       "status_ntf": false,
       "use_client_cert": false,
       "enable_rpc": true,
       "enable_control": true
     },
+    "plugs_ui": {
+      "leds": {
+        "mode": "power",
+        "colors": {
+          "switch:0": {
+            "on": {
+              "rgb": [0, 100, 0],
+              "brightness": 100
+            },
+            "off": {
+              "rgb": [100, 0, 0],
+              "brightness": 100
+            }
+          },
+          "power": {
+            "brightness": 100
+          }
+        },
+        "night_mode": {
+          "enable": true,
+          "brightness": 5,
+          "active_between": ["22:00", "08:00"]
+        }
+      },
+      "controls": {
+        "switch:0": {
+          "in_mode": "momentary"
+        }
+      }
+    },
     "switch:0": {
       "id": 0,
-      "name": "1PMmini Gen3",
-      "in_mode": "follow",
-      "in_locked": false,
-      "initial_state": "match_input",
+      "name": null,
+      "initial_state": "restore_last",
       "auto_on": false,
       "auto_on_delay": 60,
       "auto_off": false,
       "auto_off_delay": 60,
-      "power_limit": 2240,
+      "power_limit": 2500,
       "voltage_limit": 280,
       "autorecover_voltage_errors": false,
-      "current_limit": 8,
-      "reverse": false
+      "current_limit": 12
     },
     "sys": {
       "device": {
-        "name": "1PMmini Gen3",
-        "mac": "543204519264",
-        "fw_id": "20250520-083740/1.6.2-gc8a76e2",
+        "name": "PlugSG3 Gen3",
+        "mac": "8CBFEAA133F0",
+        "fw_id": "20240820-134301/1.2.3-plugsg3prod0-gec79607",
         "discoverable": true,
-        "eco_mode": false
+        "eco_mode": true
       },
       "location": null,
       "debug": {
@@ -100,9 +111,9 @@
         "listen_port": null
       },
       "sntp": {
-        "server": "time.cloudflare.com"
+        "server": "time.google.com"
       },
-      "cfg_rev": 28
+      "cfg_rev": 24
     },
     "wifi": {
       "ap": {
@@ -125,8 +136,8 @@
       },
       "sta1": {
         "ssid": "",
-        "is_open": false,
-        "enable": true,
+        "is_open": true,
+        "enable": false,
         "ipv4mode": "dhcp",
         "ip": null,
         "netmask": null,
@@ -146,85 +157,69 @@
   },
   "status": {
     "ble": {},
-    "bthome": {
-      "errors": ["bluetooth_disabled"]
-    },
     "cloud": {
       "connected": true
-    },
-    "input:0": {
-      "id": 0,
-      "state": false
-    },
-    "knx": {},
-    "matter": {
-      "num_fabrics": 0,
-      "commissionable": false
     },
     "mqtt": {
       "connected": false
     },
+    "plugs_ui": {},
     "switch:0": {
       "id": 0,
       "source": "init",
-      "output": false,
+      "output": true,
       "apower": 0,
-      "voltage": 228.1,
+      "voltage": 234.7,
       "freq": 50,
       "current": 0,
       "aenergy": {
-        "total": 0,
+        "total": 452,
         "by_minute": [0, 0, 0],
-        "minute_ts": 1752840180
+        "minute_ts": 1752840000
       },
       "ret_aenergy": {
         "total": 0,
         "by_minute": [0, 0, 0],
-        "minute_ts": 1752840180
+        "minute_ts": 1752840000
       },
       "temperature": {
-        "tC": 66.5,
-        "tF": 151.7
+        "tC": 39.1,
+        "tF": 102.4
       }
     },
     "sys": {
-      "mac": "543204519264",
+      "mac": "8CBFEAA133F0",
       "restart_required": false,
-      "time": "14:03",
-      "unixtime": 1752840184,
-      "last_sync_ts": 1752838410,
-      "uptime": 1401943,
-      "ram_size": 250840,
-      "ram_free": 118408,
-      "ram_min_free": 89940,
+      "time": "12:00",
+      "unixtime": 1752840044,
+      "uptime": 1401426,
+      "ram_size": 219816,
+      "ram_free": 114216,
       "fs_size": 1048576,
-      "fs_free": 593920,
-      "cfg_rev": 28,
-      "kvs_rev": 3,
+      "fs_free": 688128,
+      "cfg_rev": 24,
+      "kvs_rev": 0,
       "schedule_rev": 1,
-      "webhook_rev": 0,
-      "btrelay_rev": 0,
+      "webhook_rev": 1,
       "available_updates": {
         "beta": {
           "version": "1.7.0-beta3"
         }
       },
-      "reset_reason": 1,
-      "utc_offset": 7200
+      "reset_reason": 1
     },
     "wifi": {
-      "sta_ip": "192.168.68.96",
+      "sta_ip": "192.168.68.59",
       "status": "got ip",
       "ssid": "",
-      "rssi": -61,
-      "sta_ip6": ["fe80::5632:4ff:fe51:9264", "fd78:cbf8:4939:746:5632:4ff:fe51:9264"]
+      "rssi": -59
     },
     "ws": {
       "connected": false
     }
   },
   "components": [],
-  "cfg_rev": 28,
+  "cfg_rev": 24,
   "offset": 0,
   "total": 0
 }

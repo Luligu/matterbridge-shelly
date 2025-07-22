@@ -10,7 +10,7 @@ If you like this project and find it useful, please consider giving it a star on
 
 You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his invaluable contribution to this project.
 
-## [2.1.0] - 2025-07-18
+## [2.1.0] - 2025-07-22
 
 ### Added
 
@@ -28,10 +28,12 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 - [Jest]: Jest test on WsClient with coverage 100%.
 - [Jest]: Jest test on WsServer with coverage 100%.
 - [Jest]: Jest test on CoapServer with coverage 100%.
+- [Jest]: Jest test on ShellyDevice with coverage 100%.
 
 - [triphase]: Added support for shellypro3em with profile triphase. Four PowerMeters are created: the first is the total, then phase A, B and C.
 - [pro]: Added support for returned energy.
 - [BLU]: Added bthomedevice_event for BLU buttons.
+- [config]: Added the default config file for new setups (requires Matterbridge 3.1.5).
 
 ### Changed
 
