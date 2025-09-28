@@ -10,6 +10,17 @@ If you like this project and find it useful, please consider giving it a star on
 
 You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his invaluable contribution to this project.
 
+## [2.1.2] - 2025-09-28
+
+### Changed
+
+- [package]: Updated package to Automator v. 2.0.7.
+- [package]: Updated dependencies.
+
+<a href="https://www.buymeacoffee.com/luligugithub">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="80">
+</a>
+
 ## [2.1.1] - 2025-07-22
 
 ### Added

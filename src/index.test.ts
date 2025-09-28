@@ -54,17 +54,21 @@ describe('initializePlugin', () => {
   } as unknown as AnsiLogger;
 
   const mockMatterbridge = {
+    homeDirectory: HOMEDIR,
+    rootDirectory: HOMEDIR,
     matterbridgeDirectory: HOMEDIR + '/.matterbridge',
     matterbridgePluginDirectory: HOMEDIR + '/Matterbridge',
-    systemInformation: { ipv4Address: undefined, osRelease: 'xx.xx.xx.xx.xx.xx', nodeVersion: '22.1.10' },
+    matterbridgeCertDirectory: HOMEDIR + '.mattercert',
+    systemInformation: { ipv4Address: undefined, ipv6Address: undefined, osRelease: 'xx.xx.xx.xx.xx.xx', nodeVersion: '22.1.10' },
     matterbridgeVersion: '3.1.6',
     log: mockLog,
-    getDevices: jest.fn(() => []),
     getPlugins: jest.fn(() => []),
-    plugins: { get: jest.fn((pluginName: string) => undefined) },
-    addBridgedEndpoint: jest.fn(async (pluginName: string, device: MatterbridgeEndpoint) => {}),
-    removeBridgedEndpoint: jest.fn(async (pluginName: string, device: MatterbridgeEndpoint) => {}),
-    removeAllBridgedEndpoints: jest.fn(async (pluginName: string) => {}),
+    getDevices: jest.fn(() => []),
+    plugins: { get: jest.fn((name: string) => undefined) },
+    devices: { get: jest.fn((uniqueId: string) => undefined) },
+    addBridgedEndpoint: jest.fn(async (pluginName: string, device: MatterbridgeEndpoint) => undefined),
+    removeBridgedEndpoint: jest.fn(async (pluginName: string, device: MatterbridgeEndpoint) => undefined),
+    removeAllBridgedEndpoints: jest.fn(async (pluginName: string) => undefined),
   } as unknown as Matterbridge;
 
   const mockConfig = {
@@ -82,7 +86,6 @@ describe('initializePlugin', () => {
     enableMdnsDiscover: false,
     enableStorageDiscover: false,
     resetStorageDiscover: false,
-    enableConfigDiscover: false,
     enableBleDiscover: false,
     deviceIp: {},
     debug: false,

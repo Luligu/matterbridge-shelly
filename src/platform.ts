@@ -366,18 +366,6 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         const shelly = this.matterbridge.plugins.get('matterbridge-shelly');
         if (shelly) this.matterbridge.plugins.saveConfigFromJson(shelly, this.config);
       }
-      /*
-      // On the first run or after if expertMode is false, add the trv gateway devices to the nocacheList
-      if ((this.firstRun === true || config.expertMode === false) && discoveredDevice.id.includes('shellyblugwg3')) {
-        if (!config.nocacheList) config.nocacheList = [];
-        if (!config.nocacheList.includes(discoveredDevice.id)) {
-          config.nocacheList.push(discoveredDevice.id);
-          this.log.info(`Shelly device ${hk}${discoveredDevice.id}${nf} host ${zb}${discoveredDevice.host}${nf} added to nocacheList`);
-        }
-        const shelly = this.matterbridge.plugins.get('matterbridge-shelly');
-        if (shelly) this.matterbridge.plugins.saveConfigFromJson(shelly, this.config);
-      }
-      */
     });
 
     // handle Shelly add event
@@ -1818,7 +1806,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       } catch (error) {
         this.log.debug(`****Failed to delete cache for device ${value} file ${fileName} error: ${error}`);
       }
-      this.selectDevice.delete(value);
+      this.clearDeviceSelect(value);
       this.log.debug(`Deleted select for device: ${value}`);
       this.log.info(`Removed device id ${hk}${value}${nf}`);
     }
