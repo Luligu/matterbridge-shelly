@@ -135,6 +135,7 @@ const mockMatterbridge = {
   rootDirectory: HOMEDIR,
   matterbridgeDirectory: HOMEDIR + '.matterbridge',
   matterbridgePluginDirectory: HOMEDIR + 'Matterbridge',
+  matterbridgeCertDirectory: HOMEDIR + '.mattercert',
   systemInformation: {
     ipv4Address: undefined,
     ipv6Address: undefined,
@@ -143,23 +144,15 @@ const mockMatterbridge = {
   },
   matterbridgeVersion: '3.1.6',
   log: mockLog,
-
-  plugins: {
-    get: jest.fn(() => {
-      return [];
-    }),
-  },
-  getDevices: jest.fn(() => {
-    return [];
-  }),
-  getPlugins: jest.fn(() => {
-    return [];
-  }),
+  getPlugins: jest.fn(() => []),
+  getDevices: jest.fn(() => []),
+  plugins: { get: jest.fn((name: string) => undefined) },
+  devices: { get: jest.fn((uniqueId: string) => undefined) },
   addBridgedEndpoint: jest.fn(async (pluginName: string, device: MatterbridgeEndpoint) => {
     await aggregator.add(device);
   }),
-  removeBridgedEndpoint: jest.fn(async (pluginName: string, device: MatterbridgeEndpoint) => {}),
-  removeAllBridgedEndpoints: jest.fn(async (pluginName: string) => {}),
+  removeBridgedEndpoint: jest.fn(async (pluginName: string, device: MatterbridgeEndpoint) => undefined),
+  removeAllBridgedEndpoints: jest.fn(async (pluginName: string) => undefined),
 } as unknown as Matterbridge;
 
 const mockConfig = {
@@ -187,7 +180,6 @@ const mockConfig = {
 rmSync(HOMEDIR, { recursive: true, force: true });
 
 describe('ShellyPlatform', () => {
-  let matterbridge: Matterbridge;
   let shellyPlatform: ShellyPlatform;
   let shelly: Shelly;
 
