@@ -12,16 +12,19 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 
 ## [2.1.2] - 2025-09-28
 
-### Changed
+### Added
 
-- [package]: Updated package to Automator v. 2.0.7.
-- [package]: Updated dependencies.
 - [workflows]: Ignore any .md in build.yaml.
 - [workflows]: Ignore any .md in codeql.yaml.
 - [workflows]: Ignore any .md in codecov.yaml.
 - [workflows]: Improved speed on Node CI.
 - [devcontainer]: Added the plugin name to the container.
 - [devcontainer]: Improved performance of first build with shallow clone.
+
+### Changed
+
+- [package]: Updated package to Automator v. 2.0.7.
+- [package]: Updated dependencies.
 - [jest]: Updated jestHelpers to v. 1.0.6.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
