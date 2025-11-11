@@ -12,8 +12,8 @@ const jestConfig = {
   ...presetConfig,
   testEnvironment: 'node',
   moduleNameMapper: { '^(\\.{1,2}/.*)\\.js$': '$1' }, // Handle ESM imports by removing the .js extension
-  testPathIgnorePatterns: ['/node_modules/', '/dist/', '/vitest/', 'src/net', 'jestHelpers.ts'],
-  coveragePathIgnorePatterns: ['/node_modules/', '/dist/', '/vitest/', 'src/net', 'jestHelpers.ts'],
+  testPathIgnorePatterns: ['/node_modules/', '/dist/', '/vitest/', 'jestHelpers.test.ts'],
+  coveragePathIgnorePatterns: ['/node_modules/', '/dist/', '/vitest/', 'jestHelpers.ts'],
   maxWorkers: '100%',
 };
 
