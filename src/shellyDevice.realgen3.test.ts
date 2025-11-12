@@ -17,7 +17,7 @@ import { ShellyData } from './shellyTypes.js';
 import { setupTest } from './utils/jestHelpers.js';
 
 // Setup the test environment
-setupTest(NAME, true);
+setupTest(NAME, false);
 
 describe('Shellies', () => {
   const log = new AnsiLogger({ logName: 'ShellyDeviceRealTest', logTimestampFormat: TimestampFormat.TIME_MILLIS, logLevel: LogLevel.DEBUG });

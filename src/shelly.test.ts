@@ -1,5 +1,9 @@
 // src/shelly.test.ts
 
+const MATTER_PORT = 0;
+const NAME = 'Shelly';
+const HOMEDIR = path.join('jest', NAME);
+
 import path from 'node:path';
 
 import { AnsiLogger, CYAN, db, hk, LogLevel, MAGENTA, TimestampFormat, wr } from 'matterbridge/logger';
@@ -10,30 +14,10 @@ import { ShellyDevice } from './shellyDevice.js';
 import { WsClient } from './wsClient.js';
 import { CoapServer } from './coapServer.js';
 import { WsServer } from './wsServer.js';
+import { flushAsync, loggerLogSpy, setupTest } from './utils/jestHelpers.js';
 
-let loggerLogSpy: jest.SpiedFunction<typeof AnsiLogger.prototype.log>;
-let consoleLogSpy: jest.SpiedFunction<typeof console.log>;
-let consoleDebugSpy: jest.SpiedFunction<typeof console.log>;
-let consoleInfoSpy: jest.SpiedFunction<typeof console.log>;
-let consoleWarnSpy: jest.SpiedFunction<typeof console.log>;
-let consoleErrorSpy: jest.SpiedFunction<typeof console.log>;
-const debug = false; // Set to true to enable debug logs
-
-if (!debug) {
-  loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log').mockImplementation((level: string, message: string, ...parameters: any[]) => {});
-  consoleLogSpy = jest.spyOn(console, 'log').mockImplementation((...args: any[]) => {});
-  consoleDebugSpy = jest.spyOn(console, 'debug').mockImplementation((...args: any[]) => {});
-  consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation((...args: any[]) => {});
-  consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation((...args: any[]) => {});
-  consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation((...args: any[]) => {});
-} else {
-  loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log');
-  consoleLogSpy = jest.spyOn(console, 'log');
-  consoleDebugSpy = jest.spyOn(console, 'debug');
-  consoleInfoSpy = jest.spyOn(console, 'info');
-  consoleWarnSpy = jest.spyOn(console, 'warn');
-  consoleErrorSpy = jest.spyOn(console, 'error');
-}
+// Setup the test environment
+setupTest(NAME, false);
 
 jest.useFakeTimers();
 
@@ -55,10 +39,13 @@ describe('Shellies test', () => {
 
   afterEach(() => {});
 
-  afterAll(() => {
+  afterAll(async () => {
     shellies.destroy();
 
     jest.useRealTimers();
+
+    // Wait a bit to ensure all async operations are done
+    await flushAsync();
 
     // Restore all mocks
     jest.restoreAllMocks();

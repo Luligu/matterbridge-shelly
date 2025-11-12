@@ -17,7 +17,7 @@ import { flushAsync, setupTest } from './utils/jestHelpers.js';
 import { CoapServer } from './coapServer.ts';
 
 // Setup the test environment
-setupTest(NAME, true);
+setupTest(NAME, false);
 
 describe('Shellies', () => {
   const log = new AnsiLogger({ logName: 'ShellyDeviceRealTest', logTimestampFormat: TimestampFormat.TIME_MILLIS, logLevel: LogLevel.DEBUG });

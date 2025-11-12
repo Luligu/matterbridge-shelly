@@ -2,60 +2,22 @@
 
 /* eslint-disable no-console */
 
+const MATTER_PORT = 0;
+const NAME = 'WsClient';
+const HOMEDIR = path.join('jest', NAME);
+
+import path from 'node:path';
+
 import { jest } from '@jest/globals';
 import { WebSocket, WebSocketServer } from 'ws';
-import { getMacAddress, wait, waiter } from 'matterbridge/utils';
-import { AnsiLogger, db, er, hk, LogLevel, nf, wr, zb } from 'matterbridge/logger';
+import { wait, waiter } from 'matterbridge/utils';
+import { db, er, hk, LogLevel, nf, wr, zb } from 'matterbridge/logger';
 
 import { WsClient } from './wsClient.ts';
+import { consoleDebugSpy, flushAsync, loggerLogSpy, setupTest } from './utils/jestHelpers.js';
 
-let loggerLogSpy: jest.SpiedFunction<typeof AnsiLogger.prototype.log>;
-let consoleLogSpy: jest.SpiedFunction<typeof console.log>;
-let consoleDebugSpy: jest.SpiedFunction<typeof console.log>;
-let consoleInfoSpy: jest.SpiedFunction<typeof console.log>;
-let consoleWarnSpy: jest.SpiedFunction<typeof console.log>;
-let consoleErrorSpy: jest.SpiedFunction<typeof console.log>;
-const debug = false; // Set to true to enable debug logging
-
-if (!debug) {
-  loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log').mockImplementation((level: string, message: string, ...parameters: any[]) => {});
-  consoleLogSpy = jest.spyOn(console, 'log').mockImplementation((...args: any[]) => {});
-  consoleDebugSpy = jest.spyOn(console, 'debug').mockImplementation((...args: any[]) => {});
-  consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation((...args: any[]) => {});
-  consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation((...args: any[]) => {});
-  consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation((...args: any[]) => {});
-} else {
-  loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log');
-  consoleLogSpy = jest.spyOn(console, 'log');
-  consoleDebugSpy = jest.spyOn(console, 'debug');
-  consoleInfoSpy = jest.spyOn(console, 'info');
-  consoleWarnSpy = jest.spyOn(console, 'warn');
-  consoleErrorSpy = jest.spyOn(console, 'error');
-}
-
-function setDebug(debug: boolean) {
-  if (debug) {
-    loggerLogSpy.mockRestore();
-    consoleLogSpy.mockRestore();
-    consoleDebugSpy.mockRestore();
-    consoleInfoSpy.mockRestore();
-    consoleWarnSpy.mockRestore();
-    consoleErrorSpy.mockRestore();
-    loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log');
-    consoleLogSpy = jest.spyOn(console, 'log');
-    consoleDebugSpy = jest.spyOn(console, 'debug');
-    consoleInfoSpy = jest.spyOn(console, 'info');
-    consoleWarnSpy = jest.spyOn(console, 'warn');
-    consoleErrorSpy = jest.spyOn(console, 'error');
-  } else {
-    loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log').mockImplementation((level: string, message: string, ...parameters: any[]) => {});
-    consoleLogSpy = jest.spyOn(console, 'log').mockImplementation((...args: any[]) => {});
-    consoleDebugSpy = jest.spyOn(console, 'debug').mockImplementation((...args: any[]) => {});
-    consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation((...args: any[]) => {});
-    consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation((...args: any[]) => {});
-    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation((...args: any[]) => {});
-  }
-}
+// Setup the test environment
+setupTest(NAME, false);
 
 describe('ShellyWsClient', () => {
   let wsClient: WsClient;
@@ -63,11 +25,7 @@ describe('ShellyWsClient', () => {
 
   let sendPong = true;
 
-  // const address = 'c4:cb:76:b3:cd:1f';
-
   beforeAll(async () => {
-    // if (getMacAddress() !== address) return; // Only run these tests on the correct machine
-
     // Create a WebSocket server and await its listening state
     await new Promise<void>((resolve) => {
       server = new WebSocketServer({ port: 8080 }, () => {
@@ -117,13 +75,9 @@ describe('ShellyWsClient', () => {
     jest.clearAllMocks();
   });
 
-  afterEach(() => {
-    //
-  });
+  afterEach(() => {});
 
   afterAll(async () => {
-    // if (getMacAddress() !== address) return;
-
     console.log('Closing Jest test ws server');
 
     // Stop the WebSocket client
@@ -139,8 +93,8 @@ describe('ShellyWsClient', () => {
       });
     });
 
-    // Wait 1 seconds
-    await wait(1000);
+    // Wait a bit to ensure all async operations are done
+    await flushAsync();
 
     // Restore all mocks
     jest.restoreAllMocks();

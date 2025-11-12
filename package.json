@@ -1,13 +1,13 @@
 {
   "name": "matterbridge-shelly",
-  "version": "2.1.2",
+  "version": "2.2.0",
   "description": "Matterbridge shelly plugin",
   "author": "https://github.com/Luligu",
   "homepage": "https://www.npmjs.com/package/matterbridge-shelly",
   "license": "Apache-2.0",
   "type": "module",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "dist/platform.js",
+  "types": "dist/platform.d.ts",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Luligu/matterbridge-shelly.git"

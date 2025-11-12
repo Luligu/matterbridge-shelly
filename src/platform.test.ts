@@ -5,22 +5,18 @@ const NAME = 'Platform';
 const HOMEDIR = path.join('jest', NAME);
 
 import path from 'node:path';
-import { rmSync } from 'node:fs';
 
-import { Matterbridge, MatterbridgeEndpoint, PlatformConfig, bridge } from 'matterbridge';
+import { Matterbridge, MatterbridgeEndpoint, featuresFor } from 'matterbridge';
 import {
   OnOffCluster,
   BindingCluster,
-  BridgedDeviceBasicInformationCluster,
   DescriptorCluster,
   ElectricalEnergyMeasurement,
   ElectricalPowerMeasurement,
-  FixedLabelCluster,
   GroupsCluster,
   IdentifyCluster,
   PowerTopology,
   Switch,
-  PowerSource,
   ColorControl,
   TemperatureMeasurementCluster,
   RelativeHumidityMeasurementCluster,
@@ -29,138 +25,43 @@ import { OnOffBehavior, RelativeHumidityMeasurementBehavior, TemperatureMeasurem
 import { AnsiLogger, db, er, hk, idn, LogLevel, nf, rs, wr, zb, CYAN, TimestampFormat, YELLOW, or } from 'matterbridge/logger';
 import { wait } from 'matterbridge/utils';
 // Matter.js
-import {
-  LogLevel as MatterLogLevel,
-  LogFormat as MatterLogFormat,
-  DeviceTypeId,
-  VendorId,
-  ServerNode,
-  Endpoint,
-  MdnsService,
-  StorageContext,
-  Environment,
-} from 'matterbridge/matter';
-import { AggregatorEndpoint, RootEndpoint } from 'matterbridge/matter/endpoints';
 import { jest } from '@jest/globals';
 
 import { Shelly } from './shelly.ts';
-import { ShellyPlatform } from './platform.ts';
+import initializePlugin, { ShellyPlatform, ShellyPlatformConfig } from './platform.ts';
 import { ShellyDevice } from './shellyDevice.ts';
 import { CoapServer } from './coapServer.ts';
 import { WsServer } from './wsServer.ts';
 import { WsClient } from './wsClient.ts';
 import { ShellyData } from './shellyTypes.ts';
 import { MdnsScanner } from './mdnsScanner.ts';
+import {
+  addMatterbridgePlatform,
+  createMatterbridgeEnvironment,
+  destroyMatterbridgeEnvironment,
+  loggerLogSpy,
+  matterbridge,
+  setupTest,
+  startMatterbridgeEnvironment,
+  stopMatterbridgeEnvironment,
+  aggregator,
+} from './utils/jestHelpers.js';
 
-const address = 'c4:cb:76:b3:cd:1f';
+// Setup the test environment
+setupTest(NAME, false);
 
-let loggerLogSpy: jest.SpiedFunction<typeof AnsiLogger.prototype.log>;
-let consoleLogSpy: jest.SpiedFunction<typeof console.log>;
-let consoleDebugSpy: jest.SpiedFunction<typeof console.log>;
-let consoleInfoSpy: jest.SpiedFunction<typeof console.log>;
-let consoleWarnSpy: jest.SpiedFunction<typeof console.log>;
-let consoleErrorSpy: jest.SpiedFunction<typeof console.log>;
-const debug = false; // Set to true to enable debug logs
-
-if (!debug) {
-  loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log').mockImplementation((level: string, message: string, ...parameters: any[]) => {});
-  consoleLogSpy = jest.spyOn(console, 'log').mockImplementation((...args: any[]) => {});
-  consoleDebugSpy = jest.spyOn(console, 'debug').mockImplementation((...args: any[]) => {});
-  consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation((...args: any[]) => {});
-  consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation((...args: any[]) => {});
-  consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation((...args: any[]) => {});
-} else {
-  loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log');
-  consoleLogSpy = jest.spyOn(console, 'log');
-  consoleDebugSpy = jest.spyOn(console, 'debug');
-  consoleInfoSpy = jest.spyOn(console, 'info');
-  consoleWarnSpy = jest.spyOn(console, 'warn');
-  consoleErrorSpy = jest.spyOn(console, 'error');
-}
-
-function setDebug(debug: boolean) {
-  if (debug) {
-    loggerLogSpy.mockRestore();
-    consoleLogSpy.mockRestore();
-    consoleDebugSpy.mockRestore();
-    consoleInfoSpy.mockRestore();
-    consoleWarnSpy.mockRestore();
-    consoleErrorSpy.mockRestore();
-    loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log');
-    consoleLogSpy = jest.spyOn(console, 'log');
-    consoleDebugSpy = jest.spyOn(console, 'debug');
-    consoleInfoSpy = jest.spyOn(console, 'info');
-    consoleWarnSpy = jest.spyOn(console, 'warn');
-    consoleErrorSpy = jest.spyOn(console, 'error');
-  } else {
-    loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log').mockImplementation((level: string, message: string, ...parameters: any[]) => {});
-    consoleLogSpy = jest.spyOn(console, 'log').mockImplementation((...args: any[]) => {});
-    consoleDebugSpy = jest.spyOn(console, 'debug').mockImplementation((...args: any[]) => {});
-    consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation((...args: any[]) => {});
-    consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation((...args: any[]) => {});
-    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation((...args: any[]) => {});
-  }
-}
-
-const environment = Environment.default;
-let server: ServerNode<ServerNode.RootEndpoint>;
-let aggregator: Endpoint<AggregatorEndpoint>;
-let device: MatterbridgeEndpoint;
-
-const log = new AnsiLogger({ logName: NAME, logTimestampFormat: TimestampFormat.TIME_MILLIS, logLevel: LogLevel.DEBUG });
-
-const mockLog = {
-  fatal: jest.fn((message: string, ...parameters: any[]) => {
-    log.fatal(message, ...parameters);
-  }),
-  error: jest.fn((message: string, ...parameters: any[]) => {
-    log.error(message, ...parameters);
-  }),
-  warn: jest.fn((message: string, ...parameters: any[]) => {
-    log.warn(message, ...parameters);
-  }),
-  notice: jest.fn((message: string, ...parameters: any[]) => {
-    log.notice(message, ...parameters);
-  }),
-  info: jest.fn((message: string, ...parameters: any[]) => {
-    log.info(message, ...parameters);
-  }),
-  debug: jest.fn((message: string, ...parameters: any[]) => {
-    log.debug(message, ...parameters);
-  }),
-} as unknown as AnsiLogger;
-
-const mockMatterbridge = {
-  homeDirectory: HOMEDIR,
-  rootDirectory: HOMEDIR,
-  matterbridgeDirectory: HOMEDIR + '.matterbridge',
-  matterbridgePluginDirectory: HOMEDIR + 'Matterbridge',
-  matterbridgeCertDirectory: HOMEDIR + '.mattercert',
-  systemInformation: {
-    ipv4Address: undefined,
-    ipv6Address: undefined,
-    osRelease: 'xx.xx.xx.xx.xx.xx',
-    nodeVersion: '22.1.10',
-  },
-  matterbridgeVersion: '3.1.6',
-  log: mockLog,
-  getPlugins: jest.fn(() => []),
-  getDevices: jest.fn(() => []),
-  plugins: { get: jest.fn((name: string) => undefined) },
-  devices: { get: jest.fn((uniqueId: string) => undefined) },
-  addBridgedEndpoint: jest.fn(async (pluginName: string, device: MatterbridgeEndpoint) => {
-    await aggregator.add(device);
-  }),
-  removeBridgedEndpoint: jest.fn(async (pluginName: string, device: MatterbridgeEndpoint) => undefined),
-  removeAllBridgedEndpoints: jest.fn(async (pluginName: string) => undefined),
-} as unknown as Matterbridge;
-
-const mockConfig = {
+const mockConfig: ShellyPlatformConfig = {
   name: 'matterbridge-shelly',
   type: 'DynamicPlatform',
   version: '1.1.2',
   username: 'admin',
   password: 'tango',
+  switchList: [],
+  lightList: [],
+  inputContactList: [],
+  inputMomentaryList: [],
+  inputLatchingList: [],
+  nocacheList: [],
   blackList: [],
   whiteList: [],
   entityBlackList: [],
@@ -169,19 +70,22 @@ const mockConfig = {
   enableStorageDiscover: false,
   resetStorageDiscover: false,
   enableBleDiscover: true,
+  failsafeCount: 0,
+  postfix: '',
+  expertMode: false,
   debug: true,
   debugMdns: true,
   debugCoap: true,
   debugWs: true,
   unregisterOnShutdown: false,
-} as PlatformConfig;
-
-// Cleanup the test environment
-rmSync(HOMEDIR, { recursive: true, force: true });
+};
 
 describe('ShellyPlatform', () => {
+  const log = new AnsiLogger({ logName: NAME, logTimestampFormat: TimestampFormat.TIME_MILLIS, logLevel: LogLevel.DEBUG });
   let shellyPlatform: ShellyPlatform;
   let shelly: Shelly;
+
+  const address = 'c4:cb:76:b3:cd:1f';
 
   jest.spyOn(Matterbridge.prototype, 'addBridgedEndpoint').mockImplementation((pluginName: string, device: MatterbridgeEndpoint) => {
     return Promise.resolve();
@@ -193,12 +97,12 @@ describe('ShellyPlatform', () => {
     return Promise.resolve();
   });
 
-  const CoapServerStart = jest.spyOn(CoapServer.prototype, 'start').mockImplementation(() => {});
+  const coapServerStartSpy = jest.spyOn(CoapServer.prototype, 'start').mockImplementation(() => {});
   const coapServerStopSpy = jest.spyOn(CoapServer.prototype, 'stop').mockImplementation(() => {});
-  const CoapServerRegisterDevice = jest.spyOn(CoapServer.prototype, 'registerDevice').mockImplementation(async (host: string, id: string, registerOnly: boolean) => {});
-  const WsServerStart = jest.spyOn(WsServer.prototype, 'start').mockImplementation(() => {});
+  const coapServerRegisterDeviceSpy = jest.spyOn(CoapServer.prototype, 'registerDevice').mockImplementation(async (host: string, id: string, registerOnly: boolean) => {});
+  const wsServerStartSpy = jest.spyOn(WsServer.prototype, 'start').mockImplementation(() => {});
   const wsServerStopSpy = jest.spyOn(WsServer.prototype, 'stop').mockImplementation(() => {});
-  const WsClientStart = jest.spyOn(WsClient.prototype, 'start').mockImplementation(() => {});
+  const wsClientStartSpy = jest.spyOn(WsClient.prototype, 'start').mockImplementation(() => {});
   const wsClientStopSpy = jest.spyOn(WsClient.prototype, 'stop').mockImplementation(() => {});
   const mdnsScannerStartSpy = jest.spyOn(MdnsScanner.prototype, 'start');
   const mdnsScannerStopSpy = jest.spyOn(MdnsScanner.prototype, 'stop');
@@ -215,7 +119,7 @@ describe('ShellyPlatform', () => {
     (shellyPlatform as any).failsafeCount = 0;
 
     // Clean up the shelly instance
-    const shelly = (shellyPlatform as any).shelly as Shelly;
+    // const shelly = (shellyPlatform as any).shelly as Shelly;
     shelly.devices.forEach((device: ShellyDevice) => {
       shelly.removeDevice(device);
       device.destroy();
@@ -224,122 +128,66 @@ describe('ShellyPlatform', () => {
     clearInterval((shelly as any).fetchInterval);
   };
 
-  const featuresFor = (endpoint: MatterbridgeEndpoint, behavior: string) => {
-    return (endpoint.behaviors.supported as any)[behavior]['cluster']['supportedFeatures'];
-  };
-
   beforeAll(async () => {
-    // Setup the matter environment
-    environment.vars.set('log.level', MatterLogLevel.DEBUG);
-    environment.vars.set('log.format', MatterLogFormat.ANSI);
-    environment.vars.set('path.root', HOMEDIR);
-    environment.vars.set('runtime.signals', false);
-    environment.vars.set('runtime.exitcode', false);
+    // Create Matterbridge environment
+    await createMatterbridgeEnvironment(NAME);
+    await startMatterbridgeEnvironment(MATTER_PORT);
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     // Clear all mocks before each test
     jest.clearAllMocks();
   });
 
   afterAll(async () => {
+    // Destroy Matterbridge environment
+    await stopMatterbridgeEnvironment();
+    await destroyMatterbridgeEnvironment();
     // Restore all mocks
     jest.restoreAllMocks();
   });
 
-  test('create the server node', async () => {
-    // Create the server node
-    server = await ServerNode.create({
-      id: NAME + 'ServerNode',
+  it('should return an instance of ShellyPlatform', async () => {
+    const platform = initializePlugin(matterbridge, log, mockConfig);
+    expect(platform).toBeDefined();
+    expect(platform).toBeInstanceOf(ShellyPlatform);
+    expect(loggerLogSpy).not.toHaveBeenCalledWith(LogLevel.ERROR, expect.any(String));
 
-      productDescription: {
-        name: NAME + 'ServerNode',
-        deviceType: DeviceTypeId(RootEndpoint.deviceType),
-        vendorId: VendorId(0xfff1),
-        productId: 0x8000,
-      },
-
-      // Provide defaults for the BasicInformation cluster on the Root endpoint
-      basicInformation: {
-        vendorId: VendorId(0xfff1),
-        vendorName: 'Matterbridge',
-        productId: 0x8000,
-        productName: 'Matterbridge ' + NAME,
-        nodeLabel: NAME + 'ServerNode',
-        hardwareVersion: 1,
-        softwareVersion: 1,
-        reachable: true,
-      },
-
-      network: {
-        port: MATTER_PORT,
-      },
-    });
-    expect(server).toBeDefined();
-    expect(server.lifecycle.isReady).toBeTruthy();
-  });
-
-  test('create the aggregator node', async () => {
-    aggregator = new Endpoint(AggregatorEndpoint, {
-      id: NAME + 'AggregatorNode',
-    });
-    expect(aggregator).toBeDefined();
-  });
-
-  test('add the aggregator node to the server', async () => {
-    expect(server).toBeDefined();
-    expect(aggregator).toBeDefined();
-    await server.add(aggregator);
-    expect(server.parts.has(aggregator.id)).toBeTruthy();
-    expect(server.parts.has(aggregator)).toBeTruthy();
-    expect(aggregator.lifecycle.isReady).toBeTruthy();
-  });
-
-  test('start the server node', async () => {
-    // Run the server
-    expect(server.lifecycle.isReady).toBeTruthy();
-    expect(server.lifecycle.isOnline).toBeFalsy();
-
-    // Wait for the server to be online
-    await new Promise<void>((resolve) => {
-      server.lifecycle.online.on(async () => {
-        resolve();
-      });
-      server.start();
-    });
-
-    // Check if the server is online
-    expect(server.lifecycle.isReady).toBeTruthy();
-    expect(server.lifecycle.isOnline).toBeTruthy();
+    jest.clearAllMocks();
+    await platform.onShutdown();
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, expect.stringContaining('Shutting down platform'));
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.ERROR, 'NodeStorage is not initialized');
+    (platform as any).shelly.destroy();
   });
 
   it('should initialize platform with config name and version', () => {
-    shellyPlatform = new ShellyPlatform(mockMatterbridge, mockLog, mockConfig as any);
+    shellyPlatform = new ShellyPlatform(matterbridge, log, mockConfig as any);
+    addMatterbridgePlatform(shellyPlatform, 'matterbridge-shelly');
     shelly = (shellyPlatform as any).shelly;
-    expect(mockLog.debug).toHaveBeenCalledWith(`Initializing platform: ${idn}${mockConfig.name}${rs}${db} v.${CYAN}${mockConfig.version}`);
-    clearInterval((shellyPlatform as any).shelly.fetchInterval);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Initializing platform: ${idn}${mockConfig.name}${rs}${db} v.${CYAN}${mockConfig.version}`);
+    clearInterval((shelly as any).fetchInterval);
     shellyPlatform.config.entityBlackList = [];
   });
 
   it('should validate version', () => {
-    mockMatterbridge.matterbridgeVersion = '1.5.4';
+    matterbridge.matterbridgeVersion = '1.5.4';
     expect(shellyPlatform.verifyMatterbridgeVersion('1.5.3')).toBe(true);
     expect(shellyPlatform.verifyMatterbridgeVersion('1.5.4')).toBe(true);
     expect(shellyPlatform.verifyMatterbridgeVersion('2.0.0')).toBe(false);
   });
 
   it('should validate version beta', () => {
-    mockMatterbridge.matterbridgeVersion = '1.5.4-dev.1';
+    matterbridge.matterbridgeVersion = '1.5.4-dev.1';
     expect(shellyPlatform.verifyMatterbridgeVersion('1.5.3')).toBe(true);
     expect(shellyPlatform.verifyMatterbridgeVersion('1.5.4')).toBe(true);
     expect(shellyPlatform.verifyMatterbridgeVersion('2.0.0')).toBe(false);
-    mockMatterbridge.matterbridgeVersion = '1.5.5';
+    matterbridge.matterbridgeVersion = '1.5.5';
   });
 
   it('should throw because of version', () => {
-    mockMatterbridge.matterbridgeVersion = '1.5.4';
-    expect(() => new ShellyPlatform(mockMatterbridge, mockLog, mockConfig as any)).toThrow();
-    mockMatterbridge.matterbridgeVersion = '3.1.4';
+    matterbridge.matterbridgeVersion = '1.5.4';
+    expect(() => new ShellyPlatform(matterbridge, log, mockConfig as any)).toThrow();
+    matterbridge.matterbridgeVersion = '3.1.4';
   });
 
   it('should call onStart with reason and start mDNS', async () => {
@@ -347,18 +195,18 @@ describe('ShellyPlatform', () => {
     shellyPlatform.config.enableMdnsDiscover = true;
 
     await shellyPlatform.onStart('Test reason');
-    expect(mockLog.info).toHaveBeenCalledWith(`Starting platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Starting platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, 'Started MdnsScanner for shelly devices.');
     expect((shellyPlatform as any).nodeStorageManager).toBeDefined();
-    expect((shellyPlatform as any).shelly.mdnsScanner).toBeDefined();
-    expect((shellyPlatform as any).shelly.mdnsScanner.isScanning).toBe(true);
-    expect((shellyPlatform as any).shelly.coapServer).toBeDefined();
-    expect((shellyPlatform as any).shelly.coapServer.isListening).toBe(false);
-    expect((shellyPlatform as any).shelly.wsServer).toBeDefined();
-    expect((shellyPlatform as any).shelly.wsServer.isListening).toBe(false);
+    expect((shelly as any).mdnsScanner).toBeDefined();
+    expect((shelly as any).mdnsScanner.isScanning).toBe(true);
+    expect((shelly as any).coapServer).toBeDefined();
+    expect((shelly as any).coapServer.isListening).toBe(false);
+    expect((shelly as any).wsServer).toBeDefined();
+    expect((shelly as any).wsServer.isListening).toBe(false);
     shellyPlatform.config.enableMdnsDiscover = false;
-    (shellyPlatform as any).shelly.mdnsScanner?.stop();
-    expect((shellyPlatform as any).shelly.mdnsScanner.isScanning).toBe(false);
+    (shelly as any).mdnsScanner?.stop();
+    expect((shelly as any).mdnsScanner.isScanning).toBe(false);
 
     cleanup();
   });
@@ -367,9 +215,9 @@ describe('ShellyPlatform', () => {
     shellyPlatform.config.enableStorageDiscover = false;
     shellyPlatform.config.resetStorageDiscover = true;
     await shellyPlatform.onStart('Test reason');
-    expect(mockLog.info).toHaveBeenCalledWith(`Starting platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
-    expect(mockLog.info).toHaveBeenCalledWith(`Resetting the Shellies storage...`);
-    expect(mockLog.info).toHaveBeenCalledWith(`Reset of Shellies storage done!`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Starting platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Resetting the Shellies storage...`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Reset of Shellies storage done!`);
     expect((shellyPlatform as any).nodeStorageManager).toBeDefined();
     expect((shellyPlatform as any).storedDevices.size).toBe(0);
     shellyPlatform.config.resetStorageDiscover = false;
@@ -383,7 +231,7 @@ describe('ShellyPlatform', () => {
     shellyPlatform.storedDevices.set('shellyemg3-84FCE636582C', { id: 'shellyemg3-84FCE636582C', host: 'invalid', port: 80, gen: 1 });
     shellyPlatform.storedDevices.set('shellyplus-34FCE636582C', { id: 'shellyplus-34FCE636582C', host: '192.168.255.1', port: 80, gen: 2 });
     expect(await (shellyPlatform as any).saveStoredDevices()).toBeTruthy();
-    expect(mockLog.debug).toHaveBeenCalledWith(`Saving ${CYAN}2${db} discovered Shelly devices to the storage`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Saving ${CYAN}2${db} discovered Shelly devices to the storage`);
     expect((shellyPlatform as any).storedDevices.size).toBe(2);
 
     const create = jest.spyOn(ShellyDevice, 'create' as any).mockImplementation(async () => {
@@ -391,10 +239,14 @@ describe('ShellyPlatform', () => {
     });
     await shellyPlatform.onStart('Test reason');
 
-    expect(mockLog.info).toHaveBeenCalledWith(`Starting platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
-    expect(mockLog.info).toHaveBeenCalledWith(`Loading from storage 2 Shelly devices`);
-    expect(mockLog.error).toHaveBeenCalledWith(`Stored Shelly device id ${hk}shellyemg3-84FCE636582C${er} host ${zb}invalid${er} is not valid. Please remove it from the storage.`);
-    expect(mockLog.debug).toHaveBeenCalledWith(
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Starting platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Loading from storage 2 Shelly devices`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(
+      LogLevel.ERROR,
+      `Stored Shelly device id ${hk}shellyemg3-84FCE636582C${er} host ${zb}invalid${er} is not valid. Please remove it from the storage.`,
+    );
+    expect(loggerLogSpy).toHaveBeenCalledWith(
+      LogLevel.DEBUG,
       `Loading from storage Shelly device ${hk}shellyplus-34FCE636582C${db} host ${zb}192.168.255.1${db} port ${CYAN}80${db} gen ${CYAN}2${db}`,
     );
     expect(shellyPlatform.storedDevices.size).toBe(2);
@@ -410,8 +262,8 @@ describe('ShellyPlatform', () => {
 
     await expect(shellyPlatform.onStart('Test reason')).rejects.toThrow();
 
-    expect(mockLog.info).toHaveBeenCalledWith(`Starting platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
-    expect(mockLog.notice).toHaveBeenCalledWith(`Waiting for the configured number of 0/2 devices to be loaded.`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Starting platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.NOTICE, `Waiting for the configured number of 0/2 devices to be loaded.`);
     shellyPlatform.config.failsafeCount = 0;
 
     cleanup();
@@ -419,16 +271,16 @@ describe('ShellyPlatform', () => {
 
   it('should call onStart with reason and add discovered devices', async () => {
     await shellyPlatform.onStart('Test reason');
-    expect(mockLog.info).toHaveBeenCalledWith(`Starting platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Starting platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
 
     const create = jest.spyOn(ShellyDevice, 'create' as any).mockImplementation(async () => {
       return Promise.resolve(undefined);
     });
 
-    (shellyPlatform as any).shelly.emit('discovered', { id: 'shelly1l-E8DB84AAD781', host: '192.168.1.241', port: 80, gen: 1 });
-    await wait(100);
+    (shelly as any).emit('discovered', { id: 'shelly1l-E8DB84AAD781', host: '192.168.1.241', port: 80, gen: 1 });
+    await wait(50);
     expect((shellyPlatform as any).discoveredDevices.size).toBe(1);
-    expect((shellyPlatform as any).shelly._devices.size).toBe(0);
+    expect((shelly as any)._devices.size).toBe(0);
 
     create.mockRestore();
     cleanup();
@@ -440,15 +292,15 @@ describe('ShellyPlatform', () => {
     shellyPlatform.config.inputMomentaryList = ['shelly1-34945472A643'];
 
     await shellyPlatform.onStart('Test reason');
-    expect(mockLog.info).toHaveBeenCalledWith(`Starting platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Starting platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
 
-    const shelly1 = await ShellyDevice.create((shellyPlatform as any).shelly, (shellyPlatform as any).log, path.join('src', 'mock', 'shelly1-34945472A643.json'));
+    const shelly1 = await ShellyDevice.create(shelly, (shellyPlatform as any).log, path.join('src', 'mock', 'shelly1-34945472A643.json'));
     expect(shelly1).not.toBeUndefined();
     if (!shelly1) return;
 
     await shelly.addDevice(shelly1);
-    await wait(100);
-    expect(mockLog.info).toHaveBeenCalledWith(`Shelly added ${idn}${shelly1.name}${rs} device id ${hk}${shelly1.id}${rs}${nf} host ${zb}${shelly1.host}${nf}`);
+    await wait(50);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Shelly added ${idn}${shelly1.name}${rs} device id ${hk}${shelly1.id}${rs}${nf} host ${zb}${shelly1.host}${nf}`);
     expect(shellyPlatform.discoveredDevices.size).toBe(0);
     expect(shellyPlatform.storedDevices.size).toBe(0);
     expect(shelly.devices).toHaveLength(1);
@@ -460,14 +312,8 @@ describe('ShellyPlatform', () => {
     if (!device) return;
     await aggregator.add(device);
 
-    expect(device.hasClusterServer(DescriptorCluster)).toBeTruthy();
-    // expect(device.hasClusterServer(MatterbridgeBehavior)).toBeTruthy();
-    expect(device.hasClusterServer(BridgedDeviceBasicInformationCluster)).toBeTruthy();
-    expect(device.hasClusterServer(FixedLabelCluster)).toBeTruthy();
-    expect(device.hasClusterServer(PowerSource.Cluster.id)).toBeTruthy();
     expect(device.getAllClusterServerNames()).toEqual(['descriptor', 'matterbridge', 'bridgedDeviceBasicInformation', 'powerSource', 'fixedLabel']);
     expect(device.getChildEndpoints()).toHaveLength(3);
-    expect(device.getChildEndpointByName('PowerSource')).not.toBeDefined();
     expect(device.getChildEndpointByName('relay:0')).toBeDefined();
     expect(device.getChildEndpointByName('relay:0')?.hasClusterServer(DescriptorCluster)).toBeTruthy();
     expect(device.getChildEndpointByName('relay:0')?.hasClusterServer(BindingCluster)).not.toBeTruthy();
@@ -494,9 +340,9 @@ describe('ShellyPlatform', () => {
     expect(switchEndpoint.stateOf(OnOffBehavior).onOff).toBe(true);
     await switchEndpoint.setStateOf(OnOffBehavior, { onOff: false });
     expect(switchEndpoint.stateOf(OnOffBehavior).onOff).toBe(false);
-    shelly = (shellyPlatform as any).shelly;
+    shelly = shelly as any;
     shelly.coapServer.emit('coapupdate', shelly1.host, { 'relay:0': { state: true } } as ShellyData);
-    await wait(100);
+    await wait(50);
     expect(switchEndpoint.stateOf(OnOffBehavior).onOff).toBe(true);
 
     // Test commands for switch from Matter to Shelly
@@ -531,15 +377,15 @@ describe('ShellyPlatform', () => {
     shellyPlatform.config.inputMomentaryList = ['shellyht-703523'];
 
     await shellyPlatform.onStart('Test reason');
-    expect(mockLog.info).toHaveBeenCalledWith(`Starting platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Starting platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
 
-    const shellyHt = await ShellyDevice.create((shellyPlatform as any).shelly, (shellyPlatform as any).log, path.join('src', 'mock', 'shellyht-703523.json'));
+    const shellyHt = await ShellyDevice.create(shelly, (shellyPlatform as any).log, path.join('src', 'mock', 'shellyht-703523.json'));
     expect(shellyHt).not.toBeUndefined();
     if (!shellyHt) return;
 
     await shelly.addDevice(shellyHt);
-    await wait(100);
-    expect(mockLog.info).toHaveBeenCalledWith(`Shelly added ${idn}${shellyHt.name}${rs} device id ${hk}${shellyHt.id}${rs}${nf} host ${zb}${shellyHt.host}${nf}`);
+    await wait(50);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Shelly added ${idn}${shellyHt.name}${rs} device id ${hk}${shellyHt.id}${rs}${nf} host ${zb}${shellyHt.host}${nf}`);
     expect(shellyPlatform.discoveredDevices.size).toBe(0);
     expect(shellyPlatform.storedDevices.size).toBe(0);
     expect(shelly.devices).toHaveLength(1);
@@ -551,11 +397,6 @@ describe('ShellyPlatform', () => {
     if (!device) return;
     await aggregator.add(device);
 
-    expect(device.hasClusterServer(DescriptorCluster)).toBeTruthy();
-    // expect(device.hasClusterServer(MatterbridgeBehavior)).toBeTruthy();
-    expect(device.hasClusterServer(BridgedDeviceBasicInformationCluster)).toBeTruthy();
-    expect(device.hasClusterServer(FixedLabelCluster)).toBeTruthy();
-    expect(device.hasClusterServer(PowerSource.Cluster.id)).toBeTruthy();
     expect(device.getAllClusterServerNames()).toEqual(['descriptor', 'matterbridge', 'bridgedDeviceBasicInformation', 'powerSource', 'fixedLabel']);
     expect(device.getChildEndpoints()).toHaveLength(2);
     expect(device.getChildEndpointByName('temperature')).toBeDefined();
@@ -568,9 +409,8 @@ describe('ShellyPlatform', () => {
     expect(device.getChildEndpointByName('humidity')?.hasClusterServer(RelativeHumidityMeasurementCluster)).toBeTruthy();
 
     // Test updates on switch from Shelly to Matter
-    shelly = (shellyPlatform as any).shelly;
     shelly.coapServer.emit('coapupdate', shellyHt.host, { temperature: { tC: 20.75, tF: 71.15 }, humidity: { value: 60.5 } } as ShellyData);
-    await wait(100);
+    await wait(50);
     const temperatureEndpoint = device.getChildEndpointByName('temperature') as MatterbridgeEndpoint;
     expect(temperatureEndpoint.stateOf(TemperatureMeasurementBehavior).measuredValue).toBe(2075);
     const humidityEndpoint = device.getChildEndpointByName('humidity') as MatterbridgeEndpoint;
@@ -578,7 +418,7 @@ describe('ShellyPlatform', () => {
 
     cleanup();
     shellyHt.destroy();
-  }, 10000);
+  });
 
   it('should add shellyprorgbwwpm mode rgbctt', async () => {
     expect(shellyPlatform).toBeDefined();
@@ -586,15 +426,15 @@ describe('ShellyPlatform', () => {
     shellyPlatform.config.inputMomentaryList = ['shellyprorgbwwpm-AC1518784844'];
 
     await shellyPlatform.onStart('Test reason');
-    expect(mockLog.info).toHaveBeenCalledWith(`Starting platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Starting platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
 
-    const shellyPro = await ShellyDevice.create((shellyPlatform as any).shelly, (shellyPlatform as any).log, path.join('src', 'mock', 'shellyprorgbwwpm-AC1518784844.json'));
+    const shellyPro = await ShellyDevice.create(shelly as any, (shellyPlatform as any).log, path.join('src', 'mock', 'shellyprorgbwwpm-AC1518784844.json'));
     expect(shellyPro).not.toBeUndefined();
     if (!shellyPro) return;
 
     await shelly.addDevice(shellyPro);
-    await wait(100);
-    expect(mockLog.info).toHaveBeenCalledWith(`Shelly added ${idn}${shellyPro.name}${rs} device id ${hk}${shellyPro.id}${rs}${nf} host ${zb}${shellyPro.host}${nf}`);
+    await wait(50);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Shelly added ${idn}${shellyPro.name}${rs} device id ${hk}${shellyPro.id}${rs}${nf} host ${zb}${shellyPro.host}${nf}`);
     expect(shellyPlatform.discoveredDevices.size).toBe(0);
     expect(shellyPlatform.storedDevices.size).toBe(0);
     expect(shelly.devices).toHaveLength(1);
@@ -658,34 +498,34 @@ describe('ShellyPlatform', () => {
     expect(cctEndpoint.getAttribute('onOff', 'onOff')).toBe(false);
     expect(cctEndpoint.getAttribute('levelControl', 'currentLevel')).toBe(100);
     expect(cctEndpoint.getAttribute('colorControl', 'colorTemperatureMireds')).toBe(300);
-    shelly = (shellyPlatform as any).shelly;
+    shelly = shelly as any;
     shelly.wsServer.emit('wssupdate', shellyPro.id, { 'cct:0': { state: true, brightness: 50, ct: 3000 } } as ShellyData);
-    await wait(100);
+    await wait(50);
     expect(cctEndpoint.getAttribute('onOff', 'onOff')).toBe(true);
     expect(cctEndpoint.getAttribute('levelControl', 'currentLevel')).toBe(127);
     expect(cctEndpoint.getAttribute('colorControl', 'colorTemperatureMireds')).toBe(454);
     expect(cctEndpoint.getAttribute('colorControl', 'colorMode')).toBe(ColorControl.ColorMode.ColorTemperatureMireds);
     expect(cctEndpoint.getAttribute('colorControl', 'enhancedColorMode')).toBe(ColorControl.ColorMode.ColorTemperatureMireds);
     shelly.wsServer.emit('wssupdate', shellyPro.id, { 'cct:0': { ct: 2700 } } as ShellyData);
-    await wait(100);
+    await wait(50);
     expect(cctEndpoint.getAttribute('colorControl', 'colorTemperatureMireds')).toBe(500);
     shelly.wsServer.emit('wssupdate', shellyPro.id, { 'cct:0': { ct: 6500 } } as ShellyData);
-    await wait(100);
+    await wait(50);
     expect(cctEndpoint.getAttribute('colorControl', 'colorTemperatureMireds')).toBe(147);
     shelly.wsServer.emit('wssupdate', shellyPro.id, { 'cct:0': { ct: 6600 } } as ShellyData);
-    await wait(100);
+    await wait(50);
     expect(cctEndpoint.getAttribute('colorControl', 'colorTemperatureMireds')).toBe(147);
     shelly.wsServer.emit('wssupdate', shellyPro.id, { 'cct:0': { ct: 1600 } } as ShellyData);
-    await wait(100);
+    await wait(50);
     expect(cctEndpoint.getAttribute('colorControl', 'colorTemperatureMireds')).toBe(147);
     shelly.wsServer.emit('wssupdate', shellyPro.id, { 'cct:0': { ct: 1600 } } as ShellyData);
-    await wait(100);
+    await wait(50);
     expect(cctEndpoint.getAttribute('colorControl', 'colorTemperatureMireds')).toBe(147);
     shelly.wsServer.emit('wssupdate', shellyPro.id, { 'cct:0': { ct: 1600 } } as ShellyData);
-    await wait(100);
+    await wait(50);
     expect(cctEndpoint.getAttribute('colorControl', 'colorTemperatureMireds')).toBe(147);
     shelly.wsServer.emit('wssupdate', shellyPro.id, { 'cct:0': { ct: 4329 } } as ShellyData);
-    await wait(100);
+    await wait(50);
     expect(cctEndpoint.getAttribute('colorControl', 'colorTemperatureMireds')).toBe(250);
 
     // Test updates on rgb
@@ -701,7 +541,7 @@ describe('ShellyPlatform', () => {
     expect(rgbEndpoint.getAttribute('colorControl', 'currentHue')).toBe(100);
     expect(rgbEndpoint.getAttribute('colorControl', 'currentSaturation')).toBe(100);
     shelly.wsServer.emit('wssupdate', shellyPro.id, { 'rgb:0': { state: true, brightness: 50, rgb: [100, 200, 255] } } as ShellyData);
-    await wait(100);
+    await wait(50);
     expect(rgbEndpoint.getAttribute('onOff', 'onOff')).toBe(true);
     expect(rgbEndpoint.getAttribute('levelControl', 'currentLevel')).toBe(127);
     expect(rgbEndpoint.getAttribute('colorControl', 'currentHue')).toBe(142);
@@ -804,15 +644,16 @@ describe('ShellyPlatform', () => {
     shellyPlatform.config.inputMomentaryList = ['shellyplusrgbwpm-A0A3B35C7024'];
 
     await shellyPlatform.onStart('Test reason');
-    expect(mockLog.info).toHaveBeenCalledWith(`Starting platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Starting platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
 
-    const shellyPlusRgbwPm = await ShellyDevice.create((shellyPlatform as any).shelly, (shellyPlatform as any).log, path.join('src', 'mock', 'shellyplusrgbwpm-A0A3B35C7024.json'));
+    const shellyPlusRgbwPm = await ShellyDevice.create(shelly as any, (shellyPlatform as any).log, path.join('src', 'mock', 'shellyplusrgbwpm-A0A3B35C7024.json'));
     expect(shellyPlusRgbwPm).not.toBeUndefined();
     if (!shellyPlusRgbwPm) return;
 
     await shelly.addDevice(shellyPlusRgbwPm);
-    await wait(100);
-    expect(mockLog.info).toHaveBeenCalledWith(
+    await wait(50);
+    expect(loggerLogSpy).toHaveBeenCalledWith(
+      LogLevel.INFO,
       `Shelly added ${idn}${shellyPlusRgbwPm.name}${rs} device id ${hk}${shellyPlusRgbwPm.id}${rs}${nf} host ${zb}${shellyPlusRgbwPm.host}${nf}`,
     );
     expect(shellyPlatform.discoveredDevices.size).toBe(0);
@@ -902,7 +743,7 @@ describe('ShellyPlatform', () => {
     expect(rgbEndpoint.getAttribute('colorControl', 'currentSaturation')).toBe(100);
     expect(rgbEndpoint.getAttribute('colorControl', 'colorTemperatureMireds')).toBe(250);
     shelly.wsServer.emit('wssupdate', shellyPlusRgbwPm.id, { 'rgb:0': { id: 0, state: true, brightness: 50, rgb: [255, 111, 128] } } as ShellyData);
-    await wait(100);
+    await wait(50);
     expect(rgbEndpoint.getAttribute('onOff', 'onOff')).toBe(true);
     expect(rgbEndpoint.getAttribute('levelControl', 'currentLevel')).toBe(127);
     expect(rgbEndpoint.getAttribute('colorControl', 'currentHue')).toBe(249);
@@ -914,7 +755,7 @@ describe('ShellyPlatform', () => {
     shelly.wsServer.emit('wssupdate', shellyPlusRgbwPm.id, {
       'rgb:0': { id: 0, aenergy: { total: 55.774, by_minute: [Array], minute_ts: 1745084640 }, apower: 12.85, current: 0.15, voltage: 12.8 },
     } as ShellyData);
-    await wait(100);
+    await wait(50);
     expect(rgbEndpoint.getAttribute('ElectricalPowerMeasurement', 'voltage')).toBe(12800);
     expect(rgbEndpoint.getAttribute('ElectricalPowerMeasurement', 'activeCurrent')).toBe(150);
     expect(rgbEndpoint.getAttribute('ElectricalPowerMeasurement', 'activePower')).toBe(12850);
@@ -980,15 +821,18 @@ describe('ShellyPlatform', () => {
     shellyPlatform.config.inputMomentaryList = [];
 
     await shellyPlatform.onStart('Test reason');
-    expect(mockLog.info).toHaveBeenCalledWith(`Starting platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Starting platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
 
-    const shelly2PMGen3 = await ShellyDevice.create((shellyPlatform as any).shelly, (shellyPlatform as any).log, path.join('src', 'mock', 'shelly2pmg3-34CDB0770C4C.json'));
+    const shelly2PMGen3 = await ShellyDevice.create(shelly, (shellyPlatform as any).log, path.join('src', 'mock', 'shelly2pmg3-34CDB0770C4C.json'));
     expect(shelly2PMGen3).not.toBeUndefined();
     if (!shelly2PMGen3) return;
 
     await shelly.addDevice(shelly2PMGen3);
-    await wait(100);
-    expect(mockLog.info).toHaveBeenCalledWith(`Shelly added ${idn}${shelly2PMGen3.name}${rs} device id ${hk}${shelly2PMGen3.id}${rs}${nf} host ${zb}${shelly2PMGen3.host}${nf}`);
+    await wait(50);
+    expect(loggerLogSpy).toHaveBeenCalledWith(
+      LogLevel.INFO,
+      `Shelly added ${idn}${shelly2PMGen3.name}${rs} device id ${hk}${shelly2PMGen3.id}${rs}${nf} host ${zb}${shelly2PMGen3.host}${nf}`,
+    );
     expect(shellyPlatform.discoveredDevices.size).toBe(0);
     expect(shellyPlatform.storedDevices.size).toBe(0);
     expect(shelly.devices).toHaveLength(1);
@@ -1029,23 +873,23 @@ describe('ShellyPlatform', () => {
     await coverEndpoint.setAttribute('windowCovering', 'targetPositionLiftPercent100ths', 0); // Fully open
     expect(coverEndpoint.getAttribute('windowCovering', 'currentPositionLiftPercent100ths')).toBe(0);
     expect(coverEndpoint.getAttribute('windowCovering', 'targetPositionLiftPercent100ths')).toBe(0);
-    shelly = (shellyPlatform as any).shelly;
+    shelly = shelly as any;
 
     shelly2PMGen3.getComponent('cover:0')?.setValue('current_pos', 50);
     shelly2PMGen3.getComponent('cover:0')?.setValue('target_pos', 50);
 
     shelly.wsServer.emit('wssupdate', shelly2PMGen3.id, { 'cover:0': { current_pos: 0, target_pos: 0 } } as ShellyData); // Fully closed
-    await wait(100);
+    await wait(50);
     expect(coverEndpoint.getAttribute('windowCovering', 'currentPositionLiftPercent100ths')).toBe(10000);
     expect(coverEndpoint.getAttribute('windowCovering', 'targetPositionLiftPercent100ths')).toBe(10000);
 
     shelly.wsServer.emit('wssupdate', shelly2PMGen3.id, { 'cover:0': { current_pos: 50, target_pos: 50 } } as ShellyData); // Fully open
-    await wait(100);
+    await wait(50);
     expect(coverEndpoint.getAttribute('windowCovering', 'currentPositionLiftPercent100ths')).toBe(5000);
     expect(coverEndpoint.getAttribute('windowCovering', 'targetPositionLiftPercent100ths')).toBe(5000);
 
     shelly.wsServer.emit('wssupdate', shelly2PMGen3.id, { 'cover:0': { current_pos: 100, target_pos: 100 } } as ShellyData); // Fully open
-    await wait(100);
+    await wait(50);
     expect(coverEndpoint.getAttribute('windowCovering', 'currentPositionLiftPercent100ths')).toBe(0);
     expect(coverEndpoint.getAttribute('windowCovering', 'targetPositionLiftPercent100ths')).toBe(0);
 
@@ -1105,7 +949,7 @@ describe('ShellyPlatform', () => {
 
     shellyPlatform.discoveredDevices.clear();
     shellyPlatform.storedDevices.clear();
-    (shellyPlatform as any).shelly.emit('discovered', { id: 'shelly1-84FCE1234', host: 'invalid', port: 80, gen: 1 });
+    (shelly as any).emit('discovered', { id: 'shelly1-84FCE1234', host: 'invalid', port: 80, gen: 1 });
     expect(await (shellyPlatform as any).loadStoredDevices()).toBeTruthy();
     expect((shellyPlatform as any).storedDevices.size).toBe(1);
 
@@ -1117,10 +961,10 @@ describe('ShellyPlatform', () => {
       return Promise.resolve(undefined);
     });
 
-    (shellyPlatform as any).shelly.emit('discovered', { id: 'shelly1-84FCE1234', host: 'invalid', port: 80, gen: 1 });
+    (shelly as any).emit('discovered', { id: 'shelly1-84FCE1234', host: 'invalid', port: 80, gen: 1 });
     expect(await (shellyPlatform as any).loadStoredDevices()).toBeTruthy();
     expect((shellyPlatform as any).storedDevices.size).toBe(1);
-    expect(mockLog.info).toHaveBeenCalledWith(`Shelly device ${hk}shelly1-84FCE1234${nf} host ${zb}invalid${nf} already discovered`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Shelly device ${hk}shelly1-84FCE1234${nf} host ${zb}invalid${nf} already discovered`);
 
     create.mockRestore();
   });
@@ -1130,10 +974,13 @@ describe('ShellyPlatform', () => {
       return Promise.resolve(undefined);
     });
 
-    (shellyPlatform as any).shelly.emit('discovered', { id: 'shelly1-84FCE1234', host: 'invalid new host', port: 80, gen: 1 });
+    (shelly as any).emit('discovered', { id: 'shelly1-84FCE1234', host: 'invalid new host', port: 80, gen: 1 });
     expect(await (shellyPlatform as any).loadStoredDevices()).toBeTruthy();
     expect((shellyPlatform as any).storedDevices.size).toBe(1);
-    expect(mockLog.warn).toHaveBeenCalledWith(`Shelly device ${hk}shelly1-84FCE1234${wr} host ${zb}invalid new host${wr} has been discovered with a different host.`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(
+      LogLevel.WARN,
+      `Shelly device ${hk}shelly1-84FCE1234${wr} host ${zb}invalid new host${wr} has been discovered with a different host.`,
+    );
 
     cleanup();
     create.mockRestore();
@@ -1141,45 +988,30 @@ describe('ShellyPlatform', () => {
 
   it('should call onConfigure', async () => {
     await shellyPlatform.onConfigure();
-    expect(mockLog.info).toHaveBeenCalledWith(`Configuring platform ${idn}${mockConfig.name}${rs}${nf}`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Configuring platform ${idn}${mockConfig.name}${rs}${nf}`);
   });
 
   it('should call onChangeLoggerLevel and log a partial message', async () => {
     await shellyPlatform.onChangeLoggerLevel(LogLevel.DEBUG);
-    expect(mockLog.debug).toHaveBeenCalledWith(expect.stringContaining(`Changing logger level for platform ${idn}${mockConfig.name}${rs}`));
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`Changing logger level for platform ${idn}${mockConfig.name}${rs}`));
   });
 
   it('should call onShutdown with reason', async () => {
     await shellyPlatform.onShutdown('Test reason');
-    expect(mockLog.info).toHaveBeenCalledWith(`Shutting down platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
-    expect(mockMatterbridge.removeAllBridgedEndpoints).not.toHaveBeenCalled();
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Shutting down platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
+    expect(matterbridge.removeAllBridgedEndpoints).not.toHaveBeenCalled();
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, 'Stopped MdnsScanner for shelly devices.');
   });
 
   it('should call onShutdown with reason and unregister', async () => {
     mockConfig.unregisterOnShutdown = true;
     await shellyPlatform.onShutdown('Test reason');
-    expect(mockLog.info).toHaveBeenCalledWith(`Shutting down platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
-    expect(mockMatterbridge.removeAllBridgedEndpoints).toHaveBeenCalled();
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Shutting down platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
+    expect(matterbridge.removeAllBridgedEndpoints).toHaveBeenCalled();
   });
 
   it('should destroy shelly', async () => {
-    (shellyPlatform as any).shelly.destroy();
-    expect((shellyPlatform as any).shelly.fetchInterval).toBeUndefined();
-  });
-
-  test('close the server node', async () => {
-    expect(server).toBeDefined();
-    expect(server.lifecycle.isReady).toBeTruthy();
-    expect(server.lifecycle.isOnline).toBeTruthy();
-    await server.close();
-    expect(server.lifecycle.isReady).toBeTruthy();
-    expect(server.lifecycle.isOnline).toBeFalsy();
-  });
-
-  test('stop the mDNS service', async () => {
-    expect(server).toBeDefined();
-    await server.env.get(MdnsService)[Symbol.asyncDispose]();
-    await new Promise((resolve) => setTimeout(resolve, 250)); // Wait for async operations in matter.js to complete
+    (shelly as any).destroy();
+    expect((shelly as any).fetchInterval).toBeUndefined();
   });
 });
