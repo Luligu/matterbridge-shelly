@@ -16,7 +16,7 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 
 - [test]: Refactored real tests on Gen 1/2/3.
 - [test]: Refactored all test for consistency with the matterbridge test setup.
-- [package]: Upgraded to the current Matterbridge signatures.
+- [package]: Updated to the current Matterbridge signatures.
 
 ### Changed
 

@@ -28,7 +28,6 @@ import os from 'node:os';
 
 // Matterbridge imports
 import {
-  Matterbridge,
   MatterbridgeDynamicPlatform,
   PlatformConfig,
   onOffSwitch,
@@ -53,6 +52,7 @@ import {
   waterLeakDetector,
   smokeCoAlarm,
   extendedColorLight,
+  PlatformMatterbridge,
 } from 'matterbridge';
 import {
   hslColorToRgbColor,
@@ -104,10 +104,7 @@ import { ShellyDataType, ShellyDeviceId, ShellyEvent } from './shellyTypes.js';
 import { shellyCoverCommandHandler, shellyIdentifyCommandHandler, shellyLightCommandHandler, shellySwitchCommandHandler } from './platformCommandHadlers.js';
 import { shellyUpdateHandler } from './platformUpdateHandler.js';
 
-export interface ShellyPlatformConfig {
-  name: string;
-  type: string;
-  version: string;
+export interface ShellyPlatformConfig extends PlatformConfig {
   username: string;
   password: string;
   switchList: string[];
@@ -128,11 +125,22 @@ export interface ShellyPlatformConfig {
   postfix: string;
   expertMode: boolean;
   firstRun?: boolean;
-  debug: boolean;
   debugMdns: boolean;
   debugCoap: boolean;
   debugWs: boolean;
-  unregisterOnShutdown: boolean;
+}
+
+/**
+ * This is the standard interface for Matterbridge plugins.
+ * Each plugin should export a default function that follows this signature.
+ *
+ * @param {PlatformMatterbridge} matterbridge - An instance of MatterBridge. This is the main interface for interacting with the MatterBridge system.
+ * @param {AnsiLogger} log - An instance of AnsiLogger. This is used for logging messages in a format that can be displayed with ANSI color codes.
+ * @param {PlatformConfig} config - The platform configuration.
+ * @returns {ShellyPlatform} - An instance of the ShellyPlatform. This is the main interface for interacting with the Shellies.
+ */
+export default function initializePlugin(matterbridge: PlatformMatterbridge, log: AnsiLogger, config: ShellyPlatformConfig): ShellyPlatform {
+  return new ShellyPlatform(matterbridge, log, config);
 }
 
 export class ShellyPlatform extends MatterbridgeDynamicPlatform {
@@ -157,8 +165,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
   private failsafeCountSeconds = 360;
   private firstRun = false;
 
-  constructor(matterbridge: Matterbridge, log: AnsiLogger, config: ShellyPlatformConfig) {
-    super(matterbridge, log, config as unknown as PlatformConfig);
+  constructor(matterbridge: PlatformMatterbridge, log: AnsiLogger, config: ShellyPlatformConfig) {
+    super(matterbridge, log, config);
 
     // Verify that Matterbridge is the correct version
     if (this.verifyMatterbridgeVersion === undefined || typeof this.verifyMatterbridgeVersion !== 'function' || !this.verifyMatterbridgeVersion('3.1.6')) {
@@ -199,7 +207,9 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     }
     // Expert mode setup
     if (config.expertMode === false) {
-      const shelly = matterbridge.plugins.get('matterbridge-shelly');
+      // TODO: set the schema in platform
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const shelly = (matterbridge as any).plugins.get('matterbridge-shelly');
       if (shelly && shelly.schemaJson && isValidObject(shelly.schemaJson.properties, 1)) {
         const properties = shelly.schemaJson.properties as Record<string, object>;
         delete properties.switchList;
@@ -276,7 +286,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     this.shelly = new Shelly(log, this.username, this.password);
     this.shelly.setLogLevel(log.logLevel, this.config.debugMdns as boolean, this.config.debugCoap as boolean, this.config.debugWs as boolean);
     this.shelly.dataPath = path.join(matterbridge.matterbridgePluginDirectory, 'matterbridge-shelly');
-    this.shelly.interfaceName = matterbridge.mdnsInterface;
+    this.shelly.interfaceName = matterbridge.systemInformation.interfaceName;
     this.shelly.ipv4Address = matterbridge.systemInformation.ipv4Address;
     this.shelly.ipv6Address = matterbridge.systemInformation.ipv6Address;
     // Log network interfaces
@@ -363,8 +373,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           config.inputMomentaryList.push(discoveredDevice.id);
           this.log.info(`Shelly device ${hk}${discoveredDevice.id}${nf} host ${zb}${discoveredDevice.host}${nf} added to inputMomentaryList`);
         }
-        const shelly = this.matterbridge.plugins.get('matterbridge-shelly');
-        if (shelly) this.matterbridge.plugins.saveConfigFromJson(shelly, this.config);
+        this.saveConfig(this.config);
       }
     });
 
@@ -604,7 +613,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       // Create a new Matterbridge device
       const deviceTypes: AtLeastOne<DeviceTypeDefinition> = [bridgedNode];
       if (this.validateEntity(device.id, 'PowerSource')) deviceTypes.push(powerSource);
-      const mbDevice = new MatterbridgeEndpoint(deviceTypes, { uniqueStorageKey: device.name }, config.debug as boolean);
+      const mbDevice = new MatterbridgeEndpoint(deviceTypes, { id: device.name }, config.debug as boolean);
       mbDevice.configUrl = `http://${device.host}`;
       mbDevice.log.logName = device.name;
       mbDevice.createDefaultBridgedDeviceBasicInformationClusterServer(
@@ -726,7 +735,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
                 `Shelly device ${idn}${device.name}${rs}${nt} id ${hk}${device.id}${nt} host ${zb}${device.host}${nt} added a component: ${CYAN}${data.target}${nt}.`,
               );
               device.log.notice(`Please restart matterbridge for the change to take effect.`);
-              this.matterbridge.frontend.wssSendRestartRequired();
+              this.wssSendRestartRequired();
             }
             // component_removed is triggered by a gateway when a component is removed
             if (event === 'component_removed') {
@@ -735,7 +744,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
                 `Shelly device ${idn}${device.name}${rs}${nt} id ${hk}${device.id}${nt} host ${zb}${device.host}${nt} removed a component: ${CYAN}${data.target}${nt}.`,
               );
               device.log.notice(`Please restart matterbridge for the change to take effect.`);
-              this.matterbridge.frontend.wssSendRestartRequired();
+              this.wssSendRestartRequired();
             }
             // scheduled_restart is for restart and for reset
             if (event === 'scheduled_restart') {
@@ -1613,7 +1622,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       this.log.debug(`Configuring device ${dn}${mbDevice.deviceName}${db} configUrl ${YELLOW}${mbDevice.configUrl}${db}`);
 
       for (const childEndpoint of mbDevice.getChildEndpoints()) {
-        const label = childEndpoint.uniqueStorageKey;
+        const label = childEndpoint.id;
         if (!label) return;
         // Configure the cluster OnOff attribute onOff
         if (label.startsWith('switch') || label.startsWith('relay') || label.startsWith('light') || label.startsWith('rgb')) {
@@ -1786,7 +1795,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         (this.config as unknown as ShellyPlatformConfig).blackList.push(value);
         this.shelly.getDevice(value)?.destroy();
         this.shelly.removeDevice(value);
-        this.matterbridge.frontend.wssSendRestartRequired();
+        this.wssSendRestartRequired();
       }
       this.log.info(`Removing device id ${hk}${value}${nf}`);
       this.storedDevices.delete(value);
@@ -1986,7 +1995,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     });
     */
     if (definition) {
-      const mbDevice = new MatterbridgeEndpoint(definition, { uniqueStorageKey: bthomeDevice.name }, this.config.debug as boolean);
+      const mbDevice = new MatterbridgeEndpoint(definition, { id: bthomeDevice.name }, this.config.debug as boolean);
       this.bluBridgedDevices.set(bthomeDevice.addr, mbDevice);
       mbDevice.configUrl = `http://${gateway.host}`;
       mbDevice.createDefaultBridgedDeviceBasicInformationClusterServer(
