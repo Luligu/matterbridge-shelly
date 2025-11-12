@@ -286,6 +286,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     this.shelly = new Shelly(log, this.username, this.password);
     this.shelly.setLogLevel(log.logLevel, this.config.debugMdns as boolean, this.config.debugCoap as boolean, this.config.debugWs as boolean);
     this.shelly.dataPath = path.join(matterbridge.matterbridgePluginDirectory, 'matterbridge-shelly');
+    // TODO: this may be wrong
     this.shelly.interfaceName = matterbridge.systemInformation.interfaceName;
     this.shelly.ipv4Address = matterbridge.systemInformation.ipv4Address;
     this.shelly.ipv6Address = matterbridge.systemInformation.ipv6Address;
