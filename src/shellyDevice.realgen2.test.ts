@@ -1,5 +1,11 @@
 // src/shellyDevice.realgen2.test.ts
 
+const MATTER_PORT = 0;
+const NAME = 'ShellyDeviceRealGen2';
+const HOMEDIR = path.join('jest', NAME);
+
+import path from 'node:path';
+
 import { AnsiLogger, LogLevel, TimestampFormat } from 'matterbridge/logger';
 import { getMacAddress, wait, waiter } from 'matterbridge/utils';
 import { jest } from '@jest/globals';
@@ -7,41 +13,22 @@ import { jest } from '@jest/globals';
 import { ShellyDevice } from './shellyDevice.js';
 import { Shelly } from './shelly.js';
 import { isCoverComponent, isLightComponent, isSwitchComponent, ShellyComponent } from './shellyComponent.js';
+import { setupTest } from './utils/jestHelpers.js';
 
-let loggerLogSpy: jest.SpiedFunction<typeof AnsiLogger.prototype.log>;
-let consoleLogSpy: jest.SpiedFunction<typeof console.log>;
-let consoleDebugSpy: jest.SpiedFunction<typeof console.log>;
-let consoleInfoSpy: jest.SpiedFunction<typeof console.log>;
-let consoleWarnSpy: jest.SpiedFunction<typeof console.log>;
-let consoleErrorSpy: jest.SpiedFunction<typeof console.log>;
-const debug = false; // Set to true to enable debug logging
-
-if (!debug) {
-  loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log').mockImplementation((level: string, message: string, ...parameters: any[]) => {});
-  consoleLogSpy = jest.spyOn(console, 'log').mockImplementation((...args: any[]) => {});
-  consoleDebugSpy = jest.spyOn(console, 'debug').mockImplementation((...args: any[]) => {});
-  consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation((...args: any[]) => {});
-  consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation((...args: any[]) => {});
-  consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation((...args: any[]) => {});
-} else {
-  loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log');
-  consoleLogSpy = jest.spyOn(console, 'log');
-  consoleDebugSpy = jest.spyOn(console, 'debug');
-  consoleInfoSpy = jest.spyOn(console, 'info');
-  consoleWarnSpy = jest.spyOn(console, 'warn');
-  consoleErrorSpy = jest.spyOn(console, 'error');
-}
+// Setup the test environment
+setupTest(NAME, true);
 
 describe('Shellies', () => {
   const log = new AnsiLogger({ logName: 'ShellyDeviceRealTest', logTimestampFormat: TimestampFormat.TIME_MILLIS, logLevel: LogLevel.DEBUG });
   const shelly = new Shelly(log, 'admin', 'tango');
   let device: ShellyDevice | undefined;
 
-  const firmwareGen2 = '1.4.4-g6d2a586';
-  const address = 'c4:cb:76:b3:cd:1f';
+  const firmwareGen1 = 'v1.14.0-gcb84623';
+  const firmwareGen2 = '1.7.1-gd336f31';
+  const address = ['*c4:cb:76:b3:cd:1f', '*00:15:5d:58:f3:aa'];
 
   beforeAll(async () => {
-    shelly.dataPath = 'temp';
+    shelly.dataPath = HOMEDIR;
     shelly.setLogLevel(LogLevel.DEBUG, true, true, true);
   });
 
@@ -72,10 +59,9 @@ describe('Shellies', () => {
     expect(shelly).toBeDefined();
   });
 
-  if (getMacAddress() !== 'address') return;
+  if (!address.includes(getMacAddress() || '')) return;
 
   test('Create a gen 2 shellyplusrgbwpm device color mode and send commands', async () => {
-    if (getMacAddress() !== address) return;
     device = await ShellyDevice.create(shelly, log, '192.168.1.244');
     expect(device).not.toBeUndefined();
     if (!device) return;
@@ -148,7 +134,6 @@ describe('Shellies', () => {
   }, 30000);
 
   test('Create a gen 2 shellyplusrgbwpm device white mode and send commands', async () => {
-    if (getMacAddress() !== address) return;
     device = await ShellyDevice.create(shelly, log, '192.168.1.171');
     expect(device).not.toBeUndefined();
     if (!device) return;
@@ -303,7 +288,6 @@ describe('Shellies', () => {
   }, 30000);
 
   test('create a gen 2 shellyplus1pm 217 device and update', async () => {
-    if (getMacAddress() !== address) return;
     device = await ShellyDevice.create(shelly, log, '192.168.1.217');
     expect(device).not.toBeUndefined();
     if (!device) return;
@@ -356,7 +340,6 @@ describe('Shellies', () => {
   }, 20000);
 
   test('create a gen 2 shellyplus2pm 218 cover device and update', async () => {
-    if (getMacAddress() !== address) return;
     device = await ShellyDevice.create(shelly, log, '192.168.1.218');
     expect(device).not.toBeUndefined();
     if (!device) return;
@@ -423,7 +406,6 @@ describe('Shellies', () => {
   }, 120000);
 
   test('Create a gen 2 shellyplus2pm device switch mode and send commands', async () => {
-    if (getMacAddress() !== address) return;
     device = await ShellyDevice.create(shelly, log, '192.168.1.163');
     expect(device).not.toBeUndefined();
     if (!device) return;
@@ -505,7 +487,6 @@ describe('Shellies', () => {
   }, 30000);
 
   test('Create a gen 2 shellyplus1 device and send commands', async () => {
-    if (getMacAddress() !== address) return;
     device = await ShellyDevice.create(shelly, log, '192.168.1.237');
     expect(device).not.toBeUndefined();
     if (!device) return;
@@ -565,7 +546,6 @@ describe('Shellies', () => {
   }, 30000);
 
   test('Create a gen 2 shellyplusplugs device and send commands', async () => {
-    if (getMacAddress() !== address) return;
     device = await ShellyDevice.create(shelly, log, '192.168.1.153');
     expect(device).not.toBeUndefined();
     if (!device) return;
@@ -625,7 +605,6 @@ describe('Shellies', () => {
   }, 30000);
 
   test('Create a gen 2 shellyplusi4 AC device and update', async () => {
-    if (getMacAddress() !== address) return;
     device = await ShellyDevice.create(shelly, log, '192.168.1.224');
     expect(device).not.toBeUndefined();
     if (!device) return;
@@ -683,7 +662,6 @@ describe('Shellies', () => {
   }, 30000);
 
   test('Create a gen 2 shellyplusi4 DC device and update', async () => {
-    if (getMacAddress() !== address) return;
     device = await ShellyDevice.create(shelly, log, '192.168.1.161');
     expect(device).not.toBeUndefined();
     if (!device) return;
@@ -741,7 +719,6 @@ describe('Shellies', () => {
   }, 30000);
 
   test('Create a gen 2 shellyplus010v device and update', async () => {
-    if (getMacAddress() !== address) return;
     device = await ShellyDevice.create(shelly, log, '192.168.1.160');
     expect(device).not.toBeUndefined();
     if (!device) return;

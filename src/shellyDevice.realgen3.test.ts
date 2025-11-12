@@ -1,6 +1,10 @@
 // src/shellyDevice.realgen3.test.ts
 
-/* eslint-disable jest/no-commented-out-tests */
+const MATTER_PORT = 0;
+const NAME = 'ShellyDeviceRealGen3';
+const HOMEDIR = path.join('jest', NAME);
+
+import path from 'node:path';
 
 import { AnsiLogger, LogLevel, TimestampFormat } from 'matterbridge/logger';
 import { getMacAddress, wait, waiter } from 'matterbridge/utils';
@@ -10,41 +14,22 @@ import { ShellyDevice } from './shellyDevice.js';
 import { Shelly } from './shelly.js';
 import { isCoverComponent, isLightComponent, isSwitchComponent, ShellyCoverComponent, ShellySwitchComponent } from './shellyComponent.js';
 import { ShellyData } from './shellyTypes.js';
+import { setupTest } from './utils/jestHelpers.js';
 
-let loggerLogSpy: jest.SpiedFunction<typeof AnsiLogger.prototype.log>;
-let consoleLogSpy: jest.SpiedFunction<typeof console.log>;
-let consoleDebugSpy: jest.SpiedFunction<typeof console.log>;
-let consoleInfoSpy: jest.SpiedFunction<typeof console.log>;
-let consoleWarnSpy: jest.SpiedFunction<typeof console.log>;
-let consoleErrorSpy: jest.SpiedFunction<typeof console.log>;
-const debug = false; // Set to true to enable debug logging
-
-if (!debug) {
-  loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log').mockImplementation((level: string, message: string, ...parameters: any[]) => {});
-  consoleLogSpy = jest.spyOn(console, 'log').mockImplementation((...args: any[]) => {});
-  consoleDebugSpy = jest.spyOn(console, 'debug').mockImplementation((...args: any[]) => {});
-  consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation((...args: any[]) => {});
-  consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation((...args: any[]) => {});
-  consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation((...args: any[]) => {});
-} else {
-  loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log');
-  consoleLogSpy = jest.spyOn(console, 'log');
-  consoleDebugSpy = jest.spyOn(console, 'debug');
-  consoleInfoSpy = jest.spyOn(console, 'info');
-  consoleWarnSpy = jest.spyOn(console, 'warn');
-  consoleErrorSpy = jest.spyOn(console, 'error');
-}
+// Setup the test environment
+setupTest(NAME, true);
 
 describe('Shellies', () => {
   const log = new AnsiLogger({ logName: 'ShellyDeviceRealTest', logTimestampFormat: TimestampFormat.TIME_MILLIS, logLevel: LogLevel.DEBUG });
   const shelly = new Shelly(log, 'admin', 'tango');
   let device: ShellyDevice | undefined;
 
-  const firmwareGen2 = '1.4.4-g6d2a586';
-  const address = 'c4:cb:76:b3:cd:1f';
+  const firmwareGen1 = 'v1.14.0-gcb84623';
+  const firmwareGen2 = '1.7.1-gd336f31';
+  const address = ['*c4:cb:76:b3:cd:1f', '*00:15:5d:58:f3:aa'];
 
   beforeAll(async () => {
-    shelly.dataPath = 'temp';
+    shelly.dataPath = HOMEDIR;
     shelly.setLogLevel(LogLevel.DEBUG, true, true, true);
   });
 
@@ -75,10 +60,9 @@ describe('Shellies', () => {
     expect(shelly).toBeDefined();
   });
 
-  if (getMacAddress() !== 'address') return;
+  if (!address.includes(getMacAddress() || '')) return;
 
   test('create a sleepy gen 3 shellyhtg3 device and update', async () => {
-    if (getMacAddress() !== address) return;
     device = await ShellyDevice.create(shelly, log, '192.168.1.100');
     // expect(device).not.toBeUndefined(); // Skip this test if is sleeping
     if (!device) return;
@@ -129,7 +113,6 @@ describe('Shellies', () => {
   }, 30000);
 
   test('create a gen 3 shelly1g3 device and update', async () => {
-    if (getMacAddress() !== address) return;
     device = await ShellyDevice.create(shelly, log, '192.168.1.157');
     expect(device).not.toBeUndefined();
     if (!device) return;
@@ -184,7 +167,6 @@ describe('Shellies', () => {
   }, 30000);
 
   test('create a gen 3 shelly1minig3 device and update', async () => {
-    if (getMacAddress() !== address) return;
     device = await ShellyDevice.create(shelly, log, '192.168.1.221');
     expect(device).not.toBeUndefined();
     if (!device) return;
@@ -337,7 +319,6 @@ describe('Shellies', () => {
   }, 30000);
 
   test('create a gen 3 shelly1pmg3 device and update', async () => {
-    if (getMacAddress() !== address) return;
     device = await ShellyDevice.create(shelly, log, '192.168.1.158');
     expect(device).not.toBeUndefined();
     if (!device) return;
@@ -463,7 +444,6 @@ describe('Shellies', () => {
   }, 30000);
 
   test('create a gen 3 shelly1pmminig3 device and update', async () => {
-    if (getMacAddress() !== address) return;
     device = await ShellyDevice.create(shelly, log, '192.168.1.225');
     expect(device).not.toBeUndefined();
     if (!device) return;
@@ -518,7 +498,6 @@ describe('Shellies', () => {
   }, 30000);
 
   test('create a gen 3 shelly2pmg3 mode cover device and update', async () => {
-    if (getMacAddress() !== address) return;
     device = await ShellyDevice.create(shelly, log, '192.168.1.166');
     expect(device).not.toBeUndefined();
     if (!device) return;
@@ -729,7 +708,6 @@ describe('Shellies', () => {
   }, 120000);
 
   test('create a gen 3 shelly2pmg3 mode switch device and update', async () => {
-    if (getMacAddress() !== address) return;
     device = await ShellyDevice.create(shelly, log, '192.168.1.172');
     expect(device).not.toBeUndefined();
     if (!device) return;
@@ -813,8 +791,6 @@ describe('Shellies', () => {
   }, 30000);
 
   test('create a gen 3 shellyblugwg3 device and update', async () => {
-    if (getMacAddress() !== address) return;
-
     device = await ShellyDevice.create(shelly, log, '192.168.1.164');
     expect(device).not.toBeUndefined();
     if (!device) return;
@@ -991,7 +967,6 @@ describe('Shellies', () => {
   }, 30000);
 
   test('Create a gen 3 shellyddimmerg3 device and update', async () => {
-    if (getMacAddress() !== address) return;
     device = await ShellyDevice.create(shelly, log, '192.168.1.242');
     expect(device).not.toBeUndefined();
     if (!device) return;
@@ -1058,7 +1033,6 @@ describe('Shellies', () => {
   }, 30000);
 
   test('Create a gen 3 shellyemg3 device and update', async () => {
-    if (getMacAddress() !== address) return;
     device = await ShellyDevice.create(shelly, log, '192.168.1.243');
     expect(device).not.toBeUndefined();
     if (!device) return;
@@ -1118,7 +1092,6 @@ describe('Shellies', () => {
   }, 30000);
 
   test('Create a gen 3 shellyi4g3 device and update', async () => {
-    if (getMacAddress() !== address) return;
     device = await ShellyDevice.create(shelly, log, '192.168.1.159');
     expect(device).not.toBeUndefined();
     if (!device) return;
@@ -1177,9 +1150,7 @@ describe('Shellies', () => {
     device.destroy();
   }, 30000);
 
-  /*
   test('create a gen 3 shellyplugsg3 device and update', async () => {
-    if (getMacAddress() !== address) return;
     device = await ShellyDevice.create(shelly, log, '192.168.1.165');
     expect(device).not.toBeUndefined();
     if (!device) return;
@@ -1232,10 +1203,8 @@ describe('Shellies', () => {
     shelly.removeDevice(device);
     device.destroy();
   });
-  */
 
   test('create a gen 3 shellypmminig3 device and update', async () => {
-    if (getMacAddress() !== address) return;
     device = await ShellyDevice.create(shelly, log, '192.168.1.220');
     expect(device).not.toBeUndefined();
     if (!device) return;
