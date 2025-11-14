@@ -21,6 +21,8 @@
  * limitations under the License.
  */
 
+/* eslint-disable jsdoc/reject-any-type */
+
 // Node.js imports
 import EventEmitter from 'node:events';
 import path from 'node:path';
@@ -245,8 +247,11 @@ export class CoapServer extends EventEmitter<CoapServerEvents> {
           multicastTimeout: timeout * 1000,
         })
         .on('response', (msg: IncomingMessage) => {
+          /* istanbul ignore next */
           this.log.debug(`Multicast device status code ${BLUE}${msg.code}${db} url ${BLUE}${msg.url}${db} rsinfo ${debugStringify(msg.rsinfo)}:`);
+          /* istanbul ignore next */
           this.parseShellyMessage(msg);
+          /* istanbul ignore next */
           resolve(msg);
         })
         .on('timeout', (err) => {
