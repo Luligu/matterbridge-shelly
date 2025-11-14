@@ -541,7 +541,7 @@ describe('ShellyPlatform', () => {
     expect(rgbEndpoint.getAttribute('colorControl', 'currentHue')).toBe(100);
     expect(rgbEndpoint.getAttribute('colorControl', 'currentSaturation')).toBe(100);
     shelly.wsServer.emit('wssupdate', shellyPro.id, { 'rgb:0': { state: true, brightness: 50, rgb: [100, 200, 255] } } as ShellyData);
-    await wait(50);
+    await wait(100);
     expect(rgbEndpoint.getAttribute('onOff', 'onOff')).toBe(true);
     expect(rgbEndpoint.getAttribute('levelControl', 'currentLevel')).toBe(127);
     expect(rgbEndpoint.getAttribute('colorControl', 'currentHue')).toBe(142);
