@@ -1,5 +1,10 @@
-/* eslint-disable jest/no-conditional-expect */
 // src/shellyDevice.fetch.test.ts
+
+/* eslint-disable jest/no-conditional-expect */
+
+const MATTER_PORT = 0;
+const NAME = 'ShellyDeviceFetch';
+const HOMEDIR = path.join('jest', NAME);
 
 import path from 'node:path';
 import { promises as fs } from 'node:fs';
@@ -11,66 +16,11 @@ import { jest } from '@jest/globals';
 
 import { ShellyDevice } from './shellyDevice.js';
 import { Shelly } from './shelly.js';
+import { loggerLogSpy, setupTest } from './utils/jestHelpers.js';
 
-// Spy on console methods
-let loggerDebugSpy: jest.SpiedFunction<typeof AnsiLogger.prototype.debug>;
-let loggerErrorSpy: jest.SpiedFunction<typeof AnsiLogger.prototype.error>;
+// Setup the test environment
+setupTest(NAME, false);
 
-let loggerLogSpy: jest.SpiedFunction<typeof AnsiLogger.prototype.log>;
-let consoleLogSpy: jest.SpiedFunction<typeof console.log>;
-let consoleDebugSpy: jest.SpiedFunction<typeof console.log>;
-let consoleInfoSpy: jest.SpiedFunction<typeof console.log>;
-let consoleWarnSpy: jest.SpiedFunction<typeof console.log>;
-let consoleErrorSpy: jest.SpiedFunction<typeof console.log>;
-const debug = false; // Set to true to enable debug logs
-
-if (!debug) {
-  loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log').mockImplementation((level: string, message: string, ...parameters: any[]) => {});
-  consoleLogSpy = jest.spyOn(console, 'log').mockImplementation((...args: any[]) => {});
-  consoleDebugSpy = jest.spyOn(console, 'debug').mockImplementation((...args: any[]) => {});
-  consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation((...args: any[]) => {});
-  consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation((...args: any[]) => {});
-  consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation((...args: any[]) => {});
-} else {
-  loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log');
-  consoleLogSpy = jest.spyOn(console, 'log');
-  consoleDebugSpy = jest.spyOn(console, 'debug');
-  consoleInfoSpy = jest.spyOn(console, 'info');
-  consoleWarnSpy = jest.spyOn(console, 'warn');
-  consoleErrorSpy = jest.spyOn(console, 'error');
-}
-
-if (!debug) {
-  loggerDebugSpy = jest.spyOn(AnsiLogger.prototype, 'debug').mockImplementation(() => {});
-  loggerErrorSpy = jest.spyOn(AnsiLogger.prototype, 'error').mockImplementation(() => {});
-} else {
-  loggerDebugSpy = jest.spyOn(AnsiLogger.prototype, 'debug');
-  loggerErrorSpy = jest.spyOn(AnsiLogger.prototype, 'error');
-}
-
-function setDebug(debug: boolean) {
-  if (debug) {
-    loggerLogSpy.mockRestore();
-    consoleLogSpy.mockRestore();
-    consoleDebugSpy.mockRestore();
-    consoleInfoSpy.mockRestore();
-    consoleWarnSpy.mockRestore();
-    consoleErrorSpy.mockRestore();
-    loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log');
-    consoleLogSpy = jest.spyOn(console, 'log');
-    consoleDebugSpy = jest.spyOn(console, 'debug');
-    consoleInfoSpy = jest.spyOn(console, 'info');
-    consoleWarnSpy = jest.spyOn(console, 'warn');
-    consoleErrorSpy = jest.spyOn(console, 'error');
-  } else {
-    loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log').mockImplementation((level: string, message: string, ...parameters: any[]) => {});
-    consoleLogSpy = jest.spyOn(console, 'log').mockImplementation((...args: any[]) => {});
-    consoleDebugSpy = jest.spyOn(console, 'debug').mockImplementation((...args: any[]) => {});
-    consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation((...args: any[]) => {});
-    consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation((...args: any[]) => {});
-    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation((...args: any[]) => {});
-  }
-}
 describe('ShellyDevice.fetch', () => {
   let shelly: Shelly;
   let log: AnsiLogger;
@@ -78,6 +28,8 @@ describe('ShellyDevice.fetch', () => {
   let serverPort: number;
   let testFilePath: string;
   let requestHandler: (req: IncomingMessage, res: ServerResponse) => void;
+
+  beforeAll(() => {});
 
   beforeEach(async () => {
     // Reset all mocks
@@ -134,6 +86,11 @@ describe('ShellyDevice.fetch', () => {
     }
   });
 
+  afterAll(() => {
+    // Restore all mocks
+    jest.restoreAllMocks();
+  });
+
   describe('File-based fetch', () => {
     it('should fetch shelly data from JSON file', async () => {
       const mockFileData = {
@@ -147,7 +104,7 @@ describe('ShellyDevice.fetch', () => {
       const result = await ShellyDevice.fetch(shelly, log, testFilePath, 'shelly');
 
       expect(result).toEqual(mockFileData.shelly);
-      expect(loggerDebugSpy).toHaveBeenCalledWith(expect.stringContaining(`Fetching device payloads from file ${testFilePath}: service shelly`));
+      expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`Fetching device payloads from file ${testFilePath}: service shelly`));
     });
 
     it('should fetch status data from JSON file', async () => {
@@ -233,7 +190,7 @@ describe('ShellyDevice.fetch', () => {
       const result = await ShellyDevice.fetch(shelly, log, testFilePath, 'unknown');
 
       expect(result).toBeNull(); // Method continues to HTTP fetch which fails
-      expect(loggerErrorSpy).toHaveBeenCalledWith(expect.stringContaining(`Error fetching device payloads from file ${testFilePath}: no service unknown found`));
+      expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.ERROR, expect.stringContaining(`Error fetching device payloads from file ${testFilePath}: no service unknown found`));
     });
 
     it('should handle file read error', async () => {
@@ -242,7 +199,8 @@ describe('ShellyDevice.fetch', () => {
       const result = await ShellyDevice.fetch(shelly, log, nonExistentFile, 'shelly');
 
       expect(result).toBeNull();
-      expect(loggerErrorSpy).toHaveBeenCalledWith(
+      expect(loggerLogSpy).toHaveBeenCalledWith(
+        LogLevel.ERROR,
         expect.stringContaining(`Error reading device payloads from file ${nonExistentFile}:`),
         expect.objectContaining({
           message: expect.stringContaining('ENOENT'),
@@ -256,7 +214,7 @@ describe('ShellyDevice.fetch', () => {
       const result = await ShellyDevice.fetch(shelly, log, testFilePath, 'shelly');
 
       expect(result).toBeNull();
-      expect(loggerErrorSpy).toHaveBeenCalledWith(expect.stringContaining(`Error reading device payloads from file ${testFilePath}:`), expect.any(String));
+      expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.ERROR, expect.stringContaining(`Error reading device payloads from file ${testFilePath}:`), expect.any(String));
     });
   });
 
@@ -341,7 +299,7 @@ describe('ShellyDevice.fetch', () => {
         const result = await ShellyDevice.fetch(shellyNoAuth, log, `localhost:${serverPort}`, 'status');
 
         expect(result).toBeNull();
-        expect(loggerErrorSpy).toHaveBeenCalledWith(expect.stringContaining('requires authentication but no username has been provided'));
+        expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.ERROR, expect.stringContaining('requires authentication but no username has been provided'));
       });
     });
 
@@ -414,7 +372,7 @@ describe('ShellyDevice.fetch', () => {
         const result = await ShellyDevice.fetch(shelly, log, `localhost:${serverPort}`, 'status');
 
         expect(result).toBeNull();
-        expect(loggerErrorSpy).toHaveBeenCalledWith(expect.stringContaining('Response error fetching shelly'));
+        expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.ERROR, expect.stringContaining('Response error fetching shelly'));
       });
 
       it('should handle network timeout', async () => {
@@ -445,7 +403,7 @@ describe('ShellyDevice.fetch', () => {
         const result = await fetchPromise;
 
         expect(result).toBeNull();
-        expect(loggerDebugSpy).toHaveBeenCalledWith(expect.stringContaining('***Aborting fetch device'));
+        expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining('***Aborting fetch device'));
 
         timeoutServer.close();
         jest.useRealTimers();
@@ -458,7 +416,7 @@ describe('ShellyDevice.fetch', () => {
         const result = await ShellyDevice.fetch(shelly, log, `localhost:${unavailablePort}`, 'status');
 
         expect(result).toBeNull();
-        expect(loggerDebugSpy).toHaveBeenCalledWith(expect.stringContaining('Error fetching shelly'));
+        expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining('Error fetching shelly'));
       });
 
       it('should handle invalid JSON response', async () => {
@@ -471,7 +429,7 @@ describe('ShellyDevice.fetch', () => {
         const result = await ShellyDevice.fetch(shelly, log, `localhost:${serverPort}`, 'status');
 
         expect(result).toBeNull();
-        expect(loggerDebugSpy).toHaveBeenCalledWith(expect.stringContaining('Error fetching shelly'));
+        expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining('Error fetching shelly'));
       });
     });
 
@@ -583,7 +541,7 @@ describe('ShellyDevice.fetch', () => {
       const result = await ShellyDevice.fetch(shellyUndefined, log, `localhost:${serverPort}`, 'status');
 
       expect(result).toBeNull();
-      expect(loggerErrorSpy).toHaveBeenCalledWith(expect.stringContaining('requires authentication but no username has been provided'));
+      expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.ERROR, expect.stringContaining('requires authentication but no username has been provided'));
     });
 
     it('should handle empty service name', async () => {

@@ -1,5 +1,9 @@
 // src/shellyDevice.mock.test.ts
 
+const MATTER_PORT = 0;
+const NAME = 'ShellyDeviceMock';
+const HOMEDIR = path.join('jest', NAME);
+
 import path from 'node:path';
 
 import { AnsiLogger, TimestampFormat, LogLevel } from 'matterbridge/logger';
@@ -9,35 +13,14 @@ import { wait } from 'matterbridge/utils';
 import { ShellyDevice } from './shellyDevice.js';
 import { Shelly } from './shelly.js';
 import { ShellyComponent } from './shellyComponent.js';
-import { ShellyData } from './shellyTypes.js';
 import { CoapServer } from './coapServer.js';
 import { WsServer } from './wsServer.js';
 import { WsClient } from './wsClient.js';
 import { MdnsScanner } from './mdnsScanner.js';
+import { setupTest } from './utils/jestHelpers.js';
 
-let loggerLogSpy: jest.SpiedFunction<typeof AnsiLogger.prototype.log>;
-let consoleLogSpy: jest.SpiedFunction<typeof console.log>;
-let consoleDebugSpy: jest.SpiedFunction<typeof console.log>;
-let consoleInfoSpy: jest.SpiedFunction<typeof console.log>;
-let consoleWarnSpy: jest.SpiedFunction<typeof console.log>;
-let consoleErrorSpy: jest.SpiedFunction<typeof console.log>;
-const debug = false; // Set to true to enable debug logs
-
-if (!debug) {
-  loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log').mockImplementation((level: string, message: string, ...parameters: any[]) => {});
-  consoleLogSpy = jest.spyOn(console, 'log').mockImplementation((...args: any[]) => {});
-  consoleDebugSpy = jest.spyOn(console, 'debug').mockImplementation((...args: any[]) => {});
-  consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation((...args: any[]) => {});
-  consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation((...args: any[]) => {});
-  consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation((...args: any[]) => {});
-} else {
-  loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log');
-  consoleLogSpy = jest.spyOn(console, 'log');
-  consoleDebugSpy = jest.spyOn(console, 'debug');
-  consoleInfoSpy = jest.spyOn(console, 'info');
-  consoleWarnSpy = jest.spyOn(console, 'warn');
-  consoleErrorSpy = jest.spyOn(console, 'error');
-}
+// Setup the test environment
+setupTest(NAME, false);
 
 const coapServerStartSpy = jest.spyOn(CoapServer.prototype, 'start').mockImplementation(() => {});
 const coapServerStopSpy = jest.spyOn(CoapServer.prototype, 'stop').mockImplementation(() => {});

@@ -3,6 +3,7 @@
 /* eslint-disable jest/no-done-callback */
 /* eslint-disable no-console */
 
+const MATTER_PORT = 0;
 const NAME = 'Mdns';
 const HOMEDIR = path.join('jest', NAME);
 
@@ -15,6 +16,10 @@ import { LogLevel, AnsiLogger, ign, db, hk, CYAN, rs } from 'matterbridge/logger
 import { ResponsePacket } from 'multicast-dns';
 
 import { MdnsScanner, DiscoveredDeviceListener, DiscoveredDevice } from './mdnsScanner.ts';
+import { flushAsync, loggerLogSpy, setupTest } from './utils/jestHelpers.js';
+
+// Setup the test environment
+setupTest(NAME, false);
 
 function loadResponse(shellyId: string) {
   const responseFile = path.join('src', 'mock', `${shellyId}.mdns.json`);
@@ -30,33 +35,6 @@ function loadResponse(shellyId: string) {
     return undefined;
   }
 }
-
-let loggerLogSpy: jest.SpiedFunction<typeof AnsiLogger.prototype.log>;
-let consoleLogSpy: jest.SpiedFunction<typeof console.log>;
-let consoleDebugSpy: jest.SpiedFunction<typeof console.log>;
-let consoleInfoSpy: jest.SpiedFunction<typeof console.log>;
-let consoleWarnSpy: jest.SpiedFunction<typeof console.log>;
-let consoleErrorSpy: jest.SpiedFunction<typeof console.log>;
-const debug = false; // Set to true to enable debug logs
-
-if (!debug) {
-  loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log').mockImplementation((level: string, message: string, ...parameters: any[]) => {});
-  consoleLogSpy = jest.spyOn(console, 'log').mockImplementation((...args: any[]) => {});
-  consoleDebugSpy = jest.spyOn(console, 'debug').mockImplementation((...args: any[]) => {});
-  consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation((...args: any[]) => {});
-  consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation((...args: any[]) => {});
-  consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation((...args: any[]) => {});
-} else {
-  loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log');
-  consoleLogSpy = jest.spyOn(console, 'log');
-  consoleDebugSpy = jest.spyOn(console, 'debug');
-  consoleInfoSpy = jest.spyOn(console, 'info');
-  consoleWarnSpy = jest.spyOn(console, 'warn');
-  consoleErrorSpy = jest.spyOn(console, 'error');
-}
-
-// Cleanup the test environment
-rmSync(HOMEDIR, { recursive: true, force: true });
 
 describe('Shellies MdnsScanner test', () => {
   const mdns = new MdnsScanner(LogLevel.DEBUG);
@@ -82,6 +60,9 @@ describe('Shellies MdnsScanner test', () => {
     // Stop the mdns scanner
     mdns.stop();
     mdns.removeAllListeners();
+
+    // Wait a bit to ensure all async operations are done
+    await flushAsync();
 
     // Restore all mocks
     jest.restoreAllMocks();

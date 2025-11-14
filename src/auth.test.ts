@@ -1,7 +1,12 @@
 // src/auth.test.ts
 
+const MATTER_PORT = 0;
+const NAME = 'Auth';
+const HOMEDIR = path.join('jest', NAME);
+
+import path from 'node:path';
+
 import { jest } from '@jest/globals';
-import { AnsiLogger } from 'matterbridge/logger';
 
 import {
   parseBasicAuthenticateHeader,
@@ -12,44 +17,20 @@ import {
   getGen2BodyOptions,
   generateNonce,
 } from './auth.ts';
+import { setupTest } from './utils/jestHelpers.js';
 
-let loggerLogSpy: jest.SpiedFunction<typeof AnsiLogger.prototype.log>;
-let consoleLogSpy: jest.SpiedFunction<typeof console.log>;
-let consoleDebugSpy: jest.SpiedFunction<typeof console.log>;
-let consoleInfoSpy: jest.SpiedFunction<typeof console.log>;
-let consoleWarnSpy: jest.SpiedFunction<typeof console.log>;
-let consoleErrorSpy: jest.SpiedFunction<typeof console.log>;
-const debug = false; // Set to true to enable debug logs
-
-if (!debug) {
-  loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log').mockImplementation((level: string, message: string, ...parameters: any[]) => {});
-  consoleLogSpy = jest.spyOn(console, 'log').mockImplementation((...args: any[]) => {});
-  consoleDebugSpy = jest.spyOn(console, 'debug').mockImplementation((...args: any[]) => {});
-  consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation((...args: any[]) => {});
-  consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation((...args: any[]) => {});
-  consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation((...args: any[]) => {});
-} else {
-  loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log');
-  consoleLogSpy = jest.spyOn(console, 'log');
-  consoleDebugSpy = jest.spyOn(console, 'debug');
-  consoleInfoSpy = jest.spyOn(console, 'info');
-  consoleWarnSpy = jest.spyOn(console, 'warn');
-  consoleErrorSpy = jest.spyOn(console, 'error');
-}
+// Setup the test environment
+setupTest(NAME, false);
 
 describe('Authentication utility test', () => {
-  beforeAll(() => {
-    //
-  });
+  beforeAll(() => {});
 
   beforeEach(() => {
     // Clear all mocks before each test
     jest.clearAllMocks();
   });
 
-  afterEach(() => {
-    //
-  });
+  afterEach(() => {});
 
   afterAll(() => {
     // Restore all mocks

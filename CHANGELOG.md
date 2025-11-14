@@ -10,6 +10,25 @@ If you like this project and find it useful, please consider giving it a star on
 
 You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his invaluable contribution to this project.
 
+## [2.2.0] - 2025-11-14
+
+### Added
+
+- [test]: Refactored real tests on Gen 1/2/3.
+- [test]: Refactored all test for consistency with the matterbridge test setup.
+- [package]: Updated to the current Matterbridge signatures.
+
+### Changed
+
+- [package]: Updated dependencies.
+- [package]: Bumped package to automator v. 2.0.12.
+- [jest]: Updated jestHelpers to v. 1.0.12.
+- [workflows]: Use shallow clones and --no-fund --no-audit for faster builds.
+
+<a href="https://www.buymeacoffee.com/luligugithub">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="80">
+</a>
+
 ## [2.1.2] - 2025-09-28
 
 ### Added

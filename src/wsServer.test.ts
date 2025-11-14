@@ -1,82 +1,43 @@
 // src/wsServer.test.ts
 
+const MATTER_PORT = 0;
+const NAME = 'WsServer';
+const HOMEDIR = path.join('jest', NAME);
+
+import path from 'node:path';
+
 import { jest } from '@jest/globals';
 import { wait, waiter } from 'matterbridge/utils';
 import { WebSocket } from 'ws';
-import { AnsiLogger, LogLevel } from 'matterbridge/logger';
+import { LogLevel } from 'matterbridge/logger';
 
 import { WsServer } from './wsServer.ts';
 import { ShellyData } from './shellyTypes.ts';
+import { flushAsync, setupTest } from './utils/jestHelpers.js';
 
-let loggerLogSpy: jest.SpiedFunction<typeof AnsiLogger.prototype.log>;
-let consoleLogSpy: jest.SpiedFunction<typeof console.log>;
-let consoleDebugSpy: jest.SpiedFunction<typeof console.log>;
-let consoleInfoSpy: jest.SpiedFunction<typeof console.log>;
-let consoleWarnSpy: jest.SpiedFunction<typeof console.log>;
-let consoleErrorSpy: jest.SpiedFunction<typeof console.log>;
-const debug = false; // Set to true to enable debug logging
-
-if (!debug) {
-  loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log').mockImplementation((level: string, message: string, ...parameters: any[]) => {});
-  consoleLogSpy = jest.spyOn(console, 'log').mockImplementation((...args: any[]) => {});
-  consoleDebugSpy = jest.spyOn(console, 'debug').mockImplementation((...args: any[]) => {});
-  consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation((...args: any[]) => {});
-  consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation((...args: any[]) => {});
-  consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation((...args: any[]) => {});
-} else {
-  loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log');
-  consoleLogSpy = jest.spyOn(console, 'log');
-  consoleDebugSpy = jest.spyOn(console, 'debug');
-  consoleInfoSpy = jest.spyOn(console, 'info');
-  consoleWarnSpy = jest.spyOn(console, 'warn');
-  consoleErrorSpy = jest.spyOn(console, 'error');
-}
-
-function setDebug(debug: boolean) {
-  if (debug) {
-    loggerLogSpy.mockRestore();
-    consoleLogSpy.mockRestore();
-    consoleDebugSpy.mockRestore();
-    consoleInfoSpy.mockRestore();
-    consoleWarnSpy.mockRestore();
-    consoleErrorSpy.mockRestore();
-    loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log');
-    consoleLogSpy = jest.spyOn(console, 'log');
-    consoleDebugSpy = jest.spyOn(console, 'debug');
-    consoleInfoSpy = jest.spyOn(console, 'info');
-    consoleWarnSpy = jest.spyOn(console, 'warn');
-    consoleErrorSpy = jest.spyOn(console, 'error');
-  } else {
-    loggerLogSpy = jest.spyOn(AnsiLogger.prototype, 'log').mockImplementation((level: string, message: string, ...parameters: any[]) => {});
-    consoleLogSpy = jest.spyOn(console, 'log').mockImplementation((...args: any[]) => {});
-    consoleDebugSpy = jest.spyOn(console, 'debug').mockImplementation((...args: any[]) => {});
-    consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation((...args: any[]) => {});
-    consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation((...args: any[]) => {});
-    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation((...args: any[]) => {});
-  }
-}
+// Setup the test environment
+setupTest(NAME, false);
 
 describe('ShellyWsServer', () => {
   let wsServer: WsServer;
 
-  beforeAll(async () => {
-    //
-  });
+  beforeAll(async () => {});
 
   beforeEach(() => {
     // Clear all mocks before each test
     jest.clearAllMocks();
   });
 
-  afterEach(() => {
-    //
-  });
+  afterEach(() => {});
 
   afterAll(async () => {
     // Stop the WebSocket client
     wsServer.stop();
     // prettier-ignore
     await waiter('wsServer not listening', () => { return !(wsServer as any)._isListening; }, true);
+
+    // Wait a bit to ensure all async operations are done
+    await flushAsync();
 
     // Restore all mocks
     jest.restoreAllMocks();
