@@ -205,7 +205,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       // If not already set by the user
       if (!isValidArray(config.entityBlackList, 1)) config.entityBlackList = ['Lux', 'Illuminance', 'Vibration', 'Button'];
     }
-    // Expert mode setup
+    // Expert mode setup (will be re-applied after onStart)
     if (config.expertMode === false) {
       this.setSchema(baseSchema);
     }
