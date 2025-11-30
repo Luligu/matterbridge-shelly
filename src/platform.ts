@@ -67,6 +67,7 @@ import {
   xyColorToRgbColor,
   miredToKelvin,
   kelvinToRGB,
+  inspectError,
 } from 'matterbridge/utils';
 // Logger imports
 import { AnsiLogger, CYAN, GREEN, LogLevel, TimestampFormat, YELLOW, db, debugStringify, dn, er, hk, idn, nf, nt, rs, wr, zb } from 'matterbridge/logger';
@@ -207,37 +208,42 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     }
     // Expert mode setup
     if (config.expertMode === false) {
-      // TODO: set the schema in platform
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const shelly = (matterbridge as any).plugins.get('matterbridge-shelly');
-      if (shelly && shelly.schemaJson && isValidObject(shelly.schemaJson.properties, 1)) {
-        const properties = shelly.schemaJson.properties as Record<string, object>;
-        delete properties.switchList;
-        delete properties.lightList;
-        delete properties.inputContactList;
-        delete properties.inputLatchingList;
-        delete properties.inputMomentaryList;
-        delete properties.inputLatchingList;
-        delete properties.addDevice;
-        delete properties.removeDevice;
-        delete properties.scanNetwork;
-        delete properties.entityBlackList;
-        delete properties.deviceEntityBlackList;
-        delete properties.nocacheList;
-        delete properties.deviceIp;
-        delete properties.enableMdnsDiscover;
-        delete properties.enableStorageDiscover;
-        delete properties.resetStorageDiscover;
-        delete properties.enableConfigDiscover;
-        delete properties.enableBleDiscover;
-        delete properties.failsafeCount;
-        delete properties.postfix;
-        delete properties.debug;
-        delete properties.debugMdns;
-        delete properties.debugCoap;
-        delete properties.debugWs;
-        delete properties.unregisterOnShutdown;
-      }
+      this.getSchema()
+        .then((schema) => {
+          if (!schema || !isValidObject(schema.properties, 1)) return;
+          const properties = schema.properties as Record<string, object>;
+          delete properties.switchList;
+          delete properties.lightList;
+          delete properties.inputContactList;
+          delete properties.inputLatchingList;
+          delete properties.inputMomentaryList;
+          delete properties.inputLatchingList;
+          delete properties.addDevice;
+          delete properties.removeDevice;
+          delete properties.scanNetwork;
+          delete properties.entityBlackList;
+          delete properties.deviceEntityBlackList;
+          delete properties.nocacheList;
+          delete properties.deviceIp;
+          delete properties.enableMdnsDiscover;
+          delete properties.enableStorageDiscover;
+          delete properties.resetStorageDiscover;
+          delete properties.enableConfigDiscover;
+          delete properties.enableBleDiscover;
+          delete properties.failsafeCount;
+          delete properties.postfix;
+          delete properties.debug;
+          delete properties.debugMdns;
+          delete properties.debugCoap;
+          delete properties.debugWs;
+          delete properties.unregisterOnShutdown;
+          this.setSchema(schema);
+          return;
+        })
+        .catch((error) => {
+          // istanbul ignore next
+          inspectError(this.log, 'Error processing schema:', error);
+        });
     }
 
     log.debug(`Initializing platform: ${idn}${config.name}${rs}${db} v.${CYAN}${config.version}`);
