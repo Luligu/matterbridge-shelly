@@ -17,6 +17,7 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 - [package]: Updated dependencies.
 - [package]: Updated to the current Matterbridge signatures.
 - [package]: Required matterbridge v.3.4.0.
+- [package]: Updated to the Matterbridge Jest module.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
   <img src="bmc-button.svg" alt="Buy me a coffee" width="80">
