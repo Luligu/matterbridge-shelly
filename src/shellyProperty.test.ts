@@ -6,14 +6,15 @@ const HOMEDIR = path.join('jest', NAME);
 
 import path from 'node:path';
 
+import { setupTest } from 'matterbridge/jestutils';
+
 import { ShellyProperty } from './shellyProperty.ts';
 import { ShellyComponent } from './shellyComponent.ts';
 import { ShellyDataType } from './shellyTypes.ts';
 import { ShellyDevice } from './shellyDevice.ts';
-import { setupTest } from './utils/jestHelpers.js';
 
 // Setup the test environment
-setupTest(NAME, false);
+await setupTest(NAME, false);
 
 describe('ShellyProperty', () => {
   const device: ShellyDevice = {} as ShellyDevice;

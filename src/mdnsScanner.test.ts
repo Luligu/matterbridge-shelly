@@ -14,12 +14,12 @@ import { RemoteInfo } from 'node:dgram';
 import { jest } from '@jest/globals';
 import { LogLevel, AnsiLogger, ign, db, hk, CYAN, rs } from 'matterbridge/logger';
 import { ResponsePacket } from 'multicast-dns';
+import { flushAsync, loggerLogSpy, setupTest } from 'matterbridge/jestutils';
 
 import { MdnsScanner, DiscoveredDeviceListener, DiscoveredDevice } from './mdnsScanner.ts';
-import { flushAsync, loggerLogSpy, setupTest } from './utils/jestHelpers.js';
 
 // Setup the test environment
-setupTest(NAME, false);
+await setupTest(NAME, false);
 
 function loadResponse(shellyId: string) {
   const responseFile = path.join('src', 'mock', `${shellyId}.mdns.json`);

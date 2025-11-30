@@ -13,13 +13,13 @@ import { tmpdir } from 'node:os';
 
 import { AnsiLogger, LogLevel, TimestampFormat } from 'matterbridge/logger';
 import { jest } from '@jest/globals';
+import { loggerLogSpy, setupTest } from 'matterbridge/jestutils';
 
 import { ShellyDevice } from './shellyDevice.js';
 import { Shelly } from './shelly.js';
-import { loggerLogSpy, setupTest } from './utils/jestHelpers.js';
 
 // Setup the test environment
-setupTest(NAME, false);
+await setupTest(NAME, false);
 
 describe('ShellyDevice.fetch', () => {
   let shelly: Shelly;

@@ -8,16 +8,16 @@ import path from 'node:path';
 
 import { AnsiLogger, CYAN, db, hk, LogLevel, MAGENTA, TimestampFormat, wr } from 'matterbridge/logger';
 import { jest } from '@jest/globals';
+import { flushAsync, loggerLogSpy, setupTest } from 'matterbridge/jestutils';
 
 import { Shelly } from './shelly.js';
 import { ShellyDevice } from './shellyDevice.js';
 import { WsClient } from './wsClient.js';
 import { CoapServer } from './coapServer.js';
 import { WsServer } from './wsServer.js';
-import { flushAsync, loggerLogSpy, setupTest } from './utils/jestHelpers.js';
 
 // Setup the test environment
-setupTest(NAME, false);
+await setupTest(NAME, false);
 
 jest.useFakeTimers();
 

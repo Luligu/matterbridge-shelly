@@ -10,12 +10,12 @@ import { readFileSync, promises as fs } from 'node:fs';
 import { jest } from '@jest/globals';
 import { CYAN, db, hk, LogLevel, nf, zb } from 'matterbridge/logger';
 import { IncomingMessage, parameters } from 'coap';
+import { flushAsync, loggerLogSpy, setupTest } from 'matterbridge/jestutils';
 
 import { CoapServer } from './coapServer.ts';
-import { flushAsync, loggerLogSpy, setupTest } from './utils/jestHelpers.js';
 
 // Setup the test environment
-setupTest(NAME, false);
+await setupTest(NAME, false);
 
 describe('Coap scanner', () => {
   const coapServer = new CoapServer({ username: 'admin', password: 'tango' } as any, LogLevel.DEBUG);

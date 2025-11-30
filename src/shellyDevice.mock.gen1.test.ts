@@ -9,6 +9,7 @@ import path from 'node:path';
 import { AnsiLogger, TimestampFormat } from 'matterbridge/logger';
 import { jest } from '@jest/globals';
 import { wait } from 'matterbridge/utils';
+import { setupTest } from 'matterbridge/jestutils';
 
 import { ShellyDevice } from './shellyDevice.js';
 import { Shelly } from './shelly.js';
@@ -16,10 +17,9 @@ import { CoapServer } from './coapServer.js';
 import { WsServer } from './wsServer.js';
 import { WsClient } from './wsClient.js';
 import { MdnsScanner } from './mdnsScanner.js';
-import { setupTest } from './utils/jestHelpers.js';
 
 // Setup the test environment
-setupTest(NAME, false);
+await setupTest(NAME, false);
 
 const coapServerStartSpy = jest.spyOn(CoapServer.prototype, 'start').mockImplementation(() => {});
 const coapServerStopSpy = jest.spyOn(CoapServer.prototype, 'stop').mockImplementation(() => {});

@@ -8,16 +8,16 @@ import path from 'node:path';
 
 import { AnsiLogger, TimestampFormat } from 'matterbridge/logger';
 import { jest } from '@jest/globals';
+import { setupTest } from 'matterbridge/jestutils';
 
 import { isCoverComponent, isLightComponent, isSwitchComponent, ShellyComponent, ShellyCoverComponent, ShellyLightComponent, ShellySwitchComponent } from './shellyComponent.ts';
 import { ShellyDevice } from './shellyDevice.ts';
 import { ShellyProperty } from './shellyProperty.ts';
 import { ShellyData, ShellyDataType } from './shellyTypes.ts';
 import { Shelly } from './shelly.ts';
-import { setupTest } from './utils/jestHelpers.js';
 
 // Setup the test environment
-setupTest(NAME, false);
+await setupTest(NAME, false);
 
 describe('ShellyComponent', () => {
   let fetchSpy: jest.SpiedFunction<typeof ShellyDevice.fetch>;
