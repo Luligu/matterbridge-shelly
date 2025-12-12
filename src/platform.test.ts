@@ -26,15 +26,6 @@ import { AnsiLogger, db, er, hk, idn, LogLevel, nf, rs, wr, zb, CYAN, TimestampF
 import { wait } from 'matterbridge/utils';
 // Matter.js
 import { jest } from '@jest/globals';
-
-import { Shelly } from './shelly.ts';
-import initializePlugin, { ShellyPlatform, ShellyPlatformConfig } from './platform.ts';
-import { ShellyDevice } from './shellyDevice.ts';
-import { CoapServer } from './coapServer.ts';
-import { WsServer } from './wsServer.ts';
-import { WsClient } from './wsClient.ts';
-import { ShellyData } from './shellyTypes.ts';
-import { MdnsScanner } from './mdnsScanner.ts';
 import {
   addMatterbridgePlatform,
   createMatterbridgeEnvironment,
@@ -45,10 +36,19 @@ import {
   startMatterbridgeEnvironment,
   stopMatterbridgeEnvironment,
   aggregator,
-} from './utils/jestHelpers.js';
+} from 'matterbridge/jestutils';
+
+import { Shelly } from './shelly.ts';
+import initializePlugin, { ShellyPlatform, ShellyPlatformConfig } from './platform.ts';
+import { ShellyDevice } from './shellyDevice.ts';
+import { CoapServer } from './coapServer.ts';
+import { WsServer } from './wsServer.ts';
+import { WsClient } from './wsClient.ts';
+import { ShellyData } from './shellyTypes.ts';
+import { MdnsScanner } from './mdnsScanner.ts';
 
 // Setup the test environment
-setupTest(NAME, false);
+await setupTest(NAME, false);
 
 const mockConfig: ShellyPlatformConfig = {
   name: 'matterbridge-shelly',
@@ -187,7 +187,7 @@ describe('ShellyPlatform', () => {
   it('should throw because of version', () => {
     matterbridge.matterbridgeVersion = '1.5.4';
     expect(() => new ShellyPlatform(matterbridge, log, mockConfig as any)).toThrow();
-    matterbridge.matterbridgeVersion = '3.1.4';
+    matterbridge.matterbridgeVersion = '3.4.0';
   });
 
   it('should call onStart with reason and start mDNS', async () => {

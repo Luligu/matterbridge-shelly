@@ -9,15 +9,15 @@ import path from 'node:path';
 import { AnsiLogger, LogLevel, TimestampFormat } from 'matterbridge/logger';
 import { getMacAddress, wait, waiter } from 'matterbridge/utils';
 import { jest } from '@jest/globals';
+import { flushAsync, setupTest } from 'matterbridge/jestutils';
 
 import { Shelly } from './shelly.ts';
 import { ShellyDevice } from './shellyDevice.ts';
 import { isCoverComponent, isLightComponent, isSwitchComponent } from './shellyComponent.ts';
-import { flushAsync, setupTest } from './utils/jestHelpers.js';
 import { CoapServer } from './coapServer.ts';
 
 // Setup the test environment
-setupTest(NAME, false);
+await setupTest(NAME, false);
 
 describe('Shellies', () => {
   const log = new AnsiLogger({ logName: 'ShellyDeviceRealTest', logTimestampFormat: TimestampFormat.TIME_MILLIS, logLevel: LogLevel.DEBUG });

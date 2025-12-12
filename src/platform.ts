@@ -169,9 +169,9 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     super(matterbridge, log, config);
 
     // Verify that Matterbridge is the correct version
-    if (this.verifyMatterbridgeVersion === undefined || typeof this.verifyMatterbridgeVersion !== 'function' || !this.verifyMatterbridgeVersion('3.1.6')) {
+    if (this.verifyMatterbridgeVersion === undefined || typeof this.verifyMatterbridgeVersion !== 'function' || !this.verifyMatterbridgeVersion('3.4.0')) {
       throw new Error(
-        `This plugin requires Matterbridge version >= "3.1.6". Please update Matterbridge from ${this.matterbridge.matterbridgeVersion} to the latest version in the frontend."`,
+        `This plugin requires Matterbridge version >= "3.4.0". Please update Matterbridge from ${this.matterbridge.matterbridgeVersion} to the latest version in the frontend."`,
       );
     }
 
@@ -205,39 +205,9 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       // If not already set by the user
       if (!isValidArray(config.entityBlackList, 1)) config.entityBlackList = ['Lux', 'Illuminance', 'Vibration', 'Button'];
     }
-    // Expert mode setup
+    // Expert mode setup (will be re-applied after onStart)
     if (config.expertMode === false) {
-      // TODO: set the schema in platform
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const shelly = (matterbridge as any).plugins.get('matterbridge-shelly');
-      if (shelly && shelly.schemaJson && isValidObject(shelly.schemaJson.properties, 1)) {
-        const properties = shelly.schemaJson.properties as Record<string, object>;
-        delete properties.switchList;
-        delete properties.lightList;
-        delete properties.inputContactList;
-        delete properties.inputLatchingList;
-        delete properties.inputMomentaryList;
-        delete properties.inputLatchingList;
-        delete properties.addDevice;
-        delete properties.removeDevice;
-        delete properties.scanNetwork;
-        delete properties.entityBlackList;
-        delete properties.deviceEntityBlackList;
-        delete properties.nocacheList;
-        delete properties.deviceIp;
-        delete properties.enableMdnsDiscover;
-        delete properties.enableStorageDiscover;
-        delete properties.resetStorageDiscover;
-        delete properties.enableConfigDiscover;
-        delete properties.enableBleDiscover;
-        delete properties.failsafeCount;
-        delete properties.postfix;
-        delete properties.debug;
-        delete properties.debugMdns;
-        delete properties.debugCoap;
-        delete properties.debugWs;
-        delete properties.unregisterOnShutdown;
-      }
+      this.setSchema(baseSchema);
     }
 
     log.debug(`Initializing platform: ${idn}${config.name}${rs}${db} v.${CYAN}${config.version}`);
@@ -1598,6 +1568,10 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       this.log.notice(`Platform first configuration terminated`);
       this.config.firstRun = false;
     }
+    // Expert mode setup
+    if (config.expertMode === false) {
+      this.setSchema(baseSchema);
+    }
 
     this.log.info(`Started platform ${idn}${this.config.name}${rs}${nf}: ${reason ?? ''}`);
   }
@@ -2099,3 +2073,57 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     }
   }
 }
+
+const baseSchema = {
+  title: 'Matterbridge shelly plugin',
+  description: 'matterbridge-shelly v. 0.0.1 by https://github.com/Luligu',
+  type: 'object',
+  properties: {
+    name: {
+      'description': 'Plugin name',
+      'type': 'string',
+      'readOnly': true,
+      'ui:widget': 'hidden',
+    },
+    type: {
+      'description': 'Plugin type',
+      'type': 'string',
+      'readOnly': true,
+      'ui:widget': 'hidden',
+    },
+    username: {
+      description: 'Username for password protected shelly devices (used only for gen 1 devices).',
+      type: 'string',
+    },
+    password: {
+      'description': 'Password for password protected shelly devices (must be unique for all the devices).',
+      'type': 'string',
+      'ui:widget': 'password',
+    },
+    whiteList: {
+      description:
+        'Only the devices in the list will be exposed. Use the device id (e.g. shellyplus2pm-5443B23D81F8) or BLU addr (i.e. 7c:c6:b6:65:2d:87). If the list is empty, all the devices will be exposed.',
+      type: 'array',
+      items: {
+        type: 'string',
+      },
+      uniqueItems: true,
+      selectFrom: 'serial',
+    },
+    blackList: {
+      description:
+        'The devices in the list will not be exposed. Use the device id (e.g. shellyplus2pm-5443B23D81F8) or BLU addr (i.e. 7c:c6:b6:65:2d:87). If the list is empty, no devices will be excluded.',
+      type: 'array',
+      items: {
+        type: 'string',
+      },
+      uniqueItems: true,
+      selectFrom: 'serial',
+    },
+    expertMode: {
+      description: 'Enable the expert mode for the plugin configuration (restart required)',
+      type: 'boolean',
+      default: false,
+    },
+  },
+};

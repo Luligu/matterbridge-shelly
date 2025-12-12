@@ -12,12 +12,12 @@ import { jest } from '@jest/globals';
 import { WebSocket, WebSocketServer } from 'ws';
 import { wait, waiter } from 'matterbridge/utils';
 import { db, er, hk, LogLevel, nf, wr, zb } from 'matterbridge/logger';
+import { consoleDebugSpy, flushAsync, loggerLogSpy, setupTest } from 'matterbridge/jestutils';
 
 import { WsClient } from './wsClient.ts';
-import { consoleDebugSpy, flushAsync, loggerLogSpy, setupTest } from './utils/jestHelpers.js';
 
 // Setup the test environment
-setupTest(NAME, false);
+await setupTest(NAME, false);
 
 describe('ShellyWsClient', () => {
   let wsClient: WsClient;

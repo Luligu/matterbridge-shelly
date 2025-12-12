@@ -7,6 +7,7 @@ const HOMEDIR = path.join('jest', NAME);
 import path from 'node:path';
 
 import { jest } from '@jest/globals';
+import { setupTest } from 'matterbridge/jestutils';
 
 import {
   parseBasicAuthenticateHeader,
@@ -17,10 +18,9 @@ import {
   getGen2BodyOptions,
   generateNonce,
 } from './auth.ts';
-import { setupTest } from './utils/jestHelpers.js';
 
 // Setup the test environment
-setupTest(NAME, false);
+await setupTest(NAME, false);
 
 describe('Authentication utility test', () => {
   beforeAll(() => {});

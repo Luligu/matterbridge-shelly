@@ -10,13 +10,13 @@ import { jest } from '@jest/globals';
 import { wait, waiter } from 'matterbridge/utils';
 import { WebSocket } from 'ws';
 import { LogLevel } from 'matterbridge/logger';
+import { flushAsync, setupTest } from 'matterbridge/jestutils';
 
 import { WsServer } from './wsServer.ts';
 import { ShellyData } from './shellyTypes.ts';
-import { flushAsync, setupTest } from './utils/jestHelpers.js';
 
 // Setup the test environment
-setupTest(NAME, false);
+await setupTest(NAME, false);
 
 describe('ShellyWsServer', () => {
   let wsServer: WsServer;
