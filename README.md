@@ -1,10 +1,10 @@
-# <img src="matterbridge.svg" alt="Matterbridge Logo" width="64px" height="64px">&nbsp;&nbsp;&nbsp;Matterbridge shelly plugin &nbsp;&nbsp; <img src="Shelly.svg" alt="Shelly logo" width="200" />
+# <img src="https://matterbridge.io/assets/matterbridge.svg" alt="Matterbridge Logo" width="64px" height="64px">&nbsp;&nbsp;&nbsp;Matterbridge shelly plugin &nbsp;&nbsp; <img src="https://matterbridge.io/assets/Shelly.svg" alt="Shelly logo" width="200" />
 
 [![npm version](https://img.shields.io/npm/v/matterbridge-shelly.svg)](https://www.npmjs.com/package/matterbridge-shelly)
 [![npm downloads](https://img.shields.io/npm/dt/matterbridge-shelly.svg)](https://www.npmjs.com/package/matterbridge-shelly)
 [![Docker Version](https://img.shields.io/docker/v/luligu/matterbridge?label=docker%20version&sort=semver)](https://hub.docker.com/r/luligu/matterbridge)
 [![Docker Pulls](https://img.shields.io/docker/pulls/luligu/matterbridge.svg)](https://hub.docker.com/r/luligu/matterbridge)
-![Node.js CI](https://github.com/Luligu/matterbridge-shelly/actions/workflows/build-matterbridge-plugin.yml/badge.svg)
+![Node.js CI](https://github.com/Luligu/matterbridge-shelly/actions/workflows/build.yml/badge.svg)
 ![CodeQL](https://github.com/Luligu/matterbridge-shelly/actions/workflows/codeql.yml/badge.svg)
 [![codecov](https://codecov.io/gh/Luligu/matterbridge-shelly/branch/main/graph/badge.svg)](https://codecov.io/gh/Luligu/matterbridge-shelly)
 
@@ -42,7 +42,7 @@ Features:
 If you like this project and find it useful, please consider giving it a star on GitHub at https://github.com/Luligu/matterbridge-shelly and sponsoring it.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="bmc-button.svg" alt="Buy me a coffee" width="120">
+  <img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="120">
 </a>
 
 ## Sponsors
@@ -50,7 +50,7 @@ If you like this project and find it useful, please consider giving it a star on
 This project is proudly sponsored by:
 
 <a href="https://www.shelly.com/en">
-  <img src="Shelly.svg" alt="Shelly logo" width="100" />
+  <img src="https://matterbridge.io/assets/Shelly.svg" alt="Shelly logo" width="100" />
 </a>
 
 [Shelly Group](https://corporate.shelly.com/about-shelly-group/)
