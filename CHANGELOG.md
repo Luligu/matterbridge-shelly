@@ -1,12 +1,28 @@
-# <img src="matterbridge.svg" alt="Matterbridge Logo" width="64px" height="64px">&nbsp;&nbsp;&nbsp;Matterbridge shelly plugin changelog
+# <img src="https://matterbridge.io/assets/matterbridge.svg" alt="Matterbridge Logo" width="64px" height="64px">&nbsp;&nbsp;&nbsp;Matterbridge shelly plugin changelog
 
 All notable changes to this project will be documented in this file.
 
 If you like this project and find it useful, please consider giving it a star on [GitHub](https://github.com/Luligu/matterbridge-shelly) and sponsoring it.
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="120"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="120"></a>
 
 You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his invaluable contribution to this project.
+
+## [2.2.2] - 2026-01-20
+
+### Added
+
+- [matter]: Conformance to Matter 1.4.2 and matterbridge 3.5.x.
+- [thermostat]: Conformance to Matter 1.4.2.
+
+### Changed
+
+- [package]: Updated dependencies.
+- [package]: Updated package to automator v. 3.0.0.
+- [package]: Refactored Dev Container to use Matterbridge mDNS reflector.
+- [package]: Requires Matterbridge v.3.5.0.
+
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [2.2.1] - 2025-12-12
 
@@ -17,7 +33,7 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 - [package]: Required matterbridge v.3.4.0.
 - [package]: Updated to the Matterbridge Jest module.
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [2.2.0] - 2025-11-14
 
@@ -34,7 +50,7 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 - [jest]: Updated jestHelpers to v. 1.0.12.
 - [workflows]: Use shallow clones and --no-fund --no-audit for faster builds.
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [2.1.2] - 2025-09-28
 
@@ -53,7 +69,7 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 - [package]: Updated dependencies.
 - [jest]: Updated jestHelpers to v. 1.0.6.
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [2.1.1] - 2025-07-22
 
@@ -90,7 +106,7 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 - [package]: Updated workflows.
 - [worflows]: Removed workflows running on node 18 since it reached the end-of-life in April 2025.
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [2.0.10] - 2025-05-26
 
@@ -110,7 +126,7 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 - [energy]: Fixed reading of energy component coming not rounded from certain devices.
 - [mcast]: Fixed detection of coap setting in old gen1 devices.
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [2.0.9] - 2025-04-30
 
@@ -127,7 +143,7 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 
 - [WallDisplay]: Fixed PowerSource component.
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [2.0.8] - 2025-04-19
 
@@ -162,7 +178,7 @@ For shellyflood, if you have SmartThings, blacklist the Temperature entity for e
 - [restart]: Fixed the case when a device with sleep mode has not updated the cache file. Thanks Pasqualito.
 - [entity]: Fixed the black list of PowerMeter in deviceEntityBlackList. Thanks Tamer.
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [2.0.7] - 2025-04-13
 
@@ -181,7 +197,7 @@ For shellyflood, if you have SmartThings, blacklist the Temperature entity for e
 
 - [restart]: Fixed the case when a device with sleep mode sends config changed.
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [2.0.6] - 2025-04-02
 
@@ -204,7 +220,7 @@ For shellyflood, if you have SmartThings, blacklist the Temperature entity for e
 - [configUrl]: When a device IP change is detected, the configUrl is updated too.
 - [CoIoT]: Fixed wrong error message for the first generation of Gen 1 device that don't have peer and enable in the CoIoT component. Thanks D.D.
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [2.0.5] - 2025-03-19
 
@@ -230,7 +246,7 @@ For shellyflood, if you have SmartThings, blacklist the Temperature entity for e
 - [package]: Updated dependencies.
 - [plugin]: Requires Matterbridge 2.2.5.
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [2.0.4] - 2025-03-13
 
@@ -257,7 +273,7 @@ For shellyflood, if you have SmartThings, blacklist the Temperature entity for e
 
 - [platform]: Fixed initial values of battery component.
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [2.0.3] - 2025-03-05
 
@@ -265,7 +281,7 @@ For shellyflood, if you have SmartThings, blacklist the Temperature entity for e
 
 - [MdnsScanner]: Added discovery of gen 4 devices.
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [2.0.2] - 2025-03-05
 
@@ -277,7 +293,7 @@ For shellyflood, if you have SmartThings, blacklist the Temperature entity for e
 
 - [platform]: Fixed edge case for select and unselect.
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [2.0.1] - 2025-03-02
 
@@ -289,7 +305,7 @@ For shellyflood, if you have SmartThings, blacklist the Temperature entity for e
 - [package]: Updated dependencies.
 - [plugin]: Requires Matterbridge 2.2.1.
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [2.0.0] - 2025-02-27
 
@@ -313,7 +329,7 @@ For shellyflood, if you have SmartThings, blacklist the Temperature entity for e
 - [platform]: Removed coiot component from Select.
 - [select]: Fix bthomesensor_event with select Button.
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [1.1.6] - 2025-02-11
 
@@ -330,7 +346,7 @@ For shellyflood, if you have SmartThings, blacklist the Temperature entity for e
 
 ### Fixed
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [1.1.5] - 2025-02-02
 
@@ -350,7 +366,7 @@ For shellyflood, if you have SmartThings, blacklist the Temperature entity for e
 - [switch]: Update triggerSwitch logic for edge.
 - [shellywalldisplay]: Fix NotifyEvent for "user_1".
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [1.1.4] - 2025-01-20
 
@@ -369,7 +385,7 @@ For shellyflood, if you have SmartThings, blacklist the Temperature entity for e
 
 - [em1data]: Fixed typo em1data.
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [1.1.3] - 2025-01-11
 
@@ -384,7 +400,7 @@ For shellyflood, if you have SmartThings, blacklist the Temperature entity for e
 
 - [package]: Updated dependencies.
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [1.1.2] - 2025-01-08
 
@@ -397,7 +413,7 @@ For shellyflood, if you have SmartThings, blacklist the Temperature entity for e
 
 - [package]: Updated dependencies.
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [1.1.1] - 2024-12-22
 
@@ -418,7 +434,7 @@ For shellyflood, if you have SmartThings, blacklist the Temperature entity for e
 
 - [configure]: Fixed async loop.
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [1.1.0] - 2024-12-14
 
@@ -442,7 +458,7 @@ For shellyflood, if you have SmartThings, blacklist the Temperature entity for e
 - [matter]: Update all device types.
 - [package]: Updated dependencies.
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [1.0.11] - 2024-12-04
 
@@ -463,7 +479,7 @@ For shellyflood, if you have SmartThings, blacklist the Temperature entity for e
 - [platform]: Refactor Matter Thermostat component for BLU Trv
 - [levelControl]: Fix max level to 254.
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [1.0.10] - 2024-11-21
 
@@ -481,7 +497,7 @@ For shellyflood, if you have SmartThings, blacklist the Temperature entity for e
 - [log]: Show username and password with \*\*\*\* in logs.
 - [package]: Updated dependencies.
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [1.0.9] - 2024-11-11
 
@@ -503,7 +519,7 @@ For shellyflood, if you have SmartThings, blacklist the Temperature entity for e
 
 - [BTHome]: Fixed log level for BLU devices.
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [1.0.8] - 2024-10-23
 
@@ -515,7 +531,7 @@ For shellyflood, if you have SmartThings, blacklist the Temperature entity for e
 
 - [package]: Updated dependencies.
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [1.0.7] - 2024-10-23
 
@@ -527,7 +543,7 @@ For shellyflood, if you have SmartThings, blacklist the Temperature entity for e
 
 - [package]: Updated dependencies.
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [1.0.6] - 2024-10-21
 
@@ -535,7 +551,7 @@ For shellyflood, if you have SmartThings, blacklist the Temperature entity for e
 
 - [package]: Updated package.
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [1.0.5] - 2024-10-21
 
@@ -549,7 +565,7 @@ For shellyflood, if you have SmartThings, blacklist the Temperature entity for e
 - [shelly]: Added ColorTemp to Shelly Duo and Shelly Bulb in white mode.
 - [cockpit]: Added cockpit dashboard 1.0
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [1.0.4] - 2024-10-17
 
@@ -562,7 +578,7 @@ For shellyflood, if you have SmartThings, blacklist the Temperature entity for e
 
 - [package]: Updated dependencies.
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [1.0.3] - 2024-10-15
 
@@ -575,7 +591,7 @@ For shellyflood, if you have SmartThings, blacklist the Temperature entity for e
 - [plugin]: Changed required version of matterbridge to 1.5.9.
 - [package]: Updated dependencies.
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [1.0.2] - 2024-10-13
 
@@ -589,7 +605,7 @@ For shellyflood, if you have SmartThings, blacklist the Temperature entity for e
 
 - [BTHome]: Fixed issue to BTHome components discovery.
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [1.0.1] - 2024-10-10
 
@@ -604,7 +620,7 @@ For shellyflood, if you have SmartThings, blacklist the Temperature entity for e
 - [BTHome]: Added type checking to BTHome components discovery.
 - [BTHome]: Fixed the case when blutrv ids and bthomedevice ids are different in the shellyblugwg3 config.
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [1.0.0] - 2024-10-07
 
@@ -666,7 +682,7 @@ To allow an easy update to the new version, please after the update, restart, wa
 
 - [shelly BLU]: Fixed bthome discover when one BLU is paired with more then one gateway.
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [0.11.0] - 2024-10-01
 
@@ -686,7 +702,7 @@ To allow an easy update to the new version, please after the update, restart, wa
 - [ShellyMdnsScanner]: Fixed name discovered for shellyplug-s
 - [ShellyDevice]: Fixed normalizeId.
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [0.10.0] - 2024-09-26
 
@@ -714,7 +730,7 @@ To allow an easy update to the new version, please after the update, restart, wa
 - [covery]: Fixed cover closed for gen 2 devices.
 - [mdns]: Fixed gen discovery.
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [0.9.10] - 2024-09-19
 
@@ -723,7 +739,7 @@ To allow an easy update to the new version, please after the update, restart, wa
 - [ShellyWsClient]: Refactor wsClient to send different src client id.
 - [package]: Updated dependencies.
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [0.9.9] - 2024-09-17
 
@@ -736,7 +752,7 @@ To allow an easy update to the new version, please after the update, restart, wa
 
 - [shelly]: Fixed the bug in configure when postfix is used.
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [0.9.8] - 2024-09-13
 
@@ -757,7 +773,7 @@ To allow an easy update to the new version, please after the update, restart, wa
 - [package]: Updated typescript to 5.6.2.
 - [package]: Updated dependencies.
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [0.9.7] - 2024-09-09
 
@@ -778,7 +794,7 @@ To allow an easy update to the new version, please after the update, restart, wa
 
 - [package]: Updated dependencies.
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [0.9.6] - 2024-09-06
 
@@ -796,7 +812,7 @@ To allow an easy update to the new version, please after the update, restart, wa
 
 - [package]: Updated dependencies.
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [0.9.5] - 2024-09-04
 
@@ -808,7 +824,7 @@ To allow an easy update to the new version, please after the update, restart, wa
 
 - [package]: Updated dependencies.
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [0.9.4] - 2024-09-03
 
@@ -822,7 +838,7 @@ To allow an easy update to the new version, please after the update, restart, wa
 
 - [package]: Updated dependencies.
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [0.9.3] - 2024-08-29
 
@@ -836,7 +852,7 @@ To allow an easy update to the new version, please after the update, restart, wa
 
 - [shelly]: Fixed WindowCovering.MovementStatus for Gen. 1 rollers
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [0.9.2] - 2024-08-28
 
@@ -849,7 +865,7 @@ To allow an easy update to the new version, please after the update, restart, wa
 
 - [package]: Fixed dependencies.
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [0.9.1] - 2024-08-20
 
@@ -871,7 +887,7 @@ To allow an easy update to the new version, please after the update, restart, wa
 
 - [package]: Fixed dependencies.
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [0.9.0] - 2024-08-14
 
@@ -889,7 +905,7 @@ To allow an easy update to the new version, please after the update, restart, wa
 - [shelly]: Added WsServer to get updates and events from Gen. 2 and Gen 3. devices with sleep mode.
 - [shelly]: Added support for shellyhtg3 (beta).
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [0.8.1] - 2024-08-12
 
@@ -911,7 +927,7 @@ To allow an easy update to the new version, please after the update, restart, wa
 
 - [shelly]: Added strict type checking to updates from devices to prevent validation errors caused by unsupported devices or firmware.
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [0.8.0] - 2024-08-09
 
@@ -976,7 +992,7 @@ To allow an easy update to the new version, please after the update, restart, wa
 - [shelly]: Verified shellyemg3 with firmware v. g1216eb0
 - [shelly]: Verified shellyddimmerg3 with firmware v. g55db545
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [0.7.5] - 2024-07-28
 
@@ -992,7 +1008,7 @@ To allow an easy update to the new version, please after the update, restart, wa
 
 - [shelly]: Fixed issue when Input.state is null.
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [0.7.4] - 2024-07-23
 
@@ -1000,7 +1016,7 @@ To allow an easy update to the new version, please after the update, restart, wa
 
 - [imports]: Updated matterbridge imports.
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [0.7.3] - 2024-07-10
 
@@ -1009,7 +1025,7 @@ To allow an easy update to the new version, please after the update, restart, wa
 - [imports]: Updated matterbridge imports.
 - [package]: Updated dependencies.
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [0.7.2] - 2024-07-09
 
@@ -1022,7 +1038,7 @@ To allow an easy update to the new version, please after the update, restart, wa
 
 - [shelly]: Fixed issue caused by a shelly with undefined data.
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [0.7.1] - 2024-07-05
 
@@ -1034,7 +1050,7 @@ To allow an easy update to the new version, please after the update, restart, wa
 
 - [shelly]: Fixed issue caused by a shelly gen 1 when it sends a CoIoT message /cit/d without blk.
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [0.7.0] - 2024-06-30
 
@@ -1047,7 +1063,7 @@ To allow an easy update to the new version, please after the update, restart, wa
 - [PowerMeter]: Fixed voltage error message in PowerMeter.
 - [shelly]: Fixed authentication.
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [0.6.1] - 2024-06-28
 
@@ -1056,7 +1072,7 @@ To allow an easy update to the new version, please after the update, restart, wa
 - [firmware]: The recent firmware update for Gen 2 and Gen. 3 devices changed the way data is sent. This fix the electrical readings.
 - [package]: Updated eslint to 9.6.0
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [0.6.0] - 2024-06-26
 
@@ -1069,7 +1085,7 @@ To allow an easy update to the new version, please after the update, restart, wa
 
 - [package]: Updated dependencies
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [0.5.1] - 2024-06-25
 
@@ -1083,7 +1099,7 @@ To allow an easy update to the new version, please after the update, restart, wa
 - [cover]: Fix cover move to position for gen 2.
 - [power]: Fix power value update.
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [0.4.0] - 2024-06-23
 
@@ -1096,7 +1112,7 @@ To allow an easy update to the new version, please after the update, restart, wa
 
 - [deviceGen2]: Fix mdnsDiscovery for gen 2 pro devices. When you upgrade select resetStorageDiscover on the first start please.
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [0.3.3] - 2024-06-21
 
@@ -1104,7 +1120,7 @@ To allow an easy update to the new version, please after the update, restart, wa
 
 - [deviceGen2]: Fix power meter update from gen. 2/3 devices.
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [0.3.2] - 2024-06-21
 
@@ -1112,13 +1128,13 @@ To allow an easy update to the new version, please after the update, restart, wa
 
 - [Gen. 1]: PowerMeter and fix update from gen. 1 devices.
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [0.3.1] - 2024-06-19
 
 First published release.
 
-<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 <!-- Commented out section
 ## [1.1.2] - 2024-03-08
