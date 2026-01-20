@@ -8,7 +8,7 @@ If you like this project and find it useful, please consider giving it a star on
 
 You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his invaluable contribution to this project.
 
-## [2.2.2] - Dev branch
+## [2.2.2] - 2026-01-20
 
 ### Added
 
@@ -19,6 +19,8 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 
 - [package]: Updated dependencies.
 - [package]: Updated package to automator v. 3.0.0.
+- [package]: Refactored Dev Container to use Matterbridge mDNS reflector.
+- [package]: Requires Matterbridge v.3.5.0.
 
 <a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 

@@ -46,6 +46,15 @@
   "engines": {
     "node": ">=20.0.0 <21.0.0 || >=22.0.0 <23.0.0 || >=24.0.0 <25.0.0"
   },
+  "files": [
+    "bin",
+    "dist",
+    "npm-shrinkwrap.json",
+    "CHANGELOG.md",
+    "BLU.md",
+    "*.config.json",
+    "*.schema.json"
+  ],
   "scripts": {
     "start": "matterbridge",
     "build": "tsc --project tsconfig.json",
@@ -101,15 +110,6 @@
     "matterbridge:disable": "matterbridge -disable .",
     "matterbridge:list": "matterbridge -list"
   },
-  "files": [
-    "bin",
-    "dist",
-    "npm-shrinkwrap.json",
-    "CHANGELOG.md",
-    "BLU.md",
-    "*.config.json",
-    "*.schema.json"
-  ],
   "dependencies": {
     "coap": "1.5.0",
     "multicast-dns": "7.2.5",

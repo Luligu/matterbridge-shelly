@@ -148,6 +148,7 @@ describe('ShellyPlatform', () => {
   });
 
   it('should return an instance of ShellyPlatform', async () => {
+    matterbridge.matterbridgeVersion = '3.5.0';
     const platform = initializePlugin(matterbridge, log, mockConfig);
     expect(platform).toBeDefined();
     expect(platform).toBeInstanceOf(ShellyPlatform);
@@ -161,6 +162,7 @@ describe('ShellyPlatform', () => {
   });
 
   it('should initialize platform with config name and version', () => {
+    matterbridge.matterbridgeVersion = '3.5.0';
     shellyPlatform = new ShellyPlatform(matterbridge, log, mockConfig as any);
     addMatterbridgePlatform(shellyPlatform, 'matterbridge-shelly');
     shelly = (shellyPlatform as any).shelly;
@@ -187,7 +189,7 @@ describe('ShellyPlatform', () => {
   it('should throw because of version', () => {
     matterbridge.matterbridgeVersion = '1.5.4';
     expect(() => new ShellyPlatform(matterbridge, log, mockConfig as any)).toThrow();
-    matterbridge.matterbridgeVersion = '3.4.0';
+    matterbridge.matterbridgeVersion = '3.5.0';
   });
 
   it('should call onStart with reason and start mDNS', async () => {
