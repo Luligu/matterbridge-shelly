@@ -46,6 +46,3 @@ vite.config.*
 # Package specific directories and files that should be ignored
 
 TODO.md
-src/net
-matterstorage
-matterstorage.backup
