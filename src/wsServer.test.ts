@@ -7,13 +7,13 @@ const HOMEDIR = path.join('jest', NAME);
 import path from 'node:path';
 
 import { jest } from '@jest/globals';
+import { flushAsync, setupTest } from 'matterbridge/jestutils';
+import { LogLevel } from 'matterbridge/logger';
 import { wait, waiter } from 'matterbridge/utils';
 import { WebSocket } from 'ws';
-import { LogLevel } from 'matterbridge/logger';
-import { flushAsync, setupTest } from 'matterbridge/jestutils';
 
-import { WsServer } from './wsServer.ts';
 import { ShellyData } from './shellyTypes.ts';
+import { WsServer } from './wsServer.ts';
 
 // Setup the test environment
 await setupTest(NAME, false);

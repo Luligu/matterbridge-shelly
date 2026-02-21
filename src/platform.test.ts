@@ -6,49 +6,48 @@ const HOMEDIR = path.join('jest', NAME);
 
 import path from 'node:path';
 
-import { MatterbridgeEndpoint, featuresFor } from 'matterbridge';
+import { jest } from '@jest/globals';
+import { featuresFor, MatterbridgeEndpoint } from 'matterbridge';
 import {
-  OnOffCluster,
+  addBridgedEndpointSpy,
+  addMatterbridgePlatform,
+  aggregator,
+  createMatterbridgeEnvironment,
+  destroyMatterbridgeEnvironment,
+  loggerLogSpy,
+  matterbridge,
+  removeAllBridgedEndpointsSpy,
+  removeBridgedEndpointSpy,
+  setupTest,
+  startMatterbridgeEnvironment,
+  stopMatterbridgeEnvironment,
+} from 'matterbridge/jestutils';
+import { AnsiLogger, CYAN, db, er, hk, idn, LogLevel, nf, or, rs, TimestampFormat, wr, YELLOW, zb } from 'matterbridge/logger';
+import { OnOffBehavior, RelativeHumidityMeasurementBehavior, TemperatureMeasurementBehavior } from 'matterbridge/matter/behaviors';
+import {
   BindingCluster,
+  ColorControl,
   DescriptorCluster,
   ElectricalEnergyMeasurement,
   ElectricalPowerMeasurement,
   GroupsCluster,
   IdentifyCluster,
+  OnOffCluster,
   PowerTopology,
-  Switch,
-  ColorControl,
-  TemperatureMeasurementCluster,
   RelativeHumidityMeasurementCluster,
+  Switch,
+  TemperatureMeasurementCluster,
 } from 'matterbridge/matter/clusters';
-import { OnOffBehavior, RelativeHumidityMeasurementBehavior, TemperatureMeasurementBehavior } from 'matterbridge/matter/behaviors';
-import { AnsiLogger, db, er, hk, idn, LogLevel, nf, rs, wr, zb, CYAN, TimestampFormat, YELLOW, or } from 'matterbridge/logger';
 import { wait } from 'matterbridge/utils';
-// Matter.js
-import { jest } from '@jest/globals';
-import {
-  addMatterbridgePlatform,
-  createMatterbridgeEnvironment,
-  destroyMatterbridgeEnvironment,
-  loggerLogSpy,
-  matterbridge,
-  setupTest,
-  startMatterbridgeEnvironment,
-  stopMatterbridgeEnvironment,
-  aggregator,
-  addBridgedEndpointSpy,
-  removeBridgedEndpointSpy,
-  removeAllBridgedEndpointsSpy,
-} from 'matterbridge/jestutils';
 
-import { Shelly } from './shelly.ts';
-import initializePlugin, { ShellyPlatform, ShellyPlatformConfig } from './platform.ts';
-import { ShellyDevice } from './shellyDevice.ts';
 import { CoapServer } from './coapServer.ts';
-import { WsServer } from './wsServer.ts';
-import { WsClient } from './wsClient.ts';
-import { ShellyData } from './shellyTypes.ts';
 import { MdnsScanner } from './mdnsScanner.ts';
+import initializePlugin, { ShellyPlatform, ShellyPlatformConfig } from './platform.ts';
+import { Shelly } from './shelly.ts';
+import { ShellyDevice } from './shellyDevice.ts';
+import { ShellyData } from './shellyTypes.ts';
+import { WsClient } from './wsClient.ts';
+import { WsServer } from './wsServer.ts';
 
 // Setup the test environment
 await setupTest(NAME, false);

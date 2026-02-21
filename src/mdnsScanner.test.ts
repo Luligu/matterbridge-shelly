@@ -7,16 +7,16 @@ const MATTER_PORT = 0;
 const NAME = 'Mdns';
 const HOMEDIR = path.join('jest', NAME);
 
-import path from 'node:path';
-import { readFileSync, rmSync } from 'node:fs';
 import { RemoteInfo } from 'node:dgram';
+import { readFileSync, rmSync } from 'node:fs';
+import path from 'node:path';
 
 import { jest } from '@jest/globals';
-import { LogLevel, AnsiLogger, ign, db, hk, CYAN, rs } from 'matterbridge/logger';
-import { ResponsePacket } from 'multicast-dns';
 import { flushAsync, loggerLogSpy, setupTest } from 'matterbridge/jestutils';
+import { AnsiLogger, CYAN, db, hk, ign, LogLevel, rs } from 'matterbridge/logger';
+import { ResponsePacket } from 'multicast-dns';
 
-import { MdnsScanner, DiscoveredDeviceListener, DiscoveredDevice } from './mdnsScanner.ts';
+import { DiscoveredDevice, DiscoveredDeviceListener, MdnsScanner } from './mdnsScanner.ts';
 
 // Setup the test environment
 await setupTest(NAME, false);

@@ -23,12 +23,12 @@
 
 import EventEmitter from 'node:events';
 
-import { BLUE, CYAN, GREEN, GREY, YELLOW, db, debugStringify, er } from 'matterbridge/logger';
+import { BLUE, CYAN, db, debugStringify, er, GREEN, GREY, YELLOW } from 'matterbridge/logger';
 import { deepEqual, isValidArray, isValidNumber, isValidObject } from 'matterbridge/utils';
 
-import { ShellyData, ShellyDataType, ShellyEvent } from './shellyTypes.js';
-import { ShellyProperty } from './shellyProperty.js';
 import { ShellyDevice } from './shellyDevice.js';
+import { ShellyProperty } from './shellyProperty.js';
+import { ShellyData, ShellyDataType, ShellyEvent } from './shellyTypes.js';
 
 interface LightComponent {
   On(): void;

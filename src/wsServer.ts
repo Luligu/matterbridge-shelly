@@ -24,7 +24,7 @@
 import EventEmitter from 'node:events';
 import { createServer, IncomingMessage, Server } from 'node:http';
 
-import { AnsiLogger, CYAN, LogLevel, TimestampFormat, db, er, hk, rs, wr, zb } from 'matterbridge/logger';
+import { AnsiLogger, CYAN, db, er, hk, LogLevel, rs, TimestampFormat, wr, zb } from 'matterbridge/logger';
 import WebSocket, { WebSocketServer } from 'ws';
 
 import { ShellyDevice } from './shellyDevice.js';

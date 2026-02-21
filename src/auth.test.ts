@@ -10,13 +10,13 @@ import { jest } from '@jest/globals';
 import { setupTest } from 'matterbridge/jestutils';
 
 import {
-  parseBasicAuthenticateHeader,
-  parseDigestAuthenticateHeader,
   createBasicShellyAuth,
   createDigestShellyAuth,
+  generateNonce,
   getGen1BodyOptions,
   getGen2BodyOptions,
-  generateNonce,
+  parseBasicAuthenticateHeader,
+  parseDigestAuthenticateHeader,
 } from './auth.ts';
 
 // Setup the test environment

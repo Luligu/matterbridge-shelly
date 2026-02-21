@@ -22,29 +22,29 @@
  */
 
 import { MatterbridgeEndpoint } from 'matterbridge';
+import { db, debugStringify, dn, er, hk, idn, or, rs, YELLOW, zb } from 'matterbridge/logger';
 import {
-  SmokeCoAlarm,
+  BooleanState,
+  ColorControl,
+  ElectricalEnergyMeasurement,
+  ElectricalPowerMeasurement,
+  IlluminanceMeasurement,
+  LevelControl,
+  OccupancySensing,
   OnOff,
   PowerSource,
-  WindowCovering,
-  ColorControl,
-  LevelControl,
-  BooleanState,
-  OccupancySensing,
-  IlluminanceMeasurement,
-  TemperatureMeasurement,
   RelativeHumidityMeasurement,
+  SmokeCoAlarm,
+  TemperatureMeasurement,
   Thermostat,
-  ElectricalPowerMeasurement,
-  ElectricalEnergyMeasurement,
+  WindowCovering,
 } from 'matterbridge/matter/clusters';
-import { db, debugStringify, dn, er, hk, idn, or, rs, YELLOW, zb } from 'matterbridge/logger';
 import { isValidArray, isValidBoolean, isValidNumber, isValidObject, isValidString, rgbColorToHslColor } from 'matterbridge/utils';
 
+import { ShellyPlatform } from './platform.js';
+import { isLightComponent, isSwitchComponent } from './shellyComponent.js';
 import { ShellyDevice } from './shellyDevice.js';
 import { ShellyData, ShellyDataType } from './shellyTypes.js';
-import { isLightComponent, isSwitchComponent } from './shellyComponent.js';
-import { ShellyPlatform } from './platform.js';
 
 /**
  * Handles updates from Shelly devices and updates the corresponding Matterbridge endpoint.

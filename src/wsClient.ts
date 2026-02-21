@@ -24,7 +24,7 @@
 import crypto from 'node:crypto';
 import EventEmitter from 'node:events';
 
-import { AnsiLogger, CYAN, LogLevel, TimestampFormat, db, er, hk, nf, rs, wr, zb } from 'matterbridge/logger';
+import { AnsiLogger, CYAN, db, er, hk, LogLevel, nf, rs, TimestampFormat, wr, zb } from 'matterbridge/logger';
 import WebSocket from 'ws';
 
 import { createDigestShellyAuth } from './auth.js';
