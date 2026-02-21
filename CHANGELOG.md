@@ -27,6 +27,19 @@ If you like this project and find it useful, please consider giving it a star on
 
 You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his invaluable contribution to this project.
 
+## [2.2.4] - Dev branch
+
+### Changed
+
+- [package]: Update dependencies.
+- [package]: Bump package to `automator` v.3.0.8.
+- [package]: Bump `node-persist-manager` to v.2.0.1.
+- [package]: Bump `eslint` to v.10.0.1.
+- [package]: Bump `typescript-eslint` to v.8.56.0.
+- [eslint]: Use minimatch in ignores.
+
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+
 ## [2.2.3] - 2026-02-07
 
 ### Changed

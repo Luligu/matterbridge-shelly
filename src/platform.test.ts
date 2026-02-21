@@ -6,7 +6,7 @@ const HOMEDIR = path.join('jest', NAME);
 
 import path from 'node:path';
 
-import { Matterbridge, MatterbridgeEndpoint, featuresFor } from 'matterbridge';
+import { MatterbridgeEndpoint, featuresFor } from 'matterbridge';
 import {
   OnOffCluster,
   BindingCluster,
@@ -36,6 +36,9 @@ import {
   startMatterbridgeEnvironment,
   stopMatterbridgeEnvironment,
   aggregator,
+  addBridgedEndpointSpy,
+  removeBridgedEndpointSpy,
+  removeAllBridgedEndpointsSpy,
 } from 'matterbridge/jestutils';
 
 import { Shelly } from './shelly.ts';
@@ -87,13 +90,13 @@ describe('ShellyPlatform', () => {
 
   const address = 'c4:cb:76:b3:cd:1f';
 
-  jest.spyOn(Matterbridge.prototype, 'addBridgedEndpoint').mockImplementation((pluginName: string, device: MatterbridgeEndpoint) => {
+  addBridgedEndpointSpy.mockImplementation((pluginName: string, device: MatterbridgeEndpoint) => {
     return Promise.resolve();
   });
-  jest.spyOn(Matterbridge.prototype, 'removeBridgedEndpoint').mockImplementation((pluginName: string, device: MatterbridgeEndpoint) => {
+  removeBridgedEndpointSpy.mockImplementation((pluginName: string, device: MatterbridgeEndpoint) => {
     return Promise.resolve();
   });
-  jest.spyOn(Matterbridge.prototype, 'removeAllBridgedEndpoints').mockImplementation((pluginName: string) => {
+  removeAllBridgedEndpointsSpy.mockImplementation((pluginName: string) => {
     return Promise.resolve();
   });
 

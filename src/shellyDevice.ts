@@ -510,6 +510,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
    * @returns {Promise<ShellyDevice | undefined>} A Promise that resolves to a ShellyDevice instance or undefined if an error occurs.
    */
   static async create(shelly: Shelly, log: AnsiLogger, host: string): Promise<ShellyDevice | undefined> {
+    // eslint-disable-next-line no-useless-assignment
     let shellyPayload: ShellyData | null = null;
     let statusPayload: ShellyData | null = null;
     let settingsPayload: ShellyData | null = null;
