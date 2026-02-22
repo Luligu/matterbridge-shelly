@@ -1311,11 +1311,19 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         } else if (component.name === 'Smoke') {
           const smokeComponent = device.getComponent(key);
           if (smokeComponent?.hasProperty('alarm') && isValidBoolean(smokeComponent.getValue('alarm'))) {
-            // const child = mbDevice.addChildDeviceType(key, [contactSensor], undefined, config.debug as boolean);
             const child = mbDevice.addChildDeviceType(key, [smokeCoAlarm], undefined, config.debug as boolean);
             child.log.logName = `${device.name} ${key}`;
-            // child.createDefaultBooleanStateClusterServer(!smokeComponent.getValue('alarm') as boolean);
             child.createSmokeOnlySmokeCOAlarmClusterServer(smokeComponent.getValue('alarm') ? SmokeCoAlarm.AlarmState.Critical : SmokeCoAlarm.AlarmState.Normal);
+            child.addRequiredClusterServers();
+            // Add event handler
+            smokeComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
+              shellyUpdateHandler(this, mbDevice, device, component, property, value);
+            });
+          }
+          if (smokeComponent?.hasProperty('smoke') && isValidBoolean(smokeComponent.getValue('smoke'))) {
+            const child = mbDevice.addChildDeviceType(key, [smokeCoAlarm], undefined, config.debug as boolean);
+            child.log.logName = `${device.name} ${key}`;
+            child.createSmokeOnlySmokeCOAlarmClusterServer(smokeComponent.getValue('smoke') ? SmokeCoAlarm.AlarmState.Critical : SmokeCoAlarm.AlarmState.Normal);
             child.addRequiredClusterServers();
             // Add event handler
             smokeComponent.on('update', (component: string, property: string, value: ShellyDataType) => {

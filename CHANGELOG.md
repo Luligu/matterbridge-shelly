@@ -29,6 +29,11 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 
 ## [2.2.4] - Dev branch
 
+### Added
+
+- [shelly]: Verified firmware 1.7.4.
+- [Jest]: Jest test on UpdateHandler with coverage 100%.
+
 ### Changed
 
 - [package]: Update dependencies.
@@ -38,6 +43,10 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 - [package]: Bump `typescript-eslint` to v.8.56.0.
 - [package]: Replace `eslint-plugin-import` with `eslint-plugin-simple-import-sort`.
 - [eslint]: Use minimatch in ignores.
+
+### Fixed
+
+- [smoke]: Fix shelly smoke detection.
 
 <a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 

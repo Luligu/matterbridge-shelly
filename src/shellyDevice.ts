@@ -88,9 +88,12 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
   cached = false;
 
   colorUpdateTimeout?: NodeJS.Timeout;
+  colorUpdateTimeoutMs = 200;
   colorCommandTimeout?: NodeJS.Timeout;
   thermostatSystemModeTimeout?: NodeJS.Timeout;
   thermostatSetpointTimeout?: NodeJS.Timeout;
+  coverUpdateTimeout?: NodeJS.Timeout;
+  coverUpdateTimeoutMs = 1000;
   private lastseenInterval?: NodeJS.Timeout;
   private startWsClientTimeout?: NodeJS.Timeout;
   wsClient?: WsClient;
@@ -133,6 +136,8 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
     this.thermostatSystemModeTimeout = undefined;
     if (this.thermostatSetpointTimeout) clearInterval(this.thermostatSetpointTimeout);
     this.thermostatSetpointTimeout = undefined;
+    if (this.coverUpdateTimeout) clearInterval(this.coverUpdateTimeout);
+    this.coverUpdateTimeout = undefined;
     if (this.lastseenInterval) clearInterval(this.lastseenInterval);
     this.lastseenInterval = undefined;
     this.lastseen = 0;
