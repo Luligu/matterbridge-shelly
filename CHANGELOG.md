@@ -32,17 +32,22 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 ### Added
 
 - [shelly]: Verified firmware 1.7.4.
-- [Jest]: Jest test on UpdateHandler with coverage 100%.
+- [Jest]: Add jest test on UpdateHandler with coverage 100%.
+- [package]: Add `CONTRIBUTING.md`.
+- [package]: Add `STYLEGUIDE.md`.
 
 ### Changed
 
 - [package]: Update dependencies.
-- [package]: Bump package to `automator` v.3.0.9.
+- [package]: Bump package to `automator` v.3.1.1.
+- [package]: Add `@eslint/json`.
+- [package]: Add `@eslint/markdown`.
+- [package]: Add `CONTRIBUTING.md`.
+- [package]: Add `STYLEGUIDE.md`.
 - [package]: Bump `node-persist-manager` to v.2.0.1.
-- [package]: Bump `eslint` to v.10.0.1.
+- [package]: Bump `eslint` to v.10.0.2.
 - [package]: Bump `typescript-eslint` to v.8.56.0.
 - [package]: Replace `eslint-plugin-import` with `eslint-plugin-simple-import-sort`.
-- [eslint]: Use minimatch in ignores.
 
 ### Fixed
 
