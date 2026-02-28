@@ -33,8 +33,6 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 
 - [shelly]: Verified firmware 1.7.4.
 - [Jest]: Add jest test on UpdateHandler with coverage 100%.
-- [package]: Add `CONTRIBUTING.md`.
-- [package]: Add `STYLEGUIDE.md`.
 
 ### Changed
 
