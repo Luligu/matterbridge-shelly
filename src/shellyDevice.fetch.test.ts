@@ -6,17 +6,17 @@ const MATTER_PORT = 0;
 const NAME = 'ShellyDeviceFetch';
 const HOMEDIR = path.join('jest', NAME);
 
-import path from 'node:path';
 import { promises as fs } from 'node:fs';
-import { createServer, Server, IncomingMessage, ServerResponse } from 'node:http';
+import { createServer, IncomingMessage, Server, ServerResponse } from 'node:http';
 import { tmpdir } from 'node:os';
+import path from 'node:path';
 
-import { AnsiLogger, LogLevel, TimestampFormat } from 'matterbridge/logger';
 import { jest } from '@jest/globals';
 import { loggerLogSpy, setupTest } from 'matterbridge/jestutils';
+import { AnsiLogger, LogLevel, TimestampFormat } from 'matterbridge/logger';
 
-import { ShellyDevice } from './shellyDevice.js';
 import { Shelly } from './shelly.js';
+import { ShellyDevice } from './shellyDevice.js';
 
 // Setup the test environment
 await setupTest(NAME, false);

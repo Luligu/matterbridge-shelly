@@ -6,19 +6,19 @@ const HOMEDIR = path.join('jest', NAME);
 
 import path from 'node:path';
 
-import { AnsiLogger, TimestampFormat, LogLevel, MAGENTA, db, BLUE, hk, zb, nt, dn, er, nf, YELLOW } from 'matterbridge/logger';
 import { jest } from '@jest/globals';
-import { wait } from 'matterbridge/utils';
 import { flushAsync, loggerLogSpy, setupTest } from 'matterbridge/jestutils';
+import { AnsiLogger, BLUE, db, dn, er, hk, LogLevel, MAGENTA, nf, nt, TimestampFormat, YELLOW, zb } from 'matterbridge/logger';
+import { wait } from 'matterbridge/utils';
 
-import { ShellyDevice } from './shellyDevice.js';
+import { CoapServer } from './coapServer.js';
+import { MdnsScanner } from './mdnsScanner.js';
 import { Shelly } from './shelly.js';
 import { ShellyComponent } from './shellyComponent.js';
+import { ShellyDevice } from './shellyDevice.js';
 import { BTHomeComponent, ShellyDataType } from './shellyTypes.js';
-import { CoapServer } from './coapServer.js';
-import { WsServer } from './wsServer.js';
 import { WsClient } from './wsClient.js';
-import { MdnsScanner } from './mdnsScanner.js';
+import { WsServer } from './wsServer.js';
 
 // Setup the test environment
 await setupTest(NAME, false);

@@ -9,10 +9,10 @@ const HOMEDIR = path.join('jest', NAME);
 import path from 'node:path';
 
 import { jest } from '@jest/globals';
-import { WebSocket, WebSocketServer } from 'ws';
-import { wait, waiter } from 'matterbridge/utils';
-import { db, er, hk, LogLevel, nf, wr, zb } from 'matterbridge/logger';
 import { consoleDebugSpy, flushAsync, loggerLogSpy, setupTest } from 'matterbridge/jestutils';
+import { db, er, hk, LogLevel, nf, wr, zb } from 'matterbridge/logger';
+import { wait, waiter } from 'matterbridge/utils';
+import { WebSocket, WebSocketServer } from 'ws';
 
 import { WsClient } from './wsClient.ts';
 

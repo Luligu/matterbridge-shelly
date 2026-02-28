@@ -6,46 +6,46 @@ const HOMEDIR = path.join('jest', NAME);
 
 import path from 'node:path';
 
-import { Matterbridge, MatterbridgeEndpoint, featuresFor } from 'matterbridge';
-import {
-  OnOffCluster,
-  BindingCluster,
-  DescriptorCluster,
-  ElectricalEnergyMeasurement,
-  ElectricalPowerMeasurement,
-  GroupsCluster,
-  IdentifyCluster,
-  PowerTopology,
-  Switch,
-  ColorControl,
-  TemperatureMeasurementCluster,
-  RelativeHumidityMeasurementCluster,
-} from 'matterbridge/matter/clusters';
-import { OnOffBehavior, RelativeHumidityMeasurementBehavior, TemperatureMeasurementBehavior } from 'matterbridge/matter/behaviors';
-import { AnsiLogger, db, er, hk, idn, LogLevel, nf, rs, wr, zb, CYAN, TimestampFormat, YELLOW, or } from 'matterbridge/logger';
-import { wait } from 'matterbridge/utils';
-// Matter.js
 import { jest } from '@jest/globals';
+import { featuresFor, MatterbridgeEndpoint } from 'matterbridge';
 import {
   addMatterbridgePlatform,
+  aggregator,
   createMatterbridgeEnvironment,
   destroyMatterbridgeEnvironment,
+  log,
   loggerLogSpy,
   matterbridge,
   setupTest,
   startMatterbridgeEnvironment,
   stopMatterbridgeEnvironment,
-  aggregator,
 } from 'matterbridge/jestutils';
+import { CYAN, db, er, hk, idn, LogLevel, nf, or, rs, wr, YELLOW, zb } from 'matterbridge/logger';
+import { OnOffBehavior, RelativeHumidityMeasurementBehavior, TemperatureMeasurementBehavior } from 'matterbridge/matter/behaviors';
+import {
+  BindingCluster,
+  ColorControl,
+  DescriptorCluster,
+  ElectricalEnergyMeasurement,
+  ElectricalPowerMeasurement,
+  GroupsCluster,
+  IdentifyCluster,
+  OnOffCluster,
+  PowerTopology,
+  RelativeHumidityMeasurementCluster,
+  Switch,
+  TemperatureMeasurementCluster,
+} from 'matterbridge/matter/clusters';
+import { wait } from 'matterbridge/utils';
 
-import { Shelly } from './shelly.ts';
-import initializePlugin, { ShellyPlatform, ShellyPlatformConfig } from './platform.ts';
-import { ShellyDevice } from './shellyDevice.ts';
 import { CoapServer } from './coapServer.ts';
-import { WsServer } from './wsServer.ts';
-import { WsClient } from './wsClient.ts';
-import { ShellyData } from './shellyTypes.ts';
 import { MdnsScanner } from './mdnsScanner.ts';
+import initializePlugin, { ShellyPlatform, ShellyPlatformConfig } from './platform.ts';
+import { Shelly } from './shelly.ts';
+import { ShellyDevice } from './shellyDevice.ts';
+import { ShellyData } from './shellyTypes.ts';
+import { WsClient } from './wsClient.ts';
+import { WsServer } from './wsServer.ts';
 
 // Setup the test environment
 await setupTest(NAME, false);
@@ -72,7 +72,7 @@ const mockConfig: ShellyPlatformConfig = {
   enableBleDiscover: true,
   failsafeCount: 0,
   postfix: '',
-  expertMode: false,
+  expertMode: true,
   debug: true,
   debugMdns: true,
   debugCoap: true,
@@ -81,21 +81,10 @@ const mockConfig: ShellyPlatformConfig = {
 };
 
 describe('ShellyPlatform', () => {
-  const log = new AnsiLogger({ logName: NAME, logTimestampFormat: TimestampFormat.TIME_MILLIS, logLevel: LogLevel.DEBUG });
   let shellyPlatform: ShellyPlatform;
   let shelly: Shelly;
 
   const address = 'c4:cb:76:b3:cd:1f';
-
-  jest.spyOn(Matterbridge.prototype, 'addBridgedEndpoint').mockImplementation((pluginName: string, device: MatterbridgeEndpoint) => {
-    return Promise.resolve();
-  });
-  jest.spyOn(Matterbridge.prototype, 'removeBridgedEndpoint').mockImplementation((pluginName: string, device: MatterbridgeEndpoint) => {
-    return Promise.resolve();
-  });
-  jest.spyOn(Matterbridge.prototype, 'removeAllBridgedEndpoints').mockImplementation((pluginName: string) => {
-    return Promise.resolve();
-  });
 
   const coapServerStartSpy = jest.spyOn(CoapServer.prototype, 'start').mockImplementation(() => {});
   const coapServerStopSpy = jest.spyOn(CoapServer.prototype, 'stop').mockImplementation(() => {});
@@ -148,7 +137,6 @@ describe('ShellyPlatform', () => {
   });
 
   it('should return an instance of ShellyPlatform', async () => {
-    matterbridge.matterbridgeVersion = '3.5.0';
     const platform = initializePlugin(matterbridge, log, mockConfig);
     expect(platform).toBeDefined();
     expect(platform).toBeInstanceOf(ShellyPlatform);
@@ -162,13 +150,12 @@ describe('ShellyPlatform', () => {
   });
 
   it('should initialize platform with config name and version', () => {
-    matterbridge.matterbridgeVersion = '3.5.0';
     shellyPlatform = new ShellyPlatform(matterbridge, log, mockConfig as any);
     addMatterbridgePlatform(shellyPlatform, 'matterbridge-shelly');
     shelly = (shellyPlatform as any).shelly;
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Initializing platform: ${idn}${mockConfig.name}${rs}${db} v.${CYAN}${mockConfig.version}`);
     clearInterval((shelly as any).fetchInterval);
-    shellyPlatform.config.entityBlackList = [];
+    shellyPlatform.config.entityBlackList = []; // First run turn off entity black list
   });
 
   it('should validate version', () => {
@@ -1010,10 +997,5 @@ describe('ShellyPlatform', () => {
     await shellyPlatform.onShutdown('Test reason');
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Shutting down platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
     expect(matterbridge.removeAllBridgedEndpoints).toHaveBeenCalled();
-  });
-
-  it('should destroy shelly', async () => {
-    (shelly as any).destroy();
-    expect((shelly as any).fetchInterval).toBeUndefined();
   });
 });

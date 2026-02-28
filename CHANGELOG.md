@@ -27,6 +27,32 @@ If you like this project and find it useful, please consider giving it a star on
 
 You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his invaluable contribution to this project.
 
+## [2.2.4] - 2026-02-28
+
+### Added
+
+- [shelly]: Verified firmware 1.7.4.
+- [Jest]: Add jest test on UpdateHandler with coverage 100%.
+
+### Changed
+
+- [package]: Update dependencies.
+- [package]: Bump package to `automator` v.3.1.1.
+- [package]: Add `@eslint/json`.
+- [package]: Add `@eslint/markdown`.
+- [package]: Add `CONTRIBUTING.md`.
+- [package]: Add `STYLEGUIDE.md`.
+- [package]: Bump `node-persist-manager` to v.2.0.1.
+- [package]: Bump `eslint` to v.10.0.2.
+- [package]: Bump `typescript-eslint` to v.8.56.0.
+- [package]: Replace `eslint-plugin-import` with `eslint-plugin-simple-import-sort`.
+
+### Fixed
+
+- [smoke]: Fix shelly smoke detection.
+
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+
 ## [2.2.3] - 2026-02-07
 
 ### Changed

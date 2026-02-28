@@ -21,23 +21,17 @@
  * limitations under the License.
  */
 
-// Node 18.x: fetch is available, but flagged as “experimental” until Node 18.17.0.
-/* eslint-disable n/no-unsupported-features/node-builtins */
-
-// Node.js imports
-import { EventEmitter } from 'node:events';
 import crypto from 'node:crypto';
+import { EventEmitter } from 'node:events';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 
-// Matterbridge imports
+import { AnsiLogger, BLUE, CYAN, db, debugStringify, dn, er, GREEN, GREY, hk, idn, LogLevel, MAGENTA, nf, nt, RESET, rk, rs, wr, YELLOW, zb } from 'matterbridge/logger';
 import { isValidNumber, isValidObject, isValidString } from 'matterbridge/utils';
-import { AnsiLogger, LogLevel, BLUE, CYAN, GREEN, GREY, MAGENTA, RESET, db, debugStringify, er, hk, nf, wr, zb, rs, YELLOW, idn, nt, rk, dn } from 'matterbridge/logger';
 
-// Shellies imports
-import { parseDigestAuthenticateHeader, createDigestShellyAuth, createBasicShellyAuth, parseBasicAuthenticateHeader, getGen2BodyOptions, getGen1BodyOptions } from './auth.js';
-import { WsClient } from './wsClient.js';
+import { createBasicShellyAuth, createDigestShellyAuth, getGen1BodyOptions, getGen2BodyOptions, parseBasicAuthenticateHeader, parseDigestAuthenticateHeader } from './auth.js';
 import { Shelly } from './shelly.js';
+import { isCoverComponent, isLightComponent, isSwitchComponent, ShellyComponent } from './shellyComponent.js';
 import {
   BTHomeBluTrvComponent,
   BTHomeComponent,
@@ -50,7 +44,7 @@ import {
   ShellyDataType,
   ShellyEvent,
 } from './shellyTypes.js';
-import { isCoverComponent, isLightComponent, isSwitchComponent, ShellyComponent } from './shellyComponent.js';
+import { WsClient } from './wsClient.js';
 
 interface ShellyDeviceEvents {
   online: [];
@@ -94,9 +88,12 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
   cached = false;
 
   colorUpdateTimeout?: NodeJS.Timeout;
+  colorUpdateTimeoutMs = 200;
   colorCommandTimeout?: NodeJS.Timeout;
   thermostatSystemModeTimeout?: NodeJS.Timeout;
   thermostatSetpointTimeout?: NodeJS.Timeout;
+  coverUpdateTimeout?: NodeJS.Timeout;
+  coverUpdateTimeoutMs = 1000;
   private lastseenInterval?: NodeJS.Timeout;
   private startWsClientTimeout?: NodeJS.Timeout;
   wsClient?: WsClient;
@@ -139,6 +136,8 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
     this.thermostatSystemModeTimeout = undefined;
     if (this.thermostatSetpointTimeout) clearInterval(this.thermostatSetpointTimeout);
     this.thermostatSetpointTimeout = undefined;
+    if (this.coverUpdateTimeout) clearInterval(this.coverUpdateTimeout);
+    this.coverUpdateTimeout = undefined;
     if (this.lastseenInterval) clearInterval(this.lastseenInterval);
     this.lastseenInterval = undefined;
     this.lastseen = 0;
@@ -510,6 +509,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
    * @returns {Promise<ShellyDevice | undefined>} A Promise that resolves to a ShellyDevice instance or undefined if an error occurs.
    */
   static async create(shelly: Shelly, log: AnsiLogger, host: string): Promise<ShellyDevice | undefined> {
+    // eslint-disable-next-line no-useless-assignment
     let shellyPayload: ShellyData | null = null;
     let statusPayload: ShellyData | null = null;
     let settingsPayload: ShellyData | null = null;

@@ -6,15 +6,15 @@ const HOMEDIR = path.join('jest', NAME);
 
 import path from 'node:path';
 
-import { AnsiLogger, LogLevel, TimestampFormat } from 'matterbridge/logger';
-import { getMacAddress, wait, waiter } from 'matterbridge/utils';
 import { jest } from '@jest/globals';
 import { flushAsync, setupTest } from 'matterbridge/jestutils';
+import { AnsiLogger, LogLevel, TimestampFormat } from 'matterbridge/logger';
+import { getMacAddress, wait, waiter } from 'matterbridge/utils';
 
-import { Shelly } from './shelly.ts';
-import { ShellyDevice } from './shellyDevice.ts';
-import { isCoverComponent, isLightComponent, isSwitchComponent } from './shellyComponent.ts';
 import { CoapServer } from './coapServer.ts';
+import { Shelly } from './shelly.ts';
+import { isCoverComponent, isLightComponent, isSwitchComponent } from './shellyComponent.ts';
+import { ShellyDevice } from './shellyDevice.ts';
 
 // Setup the test environment
 await setupTest(NAME, false);

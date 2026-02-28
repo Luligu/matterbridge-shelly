@@ -21,13 +21,13 @@
  * limitations under the License.
  */
 
-import EventEmitter from 'node:events';
 import { RemoteInfo, SocketType } from 'node:dgram';
+import EventEmitter from 'node:events';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 
+import { AnsiLogger, BLUE, CYAN, db, debugStringify, er, hk, idn, ign, LogLevel, nf, rs, TimestampFormat, zb } from 'matterbridge/logger';
 import mdns, { QueryPacket, ResponsePacket } from 'multicast-dns';
-import { AnsiLogger, BLUE, CYAN, LogLevel, TimestampFormat, db, debugStringify, er, hk, idn, ign, nf, rs, zb } from 'matterbridge/logger';
 
 import { ShellyDeviceId } from './shellyTypes.js';
 

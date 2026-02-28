@@ -21,88 +21,83 @@
  * limitations under the License.
  */
 
-// Node.js imports
-import path from 'node:path';
 import * as fs from 'node:fs';
 import os from 'node:os';
+import path from 'node:path';
 
-// Matterbridge imports
 import {
-  MatterbridgeDynamicPlatform,
-  PlatformConfig,
-  onOffSwitch,
-  powerSource,
   bridgedNode,
-  electricalSensor,
+  colorTemperatureLight,
+  contactSensor,
+  coverDevice,
   DeviceTypeDefinition,
+  dimmableLight,
+  electricalSensor,
+  extendedColorLight,
+  genericSwitch,
+  humiditySensor,
+  lightSensor,
+  MatterbridgeDynamicPlatform,
+  MatterbridgeEndpoint,
+  modeSelect,
+  occupancySensor,
   onOffLight,
   onOffOutlet,
-  thermostatDevice,
-  modeSelect,
-  coverDevice,
-  genericSwitch,
-  contactSensor,
-  lightSensor,
-  occupancySensor,
-  temperatureSensor,
-  humiditySensor,
-  dimmableLight,
-  colorTemperatureLight,
-  MatterbridgeEndpoint,
-  waterLeakDetector,
-  smokeCoAlarm,
-  extendedColorLight,
+  onOffSwitch,
+  PlatformConfig,
   PlatformMatterbridge,
+  powerSource,
+  smokeCoAlarm,
+  temperatureSensor,
+  thermostatDevice,
+  waterLeakDetector,
 } from 'matterbridge';
-import {
-  hslColorToRgbColor,
-  rgbColorToHslColor,
-  isValidIpv4Address,
-  isValidString,
-  isValidNumber,
-  isValidBoolean,
-  isValidArray,
-  isValidObject,
-  waiter,
-  xyColorToRgbColor,
-  miredToKelvin,
-  kelvinToRGB,
-} from 'matterbridge/utils';
-// Logger imports
-import { AnsiLogger, CYAN, GREEN, LogLevel, TimestampFormat, YELLOW, db, debugStringify, dn, er, hk, idn, nf, nt, rs, wr, zb } from 'matterbridge/logger';
-// Storage imports
-import { NodeStorage, NodeStorageManager } from 'matterbridge/storage';
-// @matter imports
+import { AnsiLogger, CYAN, db, debugStringify, dn, er, GREEN, hk, idn, LogLevel, nf, nt, rs, TimestampFormat, wr, YELLOW, zb } from 'matterbridge/logger';
 import { AtLeastOne, NumberTag } from 'matterbridge/matter';
-import { VendorId, Semtag } from 'matterbridge/matter/types';
 import {
+  BooleanState,
   BridgedDeviceBasicInformation,
+  ColorControl,
+  ElectricalEnergyMeasurement,
+  ElectricalPowerMeasurement,
+  IlluminanceMeasurement,
+  LevelControl,
+  ModeSelect,
+  OccupancySensing,
   OnOff,
   PowerSource,
-  WindowCovering,
-  ColorControl,
-  LevelControl,
-  BooleanState,
-  OccupancySensing,
-  IlluminanceMeasurement,
-  TemperatureMeasurement,
   RelativeHumidityMeasurement,
-  ElectricalPowerMeasurement,
-  ElectricalEnergyMeasurement,
-  Thermostat,
-  Switch,
-  ModeSelect,
   SmokeCoAlarm,
+  Switch,
+  TemperatureMeasurement,
+  Thermostat,
+  WindowCovering,
 } from 'matterbridge/matter/clusters';
+import { Semtag, VendorId } from 'matterbridge/matter/types';
+import { NodeStorage, NodeStorageManager } from 'matterbridge/storage';
+import {
+  hslColorToRgbColor,
+  isValidArray,
+  isValidBoolean,
+  isValidIpv4Address,
+  isValidNumber,
+  isValidObject,
+  isValidString,
+  kelvinToRGB,
+  miredToKelvin,
+  rgbColorToHslColor,
+  waiter,
+  xyColorToRgbColor,
+} from 'matterbridge/utils';
 
-// Shelly imports
-import { Shelly } from './shelly.js';
 import { DiscoveredDevice } from './mdnsScanner.js';
-import { ShellyDevice } from './shellyDevice.js';
-import { isCoverComponent, isLightComponent, isSwitchComponent, ShellyComponent, ShellyCoverComponent, ShellyLightComponent, ShellySwitchComponent } from './shellyComponent.js';
-import { ShellyDataType, ShellyDeviceId, ShellyEvent } from './shellyTypes.js';
 import { shellyCoverCommandHandler, shellyIdentifyCommandHandler, shellyLightCommandHandler, shellySwitchCommandHandler } from './platformCommandHadlers.js';
 import { shellyUpdateHandler } from './platformUpdateHandler.js';
+// Shelly imports
+import { Shelly } from './shelly.js';
+import { isCoverComponent, isLightComponent, isSwitchComponent, ShellyComponent, ShellyCoverComponent, ShellyLightComponent, ShellySwitchComponent } from './shellyComponent.js';
+import { ShellyDevice } from './shellyDevice.js';
+import { ShellyDataType, ShellyDeviceId, ShellyEvent } from './shellyTypes.js';
 
 export interface ShellyPlatformConfig extends PlatformConfig {
   username: string;
@@ -1316,11 +1311,19 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         } else if (component.name === 'Smoke') {
           const smokeComponent = device.getComponent(key);
           if (smokeComponent?.hasProperty('alarm') && isValidBoolean(smokeComponent.getValue('alarm'))) {
-            // const child = mbDevice.addChildDeviceType(key, [contactSensor], undefined, config.debug as boolean);
             const child = mbDevice.addChildDeviceType(key, [smokeCoAlarm], undefined, config.debug as boolean);
             child.log.logName = `${device.name} ${key}`;
-            // child.createDefaultBooleanStateClusterServer(!smokeComponent.getValue('alarm') as boolean);
             child.createSmokeOnlySmokeCOAlarmClusterServer(smokeComponent.getValue('alarm') ? SmokeCoAlarm.AlarmState.Critical : SmokeCoAlarm.AlarmState.Normal);
+            child.addRequiredClusterServers();
+            // Add event handler
+            smokeComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
+              shellyUpdateHandler(this, mbDevice, device, component, property, value);
+            });
+          }
+          if (smokeComponent?.hasProperty('smoke') && isValidBoolean(smokeComponent.getValue('smoke'))) {
+            const child = mbDevice.addChildDeviceType(key, [smokeCoAlarm], undefined, config.debug as boolean);
+            child.log.logName = `${device.name} ${key}`;
+            child.createSmokeOnlySmokeCOAlarmClusterServer(smokeComponent.getValue('smoke') ? SmokeCoAlarm.AlarmState.Critical : SmokeCoAlarm.AlarmState.Normal);
             child.addRequiredClusterServers();
             // Add event handler
             smokeComponent.on('update', (component: string, property: string, value: ShellyDataType) => {

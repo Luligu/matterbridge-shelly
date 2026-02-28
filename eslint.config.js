@@ -5,55 +5,64 @@
 import path from 'node:path';
 import url from 'node:url';
 
-import { defineConfig } from 'eslint/config';
 import js from '@eslint/js';
+import json from '@eslint/json';
+import markdown from '@eslint/markdown';
+import vitest from '@vitest/eslint-plugin';
+import { defineConfig } from 'eslint/config';
+import jest from 'eslint-plugin-jest';
+import jsdoc from 'eslint-plugin-jsdoc';
+import n from 'eslint-plugin-n';
+import prettier from 'eslint-plugin-prettier/recommended';
+import promise from 'eslint-plugin-promise';
+import pluginSimpleImportSort from 'eslint-plugin-simple-import-sort';
 import tseslint from 'typescript-eslint';
-import pluginImport from 'eslint-plugin-import';
-import pluginN from 'eslint-plugin-n';
-import pluginPromise from 'eslint-plugin-promise';
-import pluginJsdoc from 'eslint-plugin-jsdoc';
-import pluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
-import pluginJest from 'eslint-plugin-jest';
-import pluginVitest from '@vitest/eslint-plugin';
 
+const sourceFiles = ['**/*.{js,mjs,cjs,ts,mts,cts}'];
 const __filename = url.fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export default defineConfig([
   {
     name: 'Global Ignores',
-    ignores: ['dist', 'node_modules', '.cache', 'coverage', 'build', 'screenshots', 'scripts'],
+    // This works faster in eslint 10.x and is recursive by default, so we don't need to specify '**/' in the patterns
+    ignores: ['.cache', 'build', 'coverage', 'dist', 'jest', 'node_modules', 'screenshots', 'temp', 'vendor', 'vite.config.ts'],
   },
-  js.configs.recommended,
-  ...tseslint.configs.strict,
-  // Comment the previous line and uncomment the following line if you want to use strict with type checking
-  // ...tseslint.configs.strictTypeChecked,
-  pluginImport.flatConfigs.recommended,
-  pluginN.configs['flat/recommended-script'],
-  pluginPromise.configs['flat/recommended'],
-  pluginJsdoc.configs['flat/recommended'],
-  pluginPrettierRecommended, // Prettier plugin must be the last plugin in the list
+  // Comment out this line if you want to enable strict type-checked rules, but be aware that it may cause many errors until you fix all type issues in your codebase
+  ...tseslint.configs.strict.map((c) => ({ ...c, files: sourceFiles })),
+  // Uncomment this line to enable strict type-checked rules, but be aware that it may cause many errors until you fix all type issues in your codebase
+  // ...tseslint.configs.strictTypeChecked.map((c) => ({ ...c, files: sourceFiles })),
+  { ...n.configs['flat/recommended-script'], files: sourceFiles },
+  { ...promise.configs['flat/recommended'], files: sourceFiles },
+  { ...jsdoc.configs['flat/recommended'], files: sourceFiles },
+  prettier, // Prettier plugin must be the last plugin in the list and is intentionally not spread with a files property cause it can be used in all file types, not just source files
   {
-    name: 'Global Configuration',
+    name: 'JavaScript & TypeScript Source Files',
+    files: sourceFiles,
     languageOptions: {
       sourceType: 'module',
       ecmaVersion: 'latest',
-      parserOptions: {
-        tsconfigRootDir: __dirname,
-      },
     },
     linterOptions: {
       reportUnusedDisableDirectives: 'error', // Report unused eslint-disable directives
       reportUnusedInlineConfigs: 'error', // Report unused eslint-disable-line directives
     },
+    plugins: {
+      js,
+      n,
+      promise,
+      jsdoc,
+      'simple-import-sort': pluginSimpleImportSort,
+    },
+    extends: ['js/recommended'],
     rules: {
       'no-console': 'warn', // Warn on console usage
-      'spaced-comment': ['error', 'always'], // Require space after comment markers
+      'spaced-comment': ['error', 'always'], // Require space after comment markers. Deprecated, but we still want to enforce it cause it's not handled by Prettier
       'no-unused-vars': 'warn', // Use the base rule for unused variables
-      'import/order': ['warn', { 'newlines-between': 'always' }],
-      'import/no-unresolved': 'off', // Too many false errors with named exports
-      'import/named': 'off', // Too many false errors with named exports
+      'simple-import-sort/imports': ['warn'],
+      'simple-import-sort/exports': ['warn'],
       'n/prefer-node-protocol': 'error', // Prefer using 'node:' protocol for built-in modules
+      'n/no-unsupported-features/node-builtins': ['error', { ignores: ['fetch'] }],
       'n/no-extraneous-import': 'off', // Allow imports from node_modules
       'n/no-unpublished-import': 'off', // Allow imports from unpublished packages
       'promise/always-return': 'warn', // Ensure promises always return a value
@@ -67,7 +76,7 @@ export default defineConfig([
   },
   {
     name: 'JavaScript Source Files',
-    files: ['**/*.js'],
+    files: ['**/*.{js,mjs,cjs}'],
     extends: [tseslint.configs.disableTypeChecked],
   },
   {
@@ -75,8 +84,6 @@ export default defineConfig([
     files: ['src/**/*.ts'],
     ignores: ['src/**/*.test.ts', 'src/**/*.spec.ts'], // Ignore test files
     languageOptions: {
-      sourceType: 'module',
-      ecmaVersion: 'latest',
       parser: tseslint.parser,
       parserOptions: {
         tsconfigRootDir: __dirname,
@@ -84,8 +91,8 @@ export default defineConfig([
       },
     },
     rules: {
-      // Override/add rules specific to typescript files here
-      'no-unused-vars': 'off', // Disable base rule for unused variables in test files
+      'no-undef': 'off', // Disable no-undef for TypeScript files since TypeScript already checks for undefined variables
+      'no-unused-vars': 'off', // Disable base rule for unused variables and use the TypeScript-specific rule instead
       '@typescript-eslint/no-unused-vars': [
         'error',
         {
@@ -97,61 +104,82 @@ export default defineConfig([
           caughtErrorsIgnorePattern: '^_', // Ignore unused caught errors starting with _
         },
       ],
+      // Eventually we want to enable these rules, but they may cause many errors
+      // '@typescript-eslint/no-floating-promises': 'error',
+      // '@typescript-eslint/no-misused-promises': 'error',
+      // '@typescript-eslint/require-await': 'warn',
     },
   },
   {
     name: 'Jest Test Files',
     files: ['**/*.spec.ts', '**/*.test.ts', 'test/**/*.ts'],
-    ignores: ['vitest'], // Ignore Vitest test files
+    ignores: ['vitest/'], // Ignore Vitest test files
     languageOptions: {
-      sourceType: 'module',
-      ecmaVersion: 'latest',
       parser: tseslint.parser,
       parserOptions: {
         tsconfigRootDir: __dirname,
         project: './tsconfig.jest.json', // Use a separate tsconfig for Jest tests with "isolatedModules": true
       },
     },
-    plugins: {
-      jest: pluginJest, // Add Jest plugin for test files
-    },
+    plugins: { jest },
     rules: {
-      // Override/add rules specific to test files here
-      'no-unused-vars': 'off', // Disable base rule for unused variables in test files
+      'no-undef': 'off', // Disable no-undef for TypeScript files since TypeScript already checks for undefined variables
+      'no-unused-vars': 'off', // Disable base rule for unused variables and use the TypeScript-specific rule instead
       '@typescript-eslint/no-unused-vars': 'off', // Disable TypeScript rule for unused variables in test files
       '@typescript-eslint/no-explicit-any': 'off', // Allow 'any' type in test files
       '@typescript-eslint/no-empty-function': 'off', // Allow empty functions in test files
       'jsdoc/require-jsdoc': 'off', // Disable JSDoc rule in test files
 
       // Recommended Jest rules
-      ...pluginJest.configs.recommended.rules,
+      ...jest.configs.recommended.rules,
     },
   },
   {
     name: 'Vitest Test Files',
     files: ['vitest/*.spec.ts', 'vitest/*.test.ts'],
     languageOptions: {
-      sourceType: 'module',
-      ecmaVersion: 'latest',
       parser: tseslint.parser,
       parserOptions: {
         tsconfigRootDir: __dirname,
         project: './tsconfig.vitest.json', // Use a separate tsconfig for Vitest tests
       },
     },
-    plugins: {
-      vitest: pluginVitest,
-    },
+    plugins: { vitest },
     rules: {
-      // Override/add rules specific to test files here
-      'no-unused-vars': 'off', // Disable base rule for unused variables in test files
+      'no-undef': 'off', // Disable no-undef for TypeScript files since TypeScript already checks for undefined variables
+      'no-unused-vars': 'off', // Disable base rule for unused variables and use the TypeScript-specific rule instead
       '@typescript-eslint/no-unused-vars': 'off', // Disable TypeScript rule for unused variables in test files
       '@typescript-eslint/no-explicit-any': 'off', // Allow 'any' type in test files
       '@typescript-eslint/no-empty-function': 'off', // Allow empty functions in test files
       'jsdoc/require-jsdoc': 'off', // Disable JSDoc rule in test files
 
       // Recommended Vitest rules
-      ...pluginVitest.configs.recommended.rules,
+      ...vitest.configs.recommended.rules,
+    },
+  },
+  {
+    name: 'JSON Files',
+    files: ['**/*.json'],
+    ignores: ['**/devcontainer.json'], // Ignore devcontainer.json files
+    plugins: { json },
+    language: 'json/json',
+    rules: {
+      'json/no-duplicate-keys': 'error',
+    },
+  },
+  {
+    name: 'JSONC files',
+    files: ['**/devcontainer.json', '**/*.jsonc'],
+    plugins: { json },
+    language: 'json/jsonc',
+  },
+  {
+    name: 'Markdown Files',
+    files: ['**/*.md'],
+    plugins: { markdown },
+    language: 'markdown/commonmark',
+    rules: {
+      'markdown/no-html': 'off', // Allow HTML in Markdown files
     },
   },
 ]);

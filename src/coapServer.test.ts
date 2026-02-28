@@ -4,13 +4,13 @@ const MATTER_PORT = 0;
 const NAME = 'Coap';
 const HOMEDIR = path.join('jest', NAME);
 
+import { promises as fs, readFileSync } from 'node:fs';
 import path from 'node:path';
-import { readFileSync, promises as fs } from 'node:fs';
 
 import { jest } from '@jest/globals';
-import { CYAN, db, hk, LogLevel, nf, zb } from 'matterbridge/logger';
 import { IncomingMessage, parameters } from 'coap';
 import { flushAsync, loggerLogSpy, setupTest } from 'matterbridge/jestutils';
+import { CYAN, db, hk, LogLevel, nf, zb } from 'matterbridge/logger';
 
 import { CoapServer } from './coapServer.ts';
 

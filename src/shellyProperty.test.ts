@@ -8,10 +8,10 @@ import path from 'node:path';
 
 import { setupTest } from 'matterbridge/jestutils';
 
-import { ShellyProperty } from './shellyProperty.ts';
 import { ShellyComponent } from './shellyComponent.ts';
-import { ShellyDataType } from './shellyTypes.ts';
 import { ShellyDevice } from './shellyDevice.ts';
+import { ShellyProperty } from './shellyProperty.ts';
+import { ShellyDataType } from './shellyTypes.ts';
 
 // Setup the test environment
 await setupTest(NAME, false);

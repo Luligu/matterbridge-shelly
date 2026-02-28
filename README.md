@@ -68,19 +68,7 @@ I would like to express my appreciation to [Tamer Salah](https://github.com/tamm
 
 ### Matterbridge
 
-Follow these steps to install or update Matterbridge if it is not already installed and up to date:
-
-```
-npm install -g matterbridge --omit=dev
-```
-
-on Linux and macOS you may need the necessary permissions:
-
-```
-sudo npm install -g matterbridge --omit=dev
-```
-
-See the complete guidelines on [Matterbridge](https://github.com/Luligu/matterbridge/blob/main/README.md) for more information.
+See the complete guidelines on [Matterbridge](https://matterbridge.io) for more information.
 
 ### Any shelly device
 
@@ -133,7 +121,7 @@ Just open the frontend, select the matterbridge-shelly plugin and click on insta
 
 On windows:
 
-```
+```shell
 cd $HOME\Matterbridge
 npm install -g matterbridge-shelly --omit=dev
 matterbridge -add matterbridge-shelly
@@ -141,7 +129,7 @@ matterbridge -add matterbridge-shelly
 
 On linux:
 
-```
+```shell
 cd ~/Matterbridge
 sudo npm install -g matterbridge-shelly --omit=dev
 matterbridge -add matterbridge-shelly
@@ -149,7 +137,7 @@ matterbridge -add matterbridge-shelly
 
 Then start Matterbridge from a terminal
 
-```
+```shell
 matterbridge
 ```
 
@@ -296,17 +284,17 @@ Should be enabled only if you want to remove the devices from the controllers on
 
 These are the config values:
 
-```
+```json
 {
   "name": "matterbridge-shelly",
   "type": "DynamicPlatform",
   "username": "<USERNAME>",
   "password": "<PASSWORD>",
-  "switchList": []
-  "lightList": []
-  "inputContactList": []
-  "inputMomentaryList": []
-  "inputLatchingList": []
+  "switchList": [],
+  "lightList": [],
+  "inputContactList": [],
+  "inputMomentaryList": [],
+  "inputLatchingList": [],
   "blackList": [],
   "whiteList": [],
   "entityBlackList": [],
@@ -318,11 +306,11 @@ These are the config values:
   },
   "enableMdnsDiscover": true,
   "enableStorageDiscover": true,
-  "resetStorageDiscover": false
+  "resetStorageDiscover": false,
   "enableConfigDiscover": false,
   "enableBleDiscover": true,
   "failsafeCount": 0,
-  "postfix": ""
+  "postfix": "",
   "debug": false,
   "debugMdns": false,
   "debugCoap": false,
@@ -335,14 +323,14 @@ You can edit the config file from the frontend (best option) or
 
 On windows:
 
-```
+```shell
 cd $HOME\.matterbridge
 notepad matterbridge-shelly.config.json
 ```
 
 On linux:
 
-```
+```shell
 cd ~/.matterbridge
 nano matterbridge-shelly.config.json
 ```

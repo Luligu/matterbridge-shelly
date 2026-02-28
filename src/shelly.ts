@@ -24,15 +24,15 @@
 import crypto from 'node:crypto';
 import EventEmitter from 'node:events';
 
-import { AnsiLogger, CYAN, MAGENTA, BRIGHT, hk, db, nf, wr, zb, LogLevel, er } from 'matterbridge/logger';
+import { AnsiLogger, BRIGHT, CYAN, db, er, hk, LogLevel, MAGENTA, nf, wr, zb } from 'matterbridge/logger';
 import { isValidArray, isValidObject } from 'matterbridge/utils';
 
-import { ShellyDevice } from './shellyDevice.js';
-import { DiscoveredDevice, MdnsScanner } from './mdnsScanner.js';
 import { CoapServer } from './coapServer.js';
+import { DiscoveredDevice, MdnsScanner } from './mdnsScanner.js';
+import { ShellyDevice } from './shellyDevice.js';
+import { ShellyData, ShellyDataType, ShellyDeviceId, ShellyEvent } from './shellyTypes.js';
 import { WsClient } from './wsClient.js';
 import { WsServer } from './wsServer.js';
-import { ShellyData, ShellyDataType, ShellyDeviceId, ShellyEvent } from './shellyTypes.js';
 
 interface ShellyEvents {
   discovered: [device: DiscoveredDevice];

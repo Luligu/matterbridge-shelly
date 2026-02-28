@@ -6,14 +6,14 @@ const HOMEDIR = path.join('jest', NAME);
 
 import path from 'node:path';
 
-import { AnsiLogger, LogLevel, TimestampFormat } from 'matterbridge/logger';
-import { getMacAddress, wait, waiter } from 'matterbridge/utils';
 import { jest } from '@jest/globals';
 import { setupTest } from 'matterbridge/jestutils';
+import { AnsiLogger, LogLevel, TimestampFormat } from 'matterbridge/logger';
+import { getMacAddress, wait, waiter } from 'matterbridge/utils';
 
-import { ShellyDevice } from './shellyDevice.js';
 import { Shelly } from './shelly.js';
 import { isCoverComponent, isLightComponent, isSwitchComponent, ShellyComponent } from './shellyComponent.js';
+import { ShellyDevice } from './shellyDevice.js';
 
 // Setup the test environment
 await setupTest(NAME, false);

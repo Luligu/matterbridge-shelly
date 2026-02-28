@@ -23,20 +23,16 @@
 
 /* eslint-disable jsdoc/reject-any-type */
 
-// Node.js imports
 import EventEmitter from 'node:events';
-import path from 'node:path';
 import { promises as fs } from 'node:fs';
+import path from 'node:path';
 
-// CoAP imports
-import coap, { Server, IncomingMessage, OutgoingMessage, parameters, globalAgent } from 'coap';
-// Matterbridge imports
-import { AnsiLogger, BLUE, CYAN, LogLevel, MAGENTA, RESET, TimestampFormat, db, debugStringify, er, hk, nf, wr, zb } from 'matterbridge/logger';
+import coap, { globalAgent, IncomingMessage, OutgoingMessage, parameters, Server } from 'coap';
+import { AnsiLogger, BLUE, CYAN, db, debugStringify, er, hk, LogLevel, MAGENTA, nf, RESET, TimestampFormat, wr, zb } from 'matterbridge/logger';
 
-// Shelly imports
 import { Shelly } from './shelly.js';
-import { ShellyData, ShellyDataType } from './shellyTypes.js';
 import { ShellyDevice } from './shellyDevice.js';
+import { ShellyData, ShellyDataType } from './shellyTypes.js';
 
 const COIOT_OPTION_GLOBAL_DEVID = '3332';
 const COIOT_OPTION_STATUS_VALIDITY = '3412';

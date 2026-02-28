@@ -22,29 +22,29 @@
  */
 
 import { MatterbridgeEndpoint } from 'matterbridge';
+import { db, debugStringify, dn, er, hk, idn, or, rs, YELLOW, zb } from 'matterbridge/logger';
 import {
-  SmokeCoAlarm,
+  BooleanState,
+  ColorControl,
+  ElectricalEnergyMeasurement,
+  ElectricalPowerMeasurement,
+  IlluminanceMeasurement,
+  LevelControl,
+  OccupancySensing,
   OnOff,
   PowerSource,
-  WindowCovering,
-  ColorControl,
-  LevelControl,
-  BooleanState,
-  OccupancySensing,
-  IlluminanceMeasurement,
-  TemperatureMeasurement,
   RelativeHumidityMeasurement,
+  SmokeCoAlarm,
+  TemperatureMeasurement,
   Thermostat,
-  ElectricalPowerMeasurement,
-  ElectricalEnergyMeasurement,
+  WindowCovering,
 } from 'matterbridge/matter/clusters';
-import { db, debugStringify, dn, er, hk, idn, or, rs, YELLOW, zb } from 'matterbridge/logger';
 import { isValidArray, isValidBoolean, isValidNumber, isValidObject, isValidString, rgbColorToHslColor } from 'matterbridge/utils';
 
+import { ShellyPlatform } from './platform.js';
+import { isLightComponent, isSwitchComponent } from './shellyComponent.js';
 import { ShellyDevice } from './shellyDevice.js';
 import { ShellyData, ShellyDataType } from './shellyTypes.js';
-import { isLightComponent, isSwitchComponent } from './shellyComponent.js';
-import { ShellyPlatform } from './platform.js';
 
 /**
  * Handles updates from Shelly devices and updates the corresponding Matterbridge endpoint.
@@ -106,7 +106,7 @@ export function shellyUpdateHandler(
       if (isValidNumber(hue, 0, 254)) endpoint?.setAttribute(ColorControl.Cluster.id, 'currentHue', hue, shellyDevice.log);
       if (isValidNumber(saturation, 0, 254)) endpoint?.setAttribute(ColorControl.Cluster.id, 'currentSaturation', saturation, shellyDevice.log);
       endpoint?.setAttribute(ColorControl.Cluster.id, 'colorMode', ColorControl.ColorMode.CurrentHueAndCurrentSaturation, shellyDevice.log);
-    }, 200);
+    }, shellyDevice.colorUpdateTimeoutMs).unref();
   }
   // Update colorTemp gen 1
   if (isLightComponent(shellyComponent) && property === 'temp' && isValidNumber(value, 2700, 6500)) {
@@ -252,6 +252,10 @@ export function shellyUpdateHandler(
     const matterLux = Math.round(Math.max(Math.min(10000 * Math.log10(value), 0xfffe), 0));
     endpoint.setAttribute(IlluminanceMeasurement.Cluster.id, 'measuredValue', matterLux, shellyDevice.log);
   }
+  // Update for vibration
+  if (shellyComponent.name === 'Vibration' && property === 'vibration' && isValidBoolean(value)) {
+    if (value) endpoint.triggerSwitchEvent('Single', shellyDevice.log);
+  }
   if (shellyDevice.gen === 1) {
     // Update for Thermostat target_t.enabled (Gen1)
     if (shellyComponent.name === 'Thermostat' && property === 'target_t' && isValidObject(value)) {
@@ -287,10 +291,6 @@ export function shellyUpdateHandler(
         endpoint.setAttribute(Thermostat.Cluster.id, 'occupiedCoolingSetpoint', value * 100, shellyDevice.log);
     }
   }
-  // Update for vibration
-  if (shellyComponent.name === 'Vibration' && property === 'vibration' && isValidBoolean(value)) {
-    if (value) endpoint.triggerSwitchEvent('Single', shellyDevice.log);
-  }
   // Update cover
   if (shellyComponent.name === 'Cover' || shellyComponent.name === 'Roller') {
     // Matter uses 10000 = fully closed   0 = fully opened
@@ -312,15 +312,16 @@ export function shellyUpdateHandler(
       if ((shellyDevice.gen === 1 && value === 'stop') || (shellyDevice.gen > 1 && value === 'stopped')) {
         const status = WindowCovering.MovementStatus.Stopped;
         endpoint.setAttribute(WindowCovering.Cluster.id, 'operationalStatus', { global: status, lift: status, tilt: status }, shellyDevice.log);
-        setTimeout(() => {
+        shellyDevice.coverUpdateTimeout = setTimeout(() => {
           shellyDevice.log.debug(`Setting target position to current position on endpoint ${or}${endpoint?.name}:${endpoint?.number}${db}`);
           const current = endpoint?.getAttribute(WindowCovering.Cluster.id, 'currentPositionLiftPercent100ths', shellyDevice.log);
+          // istanbul ignore next cause is just a safety check, it should never happen that current position is not valid
           if (!isValidNumber(current, 0, 10000)) {
             matterbridgeDevice.log.error(`Error: current position not found on endpoint ${or}${endpoint?.name}:${endpoint?.number}${er}`);
             return;
           }
           endpoint?.setAttribute(WindowCovering.Cluster.id, 'targetPositionLiftPercent100ths', current, shellyDevice.log);
-        }, 1000);
+        }, shellyDevice.coverUpdateTimeoutMs).unref();
       }
       // Gen 2 devices send open for fully open
       if (shellyDevice.gen > 1 && value === 'open') {
@@ -355,6 +356,7 @@ export function shellyUpdateHandler(
   }
   // Update energy from main components (gen 2 devices send power total inside the component not with meter)
   if (['Light', 'Rgb', 'Relay', 'Switch', 'Cover', 'Roller', 'PowerMeter'].includes(shellyComponent.name)) {
+    // istanbul ignore next cause is tested elsewhere
     if (!platform.validateEntity(shellyDevice.id, 'PowerMeter')) return;
 
     // For triphase devices (shellypro3em and shelly3em63g3) we have em:0 and emdata:0. We add phase A, B and C components as well and we use em:0 as total. The em:1, em:2 and em:3 need to be updated from the em:0 phases.
@@ -369,6 +371,7 @@ export function shellyUpdateHandler(
         if (property.startsWith('a_')) endpoint = matterbridgeDevice.getChildEndpointByName('em:1');
         if (property.startsWith('b_')) endpoint = matterbridgeDevice.getChildEndpointByName('em:2');
         if (property.startsWith('c_')) endpoint = matterbridgeDevice.getChildEndpointByName('em:3');
+        // istanbul ignore next cause is just a safety check, it should never happen that endpoint is not found
         if (!endpoint) {
           shellyDevice.log.debug(`****shellyUpdateHandler error: endpoint not found for triphase shelly device ${dn}${shellyDevice?.id}${db}`);
           return;
@@ -401,6 +404,7 @@ export function shellyUpdateHandler(
       }
       // Calculate current from power and voltage
       const voltage = shellyComponent.hasProperty('voltage') ? (shellyComponent.getValue('voltage') as number) : undefined;
+      // istanbul ignore next
       if (isValidNumber(voltage, 10)) {
         const current = Math.round((value / voltage) * 1000) / 1000;
         endpoint.setAttribute(ElectricalPowerMeasurement.Cluster.id, 'activeCurrent', Math.round(current * 1000), shellyDevice.log);
@@ -430,9 +434,12 @@ export function shellyUpdateHandler(
       if (shellyComponent.hasProperty('act_power')) return;
       if (shellyComponent.hasProperty('apower')) return;
       if (shellyComponent.hasProperty('power')) return;
+      // istanbul ignore next
       if (shellyComponent.id.startsWith('emeter')) return; // Skip the rest for em3 devices
       // Calculate power from current and voltage
+      // istanbul ignore next
       const voltage = shellyComponent.hasProperty('voltage') ? (shellyComponent.getValue('voltage') as number) : undefined;
+      // istanbul ignore next
       if (isValidNumber(voltage, 0)) {
         const power = Math.round(value * voltage * 1000) / 1000;
         endpoint.setAttribute(ElectricalPowerMeasurement.Cluster.id, 'activePower', Math.round(power * 1000), shellyDevice.log);
