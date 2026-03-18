@@ -7,6 +7,7 @@ const HOMEDIR = path.join('jest', NAME);
 import path from 'node:path';
 
 import { jest } from '@jest/globals';
+import { MatterbridgeEndpoint } from 'matterbridge';
 import {
   addMatterbridgePlatform,
   createMatterbridgeEnvironment,
@@ -17,7 +18,6 @@ import {
   loggerInfoSpy,
   loggerLogSpy,
   matterbridge,
-  setAttributeSpy,
   setDebug,
   setupTest,
   startMatterbridgeEnvironment,
@@ -26,8 +26,6 @@ import {
 import { CYAN, db, dn, hk, idn, LogLevel, nf, rs, zb } from 'matterbridge/logger';
 import { wait } from 'matterbridge/utils';
 
-import { MatterbridgeEndpoint } from '../../matterbridge/packages/core/dist/matterbridgeEndpoint';
-import { dev } from '../../matterbridge/packages/types/dist/matterbridgeTypes';
 import { CoapServer } from './coapServer.ts';
 import { MdnsScanner } from './mdnsScanner.ts';
 import { ShellyPlatform, ShellyPlatformConfig } from './platform.ts';
@@ -363,7 +361,7 @@ describe('ShellyPlatform', () => {
         shellyUpdateHandler(shellyPlatform, endpoint, device, 'thermostat:0', 'current_C', 21);
         const dataEndpoint = endpoint.getChildEndpointByOriginalId('thermostat:0');
         if (!dataEndpoint) return;
-        dataEndpoint.setAttribute = async (clusterId, attribute, value, log) => {
+        dataEndpoint.setAttribute = async () => {
           return true;
         };
         device.getComponent('thermostat:0')?.setValue('type', 'cooling');

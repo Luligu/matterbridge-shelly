@@ -27,6 +27,16 @@ If you like this project and find it useful, please consider giving it a star on
 
 You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his invaluable contribution to this project.
 
+## [2.2.5] - Dev branch
+
+- [package]: Update dependencies.
+- [package]: Bump package to `automator` v.3.1.2.
+- [package]: Bump `eslint` to v.10.0.3.
+- [package]: Bump `typescript-eslint` to v.8.57.1.
+- [devcontainer]: Bump `Dev Container` configuration.
+
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+
 ## [2.2.4] - 2026-02-28
 
 ### Added
