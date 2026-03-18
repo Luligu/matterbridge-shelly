@@ -35,6 +35,11 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 - [package]: Bump `typescript-eslint` to v.8.57.1.
 - [devcontainer]: Bump `Dev Container` configuration.
 
+### Added
+
+- [blu]: Add `Shelly BLU H&T ZB`.
+- [blu]: Add `Shelly BLU H&T Display ZB`.
+
 ### Fixed
 
 - [blu]: Fix blu device detection: unknown devices and sensors are ignored.

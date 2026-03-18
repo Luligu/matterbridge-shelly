@@ -388,8 +388,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
         if (component.key.startsWith('blutrv:')) {
           if (!isValidString(component.key, 6) || !isValidObject(component.status, 5) || !isValidObject(component.config, 5)) {
             this.log.error(
-              `BTHome BLUTrv id ${CYAN}${component.config.id}${er} key ${CYAN}${component.key}${er} address ${CYAN}${component.config.addr}${er} has no valid data!`,
-              component,
+              `BTHome BLUTrv id ${CYAN}${component.config.id}${er} key ${CYAN}${component.key}${er} address ${CYAN}${component.config.addr}${er} has no valid data: ${debugStringify(component)}`,
             );
             return;
           }
@@ -447,8 +446,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
           ) {
             this.log.error(
               `BTHome device id ${CYAN}${component.config.id}${er} key ${CYAN}${component.key}${er} address ${CYAN}${component.config.addr}${er} ` +
-                `name ${CYAN}${component.config.name}${er} has no valid data!`,
-              component,
+                `name ${CYAN}${component.config.name}${er} has no valid data: ${debugStringify(component)}`,
             );
             continue;
           }
@@ -488,8 +486,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
           ) {
             this.log.error(
               `BTHome sensor id ${CYAN}${component.config.id}${er} key ${CYAN}${component.key}${er} address ${CYAN}${component.config.addr}${er} ` +
-                `name ${CYAN}${component.config.name}${er} obj_id ${CYAN}${component.config.obj_id}${er} has no valid data!`,
-              component,
+                `name ${CYAN}${component.config.name}${er} obj_id ${CYAN}${component.config.obj_id}${er} has no valid data: ${debugStringify(component)}`,
             );
             continue;
           }

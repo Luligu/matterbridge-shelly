@@ -1066,17 +1066,17 @@ describe('Shelly devices test', () => {
 
     let component: BTHomeComponent = { key: 'blutrv:200', status: { id: 200, target_C: 20, current_C: 24.1, rssi: -48, battery: 100 }, config: {} } as BTHomeComponent;
     device.scanBTHomeComponents([component]);
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.ERROR, expect.stringContaining('has no valid data!'), expect.anything());
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.ERROR, expect.stringContaining('has no valid data'));
     jest.clearAllMocks();
 
     component = { key: 'bthomedevice:200', status: { id: 200, target_C: 20, current_C: 24.1, rssi: -48, battery: 100 }, config: { meta: {} } } as BTHomeComponent;
     device.scanBTHomeComponents([component]);
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.ERROR, expect.stringContaining('has no valid data!'), expect.anything());
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.ERROR, expect.stringContaining('has no valid data'));
     jest.clearAllMocks();
 
     component = { key: 'bthomesensor:200', status: { id: 200, target_C: 20, current_C: 24.1, rssi: -48, battery: 100 }, config: { obj_id: {} } } as BTHomeComponent;
     device.scanBTHomeComponents([component]);
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.ERROR, expect.stringContaining('has no valid data!'), expect.anything());
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.ERROR, expect.stringContaining('has no valid data'));
     jest.clearAllMocks();
 
     device.destroy();

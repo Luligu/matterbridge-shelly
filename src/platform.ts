@@ -1954,7 +1954,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     if (bthomeDevice.model === 'Shelly BLU DoorWindow') definition = [bridgedNode, powerSource];
     else if (bthomeDevice.model === 'Shelly BLU Motion') definition = [bridgedNode, powerSource];
     else if (bthomeDevice.model === 'Shelly BLU Button1') definition = [genericSwitch, bridgedNode, powerSource];
-    else if (bthomeDevice.model === 'Shelly BLU HT') definition = [bridgedNode, powerSource];
+    else if (bthomeDevice.model === 'Shelly BLU HT' || bthomeDevice.model === 'Shelly BLU H&T ZB' || bthomeDevice.model === 'Shelly BLU H&T Display ZB')
+      definition = [bridgedNode, powerSource];
     else if (bthomeDevice.model === 'Shelly BLU RC Button 4') definition = [bridgedNode, powerSource];
     else if (bthomeDevice.model === 'Shelly BLU Wall Switch 4') definition = [bridgedNode, powerSource];
     else if (bthomeDevice.model === 'Shelly BLU Trv') definition = [thermostatDevice, bridgedNode, powerSource];
@@ -1999,7 +2000,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       } else if (bthomeDevice.model === 'Shelly BLU Button1') {
         mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer();
         mbDevice.createDefaultSwitchClusterServer();
-      } else if (bthomeDevice.model === 'Shelly BLU HT') {
+      } else if (bthomeDevice.model === 'Shelly BLU HT' || bthomeDevice.model === 'Shelly BLU H&T ZB' || bthomeDevice.model === 'Shelly BLU H&T Display ZB') {
         mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer();
         mbDevice.addFixedLabel('composed', 'Sensor');
         mbDevice.addChildDeviceTypeWithClusterServer('Temperature', [temperatureSensor], [], undefined, this.config.debug as boolean);
