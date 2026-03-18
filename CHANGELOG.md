@@ -40,6 +40,8 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 - [blu]: Add `Shelly BLU H&T ZB`.
 - [blu]: Add `Shelly BLU H&T Display ZB`.
 
+If you have any of the new ble devices, send me the full log and I will add them.
+
 ### Fixed
 
 - [blu]: Fix blu device detection: unknown devices and sensors are ignored.
