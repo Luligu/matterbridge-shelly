@@ -29,18 +29,20 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 
 ## [2.2.5] - Dev branch
 
-- [package]: Update dependencies.
-- [package]: Bump package to `automator` v.3.1.2.
-- [package]: Bump `eslint` to v.10.0.3.
-- [package]: Bump `typescript-eslint` to v.8.57.1.
-- [devcontainer]: Bump `Dev Container` configuration.
-
 ### Added
 
 - [blu]: Add `Shelly BLU H&T ZB`.
 - [blu]: Add `Shelly BLU H&T Display ZB`.
 
 If you have any of the new ble devices, send me the full log and I will add them.
+
+### Changed
+
+- [package]: Update dependencies.
+- [package]: Bump package to `automator` v.3.1.2.
+- [package]: Bump `eslint` to v.10.0.3.
+- [package]: Bump `typescript-eslint` to v.8.57.1.
+- [devcontainer]: Bump `Dev Container` configuration.
 
 ### Fixed
 
