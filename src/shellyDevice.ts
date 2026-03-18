@@ -337,6 +337,13 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
       'SBBT-004CEU': 'Shelly BLU Wall Switch 4',
       'SBBT-004CUS': 'Shelly BLU RC Button 4',
       'TRV': 'Shelly BLU Trv',
+      'SBRC-005B': 'Shelly BLU Remote Control ZB',
+      'SBWS-90CM': 'Shelly BLU Weather Station',
+      'SBHT-103C': 'Shelly BLU H&T Display ZB',
+      'SBHT-203C': 'Shelly BLU H&T ZB',
+      'SBBT-104CEU': 'Shelly BLU Wall Switch 4 ZB',
+      'SBBT-104CUS': 'Shelly BLU RC Button 4 ZB',
+      'SBBT-102C': 'Shelly BLU Button Tough 1 ZB',
     };
     /*
     From: https://shelly-api-docs.shelly.cloud/docs-ble/common
@@ -349,6 +356,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
     if (model.startsWith('SBMO-3Z')) return modelsMap['SBMO-003Z'];
     if (model.startsWith('SBBT-EU')) return modelsMap['SBBT-004CEU'];
     if (model.startsWith('SBBT-US')) return modelsMap['SBBT-004CUS'];
+
     return modelsMap[model] || `Unknown Shelly BLU model ${model}`;
   }
 
@@ -414,6 +422,20 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
             component.config.meta = { ui: { view: 'regular', local_name: 'SBBT-004CUS', icon: null } };
           } else if (component.attrs?.model_id === 8) {
             component.config.meta = { ui: { view: 'regular', local_name: 'TRV', icon: null } };
+          } else if (component.attrs?.model_id === 9) {
+            component.config.meta = { ui: { view: 'regular', local_name: 'SBRC-005B', icon: null } }; // 9 -Shelly BLU Remote Control ZB
+          } else if (component.attrs?.model_id === 0xb) {
+            component.config.meta = { ui: { view: 'regular', local_name: 'SBWS-90CM', icon: null } }; // 11 -Shelly BLU Weather Station
+          } else if (component.attrs?.model_id === 0xc) {
+            component.config.meta = { ui: { view: 'regular', local_name: 'SBHT-103C', icon: null } }; // 12 - Shelly BLU H&T Display ZB
+          } else if (component.attrs?.model_id === 0x11) {
+            component.config.meta = { ui: { view: 'regular', local_name: 'SBHT-203C', icon: null } }; // 17 - Shelly BLU H&T ZB
+          } else if (component.attrs?.model_id === 0x15) {
+            component.config.meta = { ui: { view: 'regular', local_name: 'SBBT-104CEU', icon: null } }; // 21 -Shelly BLU Wall Switch 4 ZB
+          } else if (component.attrs?.model_id === 0x16) {
+            component.config.meta = { ui: { view: 'regular', local_name: 'SBBT-104CUS', icon: null } }; // 22 -Shelly BLU RC Button 4 ZB
+          } else if (component.attrs?.model_id === 0x17) {
+            component.config.meta = { ui: { view: 'regular', local_name: 'SBBT-102C', icon: null } }; // 23 -Shelly BLU Button Tough 1 ZB
           }
           if (
             !isValidString(component.key, 12) ||
@@ -428,7 +450,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
                 `name ${CYAN}${component.config.name}${er} has no valid data!`,
               component,
             );
-            return;
+            continue;
           }
           const blutrv_id = this.bthomeTrvs.get(component.config.addr)?.id ?? 0;
           this.log.debug(
@@ -469,7 +491,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
                 `name ${CYAN}${component.config.name}${er} obj_id ${CYAN}${component.config.obj_id}${er} has no valid data!`,
               component,
             );
-            return;
+            continue;
           }
           this.log.debug(
             `- BLU sensor id ${CYAN}${component.status.id}${db} key ${CYAN}${component.key}${db} address ${CYAN}${component.config.addr}${db} ` +
@@ -1235,6 +1257,18 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
     if (!this.shellyPayload) {
       if (this.online) {
         this.log.warn(`Error fetching shelly from device ${hk}${this.id}${wr} host ${zb}${this.host}${wr}. No data found.`);
+        this.online = false;
+        this.emit('offline');
+      }
+      return null;
+    }
+    if (this.shellyPayload.mac !== this.mac) {
+      this.log.warn(
+        `Device ${hk}${this.id}${wr} host ${zb}${this.host}${wr} has a different MAC address (${CYAN}${this.shellyPayload.mac}${wr}) than the one registered in the device (${CYAN}${this.mac}${wr}). Waiting for mDns to update the device information...`,
+      );
+      this.wsClient?.stop();
+      if (this.online) {
+        this.log.info(`The device ${hk}${this.id}${nf} host ${zb}${this.host}${nf} is offline.`);
         this.online = false;
         this.emit('offline');
       }

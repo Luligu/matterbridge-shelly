@@ -35,6 +35,10 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 - [package]: Bump `typescript-eslint` to v.8.57.1.
 - [devcontainer]: Bump `Dev Container` configuration.
 
+### Fixed
+
+- [blu]: Fix blu device detection: unknown devices and sensors are ignored.
+
 <a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [2.2.4] - 2026-02-28
