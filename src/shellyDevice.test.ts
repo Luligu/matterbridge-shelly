@@ -565,6 +565,44 @@ describe('Shelly devices test', () => {
     device.destroy();
   });
 
+  test('fetchUpdate should fail when shelly mac is invalid', async () => {
+    // Create a basic device first
+    const device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shelly2pmg3-34CDB0770C4C.json'));
+    expect(device).toBeDefined();
+    if (!device) return;
+    expect(device.cached).toBe(false);
+    expect(device.online).toBe(true);
+
+    // Mock fetch to fail for shelly
+    fetchSpy.mockImplementation((shelly: Shelly, log: AnsiLogger, host: string, service: string, params?: Record<string, string | number | boolean | object>) => {
+      if (service === 'shelly')
+        return Promise.resolve({
+          name: '2PM Gen3 Cover',
+          id: 'shelly2pmg3-34cdb0770c4c',
+          mac: 'invalid',
+          slot: 1,
+          model: 'S3SW-002P16EU',
+          gen: 3,
+          fw_id: '20250520-083748/1.6.2-gc8a76e2',
+          ver: '1.6.2',
+          app: 'S2PMG3',
+          auth_en: false,
+          auth_domain: null,
+          profile: 'cover',
+          matter: false,
+        });
+      return Promise.resolve({});
+    });
+
+    device.online = true; // Set online to test offline transition
+    const result = await device.fetchUpdate();
+    expect(result).toBeNull();
+    expect(device.online).toBe(false);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.WARN, expect.stringContaining(`has a different MAC address`));
+
+    device.destroy();
+  });
+
   test('fetchUpdate should fail when settings fetch fails', async () => {
     const device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shelly2pmg3-34CDB0770C4C.json'));
     expect(device).toBeDefined();
