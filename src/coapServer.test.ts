@@ -12,7 +12,7 @@ import { IncomingMessage, parameters } from 'coap';
 import { flushAsync, loggerLogSpy, setupTest } from 'matterbridge/jestutils';
 import { CYAN, db, hk, LogLevel, nf, zb } from 'matterbridge/logger';
 
-import { CoapServer } from './coapServer.ts';
+import { CoapServer } from './coapServer.js';
 
 // Setup the test environment
 await setupTest(NAME, false);

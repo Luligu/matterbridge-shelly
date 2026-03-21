@@ -38,14 +38,14 @@ import {
 } from 'matterbridge/matter/clusters';
 import { wait } from 'matterbridge/utils';
 
-import { CoapServer } from './coapServer.ts';
-import { MdnsScanner } from './mdnsScanner.ts';
-import initializePlugin, { ShellyPlatform, ShellyPlatformConfig } from './platform.ts';
-import { Shelly } from './shelly.ts';
-import { ShellyDevice } from './shellyDevice.ts';
-import { ShellyData } from './shellyTypes.ts';
-import { WsClient } from './wsClient.ts';
-import { WsServer } from './wsServer.ts';
+import { CoapServer } from './coapServer.js';
+import { MdnsScanner } from './mdnsScanner.js';
+import initializePlugin, { ShellyPlatform, ShellyPlatformConfig } from './platform.js';
+import { Shelly } from './shelly.js';
+import { ShellyDevice } from './shellyDevice.js';
+import { ShellyData } from './shellyTypes.js';
+import { WsClient } from './wsClient.js';
+import { WsServer } from './wsServer.js';
 
 // Setup the test environment
 await setupTest(NAME, false);
@@ -176,7 +176,7 @@ describe('ShellyPlatform', () => {
   it('should throw because of version', () => {
     matterbridge.matterbridgeVersion = '1.5.4';
     expect(() => new ShellyPlatform(matterbridge, log, mockConfig as any)).toThrow();
-    matterbridge.matterbridgeVersion = '3.5.0';
+    matterbridge.matterbridgeVersion = '3.7.0';
   });
 
   it('should call onStart with reason and start mDNS', async () => {
@@ -339,16 +339,16 @@ describe('ShellyPlatform', () => {
       return Promise.resolve(undefined);
     });
 
-    await switchEndpoint.executeCommandHandler('identify', {});
+    await switchEndpoint.executeCommandHandler('identify', { identifyTime: 0 }, 'identify', {} as any, switchEndpoint);
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, expect.stringContaining(`Identify command received for endpoint ${or}MA-onoffpluginunit${nf}`));
 
-    await switchEndpoint.executeCommandHandler('on', {});
+    await switchEndpoint.executeCommandHandler('on', {}, 'onOff', {} as any, switchEndpoint);
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `${db}Sent command ${hk}Relay${db}:${hk}relay:0${db}:${hk}On()${db} to shelly device ${idn}${shelly1.id}${rs}${db}`);
 
-    await switchEndpoint.executeCommandHandler('off', {});
+    await switchEndpoint.executeCommandHandler('off', {}, 'onOff', {} as any, switchEndpoint);
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `${db}Sent command ${hk}Relay${db}:${hk}relay:0${db}:${hk}Off()${db} to shelly device ${idn}${shelly1.id}${rs}${db}`);
 
-    await switchEndpoint.executeCommandHandler('toggle', {});
+    await switchEndpoint.executeCommandHandler('toggle', {}, 'onOff', {} as any, switchEndpoint);
     expect(loggerLogSpy).toHaveBeenCalledWith(
       LogLevel.INFO,
       `${db}Sent command ${hk}Relay${db}:${hk}relay:0${db}:${hk}Toggle()${db} to shelly device ${idn}${shelly1.id}${rs}${db}`,
@@ -545,52 +545,76 @@ describe('ShellyPlatform', () => {
     // Test commands for light from Matter to Shelly
     loggerLogSpy.mockClear();
 
-    await rgbEndpoint.executeCommandHandler('on', {});
+    await rgbEndpoint.executeCommandHandler('on', {}, 'onOff', {} as any, rgbEndpoint);
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `${db}Sent command ${hk}Rgb${db}:${hk}rgb:0${db}:${hk}On()${db} to shelly device ${idn}${shellyPro.id}${rs}${db}`);
     expect(fetch).toHaveBeenCalledWith(shellyPro.shelly, shellyPro.log, shellyPro.host, 'Rgb.Set', { id: 0, on: true });
 
-    await rgbEndpoint.executeCommandHandler('off', {});
+    await rgbEndpoint.executeCommandHandler('off', {}, 'onOff', {} as any, rgbEndpoint);
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `${db}Sent command ${hk}Rgb${db}:${hk}rgb:0${db}:${hk}Off()${db} to shelly device ${idn}${shellyPro.id}${rs}${db}`);
     expect(fetch).toHaveBeenCalledWith(shellyPro.shelly, shellyPro.log, shellyPro.host, 'Rgb.Set', { id: 0, on: false });
 
-    await rgbEndpoint.executeCommandHandler('toggle', {});
+    await rgbEndpoint.executeCommandHandler('toggle', {}, 'onOff', {} as any, rgbEndpoint);
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `${db}Sent command ${hk}Rgb${db}:${hk}rgb:0${db}:${hk}Toggle()${db} to shelly device ${idn}${shellyPro.id}${rs}${db}`);
     expect(fetch).toHaveBeenCalledWith(shellyPro.shelly, shellyPro.log, shellyPro.host, 'Rgb.Toggle', { id: 0 });
 
-    await rgbEndpoint.executeCommandHandler('moveToLevel', { level: 50 });
+    await rgbEndpoint.executeCommandHandler(
+      'moveToLevel',
+      { level: 50, transitionTime: 0, optionsMask: {} as any, optionsOverride: {} as any },
+      'levelControl',
+      {} as any,
+      rgbEndpoint,
+    );
     expect(loggerLogSpy).toHaveBeenCalledWith(
       LogLevel.INFO,
       `${db}Sent command ${hk}Rgb${db}:${hk}rgb:0${db}:${hk}Level(${YELLOW}20${hk})${db} to shelly device ${idn}${shellyPro.id}${rs}${db}`,
     );
     expect(fetch).toHaveBeenCalledWith(shellyPro.shelly, shellyPro.log, shellyPro.host, 'Rgb.Set', { id: 0, brightness: 20 });
 
-    await rgbEndpoint.executeCommandHandler('moveToHueAndSaturation', { hue: 50, saturation: 50 });
+    await rgbEndpoint.executeCommandHandler(
+      'moveToHueAndSaturation',
+      { hue: 50, saturation: 50, transitionTime: 0, optionsMask: {} as any, optionsOverride: {} as any },
+      'colorControl',
+      {} as any,
+      rgbEndpoint,
+    );
     expect(loggerLogSpy).toHaveBeenCalledWith(
       LogLevel.INFO,
       `${db}Sent command ${hk}Rgb${db}:${hk}rgb:0${db}:${hk}ColorRGB(${YELLOW}144${hk}, ${YELLOW}153${hk}, ${YELLOW}103${hk})${db} to shelly device ${idn}${shellyPro.id}${rs}${db}`,
     );
     expect(fetch).toHaveBeenCalledWith(shellyPro.shelly, shellyPro.log, shellyPro.host, 'Rgb.Set', { id: 0, rgb: [144, 153, 103] });
 
-    await rgbEndpoint.executeCommandHandler('moveToColorTemperature', { colorTemperatureMireds: 250 });
+    await rgbEndpoint.executeCommandHandler(
+      'moveToColorTemperature',
+      { colorTemperatureMireds: 250, transitionTime: 0, optionsMask: {} as any, optionsOverride: {} as any },
+      'colorControl',
+      {} as any,
+      rgbEndpoint,
+    );
     expect(loggerLogSpy).toHaveBeenCalledWith(
       LogLevel.INFO,
       `${db}Sent command ${hk}Rgb${db}:${hk}rgb:0${db}:${hk}ColorRGB(${YELLOW}255${hk}, ${YELLOW}206${hk}, ${YELLOW}166${hk})${db} to shelly device ${idn}${shellyPro.id}${rs}${db}`,
     );
     expect(fetch).toHaveBeenCalledWith(shellyPro.shelly, shellyPro.log, shellyPro.host, 'Rgb.Set', { id: 0, rgb: [255, 206, 166] });
 
-    await cctEndpoint.executeCommandHandler('on', {});
+    await cctEndpoint.executeCommandHandler('on', {}, 'onOff', {} as any, cctEndpoint);
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `${db}Sent command ${hk}Cct${db}:${hk}cct:0${db}:${hk}On()${db} to shelly device ${idn}${shellyPro.id}${rs}${db}`);
     expect(fetch).toHaveBeenCalledWith(shellyPro.shelly, shellyPro.log, shellyPro.host, 'Cct.Set', { id: 0, on: true });
 
-    await cctEndpoint.executeCommandHandler('off', {});
+    await cctEndpoint.executeCommandHandler('off', {}, 'onOff', {} as any, cctEndpoint);
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `${db}Sent command ${hk}Cct${db}:${hk}cct:0${db}:${hk}Off()${db} to shelly device ${idn}${shellyPro.id}${rs}${db}`);
     expect(fetch).toHaveBeenCalledWith(shellyPro.shelly, shellyPro.log, shellyPro.host, 'Cct.Set', { id: 0, on: false });
 
-    await cctEndpoint.executeCommandHandler('toggle', {});
+    await cctEndpoint.executeCommandHandler('toggle', {}, 'onOff', {} as any, cctEndpoint);
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `${db}Sent command ${hk}Cct${db}:${hk}cct:0${db}:${hk}Toggle()${db} to shelly device ${idn}${shellyPro.id}${rs}${db}`);
     expect(fetch).toHaveBeenCalledWith(shellyPro.shelly, shellyPro.log, shellyPro.host, 'Cct.Toggle', { id: 0 });
 
-    await cctEndpoint.executeCommandHandler('moveToLevel', { level: 50 });
+    await cctEndpoint.executeCommandHandler(
+      'moveToLevel',
+      { level: 50, transitionTime: 0, optionsMask: {} as any, optionsOverride: {} as any },
+      'levelControl',
+      {} as any,
+      cctEndpoint,
+    );
     expect(loggerLogSpy).toHaveBeenCalledWith(
       LogLevel.INFO,
       `${db}Sent command ${hk}Cct${db}:${hk}cct:0${db}:${hk}Level(${YELLOW}20${hk})${db} to shelly device ${idn}${shellyPro.id}${rs}${db}`,
@@ -598,7 +622,13 @@ describe('ShellyPlatform', () => {
     expect(fetch).toHaveBeenCalledWith(shellyPro.shelly, shellyPro.log, shellyPro.host, 'Cct.Set', { id: 0, brightness: 20 });
 
     loggerLogSpy.mockClear();
-    await cctEndpoint.executeCommandHandler('moveToColorTemperature', { colorTemperatureMireds: 250 });
+    await cctEndpoint.executeCommandHandler(
+      'moveToColorTemperature',
+      { colorTemperatureMireds: 250, transitionTime: 0, optionsMask: {} as any, optionsOverride: {} as any },
+      'colorControl',
+      {} as any,
+      cctEndpoint,
+    );
     expect(loggerLogSpy).toHaveBeenCalledWith(
       LogLevel.INFO,
       `${db}Sent command ${hk}Cct${db}:${hk}cct:0${db}:${hk}ColorTemp(for model ${shellyPro.model} range 2700-5000 ${YELLOW}250${hk}->${YELLOW}4329${hk})${db} to shelly device ${idn}${shellyPro.id}${rs}${db}`,
@@ -606,7 +636,13 @@ describe('ShellyPlatform', () => {
     expect(fetch).toHaveBeenCalledWith(shellyPro.shelly, shellyPro.log, shellyPro.host, 'Cct.Set', { id: 0, ct: 4329 });
 
     loggerLogSpy.mockClear();
-    await cctEndpoint.executeCommandHandler('moveToColorTemperature', { colorTemperatureMireds: 500 });
+    await cctEndpoint.executeCommandHandler(
+      'moveToColorTemperature',
+      { colorTemperatureMireds: 500, transitionTime: 0, optionsMask: {} as any, optionsOverride: {} as any },
+      'colorControl',
+      {} as any,
+      cctEndpoint,
+    );
     expect(loggerLogSpy).toHaveBeenCalledWith(
       LogLevel.INFO,
       `${db}Sent command ${hk}Cct${db}:${hk}cct:0${db}:${hk}ColorTemp(for model ${shellyPro.model} range 2700-5000 ${YELLOW}500${hk}->${YELLOW}2700${hk})${db} to shelly device ${idn}${shellyPro.id}${rs}${db}`,
@@ -614,7 +650,13 @@ describe('ShellyPlatform', () => {
     expect(fetch).toHaveBeenCalledWith(shellyPro.shelly, shellyPro.log, shellyPro.host, 'Cct.Set', { id: 0, ct: 2700 });
 
     loggerLogSpy.mockClear();
-    await cctEndpoint.executeCommandHandler('moveToColorTemperature', { colorTemperatureMireds: 147 });
+    await cctEndpoint.executeCommandHandler(
+      'moveToColorTemperature',
+      { colorTemperatureMireds: 147, transitionTime: 0, optionsMask: {} as any, optionsOverride: {} as any },
+      'colorControl',
+      {} as any,
+      cctEndpoint,
+    );
     expect(loggerLogSpy).toHaveBeenCalledWith(
       LogLevel.INFO,
       `${db}Sent command ${hk}Cct${db}:${hk}cct:0${db}:${hk}ColorTemp(for model ${shellyPro.model} range 2700-5000 ${YELLOW}147${hk}->${YELLOW}5000${hk})${db} to shelly device ${idn}${shellyPro.id}${rs}${db}`,
@@ -756,42 +798,60 @@ describe('ShellyPlatform', () => {
 
     // Test commands for light from Matter to Shelly
     loggerLogSpy.mockClear();
-    await rgbEndpoint.executeCommandHandler('on', {});
+    await rgbEndpoint.executeCommandHandler('on', {}, 'onOff', {} as any, rgbEndpoint);
     expect(loggerLogSpy).toHaveBeenCalledWith(
       LogLevel.INFO,
       `${db}Sent command ${hk}Rgb${db}:${hk}rgb:0${db}:${hk}On()${db} to shelly device ${idn}${shellyPlusRgbwPm.id}${rs}${db}`,
     );
     expect(fetch).toHaveBeenCalledWith(shellyPlusRgbwPm.shelly, shellyPlusRgbwPm.log, shellyPlusRgbwPm.host, 'Rgb.Set', { id: 0, on: true });
 
-    await rgbEndpoint.executeCommandHandler('off', {});
+    await rgbEndpoint.executeCommandHandler('off', {}, 'onOff', {} as any, rgbEndpoint);
     expect(loggerLogSpy).toHaveBeenCalledWith(
       LogLevel.INFO,
       `${db}Sent command ${hk}Rgb${db}:${hk}rgb:0${db}:${hk}Off()${db} to shelly device ${idn}${shellyPlusRgbwPm.id}${rs}${db}`,
     );
     expect(fetch).toHaveBeenCalledWith(shellyPlusRgbwPm.shelly, shellyPlusRgbwPm.log, shellyPlusRgbwPm.host, 'Rgb.Set', { id: 0, on: false });
 
-    await rgbEndpoint.executeCommandHandler('toggle', {});
+    await rgbEndpoint.executeCommandHandler('toggle', {}, 'onOff', {} as any, rgbEndpoint);
     expect(loggerLogSpy).toHaveBeenCalledWith(
       LogLevel.INFO,
       `${db}Sent command ${hk}Rgb${db}:${hk}rgb:0${db}:${hk}Toggle()${db} to shelly device ${idn}${shellyPlusRgbwPm.id}${rs}${db}`,
     );
     expect(fetch).toHaveBeenCalledWith(shellyPlusRgbwPm.shelly, shellyPlusRgbwPm.log, shellyPlusRgbwPm.host, 'Rgb.Toggle', { id: 0 });
 
-    await rgbEndpoint.executeCommandHandler('moveToLevel', { level: 50 });
+    await rgbEndpoint.executeCommandHandler(
+      'moveToLevel',
+      { level: 50, transitionTime: 0, optionsMask: {} as any, optionsOverride: {} as any },
+      'levelControl',
+      {} as any,
+      rgbEndpoint,
+    );
     expect(loggerLogSpy).toHaveBeenCalledWith(
       LogLevel.INFO,
       `${db}Sent command ${hk}Rgb${db}:${hk}rgb:0${db}:${hk}Level(${YELLOW}20${hk})${db} to shelly device ${idn}${shellyPlusRgbwPm.id}${rs}${db}`,
     );
     expect(fetch).toHaveBeenCalledWith(shellyPlusRgbwPm.shelly, shellyPlusRgbwPm.log, shellyPlusRgbwPm.host, 'Rgb.Set', { id: 0, brightness: 20 });
 
-    await rgbEndpoint.executeCommandHandler('moveToHueAndSaturation', { hue: 50, saturation: 50 });
+    await rgbEndpoint.executeCommandHandler(
+      'moveToHueAndSaturation',
+      { hue: 50, saturation: 50, transitionTime: 0, optionsMask: {} as any, optionsOverride: {} as any },
+      'colorControl',
+      {} as any,
+      rgbEndpoint,
+    );
     expect(loggerLogSpy).toHaveBeenCalledWith(
       LogLevel.INFO,
       `${db}Sent command ${hk}Rgb${db}:${hk}rgb:0${db}:${hk}ColorRGB(${YELLOW}144${hk}, ${YELLOW}153${hk}, ${YELLOW}103${hk})${db} to shelly device ${idn}${shellyPlusRgbwPm.id}${rs}${db}`,
     );
     expect(fetch).toHaveBeenCalledWith(shellyPlusRgbwPm.shelly, shellyPlusRgbwPm.log, shellyPlusRgbwPm.host, 'Rgb.Set', { id: 0, rgb: [144, 153, 103] });
 
-    await rgbEndpoint.executeCommandHandler('moveToColorTemperature', { colorTemperatureMireds: 250 });
+    await rgbEndpoint.executeCommandHandler(
+      'moveToColorTemperature',
+      { colorTemperatureMireds: 250, transitionTime: 0, optionsMask: {} as any, optionsOverride: {} as any },
+      'colorControl',
+      {} as any,
+      rgbEndpoint,
+    );
     expect(loggerLogSpy).toHaveBeenCalledWith(
       LogLevel.INFO,
       `${db}Sent command ${hk}Rgb${db}:${hk}rgb:0${db}:${hk}ColorRGB(${YELLOW}255${hk}, ${YELLOW}206${hk}, ${YELLOW}166${hk})${db} to shelly device ${idn}${shellyPlusRgbwPm.id}${rs}${db}`,
@@ -889,28 +949,28 @@ describe('ShellyPlatform', () => {
 
     loggerLogSpy.mockClear();
 
-    await coverEndpoint.executeCommandHandler('downOrClose', {});
+    await coverEndpoint.executeCommandHandler('downOrClose', {}, 'windowCovering', {} as any, coverEndpoint);
     expect(loggerLogSpy).toHaveBeenCalledWith(
       LogLevel.INFO,
       `${db}Sent command ${hk}Cover${db}:${hk}cover:0${db}:${hk}Close()${db} to shelly device ${idn}${shelly2PMGen3.id}${rs}${db}`,
     );
     expect(fetch).toHaveBeenCalledWith(shelly2PMGen3.shelly, shelly2PMGen3.log, shelly2PMGen3.host, 'Cover.Close', { id: 0 });
 
-    await coverEndpoint.executeCommandHandler('upOrOpen', {});
+    await coverEndpoint.executeCommandHandler('upOrOpen', {}, 'windowCovering', {} as any, coverEndpoint);
     expect(loggerLogSpy).toHaveBeenCalledWith(
       LogLevel.INFO,
       `${db}Sent command ${hk}Cover${db}:${hk}cover:0${db}:${hk}Open()${db} to shelly device ${idn}${shelly2PMGen3.id}${rs}${db}`,
     );
     expect(fetch).toHaveBeenCalledWith(shelly2PMGen3.shelly, shelly2PMGen3.log, shelly2PMGen3.host, 'Cover.Open', { id: 0 });
 
-    await coverEndpoint.executeCommandHandler('stopMotion', {});
+    await coverEndpoint.executeCommandHandler('stopMotion', {}, 'windowCovering', {} as any, coverEndpoint);
     expect(loggerLogSpy).toHaveBeenCalledWith(
       LogLevel.INFO,
       `${db}Sent command ${hk}Cover${db}:${hk}cover:0${db}:${hk}Stop()${db} to shelly device ${idn}${shelly2PMGen3.id}${rs}${db}`,
     );
     expect(fetch).toHaveBeenCalledWith(shelly2PMGen3.shelly, shelly2PMGen3.log, shelly2PMGen3.host, 'Cover.Stop', { id: 0 });
 
-    await coverEndpoint.executeCommandHandler('goToLiftPercentage', { liftPercent100thsValue: 5000 });
+    await coverEndpoint.executeCommandHandler('goToLiftPercentage', { liftPercent100thsValue: 5000 }, 'windowCovering', {} as any, coverEndpoint);
     expect(loggerLogSpy).toHaveBeenCalledWith(
       LogLevel.INFO,
       `${db}Sent command ${hk}Cover${db}:${hk}cover:0${db}:${hk}GoToPosition(${YELLOW}50${hk})${db} to shelly device ${idn}${shelly2PMGen3.id}${rs}${db}`,

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# postSStartCommand.sh
+# postStartCommand.sh
 
 # This script runs after the Dev Container is started to set up the dev container environment.
 

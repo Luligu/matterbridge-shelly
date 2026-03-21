@@ -12,8 +12,8 @@ import { LogLevel } from 'matterbridge/logger';
 import { wait, waiter } from 'matterbridge/utils';
 import { WebSocket } from 'ws';
 
-import { ShellyData } from './shellyTypes.ts';
-import { WsServer } from './wsServer.ts';
+import { ShellyData } from './shellyTypes.js';
+import { WsServer } from './wsServer.js';
 
 // Setup the test environment
 await setupTest(NAME, false);

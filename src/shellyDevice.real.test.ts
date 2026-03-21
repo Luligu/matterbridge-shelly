@@ -11,9 +11,9 @@ import { setupTest } from 'matterbridge/jestutils';
 import { AnsiLogger, LogLevel, TimestampFormat } from 'matterbridge/logger';
 import { getMacAddress, wait } from 'matterbridge/utils';
 
-import { Shelly } from './shelly.ts';
-import { ShellyCoverComponent, ShellySwitchComponent } from './shellyComponent.ts';
-import { ShellyDevice } from './shellyDevice.ts';
+import { Shelly } from './shelly.js';
+import { ShellyCoverComponent, ShellySwitchComponent } from './shellyComponent.js';
+import { ShellyDevice } from './shellyDevice.js';
 
 // Setup the test environment
 await setupTest(NAME, false);

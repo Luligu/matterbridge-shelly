@@ -27,22 +27,28 @@ If you like this project and find it useful, please consider giving it a star on
 
 You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his invaluable contribution to this project.
 
-## [2.2.5] - Dev branch
+## [2.2.5] - 2026-03-21
 
 ### Added
 
 - [blu]: Add `Shelly BLU H&T ZB`.
 - [blu]: Add `Shelly BLU H&T Display ZB`.
+- [platform]: Require matterbridge v.3.7.0.
 
 If you have any of the new ble devices, send me the full log and I will add them.
 
 ### Changed
 
 - [package]: Update dependencies.
-- [package]: Bump package to `automator` v.3.1.2.
-- [package]: Bump `eslint` to v.10.0.3.
+- [package]: Bump package to `automator` v.3.1.3.
+- [devcontainer]: Update `Dev Container` configuration.
+- [devcontainer]: Add postStartCommand to the `Dev Container` configuration.
+- [package]: Refactor `build.yml` to use matterbridge dev branch for push and main for pull requests.
+- [package]: Add `type checking` script for Jest tests.
+- [package]: Update actions versions in workflows.
+- [package]: Bump `eslint` to v.10.1.0.
+- [package]: Add `CODE_OF_CONDUCT.md`.
 - [package]: Bump `typescript-eslint` to v.8.57.1.
-- [devcontainer]: Bump `Dev Container` configuration.
 
 ### Fixed
 

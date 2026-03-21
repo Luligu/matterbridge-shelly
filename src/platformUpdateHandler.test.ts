@@ -26,14 +26,14 @@ import {
 import { CYAN, db, dn, hk, idn, LogLevel, nf, rs, zb } from 'matterbridge/logger';
 import { wait } from 'matterbridge/utils';
 
-import { CoapServer } from './coapServer.ts';
-import { MdnsScanner } from './mdnsScanner.ts';
-import { ShellyPlatform, ShellyPlatformConfig } from './platform.ts';
-import { shellyUpdateHandler } from './platformUpdateHandler.ts';
-import { Shelly } from './shelly.ts';
-import { ShellyDevice } from './shellyDevice.ts';
-import { WsClient } from './wsClient.ts';
-import { WsServer } from './wsServer.ts';
+import { CoapServer } from './coapServer.js';
+import { MdnsScanner } from './mdnsScanner.js';
+import { ShellyPlatform, ShellyPlatformConfig } from './platform.js';
+import { shellyUpdateHandler } from './platformUpdateHandler.js';
+import { Shelly } from './shelly.js';
+import { ShellyDevice } from './shellyDevice.js';
+import { WsClient } from './wsClient.js';
+import { WsServer } from './wsServer.js';
 
 // Setup the test environment
 await setupTest(NAME, false);

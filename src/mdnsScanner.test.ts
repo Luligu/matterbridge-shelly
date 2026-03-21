@@ -16,7 +16,7 @@ import { flushAsync, loggerLogSpy, setupTest } from 'matterbridge/jestutils';
 import { AnsiLogger, CYAN, db, hk, ign, LogLevel, rs } from 'matterbridge/logger';
 import { ResponsePacket } from 'multicast-dns';
 
-import { DiscoveredDevice, DiscoveredDeviceListener, MdnsScanner } from './mdnsScanner.ts';
+import { DiscoveredDevice, DiscoveredDeviceListener, MdnsScanner } from './mdnsScanner.js';
 
 // Setup the test environment
 await setupTest(NAME, false);

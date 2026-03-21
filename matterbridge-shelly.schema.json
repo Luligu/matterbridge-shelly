@@ -4,13 +4,13 @@
   "type": "object",
   "properties": {
     "name": {
-      "description": "Plugin name",
+      "description": "Plugin Name",
       "type": "string",
       "readOnly": true,
       "ui:widget": "hidden"
     },
     "type": {
-      "description": "Plugin type",
+      "description": "Plugin Type",
       "type": "string",
       "readOnly": true,
       "ui:widget": "hidden"
@@ -182,26 +182,31 @@
       "default": false
     },
     "debug": {
+      "title": "Enable Debug",
       "description": "Enable the debug for the plugin (development only)",
       "type": "boolean",
       "default": false
     },
     "debugMdns": {
+      "title": "Enable Debug Mdns",
       "description": "Enable the debug for the shelly mdnsScanner (development only)",
       "type": "boolean",
       "default": false
     },
     "debugCoap": {
+      "title": "Enable Debug Coap",
       "description": "Enable the debug for the shelly coapServer (development only)",
       "type": "boolean",
       "default": false
     },
     "debugWs": {
+      "title": "Enable Debug Ws",
       "description": "Enable the debug for the shelly WsClient and WsServer (development only)",
       "type": "boolean",
       "default": false
     },
     "unregisterOnShutdown": {
+      "title": "Unregister On Shutdown",
       "description": "Unregister all devices on shutdown (development only)",
       "type": "boolean",
       "default": false,
