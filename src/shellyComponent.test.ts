@@ -10,11 +10,11 @@ import { jest } from '@jest/globals';
 import { setupTest } from 'matterbridge/jestutils';
 import { AnsiLogger, TimestampFormat } from 'matterbridge/logger';
 
-import { Shelly } from './shelly.ts';
-import { isCoverComponent, isLightComponent, isSwitchComponent, ShellyComponent, ShellyCoverComponent, ShellyLightComponent, ShellySwitchComponent } from './shellyComponent.ts';
-import { ShellyDevice } from './shellyDevice.ts';
-import { ShellyProperty } from './shellyProperty.ts';
-import { ShellyData, ShellyDataType } from './shellyTypes.ts';
+import { Shelly } from './shelly.js';
+import { isCoverComponent, isLightComponent, isSwitchComponent, ShellyComponent, ShellyCoverComponent, ShellyLightComponent, ShellySwitchComponent } from './shellyComponent.js';
+import { ShellyDevice } from './shellyDevice.js';
+import { ShellyProperty } from './shellyProperty.js';
+import { ShellyData, ShellyDataType } from './shellyTypes.js';
 
 // Setup the test environment
 await setupTest(NAME, false);

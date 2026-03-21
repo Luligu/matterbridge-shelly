@@ -17,7 +17,7 @@ import {
   getGen2BodyOptions,
   parseBasicAuthenticateHeader,
   parseDigestAuthenticateHeader,
-} from './auth.ts';
+} from './auth.js';
 
 // Setup the test environment
 await setupTest(NAME, false);

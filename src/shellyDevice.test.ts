@@ -7,7 +7,7 @@ const HOMEDIR = path.join('jest', NAME);
 import path from 'node:path';
 
 import { jest } from '@jest/globals';
-import { flushAsync, loggerLogSpy, setupTest } from 'matterbridge/jestutils';
+import { flushAsync, loggerLogSpy, setDebug, setupTest } from 'matterbridge/jestutils';
 import { AnsiLogger, BLUE, db, dn, er, hk, LogLevel, MAGENTA, nf, nt, TimestampFormat, YELLOW, zb } from 'matterbridge/logger';
 import { wait } from 'matterbridge/utils';
 
@@ -228,6 +228,30 @@ describe('Shelly devices test', () => {
     device.thermostatSystemModeTimeout = setTimeout(() => {}, 1000); // Prevent timeout in tests
     device.thermostatSetpointTimeout = setTimeout(() => {}, 1000); // Prevent timeout in tests
     (device as any).startWsClientTimeout = setTimeout(() => {}, 1000); // Prevent timeout in tests
+    device.destroy();
+  });
+
+  test('create a dummy btHome gateway device and fetch', async () => {
+    const device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shellydummy-AABBCCDDEEFF.json'));
+    expect(device).toBeDefined();
+    if (!device) return;
+    expect(device.name).toBe('2PM Gen3 Cover');
+    expect(device.id).toBe('shellydummy-AABBCCDDEEFF');
+    expect(device.host).toBe(path.join('src', 'mock', 'shellydummy-AABBCCDDEEFF.json'));
+    expect(device.username).toBe('admin');
+    expect(device.password).toBe('tango');
+    expect(device.components).toHaveLength(13);
+    // @ts-expect-error componentsPayload is private
+    expect(device.componentsPayload.components).toHaveLength(24);
+    expect(device.bthomeTrvs.size).toBe(0);
+    expect(device.bthomeDevices.size).toBe(5);
+    expect(device.bthomeSensors.size).toBe(19);
+
+    const payload = await device.fetchUpdate();
+    expect(payload).not.toBeNull();
+    expect(payload).toBeInstanceOf(Object);
+    expect(payload).toHaveProperty('cover:0');
+
     device.destroy();
   });
 
@@ -541,6 +565,44 @@ describe('Shelly devices test', () => {
     device.destroy();
   });
 
+  test('fetchUpdate should fail when shelly mac is invalid', async () => {
+    // Create a basic device first
+    const device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shelly2pmg3-34CDB0770C4C.json'));
+    expect(device).toBeDefined();
+    if (!device) return;
+    expect(device.cached).toBe(false);
+    expect(device.online).toBe(true);
+
+    // Mock fetch to fail for shelly
+    fetchSpy.mockImplementation((shelly: Shelly, log: AnsiLogger, host: string, service: string, params?: Record<string, string | number | boolean | object>) => {
+      if (service === 'shelly')
+        return Promise.resolve({
+          name: '2PM Gen3 Cover',
+          id: 'shelly2pmg3-34cdb0770c4c',
+          mac: 'invalid',
+          slot: 1,
+          model: 'S3SW-002P16EU',
+          gen: 3,
+          fw_id: '20250520-083748/1.6.2-gc8a76e2',
+          ver: '1.6.2',
+          app: 'S2PMG3',
+          auth_en: false,
+          auth_domain: null,
+          profile: 'cover',
+          matter: false,
+        });
+      return Promise.resolve({});
+    });
+
+    device.online = true; // Set online to test offline transition
+    const result = await device.fetchUpdate();
+    expect(result).toBeNull();
+    expect(device.online).toBe(false);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.WARN, expect.stringContaining(`has a different MAC address`));
+
+    device.destroy();
+  });
+
   test('fetchUpdate should fail when settings fetch fails', async () => {
     const device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shelly2pmg3-34CDB0770C4C.json'));
     expect(device).toBeDefined();
@@ -548,7 +610,22 @@ describe('Shelly devices test', () => {
 
     // Mock fetch to fail for settings
     fetchSpy.mockImplementation((shelly: Shelly, log: AnsiLogger, host: string, service: string, params?: Record<string, string | number | boolean | object>) => {
-      if (service === 'shelly') return Promise.resolve({});
+      if (service === 'shelly')
+        return Promise.resolve({
+          name: '2PM Gen3 Cover',
+          id: 'shelly2pmg3-34cdb0770c4c',
+          mac: '34CDB0770C4C',
+          slot: 1,
+          model: 'S3SW-002P16EU',
+          gen: 3,
+          fw_id: '20250520-083748/1.6.2-gc8a76e2',
+          ver: '1.6.2',
+          app: 'S2PMG3',
+          auth_en: false,
+          auth_domain: null,
+          profile: 'cover',
+          matter: false,
+        });
       if (service === 'Shelly.GetConfig') return Promise.resolve(null);
       return Promise.resolve({});
     });
@@ -569,7 +646,22 @@ describe('Shelly devices test', () => {
 
     // Mock fetch to fail for status
     fetchSpy.mockImplementation((shelly: Shelly, log: AnsiLogger, host: string, service: string, params?: Record<string, string | number | boolean | object>) => {
-      if (service === 'shelly') return Promise.resolve({});
+      if (service === 'shelly')
+        return Promise.resolve({
+          name: '2PM Gen3 Cover',
+          id: 'shelly2pmg3-34cdb0770c4c',
+          mac: '34CDB0770C4C',
+          slot: 1,
+          model: 'S3SW-002P16EU',
+          gen: 3,
+          fw_id: '20250520-083748/1.6.2-gc8a76e2',
+          ver: '1.6.2',
+          app: 'S2PMG3',
+          auth_en: false,
+          auth_domain: null,
+          profile: 'cover',
+          matter: false,
+        });
       if (service === 'Shelly.GetConfig') return Promise.resolve({});
       if (service === 'Shelly.GetStatus') return Promise.resolve(null);
       return Promise.resolve({});
@@ -1012,17 +1104,17 @@ describe('Shelly devices test', () => {
 
     let component: BTHomeComponent = { key: 'blutrv:200', status: { id: 200, target_C: 20, current_C: 24.1, rssi: -48, battery: 100 }, config: {} } as BTHomeComponent;
     device.scanBTHomeComponents([component]);
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.ERROR, expect.stringContaining('has no valid data!'), expect.anything());
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.ERROR, expect.stringContaining('has no valid data'));
     jest.clearAllMocks();
 
     component = { key: 'bthomedevice:200', status: { id: 200, target_C: 20, current_C: 24.1, rssi: -48, battery: 100 }, config: { meta: {} } } as BTHomeComponent;
     device.scanBTHomeComponents([component]);
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.ERROR, expect.stringContaining('has no valid data!'), expect.anything());
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.ERROR, expect.stringContaining('has no valid data'));
     jest.clearAllMocks();
 
     component = { key: 'bthomesensor:200', status: { id: 200, target_C: 20, current_C: 24.1, rssi: -48, battery: 100 }, config: { obj_id: {} } } as BTHomeComponent;
     device.scanBTHomeComponents([component]);
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.ERROR, expect.stringContaining('has no valid data!'), expect.anything());
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.ERROR, expect.stringContaining('has no valid data'));
     jest.clearAllMocks();
 
     device.destroy();

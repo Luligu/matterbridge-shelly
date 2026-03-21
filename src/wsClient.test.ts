@@ -14,7 +14,7 @@ import { db, er, hk, LogLevel, nf, wr, zb } from 'matterbridge/logger';
 import { wait, waiter } from 'matterbridge/utils';
 import { WebSocket, WebSocketServer } from 'ws';
 
-import { WsClient } from './wsClient.ts';
+import { WsClient } from './wsClient.js';
 
 // Setup the test environment
 await setupTest(NAME, false);

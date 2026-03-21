@@ -11,10 +11,10 @@ import { flushAsync, setupTest } from 'matterbridge/jestutils';
 import { AnsiLogger, LogLevel, TimestampFormat } from 'matterbridge/logger';
 import { getMacAddress, wait, waiter } from 'matterbridge/utils';
 
-import { CoapServer } from './coapServer.ts';
-import { Shelly } from './shelly.ts';
-import { isCoverComponent, isLightComponent, isSwitchComponent } from './shellyComponent.ts';
-import { ShellyDevice } from './shellyDevice.ts';
+import { CoapServer } from './coapServer.js';
+import { Shelly } from './shelly.js';
+import { isCoverComponent, isLightComponent, isSwitchComponent } from './shellyComponent.js';
+import { ShellyDevice } from './shellyDevice.js';
 
 // Setup the test environment
 await setupTest(NAME, false);
