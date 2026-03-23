@@ -913,19 +913,22 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           child.addCommandHandler('identify', async ({ request }) => {
             shellyIdentifyCommandHandler(child, component, request);
           });
-          child.addCommandHandler('upOrOpen', async () => {
-            child.setAttribute(WindowCovering.Cluster.id, 'targetPositionLiftPercent100ths', 0, child.log);
+          child.addCommandHandler('upOrOpen', async ({ attributes }) => {
+            // child.setAttribute(WindowCovering.Cluster.id, 'targetPositionLiftPercent100ths', 0, child.log);
+            attributes.currentPositionLiftPercent100ths = 0;
             shellyCoverCommandHandler(child, component, 'Open', 0);
           });
-          child.addCommandHandler('downOrClose', async () => {
-            child.setAttribute(WindowCovering.Cluster.id, 'targetPositionLiftPercent100ths', 10000, child.log);
+          child.addCommandHandler('downOrClose', async ({ attributes }) => {
+            // child.setAttribute(WindowCovering.Cluster.id, 'targetPositionLiftPercent100ths', 10000, child.log);
+            attributes.currentPositionLiftPercent100ths = 10000;
             shellyCoverCommandHandler(child, component, 'Close', 10000);
           });
           child.addCommandHandler('stopMotion', async () => {
             shellyCoverCommandHandler(child, component, 'Stop');
           });
-          child.addCommandHandler('goToLiftPercentage', async ({ request }) => {
-            child.setAttribute(WindowCovering.Cluster.id, 'targetPositionLiftPercent100ths', request.liftPercent100thsValue, child.log);
+          child.addCommandHandler('goToLiftPercentage', async ({ request, attributes }) => {
+            // child.setAttribute(WindowCovering.Cluster.id, 'targetPositionLiftPercent100ths', request.liftPercent100thsValue, child.log);
+            attributes.currentPositionLiftPercent100ths = request.liftPercent100thsValue;
             if (request.liftPercent100thsValue === 0) shellyCoverCommandHandler(child, component, 'Open', 0);
             else if (request.liftPercent100thsValue === 10000) shellyCoverCommandHandler(child, component, 'Close', 10000);
             else shellyCoverCommandHandler(child, component, 'GoToPosition', request.liftPercent100thsValue);
