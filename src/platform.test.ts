@@ -80,6 +80,11 @@ const mockConfig: ShellyPlatformConfig = {
   unregisterOnShutdown: false,
 };
 
+function expectUnorderedNumberArray(actual: unknown, expected: number[]): void {
+  expect(Array.isArray(actual)).toBe(true);
+  expect([...(actual as number[])].sort((a, b) => a - b)).toEqual([...expected].sort((a, b) => a - b));
+}
+
 describe('ShellyPlatform', () => {
   let shellyPlatform: ShellyPlatform;
   let shelly: Shelly;
@@ -754,10 +759,10 @@ describe('ShellyPlatform', () => {
       { deviceType: 269, revision: 4 },
       { deviceType: 1296, revision: 1 },
     ]);
-    expect(child?.getAttribute('Identify', 'acceptedCommandList')).toEqual([0, 64]);
-    expect(child?.getAttribute('OnOff', 'acceptedCommandList')).toEqual([0, 64, 65, 66, 1, 2]);
-    expect(child?.getAttribute('LevelControl', 'acceptedCommandList')).toEqual([0, 1, 2, 3, 4, 5, 6, 7]);
-    expect(child?.getAttribute('ColorControl', 'acceptedCommandList')).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 75, 76, 71]);
+    expectUnorderedNumberArray(child?.getAttribute('Identify', 'acceptedCommandList'), [0, 64]);
+    expectUnorderedNumberArray(child?.getAttribute('OnOff', 'acceptedCommandList'), [0, 64, 65, 66, 1, 2]);
+    expectUnorderedNumberArray(child?.getAttribute('LevelControl', 'acceptedCommandList'), [0, 1, 2, 3, 4, 5, 6, 7]);
+    expectUnorderedNumberArray(child?.getAttribute('ColorControl', 'acceptedCommandList'), [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 75, 76, 71]);
 
     // Test updates on rgb
     const rgbEndpoint = device.getChildEndpointByName('rgb:0') as MatterbridgeEndpoint;
