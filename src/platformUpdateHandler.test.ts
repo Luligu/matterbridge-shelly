@@ -1,8 +1,7 @@
 // src/platformUpdateHandler.test.ts
 
-const MATTER_PORT = 6100;
 const NAME = 'PlatformUpdateHandler';
-const HOMEDIR = path.join('jest', NAME);
+const MATTER_PORT = 6100;
 
 import path from 'node:path';
 
@@ -106,7 +105,7 @@ describe('ShellyPlatform', () => {
 
   beforeAll(async () => {
     // Create Matterbridge environment
-    await createMatterbridgeEnvironment(NAME);
+    await createMatterbridgeEnvironment();
     await startMatterbridgeEnvironment(MATTER_PORT);
   });
 

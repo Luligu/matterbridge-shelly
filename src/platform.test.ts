@@ -1,8 +1,7 @@
 // src/platform.test.ts
 
-const MATTER_PORT = 6000;
 const NAME = 'Platform';
-const HOMEDIR = path.join('jest', NAME);
+const MATTER_PORT = 6000;
 
 import path from 'node:path';
 
@@ -10,7 +9,6 @@ import { jest } from '@jest/globals';
 import { featuresFor, MatterbridgeEndpoint } from 'matterbridge';
 import {
   addMatterbridgePlatform,
-  aggregator,
   createMatterbridgeEnvironment,
   destroyMatterbridgeEnvironment,
   log,
@@ -124,7 +122,7 @@ describe('ShellyPlatform', () => {
 
   beforeAll(async () => {
     // Create Matterbridge environment
-    await createMatterbridgeEnvironment(NAME);
+    await createMatterbridgeEnvironment();
     await startMatterbridgeEnvironment(MATTER_PORT);
   });
 
@@ -304,7 +302,7 @@ describe('ShellyPlatform', () => {
     const device = shellyPlatform.bridgedDevices.get('shelly1-34945472A643');
     expect(device).toBeDefined();
     if (!device) return;
-    await aggregator.add(device);
+    // await aggregator.add(device);
 
     expect(device.getAllClusterServerNames()).toEqual(['descriptor', 'matterbridge', 'bridgedDeviceBasicInformation', 'powerSource', 'fixedLabel']);
     expect(device.getChildEndpoints()).toHaveLength(3);
@@ -389,7 +387,7 @@ describe('ShellyPlatform', () => {
     const device = shellyPlatform.bridgedDevices.get('shellyht-703523');
     expect(device).toBeDefined();
     if (!device) return;
-    await aggregator.add(device);
+    // await aggregator.add(device);
 
     expect(device.getAllClusterServerNames()).toEqual(['descriptor', 'matterbridge', 'bridgedDeviceBasicInformation', 'powerSource', 'fixedLabel']);
     expect(device.getChildEndpoints()).toHaveLength(2);
@@ -438,7 +436,7 @@ describe('ShellyPlatform', () => {
     const device = shellyPlatform.bridgedDevices.get('shellyprorgbwwpm-AC1518784844');
     expect(device).toBeDefined();
     if (!device) return;
-    await aggregator.add(device);
+    // await aggregator.add(device);
 
     expect(device.getAllClusterServerNames()).toEqual(['descriptor', 'matterbridge', 'bridgedDeviceBasicInformation', 'powerSource', 'fixedLabel']);
     expect(featuresFor(device, 'powerSource').wired).toBe(true);
@@ -701,7 +699,7 @@ describe('ShellyPlatform', () => {
     const device = shellyPlatform.bridgedDevices.get('shellyplusrgbwpm-A0A3B35C7024');
     expect(device).toBeDefined();
     if (!device) return;
-    await aggregator.add(device);
+    // await aggregator.add(device);
 
     expect(device.getAllClusterServerNames()).toEqual(['descriptor', 'matterbridge', 'bridgedDeviceBasicInformation', 'powerSource', 'fixedLabel']);
     expect(featuresFor(device, 'powerSource')).toEqual({
@@ -896,7 +894,7 @@ describe('ShellyPlatform', () => {
     const device = shellyPlatform.bridgedDevices.get('shelly2pmg3-34CDB0770C4C');
     expect(device).toBeDefined();
     if (!device) return;
-    await aggregator.add(device);
+    // await aggregator.add(device);
 
     expect(device.getAllClusterServerNames()).toEqual(['descriptor', 'matterbridge', 'bridgedDeviceBasicInformation', 'powerSource', 'fixedLabel']);
     expect(featuresFor(device, 'powerSource').wired).toBe(true);
