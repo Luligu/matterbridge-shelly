@@ -107,7 +107,7 @@ describe('ShellyPlatform', () => {
   });
 
   afterEach(async () => {
-    // Clear the debug flag before each test
+    // Clear the debug
     await setDebug(false);
   });
 

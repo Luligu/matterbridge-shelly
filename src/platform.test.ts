@@ -14,6 +14,7 @@ import {
   log,
   loggerLogSpy,
   matterbridge,
+  setDebug,
   setupTest,
   startMatterbridgeEnvironment,
   stopMatterbridgeEnvironment,
@@ -129,6 +130,11 @@ describe('ShellyPlatform', () => {
   beforeEach(async () => {
     // Clear all mocks before each test
     jest.clearAllMocks();
+  });
+
+  afterEach(async () => {
+    // Clear debug
+    await setDebug(false);
   });
 
   afterAll(async () => {
