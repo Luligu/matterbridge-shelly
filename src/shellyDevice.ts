@@ -950,7 +950,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
         this.log.debug(`Device ${hk}${this.id}${db} has event ${YELLOW}${event.event}${db} at ${CYAN}${this.getLocalTimeFromLastUpdated(event.ts as number)}${db}`);
         this.emit('bthome_event', event);
       } else if (isValidObject(event) && isValidString(event.event) && isValidNumber(event.ts) && isValidString(event.component) && event.component.startsWith('bthomedevice:')) {
-        const device = Array.from(this.bthomeDevices).find(([_addr, _device]) => _device.key === event.component)?.[1];
+        const device = Array.from(this.bthomeDevices).find(([_addr, bthomeDevice]) => bthomeDevice.key === event.component)?.[1];
         if (device) {
           this.log.debug(
             `Device ${hk}${this.id}${db} has event ${YELLOW}${event.event}${db} at ${CYAN}${this.getLocalTimeFromLastUpdated(event.ts as number)}${db} ` +
@@ -999,9 +999,9 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
     for (const key in data) {
       if (key.startsWith('bthomedevice:')) {
         let device = undefined;
-        for (const _device of this.bthomeDevices.values()) {
-          if (_device.key === key) {
-            device = _device;
+        for (const bthomedevice of this.bthomeDevices.values()) {
+          if (bthomedevice.key === key) {
+            device = bthomedevice;
           }
         }
         if (device) {

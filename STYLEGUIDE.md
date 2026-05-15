@@ -28,7 +28,7 @@ Concise rules the codebase and Copilot suggestions should follow.
 
 For every public/exported function or public methods (and important internal helpers):
 
-```
+```jsdoc
 /**
  * One‑line summary (starts with a verb, ends without period if short).
  *
@@ -76,7 +76,7 @@ The logger is always AnsiLogger.
 - The default tabWidth is 2 not 4.
 - No trailing spaces; keep imports sorted by groups: std libs, external deps, internal modules, types.
 - Use trailing commas where multi‑line.
-- The repo uses import 'eslint-plugin-simple-import-sort', 'eslint-plugin-n', 'eslint-plugin-promise', 'eslint-plugin-jsdoc', 'eslint-plugin-prettier/recommended', 'eslint-plugin-jest';
+- The repo uses `eslint-plugin-simple-import-sort`, `eslint-plugin-n`, `eslint-plugin-jsdoc`, `eslint-plugin-prettier`, `eslint-plugin-jest`, `@eslint/json`, `@eslint/markdown` and `@vitest/eslint-plugin`.
 
 ## 8. Tests
 

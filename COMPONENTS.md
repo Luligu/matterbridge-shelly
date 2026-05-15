@@ -19,7 +19,7 @@ Given the components of a shellyplusrgbwpm device (as shown in the logs from the
 
 To blacklist all Input components of this device, use the component name as shown below:
 
-```
+```json
 "deviceEntityBlackList": { "shellyplusrgbwpm-ECC9FF4CEAF0": ["Input"] }
 ```
 
@@ -27,7 +27,7 @@ To blacklist all Input components of this device, use the component name as show
 
 To blacklist only the third (input:2) and fourth (input:3) Input components of this device, use the component IDs as follows:
 
-```
+```json
 "deviceEntityBlackList": { "shellyplusrgbwpm-ECC9FF4CEAF0": ["input:2", "input:3"] }
 ```
 
@@ -35,7 +35,7 @@ To blacklist only the third (input:2) and fourth (input:3) Input components of t
 
 To expose only the motion component while blacklisting all secondary components, use the component names as shown below:
 
-```
+```json
 "deviceEntityBlackList": { "7c:c6:b6:65:2d:99": ["Illuminance", "Button"] }
 ```
 
@@ -43,7 +43,7 @@ To expose only the motion component while blacklisting all secondary components,
 
 To expose only the contact component while blacklisting all secondary components, use the component names as shown below:
 
-```
+```json
 "deviceEntityBlackList": { "0c:ef:f6:f1:d7:7b": ["Illuminance"] }
 ```
 
@@ -51,18 +51,18 @@ To expose only the contact component while blacklisting all secondary components
 
 To expose only the temperature and humidity components while blacklisting all secondary components, use the component names as shown below:
 
-```
+```json
 "deviceEntityBlackList": { "7c:c6:b6:65:2d:87": ["Button"] }
 ```
 
 ## Example 5: How to disable for all devices the electrical measurements
 
-```
+```json
 "entityBlackList": ["PowerMeter"]
 ```
 
 ## Example 6: How to disable the electrical measurements for a single device
 
-```
+```json
 "deviceEntityBlackList": { "shellyplusrgbwpm-ECC9FF4CEAF0": ["PowerMeter"] }
 ```

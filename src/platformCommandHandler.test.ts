@@ -1,10 +1,7 @@
 // src/platformCommandHandler.test.ts
 
-const MATTER_PORT = 6200;
 const NAME = 'PlatformCommandHandler';
-const HOMEDIR = path.join('jest', NAME);
-
-import path from 'node:path';
+const MATTER_PORT = 6200;
 
 import { jest } from '@jest/globals';
 import {
@@ -100,7 +97,7 @@ describe('ShellyPlatform', () => {
 
   beforeAll(async () => {
     // Create Matterbridge environment
-    await createMatterbridgeEnvironment(NAME);
+    await createMatterbridgeEnvironment();
     await startMatterbridgeEnvironment(MATTER_PORT);
   });
 
@@ -110,7 +107,7 @@ describe('ShellyPlatform', () => {
   });
 
   afterEach(async () => {
-    // Clear the debug flag before each test
+    // Clear the debug
     await setDebug(false);
   });
 

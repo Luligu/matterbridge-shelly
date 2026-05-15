@@ -23,20 +23,21 @@
 
 import { MatterbridgeEndpoint } from 'matterbridge';
 import { db, debugStringify, hk, idn, nf, or, rs, YELLOW } from 'matterbridge/logger';
+import { Identify } from 'matterbridge/matter/clusters';
 import { isValidArray, isValidNumber, isValidObject } from 'matterbridge/utils';
 
 import { ShellyComponent, ShellyCoverComponent, ShellyLightComponent, ShellySwitchComponent } from './shellyComponent.js';
 
-type PrimitiveValues = boolean | number | bigint | string | object | null | undefined;
+// type PrimitiveValues = boolean | number | bigint | string | object | null | undefined;
 
 /**
  * Handles the identify command for a Shelly device.
  *
  * @param {MatterbridgeDevice} endpoint - The Matterbridge device endpoint.
  * @param {ShellyComponent} component - The Shelly component.
- * @param {Record<string, PrimitiveValues>} request - The request payload.
+ * @param {Identify.IdentifyRequest} request - The request payload.
  */
-export function shellyIdentifyCommandHandler(endpoint: MatterbridgeEndpoint, component: ShellyComponent, request: Record<string, PrimitiveValues>): void {
+export function shellyIdentifyCommandHandler(endpoint: MatterbridgeEndpoint, component: ShellyComponent, request: Identify.IdentifyRequest): void {
   endpoint.log.info(
     `Identify command received for endpoint ${or}${endpoint.name}${nf}:${or}${endpoint.number}${nf} component ${hk}${component.name}${nf}:${hk}${component.id}${nf} request ${debugStringify(request)}`,
   );

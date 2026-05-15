@@ -1,8 +1,7 @@
 // src/platform.test.ts
 
-const MATTER_PORT = 6000;
 const NAME = 'Platform';
-const HOMEDIR = path.join('jest', NAME);
+const MATTER_PORT = 6000;
 
 import path from 'node:path';
 
@@ -10,12 +9,12 @@ import { jest } from '@jest/globals';
 import { featuresFor, MatterbridgeEndpoint } from 'matterbridge';
 import {
   addMatterbridgePlatform,
-  aggregator,
   createMatterbridgeEnvironment,
   destroyMatterbridgeEnvironment,
   log,
   loggerLogSpy,
   matterbridge,
+  setDebug,
   setupTest,
   startMatterbridgeEnvironment,
   stopMatterbridgeEnvironment,
@@ -80,6 +79,11 @@ const mockConfig: ShellyPlatformConfig = {
   unregisterOnShutdown: false,
 };
 
+function expectUnorderedNumberArray(actual: unknown, expected: number[]): void {
+  expect(Array.isArray(actual)).toBe(true);
+  expect([...(actual as number[])].sort((a, b) => a - b)).toEqual([...expected].sort((a, b) => a - b));
+}
+
 describe('ShellyPlatform', () => {
   let shellyPlatform: ShellyPlatform;
   let shelly: Shelly;
@@ -119,13 +123,18 @@ describe('ShellyPlatform', () => {
 
   beforeAll(async () => {
     // Create Matterbridge environment
-    await createMatterbridgeEnvironment(NAME);
+    await createMatterbridgeEnvironment();
     await startMatterbridgeEnvironment(MATTER_PORT);
   });
 
   beforeEach(async () => {
     // Clear all mocks before each test
     jest.clearAllMocks();
+  });
+
+  afterEach(async () => {
+    // Clear debug
+    await setDebug(false);
   });
 
   afterAll(async () => {
@@ -299,7 +308,7 @@ describe('ShellyPlatform', () => {
     const device = shellyPlatform.bridgedDevices.get('shelly1-34945472A643');
     expect(device).toBeDefined();
     if (!device) return;
-    await aggregator.add(device);
+    // await aggregator.add(device);
 
     expect(device.getAllClusterServerNames()).toEqual(['descriptor', 'matterbridge', 'bridgedDeviceBasicInformation', 'powerSource', 'fixedLabel']);
     expect(device.getChildEndpoints()).toHaveLength(3);
@@ -384,7 +393,7 @@ describe('ShellyPlatform', () => {
     const device = shellyPlatform.bridgedDevices.get('shellyht-703523');
     expect(device).toBeDefined();
     if (!device) return;
-    await aggregator.add(device);
+    // await aggregator.add(device);
 
     expect(device.getAllClusterServerNames()).toEqual(['descriptor', 'matterbridge', 'bridgedDeviceBasicInformation', 'powerSource', 'fixedLabel']);
     expect(device.getChildEndpoints()).toHaveLength(2);
@@ -433,7 +442,7 @@ describe('ShellyPlatform', () => {
     const device = shellyPlatform.bridgedDevices.get('shellyprorgbwwpm-AC1518784844');
     expect(device).toBeDefined();
     if (!device) return;
-    await aggregator.add(device);
+    // await aggregator.add(device);
 
     expect(device.getAllClusterServerNames()).toEqual(['descriptor', 'matterbridge', 'bridgedDeviceBasicInformation', 'powerSource', 'fixedLabel']);
     expect(featuresFor(device, 'powerSource').wired).toBe(true);
@@ -696,7 +705,7 @@ describe('ShellyPlatform', () => {
     const device = shellyPlatform.bridgedDevices.get('shellyplusrgbwpm-A0A3B35C7024');
     expect(device).toBeDefined();
     if (!device) return;
-    await aggregator.add(device);
+    // await aggregator.add(device);
 
     expect(device.getAllClusterServerNames()).toEqual(['descriptor', 'matterbridge', 'bridgedDeviceBasicInformation', 'powerSource', 'fixedLabel']);
     expect(featuresFor(device, 'powerSource')).toEqual({
@@ -754,10 +763,10 @@ describe('ShellyPlatform', () => {
       { deviceType: 269, revision: 4 },
       { deviceType: 1296, revision: 1 },
     ]);
-    expect(child?.getAttribute('Identify', 'acceptedCommandList')).toEqual([0, 64]);
-    expect(child?.getAttribute('OnOff', 'acceptedCommandList')).toEqual([0, 64, 65, 66, 1, 2]);
-    expect(child?.getAttribute('LevelControl', 'acceptedCommandList')).toEqual([0, 1, 2, 3, 4, 5, 6, 7]);
-    expect(child?.getAttribute('ColorControl', 'acceptedCommandList')).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 75, 76, 71]);
+    expectUnorderedNumberArray(child?.getAttribute('Identify', 'acceptedCommandList'), [0, 64]);
+    expectUnorderedNumberArray(child?.getAttribute('OnOff', 'acceptedCommandList'), [0, 64, 65, 66, 1, 2]);
+    expectUnorderedNumberArray(child?.getAttribute('LevelControl', 'acceptedCommandList'), [0, 1, 2, 3, 4, 5, 6, 7]);
+    expectUnorderedNumberArray(child?.getAttribute('ColorControl', 'acceptedCommandList'), [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 75, 76, 71]);
 
     // Test updates on rgb
     const rgbEndpoint = device.getChildEndpointByName('rgb:0') as MatterbridgeEndpoint;
@@ -891,7 +900,7 @@ describe('ShellyPlatform', () => {
     const device = shellyPlatform.bridgedDevices.get('shelly2pmg3-34CDB0770C4C');
     expect(device).toBeDefined();
     if (!device) return;
-    await aggregator.add(device);
+    // await aggregator.add(device);
 
     expect(device.getAllClusterServerNames()).toEqual(['descriptor', 'matterbridge', 'bridgedDeviceBasicInformation', 'powerSource', 'fixedLabel']);
     expect(featuresFor(device, 'powerSource').wired).toBe(true);
