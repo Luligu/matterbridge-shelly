@@ -160,7 +160,11 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
   private failsafeCountSeconds = 360;
   private firstRun = false;
 
-  constructor(matterbridge: PlatformMatterbridge, log: AnsiLogger, config: ShellyPlatformConfig) {
+  constructor(
+    matterbridge: PlatformMatterbridge,
+    log: AnsiLogger,
+    override config: ShellyPlatformConfig,
+  ) {
     super(matterbridge, log, config);
 
     // Verify that Matterbridge is the correct version

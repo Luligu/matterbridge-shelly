@@ -1483,7 +1483,8 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
             if (!authParams.nonce) throw new Error('No authenticate nonce parameter found in header');
             // istanbul ignore next if
             if (!authParams.realm) throw new Error('No authenticate realm parameter found in header');
-            const auth = createDigestShellyAuth('admin', shelly.password ?? '', parseInt(authParams.nonce), crypto.randomInt(0, 999999999), authParams.realm);
+            const nonce = /^\d+$/.test(authParams.nonce) ? parseInt(authParams.nonce) : authParams.nonce;
+            const auth = createDigestShellyAuth('admin', shelly.password ?? '', nonce, crypto.randomInt(0, 999999999), authParams.realm);
             options.body = getGen2BodyOptions('2.0', 10, 'Matterbridge', service, params, auth);
           }
           log.debug(`${GREY}options: ${JSON.stringify(options)}${RESET}`);
