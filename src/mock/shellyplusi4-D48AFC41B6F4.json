@@ -6,19 +6,17 @@
     "slot": 0,
     "model": "SNSN-0D24X",
     "gen": 2,
-    "fw_id": "20241011-114443/1.4.4-g6d2a586",
-    "ver": "1.4.4",
+    "fw_id": "20260311-095904/1.7.5-g9979d16",
+    "ver": "1.7.5",
     "app": "PlusI4",
     "auth_en": false,
-    "auth_domain": null
+    "auth_domain": null,
+    "provision": "complete"
   },
   "settings": {
     "ble": {
       "enable": false,
       "rpc": {
-        "enable": true
-      },
-      "observer": {
         "enable": false
       }
     },
@@ -75,7 +73,7 @@
       "device": {
         "name": "i4 DC Plus",
         "mac": "D48AFC41B6F4",
-        "fw_id": "20241011-114443/1.4.4-g6d2a586",
+        "fw_id": "20260311-095904/1.7.5-g9979d16",
         "discoverable": true,
         "eco_mode": false,
         "addon_type": null
@@ -100,9 +98,9 @@
         "listen_port": null
       },
       "sntp": {
-        "server": "time.google.com"
+        "server": "time.cloudflare.com"
       },
-      "cfg_rev": 25
+      "cfg_rev": 34
     },
     "wifi": {
       "ap": {
@@ -171,36 +169,37 @@
     "sys": {
       "mac": "D48AFC41B6F4",
       "restart_required": false,
-      "time": "14:49",
-      "unixtime": 1741441785,
-      "uptime": 788523,
-      "ram_size": 253708,
-      "ram_free": 131812,
+      "time": "13:16",
+      "unixtime": 1779362194,
+      "last_sync_ts": 1779360864,
+      "uptime": 3729510,
+      "ram_size": 251164,
+      "ram_free": 130608,
+      "ram_min_free": 108728,
       "fs_size": 393216,
-      "fs_free": 110592,
-      "cfg_rev": 25,
+      "fs_free": 126976,
+      "cfg_rev": 34,
       "kvs_rev": 0,
       "schedule_rev": 1,
       "webhook_rev": 0,
-      "available_updates": {
-        "beta": {
-          "version": "1.5.1-beta1"
-        }
-      },
-      "reset_reason": 1
+      "btrelay_rev": 0,
+      "available_updates": {},
+      "reset_reason": 3,
+      "utc_offset": 7200
     },
     "wifi": {
-      "sta_ip": "192.168.1.161",
+      "sta_ip": "192.168.68.72",
       "status": "got ip",
       "ssid": "",
-      "rssi": -54
+      "bssid": "20:23:51:59:e7:ac",
+      "rssi": -59
     },
     "ws": {
       "connected": false
     }
   },
   "components": [],
-  "cfg_rev": 25,
+  "cfg_rev": 34,
   "offset": 0,
   "total": 0
 }

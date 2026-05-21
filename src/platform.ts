@@ -91,7 +91,7 @@ import {
 } from 'matterbridge/utils';
 
 import { DiscoveredDevice } from './mdnsScanner.js';
-import { shellyCoverCommandHandler, shellyIdentifyCommandHandler, shellyLightCommandHandler, shellySwitchCommandHandler } from './platformCommandHadlers.js';
+import { shellyCoverCommandHandler, shellyIdentifyCommandHandler, shellyLightCommandHandler, shellySwitchCommandHandler } from './platformCommandHandlers.js';
 import { shellyUpdateHandler } from './platformUpdateHandler.js';
 // Shelly imports
 import { Shelly } from './shelly.js';
@@ -514,13 +514,13 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
                 buttonEndpoint = blu.getChildEndpointByName('Button' + event.idx);
               } else if (bthomeDevice.model === 'Shelly BLU Wall Switch 4') {
                 buttonEndpoint = blu.getChildEndpointByName('Button' + event.idx);
-              } else if (bthomeDevice.model === 'Shelly BLU Button1') {
+              } else if (bthomeDevice.model === 'Shelly BLU Button1' || bthomeDevice.model === 'Shelly BLU Button Tough 1 ZB') {
                 buttonEndpoint = blu;
               } else {
                 buttonEndpoint = blu.getChildEndpointByName('Button');
               }
               if (!buttonEndpoint) {
-                if (['Shelly BLU Button1', 'Shelly BLU RC Button 4', 'Shelly BLU Wall Switch 4'].includes(bthomeDevice.model))
+                if (['Shelly BLU Button1', 'Shelly BLU Button Tough 1 ZB', 'Shelly BLU RC Button 4', 'Shelly BLU Wall Switch 4'].includes(bthomeDevice.model))
                   blu.log.warn(`Shelly device ${idn}${blu?.deviceName ?? addr}${rs}${wr} child endpoint for button not found`);
                 return;
               }
@@ -552,13 +552,13 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               buttonEndpoint = blu.getChildEndpointByName('Button' + sensorIndex);
             } else if (bthomeDevice.model === 'Shelly BLU Wall Switch 4') {
               buttonEndpoint = blu.getChildEndpointByName('Button' + sensorIndex);
-            } else if (bthomeDevice.model === 'Shelly BLU Button1') {
+            } else if (bthomeDevice.model === 'Shelly BLU Button1' || bthomeDevice.model === 'Shelly BLU Button Tough 1 ZB') {
               buttonEndpoint = blu;
             } else {
               buttonEndpoint = blu.getChildEndpointByName('Button');
             }
             if (!buttonEndpoint) {
-              if (['Shelly BLU Button1', 'Shelly BLU RC Button 4', 'Shelly BLU Wall Switch 4'].includes(bthomeDevice.model))
+              if (['Shelly BLU Button1', 'Shelly BLU Button Tough 1 ZB', 'Shelly BLU RC Button 4', 'Shelly BLU Wall Switch 4'].includes(bthomeDevice.model))
                 blu.log.warn(`Shelly device ${idn}${blu?.deviceName ?? addr}${rs}${wr} child endpoint for button not found`);
               return;
             }
@@ -1291,6 +1291,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           }
         } else if (component.name === 'Flood') {
           const floodComponent = device.getComponent(key);
+          // Gen 1
           if (floodComponent?.hasProperty('flood') && isValidBoolean(floodComponent.getValue('flood'))) {
             // const child = mbDevice.addChildDeviceType(key, [contactSensor], undefined, config.debug as boolean);
             const child = mbDevice.addChildDeviceType(key, [waterLeakDetector], undefined, config.debug as boolean);
@@ -1303,6 +1304,20 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               shellyUpdateHandler(this, mbDevice, device, component, property, value);
             });
           }
+          // Gen 2+
+          if (floodComponent?.hasProperty('alarm') && isValidBoolean(floodComponent.getValue('alarm'))) {
+            // const child = mbDevice.addChildDeviceType(key, [contactSensor], undefined, config.debug as boolean);
+            const child = mbDevice.addChildDeviceType(key, [waterLeakDetector], undefined, config.debug as boolean);
+            child.log.logName = `${device.name} ${key}`;
+            // child.createDefaultBooleanStateClusterServer(!(floodComponent.getValue('flood') as boolean));
+            child.createDefaultBooleanStateClusterServer(floodComponent.getValue('alarm') as boolean); // Water Leak Detector: true = leak, false = no leak
+            child.addRequiredClusterServers();
+            // Add event handler
+            floodComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
+              shellyUpdateHandler(this, mbDevice, device, component, property, value);
+            });
+          }
+          // Gen 2+
         } else if (component.name === 'Gas') {
           const gasComponent = device.getComponent(key);
           if (gasComponent?.hasProperty('sensor_state') && isValidString(gasComponent.getValue('alarm_state'))) {
@@ -1958,9 +1973,9 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         `model ${CYAN}${bthomeDevice.model}${nf} (${CYAN}${bthomeDevice.type}${nf})`,
     );
     let definition: AtLeastOne<DeviceTypeDefinition> | undefined;
-    if (bthomeDevice.model === 'Shelly BLU DoorWindow') definition = [bridgedNode, powerSource];
+    if (bthomeDevice.model === 'Shelly BLU DoorWindow' || bthomeDevice.model === 'Shelly BLU DoorWindow ZB') definition = [bridgedNode, powerSource];
     else if (bthomeDevice.model === 'Shelly BLU Motion') definition = [bridgedNode, powerSource];
-    else if (bthomeDevice.model === 'Shelly BLU Button1') definition = [genericSwitch, bridgedNode, powerSource];
+    else if (bthomeDevice.model === 'Shelly BLU Button1' || bthomeDevice.model === 'Shelly BLU Button Tough 1 ZB') definition = [genericSwitch, bridgedNode, powerSource];
     else if (bthomeDevice.model === 'Shelly BLU HT' || bthomeDevice.model === 'Shelly BLU H&T ZB' || bthomeDevice.model === 'Shelly BLU H&T Display ZB')
       definition = [bridgedNode, powerSource];
     else if (bthomeDevice.model === 'Shelly BLU RC Button 4') definition = [bridgedNode, powerSource];
@@ -1972,14 +1987,6 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       this.log.warn(`BLU device ${idn}${bthomeDevice.name}${rs}${wr} address ${CYAN}${bthomeDevice.addr}${wr} already registered with another ble gateway.`);
       return;
     }
-    /*
-    this.bluBridgedDevices.forEach((blu) => {
-      if (blu.serialNumber === bthomeDevice.addr + (this.postfix ? '-' + this.postfix : '')) {
-        this.log.warn(`BLU device ${idn}${bthomeDevice.name}${rs}${wr} address ${CYAN}${bthomeDevice.addr}${wr} already registered with another ble gateway.`);
-        definition = undefined;
-      }
-    });
-    */
     if (definition) {
       const mbDevice = new MatterbridgeEndpoint(definition, { id: bthomeDevice.name }, this.config.debug as boolean);
       this.bluBridgedDevices.set(bthomeDevice.addr, mbDevice);
@@ -1991,7 +1998,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         'Shelly',
         bthomeDevice.model,
       );
-      if (bthomeDevice.model === 'Shelly BLU DoorWindow') {
+      if (bthomeDevice.model === 'Shelly BLU DoorWindow' || bthomeDevice.model === 'Shelly BLU DoorWindow ZB') {
         mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer();
         mbDevice.addFixedLabel('composed', 'Sensor');
         mbDevice.addChildDeviceTypeWithClusterServer('Contact', [contactSensor], [], undefined, this.config.debug as boolean);
@@ -2004,7 +2011,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         if (this.validateEntity(bthomeDevice.addr, 'Illuminance'))
           mbDevice.addChildDeviceTypeWithClusterServer('Illuminance', [lightSensor], [], undefined, this.config.debug as boolean);
         if (this.validateEntity(bthomeDevice.addr, 'Button')) mbDevice.addChildDeviceTypeWithClusterServer('Button', [genericSwitch], [], undefined, this.config.debug as boolean);
-      } else if (bthomeDevice.model === 'Shelly BLU Button1') {
+      } else if (bthomeDevice.model === 'Shelly BLU Button1' || bthomeDevice.model === 'Shelly BLU Button Tough 1 ZB') {
         mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer();
         mbDevice.createDefaultSwitchClusterServer();
       } else if (bthomeDevice.model === 'Shelly BLU HT' || bthomeDevice.model === 'Shelly BLU H&T ZB' || bthomeDevice.model === 'Shelly BLU H&T Display ZB') {
@@ -2013,14 +2020,14 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         mbDevice.addChildDeviceTypeWithClusterServer('Temperature', [temperatureSensor], [], undefined, this.config.debug as boolean);
         mbDevice.addChildDeviceTypeWithClusterServer('Humidity', [humiditySensor], [], undefined, this.config.debug as boolean);
         if (this.validateEntity(bthomeDevice.addr, 'Button')) mbDevice.addChildDeviceTypeWithClusterServer('Button', [genericSwitch], [], undefined, this.config.debug as boolean);
-      } else if (bthomeDevice.model === 'Shelly BLU RC Button 4') {
+      } else if (bthomeDevice.model === 'Shelly BLU RC Button 4' || bthomeDevice.model === 'Shelly BLU RC Button 4 ZB') {
         mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer();
         mbDevice.addFixedLabel('composed', 'Input');
         mbDevice.addChildDeviceTypeWithClusterServer('Button0', [genericSwitch], [Switch.Cluster.id], undefined, this.config.debug as boolean);
         mbDevice.addChildDeviceTypeWithClusterServer('Button1', [genericSwitch], [Switch.Cluster.id], undefined, this.config.debug as boolean);
         mbDevice.addChildDeviceTypeWithClusterServer('Button2', [genericSwitch], [Switch.Cluster.id], undefined, this.config.debug as boolean);
         mbDevice.addChildDeviceTypeWithClusterServer('Button3', [genericSwitch], [Switch.Cluster.id], undefined, this.config.debug as boolean);
-      } else if (bthomeDevice.model === 'Shelly BLU Wall Switch 4') {
+      } else if (bthomeDevice.model === 'Shelly BLU Wall Switch 4' || bthomeDevice.model === 'Shelly BLU Wall Switch 4 ZB') {
         mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer();
         mbDevice.addFixedLabel('composed', 'Input');
         mbDevice.addChildDeviceTypeWithClusterServer('Button0', [genericSwitch], [Switch.Cluster.id], undefined, this.config.debug as boolean);

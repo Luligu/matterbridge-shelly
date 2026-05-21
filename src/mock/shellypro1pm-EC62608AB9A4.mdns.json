@@ -15,26 +15,26 @@
   "questions": [],
   "answers": [
     {
-      "name": "_http._tcp.local",
+      "name": "_shelly._tcp.local",
       "type": "PTR",
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": "shellypro1pm-ec62608ab9a4._http._tcp.local"
+      "data": "shellypro1pm-ec62608ab9a4._shelly._tcp.local"
     },
     {
-      "name": "_http._tcp.local",
+      "name": "_shelly._tcp.local",
       "type": "PTR",
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": "1PM Pro._http._tcp.local"
+      "data": "1PM Pro._shelly._tcp.local"
     }
   ],
   "authorities": [],
   "additionals": [
     {
-      "name": "shellypro1pm-ec62608ab9a4._http._tcp.local",
+      "name": "shellypro1pm-ec62608ab9a4._shelly._tcp.local",
       "type": "SRV",
       "ttl": 120,
       "class": "IN",
@@ -47,12 +47,12 @@
       }
     },
     {
-      "name": "shellypro1pm-ec62608ab9a4._http._tcp.local",
+      "name": "shellypro1pm-ec62608ab9a4._shelly._tcp.local",
       "type": "TXT",
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": ["gen=2"]
+      "data": ["gen=2", "app=Pro1PM", "ver=1.7.5"]
     },
     {
       "name": "ShellyPro1PM-EC62608AB9A4.local",
@@ -60,10 +60,10 @@
       "ttl": 120,
       "class": "IN",
       "flush": true,
-      "data": "192.168.68.67"
+      "data": "192.168.68.58"
     },
     {
-      "name": "1PM Pro._http._tcp.local",
+      "name": "1PM Pro._shelly._tcp.local",
       "type": "SRV",
       "ttl": 120,
       "class": "IN",
@@ -76,12 +76,12 @@
       }
     },
     {
-      "name": "1PM Pro._http._tcp.local",
+      "name": "1PM Pro._shelly._tcp.local",
       "type": "TXT",
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": ["gen=2", "app=Pro1PM", "ver=1.6.2"]
+      "data": ["gen=2", "app=Pro1PM", "ver=1.7.5"]
     },
     {
       "name": "1PM-Pro.local",
@@ -89,7 +89,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": true,
-      "data": "192.168.68.67"
+      "data": "192.168.68.58"
     }
   ]
 }

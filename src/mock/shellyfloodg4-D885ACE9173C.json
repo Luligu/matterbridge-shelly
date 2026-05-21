@@ -1,0 +1,195 @@
+{
+  "shelly": {
+    "name": "Flood Gen4 I",
+    "id": "shellyfloodg4-d885ace9173c",
+    "mac": "D885ACE9173C",
+    "slot": 0,
+    "model": "S4SN-0071A",
+    "gen": 4,
+    "fw_id": "20260211-153201/gefb9927",
+    "ver": "1.8.99-floodsg4prod0",
+    "app": "FloodSensorG4",
+    "auth_en": false,
+    "auth_domain": null,
+    "matter": false,
+    "enhanced_security": false
+  },
+  "settings": {
+    "ble": {
+      "enable": false,
+      "rpc": {
+        "enable": true
+      }
+    },
+    "cloud": {
+      "enable": true,
+      "server": "shelly-103-eu.shelly.cloud:6022/jrpc"
+    },
+    "devicepower:0": {},
+    "flood:0": {
+      "id": 0,
+      "name": null,
+      "alarm_mode": "normal",
+      "report_holdoff": 0
+    },
+    "matter": {
+      "enable": false
+    },
+    "mqtt": {
+      "enable": false,
+      "server": null,
+      "client_id": "shellyfloodg4-d885ace9173c",
+      "user": null,
+      "ssl_ca": null,
+      "topic_prefix": "shellyfloodg4-d885ace9173c",
+      "rpc_ntf": true,
+      "status_ntf": false,
+      "use_client_cert": false,
+      "enable_rpc": true,
+      "enable_control": true
+    },
+    "sys": {
+      "device": {
+        "name": "Flood Gen4 I",
+        "mac": "D885ACE9173C",
+        "fw_id": "20260211-153201/gefb9927",
+        "discoverable": true,
+        "eco_mode": false,
+        "tls_check_cert_validity_time": true,
+        "enhanced_security": false
+      },
+      "location": null,
+      "debug": {
+        "level": 2,
+        "file_level": null,
+        "mqtt": {
+          "enable": false
+        },
+        "websocket": {
+          "enable": false
+        },
+        "file_log": {
+          "enable": false
+        },
+        "udp": {
+          "addr": null
+        }
+      },
+      "ui_data": {},
+      "rpc_udp": {
+        "dst_addr": null,
+        "listen_port": null
+      },
+      "sntp": {
+        "server": "time.cloudflare.com"
+      },
+      "cfg_rev": 12
+    },
+    "wifi": {
+      "ap": {
+        "ssid": "",
+        "is_open": true,
+        "enable": false
+      },
+      "sta": {
+        "ssid": "",
+        "is_open": false,
+        "enable": true,
+        "ipv4mode": "dhcp",
+        "ip": null,
+        "netmask": null,
+        "gw": null,
+        "nameserver": null
+      },
+      "sta1": {
+        "ssid": "",
+        "is_open": true,
+        "enable": false,
+        "ipv4mode": "dhcp",
+        "ip": null,
+        "netmask": null,
+        "gw": null,
+        "nameserver": null
+      },
+      "roam": {
+        "rssi_thr": -80,
+        "interval": 60
+      }
+    },
+    "ws": {
+      "enable": true,
+      "server": "ws://192.168.69.100:8485",
+      "ssl_ca": "ca.pem"
+    },
+    "zigbee": {
+      "enable": false
+    }
+  },
+  "status": {
+    "ble": {},
+    "cloud": {
+      "connected": true
+    },
+    "devicepower:0": {
+      "id": 0,
+      "battery": {
+        "V": 6.27,
+        "percent": 100
+      }
+    },
+    "flood:0": {
+      "id": 0,
+      "alarm": false,
+      "mute": false
+    },
+    "matter": {
+      "num_fabrics": 0,
+      "commissionable": false
+    },
+    "mqtt": {
+      "connected": false
+    },
+    "sys": {
+      "mac": "D885ACE9173C",
+      "restart_required": false,
+      "time": "10:54",
+      "unixtime": 1779353699,
+      "last_sync_ts": 1779353695,
+      "uptime": 4,
+      "ram_size": 306640,
+      "ram_free": 178648,
+      "ram_min_free": 160692,
+      "fs_size": 917504,
+      "fs_free": 557056,
+      "cfg_rev": 12,
+      "kvs_rev": 0,
+      "webhook_rev": 0,
+      "available_updates": {},
+      "wakeup_reason": {
+        "boot": "deepsleep_wake",
+        "cause": "status_update"
+      },
+      "wakeup_period": 43200,
+      "reset_reason": 8,
+      "utc_offset": 7200
+    },
+    "wifi": {
+      "sta_ip": "192.168.70.28",
+      "status": "got ip",
+      "ssid": "",
+      "bssid": "20:23:51:59:e7:ac",
+      "rssi": -49,
+      "sta_ip6": ["fe80::da85:acff:fee9:173c"]
+    },
+    "ws": {
+      "connected": true
+    },
+    "zigbee": {
+      "network_state": "disabled"
+    }
+  },
+  "components": [],
+  "cfg_rev": 12,
+  "offset": 0,
+  "total": 0
+}

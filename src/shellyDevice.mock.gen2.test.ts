@@ -38,10 +38,7 @@ describe('Shelly gen 2 devices test', () => {
   let device: ShellyDevice | undefined = undefined;
   let id: string;
 
-  const firmwareGen1 = 'v1.14.0-gcb84623';
-  const firmwareGen2 = '1.4.4-g6d2a586';
-  const firmwareGen3 = '1.5.0-g0087a06';
-  const firmwareGen4 = '1.6.2-gc8a76e2';
+  const firmwareGen2 = '1.7.5-g9979d16';
 
   beforeAll(() => {
     //
@@ -75,7 +72,7 @@ describe('Shelly gen 2 devices test', () => {
     expect(device.model).toBe('SNDC-0D4P10WW');
     expect(device.mac).toBe('A0A3B35C7024');
     expect(device.id).toBe(id);
-    expect(device.firmware).toBe('1.5.1-g01dd7ff'); // firmwareGen2
+    expect(device.firmware).toBe(firmwareGen2);
     expect(device.auth).toBe(false);
     expect(device.gen).toBe(2);
     expect(device.profile).toBe('rgb');
@@ -176,13 +173,13 @@ describe('Shelly gen 2 devices test', () => {
 
     expect(device.getComponent('input:0')?.getValue('type')).toBe('switch');
     expect(device.getComponent('input:1')?.getValue('type')).toBe('switch');
-    expect(device.getComponent('input:2')?.getValue('type')).toBe('switch');
-    expect(device.getComponent('input:3')?.getValue('type')).toBe('switch');
+    expect(device.getComponent('input:2')?.getValue('type')).toBe('button');
+    expect(device.getComponent('input:3')?.getValue('type')).toBe('button');
 
-    expect(device.getComponent('input:0')?.getValue('state')).toBe(false);
+    expect(device.getComponent('input:0')?.getValue('state')).toBe(null);
     expect(device.getComponent('input:1')?.getValue('state')).toBe(false);
-    expect(device.getComponent('input:2')?.getValue('state')).toBe(false);
-    expect(device.getComponent('input:3')?.getValue('state')).toBe(false);
+    expect(device.getComponent('input:2')?.getValue('state')).toBe(null);
+    expect(device.getComponent('input:3')?.getValue('state')).toBe(null);
 
     expect(await device.fetchUpdate()).not.toBeNull();
 
@@ -259,7 +256,7 @@ describe('Shelly gen 2 devices test', () => {
     expect(device.model).toBe('SAWD-0A1XX10EU1');
     expect(device.mac).toBe('00082261E102');
     expect(device.id).toBe(id);
-    expect(device.firmware).toBe('2.3.6-66e97e33');
+    expect(device.firmware).toBe('2.6.2-06f6da23');
     expect(device.auth).toBe(false);
     expect(device.gen).toBe(2);
     expect(device.profile).toBe(undefined);
@@ -653,7 +650,7 @@ describe('Shelly gen 2 devices test', () => {
   });
 
   test('Create a gen 2 shellyplussmoke device', async () => {
-    id = 'shellyplussmoke-A0A3B3B8AE48';
+    id = 'shellyplussmoke-E08CFE8BD798';
     log.logName = id;
 
     device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', id + '.json'));
@@ -661,13 +658,13 @@ describe('Shelly gen 2 devices test', () => {
     if (!device) return;
     expect(device.host).toBe(path.join('src', 'mock', id + '.json'));
     expect(device.model).toBe('SNSN-0031Z');
-    expect(device.mac).toBe('A0A3B3B8AE48');
+    expect(device.mac).toBe('E08CFE8BD798');
     expect(device.id).toBe(id);
-    expect(device.firmware).toBe(firmwareGen2);
+    expect(device.firmware).toBe('1.7.5-g9979d16');
     expect(device.auth).toBe(false);
     expect(device.gen).toBe(2);
     expect(device.profile).toBe(undefined);
-    expect(device.name).toBe(id);
+    expect(device.name).toBe('Plus Smoke');
     expect(device.hasUpdate).toBe(false);
     expect(device.lastseen).not.toBe(0);
     expect(device.online).toBe(true);

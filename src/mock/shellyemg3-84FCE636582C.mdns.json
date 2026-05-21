@@ -60,7 +60,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": true,
-      "data": "192.168.68.83"
+      "data": "192.168.68.81"
     },
     {
       "name": "EM Gen3._http._tcp.local",
@@ -81,7 +81,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": ["gen=3", "app=EMG3", "ver=1.6.2"]
+      "data": ["gen=3", "app=EMG3", "ver=1.7.5"]
     },
     {
       "name": "EM-Gen3.local",
@@ -89,7 +89,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": true,
-      "data": "192.168.68.83"
+      "data": "192.168.68.81"
     }
   ]
 }

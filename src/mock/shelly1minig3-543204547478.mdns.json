@@ -81,7 +81,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": ["gen=3", "app=Mini1G3", "ver=1.6.2"]
+      "data": ["gen=3", "app=Mini1G3", "ver=1.7.5"]
     },
     {
       "name": "1mini-Gen3.local",

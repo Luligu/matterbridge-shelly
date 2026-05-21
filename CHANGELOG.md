@@ -29,14 +29,16 @@ If you like this project and find it useful, please consider giving it a star on
 
 You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his invaluable contribution to this project.
 
-## [2.2.8] - Dev branch
+## [2.3.0] - Dev branch
 
 ### Added
 
 - [shelly]: Verified `firmware 1.7.5`.
 - [shelly]: Verified `Shelly EM Mini Gen4` (shellyemminig4).
 - [shelly]: Verified `Shelly Shutter` (shellyshutter).
+- [shelly]: Verified `Shelly Flood Gen4` (shellyfloodg4).
 - [shelly]: Verified `BLU H&T Display ZB` with firmware 1.1.10.
+- [shelly]: Verified `BLU Button Tough 1 ZB` with firmware 1.1.12.
 - [shelly]: Add new `authentication` method in firmware 2.0.0 (beta). Thanks 0FakE (https://github.com/Luligu/matterbridge-shelly/issues/188).
 - [shelly]: Verify `special characters` in password. Thanks 0FakE (https://github.com/Luligu/matterbridge-shelly/issues/188).
 
@@ -51,6 +53,7 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 - [package]: Bump `vitest` to v.4.1.7.
 - [package]: Bump `@vitest/coverage-v8` to v.4.1.7.
 - [package]: Bump `eslint-plugin-jsdoc` to v.63.0.0.
+- [package]: Bump `@eslint/markdown` to v.8.0.2.
 - [package]: Update `.devcontainer/devcontainer.json`.
 - [package]: Update `.vscode/settings.json`.
 - [package]: Add `.vscode/extensions.json`.

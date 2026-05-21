@@ -1,0 +1,221 @@
+{
+  "shelly": {
+    "name": "EM Mini Gen4",
+    "id": "shellyemminig4-d885acef41a8",
+    "mac": "D885ACEF41A8",
+    "slot": 1,
+    "model": "S4EM-001PXCEU16",
+    "gen": 4,
+    "fw_id": "20260423-102553/2.0.0-beta1-g8c7700a",
+    "ver": "2.0.0-beta1",
+    "app": "MiniEMG4",
+    "auth_en": true,
+    "auth_domain": "shellyemminig4-d885acef41a8",
+    "matter": true,
+    "provision": "complete",
+    "enhanced_security": false
+  },
+  "settings": {
+    "ble": {
+      "rpc": {
+        "enable": false
+      }
+    },
+    "bthome": {},
+    "cloud": {
+      "enable": true,
+      "server": "shelly-103-eu.shelly.cloud:6022/jrpc"
+    },
+    "em1:0": {
+      "id": 0,
+      "name": null,
+      "reverse": false,
+      "alarms": {
+        "voltage": [null, null],
+        "current": [null, null],
+        "power": [null, null]
+      }
+    },
+    "em1data:0": {},
+    "matter": {
+      "enable": true
+    },
+    "modbus": {
+      "enable": true
+    },
+    "mqtt": {
+      "enable": false,
+      "server": null,
+      "client_id": "shellyemminig4-d885acef41a8",
+      "user": null,
+      "ssl_ca": null,
+      "topic_prefix": "shellyemminig4-d885acef41a8",
+      "rpc_ntf": true,
+      "status_ntf": false,
+      "use_client_cert": false,
+      "enable_rpc": true,
+      "enable_control": true
+    },
+    "sys": {
+      "device": {
+        "name": "EM Mini Gen4",
+        "mac": "D885ACEF41A8",
+        "fw_id": "20260423-102553/2.0.0-beta1-g8c7700a",
+        "discoverable": true,
+        "eco_mode": true,
+        "tls_check_cert_validity_time": true,
+        "enhanced_security": false
+      },
+      "location": null,
+      "debug": {
+        "level": 2,
+        "file_level": null,
+        "mqtt": {
+          "enable": false
+        },
+        "websocket": {
+          "enable": false
+        },
+        "file_log": {
+          "enable": false
+        },
+        "udp": {
+          "addr": null
+        }
+      },
+      "ui_data": {
+        "device_revision": "1-19"
+      },
+      "rpc_udp": {
+        "dst_addr": null,
+        "listen_port": null
+      },
+      "sntp": {
+        "server": "time.cloudflare.com"
+      },
+      "cfg_rev": 22
+    },
+    "wifi": {
+      "ap": {
+        "ssid": "",
+        "is_open": true,
+        "enable": false,
+        "range_extender": {
+          "enable": false
+        }
+      },
+      "sta": {
+        "ssid": "",
+        "is_open": false,
+        "enable": true,
+        "ipv4mode": "dhcp",
+        "ip": null,
+        "netmask": null,
+        "gw": null,
+        "nameserver": null
+      },
+      "sta1": {
+        "ssid": "",
+        "is_open": true,
+        "enable": false,
+        "ipv4mode": "dhcp",
+        "ip": null,
+        "netmask": null,
+        "gw": null,
+        "nameserver": null
+      },
+      "roam": {
+        "rssi_thr": -80,
+        "interval": 60
+      }
+    },
+    "ws": {
+      "enable": false,
+      "server": null,
+      "ssl_ca": "ca.pem"
+    }
+  },
+  "status": {
+    "ble": {},
+    "bthome": {},
+    "cloud": {
+      "connected": true
+    },
+    "em1:0": {
+      "id": 0,
+      "voltage": 233,
+      "current": 0.028,
+      "act_power": 2.6,
+      "freq": 50,
+      "calibration": "factory"
+    },
+    "em1data:0": {
+      "id": 0,
+      "total_act_energy": 58.83,
+      "total_act_ret_energy": 0
+    },
+    "matter": {
+      "num_fabrics": 0,
+      "commissionable": false
+    },
+    "modbus": {},
+    "mqtt": {
+      "connected": false
+    },
+    "sys": {
+      "mac": "D885ACEF41A8",
+      "restart_required": false,
+      "time": "12:01",
+      "unixtime": 1779357667,
+      "last_sync_ts": 1779356735,
+      "uptime": 61872,
+      "ram_size": 344768,
+      "ram_free": 164056,
+      "ram_min_free": 115640,
+      "fs_size": 786432,
+      "fs_free": 327680,
+      "cfg_rev": 22,
+      "kvs_rev": 0,
+      "schedule_rev": 1,
+      "webhook_rev": 0,
+      "btrelay_rev": 0,
+      "available_updates": {
+        "stable": {
+          "version": "1.7.0-miniemg4prod0"
+        }
+      },
+      "alt": {
+        "MiniEMG4ZB": {
+          "name": "Shelly Mini EM Gen4",
+          "desc": "Shelly Mini EM Gen4 with Zigbee",
+          "beta": {
+            "version": "2.0.0-beta1",
+            "build_id": "20260423-102547/2.0.0-beta1-g8c7700a"
+          },
+          "stable": {
+            "version": "1.7.0-miniemg4prod0",
+            "build_id": "20250915-120859/gb95ce8e"
+          }
+        }
+      },
+      "reset_reason": 3,
+      "utc_offset": 7200
+    },
+    "wifi": {
+      "sta_ip": "192.168.68.95",
+      "status": "got ip",
+      "ssid": "",
+      "channel": 4,
+      "rssi": -50,
+      "bssid": "20:23:51:59:e7:ac",
+      "sta_ip6": ["fe80::da85:acff:feef:41a8", "fd78:cbf8:4939:46e2:da85:acff:feef:41a8"]
+    },
+    "ws": {
+      "connected": false
+    }
+  },
+  "components": [],
+  "cfg_rev": 22,
+  "offset": 0,
+  "total": 0
+}

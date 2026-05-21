@@ -179,6 +179,23 @@
       ],
       "group": { "kind": "test", "isDefault": false },
       "problemMatcher": []
+    },
+    {
+      "label": "Test: MdnsScanner",
+      "type": "shell",
+      "command": "node",
+      "args": [
+        "--no-warnings",
+        "--experimental-vm-modules",
+        "node_modules/jest/bin/jest.js",
+        "--verbose",
+        "--coverage",
+        "--maxWorkers=100%",
+        "--collectCoverageFrom=src/mdnsScanner.ts",
+        "mdnsScanner.test.ts"
+      ],
+      "group": { "kind": "test", "isDefault": false },
+      "problemMatcher": []
     }
   ]
 }

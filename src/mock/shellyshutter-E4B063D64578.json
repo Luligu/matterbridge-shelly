@@ -1,42 +1,44 @@
 {
   "shelly": {
-    "name": null,
-    "id": "shelly2pmg4-7c2c677a0110",
-    "mac": "7C2C677A0110",
+    "name": "Shutter",
+    "id": "shellyshutter-e4b063d64578",
+    "mac": "E4B063D64578",
     "slot": 1,
-    "model": "S4SW-002P16EU",
-    "gen": 4,
-    "fw_id": "20241028-151858/r1.4-389-ge55943de7-main",
-    "ver": "1.4.99",
-    "app": "S2PMG4",
-    "auth_en": false,
-    "auth_domain": null,
-    "profile": "cover"
+    "model": "S3SH-0A2P4EU",
+    "gen": 3,
+    "fw_id": "20260311-095849/1.7.5-g9979d16",
+    "ver": "1.7.5",
+    "app": "S2PMG3Shutter",
+    "auth_en": true,
+    "auth_domain": "shellyshutter-e4b063d64578",
+    "provision": "complete"
   },
   "settings": {
     "ble": {
-      "enable": true,
+      "enable": false,
       "rpc": {
-        "enable": true
+        "enable": false
       }
     },
     "bthome": {},
     "cloud": {
-      "enable": false,
-      "server": "shelly-api-eu.shelly.cloud:6022/jrpc"
+      "enable": true,
+      "server": "shelly-103-eu.shelly.cloud:6022/jrpc"
     },
     "cover:0": {
       "id": 0,
       "name": null,
       "motor": {
-        "idle_power_thr": 2.0,
+        "idle_power_thr": 2,
         "idle_confirm_period": 0.25
       },
-      "maxtime_open": 150.0,
-      "maxtime_close": 150.0,
+      "maxtime_open": 10,
+      "maxtime_close": 10,
       "initial_state": "stopped",
       "invert_directions": false,
+      "maintenance_mode": false,
       "in_mode": "dual",
+      "in_locked": false,
       "swap_inputs": false,
       "safety_switch": {
         "enable": false,
@@ -47,13 +49,13 @@
       "power_limit": 2800,
       "voltage_limit": 280,
       "undervoltage_limit": 0,
-      "current_limit": 10.0,
+      "current_limit": 10,
       "obstruction_detection": {
         "enable": false,
         "direction": "both",
         "action": "stop",
-        "power_thr": 21,
-        "holdoff": 1.0
+        "power_thr": 1000,
+        "holdoff": 1
       },
       "slat": {
         "enable": false,
@@ -67,18 +69,18 @@
     "input:0": {
       "id": 0,
       "name": null,
-      "type": "switch",
+      "type": "button",
       "enable": true,
       "invert": false,
-      "factory_reset": true
+      "factory_reset": false
     },
     "input:1": {
       "id": 1,
       "name": null,
-      "type": "switch",
+      "type": "button",
       "enable": true,
       "invert": false,
-      "factory_reset": true
+      "factory_reset": false
     },
     "knx": {
       "enable": false,
@@ -90,10 +92,10 @@
     "mqtt": {
       "enable": false,
       "server": null,
-      "client_id": "shelly2pmg4-7c2c677a0110",
+      "client_id": "shellyshutter-e4b063d64578",
       "user": null,
       "ssl_ca": null,
-      "topic_prefix": "shelly2pmg4-7c2c677a0110",
+      "topic_prefix": "shellyshutter-e4b063d64578",
       "rpc_ntf": true,
       "status_ntf": false,
       "use_client_cert": false,
@@ -102,19 +104,14 @@
     },
     "sys": {
       "device": {
-        "name": null,
-        "mac": "7C2C677A0110",
-        "fw_id": "20241028-151858/r1.4-389-ge55943de7-main",
+        "name": "Shutter",
+        "mac": "E4B063D64578",
+        "fw_id": "20260311-095849/1.7.5-g9979d16",
         "discoverable": true,
         "eco_mode": false,
-        "profile": "cover",
         "addon_type": null
       },
-      "location": {
-        "tz": "Europe/Sofia",
-        "lat": 42.6951,
-        "lon": 23.325
-      },
+      "location": null,
       "debug": {
         "level": 2,
         "file_level": null,
@@ -124,16 +121,11 @@
         "websocket": {
           "enable": false
         },
-        "file_log": {
-          "enable": false
-        },
         "udp": {
           "addr": null
         }
       },
-      "ui_data": {
-        "cover": "50,0"
-      },
+      "ui_data": {},
       "rpc_udp": {
         "dst_addr": null,
         "listen_port": null
@@ -141,19 +133,19 @@
       "sntp": {
         "server": "time.cloudflare.com"
       },
-      "cfg_rev": 21
+      "cfg_rev": 18
     },
     "wifi": {
       "ap": {
-        "ssid": "Shelly2PMG4-7C2C677A0110",
-        "is_open": false,
-        "enable": true,
+        "ssid": "",
+        "is_open": true,
+        "enable": false,
         "range_extender": {
           "enable": false
         }
       },
       "sta": {
-        "ssid": "Shelly",
+        "ssid": "",
         "is_open": false,
         "enable": true,
         "ipv4mode": "dhcp",
@@ -163,7 +155,7 @@
         "nameserver": null
       },
       "sta1": {
-        "ssid": null,
+        "ssid": "",
         "is_open": true,
         "enable": false,
         "ipv4mode": "dhcp",
@@ -185,74 +177,85 @@
   },
   "status": {
     "ble": {},
-    "bthome": {},
+    "bthome": {
+      "errors": ["bluetooth_disabled"]
+    },
     "cloud": {
-      "connected": false
+      "connected": true
     },
     "cover:0": {
       "id": 0,
-      "source": "limit_switch",
-      "state": "closed",
-      "apower": 0.0,
-      "voltage": 233.9,
-      "current": 0.0,
-      "pf": 0.0,
-      "freq": 50.0,
+      "source": "init",
+      "state": "stopped",
+      "apower": 0,
+      "voltage": 234.9,
+      "current": 0,
+      "pf": 0,
+      "freq": 50,
       "aenergy": {
-        "total": 3.89,
-        "by_minute": [0.0, 0.0, 0.0],
-        "minute_ts": 1741357920
+        "total": 0,
+        "by_minute": [0, 0, 0],
+        "minute_ts": 1779309660
       },
       "temperature": {
-        "tC": 44.1,
-        "tF": 111.4
+        "tC": 46.9,
+        "tF": 116.4
       },
-      "pos_control": true,
-      "last_direction": "close",
-      "current_pos": 0
+      "pos_control": false,
+      "last_direction": "close"
     },
     "input:0": {
       "id": 0,
-      "state": false
+      "state": null
     },
     "input:1": {
       "id": 1,
-      "state": false
+      "state": null
     },
     "knx": {},
     "mqtt": {
       "connected": false
     },
     "sys": {
-      "mac": "7C2C677A0110",
+      "mac": "E4B063D64578",
       "restart_required": false,
-      "time": "16:32",
-      "unixtime": 1741357924,
-      "uptime": 170320,
-      "ram_size": 358992,
-      "ram_free": 185344,
-      "ram_min_free": 162884,
-      "fs_size": 1048576,
-      "fs_free": 565248,
-      "cfg_rev": 21,
+      "time": "22:41",
+      "unixtime": 1779309693,
+      "last_sync_ts": 1779309197,
+      "uptime": 31886,
+      "ram_size": 263092,
+      "ram_free": 123088,
+      "ram_min_free": 93708,
+      "fs_size": 786432,
+      "fs_free": 319488,
+      "cfg_rev": 18,
       "kvs_rev": 0,
-      "schedule_rev": 7,
-      "webhook_rev": 1,
-      "available_updates": {},
-      "reset_reason": 3
+      "schedule_rev": 0,
+      "webhook_rev": 0,
+      "btrelay_rev": 0,
+      "bthc_rev": 0,
+      "available_updates": {
+        "beta": {
+          "version": "2.0.0-beta1"
+        }
+      },
+      "reset_reason": 3,
+      "utc_offset": 7200
     },
     "wifi": {
-      "sta_ip": "10.101.4.150",
+      "sta_ip": "192.168.68.96",
       "status": "got ip",
-      "ssid": "Shelly",
-      "rssi": -74
+      "ssid": "",
+      "bssid": "20:23:51:59:e7:ac",
+      "rssi": -46,
+      "sta_ip6": ["fe80::e6b0:63ff:fed6:4578", "fd78:cbf8:4939:46e2:e6b0:63ff:fed6:4578"]
     },
     "ws": {
       "connected": false
     }
   },
   "components": [],
-  "cfg_rev": 1,
+  "cfg_rev": 18,
   "offset": 0,
   "total": 0
 }

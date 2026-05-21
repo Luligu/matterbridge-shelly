@@ -1,36 +1,37 @@
 {
   "shelly": {
-    "name": null,
-    "id": "shellyplussmoke-a0a3b3b8ae48",
-    "mac": "A0A3B3B8AE48",
-    "slot": 0,
+    "name": "Plus Smoke",
+    "id": "shellyplussmoke-e08cfe8bd798",
+    "mac": "E08CFE8BD798",
+    "slot": 1,
     "model": "SNSN-0031Z",
     "gen": 2,
-    "fw_id": "20241011-114442/1.4.4-g6d2a586",
-    "ver": "1.4.4",
+    "fw_id": "20260311-095851/1.7.5-g9979d16",
+    "ver": "1.7.5",
     "app": "PlusSmoke",
     "auth_en": false,
-    "auth_domain": null
+    "auth_domain": null,
+    "provision": "complete"
   },
   "settings": {
     "ble": {
-      "enable": true,
+      "enable": false,
       "rpc": {
-        "enable": true
+        "enable": false
       }
     },
     "cloud": {
       "enable": true,
-      "server": "shelly-23-eu.shelly.cloud:6022/jrpc"
+      "server": "shelly-103-eu.shelly.cloud:6022/jrpc"
     },
     "devicepower:0": {},
     "mqtt": {
       "enable": false,
       "server": null,
-      "client_id": "shellyplussmoke-a0a3b3b8ae48",
+      "client_id": "shellyplussmoke-e08cfe8bd798",
       "user": null,
       "ssl_ca": null,
-      "topic_prefix": "shellyplussmoke-a0a3b3b8ae48",
+      "topic_prefix": "shellyplussmoke-e08cfe8bd798",
       "rpc_ntf": true,
       "status_ntf": false,
       "use_client_cert": false,
@@ -43,10 +44,11 @@
     },
     "sys": {
       "device": {
-        "name": null,
-        "mac": "A0A3B3B8AE48",
-        "fw_id": "20241011-114442/1.4.4-g6d2a586",
-        "discoverable": true
+        "name": "Plus Smoke",
+        "mac": "E08CFE8BD798",
+        "fw_id": "20260311-095851/1.7.5-g9979d16",
+        "discoverable": true,
+        "eco_mode": false
       },
       "location": null,
       "debug": {
@@ -68,28 +70,28 @@
         "listen_port": null
       },
       "sntp": {
-        "server": "time.google.com"
+        "server": "time.cloudflare.com"
       },
-      "cfg_rev": 22
+      "cfg_rev": 15
     },
     "wifi": {
       "ap": {
-        "ssid": "ShellyPlusSmoke-A0A3B3B8AE48",
+        "ssid": "",
         "is_open": true,
         "enable": false
       },
       "sta": {
-        "ssid": "Tamer Umniah",
+        "ssid": "",
         "is_open": false,
         "enable": true,
-        "ipv4mode": "static",
-        "ip": "192.168.68.51",
-        "netmask": "255.255.255.0",
-        "gw": "192.168.68.1",
-        "nameserver": "192.168.1.1"
+        "ipv4mode": "dhcp",
+        "ip": null,
+        "netmask": null,
+        "gw": null,
+        "nameserver": null
       },
       "sta1": {
-        "ssid": null,
+        "ssid": "",
         "is_open": true,
         "enable": false,
         "ipv4mode": "dhcp",
@@ -105,20 +107,20 @@
     },
     "ws": {
       "enable": true,
-      "server": "ws://192.168.68.92:8485",
-      "ssl_ca": "*"
+      "server": "ws://192.168.69.100:8485",
+      "ssl_ca": "ca.pem"
     }
   },
   "status": {
     "ble": {},
     "cloud": {
-      "connected": false
+      "connected": true
     },
     "devicepower:0": {
       "id": 0,
       "battery": {
-        "V": 2.94,
-        "percent": 84
+        "V": 3,
+        "percent": 100
       }
     },
     "mqtt": {
@@ -130,38 +132,46 @@
       "mute": false
     },
     "sys": {
-      "mac": "A0A3B3B8AE48",
+      "mac": "E08CFE8BD798",
       "restart_required": false,
-      "time": "01:57",
-      "unixtime": 1729292233,
-      "uptime": 5,
-      "ram_size": 269744,
-      "ram_free": 146456,
+      "time": "11:12",
+      "unixtime": 1779354762,
+      "last_sync_ts": 1779354749,
+      "uptime": 15,
+      "ram_size": 252108,
+      "ram_free": 152860,
+      "ram_min_free": 132668,
       "fs_size": 393216,
-      "fs_free": 172032,
-      "cfg_rev": 22,
+      "fs_free": 184320,
+      "cfg_rev": 15,
       "kvs_rev": 0,
       "webhook_rev": 0,
-      "available_updates": {},
+      "available_updates": {
+        "beta": {
+          "version": "2.0.0-beta1"
+        }
+      },
       "wakeup_reason": {
         "boot": "poweron",
         "cause": "button"
       },
       "wakeup_period": 86400,
-      "reset_reason": 1
+      "reset_reason": 1,
+      "utc_offset": 7200
     },
     "wifi": {
-      "sta_ip": "192.168.68.51",
+      "sta_ip": "192.168.68.97",
       "status": "got ip",
-      "ssid": "Tamer Umniah",
-      "rssi": -49
+      "ssid": "",
+      "bssid": "20:23:51:59:e7:ac",
+      "rssi": -59
     },
     "ws": {
-      "connected": false
+      "connected": true
     }
   },
   "components": [],
-  "cfg_rev": 22,
+  "cfg_rev": 15,
   "offset": 0,
   "total": 0
 }

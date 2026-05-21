@@ -300,6 +300,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
     const objIdsMap: Record<number, string> = {
       0x01: 'Battery',
       0x05: 'Illuminance',
+      0x1e: 'Light', // 0: dark, 1:twilight, 2:bright
       0x21: 'Motion',
       0x2d: 'Contact', // 1 - open, 0 - closed
       0x2e: 'Humidity',
@@ -330,7 +331,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
    */
   getBTHomeModelText(model: string): string {
     const modelsMap: Record<string, string> = {
-      'SBBT-002C': 'Shelly BLU Button1',
+      'SBBT-002C': 'Shelly BLU Button1', // This is the old model name, the new one is SBBT-102C. Includes Tough version.
       'SBDW-002C': 'Shelly BLU DoorWindow',
       'SBHT-003C': 'Shelly BLU HT',
       'SBMO-003Z': 'Shelly BLU Motion',
@@ -344,6 +345,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
       'SBBT-104CEU': 'Shelly BLU Wall Switch 4 ZB',
       'SBBT-104CUS': 'Shelly BLU RC Button 4 ZB',
       'SBBT-102C': 'Shelly BLU Button Tough 1 ZB',
+      'SBDW-103C': 'Shelly BLU DoorWindow ZB',
     };
     /*
     From: https://shelly-api-docs.shelly.cloud/docs-ble/common
@@ -429,6 +431,8 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
             component.config.meta = { ui: { view: 'regular', local_name: 'SBHT-103C', icon: null } }; // 12 - Shelly BLU H&T Display ZB
           } else if (component.attrs?.model_id === 0x11) {
             component.config.meta = { ui: { view: 'regular', local_name: 'SBHT-203C', icon: null } }; // 17 - Shelly BLU H&T ZB
+          } else if (component.attrs?.model_id === 0x14) {
+            component.config.meta = { ui: { view: 'regular', local_name: 'SBDW-103C', icon: null } };
           } else if (component.attrs?.model_id === 0x15) {
             component.config.meta = { ui: { view: 'regular', local_name: 'SBBT-104CEU', icon: null } }; // 21 -Shelly BLU Wall Switch 4 ZB
           } else if (component.attrs?.model_id === 0x16) {
@@ -706,6 +710,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
         if (key === 'ble') device.addComponent(new ShellyComponent(device, key, 'Ble', settingsPayload[key] as ShellyData)); // Ok
         if (key === 'eth') device.addComponent(new ShellyComponent(device, key, 'Eth', settingsPayload[key] as ShellyData)); // Ok
         if (key === 'matter') device.addComponent(new ShellyComponent(device, key, 'Matter', settingsPayload[key] as ShellyData)); // Ok
+        if (key === 'zigbee') device.addComponent(new ShellyComponent(device, key, 'Zigbee', settingsPayload[key] as ShellyData)); // Ok
         if (key.startsWith('switch:')) device.addComponent(new ShellyComponent(device, key, 'Switch', settingsPayload[key] as ShellyData));
         if (key.startsWith('cover:')) device.addComponent(new ShellyComponent(device, key, 'Cover', settingsPayload[key] as ShellyData));
         if (key.startsWith('light:')) device.addComponent(new ShellyComponent(device, key, 'Light', settingsPayload[key] as ShellyData));
@@ -734,6 +739,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
         if (key.startsWith('humidity:')) device.addComponent(new ShellyComponent(device, key, 'Humidity', settingsPayload[key] as ShellyData));
         if (key.startsWith('illuminance:')) device.addComponent(new ShellyComponent(device, key, 'Illuminance', settingsPayload[key] as ShellyData));
         if (key.startsWith('smoke:')) device.addComponent(new ShellyComponent(device, key, 'Smoke', settingsPayload[key] as ShellyData));
+        if (key.startsWith('flood:')) device.addComponent(new ShellyComponent(device, key, 'Flood', settingsPayload[key] as ShellyData));
         if (key.startsWith('thermostat:')) device.addComponent(new ShellyComponent(device, key, 'Thermostat', settingsPayload[key] as ShellyData));
         if (key.startsWith('devicepower:')) device.addComponent(new ShellyComponent(device, key, 'Devicepower', settingsPayload[key] as ShellyData));
       }
@@ -1176,6 +1182,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
         if (key === 'sys') this.updateComponent(key, data[key] as ShellyData);
         if (key === 'eth') this.updateComponent(key, data[key] as ShellyData);
         if (key === 'matter') this.updateComponent(key, data[key] as ShellyData);
+        if (key === 'zigbee') this.updateComponent(key, data[key] as ShellyData);
         if (key === 'cloud') this.updateComponent(key, data[key] as ShellyData);
         if (key === 'mqtt') this.updateComponent(key, data[key] as ShellyData);
         if (key === 'ws') this.updateComponent(key, data[key] as ShellyData);
@@ -1216,6 +1223,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
         if (key.startsWith('humidity:')) this.updateComponent(key, data[key] as ShellyData);
         if (key.startsWith('illuminance:')) this.updateComponent(key, data[key] as ShellyData);
         if (key.startsWith('smoke:')) this.updateComponent(key, data[key] as ShellyData);
+        if (key.startsWith('flood:')) this.updateComponent(key, data[key] as ShellyData);
         if (key.startsWith('thermostat:')) this.updateComponent(key, data[key] as ShellyData);
 
         if (key.startsWith('devicepower:') && !this.hasComponent(key)) this.addComponent(new ShellyComponent(this, key, 'Devicepower'));

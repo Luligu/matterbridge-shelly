@@ -38,7 +38,7 @@ describe('Shelly devices test', () => {
   const shelly = new Shelly(log, 'admin', 'tango');
 
   const firmwareGen1 = 'v1.14.0-gcb84623';
-  const firmwareGen2 = '1.4.4-g6d2a586';
+  const firmwareGen2 = '1.7.5-g9979d16';
   const firmwareGen3 = '1.5.0-g0087a06';
   const firmwareGen4 = '1.6.2-gc8a76e2';
 
@@ -243,7 +243,7 @@ describe('Shelly devices test', () => {
       expect(device).not.toBeUndefined();
       const switch0 = device?.getComponent('switch:0');
       expect(switch0).not.toBeUndefined();
-      expect(switch0?.logComponent()).toBe(24);
+      expect(switch0?.logComponent()).toBe(26);
       expect(switch0?.hasProperty('name')).toBeTruthy();
       expect(switch0?.getProperty('name')).not.toBeUndefined();
       expect(switch0?.getValue('name')).toBe(null);
@@ -253,7 +253,7 @@ describe('Shelly devices test', () => {
 
       const switch1 = device?.getComponent('switch:1');
       expect(switch1).not.toBeUndefined();
-      expect(switch1?.logComponent()).toBe(24);
+      expect(switch1?.logComponent()).toBe(26);
       expect(switch1?.hasProperty('name')).toBeTruthy();
       expect(switch1?.getProperty('name')).not.toBeUndefined();
       expect(switch1?.getValue('name')).toBe(null);

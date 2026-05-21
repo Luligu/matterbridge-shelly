@@ -6,17 +6,18 @@
     "slot": 1,
     "model": "SPSW-201PE16EU",
     "gen": 2,
-    "fw_id": "20250520-083740/1.6.2-gc8a76e2",
-    "ver": "1.6.2",
+    "fw_id": "20260311-095856/1.7.5-g9979d16",
+    "ver": "1.7.5",
     "app": "Pro1PM",
     "auth_en": false,
-    "auth_domain": null
+    "auth_domain": null,
+    "provision": "complete"
   },
   "settings": {
     "ble": {
       "enable": false,
       "rpc": {
-        "enable": true
+        "enable": false
       }
     },
     "bthome": {},
@@ -89,7 +90,7 @@
       "device": {
         "name": "1PM Pro II",
         "mac": "EC6260927F7C",
-        "fw_id": "20250520-083740/1.6.2-gc8a76e2",
+        "fw_id": "20260311-095856/1.7.5-g9979d16",
         "discoverable": true,
         "eco_mode": false,
         "sys_btn_toggle": true
@@ -116,7 +117,7 @@
       "sntp": {
         "server": "time.cloudflare.com"
       },
-      "cfg_rev": 32
+      "cfg_rev": 37
     },
     "wifi": {
       "ap": {
@@ -184,66 +185,68 @@
     },
     "switch:0": {
       "id": 0,
-      "source": "SHC",
+      "source": "init",
       "output": true,
       "apower": 7,
-      "voltage": 229.3,
-      "freq": 50.1,
-      "current": 0.064,
-      "pf": 0.47,
+      "voltage": 233.6,
+      "freq": 50,
+      "current": 0.063,
+      "pf": 0.48,
       "aenergy": {
-        "total": 54354.876,
-        "by_minute": [126.182, 125.994, 125.712],
-        "minute_ts": 1752839760
+        "total": 102880.494,
+        "by_minute": [126.025, 126.072, 125.868],
+        "minute_ts": 1779361320
       },
       "ret_aenergy": {
         "total": 5123,
         "by_minute": [0, 0, 0],
-        "minute_ts": 1752839760
+        "minute_ts": 1779361320
       },
       "temperature": {
-        "tC": 53.1,
-        "tF": 127.7
+        "tC": 49.7,
+        "tF": 121.4
       }
     },
     "sys": {
       "mac": "EC6260927F7C",
       "restart_required": false,
-      "time": "13:56",
-      "unixtime": 1752839794,
-      "last_sync_ts": 1752839420,
-      "uptime": 1401558,
-      "ram_size": 251088,
-      "ram_free": 106708,
-      "ram_min_free": 80380,
+      "time": "13:02",
+      "unixtime": 1779361343,
+      "last_sync_ts": 1779359654,
+      "uptime": 3629968,
+      "ram_size": 247688,
+      "ram_free": 102076,
+      "ram_min_free": 69848,
       "fs_size": 524288,
-      "fs_free": 200704,
-      "cfg_rev": 32,
+      "fs_free": 196608,
+      "cfg_rev": 37,
       "kvs_rev": 0,
       "schedule_rev": 1,
       "webhook_rev": 0,
       "btrelay_rev": 0,
+      "bthc_rev": 0,
       "available_updates": {
         "beta": {
-          "version": "1.7.0-beta3"
+          "version": "2.0.0-beta2"
         }
       },
-      "reset_reason": 1,
+      "reset_reason": 3,
       "utc_offset": 7200
     },
     "wifi": {
-      "sta_ip": "192.168.68.56",
+      "sta_ip": "192.168.68.73",
       "status": "got ip",
       "ssid": "",
-      "rssi": -64,
-      "sta_ip6": ["fe80::ee62:60ff:fe92:7f7c", "fd78:cbf8:4939:746:ee62:60ff:fe92:7f7c"]
+      "bssid": "20:23:51:59:e7:ac",
+      "rssi": -59,
+      "sta_ip6": ["fe80::ee62:60ff:fe92:7f7c", "fd78:cbf8:4939:46e2:ee62:60ff:fe92:7f7c"]
     },
     "ws": {
       "connected": false
     }
   },
   "components": [],
-  "cfg_rev": 32,
+  "cfg_rev": 37,
   "offset": 0,
   "total": 0
 }

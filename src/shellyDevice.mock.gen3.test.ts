@@ -39,10 +39,7 @@ describe('Shelly gen 3 devices test', () => {
   let device: ShellyDevice | undefined = undefined;
   let id: string;
 
-  const firmwareGen1 = 'v1.14.0-gcb84623';
-  const firmwareGen2 = '1.6.2-gc8a76e2';
-  const firmwareGen3 = '1.6.2-gc8a76e2';
-  const firmwareGen4 = '1.6.2-gc8a76e2';
+  const firmwareGen3 = '1.7.5-g9979d16';
 
   beforeAll(() => {
     //
@@ -127,7 +124,7 @@ describe('Shelly gen 3 devices test', () => {
     expect(device.model).toBe('S3PL-00112EU');
     expect(device.mac).toBe('8CBFEAA133F0');
     expect(device.id).toBe(id);
-    expect(device.firmware).toBe('1.2.3-plugsg3prod0-gec79607'); // firmwareGen1
+    expect(device.firmware).toBe(firmwareGen3);
     expect(device.auth).toBe(false);
     expect(device.gen).toBe(3);
     expect(device.profile).toBe(undefined);
@@ -138,9 +135,9 @@ describe('Shelly gen 3 devices test', () => {
     expect(device.cached).toBe(false);
     expect(device.sleepMode).toBe(false);
 
-    expect(device.components.length).toBe(10);
-    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'MQTT', 'Switch', 'Sys', 'Sntp', 'WiFi', 'WS']);
-    expect(device.getComponentIds()).toStrictEqual(['ble', 'cloud', 'mqtt', 'switch:0', 'sys', 'sntp', 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws']);
+    expect(device.components.length).toBe(11);
+    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Matter', 'MQTT', 'Switch', 'Sys', 'Sntp', 'WiFi', 'WS']);
+    expect(device.getComponentIds()).toStrictEqual(['ble', 'cloud', 'matter', 'mqtt', 'switch:0', 'sys', 'sntp', 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws']);
 
     expect(device.getComponent('sys')?.getValue('temperature')).toBe(undefined);
     expect(device.getComponent('sys')?.getValue('overtemperature')).toBe(undefined);
@@ -472,7 +469,7 @@ describe('Shelly gen 3 devices test', () => {
     expect(device.mac).toBe('543204519264');
     expect(device.id).toBe(id);
     expect(device.firmware).toBe(firmwareGen3);
-    expect(device.auth).toBe(false);
+    expect(device.auth).toBe(true);
     expect(device.gen).toBe(3);
     expect(device.profile).toBe(undefined);
     expect(device.name).toBe('1PMmini Gen3');

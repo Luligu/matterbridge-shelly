@@ -39,10 +39,7 @@ describe('Shelly gen 4 devices test', () => {
   let device: ShellyDevice | undefined = undefined;
   let id: string;
 
-  const firmwareGen1 = 'v1.14.0-gcb84623';
-  const firmwareGen2 = '1.4.4-g6d2a586';
-  const firmwareGen3 = '1.5.0-g0087a06';
-  const firmwareGen4 = '1.6.2-gc8a76e2';
+  const firmwareGen4 = '1.7.5-g9979d16';
 
   beforeAll(() => {
     //
@@ -257,8 +254,8 @@ describe('Shelly gen 4 devices test', () => {
     if (device) device.destroy();
   });
 
-  test('Create a gen 4 shelly2pmg4 device mode cover', async () => {
-    id = 'shelly2pmg4-7C2C677A0110';
+  test('Create a gen 4 shelly2pmg4 device mode switch', async () => {
+    id = 'shelly2pmg4-98A316721128.switch';
     log.logName = id;
 
     device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', id + '.json'));
@@ -266,22 +263,92 @@ describe('Shelly gen 4 devices test', () => {
     if (!device) return;
     expect(device.host).toBe(path.join('src', 'mock', id + '.json'));
     expect(device.model).toBe('S4SW-002P16EU');
-    expect(device.mac).toBe('7C2C677A0110');
-    expect(device.id).toBe(id);
-    expect(device.firmware).toBe('r1.4-389-ge55943de7-main');
-    expect(device.auth).toBe(false);
+    expect(device.mac).toBe('98A316721128');
+    expect(device.id).toBe('shelly2pmg4-98A316721128');
+    expect(device.firmware).toBe(firmwareGen4);
+    expect(device.auth).toBe(true);
     expect(device.gen).toBe(4);
-    expect(device.profile).toBe('cover');
-    expect(device.name).toBe('shelly2pmg4-7C2C677A0110');
+    expect(device.profile).toBe('switch');
+    expect(device.name).toBe('2PM Gen4');
     expect(device.hasUpdate).toBe(false);
     expect(device.lastseen).not.toBe(0);
     expect(device.online).toBe(true);
     expect(device.cached).toBe(false);
     expect(device.sleepMode).toBe(false);
 
-    expect(device.components.length).toBe(12);
-    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Cover', 'Input', 'MQTT', 'Sys', 'Sntp', 'WiFi', 'WS']);
-    expect(device.getComponentIds()).toStrictEqual(['ble', 'cloud', 'cover:0', 'input:0', 'input:1', 'mqtt', 'sys', 'sntp', 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws']);
+    expect(device.components.length).toBe(14);
+    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Input', 'Matter', 'MQTT', 'Switch', 'Sys', 'Sntp', 'WiFi', 'WS']);
+    expect(device.getComponentIds()).toStrictEqual([
+      'ble',
+      'cloud',
+      'input:0',
+      'input:1',
+      'matter',
+      'mqtt',
+      'switch:0',
+      'switch:1',
+      'sys',
+      'sntp',
+      'wifi_ap',
+      'wifi_sta',
+      'wifi_sta1',
+      'ws',
+    ]);
+
+    expect(device.getComponent('sys')?.getValue('temperature')).toBe(undefined);
+    expect(device.getComponent('sys')?.getValue('overtemperature')).toBe(undefined);
+
+    expect(device.getComponent('input:0')?.hasProperty('state')).toBe(true);
+    expect(device.getComponent('input:1')?.hasProperty('state')).toBe(true);
+
+    expect(device.getComponent('switch:0')?.hasProperty('state')).toBe(true);
+    expect(device.getComponent('switch:0')?.hasProperty('voltage')).toBe(true);
+    expect(device.getComponent('switch:0')?.hasProperty('current')).toBe(true);
+    expect(device.getComponent('switch:0')?.hasProperty('apower')).toBe(true);
+    expect(device.getComponent('switch:0')?.hasProperty('aenergy')).toBe(true);
+    expect((device.getComponent('switch:0')?.getValue('aenergy') as ShellyData).total).toBeGreaterThanOrEqual(0);
+
+    expect(device.getComponent('switch:1')?.hasProperty('state')).toBe(true);
+    expect(device.getComponent('switch:1')?.hasProperty('voltage')).toBe(true);
+    expect(device.getComponent('switch:1')?.hasProperty('current')).toBe(true);
+    expect(device.getComponent('switch:1')?.hasProperty('apower')).toBe(true);
+    expect(device.getComponent('switch:1')?.hasProperty('aenergy')).toBe(true);
+    expect((device.getComponent('switch:1')?.getValue('aenergy') as ShellyData).total).toBeGreaterThanOrEqual(0);
+
+    expect(device.bthomeTrvs.size).toBe(0);
+    expect(device.bthomeDevices.size).toBe(2);
+    expect(device.bthomeSensors.size).toBe(5);
+
+    expect(await device.fetchUpdate()).not.toBeNull();
+
+    if (device) device.destroy();
+  });
+
+  test('Create a gen 4 shelly2pmg4 device mode cover', async () => {
+    id = 'shelly2pmg4-98A316721128.cover';
+    log.logName = id;
+
+    device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', id + '.json'));
+    expect(device).not.toBeUndefined();
+    if (!device) return;
+    expect(device.host).toBe(path.join('src', 'mock', id + '.json'));
+    expect(device.model).toBe('S4SW-002P16EU');
+    expect(device.mac).toBe('98A316721128');
+    expect(device.id).toBe('shelly2pmg4-98A316721128');
+    expect(device.firmware).toBe(firmwareGen4);
+    expect(device.auth).toBe(true);
+    expect(device.gen).toBe(4);
+    expect(device.profile).toBe('cover');
+    expect(device.name).toBe('2PM Gen4');
+    expect(device.hasUpdate).toBe(false);
+    expect(device.lastseen).not.toBe(0);
+    expect(device.online).toBe(true);
+    expect(device.cached).toBe(false);
+    expect(device.sleepMode).toBe(false);
+
+    expect(device.components.length).toBe(13);
+    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Cover', 'Input', 'Matter', 'MQTT', 'Sys', 'Sntp', 'WiFi', 'WS']);
+    expect(device.getComponentIds()).toStrictEqual(['ble', 'cloud', 'cover:0', 'input:0', 'input:1', 'matter', 'mqtt', 'sys', 'sntp', 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws']);
 
     expect(device.getComponent('sys')?.getValue('temperature')).toBe(undefined);
     expect(device.getComponent('sys')?.getValue('overtemperature')).toBe(undefined);
@@ -295,6 +362,192 @@ describe('Shelly gen 4 devices test', () => {
     expect(device.getComponent('cover:0')?.hasProperty('apower')).toBe(true);
     expect(device.getComponent('cover:0')?.hasProperty('aenergy')).toBe(true);
     expect((device.getComponent('cover:0')?.getValue('aenergy') as ShellyData).total).toBeGreaterThanOrEqual(0);
+
+    expect(device.bthomeTrvs.size).toBe(0);
+    expect(device.bthomeDevices.size).toBe(2);
+    expect(device.bthomeSensors.size).toBe(5);
+
+    expect(await device.fetchUpdate()).not.toBeNull();
+
+    if (device) device.destroy();
+  });
+
+  test('Create a gen 4 shellyfloodg4 device', async () => {
+    id = 'shellyfloodg4-D885ACE9173C';
+    log.logName = id;
+
+    device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', id + '.json'));
+    expect(device).not.toBeUndefined();
+    if (!device) return;
+    expect(device.host).toBe(path.join('src', 'mock', id + '.json'));
+    expect(device.model).toBe('S4SN-0071A');
+    expect(device.mac).toBe('D885ACE9173C');
+    expect(device.id).toBe('shellyfloodg4-D885ACE9173C');
+    expect(device.firmware).toBe('gefb9927');
+    expect(device.auth).toBe(false);
+    expect(device.gen).toBe(4);
+    expect(device.profile).toBe(undefined);
+    expect(device.name).toBe('Flood Gen4 I');
+    expect(device.hasUpdate).toBe(false);
+    expect(device.lastseen).not.toBe(0);
+    expect(device.online).toBe(true);
+    expect(device.cached).toBe(false);
+    expect(device.sleepMode).toBe(true);
+
+    expect(device.components.length).toBe(13);
+    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Devicepower', 'Flood', 'Matter', 'MQTT', 'Sys', 'Sntp', 'WiFi', 'WS', 'Zigbee']);
+    expect(device.getComponentIds()).toStrictEqual([
+      'ble',
+      'cloud',
+      'devicepower:0',
+      'flood:0',
+      'matter',
+      'mqtt',
+      'sys',
+      'sntp',
+      'wifi_ap',
+      'wifi_sta',
+      'wifi_sta1',
+      'ws',
+      'zigbee',
+    ]);
+
+    expect(device.getComponent('sys')?.getValue('temperature')).toBe(undefined);
+    expect(device.getComponent('sys')?.getValue('overtemperature')).toBe(undefined);
+
+    expect(device.getComponent('matter')?.hasProperty('enable')).toBe(true);
+    expect(device.getComponent('zigbee')?.hasProperty('enable')).toBe(true);
+
+    expect(device.getComponent('flood:0')?.hasProperty('alarm')).toBe(true);
+    expect(device.getComponent('devicepower:0')?.hasProperty('battery')).toBe(true);
+
+    expect(device.bthomeTrvs.size).toBe(0);
+    expect(device.bthomeDevices.size).toBe(0);
+    expect(device.bthomeSensors.size).toBe(0);
+
+    expect(await device.fetchUpdate()).not.toBeNull();
+
+    if (device) device.destroy();
+  });
+
+  test('Create a gen 4 shellypstripg4 device', async () => {
+    id = 'shellypstripg4-D885ACE52518';
+    log.logName = id;
+
+    device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', id + '.json'));
+    expect(device).not.toBeUndefined();
+    if (!device) return;
+    expect(device.host).toBe(path.join('src', 'mock', id + '.json'));
+    expect(device.model).toBe('S4PL-00416EU');
+    expect(device.mac).toBe('D885ACE52518');
+    expect(device.id).toBe('shellypstripg4-D885ACE52518');
+    expect(device.firmware).toBe('ga0def2d');
+    expect(device.auth).toBe(false);
+    expect(device.gen).toBe(4);
+    expect(device.profile).toBe(undefined);
+    expect(device.name).toBe('Power Strip Gen4');
+    expect(device.hasUpdate).toBe(false);
+    expect(device.lastseen).not.toBe(0);
+    expect(device.online).toBe(true);
+    expect(device.cached).toBe(false);
+    expect(device.sleepMode).toBe(false);
+
+    expect(device.components.length).toBe(14);
+    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Matter', 'MQTT', 'Switch', 'Sys', 'Sntp', 'WiFi', 'WS']);
+    expect(device.getComponentIds()).toStrictEqual([
+      'ble',
+      'cloud',
+      'matter',
+      'mqtt',
+      'switch:0',
+      'switch:1',
+      'switch:2',
+      'switch:3',
+      'sys',
+      'sntp',
+      'wifi_ap',
+      'wifi_sta',
+      'wifi_sta1',
+      'ws',
+    ]);
+
+    expect(device.getComponent('sys')?.getValue('temperature')).toBe(undefined);
+    expect(device.getComponent('sys')?.getValue('overtemperature')).toBe(undefined);
+
+    expect(device.getComponent('matter')?.hasProperty('enable')).toBe(true);
+
+    expect(device.getComponent('switch:0')?.hasProperty('state')).toBe(true);
+    expect(device.getComponent('switch:0')?.hasProperty('voltage')).toBe(true);
+    expect(device.getComponent('switch:0')?.hasProperty('current')).toBe(true);
+    expect(device.getComponent('switch:0')?.hasProperty('apower')).toBe(true);
+    expect(device.getComponent('switch:0')?.hasProperty('aenergy')).toBe(true);
+    expect((device.getComponent('switch:0')?.getValue('aenergy') as ShellyData).total).toBeGreaterThanOrEqual(0);
+
+    expect(device.getComponent('switch:1')?.hasProperty('state')).toBe(true);
+    expect(device.getComponent('switch:1')?.hasProperty('voltage')).toBe(true);
+    expect(device.getComponent('switch:1')?.hasProperty('current')).toBe(true);
+    expect(device.getComponent('switch:1')?.hasProperty('apower')).toBe(true);
+    expect(device.getComponent('switch:1')?.hasProperty('aenergy')).toBe(true);
+    expect((device.getComponent('switch:1')?.getValue('aenergy') as ShellyData).total).toBeGreaterThanOrEqual(0);
+
+    expect(device.getComponent('switch:2')?.hasProperty('state')).toBe(true);
+    expect(device.getComponent('switch:2')?.hasProperty('voltage')).toBe(true);
+    expect(device.getComponent('switch:2')?.hasProperty('current')).toBe(true);
+    expect(device.getComponent('switch:2')?.hasProperty('apower')).toBe(true);
+    expect(device.getComponent('switch:2')?.hasProperty('aenergy')).toBe(true);
+    expect((device.getComponent('switch:2')?.getValue('aenergy') as ShellyData).total).toBeGreaterThanOrEqual(0);
+
+    expect(device.getComponent('switch:3')?.hasProperty('state')).toBe(true);
+    expect(device.getComponent('switch:3')?.hasProperty('voltage')).toBe(true);
+    expect(device.getComponent('switch:3')?.hasProperty('current')).toBe(true);
+    expect(device.getComponent('switch:3')?.hasProperty('apower')).toBe(true);
+    expect(device.getComponent('switch:3')?.hasProperty('aenergy')).toBe(true);
+    expect((device.getComponent('switch:3')?.getValue('aenergy') as ShellyData).total).toBeGreaterThanOrEqual(0);
+
+    expect(device.bthomeTrvs.size).toBe(0);
+    expect(device.bthomeDevices.size).toBe(0);
+    expect(device.bthomeSensors.size).toBe(0);
+
+    expect(await device.fetchUpdate()).not.toBeNull();
+
+    if (device) device.destroy();
+  });
+
+  test('Create a gen 4 shellyemminig4 device', async () => {
+    id = 'shellyemminig4-D885ACEF41A8';
+    log.logName = id;
+
+    device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', id + '.json'));
+    expect(device).not.toBeUndefined();
+    if (!device) return;
+    expect(device.host).toBe(path.join('src', 'mock', id + '.json'));
+    expect(device.model).toBe('S4EM-001PXCEU16');
+    expect(device.mac).toBe('D885ACEF41A8');
+    expect(device.id).toBe('shellyemminig4-D885ACEF41A8');
+    expect(device.firmware).toBe('2.0.0-beta1-g8c7700a');
+    expect(device.auth).toBe(true);
+    expect(device.gen).toBe(4);
+    expect(device.profile).toBe(undefined);
+    expect(device.name).toBe('EM Mini Gen4');
+    expect(device.hasUpdate).toBe(true);
+    expect(device.lastseen).not.toBe(0);
+    expect(device.online).toBe(true);
+    expect(device.cached).toBe(false);
+    expect(device.sleepMode).toBe(false);
+
+    expect(device.components.length).toBe(11);
+    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'PowerMeter', 'Matter', 'MQTT', 'Sys', 'Sntp', 'WiFi', 'WS']);
+    expect(device.getComponentIds()).toStrictEqual(['ble', 'cloud', 'em1:0', 'matter', 'mqtt', 'sys', 'sntp', 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws']);
+
+    expect(device.getComponent('sys')?.getValue('temperature')).toBe(undefined);
+    expect(device.getComponent('sys')?.getValue('overtemperature')).toBe(undefined);
+
+    expect(device.getComponent('matter')?.hasProperty('enable')).toBe(true);
+
+    expect(device.getComponent('em1:0')?.hasProperty('voltage')).toBe(true);
+    expect(device.getComponent('em1:0')?.hasProperty('current')).toBe(true);
+    expect(device.getComponent('em1:0')?.hasProperty('act_power')).toBe(true);
+    expect(device.getComponent('em1:0')?.hasProperty('total_act_energy')).toBe(true);
 
     expect(device.bthomeTrvs.size).toBe(0);
     expect(device.bthomeDevices.size).toBe(0);

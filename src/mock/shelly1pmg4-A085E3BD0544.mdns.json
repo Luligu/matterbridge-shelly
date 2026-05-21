@@ -15,26 +15,26 @@
   "questions": [],
   "answers": [
     {
-      "name": "_shelly._tcp.local",
+      "name": "_http._tcp.local",
       "type": "PTR",
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": "shelly1pmg4-a085e3bd0544._shelly._tcp.local"
+      "data": "shelly1pmg4-a085e3bd0544._http._tcp.local"
     },
     {
-      "name": "_shelly._tcp.local",
+      "name": "_http._tcp.local",
       "type": "PTR",
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": "1PM Gen4._shelly._tcp.local"
+      "data": "1PM Gen4._http._tcp.local"
     }
   ],
   "authorities": [],
   "additionals": [
     {
-      "name": "shelly1pmg4-a085e3bd0544._shelly._tcp.local",
+      "name": "shelly1pmg4-a085e3bd0544._http._tcp.local",
       "type": "SRV",
       "ttl": 120,
       "class": "IN",
@@ -47,12 +47,12 @@
       }
     },
     {
-      "name": "shelly1pmg4-a085e3bd0544._shelly._tcp.local",
+      "name": "shelly1pmg4-a085e3bd0544._http._tcp.local",
       "type": "TXT",
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": ["gen=4", "app=S1PMG4", "ver=1.6.2"]
+      "data": ["gen=4"]
     },
     {
       "name": "Shelly1PMG4-A085E3BD0544.local",
@@ -63,7 +63,7 @@
       "data": "192.168.70.3"
     },
     {
-      "name": "1PM Gen4._shelly._tcp.local",
+      "name": "1PM Gen4._http._tcp.local",
       "type": "SRV",
       "ttl": 120,
       "class": "IN",
@@ -76,12 +76,12 @@
       }
     },
     {
-      "name": "1PM Gen4._shelly._tcp.local",
+      "name": "1PM Gen4._http._tcp.local",
       "type": "TXT",
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": ["gen=4", "app=S1PMG4", "ver=1.6.2"]
+      "data": ["gen=4", "app=S1PMG4", "ver=1.7.5"]
     },
     {
       "name": "1PM-Gen4.local",

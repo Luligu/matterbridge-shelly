@@ -220,8 +220,13 @@ export function shellyUpdateHandler(
   if (shellyComponent.name === 'Sensor' && property === 'contact_open' && isValidBoolean(value)) {
     endpoint.setAttribute(BooleanState.Cluster.id, 'stateValue', !value, shellyDevice.log);
   }
-  // Update for Flood
+  // Update for Flood Gen 1
   if (shellyComponent.name === 'Flood' && property === 'flood' && isValidBoolean(value)) {
+    // endpoint.setAttribute(BooleanState.Cluster.id, 'stateValue', !value, shellyDevice.log);
+    endpoint.setAttribute(BooleanState.Cluster.id, 'stateValue', value, shellyDevice.log); // Water Leak Detector: true = leak, false = no leak
+  }
+  // Update for Flood Gen 2+
+  if (shellyComponent.name === 'Flood' && property === 'alarm' && isValidBoolean(value)) {
     // endpoint.setAttribute(BooleanState.Cluster.id, 'stateValue', !value, shellyDevice.log);
     endpoint.setAttribute(BooleanState.Cluster.id, 'stateValue', value, shellyDevice.log); // Water Leak Detector: true = leak, false = no leak
   }

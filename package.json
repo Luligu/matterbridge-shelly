@@ -1,6 +1,6 @@
 {
   "name": "matterbridge-shelly",
-  "version": "2.2.8",
+  "version": "2.3.0",
   "description": "Matterbridge shelly plugin",
   "author": "https://github.com/Luligu",
   "homepage": "https://www.npmjs.com/package/matterbridge-shelly",
@@ -127,7 +127,7 @@
   "devDependencies": {
     "@eslint/js": "10.0.1",
     "@eslint/json": "1.2.0",
-    "@eslint/markdown": "8.0.1",
+    "@eslint/markdown": "8.0.2",
     "@jest/globals": "30.4.1",
     "@types/jest": "30.0.0",
     "@types/multicast-dns": "7.2.4",
