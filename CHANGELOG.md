@@ -34,9 +34,10 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 ### Added
 
 - [shelly]: Verified `firmware 1.7.5`.
+- [shelly]: Verified `BLU firmware 1.0.23`.
 - [shelly]: Verified `Shelly EM Mini Gen4` (shellyemminig4).
 - [shelly]: Verified `Shelly Shutter` (shellyshutter).
-- [shelly]: Verified `Shelly Flood Gen4` (shellyfloodg4).
+- [shelly]: Add support for `Shelly Flood Gen4` (shellyfloodg4).
 - [shelly]: Verified `BLU H&T Display ZB` with firmware 1.1.10.
 - [shelly]: Verified `BLU Button Tough 1 ZB` with firmware 1.1.12.
 - [shelly]: Add new `authentication` method in firmware 2.0.0 (beta). Thanks 0FakE (https://github.com/Luligu/matterbridge-shelly/issues/188).

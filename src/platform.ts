@@ -510,9 +510,9 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             }
             if (['single_push', 'double_push', 'long_push'].includes(event.event)) {
               let buttonEndpoint: MatterbridgeEndpoint | undefined;
-              if (bthomeDevice.model === 'Shelly BLU RC Button 4') {
+              if (bthomeDevice.model === 'Shelly BLU RC Button 4' || bthomeDevice.model === 'Shelly BLU RC Button 4 ZB') {
                 buttonEndpoint = blu.getChildEndpointByName('Button' + event.idx);
-              } else if (bthomeDevice.model === 'Shelly BLU Wall Switch 4') {
+              } else if (bthomeDevice.model === 'Shelly BLU Wall Switch 4' || bthomeDevice.model === 'Shelly BLU Wall Switch 4 ZB') {
                 buttonEndpoint = blu.getChildEndpointByName('Button' + event.idx);
               } else if (bthomeDevice.model === 'Shelly BLU Button1' || bthomeDevice.model === 'Shelly BLU Button Tough 1 ZB') {
                 buttonEndpoint = blu;
@@ -520,7 +520,16 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
                 buttonEndpoint = blu.getChildEndpointByName('Button');
               }
               if (!buttonEndpoint) {
-                if (['Shelly BLU Button1', 'Shelly BLU Button Tough 1 ZB', 'Shelly BLU RC Button 4', 'Shelly BLU Wall Switch 4'].includes(bthomeDevice.model))
+                if (
+                  [
+                    'Shelly BLU Button1',
+                    'Shelly BLU Button Tough 1 ZB',
+                    'Shelly BLU RC Button 4',
+                    'Shelly BLU RC Button 4 ZB',
+                    'Shelly BLU Wall Switch 4',
+                    'Shelly BLU Wall Switch 4 ZB',
+                  ].includes(bthomeDevice.model)
+                )
                   blu.log.warn(`Shelly device ${idn}${blu?.deviceName ?? addr}${rs}${wr} child endpoint for button not found`);
                 return;
               }
@@ -548,9 +557,9 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               `${idn}BLU${rs}${db} observer sensor event message for BLU device ${idn}${blu?.deviceName ?? addr}${rs}${db}: sensor ${YELLOW}${sensorName}${db} index ${YELLOW}${sensorIndex}${db} event ${debugStringify(event)}${db}`,
             );
             let buttonEndpoint: MatterbridgeEndpoint | undefined;
-            if (bthomeDevice.model === 'Shelly BLU RC Button 4') {
+            if (bthomeDevice.model === 'Shelly BLU RC Button 4' || bthomeDevice.model === 'Shelly BLU RC Button 4 ZB') {
               buttonEndpoint = blu.getChildEndpointByName('Button' + sensorIndex);
-            } else if (bthomeDevice.model === 'Shelly BLU Wall Switch 4') {
+            } else if (bthomeDevice.model === 'Shelly BLU Wall Switch 4' || bthomeDevice.model === 'Shelly BLU Wall Switch 4 ZB') {
               buttonEndpoint = blu.getChildEndpointByName('Button' + sensorIndex);
             } else if (bthomeDevice.model === 'Shelly BLU Button1' || bthomeDevice.model === 'Shelly BLU Button Tough 1 ZB') {
               buttonEndpoint = blu;
@@ -558,7 +567,16 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               buttonEndpoint = blu.getChildEndpointByName('Button');
             }
             if (!buttonEndpoint) {
-              if (['Shelly BLU Button1', 'Shelly BLU Button Tough 1 ZB', 'Shelly BLU RC Button 4', 'Shelly BLU Wall Switch 4'].includes(bthomeDevice.model))
+              if (
+                [
+                  'Shelly BLU Button1',
+                  'Shelly BLU Button Tough 1 ZB',
+                  'Shelly BLU RC Button 4',
+                  'Shelly BLU RC Button 4 ZB',
+                  'Shelly BLU Wall Switch 4',
+                  'Shelly BLU Wall Switch 4 ZB',
+                ].includes(bthomeDevice.model)
+              )
                 blu.log.warn(`Shelly device ${idn}${blu?.deviceName ?? addr}${rs}${wr} child endpoint for button not found`);
               return;
             }
@@ -1978,8 +1996,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     else if (bthomeDevice.model === 'Shelly BLU Button1' || bthomeDevice.model === 'Shelly BLU Button Tough 1 ZB') definition = [genericSwitch, bridgedNode, powerSource];
     else if (bthomeDevice.model === 'Shelly BLU HT' || bthomeDevice.model === 'Shelly BLU H&T ZB' || bthomeDevice.model === 'Shelly BLU H&T Display ZB')
       definition = [bridgedNode, powerSource];
-    else if (bthomeDevice.model === 'Shelly BLU RC Button 4') definition = [bridgedNode, powerSource];
-    else if (bthomeDevice.model === 'Shelly BLU Wall Switch 4') definition = [bridgedNode, powerSource];
+    else if (bthomeDevice.model === 'Shelly BLU RC Button 4' || bthomeDevice.model === 'Shelly BLU RC Button 4 ZB') definition = [bridgedNode, powerSource];
+    else if (bthomeDevice.model === 'Shelly BLU Wall Switch 4' || bthomeDevice.model === 'Shelly BLU Wall Switch 4 ZB') definition = [bridgedNode, powerSource];
     else if (bthomeDevice.model === 'Shelly BLU Trv') definition = [thermostatDevice, bridgedNode, powerSource];
     else this.log.error(`Shelly device ${hk}${gateway.id}${er} host ${zb}${gateway.host}${er} has an unknown BLU device model ${CYAN}${bthomeDevice.model}${nf}`);
     // Check if the BLU device is already registered
