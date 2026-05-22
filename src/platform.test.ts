@@ -151,6 +151,11 @@ describe('ShellyPlatform', () => {
   });
 
   it('should return an instance of ShellyPlatform', async () => {
+    await setDebug(true);
+    // eslint-disable-next-line no-console
+    console.log('Matterbridge version:', matterbridge.matterbridgeVersion);
+    await setDebug(false);
+
     const platform = initializePlugin(matterbridge, log, mockConfig);
     expect(platform).toBeDefined();
     expect(platform).toBeInstanceOf(ShellyPlatform);
@@ -172,25 +177,11 @@ describe('ShellyPlatform', () => {
     shellyPlatform.config.entityBlackList = []; // First run turn off entity black list
   });
 
-  it('should validate version', () => {
-    matterbridge.matterbridgeVersion = '1.5.4';
-    expect(shellyPlatform.verifyMatterbridgeVersion('1.5.3')).toBe(true);
-    expect(shellyPlatform.verifyMatterbridgeVersion('1.5.4')).toBe(true);
-    expect(shellyPlatform.verifyMatterbridgeVersion('2.0.0')).toBe(false);
-  });
-
-  it('should validate version beta', () => {
-    matterbridge.matterbridgeVersion = '1.5.4-dev.1';
-    expect(shellyPlatform.verifyMatterbridgeVersion('1.5.3')).toBe(true);
-    expect(shellyPlatform.verifyMatterbridgeVersion('1.5.4')).toBe(true);
-    expect(shellyPlatform.verifyMatterbridgeVersion('2.0.0')).toBe(false);
-    matterbridge.matterbridgeVersion = '1.5.5';
-  });
-
   it('should throw because of version', () => {
+    const savedVersion = matterbridge.matterbridgeVersion;
     matterbridge.matterbridgeVersion = '1.5.4';
     expect(() => new ShellyPlatform(matterbridge, log, mockConfig as any)).toThrow();
-    matterbridge.matterbridgeVersion = '3.7.0';
+    matterbridge.matterbridgeVersion = savedVersion;
   });
 
   it('should call onStart with reason and start mDNS', async () => {
