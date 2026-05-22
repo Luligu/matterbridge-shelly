@@ -151,11 +151,6 @@ describe('ShellyPlatform', () => {
   });
 
   it('should return an instance of ShellyPlatform', async () => {
-    await setDebug(true);
-    // eslint-disable-next-line no-console
-    console.log('Matterbridge version:', matterbridge.matterbridgeVersion);
-    await setDebug(false);
-
     const platform = initializePlugin(matterbridge, log, mockConfig);
     expect(platform).toBeDefined();
     expect(platform).toBeInstanceOf(ShellyPlatform);
@@ -755,6 +750,7 @@ describe('ShellyPlatform', () => {
       powerQuality: false,
     });
     expect(featuresFor(child as MatterbridgeEndpoint, 'electricalEnergyMeasurement')).toEqual(
+      // Matterbridge 3.7.10 is the last with Matter 1.4.2, which doesn't have apparent energy and reactive energy attributes
       matterbridge.matterbridgeVersion === '3.7.10'
         ? {
             cumulativeEnergy: true,
