@@ -763,14 +763,23 @@ describe('ShellyPlatform', () => {
       polyphasePower: false,
       powerQuality: false,
     });
-    expect(featuresFor(child as MatterbridgeEndpoint, 'electricalEnergyMeasurement')).toEqual({
-      apparentEnergy: false,
-      cumulativeEnergy: true,
-      exportedEnergy: true,
-      importedEnergy: true,
-      periodicEnergy: false,
-      reactiveEnergy: false,
-    });
+    expect(featuresFor(child as MatterbridgeEndpoint, 'electricalEnergyMeasurement')).toEqual(
+      matterbridge.matterbridgeVersion === '3.7.10'
+        ? {
+            cumulativeEnergy: true,
+            exportedEnergy: true,
+            importedEnergy: true,
+            periodicEnergy: false,
+          }
+        : {
+            apparentEnergy: false,
+            cumulativeEnergy: true,
+            exportedEnergy: true,
+            importedEnergy: true,
+            periodicEnergy: false,
+            reactiveEnergy: false,
+          },
+    );
     expect(child?.getAttribute('Descriptor', 'tagList')).toEqual([{ mfgCode: null, namespaceId: 7, tag: 0, label: 'rgb:0' }]);
     expect(child?.getAttribute('Descriptor', 'deviceTypeList')).toEqual([
       { deviceType: 269, revision: 4 },
