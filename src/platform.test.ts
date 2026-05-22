@@ -764,10 +764,12 @@ describe('ShellyPlatform', () => {
       powerQuality: false,
     });
     expect(featuresFor(child as MatterbridgeEndpoint, 'electricalEnergyMeasurement')).toEqual({
+      apparentEnergy: false,
       cumulativeEnergy: true,
       exportedEnergy: true,
       importedEnergy: true,
       periodicEnergy: false,
+      reactiveEnergy: false,
     });
     expect(child?.getAttribute('Descriptor', 'tagList')).toEqual([{ mfgCode: null, namespaceId: 7, tag: 0, label: 'rgb:0' }]);
     expect(child?.getAttribute('Descriptor', 'deviceTypeList')).toEqual([
