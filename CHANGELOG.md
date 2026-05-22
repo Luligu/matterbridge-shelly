@@ -29,7 +29,7 @@ If you like this project and find it useful, please consider giving it a star on
 
 You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his invaluable contribution to this project.
 
-## [2.3.0] - Dev branch
+## [2.3.0] - 2025-05-22
 
 ### Added
 

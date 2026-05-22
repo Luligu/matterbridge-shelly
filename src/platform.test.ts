@@ -3,6 +3,7 @@
 const NAME = 'Platform';
 const MATTER_PORT = 6000;
 
+import * as fs from 'node:fs';
 import path from 'node:path';
 
 import { jest } from '@jest/globals';
@@ -11,6 +12,10 @@ import {
   addMatterbridgePlatform,
   createMatterbridgeEnvironment,
   destroyMatterbridgeEnvironment,
+  getMoveToColorRequest,
+  getMoveToHueRequest,
+  getMoveToLevelRequest,
+  getMoveToSaturationRequest,
   log,
   loggerLogSpy,
   matterbridge,
@@ -42,7 +47,7 @@ import { MdnsScanner } from './mdnsScanner.js';
 import initializePlugin, { ShellyPlatform, ShellyPlatformConfig } from './platform.js';
 import { Shelly } from './shelly.js';
 import { ShellyDevice } from './shellyDevice.js';
-import { ShellyData } from './shellyTypes.js';
+import { ShellyData, ShellyEvent } from './shellyTypes.js';
 import { WsClient } from './wsClient.js';
 import { WsServer } from './wsServer.js';
 
@@ -365,6 +370,8 @@ describe('ShellyPlatform', () => {
 
     fetch.mockRestore();
 
+    await shellyPlatform.onConfigure();
+
     cleanup();
     shelly1.destroy();
   });
@@ -413,6 +420,8 @@ describe('ShellyPlatform', () => {
     expect(temperatureEndpoint.stateOf(TemperatureMeasurementBehavior).measuredValue).toBe(2075);
     const humidityEndpoint = device.getChildEndpointByName('humidity') as MatterbridgeEndpoint;
     expect(humidityEndpoint.stateOf(RelativeHumidityMeasurementBehavior).measuredValue).toBe(6050);
+
+    await shellyPlatform.onConfigure();
 
     cleanup();
     shellyHt.destroy();
@@ -674,6 +683,8 @@ describe('ShellyPlatform', () => {
 
     fetch.mockRestore();
 
+    await shellyPlatform.onConfigure();
+
     cleanup();
     shellyPro.destroy();
   });
@@ -867,7 +878,84 @@ describe('ShellyPlatform', () => {
     );
     expect(fetch).toHaveBeenCalledWith(shellyPlusRgbwPm.shelly, shellyPlusRgbwPm.log, shellyPlusRgbwPm.host, 'Rgb.Set', { id: 0, rgb: [255, 206, 166] });
 
+    await rgbEndpoint.executeCommandHandler('identify', { identifyTime: 0 }, 'identify', {} as any, rgbEndpoint);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, expect.stringContaining('Identify command received for endpoint'));
+
+    await rgbEndpoint.executeCommandHandler('moveToLevelWithOnOff', getMoveToLevelRequest(127, 0, false), 'levelControl', {} as any, rgbEndpoint);
+    expect(loggerLogSpy).toHaveBeenCalledWith(
+      LogLevel.INFO,
+      `${db}Sent command ${hk}Rgb${db}:${hk}rgb:0${db}:${hk}Level(${YELLOW}50${hk})${db} to shelly device ${idn}${shellyPlusRgbwPm.id}${rs}${db}`,
+    );
+    expect(fetch).toHaveBeenCalledWith(shellyPlusRgbwPm.shelly, shellyPlusRgbwPm.log, shellyPlusRgbwPm.host, 'Rgb.Set', { id: 0, brightness: 50 });
+
+    await rgbEndpoint.executeCommandHandler('moveToHue', getMoveToHueRequest(50, 0, false), 'colorControl', {} as any, rgbEndpoint);
+    await wait(600);
+    expect(loggerLogSpy).toHaveBeenCalledWith(
+      LogLevel.INFO,
+      `${db}Sent command ${hk}Rgb${db}:${hk}rgb:0${db}:${hk}ColorRGB(${YELLOW}209${hk}, ${YELLOW}255${hk}, ${YELLOW}0${hk})${db} to shelly device ${idn}${shellyPlusRgbwPm.id}${rs}${db}`,
+    );
+    expect(fetch).toHaveBeenCalledWith(shellyPlusRgbwPm.shelly, shellyPlusRgbwPm.log, shellyPlusRgbwPm.host, 'Rgb.Set', { id: 0, rgb: [209, 255, 0] });
+
+    await rgbEndpoint.executeCommandHandler('moveToSaturation', getMoveToSaturationRequest(50, 0, false), 'colorControl', {} as any, rgbEndpoint);
+    await wait(600);
+    expect(loggerLogSpy).toHaveBeenCalledWith(
+      LogLevel.INFO,
+      `${db}Sent command ${hk}Rgb${db}:${hk}rgb:0${db}:${hk}ColorRGB(${YELLOW}153${hk}, ${YELLOW}103${hk}, ${YELLOW}109${hk})${db} to shelly device ${idn}${shellyPlusRgbwPm.id}${rs}${db}`,
+    );
+    expect(fetch).toHaveBeenCalledWith(shellyPlusRgbwPm.shelly, shellyPlusRgbwPm.log, shellyPlusRgbwPm.host, 'Rgb.Set', { id: 0, rgb: [153, 103, 109] });
+
+    await rgbEndpoint.executeCommandHandler('moveToColor', getMoveToColorRequest(16384, 16384, 0, false), 'colorControl', {} as any, rgbEndpoint);
+    expect(loggerLogSpy).toHaveBeenCalledWith(
+      LogLevel.INFO,
+      `${db}Sent command ${hk}Rgb${db}:${hk}rgb:0${db}:${hk}ColorRGB(${YELLOW}171${hk}, ${YELLOW}191${hk}, ${YELLOW}255${hk})${db} to shelly device ${idn}${shellyPlusRgbwPm.id}${rs}${db}`,
+    );
+    expect(fetch).toHaveBeenCalledWith(shellyPlusRgbwPm.shelly, shellyPlusRgbwPm.log, shellyPlusRgbwPm.host, 'Rgb.Set', { id: 0, rgb: [171, 191, 255] });
+
     fetch.mockRestore();
+
+    // Test Sys component update and event handlers
+    const sysComponent = shellyPlusRgbwPm.getComponent('sys');
+    expect(sysComponent).toBeDefined();
+    if (!sysComponent) return;
+
+    loggerLogSpy.mockClear();
+    sysComponent.emit('update', 'sys', 'cfg_rev', 45);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.NOTICE, expect.stringContaining('sent config changed rev:'));
+    expect(shellyPlatform.changedDevices.has(shellyPlusRgbwPm.id)).toBe(true);
+
+    loggerLogSpy.mockClear();
+    sysComponent.emit('event', 'sys', 'component_added', { component: 'sys', event: 'component_added', ts: 0, target: 'switch:2' } as ShellyEvent);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.NOTICE, expect.stringContaining('added a component:'));
+
+    loggerLogSpy.mockClear();
+    sysComponent.emit('event', 'sys', 'component_removed', { component: 'sys', event: 'component_removed', ts: 0, target: 'switch:2' } as ShellyEvent);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.NOTICE, expect.stringContaining('removed a component:'));
+
+    loggerLogSpy.mockClear();
+    sysComponent.emit('event', 'sys', 'scheduled_restart', { component: 'sys', event: 'scheduled_restart', ts: 0, time_ms: 5000 } as ShellyEvent);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.NOTICE, expect.stringContaining('is restarting in'));
+
+    loggerLogSpy.mockClear();
+    sysComponent.emit('event', 'sys', 'config_changed', { component: 'sys', event: 'config_changed', ts: 0, cfg_rev: 45 } as ShellyEvent);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.NOTICE, expect.stringContaining('sent config changed rev:'));
+
+    loggerLogSpy.mockClear();
+    sysComponent.emit('event', 'sys', 'ota_begin', { component: 'sys', event: 'ota_begin', ts: 0 } as ShellyEvent);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.NOTICE, expect.stringContaining('is starting OTA'));
+
+    loggerLogSpy.mockClear();
+    sysComponent.emit('event', 'sys', 'ota_progress', { component: 'sys', event: 'ota_progress', ts: 0, progress_percent: 50 } as ShellyEvent);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.NOTICE, expect.stringContaining('OTA is progressing:'));
+
+    loggerLogSpy.mockClear();
+    sysComponent.emit('event', 'sys', 'ota_success', { component: 'sys', event: 'ota_success', ts: 0 } as ShellyEvent);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.NOTICE, expect.stringContaining('finished succesfully OTA'));
+
+    loggerLogSpy.mockClear();
+    sysComponent.emit('event', 'sys', 'sleep', { component: 'sys', event: 'sleep', ts: 0 } as ShellyEvent);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, expect.stringContaining('is sleeping'));
+
+    await shellyPlatform.onConfigure();
 
     cleanup();
     shellyPlusRgbwPm.destroy();
@@ -958,6 +1046,9 @@ describe('ShellyPlatform', () => {
 
     loggerLogSpy.mockClear();
 
+    await coverEndpoint.executeCommandHandler('identify', { identifyTime: 0 }, 'identify', {} as any, coverEndpoint);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, expect.stringContaining('Identify command received for endpoint'));
+
     await coverEndpoint.executeCommandHandler('downOrClose', {}, 'windowCovering', {} as any, coverEndpoint);
     expect(loggerLogSpy).toHaveBeenCalledWith(
       LogLevel.INFO,
@@ -986,7 +1077,38 @@ describe('ShellyPlatform', () => {
     );
     expect(fetch).toHaveBeenCalledWith(shelly2PMGen3.shelly, shelly2PMGen3.log, shelly2PMGen3.host, 'Cover.GoToPosition', { id: 0, pos: 50 });
 
+    await coverEndpoint.executeCommandHandler('goToLiftPercentage', { liftPercent100thsValue: 0 }, 'windowCovering', {} as any, coverEndpoint);
+    expect(loggerLogSpy).toHaveBeenCalledWith(
+      LogLevel.INFO,
+      `${db}Sent command ${hk}Cover${db}:${hk}cover:0${db}:${hk}Open()${db} to shelly device ${idn}${shelly2PMGen3.id}${rs}${db}`,
+    );
+    expect(fetch).toHaveBeenCalledWith(shelly2PMGen3.shelly, shelly2PMGen3.log, shelly2PMGen3.host, 'Cover.Open', { id: 0 });
+
+    await coverEndpoint.executeCommandHandler('goToLiftPercentage', { liftPercent100thsValue: 10000 }, 'windowCovering', {} as any, coverEndpoint);
+    expect(loggerLogSpy).toHaveBeenCalledWith(
+      LogLevel.INFO,
+      `${db}Sent command ${hk}Cover${db}:${hk}cover:0${db}:${hk}Close()${db} to shelly device ${idn}${shelly2PMGen3.id}${rs}${db}`,
+    );
+    expect(fetch).toHaveBeenCalledWith(shelly2PMGen3.shelly, shelly2PMGen3.log, shelly2PMGen3.host, 'Cover.Close', { id: 0 });
+
     fetch.mockRestore();
+
+    // Test cover:0 component electrical update events
+    const coverComponent = shelly2PMGen3.getComponent('cover:0');
+    expect(coverComponent).toBeDefined();
+    if (!coverComponent) return;
+
+    coverComponent.emit('update', 'cover:0', 'apower', 12.85);
+    coverComponent.emit('update', 'cover:0', 'voltage', 233.8);
+    coverComponent.emit('update', 'cover:0', 'current', 1.5);
+    coverComponent.emit('update', 'cover:0', 'aenergy', { total: 55.774 } as ShellyData);
+    await wait(100);
+    expect(coverEndpoint.getAttribute('ElectricalPowerMeasurement', 'activePower')).toBe(12850);
+    expect(coverEndpoint.getAttribute('ElectricalPowerMeasurement', 'voltage')).toBe(233800);
+    expect(coverEndpoint.getAttribute('ElectricalPowerMeasurement', 'activeCurrent')).toBe(1500);
+    expect(coverEndpoint.getAttribute('ElectricalEnergyMeasurement', 'cumulativeEnergyImported')?.energy).toBe(55774);
+
+    await shellyPlatform.onConfigure();
 
     cleanup();
     shelly2PMGen3.destroy();
@@ -1052,6 +1174,260 @@ describe('ShellyPlatform', () => {
   it('should call onChangeLoggerLevel and log a partial message', async () => {
     await shellyPlatform.onChangeLoggerLevel(LogLevel.DEBUG);
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`Changing logger level for platform ${idn}${mockConfig.name}${rs}`));
+  });
+
+  it('should call onAction', async () => {
+    // scanNetwork path
+    const sendQuerySpy = jest.spyOn(shelly.mdnsScanner, 'sendQuery').mockImplementation(() => {});
+    loggerLogSpy.mockClear();
+    await shellyPlatform.onAction('scanNetwork');
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Scanning the network for Shelly devices`);
+    expect(sendQuerySpy).toHaveBeenCalledTimes(1);
+    sendQuerySpy.mockRestore();
+
+    // addDevice with invalid IP
+    loggerLogSpy.mockClear();
+    await shellyPlatform.onAction('addDevice', 'not-an-ip');
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.ERROR, `Failed to add device on IP address not-an-ip. Please check the IP address.`);
+
+    // addDevice with valid IP but ShellyDevice.create returns undefined
+    const createSpy = jest.spyOn(ShellyDevice, 'create' as any).mockResolvedValue(undefined);
+    loggerLogSpy.mockClear();
+    await shellyPlatform.onAction('addDevice', '192.168.1.100');
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Adding device on IP address ${zb}192.168.1.100${nf}`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.ERROR, expect.stringContaining('Failed to add device on IP address'));
+
+    // addDevice with valid IP and ShellyDevice.create returns a device (strips url prefix/suffix)
+    const mockDevice = { id: 'shellymock-AABBCCDD', host: '192.168.1.100', gen: 2, destroy: jest.fn() };
+    createSpy.mockResolvedValue(mockDevice as any);
+    const addDeviceSpy = jest.spyOn(shellyPlatform as any, 'addDevice').mockResolvedValue(undefined);
+    loggerLogSpy.mockClear();
+    await shellyPlatform.onAction('addDevice', 'http://192.168.1.100/');
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Adding device on IP address ${zb}192.168.1.100${nf}`);
+    expect(shellyPlatform.storedDevices.has('shellymock-AABBCCDD')).toBe(true);
+    expect(mockDevice.destroy).toHaveBeenCalled();
+    createSpy.mockRestore();
+    addDeviceSpy.mockRestore();
+    shellyPlatform.storedDevices.delete('shellymock-AABBCCDD');
+
+    // removeDevice for an ID only in storedDevices (not in shelly)
+    shellyPlatform.storedDevices.set('shellydevice-AABBCC', { id: 'shellydevice-AABBCC', host: '10.0.0.1', port: 80, gen: 2 });
+    loggerLogSpy.mockClear();
+    await shellyPlatform.onAction('removeDevice', 'shellydevice-AABBCC');
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Removing device id ${hk}shellydevice-AABBCC${nf}`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Removed device id ${hk}shellydevice-AABBCC${nf}`);
+    expect(shellyPlatform.storedDevices.has('shellydevice-AABBCC')).toBe(false);
+
+    // removeDevice for an ID that IS in shelly (still in use)
+    const fakeDevice = { id: 'shellydevice-CCDDEE', host: '10.0.0.2', gen: 2, destroy: jest.fn() };
+    (shelly as any)._devices.set('shellydevice-CCDDEE', fakeDevice);
+    shellyPlatform.storedDevices.set('shellydevice-CCDDEE', { id: 'shellydevice-CCDDEE', host: '10.0.0.2', port: 80, gen: 2 });
+    loggerLogSpy.mockClear();
+    await shellyPlatform.onAction('removeDevice', 'shellydevice-CCDDEE');
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.WARN, expect.stringContaining(`Removing device id ${hk}shellydevice-CCDDEE${wr} while it is still in use`));
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Removed device id ${hk}shellydevice-CCDDEE${nf}`);
+    expect(shellyPlatform.storedDevices.has('shellydevice-CCDDEE')).toBe(false);
+    expect(fakeDevice.destroy).toHaveBeenCalled();
+  });
+
+  it('should call hasElectricalMeasurements', () => {
+    const noProps = { hasProperty: () => false } as any;
+    const hasVoltage = { hasProperty: (k: string) => k === 'voltage' } as any;
+    const hasCurrent = { hasProperty: (k: string) => k === 'current' } as any;
+    const hasPower = { hasProperty: (k: string) => k === 'apower' } as any;
+    const hasEnergy = { hasProperty: (k: string) => k === 'aenergy' } as any;
+
+    // entityBlackList contains 'PowerMeter' → always false
+    mockConfig.entityBlackList = ['PowerMeter'];
+    expect((shellyPlatform as any).hasElectricalMeasurements(undefined, noProps)).toBe(false);
+    expect((shellyPlatform as any).hasElectricalMeasurements(undefined, hasVoltage)).toBe(false);
+    mockConfig.entityBlackList = [];
+
+    // component has an electrical property → true
+    expect((shellyPlatform as any).hasElectricalMeasurements(undefined, hasVoltage)).toBe(true);
+    expect((shellyPlatform as any).hasElectricalMeasurements(undefined, hasCurrent)).toBe(true);
+    expect((shellyPlatform as any).hasElectricalMeasurements(undefined, hasPower)).toBe(true);
+    expect((shellyPlatform as any).hasElectricalMeasurements(undefined, hasEnergy)).toBe(true);
+
+    // component has no electrical properties → false
+    expect((shellyPlatform as any).hasElectricalMeasurements(undefined, noProps)).toBe(false);
+  });
+
+  it('should call addElectricalMeasurements', () => {
+    const makeEndpoint = () =>
+      ({
+        createDefaultPowerTopologyClusterServer: jest.fn().mockReturnThis(),
+        createDefaultElectricalPowerMeasurementClusterServer: jest.fn().mockReturnThis(),
+        createDefaultElectricalEnergyMeasurementClusterServer: jest.fn().mockReturnThis(),
+        name: 'test-endpoint',
+      }) as any;
+    const mockShelly = { id: 'shelly-test-001', log: { debug: jest.fn() } } as any;
+    const hasVoltage = { hasProperty: (k: string) => k === 'voltage' } as any;
+    const noProps = { hasProperty: () => false } as any;
+
+    // entityBlackList contains 'PowerMeter' → validateEntity returns false → early return
+    mockConfig.entityBlackList = ['PowerMeter'];
+    const ep1 = makeEndpoint();
+    (shellyPlatform as any).addElectricalMeasurements({} as any, ep1, mockShelly, hasVoltage);
+    expect(ep1.createDefaultPowerTopologyClusterServer).not.toHaveBeenCalled();
+    mockConfig.entityBlackList = [];
+
+    // component has electrical property + validateEntity passes → adds 3 cluster servers
+    const ep2 = makeEndpoint();
+    (shellyPlatform as any).addElectricalMeasurements({} as any, ep2, mockShelly, hasVoltage);
+    expect(ep2.createDefaultPowerTopologyClusterServer).toHaveBeenCalled();
+    expect(ep2.createDefaultElectricalPowerMeasurementClusterServer).toHaveBeenCalled();
+    expect(ep2.createDefaultElectricalEnergyMeasurementClusterServer).toHaveBeenCalled();
+
+    // component has no electrical properties → clusters not added
+    const ep3 = makeEndpoint();
+    (shellyPlatform as any).addElectricalMeasurements({} as any, ep3, mockShelly, noProps);
+    expect(ep3.createDefaultPowerTopologyClusterServer).not.toHaveBeenCalled();
+  });
+
+  it('should call saveStoredDevices', async () => {
+    // nodeStorage not initialized → false + error log
+    const originalNodeStorage = (shellyPlatform as any).nodeStorage;
+    (shellyPlatform as any).nodeStorage = undefined;
+    loggerLogSpy.mockClear();
+    expect(await (shellyPlatform as any).saveStoredDevices()).toBe(false);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.ERROR, 'NodeStorage is not initialized');
+    (shellyPlatform as any).nodeStorage = originalNodeStorage;
+
+    // nodeStorage initialized → true
+    expect(await (shellyPlatform as any).saveStoredDevices()).toBe(true);
+  });
+
+  it('should call loadStoredDevices', async () => {
+    // nodeStorage not initialized → false + error log
+    const originalNodeStorage = (shellyPlatform as any).nodeStorage;
+    (shellyPlatform as any).nodeStorage = undefined;
+    loggerLogSpy.mockClear();
+    expect(await (shellyPlatform as any).loadStoredDevices()).toBe(false);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.ERROR, 'NodeStorage is not initialized');
+    (shellyPlatform as any).nodeStorage = originalNodeStorage;
+
+    // nodeStorage initialized → true
+    expect(await (shellyPlatform as any).loadStoredDevices()).toBe(true);
+  });
+
+  it('should call addDevice', async () => {
+    // Path 1: device already added → info log + return undefined
+    (shelly as any)._devices.set('shellytest-ALREADY', { id: 'shellytest-ALREADY', host: '10.0.0.10' });
+    loggerLogSpy.mockClear();
+    expect(await (shellyPlatform as any).addDevice('shellytest-ALREADY', '10.0.0.10')).toBeUndefined();
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, expect.stringContaining('already added'));
+    (shelly as any)._devices.delete('shellytest-ALREADY');
+
+    const createSpy = jest.spyOn(ShellyDevice, 'create' as any).mockResolvedValue(undefined);
+    const shellyAddSpy = jest.spyOn(shelly, 'addDevice').mockResolvedValue(shelly as any);
+    const cacheDir = path.join(matterbridge.matterbridgePluginDirectory, 'matterbridge-shelly');
+    fs.mkdirSync(cacheDir, { recursive: true });
+
+    // Path 2: loadFromCache=true, cache file exists → device loaded from cache, setHost/cached/online set
+    const cacheFilePath = path.join(cacheDir, 'shellytest-CACHE.json');
+    fs.writeFileSync(cacheFilePath, '{}');
+    const cacheDevice = {
+      id: 'shellytest-CACHE',
+      host: '10.0.0.11',
+      name: 'Cache Dev',
+      mac: 'AA:BB:CC',
+      gen: 2,
+      setHost: jest.fn(),
+      destroy: jest.fn(),
+      cached: false,
+      online: false,
+      log: { logName: '' },
+    } as any;
+    createSpy.mockResolvedValue(cacheDevice);
+    loggerLogSpy.mockClear();
+    expect(await (shellyPlatform as any).addDevice('shellytest-CACHE', '10.0.0.11')).toBe(cacheDevice);
+    expect(cacheDevice.setHost).toHaveBeenCalledWith('10.0.0.11');
+    expect(cacheDevice.cached).toBe(true);
+    expect(cacheDevice.online).toBe(true);
+    expect(shellyAddSpy).toHaveBeenCalledWith(cacheDevice);
+    shellyAddSpy.mockClear();
+    fs.unlinkSync(cacheFilePath);
+
+    // Use nocacheList so loadFromCache=false for the remaining paths
+    mockConfig.nocacheList = ['shellytest-GOOD', 'shellytest-FAIL', 'shellytest-FALLBACK', 'shellytest-BLACK'];
+
+    // Path 3: create from host succeeds → saveDevicePayloads called + shelly.addDevice called
+    const goodDevice = {
+      id: 'shellytest-GOOD',
+      host: '10.0.0.12',
+      name: 'Good Dev',
+      mac: 'DD:EE:FF',
+      gen: 2,
+      setHost: jest.fn(),
+      destroy: jest.fn(),
+      saveDevicePayloads: jest.fn(),
+      cached: false,
+      online: false,
+      log: { logName: '' },
+    } as any;
+    createSpy.mockResolvedValue(goodDevice);
+    loggerLogSpy.mockClear();
+    expect(await (shellyPlatform as any).addDevice('shellytest-GOOD', '10.0.0.12')).toBe(goodDevice);
+    expect(goodDevice.saveDevicePayloads).toHaveBeenCalled();
+    expect(shellyAddSpy).toHaveBeenCalledWith(goodDevice);
+    shellyAddSpy.mockClear();
+
+    // Path 4: create from host fails, no fallback cache file → error log + return undefined
+    createSpy.mockResolvedValue(undefined);
+    loggerLogSpy.mockClear();
+    expect(await (shellyPlatform as any).addDevice('shellytest-FAIL', '10.0.0.13')).toBeUndefined();
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.ERROR, expect.stringContaining('Failed to create Shelly device'));
+
+    // Path 5: create from host fails, fallback cache file exists → device loaded from cache, setHost/cached/online set
+    const fallbackFilePath = path.join(cacheDir, 'shellytest-FALLBACK.json');
+    fs.writeFileSync(fallbackFilePath, '{}');
+    const fallbackDevice = {
+      id: 'shellytest-FALLBACK',
+      host: '10.0.0.14',
+      name: 'Fallback Dev',
+      mac: 'GG:HH:II',
+      gen: 2,
+      setHost: jest.fn(),
+      destroy: jest.fn(),
+      cached: false,
+      online: false,
+      log: { logName: '' },
+    } as any;
+    createSpy.mockResolvedValueOnce(undefined).mockResolvedValue(fallbackDevice);
+    loggerLogSpy.mockClear();
+    expect(await (shellyPlatform as any).addDevice('shellytest-FALLBACK', '10.0.0.14')).toBe(fallbackDevice);
+    expect(fallbackDevice.setHost).toHaveBeenCalledWith('10.0.0.14');
+    expect(fallbackDevice.cached).toBe(true);
+    expect(fallbackDevice.online).toBe(true);
+    expect(shellyAddSpy).toHaveBeenCalledWith(fallbackDevice);
+    shellyAddSpy.mockClear();
+    fs.unlinkSync(fallbackFilePath);
+
+    // Path 6: validateDevice fails (blacklisted) → device.destroy() called + return undefined
+    const blacklistedDevice = {
+      id: 'shellytest-BLACK',
+      host: '10.0.0.15',
+      name: 'Black Dev',
+      mac: 'JJ:KK:LL',
+      gen: 2,
+      setHost: jest.fn(),
+      destroy: jest.fn(),
+      saveDevicePayloads: jest.fn(),
+      cached: false,
+      online: false,
+      log: { logName: '' },
+    } as any;
+    createSpy.mockResolvedValue(blacklistedDevice);
+    mockConfig.blackList = ['shellytest-BLACK'];
+    loggerLogSpy.mockClear();
+    expect(await (shellyPlatform as any).addDevice('shellytest-BLACK', '10.0.0.15')).toBeUndefined();
+    expect(blacklistedDevice.destroy).toHaveBeenCalled();
+    mockConfig.blackList = [];
+
+    mockConfig.nocacheList = [];
+    createSpy.mockRestore();
+    shellyAddSpy.mockRestore();
   });
 
   it('should call onShutdown with reason', async () => {

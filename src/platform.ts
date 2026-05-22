@@ -593,7 +593,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         } else {
           this.gatewayDevices.delete(device.id);
         }
-      }
+      } // End of scan the device for paired BLU devices
 
       // Validate the device again to check if the device is a BLU gateway that has been added only to discover BLU devices
       if (!this.validateDevice([device.id, device.mac, device.name])) return;
@@ -610,7 +610,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         0xfff1,
         'Shelly',
         device.model,
-        1, // Number(device.firmware.split('.')[0]),
+        1,
         device.firmware,
       );
       // Set the device in the selectDevice map for the frontend device selection
@@ -681,7 +681,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       // Scan the device components
       for (const [key, component] of device) {
         // Set selectDevice entities for the device. The setSelectDevice has already been added in addDevice.
-        if (!['ble', 'cloud', 'coiot', 'mqtt', 'sys', 'sntp', 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws', 'eth'].includes(component.id)) {
+        if (!['ble', 'cloud', 'coiot', 'matter', 'zigbee', 'mqtt', 'sys', 'sntp', 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws', 'eth'].includes(component.id)) {
           this.setSelectDeviceEntity(device.id, component.name, 'All the device ' + component.name + ' components', 'component');
           this.setSelectDeviceEntity(device.id, component.id, 'Device ' + component.id + ' component', 'component');
         }
@@ -795,14 +795,6 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           if (deviceType.code === dimmableLight.code || deviceType.code === colorTemperatureLight.code || deviceType.code === extendedColorLight.code) {
             child.createDefaultLevelControlClusterServer();
           }
-          /*
-          if (deviceType.code === colorTemperatureLight.code) {
-            if (component.hasProperty('temp') && component.hasProperty('mode')) child.createHsColorControlClusterServer();
-            else if (component.hasProperty('temp') && !component.hasProperty('mode')) child.createCtColorControlClusterServer();
-            else if (component.hasProperty('ct')) child.createCtColorControlClusterServer();
-            else child.createHsColorControlClusterServer();
-          }
-          */
           if (deviceType.code === colorTemperatureLight.code) {
             child.createCtColorControlClusterServer();
           }
@@ -888,7 +880,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             key,
             this.hasElectricalMeasurements(device, component) && this.validateEntity(device.id, 'PowerMeter') ? [deviceType, electricalSensor] : [deviceType],
             tagList ? { tagList } : undefined,
-            config.debug as boolean,
+            config.debug,
           );
           child.log.logName = `${device.name} ${key}`;
           child.createDefaultIdentifyClusterServer();
