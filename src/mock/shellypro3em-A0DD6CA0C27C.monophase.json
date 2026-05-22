@@ -6,12 +6,13 @@
     "slot": 1,
     "model": "SPEM-003CEBEU",
     "gen": 2,
-    "fw_id": "20250520-083714/1.6.2-gc8a76e2",
-    "ver": "1.6.2",
+    "fw_id": "20260311-095913/1.7.5-g9979d16",
+    "ver": "1.7.5",
     "app": "Pro3EM",
     "auth_en": false,
     "auth_domain": null,
-    "profile": "monophase"
+    "profile": "monophase",
+    "provision": "complete"
   },
   "settings": {
     "ble": {
@@ -75,7 +76,7 @@
       "device": {
         "name": "3EM Pro",
         "mac": "A0DD6CA0C27C",
-        "fw_id": "20250520-083714/1.6.2-gc8a76e2",
+        "fw_id": "20260311-095913/1.7.5-g9979d16",
         "discoverable": true,
         "eco_mode": false,
         "profile": "monophase",
@@ -104,7 +105,7 @@
       "sntp": {
         "server": "time.cloudflare.com"
       },
-      "cfg_rev": 27
+      "cfg_rev": 32
     },
     "temperature:0": {
       "id": 0,
@@ -182,11 +183,11 @@
     },
     "em1:2": {
       "id": 2,
-      "voltage": 227.9,
-      "current": 0.07,
-      "act_power": 6.9,
-      "aprt_power": 15.9,
-      "pf": 0.45,
+      "voltage": 234.5,
+      "current": 0.068,
+      "act_power": 6.5,
+      "aprt_power": 16,
+      "pf": 0.41,
       "freq": 50,
       "calibration": "factory"
     },
@@ -202,7 +203,7 @@
     },
     "em1data:2": {
       "id": 2,
-      "total_act_energy": 2729.39,
+      "total_act_energy": 0.15,
       "total_act_ret_energy": 0
     },
     "eth": {
@@ -216,23 +217,23 @@
     "sys": {
       "mac": "A0DD6CA0C27C",
       "restart_required": false,
-      "time": "14:03",
-      "unixtime": 1752840234,
-      "last_sync_ts": 1752839192,
-      "uptime": 1391451,
-      "ram_size": 247660,
-      "ram_free": 118940,
-      "ram_min_free": 81012,
+      "time": "13:47",
+      "unixtime": 1779364023,
+      "last_sync_ts": 1779363947,
+      "uptime": 84,
+      "ram_size": 244408,
+      "ram_free": 114484,
+      "ram_min_free": 102352,
       "fs_size": 524288,
-      "fs_free": 184320,
-      "cfg_rev": 27,
+      "fs_free": 192512,
+      "cfg_rev": 32,
       "kvs_rev": 0,
-      "schedule_rev": 6,
-      "webhook_rev": 5,
+      "schedule_rev": 9,
+      "webhook_rev": 7,
       "btrelay_rev": 0,
       "available_updates": {
         "beta": {
-          "version": "1.7.0-beta3"
+          "version": "2.0.0-beta2"
         }
       },
       "reset_reason": 3,
@@ -240,22 +241,23 @@
     },
     "temperature:0": {
       "id": 0,
-      "tC": 48.2,
-      "tF": 118.7
+      "tC": 49.6,
+      "tF": 121.2
     },
     "wifi": {
-      "sta_ip": "192.168.68.93",
+      "sta_ip": "192.168.68.64",
       "status": "got ip",
       "ssid": "",
-      "rssi": -59,
-      "sta_ip6": ["fe80::a2dd:6cff:fea0:c27c", "fd78:cbf8:4939:746:a2dd:6cff:fea0:c27c"]
+      "bssid": "20:23:51:59:e7:ac",
+      "rssi": -65,
+      "sta_ip6": ["fe80::a2dd:6cff:fea0:c27c", "fd78:cbf8:4939:46e2:a2dd:6cff:fea0:c27c"]
     },
     "ws": {
       "connected": false
     }
   },
   "components": [],
-  "cfg_rev": 27,
+  "cfg_rev": 32,
   "offset": 0,
   "total": 0
 }

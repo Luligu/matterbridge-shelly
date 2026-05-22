@@ -3,29 +3,38 @@
     "name": "PlugSG3 Gen3",
     "id": "shellyplugsg3-8cbfeaa133f0",
     "mac": "8CBFEAA133F0",
-    "slot": 1,
+    "slot": 0,
     "model": "S3PL-00112EU",
     "gen": 3,
-    "fw_id": "20240820-134301/1.2.3-plugsg3prod0-gec79607",
-    "ver": "1.2.3-matter22",
+    "fw_id": "20260311-095902/1.7.5-g9979d16",
+    "ver": "1.7.5",
     "app": "PlugSG3",
     "auth_en": false,
     "auth_domain": null,
-    "matter": true
+    "matter": false,
+    "provision": "complete"
   },
   "settings": {
     "ble": {
       "enable": false,
       "rpc": {
         "enable": false
-      },
-      "observer": {
-        "enable": false
       }
     },
+    "bthome": {},
     "cloud": {
       "enable": true,
       "server": "shelly-103-eu.shelly.cloud:6022/jrpc"
+    },
+    "knx": {
+      "enable": false,
+      "ia": "15.15.255",
+      "routing": {
+        "addr": "224.0.23.12:3671"
+      }
+    },
+    "matter": {
+      "enable": false
     },
     "mqtt": {
       "enable": false,
@@ -81,15 +90,16 @@
       "power_limit": 2500,
       "voltage_limit": 280,
       "autorecover_voltage_errors": false,
-      "current_limit": 12
+      "current_limit": 12,
+      "reverse": false
     },
     "sys": {
       "device": {
         "name": "PlugSG3 Gen3",
         "mac": "8CBFEAA133F0",
-        "fw_id": "20240820-134301/1.2.3-plugsg3prod0-gec79607",
+        "fw_id": "20260311-095902/1.7.5-g9979d16",
         "discoverable": true,
-        "eco_mode": true
+        "eco_mode": false
       },
       "location": null,
       "debug": {
@@ -111,9 +121,9 @@
         "listen_port": null
       },
       "sntp": {
-        "server": "time.google.com"
+        "server": "time.cloudflare.com"
       },
-      "cfg_rev": 24
+      "cfg_rev": 29
     },
     "wifi": {
       "ap": {
@@ -157,8 +167,16 @@
   },
   "status": {
     "ble": {},
+    "bthome": {
+      "errors": ["bluetooth_disabled"]
+    },
     "cloud": {
       "connected": true
+    },
+    "knx": {},
+    "matter": {
+      "num_fabrics": 0,
+      "commissionable": false
     },
     "mqtt": {
       "connected": false
@@ -169,57 +187,64 @@
       "source": "init",
       "output": true,
       "apower": 0,
-      "voltage": 234.7,
+      "voltage": 233.6,
       "freq": 50,
       "current": 0,
       "aenergy": {
         "total": 452,
         "by_minute": [0, 0, 0],
-        "minute_ts": 1752840000
+        "minute_ts": 1779361860
       },
       "ret_aenergy": {
         "total": 0,
         "by_minute": [0, 0, 0],
-        "minute_ts": 1752840000
+        "minute_ts": 1779361860
       },
       "temperature": {
-        "tC": 39.1,
-        "tF": 102.4
+        "tC": 42.3,
+        "tF": 108.1
       }
     },
     "sys": {
       "mac": "8CBFEAA133F0",
       "restart_required": false,
-      "time": "12:00",
-      "unixtime": 1752840044,
-      "uptime": 1401426,
-      "ram_size": 219816,
-      "ram_free": 114216,
-      "fs_size": 1048576,
-      "fs_free": 688128,
-      "cfg_rev": 24,
+      "time": "13:11",
+      "unixtime": 1779361884,
+      "last_sync_ts": 1779360590,
+      "uptime": 3631216,
+      "ram_size": 258860,
+      "ram_free": 120940,
+      "ram_min_free": 88052,
+      "fs_size": 917504,
+      "fs_free": 446464,
+      "cfg_rev": 29,
       "kvs_rev": 0,
       "schedule_rev": 1,
       "webhook_rev": 1,
+      "btrelay_rev": 0,
+      "bthc_rev": 0,
       "available_updates": {
         "beta": {
-          "version": "1.7.0-beta3"
+          "version": "2.0.0-beta1"
         }
       },
-      "reset_reason": 1
+      "reset_reason": 3,
+      "utc_offset": 7200
     },
     "wifi": {
-      "sta_ip": "192.168.68.59",
+      "sta_ip": "192.168.68.55",
       "status": "got ip",
       "ssid": "",
-      "rssi": -59
+      "bssid": "20:23:51:59:e7:ac",
+      "rssi": -52,
+      "sta_ip6": ["fe80::8ebf:eaff:fea1:33f0", "fd78:cbf8:4939:46e2:8ebf:eaff:fea1:33f0"]
     },
     "ws": {
       "connected": false
     }
   },
   "components": [],
-  "cfg_rev": 24,
+  "cfg_rev": 29,
   "offset": 0,
   "total": 0
 }

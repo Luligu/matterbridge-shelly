@@ -20,7 +20,7 @@
       "ttl": 4500,
       "class": "IN",
       "flush": true,
-      "data": ["app=WallDisplay", "gen=2", "ver=2.3.5", "discoverable=false"]
+      "data": ["app=WallDisplay", "gen=2", "ver=2.6.2", "discoverable=false"]
     },
     {
       "name": "_services._dns-sd._udp.local",
@@ -44,7 +44,7 @@
       "ttl": 4500,
       "class": "IN",
       "flush": true,
-      "data": ["app=WallDisplay", "gen=2", "ver=2.3.5", "discoverable=false"]
+      "data": ["app=WallDisplay", "gen=2", "ver=2.6.2", "discoverable=false"]
     },
     {
       "name": "_services._dns-sd._udp.local",
@@ -89,7 +89,7 @@
       }
     },
     {
-      "name": "167.1.168.192.in-addr.arpa",
+      "name": "54.68.168.192.in-addr.arpa",
       "type": "PTR",
       "ttl": 120,
       "class": "IN",
@@ -102,7 +102,7 @@
       "ttl": 120,
       "class": "IN",
       "flush": true,
-      "data": "192.168.1.167"
+      "data": "192.168.68.54"
     }
   ],
   "authorities": [],
@@ -130,13 +130,13 @@
       }
     },
     {
-      "name": "167.1.168.192.in-addr.arpa",
+      "name": "54.68.168.192.in-addr.arpa",
       "type": "NSEC",
       "ttl": 120,
       "class": "IN",
       "flush": true,
       "data": {
-        "nextDomain": "167.1.168.192.in-addr.arpa",
+        "nextDomain": "54.68.168.192.in-addr.arpa",
         "rrtypes": ["PTR"]
       }
     },

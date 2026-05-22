@@ -145,6 +145,57 @@
       "command": "node",
       "args": ["scripts/remove-workflows.mjs"],
       "problemMatcher": []
+    },
+    {
+      "label": "Test: Auth",
+      "type": "shell",
+      "command": "node",
+      "args": [
+        "--no-warnings",
+        "--experimental-vm-modules",
+        "node_modules/jest/bin/jest.js",
+        "--verbose",
+        "--coverage",
+        "--maxWorkers=100%",
+        "--collectCoverageFrom=src/auth.ts",
+        "auth.test.ts"
+      ],
+      "group": { "kind": "test", "isDefault": false },
+      "problemMatcher": []
+    },
+    {
+      "label": "Test: WsClient",
+      "type": "shell",
+      "command": "node",
+      "args": [
+        "--no-warnings",
+        "--experimental-vm-modules",
+        "node_modules/jest/bin/jest.js",
+        "--verbose",
+        "--coverage",
+        "--maxWorkers=100%",
+        "--collectCoverageFrom=src/wsClient.ts",
+        "wsClient.test.ts"
+      ],
+      "group": { "kind": "test", "isDefault": false },
+      "problemMatcher": []
+    },
+    {
+      "label": "Test: MdnsScanner",
+      "type": "shell",
+      "command": "node",
+      "args": [
+        "--no-warnings",
+        "--experimental-vm-modules",
+        "node_modules/jest/bin/jest.js",
+        "--verbose",
+        "--coverage",
+        "--maxWorkers=100%",
+        "--collectCoverageFrom=src/mdnsScanner.ts",
+        "mdnsScanner.test.ts"
+      ],
+      "group": { "kind": "test", "isDefault": false },
+      "problemMatcher": []
     }
   ]
 }

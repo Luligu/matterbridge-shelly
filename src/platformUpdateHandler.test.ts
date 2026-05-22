@@ -181,7 +181,8 @@ describe('ShellyPlatform', () => {
     { id: 'shellyplusplugs-E86BEAEAA000', host: '192.168.1.153', port: 80, gen: 2 },
     { id: 'shellyplusrgbwpm-A0A3B35C7024', host: '192.168.1.180', port: 80, gen: 2 },
     { id: 'shellyplusrgbwpm-ECC9FF4CEAF0', host: '192.168.1.171', port: 80, gen: 2 },
-    { id: 'shellyplussmoke-A0A3B3B8AE48', host: '192.168.68.164', port: 80, gen: 2 },
+    { id: 'shellyplussmoke-E08CFE8BD798', host: '192.168.68.164', port: 80, gen: 2 },
+    { id: 'shellyplus2pm-1C692044F140', host: '192.168.70.20', port: 80, gen: 2 },
 
     // Gen2 pro
     { id: 'shellypro1pm-EC6260927F7C', host: '192.168.68.56', port: 80, gen: 2 },
@@ -191,7 +192,6 @@ describe('ShellyPlatform', () => {
     { id: 'shellypro4pm-34987A67D7D0', host: '192.168.68.54', port: 80, gen: 2 },
     { id: 'shellyprodm1pm-34987A4957C4', host: '192.168.68.57', port: 80, gen: 2 },
     { id: 'shellyproem50-A0DD6CA09158', host: '192.168.70.24', port: 80, gen: 2 },
-
     { id: 'shellyprorgbwwpm-2CBCBBA78F00', host: '10.101.9.36', port: 80, gen: 2 },
     { id: 'shellyprorgbwwpm-AC1518784844', host: '192.168.70.24', port: 80, gen: 2 },
 
@@ -214,6 +214,10 @@ describe('ShellyPlatform', () => {
     { id: 'shelly1pmg4-A085E3BD0544', host: '192.168.70.3', port: 80, gen: 4 },
     { id: 'shelly1minig4-A085E3BB944C', host: '192.168.70.2', port: 80, gen: 4 },
     { id: 'shelly1pmminig4-CCBA97C64580', host: '192.168.70.4', port: 80, gen: 4 },
+    { id: 'shellyemminig4-D885ACEF41A8', host: '192.168.68.95', port: 80, gen: 4 },
+    { id: 'shelly2pmg4-98A316721128', host: '192.168.68.75', port: 80, gen: 4 },
+    { id: 'shellypstripg4-D885ACE52518', host: '192.168.68.93', port: 80, gen: 4 },
+    { id: 'shellyfloodg4-D885ACE9173C', host: '192.168.70.28', port: 80, gen: 4 },
   ];
 
   const debugDevice = '';
@@ -315,6 +319,19 @@ describe('ShellyPlatform', () => {
       });
     }
 
+    if (shellyId.id === 'shellyplussmoke-E08CFE8BD798') {
+      it(`should update alarm for shellyplussmoke`, async () => {
+        expect(device).not.toBeUndefined();
+        if (!device) return;
+        expect(endpoint).not.toBeUndefined();
+        if (!endpoint) return;
+        expect(device.getComponent('smoke:0')).not.toBeUndefined();
+        expect(endpoint.getChildEndpointByOriginalId('smoke:0')).not.toBeUndefined();
+        shellyUpdateHandler(shellyPlatform, endpoint, device, 'smoke:0', 'alarm', false);
+        shellyUpdateHandler(shellyPlatform, endpoint, device, 'smoke:0', 'alarm', true);
+      });
+    }
+
     if (shellyId.id === 'shellydw2-483FDA825476') {
       it(`should update lux and vibration for shellydw2`, async () => {
         expect(device).not.toBeUndefined();
@@ -403,6 +420,81 @@ describe('ShellyPlatform', () => {
         shellyUpdateHandler(shellyPlatform, endpoint, device, 'light:0', 'green', 128);
         shellyUpdateHandler(shellyPlatform, endpoint, device, 'light:0', 'blue', 128);
         await flushAsync(undefined, undefined, 50);
+      });
+    }
+
+    if (shellyId.id === 'shellyfloodg4-D885ACE9173C') {
+      it(`should update alarm for shellyfloodg4`, async () => {
+        expect(device).not.toBeUndefined();
+        if (!device) return;
+        expect(endpoint).not.toBeUndefined();
+        if (!endpoint) return;
+        expect(device.getComponent('flood:0')).not.toBeUndefined();
+        expect(endpoint.getChildEndpointByOriginalId('flood:0')).not.toBeUndefined();
+        shellyUpdateHandler(shellyPlatform, endpoint, device, 'flood:0', 'alarm', false);
+        shellyUpdateHandler(shellyPlatform, endpoint, device, 'flood:0', 'alarm', true);
+      });
+    }
+
+    if (shellyId.id === 'shellypstripg4-D885ACE52518') {
+      it(`should update power for shellypstripg4`, async () => {
+        expect(device).not.toBeUndefined();
+        if (!device) return;
+        expect(endpoint).not.toBeUndefined();
+        if (!endpoint) return;
+        expect(device.getComponent('switch:0')).not.toBeUndefined();
+        expect(endpoint.getChildEndpointByOriginalId('switch:0')).not.toBeUndefined();
+        shellyUpdateHandler(shellyPlatform, endpoint, device, 'switch:0', 'apower', 100);
+        shellyUpdateHandler(shellyPlatform, endpoint, device, 'switch:1', 'apower', 200);
+        shellyUpdateHandler(shellyPlatform, endpoint, device, 'switch:2', 'apower', 50);
+        shellyUpdateHandler(shellyPlatform, endpoint, device, 'switch:3', 'apower', 0);
+      });
+    }
+
+    if (shellyId.id === 'shellyemminig4-D885ACEF41A8') {
+      it(`should update power for shellyemminig4`, async () => {
+        expect(device).not.toBeUndefined();
+        if (!device) return;
+        expect(endpoint).not.toBeUndefined();
+        if (!endpoint) return;
+        expect(device.getComponent('em1:0')).not.toBeUndefined();
+        expect(endpoint.getChildEndpointByOriginalId('em1:0')).not.toBeUndefined();
+        shellyUpdateHandler(shellyPlatform, endpoint, device, 'em1:0', 'act_power', 100);
+        shellyUpdateHandler(shellyPlatform, endpoint, device, 'em1:0', 'voltage', 230);
+      });
+    }
+
+    if (shellyId.id === 'shellyplus2pm-1C692044F140') {
+      it(`should update cover for shellyplus2pm cover`, async () => {
+        expect(device).not.toBeUndefined();
+        if (!device) return;
+        expect(endpoint).not.toBeUndefined();
+        if (!endpoint) return;
+        expect(device.getComponent('cover:0')).not.toBeUndefined();
+        expect(endpoint.getChildEndpointByOriginalId('cover:0')).not.toBeUndefined();
+        device.coverUpdateTimeoutMs = 1; // Set shorter cover update timeout for testing
+        await endpoint.getChildEndpointByOriginalId('cover:0')?.setAttribute('WindowCovering', 'currentPositionLiftPercent100ths', 3000, shellyPlatform.log);
+        shellyUpdateHandler(shellyPlatform, endpoint, device, 'cover:0', 'state', 'stopped');
+        await flushAsync(undefined, undefined, 10);
+        shellyUpdateHandler(shellyPlatform, endpoint, device, 'cover:0', 'state', 'open');
+        shellyUpdateHandler(shellyPlatform, endpoint, device, 'cover:0', 'state', 'closed');
+        shellyUpdateHandler(shellyPlatform, endpoint, device, 'cover:0', 'state', 'opening');
+        shellyUpdateHandler(shellyPlatform, endpoint, device, 'cover:0', 'state', 'closing');
+        shellyUpdateHandler(shellyPlatform, endpoint, device, 'cover:0', 'current_pos', 50);
+        shellyUpdateHandler(shellyPlatform, endpoint, device, 'cover:0', 'target_pos', 50);
+      });
+    }
+
+    if (shellyId.id === 'shelly2pmg4-98A316721128') {
+      it(`should update power for shelly2pmg4`, async () => {
+        expect(device).not.toBeUndefined();
+        if (!device) return;
+        expect(endpoint).not.toBeUndefined();
+        if (!endpoint) return;
+        expect(device.getComponent('switch:0')).not.toBeUndefined();
+        expect(endpoint.getChildEndpointByOriginalId('switch:0')).not.toBeUndefined();
+        shellyUpdateHandler(shellyPlatform, endpoint, device, 'switch:0', 'apower', 100);
+        shellyUpdateHandler(shellyPlatform, endpoint, device, 'switch:1', 'apower', 200);
       });
     }
 

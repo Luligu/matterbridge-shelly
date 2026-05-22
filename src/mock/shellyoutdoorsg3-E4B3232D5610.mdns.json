@@ -1,0 +1,95 @@
+{
+  "id": 0,
+  "type": "response",
+  "flags": 1024,
+  "flag_qr": true,
+  "opcode": "QUERY",
+  "flag_aa": true,
+  "flag_tc": false,
+  "flag_rd": false,
+  "flag_ra": false,
+  "flag_z": false,
+  "flag_ad": false,
+  "flag_cd": false,
+  "rcode": "NOERROR",
+  "questions": [],
+  "answers": [
+    {
+      "name": "_http._tcp.local",
+      "type": "PTR",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": "shellyoutdoorsg3-e4b3232d5610._http._tcp.local"
+    },
+    {
+      "name": "_http._tcp.local",
+      "type": "PTR",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": "Outdoor PlugS Gen3._http._tcp.local"
+    }
+  ],
+  "authorities": [],
+  "additionals": [
+    {
+      "name": "shellyoutdoorsg3-e4b3232d5610._http._tcp.local",
+      "type": "SRV",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": {
+        "priority": 0,
+        "weight": 0,
+        "port": 80,
+        "target": "ShellyOutdoorSG3-E4B3232D5610.local"
+      }
+    },
+    {
+      "name": "shellyoutdoorsg3-e4b3232d5610._http._tcp.local",
+      "type": "TXT",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": ["gen=3"]
+    },
+    {
+      "name": "ShellyOutdoorSG3-E4B3232D5610.local",
+      "type": "A",
+      "ttl": 120,
+      "class": "IN",
+      "flush": true,
+      "data": "192.168.68.87"
+    },
+    {
+      "name": "Outdoor PlugS Gen3._http._tcp.local",
+      "type": "SRV",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": {
+        "priority": 0,
+        "weight": 0,
+        "port": 80,
+        "target": "Outdoor-PlugS-Gen3.local"
+      }
+    },
+    {
+      "name": "Outdoor PlugS Gen3._http._tcp.local",
+      "type": "TXT",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": ["gen=3", "app=OutdoorPlugSG3", "ver=1.7.5"]
+    },
+    {
+      "name": "Outdoor-PlugS-Gen3.local",
+      "type": "A",
+      "ttl": 120,
+      "class": "IN",
+      "flush": true,
+      "data": "192.168.68.87"
+    }
+  ]
+}

@@ -6,11 +6,12 @@
     "slot": 1,
     "model": "SPEM-002CEBEU50",
     "gen": 2,
-    "fw_id": "20250520-083725/1.6.2-gc8a76e2",
-    "ver": "1.6.2",
+    "fw_id": "20260311-095857/1.7.5-g9979d16",
+    "ver": "1.7.5",
     "app": "ProEM",
     "auth_en": false,
-    "auth_domain": null
+    "auth_domain": null,
+    "provision": "complete"
   },
   "settings": {
     "ble": {
@@ -76,7 +77,7 @@
       "device": {
         "name": "Breaker box PRO-EM50 I",
         "mac": "A0DD6CA09158",
-        "fw_id": "20250520-083725/1.6.2-gc8a76e2",
+        "fw_id": "20260311-095857/1.7.5-g9979d16",
         "discoverable": true,
         "eco_mode": false,
         "addon_type": null,
@@ -104,7 +105,7 @@
       "sntp": {
         "server": "time.cloudflare.com"
       },
-      "cfg_rev": 30
+      "cfg_rev": 34
     },
     "wifi": {
       "ap": {
@@ -156,18 +157,18 @@
     },
     "em1:0": {
       "id": 0,
-      "voltage": 231.8,
-      "current": 5.068,
-      "act_power": 1045.2,
-      "aprt_power": 1176.1,
-      "pf": 0.9,
+      "voltage": 232.9,
+      "current": 1.904,
+      "act_power": 231.9,
+      "aprt_power": 444.5,
+      "pf": 0.68,
       "freq": 50,
       "calibration": "factory"
     },
     "em1:1": {
       "id": 1,
-      "voltage": 231.8,
-      "current": 0.02,
+      "voltage": 233,
+      "current": 0,
       "act_power": 0,
       "aprt_power": 4.7,
       "pf": 0,
@@ -176,7 +177,7 @@
     },
     "em1data:0": {
       "id": 0,
-      "total_act_energy": 4577003.29,
+      "total_act_energy": 8797809.13,
       "total_act_ret_energy": 0
     },
     "em1data:1": {
@@ -197,30 +198,30 @@
       "source": "init",
       "output": false,
       "temperature": {
-        "tC": 41.2,
-        "tF": 106.2
+        "tC": 42.5,
+        "tF": 108.4
       }
     },
     "sys": {
       "mac": "A0DD6CA09158",
       "restart_required": false,
-      "time": "16:34",
-      "unixtime": 1752849292,
-      "last_sync_ts": 1752848362,
-      "uptime": 1401326,
-      "ram_size": 250024,
-      "ram_free": 121588,
-      "ram_min_free": 92060,
+      "time": "13:17",
+      "unixtime": 1779362274,
+      "last_sync_ts": 1779361395,
+      "uptime": 3631208,
+      "ram_size": 246764,
+      "ram_free": 117052,
+      "ram_min_free": 76160,
       "fs_size": 524288,
-      "fs_free": 192512,
-      "cfg_rev": 30,
+      "fs_free": 200704,
+      "cfg_rev": 34,
       "kvs_rev": 0,
       "schedule_rev": 1,
       "webhook_rev": 0,
       "btrelay_rev": 10,
       "available_updates": {
         "beta": {
-          "version": "1.7.0-beta3"
+          "version": "2.0.0-beta2"
         }
       },
       "reset_reason": 3,
@@ -230,15 +231,16 @@
       "sta_ip": "192.168.70.24",
       "status": "got ip",
       "ssid": "",
-      "rssi": -63,
-      "sta_ip6": ["fe80::a2dd:6cff:fea0:9158", "fd78:cbf8:4939:746:a2dd:6cff:fea0:9158"]
+      "bssid": "20:23:51:59:e7:ac",
+      "rssi": -64,
+      "sta_ip6": ["fe80::a2dd:6cff:fea0:9158", "fd78:cbf8:4939:46e2:a2dd:6cff:fea0:9158"]
     },
     "ws": {
       "connected": false
     }
   },
   "components": [],
-  "cfg_rev": 30,
+  "cfg_rev": 34,
   "offset": 0,
   "total": 0
 }

@@ -15,12 +15,12 @@
   "questions": [],
   "answers": [
     {
-      "name": "_http._tcp.local",
+      "name": "_shelly._tcp.local",
       "type": "PTR",
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": "shelly2pmg4-7c2c677a0110._http._tcp.local"
+      "data": "shellyplus2pm-1c692044f140._shelly._tcp.local"
     },
     {
       "name": "_shelly._tcp.local",
@@ -28,29 +28,13 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": "shelly2pmg4-7c2c677a0110._shelly._tcp.local"
-    },
-    {
-      "name": "_services._dns-sd._udp.local",
-      "type": "PTR",
-      "ttl": 120,
-      "class": "IN",
-      "flush": false,
-      "data": "_shelly._tcp.local"
-    },
-    {
-      "name": "_services._dns-sd._udp.local",
-      "type": "PTR",
-      "ttl": 120,
-      "class": "IN",
-      "flush": false,
-      "data": "_http._tcp.local"
+      "data": "Dining room Shutter._shelly._tcp.local"
     }
   ],
   "authorities": [],
   "additionals": [
     {
-      "name": "shelly2pmg4-7c2c677a0110._http._tcp.local",
+      "name": "shellyplus2pm-1c692044f140._shelly._tcp.local",
       "type": "SRV",
       "ttl": 120,
       "class": "IN",
@@ -59,27 +43,27 @@
         "priority": 0,
         "weight": 0,
         "port": 80,
-        "target": "Shelly2PMG4-7C2C677A0110.local"
+        "target": "ShellyPlus2PM-1C692044F140.local"
       }
     },
     {
-      "name": "shelly2pmg4-7c2c677a0110._http._tcp.local",
+      "name": "shellyplus2pm-1c692044f140._shelly._tcp.local",
       "type": "TXT",
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": ["gen=4"]
+      "data": ["gen=2", "app=Plus2PM", "ver=1.7.5"]
     },
     {
-      "name": "Shelly2PMG4-7C2C677A0110.local",
+      "name": "ShellyPlus2PM-1C692044F140.local",
       "type": "A",
       "ttl": 120,
       "class": "IN",
       "flush": true,
-      "data": "10.101.4.150"
+      "data": "192.168.70.20"
     },
     {
-      "name": "shelly2pmg4-7c2c677a0110._shelly._tcp.local",
+      "name": "Dining room Shutter._shelly._tcp.local",
       "type": "SRV",
       "ttl": 120,
       "class": "IN",
@@ -88,24 +72,24 @@
         "priority": 0,
         "weight": 0,
         "port": 80,
-        "target": "Shelly2PMG4-7C2C677A0110.local"
+        "target": "Dining-room-Shutter.local"
       }
     },
     {
-      "name": "shelly2pmg4-7c2c677a0110._shelly._tcp.local",
+      "name": "Dining room Shutter._shelly._tcp.local",
       "type": "TXT",
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": ["gen=4", "app=S2PMG4", "ver=1.4.99"]
+      "data": ["gen=2", "app=Plus2PM", "ver=1.7.5"]
     },
     {
-      "name": "Shelly2PMG4-7C2C677A0110.local",
+      "name": "Dining-room-Shutter.local",
       "type": "A",
       "ttl": 120,
       "class": "IN",
       "flush": true,
-      "data": "10.101.4.150"
+      "data": "192.168.70.20"
     }
   ]
 }

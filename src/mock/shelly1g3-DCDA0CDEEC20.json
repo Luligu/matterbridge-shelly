@@ -3,21 +3,22 @@
     "name": "1 Gen3 II",
     "id": "shelly1g3-dcda0cdeec20",
     "mac": "DCDA0CDEEC20",
-    "slot": 1,
+    "slot": 0,
     "model": "S3SW-001X16EU",
     "gen": 3,
-    "fw_id": "20250520-083742/1.6.2-gc8a76e2",
-    "ver": "1.6.2",
+    "fw_id": "20260311-095909/1.7.5-g9979d16",
+    "ver": "1.7.5",
     "app": "S1G3",
     "auth_en": false,
     "auth_domain": null,
-    "matter": false
+    "matter": false,
+    "provision": "complete"
   },
   "settings": {
     "ble": {
       "enable": true,
       "rpc": {
-        "enable": true
+        "enable": false
       }
     },
     "bthome": {},
@@ -79,7 +80,7 @@
       "device": {
         "name": "1 Gen3 II",
         "mac": "DCDA0CDEEC20",
-        "fw_id": "20250520-083742/1.6.2-gc8a76e2",
+        "fw_id": "20260311-095909/1.7.5-g9979d16",
         "discoverable": true,
         "eco_mode": false,
         "addon_type": "sensor"
@@ -106,7 +107,7 @@
       "sntp": {
         "server": "time.cloudflare.com"
       },
-      "cfg_rev": 26
+      "cfg_rev": 29
     },
     "temperature:100": {
       "id": 100,
@@ -184,61 +185,63 @@
     },
     "switch:0": {
       "id": 0,
-      "source": "HTTP_in",
+      "source": "init",
       "output": false,
       "temperature": {
-        "tC": 60.4,
-        "tF": 140.7
+        "tC": 58.4,
+        "tF": 137.1
       }
     },
     "sys": {
       "mac": "DCDA0CDEEC20",
       "restart_required": false,
-      "time": "13:59",
-      "unixtime": 1752839944,
-      "last_sync_ts": 1752839164,
-      "uptime": 1401672,
-      "ram_size": 249608,
-      "ram_free": 69152,
-      "ram_min_free": 45352,
-      "fs_size": 1048576,
-      "fs_free": 577536,
-      "cfg_rev": 26,
+      "time": "13:15",
+      "unixtime": 1779362124,
+      "last_sync_ts": 1779361673,
+      "uptime": 4949147,
+      "ram_size": 261316,
+      "ram_free": 82124,
+      "ram_min_free": 46044,
+      "fs_size": 917504,
+      "fs_free": 442368,
+      "cfg_rev": 29,
       "kvs_rev": 0,
-      "schedule_rev": 1,
+      "schedule_rev": 2,
       "webhook_rev": 0,
       "btrelay_rev": 22,
+      "bthc_rev": 0,
       "available_updates": {
         "beta": {
-          "version": "1.7.0-beta3"
+          "version": "2.0.0-beta1"
         }
       },
-      "reset_reason": 1,
+      "reset_reason": 3,
       "utc_offset": 7200
     },
     "temperature:100": {
       "id": 100,
-      "tC": 31.1,
-      "tF": 88
+      "tC": 29.2,
+      "tF": 84.5
     },
     "temperature:101": {
       "id": 101,
-      "tC": 28.9,
-      "tF": 84.1
+      "tC": 27.8,
+      "tF": 82.1
     },
     "wifi": {
       "sta_ip": "192.168.70.8",
       "status": "got ip",
       "ssid": "",
-      "rssi": -57,
-      "sta_ip6": ["fe80::deda:cff:fede:ec20", "fd78:cbf8:4939:746:deda:cff:fede:ec20"]
+      "bssid": "20:23:51:59:e7:ac",
+      "rssi": -56,
+      "sta_ip6": ["fe80::deda:cff:fede:ec20", "fd78:cbf8:4939:46e2:deda:cff:fede:ec20"]
     },
     "ws": {
       "connected": false
     }
   },
   "components": [],
-  "cfg_rev": 26,
+  "cfg_rev": 29,
   "offset": 0,
   "total": 0
 }

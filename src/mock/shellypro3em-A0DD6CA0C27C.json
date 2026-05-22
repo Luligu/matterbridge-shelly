@@ -6,12 +6,13 @@
     "slot": 1,
     "model": "SPEM-003CEBEU",
     "gen": 2,
-    "fw_id": "20250520-083714/1.6.2-gc8a76e2",
-    "ver": "1.6.2",
+    "fw_id": "20260311-095913/1.7.5-g9979d16",
+    "ver": "1.7.5",
     "app": "Pro3EM",
     "auth_en": false,
     "auth_domain": null,
-    "profile": "triphase"
+    "profile": "triphase",
+    "provision": "complete"
   },
   "settings": {
     "ble": {
@@ -64,7 +65,7 @@
       "device": {
         "name": "3EM Pro",
         "mac": "A0DD6CA0C27C",
-        "fw_id": "20250520-083714/1.6.2-gc8a76e2",
+        "fw_id": "20260311-095913/1.7.5-g9979d16",
         "discoverable": true,
         "eco_mode": false,
         "profile": "triphase",
@@ -93,7 +94,7 @@
       "sntp": {
         "server": "time.cloudflare.com"
       },
-      "cfg_rev": 28
+      "cfg_rev": 31
     },
     "temperature:0": {
       "id": 0,
@@ -151,7 +152,7 @@
     },
     "em:0": {
       "id": 0,
-      "a_current": 0.029,
+      "a_current": 0.028,
       "a_voltage": 0,
       "a_act_power": 0,
       "a_aprt_power": 0,
@@ -163,16 +164,16 @@
       "b_aprt_power": 0,
       "b_pf": 0,
       "b_freq": 0,
-      "c_current": 0.07,
-      "c_voltage": 233.5,
-      "c_act_power": 7.2,
-      "c_aprt_power": 16.3,
-      "c_pf": 0.44,
+      "c_current": 0.068,
+      "c_voltage": 232.7,
+      "c_act_power": 6.8,
+      "c_aprt_power": 15.9,
+      "c_pf": 0.42,
       "c_freq": 50,
       "n_current": null,
-      "total_current": 0.126,
-      "total_act_power": 7.183,
-      "total_aprt_power": 16.251,
+      "total_current": 0.123,
+      "total_act_power": 6.78,
+      "total_aprt_power": 15.881,
       "user_calibrated_phase": []
     },
     "emdata:0": {
@@ -181,9 +182,9 @@
       "a_total_act_ret_energy": 0,
       "b_total_act_energy": 0.01,
       "b_total_act_ret_energy": 0,
-      "c_total_act_energy": 11.83,
+      "c_total_act_energy": 45236.95,
       "c_total_act_ret_energy": 0,
-      "total_act": 11.85,
+      "total_act": 45236.97,
       "total_act_ret": 0
     },
     "eth": {
@@ -197,23 +198,23 @@
     "sys": {
       "mac": "A0DD6CA0C27C",
       "restart_required": false,
-      "time": "17:29",
-      "unixtime": 1752852590,
-      "last_sync_ts": 1752851857,
-      "uptime": 6091,
-      "ram_size": 247588,
-      "ram_free": 118152,
-      "ram_min_free": 96540,
+      "time": "13:19",
+      "unixtime": 1779362354,
+      "last_sync_ts": 1779362012,
+      "uptime": 3630829,
+      "ram_size": 244344,
+      "ram_free": 115368,
+      "ram_min_free": 78952,
       "fs_size": 524288,
-      "fs_free": 184320,
-      "cfg_rev": 28,
+      "fs_free": 188416,
+      "cfg_rev": 31,
       "kvs_rev": 0,
-      "schedule_rev": 7,
+      "schedule_rev": 8,
       "webhook_rev": 6,
       "btrelay_rev": 0,
       "available_updates": {
         "beta": {
-          "version": "1.7.0-beta3"
+          "version": "2.0.0-beta2"
         }
       },
       "reset_reason": 3,
@@ -221,22 +222,23 @@
     },
     "temperature:0": {
       "id": 0,
-      "tC": 48,
-      "tF": 118.3
+      "tC": 49.6,
+      "tF": 121.4
     },
     "wifi": {
-      "sta_ip": "192.168.68.93",
+      "sta_ip": "192.168.68.64",
       "status": "got ip",
       "ssid": "",
-      "rssi": -61,
-      "sta_ip6": ["fe80::a2dd:6cff:fea0:c27c", "fd78:cbf8:4939:746:a2dd:6cff:fea0:c27c"]
+      "bssid": "20:23:51:59:e7:ac",
+      "rssi": -56,
+      "sta_ip6": ["fe80::a2dd:6cff:fea0:c27c", "fd78:cbf8:4939:46e2:a2dd:6cff:fea0:c27c"]
     },
     "ws": {
       "connected": false
     }
   },
   "components": [],
-  "cfg_rev": 28,
+  "cfg_rev": 31,
   "offset": 0,
   "total": 0
 }

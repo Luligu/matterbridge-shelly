@@ -91,7 +91,7 @@ import {
 } from 'matterbridge/utils';
 
 import { DiscoveredDevice } from './mdnsScanner.js';
-import { shellyCoverCommandHandler, shellyIdentifyCommandHandler, shellyLightCommandHandler, shellySwitchCommandHandler } from './platformCommandHadlers.js';
+import { shellyCoverCommandHandler, shellyIdentifyCommandHandler, shellyLightCommandHandler, shellySwitchCommandHandler } from './platformCommandHandlers.js';
 import { shellyUpdateHandler } from './platformUpdateHandler.js';
 // Shelly imports
 import { Shelly } from './shelly.js';
@@ -160,7 +160,11 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
   private failsafeCountSeconds = 360;
   private firstRun = false;
 
-  constructor(matterbridge: PlatformMatterbridge, log: AnsiLogger, config: ShellyPlatformConfig) {
+  constructor(
+    matterbridge: PlatformMatterbridge,
+    log: AnsiLogger,
+    override config: ShellyPlatformConfig,
+  ) {
     super(matterbridge, log, config);
 
     // Verify that Matterbridge is the correct version
@@ -506,17 +510,26 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             }
             if (['single_push', 'double_push', 'long_push'].includes(event.event)) {
               let buttonEndpoint: MatterbridgeEndpoint | undefined;
-              if (bthomeDevice.model === 'Shelly BLU RC Button 4') {
+              if (bthomeDevice.model === 'Shelly BLU RC Button 4' || bthomeDevice.model === 'Shelly BLU RC Button 4 ZB') {
                 buttonEndpoint = blu.getChildEndpointByName('Button' + event.idx);
-              } else if (bthomeDevice.model === 'Shelly BLU Wall Switch 4') {
+              } else if (bthomeDevice.model === 'Shelly BLU Wall Switch 4' || bthomeDevice.model === 'Shelly BLU Wall Switch 4 ZB') {
                 buttonEndpoint = blu.getChildEndpointByName('Button' + event.idx);
-              } else if (bthomeDevice.model === 'Shelly BLU Button1') {
+              } else if (bthomeDevice.model === 'Shelly BLU Button1' || bthomeDevice.model === 'Shelly BLU Button Tough 1 ZB') {
                 buttonEndpoint = blu;
               } else {
                 buttonEndpoint = blu.getChildEndpointByName('Button');
               }
               if (!buttonEndpoint) {
-                if (['Shelly BLU Button1', 'Shelly BLU RC Button 4', 'Shelly BLU Wall Switch 4'].includes(bthomeDevice.model))
+                if (
+                  [
+                    'Shelly BLU Button1',
+                    'Shelly BLU Button Tough 1 ZB',
+                    'Shelly BLU RC Button 4',
+                    'Shelly BLU RC Button 4 ZB',
+                    'Shelly BLU Wall Switch 4',
+                    'Shelly BLU Wall Switch 4 ZB',
+                  ].includes(bthomeDevice.model)
+                )
                   blu.log.warn(`Shelly device ${idn}${blu?.deviceName ?? addr}${rs}${wr} child endpoint for button not found`);
                 return;
               }
@@ -544,17 +557,26 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               `${idn}BLU${rs}${db} observer sensor event message for BLU device ${idn}${blu?.deviceName ?? addr}${rs}${db}: sensor ${YELLOW}${sensorName}${db} index ${YELLOW}${sensorIndex}${db} event ${debugStringify(event)}${db}`,
             );
             let buttonEndpoint: MatterbridgeEndpoint | undefined;
-            if (bthomeDevice.model === 'Shelly BLU RC Button 4') {
+            if (bthomeDevice.model === 'Shelly BLU RC Button 4' || bthomeDevice.model === 'Shelly BLU RC Button 4 ZB') {
               buttonEndpoint = blu.getChildEndpointByName('Button' + sensorIndex);
-            } else if (bthomeDevice.model === 'Shelly BLU Wall Switch 4') {
+            } else if (bthomeDevice.model === 'Shelly BLU Wall Switch 4' || bthomeDevice.model === 'Shelly BLU Wall Switch 4 ZB') {
               buttonEndpoint = blu.getChildEndpointByName('Button' + sensorIndex);
-            } else if (bthomeDevice.model === 'Shelly BLU Button1') {
+            } else if (bthomeDevice.model === 'Shelly BLU Button1' || bthomeDevice.model === 'Shelly BLU Button Tough 1 ZB') {
               buttonEndpoint = blu;
             } else {
               buttonEndpoint = blu.getChildEndpointByName('Button');
             }
             if (!buttonEndpoint) {
-              if (['Shelly BLU Button1', 'Shelly BLU RC Button 4', 'Shelly BLU Wall Switch 4'].includes(bthomeDevice.model))
+              if (
+                [
+                  'Shelly BLU Button1',
+                  'Shelly BLU Button Tough 1 ZB',
+                  'Shelly BLU RC Button 4',
+                  'Shelly BLU RC Button 4 ZB',
+                  'Shelly BLU Wall Switch 4',
+                  'Shelly BLU Wall Switch 4 ZB',
+                ].includes(bthomeDevice.model)
+              )
                 blu.log.warn(`Shelly device ${idn}${blu?.deviceName ?? addr}${rs}${wr} child endpoint for button not found`);
               return;
             }
@@ -571,7 +593,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         } else {
           this.gatewayDevices.delete(device.id);
         }
-      }
+      } // End of scan the device for paired BLU devices
 
       // Validate the device again to check if the device is a BLU gateway that has been added only to discover BLU devices
       if (!this.validateDevice([device.id, device.mac, device.name])) return;
@@ -588,7 +610,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         0xfff1,
         'Shelly',
         device.model,
-        1, // Number(device.firmware.split('.')[0]),
+        1,
         device.firmware,
       );
       // Set the device in the selectDevice map for the frontend device selection
@@ -659,7 +681,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       // Scan the device components
       for (const [key, component] of device) {
         // Set selectDevice entities for the device. The setSelectDevice has already been added in addDevice.
-        if (!['ble', 'cloud', 'coiot', 'mqtt', 'sys', 'sntp', 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws', 'eth'].includes(component.id)) {
+        if (!['ble', 'cloud', 'coiot', 'matter', 'zigbee', 'mqtt', 'sys', 'sntp', 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws', 'eth'].includes(component.id)) {
           this.setSelectDeviceEntity(device.id, component.name, 'All the device ' + component.name + ' components', 'component');
           this.setSelectDeviceEntity(device.id, component.id, 'Device ' + component.id + ' component', 'component');
         }
@@ -773,14 +795,6 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           if (deviceType.code === dimmableLight.code || deviceType.code === colorTemperatureLight.code || deviceType.code === extendedColorLight.code) {
             child.createDefaultLevelControlClusterServer();
           }
-          /*
-          if (deviceType.code === colorTemperatureLight.code) {
-            if (component.hasProperty('temp') && component.hasProperty('mode')) child.createHsColorControlClusterServer();
-            else if (component.hasProperty('temp') && !component.hasProperty('mode')) child.createCtColorControlClusterServer();
-            else if (component.hasProperty('ct')) child.createCtColorControlClusterServer();
-            else child.createHsColorControlClusterServer();
-          }
-          */
           if (deviceType.code === colorTemperatureLight.code) {
             child.createCtColorControlClusterServer();
           }
@@ -866,7 +880,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             key,
             this.hasElectricalMeasurements(device, component) && this.validateEntity(device.id, 'PowerMeter') ? [deviceType, electricalSensor] : [deviceType],
             tagList ? { tagList } : undefined,
-            config.debug as boolean,
+            config.debug,
           );
           child.log.logName = `${device.name} ${key}`;
           child.createDefaultIdentifyClusterServer();
@@ -1287,6 +1301,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           }
         } else if (component.name === 'Flood') {
           const floodComponent = device.getComponent(key);
+          // Gen 1
           if (floodComponent?.hasProperty('flood') && isValidBoolean(floodComponent.getValue('flood'))) {
             // const child = mbDevice.addChildDeviceType(key, [contactSensor], undefined, config.debug as boolean);
             const child = mbDevice.addChildDeviceType(key, [waterLeakDetector], undefined, config.debug as boolean);
@@ -1299,6 +1314,20 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               shellyUpdateHandler(this, mbDevice, device, component, property, value);
             });
           }
+          // Gen 2+
+          if (floodComponent?.hasProperty('alarm') && isValidBoolean(floodComponent.getValue('alarm'))) {
+            // const child = mbDevice.addChildDeviceType(key, [contactSensor], undefined, config.debug as boolean);
+            const child = mbDevice.addChildDeviceType(key, [waterLeakDetector], undefined, config.debug as boolean);
+            child.log.logName = `${device.name} ${key}`;
+            // child.createDefaultBooleanStateClusterServer(!(floodComponent.getValue('flood') as boolean));
+            child.createDefaultBooleanStateClusterServer(floodComponent.getValue('alarm') as boolean); // Water Leak Detector: true = leak, false = no leak
+            child.addRequiredClusterServers();
+            // Add event handler
+            floodComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
+              shellyUpdateHandler(this, mbDevice, device, component, property, value);
+            });
+          }
+          // Gen 2+
         } else if (component.name === 'Gas') {
           const gasComponent = device.getComponent(key);
           if (gasComponent?.hasProperty('sensor_state') && isValidString(gasComponent.getValue('alarm_state'))) {
@@ -1954,13 +1983,13 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         `model ${CYAN}${bthomeDevice.model}${nf} (${CYAN}${bthomeDevice.type}${nf})`,
     );
     let definition: AtLeastOne<DeviceTypeDefinition> | undefined;
-    if (bthomeDevice.model === 'Shelly BLU DoorWindow') definition = [bridgedNode, powerSource];
+    if (bthomeDevice.model === 'Shelly BLU DoorWindow' || bthomeDevice.model === 'Shelly BLU DoorWindow ZB') definition = [bridgedNode, powerSource];
     else if (bthomeDevice.model === 'Shelly BLU Motion') definition = [bridgedNode, powerSource];
-    else if (bthomeDevice.model === 'Shelly BLU Button1') definition = [genericSwitch, bridgedNode, powerSource];
+    else if (bthomeDevice.model === 'Shelly BLU Button1' || bthomeDevice.model === 'Shelly BLU Button Tough 1 ZB') definition = [genericSwitch, bridgedNode, powerSource];
     else if (bthomeDevice.model === 'Shelly BLU HT' || bthomeDevice.model === 'Shelly BLU H&T ZB' || bthomeDevice.model === 'Shelly BLU H&T Display ZB')
       definition = [bridgedNode, powerSource];
-    else if (bthomeDevice.model === 'Shelly BLU RC Button 4') definition = [bridgedNode, powerSource];
-    else if (bthomeDevice.model === 'Shelly BLU Wall Switch 4') definition = [bridgedNode, powerSource];
+    else if (bthomeDevice.model === 'Shelly BLU RC Button 4' || bthomeDevice.model === 'Shelly BLU RC Button 4 ZB') definition = [bridgedNode, powerSource];
+    else if (bthomeDevice.model === 'Shelly BLU Wall Switch 4' || bthomeDevice.model === 'Shelly BLU Wall Switch 4 ZB') definition = [bridgedNode, powerSource];
     else if (bthomeDevice.model === 'Shelly BLU Trv') definition = [thermostatDevice, bridgedNode, powerSource];
     else this.log.error(`Shelly device ${hk}${gateway.id}${er} host ${zb}${gateway.host}${er} has an unknown BLU device model ${CYAN}${bthomeDevice.model}${nf}`);
     // Check if the BLU device is already registered
@@ -1968,14 +1997,6 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       this.log.warn(`BLU device ${idn}${bthomeDevice.name}${rs}${wr} address ${CYAN}${bthomeDevice.addr}${wr} already registered with another ble gateway.`);
       return;
     }
-    /*
-    this.bluBridgedDevices.forEach((blu) => {
-      if (blu.serialNumber === bthomeDevice.addr + (this.postfix ? '-' + this.postfix : '')) {
-        this.log.warn(`BLU device ${idn}${bthomeDevice.name}${rs}${wr} address ${CYAN}${bthomeDevice.addr}${wr} already registered with another ble gateway.`);
-        definition = undefined;
-      }
-    });
-    */
     if (definition) {
       const mbDevice = new MatterbridgeEndpoint(definition, { id: bthomeDevice.name }, this.config.debug as boolean);
       this.bluBridgedDevices.set(bthomeDevice.addr, mbDevice);
@@ -1987,7 +2008,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         'Shelly',
         bthomeDevice.model,
       );
-      if (bthomeDevice.model === 'Shelly BLU DoorWindow') {
+      if (bthomeDevice.model === 'Shelly BLU DoorWindow' || bthomeDevice.model === 'Shelly BLU DoorWindow ZB') {
         mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer();
         mbDevice.addFixedLabel('composed', 'Sensor');
         mbDevice.addChildDeviceTypeWithClusterServer('Contact', [contactSensor], [], undefined, this.config.debug as boolean);
@@ -2000,7 +2021,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         if (this.validateEntity(bthomeDevice.addr, 'Illuminance'))
           mbDevice.addChildDeviceTypeWithClusterServer('Illuminance', [lightSensor], [], undefined, this.config.debug as boolean);
         if (this.validateEntity(bthomeDevice.addr, 'Button')) mbDevice.addChildDeviceTypeWithClusterServer('Button', [genericSwitch], [], undefined, this.config.debug as boolean);
-      } else if (bthomeDevice.model === 'Shelly BLU Button1') {
+      } else if (bthomeDevice.model === 'Shelly BLU Button1' || bthomeDevice.model === 'Shelly BLU Button Tough 1 ZB') {
         mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer();
         mbDevice.createDefaultSwitchClusterServer();
       } else if (bthomeDevice.model === 'Shelly BLU HT' || bthomeDevice.model === 'Shelly BLU H&T ZB' || bthomeDevice.model === 'Shelly BLU H&T Display ZB') {
@@ -2009,14 +2030,14 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         mbDevice.addChildDeviceTypeWithClusterServer('Temperature', [temperatureSensor], [], undefined, this.config.debug as boolean);
         mbDevice.addChildDeviceTypeWithClusterServer('Humidity', [humiditySensor], [], undefined, this.config.debug as boolean);
         if (this.validateEntity(bthomeDevice.addr, 'Button')) mbDevice.addChildDeviceTypeWithClusterServer('Button', [genericSwitch], [], undefined, this.config.debug as boolean);
-      } else if (bthomeDevice.model === 'Shelly BLU RC Button 4') {
+      } else if (bthomeDevice.model === 'Shelly BLU RC Button 4' || bthomeDevice.model === 'Shelly BLU RC Button 4 ZB') {
         mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer();
         mbDevice.addFixedLabel('composed', 'Input');
         mbDevice.addChildDeviceTypeWithClusterServer('Button0', [genericSwitch], [Switch.Cluster.id], undefined, this.config.debug as boolean);
         mbDevice.addChildDeviceTypeWithClusterServer('Button1', [genericSwitch], [Switch.Cluster.id], undefined, this.config.debug as boolean);
         mbDevice.addChildDeviceTypeWithClusterServer('Button2', [genericSwitch], [Switch.Cluster.id], undefined, this.config.debug as boolean);
         mbDevice.addChildDeviceTypeWithClusterServer('Button3', [genericSwitch], [Switch.Cluster.id], undefined, this.config.debug as boolean);
-      } else if (bthomeDevice.model === 'Shelly BLU Wall Switch 4') {
+      } else if (bthomeDevice.model === 'Shelly BLU Wall Switch 4' || bthomeDevice.model === 'Shelly BLU Wall Switch 4 ZB') {
         mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer();
         mbDevice.addFixedLabel('composed', 'Input');
         mbDevice.addChildDeviceTypeWithClusterServer('Button0', [genericSwitch], [Switch.Cluster.id], undefined, this.config.debug as boolean);

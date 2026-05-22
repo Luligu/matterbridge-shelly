@@ -1,0 +1,248 @@
+{
+  "shelly": {
+    "name": "Outdoor PlugS Gen3",
+    "id": "shellyoutdoorsg3-e4b3232d5610",
+    "mac": "E4B3232D5610",
+    "slot": 1,
+    "model": "S3PL-20112EU",
+    "gen": 3,
+    "fw_id": "20260311-095905/1.7.5-g9979d16",
+    "ver": "1.7.5",
+    "app": "OutdoorPlugSG3",
+    "auth_en": false,
+    "auth_domain": null,
+    "matter": true,
+    "provision": "complete"
+  },
+  "settings": {
+    "ble": {
+      "enable": true,
+      "rpc": {
+        "enable": false
+      }
+    },
+    "bthome": {},
+    "cloud": {
+      "enable": true,
+      "server": "shelly-103-eu.shelly.cloud:6022/jrpc"
+    },
+    "knx": {
+      "enable": false,
+      "ia": "15.15.255",
+      "routing": {
+        "addr": "224.0.23.12:3671"
+      }
+    },
+    "matter": {
+      "enable": true
+    },
+    "mqtt": {
+      "enable": false,
+      "server": null,
+      "client_id": "shellyoutdoorsg3-e4b3232d5610",
+      "user": null,
+      "ssl_ca": null,
+      "topic_prefix": "shellyoutdoorsg3-e4b3232d5610",
+      "rpc_ntf": true,
+      "status_ntf": false,
+      "use_client_cert": false,
+      "enable_rpc": true,
+      "enable_control": true
+    },
+    "plugs_ui": {
+      "leds": {
+        "mode": "power",
+        "colors": {
+          "switch:0": {
+            "on": {
+              "rgb": [0, 100, 0],
+              "brightness": 100
+            },
+            "off": {
+              "rgb": [100, 0, 0],
+              "brightness": 100
+            }
+          },
+          "power": {
+            "brightness": 100
+          }
+        },
+        "night_mode": {
+          "enable": false,
+          "brightness": 100,
+          "active_between": []
+        }
+      },
+      "controls": {
+        "switch:0": {
+          "in_mode": "momentary"
+        }
+      }
+    },
+    "switch:0": {
+      "id": 0,
+      "name": null,
+      "initial_state": "restore_last",
+      "auto_on": false,
+      "auto_on_delay": 60,
+      "auto_off": false,
+      "auto_off_delay": 60,
+      "power_limit": 2500,
+      "voltage_limit": 280,
+      "autorecover_voltage_errors": false,
+      "current_limit": 12,
+      "reverse": false
+    },
+    "sys": {
+      "device": {
+        "name": "Outdoor PlugS Gen3",
+        "mac": "E4B3232D5610",
+        "fw_id": "20260311-095905/1.7.5-g9979d16",
+        "discoverable": true,
+        "eco_mode": false
+      },
+      "location": null,
+      "debug": {
+        "level": 2,
+        "file_level": null,
+        "mqtt": {
+          "enable": false
+        },
+        "websocket": {
+          "enable": false
+        },
+        "udp": {
+          "addr": null
+        }
+      },
+      "ui_data": {},
+      "rpc_udp": {
+        "dst_addr": null,
+        "listen_port": null
+      },
+      "sntp": {
+        "server": "time.cloudflare.com"
+      },
+      "cfg_rev": 19
+    },
+    "wifi": {
+      "ap": {
+        "ssid": "",
+        "is_open": true,
+        "enable": false,
+        "range_extender": {
+          "enable": false
+        }
+      },
+      "sta": {
+        "ssid": "",
+        "is_open": false,
+        "enable": true,
+        "ipv4mode": "dhcp",
+        "ip": null,
+        "netmask": null,
+        "gw": null,
+        "nameserver": null
+      },
+      "sta1": {
+        "ssid": "",
+        "is_open": true,
+        "enable": false,
+        "ipv4mode": "dhcp",
+        "ip": null,
+        "netmask": null,
+        "gw": null,
+        "nameserver": null
+      },
+      "roam": {
+        "rssi_thr": -80,
+        "interval": 60
+      }
+    },
+    "ws": {
+      "enable": false,
+      "server": null,
+      "ssl_ca": "ca.pem"
+    }
+  },
+  "status": {
+    "ble": {},
+    "bthome": {},
+    "cloud": {
+      "connected": true
+    },
+    "knx": {},
+    "matter": {
+      "num_fabrics": 1,
+      "commissionable": false
+    },
+    "mqtt": {
+      "connected": false
+    },
+    "plugs_ui": {},
+    "switch:0": {
+      "id": 0,
+      "source": "init",
+      "output": true,
+      "apower": 0,
+      "voltage": 234.3,
+      "freq": 50,
+      "current": 0,
+      "aenergy": {
+        "total": 0,
+        "by_minute": [0, 0, 0],
+        "minute_ts": 1779361740
+      },
+      "ret_aenergy": {
+        "total": 0,
+        "by_minute": [0, 0, 0],
+        "minute_ts": 1779361740
+      },
+      "temperature": {
+        "tC": 45.2,
+        "tF": 113.4
+      }
+    },
+    "sys": {
+      "mac": "E4B3232D5610",
+      "restart_required": false,
+      "time": "13:09",
+      "unixtime": 1779361743,
+      "last_sync_ts": 1779360598,
+      "uptime": 5526192,
+      "ram_size": 258192,
+      "ram_free": 63160,
+      "ram_min_free": 22844,
+      "fs_size": 917504,
+      "fs_free": 454656,
+      "cfg_rev": 19,
+      "kvs_rev": 0,
+      "schedule_rev": 1,
+      "webhook_rev": 0,
+      "btrelay_rev": 0,
+      "bthc_rev": 0,
+      "available_updates": {
+        "beta": {
+          "version": "2.0.0-beta1"
+        }
+      },
+      "reset_reason": 3,
+      "utc_offset": 7200
+    },
+    "wifi": {
+      "sta_ip": "192.168.68.87",
+      "status": "got ip",
+      "ssid": "",
+      "bssid": "20:23:51:59:e7:ac",
+      "rssi": -63,
+      "sta_ip6": ["fe80::e6b3:23ff:fe2d:5610", "fd78:cbf8:4939:46e2:e6b3:23ff:fe2d:5610"]
+    },
+    "ws": {
+      "connected": false
+    }
+  },
+  "components": [],
+  "cfg_rev": 19,
+  "offset": 0,
+  "total": 0
+}

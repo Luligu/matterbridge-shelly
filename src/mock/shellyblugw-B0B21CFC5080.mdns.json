@@ -23,28 +23,12 @@
       "data": "shellyblugw-b0b21cfc5080._http._tcp.local"
     },
     {
-      "name": "_shelly._tcp.local",
+      "name": "_http._tcp.local",
       "type": "PTR",
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": "shellyblugw-b0b21cfc5080._shelly._tcp.local"
-    },
-    {
-      "name": "_services._dns-sd._udp.local",
-      "type": "PTR",
-      "ttl": 120,
-      "class": "IN",
-      "flush": false,
-      "data": "_shelly._tcp.local"
-    },
-    {
-      "name": "_services._dns-sd._udp.local",
-      "type": "PTR",
-      "ttl": 120,
-      "class": "IN",
-      "flush": false,
-      "data": "_http._tcp.local"
+      "data": "BLU Gateway Plus II._http._tcp.local"
     }
   ],
   "authorities": [],
@@ -76,10 +60,10 @@
       "ttl": 120,
       "class": "IN",
       "flush": true,
-      "data": "192.168.1.170"
+      "data": "192.168.68.83"
     },
     {
-      "name": "shellyblugw-b0b21cfc5080._shelly._tcp.local",
+      "name": "BLU Gateway Plus II._http._tcp.local",
       "type": "SRV",
       "ttl": 120,
       "class": "IN",
@@ -88,24 +72,24 @@
         "priority": 0,
         "weight": 0,
         "port": 80,
-        "target": "ShellyBluGw-B0B21CFC5080.local"
+        "target": "BLU-Gateway-Plus-II.local"
       }
     },
     {
-      "name": "shellyblugw-b0b21cfc5080._shelly._tcp.local",
+      "name": "BLU Gateway Plus II._http._tcp.local",
       "type": "TXT",
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": ["gen=2", "app=BluGw", "ver=1.4.4"]
+      "data": ["gen=2", "app=BluGw", "ver=1.7.5"]
     },
     {
-      "name": "ShellyBluGw-B0B21CFC5080.local",
+      "name": "BLU-Gateway-Plus-II.local",
       "type": "A",
       "ttl": 120,
       "class": "IN",
       "flush": true,
-      "data": "192.168.1.170"
+      "data": "192.168.68.83"
     }
   ]
 }

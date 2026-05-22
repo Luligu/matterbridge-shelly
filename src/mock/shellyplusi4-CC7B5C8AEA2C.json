@@ -3,22 +3,20 @@
     "name": "i4 AC Plus",
     "id": "shellyplusi4-cc7b5c8aea2c",
     "mac": "CC7B5C8AEA2C",
-    "slot": 0,
+    "slot": 1,
     "model": "SNSN-0024X",
     "gen": 2,
-    "fw_id": "20241011-114443/1.4.4-g6d2a586",
-    "ver": "1.4.4",
+    "fw_id": "20260311-095904/1.7.5-g9979d16",
+    "ver": "1.7.5",
     "app": "PlusI4",
     "auth_en": false,
-    "auth_domain": null
+    "auth_domain": null,
+    "provision": "complete"
   },
   "settings": {
     "ble": {
-      "enable": false,
+      "enable": true,
       "rpc": {
-        "enable": true
-      },
-      "observer": {
         "enable": false
       }
     },
@@ -36,7 +34,7 @@
       "id": 0,
       "name": null,
       "type": "switch",
-      "enable": true,
+      "enable": false,
       "invert": false,
       "factory_reset": true
     },
@@ -51,7 +49,7 @@
     "input:2": {
       "id": 2,
       "name": null,
-      "type": "switch",
+      "type": "button",
       "enable": true,
       "invert": false,
       "factory_reset": true
@@ -59,8 +57,8 @@
     "input:3": {
       "id": 3,
       "name": null,
-      "type": "switch",
-      "enable": true,
+      "type": "button",
+      "enable": false,
       "invert": false,
       "factory_reset": true
     },
@@ -81,7 +79,7 @@
       "device": {
         "name": "i4 AC Plus",
         "mac": "CC7B5C8AEA2C",
-        "fw_id": "20241011-114443/1.4.4-g6d2a586",
+        "fw_id": "20260311-095904/1.7.5-g9979d16",
         "discoverable": true,
         "eco_mode": false,
         "addon_type": "sensor"
@@ -106,9 +104,9 @@
         "listen_port": null
       },
       "sntp": {
-        "server": "time.google.com"
+        "server": "time.cloudflare.com"
       },
-      "cfg_rev": 17
+      "cfg_rev": 23
     },
     "temperature:100": {
       "id": 100,
@@ -163,12 +161,11 @@
     },
     "humidity:100": {
       "id": 100,
-      "rh": null,
-      "errors": ["read"]
+      "rh": 40.4
     },
     "input:0": {
       "id": 0,
-      "state": false
+      "state": null
     },
     "input:1": {
       "id": 1,
@@ -176,11 +173,11 @@
     },
     "input:2": {
       "id": 2,
-      "state": false
+      "state": null
     },
     "input:3": {
       "id": 3,
-      "state": false
+      "state": null
     },
     "mqtt": {
       "connected": false
@@ -188,42 +185,42 @@
     "sys": {
       "mac": "CC7B5C8AEA2C",
       "restart_required": false,
-      "time": "14:52",
-      "unixtime": 1741441965,
-      "uptime": 788690,
-      "ram_size": 253568,
-      "ram_free": 130328,
+      "time": "13:14",
+      "unixtime": 1779362064,
+      "last_sync_ts": 1779361807,
+      "uptime": 3631085,
+      "ram_size": 265816,
+      "ram_free": 112276,
+      "ram_min_free": 88708,
       "fs_size": 393216,
-      "fs_free": 114688,
-      "cfg_rev": 17,
+      "fs_free": 126976,
+      "cfg_rev": 23,
       "kvs_rev": 0,
-      "schedule_rev": 0,
+      "schedule_rev": 1,
       "webhook_rev": 0,
-      "available_updates": {
-        "beta": {
-          "version": "1.5.1-beta1"
-        }
-      },
-      "reset_reason": 1
+      "btrelay_rev": 0,
+      "available_updates": {},
+      "reset_reason": 3,
+      "utc_offset": 7200
     },
     "temperature:100": {
       "id": 100,
-      "tC": null,
-      "tF": null,
-      "errors": ["read"]
+      "tC": 32,
+      "tF": 89.6
     },
     "wifi": {
-      "sta_ip": "192.168.1.224",
+      "sta_ip": "192.168.68.84",
       "status": "got ip",
       "ssid": "",
-      "rssi": -62
+      "bssid": "20:23:51:59:e7:ac",
+      "rssi": -59
     },
     "ws": {
       "connected": false
     }
   },
   "components": [],
-  "cfg_rev": 17,
+  "cfg_rev": 23,
   "offset": 0,
   "total": 0
 }

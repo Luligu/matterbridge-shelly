@@ -39,10 +39,7 @@ describe('Shelly pro devices test', () => {
   let device: ShellyDevice | undefined = undefined;
   let id: string;
 
-  const firmwareGen1 = 'v1.14.0-gcb84623';
-  const firmwareGen2 = '1.6.2-gc8a76e2';
-  const firmwareGen3 = '1.6.2-gc8a76e2';
-  const firmwareGen4 = '1.6.2-gc8a76e2';
+  const firmwareGen2 = '1.7.5-g9979d16';
 
   beforeAll(() => {
     //

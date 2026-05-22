@@ -20,37 +20,21 @@
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": "shellyemminig4-7c2c6763f75c._http._tcp.local"
+      "data": "Shutter._http._tcp.local"
     },
     {
-      "name": "_shelly._tcp.local",
+      "name": "_http._tcp.local",
       "type": "PTR",
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": "shellyemminig4-7c2c6763f75c._shelly._tcp.local"
-    },
-    {
-      "name": "_services._dns-sd._udp.local",
-      "type": "PTR",
-      "ttl": 120,
-      "class": "IN",
-      "flush": false,
-      "data": "_shelly._tcp.local"
-    },
-    {
-      "name": "_services._dns-sd._udp.local",
-      "type": "PTR",
-      "ttl": 120,
-      "class": "IN",
-      "flush": false,
-      "data": "_http._tcp.local"
+      "data": "shellyshutter-e4b063d64578._http._tcp.local"
     }
   ],
   "authorities": [],
   "additionals": [
     {
-      "name": "shellyemminig4-7c2c6763f75c._http._tcp.local",
+      "name": "Shutter._http._tcp.local",
       "type": "SRV",
       "ttl": 120,
       "class": "IN",
@@ -59,27 +43,27 @@
         "priority": 0,
         "weight": 0,
         "port": 80,
-        "target": "ShellyEMMiniG4-7C2C6763F75C.local"
+        "target": "Shutter.local"
       }
     },
     {
-      "name": "shellyemminig4-7c2c6763f75c._http._tcp.local",
+      "name": "Shutter._http._tcp.local",
       "type": "TXT",
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": ["gen=4"]
+      "data": ["gen=3", "app=S2PMG3Shutter", "ver=1.7.5"]
     },
     {
-      "name": "ShellyEMMiniG4-7C2C6763F75C.local",
+      "name": "Shutter.local",
       "type": "A",
       "ttl": 120,
       "class": "IN",
       "flush": true,
-      "data": "10.101.10.89"
+      "data": "192.168.68.96"
     },
     {
-      "name": "shellyemminig4-7c2c6763f75c._shelly._tcp.local",
+      "name": "Shutter._http._tcp.local",
       "type": "SRV",
       "ttl": 120,
       "class": "IN",
@@ -88,24 +72,53 @@
         "priority": 0,
         "weight": 0,
         "port": 80,
-        "target": "ShellyEMMiniG4-7C2C6763F75C.local"
+        "target": "Shutter.local"
       }
     },
     {
-      "name": "shellyemminig4-7c2c6763f75c._shelly._tcp.local",
+      "name": "Shutter._http._tcp.local",
       "type": "TXT",
       "ttl": 120,
       "class": "IN",
       "flush": false,
-      "data": ["gen=4", "app=MiniEMG4", "ver=1.5.99-dev114743"]
+      "data": ["gen=3", "app=S2PMG3Shutter", "ver=1.7.5"]
     },
     {
-      "name": "ShellyEMMiniG4-7C2C6763F75C.local",
+      "name": "Shutter.local",
       "type": "A",
       "ttl": 120,
       "class": "IN",
       "flush": true,
-      "data": "10.101.10.89"
+      "data": "192.168.68.96"
+    },
+    {
+      "name": "shellyshutter-e4b063d64578._http._tcp.local",
+      "type": "SRV",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": {
+        "priority": 0,
+        "weight": 0,
+        "port": 80,
+        "target": "ShellyShutter-E4B063D64578.local"
+      }
+    },
+    {
+      "name": "shellyshutter-e4b063d64578._http._tcp.local",
+      "type": "TXT",
+      "ttl": 120,
+      "class": "IN",
+      "flush": false,
+      "data": ["gen=3"]
+    },
+    {
+      "name": "ShellyShutter-E4B063D64578.local",
+      "type": "A",
+      "ttl": 120,
+      "class": "IN",
+      "flush": true,
+      "data": "192.168.68.96"
     }
   ]
 }

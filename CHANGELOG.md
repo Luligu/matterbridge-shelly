@@ -29,6 +29,38 @@ If you like this project and find it useful, please consider giving it a star on
 
 You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his invaluable contribution to this project.
 
+## [2.3.0] - 2025-05-22
+
+### Added
+
+- [shelly]: Verified `firmware 1.7.5`.
+- [shelly]: Verified `BLU firmware 1.0.23`.
+- [shelly]: Verified `Shelly EM Mini Gen4` (shellyemminig4).
+- [shelly]: Verified `Shelly Shutter` (shellyshutter).
+- [shelly]: Add support for `Shelly Flood Gen4` (shellyfloodg4).
+- [shelly]: Verified `BLU H&T Display ZB` with firmware 1.1.10.
+- [shelly]: Verified `BLU Button Tough 1 ZB` with firmware 1.1.12.
+- [shelly]: Add new `authentication` method in firmware 2.0.0 (beta). Thanks 0FakE (https://github.com/Luligu/matterbridge-shelly/issues/188).
+- [shelly]: Verify `special characters` in password. Thanks 0FakE (https://github.com/Luligu/matterbridge-shelly/issues/188).
+
+### Changed
+
+- [package]: Update dependencies.
+- [package]: Bump package to `automator` v.3.1.10.
+- [package]: Bump `eslint` to v.10.4.0.
+- [package]: Bump `@types/node` to v.25.9.1.
+- [package]: Bump `ts-jest` to v.29.4.10.
+- [package]: Bump `typescript-eslint` to v.8.59.4.
+- [package]: Bump `vitest` to v.4.1.7.
+- [package]: Bump `@vitest/coverage-v8` to v.4.1.7.
+- [package]: Bump `eslint-plugin-jsdoc` to v.63.0.0.
+- [package]: Bump `@eslint/markdown` to v.8.0.2.
+- [package]: Update `.devcontainer/devcontainer.json`.
+- [package]: Update `.vscode/settings.json`.
+- [package]: Add `.vscode/extensions.json`.
+
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+
 ## [2.2.7] - 2025-05-15
 
 ### Changed

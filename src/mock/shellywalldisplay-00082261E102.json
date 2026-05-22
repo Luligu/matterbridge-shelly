@@ -4,30 +4,34 @@
     "mac": "00082261E102",
     "model": "SAWD-0A1XX10EU1",
     "gen": 2,
-    "fw_id": "20250402-115011/2.3.6-66e97e33",
-    "ver": "2.3.6",
+    "fw_id": "20260520-144343/2.6.2-06f6da23",
+    "ver": "2.6.2",
     "app": "WallDisplay",
     "auth_en": false,
-    "uptime": 1605745,
-    "app_uptime": 1605670,
+    "uptime": 139,
+    "app_uptime": 74,
     "ram_size": 134217728,
-    "ram_free": 40137288,
+    "ram_free": 43317248,
     "fs_size": 5009186816,
-    "fs_free": 4863143936,
+    "fs_free": 4616445952,
     "discoverable": false,
-    "cfg_rev": 107,
+    "cfg_rev": 119,
     "schedule_rev": 0,
     "webhook_rev": 0,
-    "platform": "vXD10000M2",
+    "virtual_rev": 0,
+    "kvs_rev": 0,
+    "platform": "vXD10000M",
     "serial": "SAWD89D0132BU",
     "batch_id": "3872b",
     "batch_date": 231211,
     "available_updates": {},
     "restart_required": false,
-    "unixtime": 1745732710,
+    "unixtime": 1779366822,
     "relay_in_thermostat": true,
+    "relays_in_thermostat": [0],
     "sensor_in_thermostat": true,
-    "awaiting_auth_code": false
+    "awaiting_auth_code": false,
+    "ch": ["switch:0"]
   },
   "settings": {
     "ble": {
@@ -45,7 +49,7 @@
         "ipv4mode": "dhcp",
         "ssid": "",
         "is_open": false,
-        "ip": "192.168.1.97",
+        "ip": "192.168.1.167",
         "netmask": "255.255.255.0",
         "gw": "192.168.1.1",
         "nameserver": "208.67.222.222"
@@ -56,11 +60,12 @@
       "auto_off": false,
       "auto_on_delay": 0,
       "initial_state": "off",
-      "in_mode": "follow",
+      "in_mode": "detached",
       "name": null
     },
     "input:0": {
       "id": 0,
+      "enable": true,
       "type": "switch",
       "invert": false,
       "factory_reset": true,
@@ -85,6 +90,20 @@
       "name": null
     },
     "ui": {
+      "brightness": {
+        "auto": true,
+        "level": 27,
+        "min_level": 1,
+        "auto_off": {
+          "enable": false,
+          "by_lux": false,
+          "timeout": 0
+        },
+        "auto_dim": {
+          "enable": true,
+          "timeout": 5
+        }
+      },
       "lock_type": "none",
       "disable_gestures_when_locked": false,
       "use_F": false,
@@ -92,15 +111,6 @@
         "enable": false,
         "timeout": 10,
         "priority_element": "CLOCK"
-      },
-      "screen_off_when_idle": true,
-      "brightness": {
-        "auto": true,
-        "level": 0,
-        "auto_off": {
-          "enable": true,
-          "by_lux": false
-        }
       },
       "relay_state_overlay": {
         "enable": true,
@@ -110,11 +120,11 @@
     "sys": {
       "device": {
         "name": "Wall Display",
-        "fw_id": "20250402-115011/2.3.6-66e97e33",
+        "fw_id": "20260520-144343/2.6.2-06f6da23",
         "mac": "00082261E102",
         "discoverable": false
       },
-      "cfg_rev": 107,
+      "cfg_rev": 119,
       "location": null,
       "sntp": {
         "server": "time.google.com"
@@ -134,16 +144,23 @@
           "Media": true,
           "MQTT": true,
           "Network": true,
+          "Radar": true,
           "RPC": true,
           "Thermostat": true,
           "Screen": true,
-          "ShellySmartControl": true,
           "UART": true,
           "Webhooks": true,
-          "WebSocket": true
+          "WebRTC": true,
+          "WebSocket": true,
+          "ShellySmartControl": true
         }
       },
-      "media_player_enabled": false
+      "media_player_enabled": false,
+      "tzdata": "2026a",
+      "icu_version": "2016f",
+      "ui_data": {
+        "device_revision": "1-118"
+      }
     },
     "cloud": {
       "enable": true,
@@ -170,7 +187,9 @@
       "hysteresis": 0.5,
       "invert_output": false,
       "display_unit": "C",
-      "target_C": 19,
+      "target_C": 21,
+      "target_F": 70,
+      "failure_detection": true,
       "name": null
     }
   },
@@ -184,22 +203,22 @@
     },
     "temperature:0": {
       "id": 0,
-      "tC": 27.3,
-      "tF": 81.2
+      "tC": 31.9,
+      "tF": 89
     },
     "humidity:0": {
       "id": 0,
-      "rh": 41.4
+      "rh": 40.7
     },
     "illuminance:0": {
       "id": 0,
-      "lux": 30,
-      "illumination": "twilight"
+      "lux": 200,
+      "illumination": "bright"
     },
     "switch:0": {
       "id": 0,
       "output": false,
-      "source": "THERMOSTAT"
+      "source": "Auto power on (off)"
     },
     "input:0": {
       "id": 0,
@@ -210,39 +229,43 @@
       "mac": "00082261E102",
       "model": "SAWD-0A1XX10EU1",
       "gen": 2,
-      "fw_id": "20250402-115011/2.3.6-66e97e33",
-      "ver": "2.3.6",
+      "fw_id": "20260520-144343/2.6.2-06f6da23",
+      "ver": "2.6.2",
       "app": "WallDisplay",
       "auth_en": false,
-      "uptime": 1605745,
-      "app_uptime": 1605670,
+      "uptime": 139,
+      "app_uptime": 74,
       "ram_size": 134217728,
-      "ram_free": 40137288,
+      "ram_free": 43317248,
       "fs_size": 5009186816,
-      "fs_free": 4863143936,
+      "fs_free": 4616441856,
       "discoverable": false,
-      "cfg_rev": 107,
+      "cfg_rev": 119,
       "schedule_rev": 0,
       "webhook_rev": 0,
-      "platform": "vXD10000M2",
+      "virtual_rev": 0,
+      "kvs_rev": 0,
+      "platform": "vXD10000M",
       "serial": "SAWD89D0132BU",
       "batch_id": "3872b",
       "batch_date": 231211,
       "available_updates": {},
       "restart_required": false,
-      "unixtime": 1745732710,
+      "unixtime": 1779366822,
       "relay_in_thermostat": true,
+      "relays_in_thermostat": [0],
       "sensor_in_thermostat": true,
-      "awaiting_auth_code": false
+      "awaiting_auth_code": false,
+      "ch": ["switch:0"]
     },
     "wifi": {
-      "sta_ip": "192.168.1.167",
+      "sta_ip": "192.168.68.54",
       "status": "got ip",
       "mac": "00:08:22:61:E1:02",
       "ssid": "",
-      "rssi": -55,
-      "netmask": "255.255.255.0",
-      "gw": "192.168.1.1",
+      "rssi": -59,
+      "netmask": "255.255.252.0",
+      "gw": "192.168.68.1",
       "nameserver": "208.67.222.222"
     },
     "media": {
@@ -251,10 +274,12 @@
         "buffering": false,
         "volume": 5
       },
-      "total_size": 0,
-      "total_size_h": "0.000 B",
+      "total_size": 3885854,
+      "total_size_h": "3.706 MB",
       "item_counts": {
         "audio": 0,
+        "alert": 0,
+        "ringtone": 10,
         "photo": 0,
         "video": 0
       }
@@ -268,16 +293,19 @@
     "thermostat:0": {
       "id": 0,
       "enable": true,
-      "target_C": 19,
-      "current_C": 27.3,
+      "target_C": 21,
+      "target_F": 70,
+      "current_C": 31.9,
+      "current_F": 89,
       "output": false,
+      "errors": [],
       "schedules": {
         "enable": false
       }
     }
   },
   "components": [],
-  "cfg_rev": 107,
+  "cfg_rev": 119,
   "offset": 0,
   "total": 0
 }

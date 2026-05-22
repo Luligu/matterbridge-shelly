@@ -6,12 +6,13 @@
     "slot": 1,
     "model": "S4SW-001X16EU",
     "gen": 4,
-    "fw_id": "20250520-083720/1.6.2-gc8a76e2",
-    "ver": "1.6.2",
+    "fw_id": "20260311-095901/1.7.5-g9979d16",
+    "ver": "1.7.5",
     "app": "S1G4",
     "auth_en": false,
     "auth_domain": null,
-    "matter": true
+    "matter": false,
+    "provision": "complete"
   },
   "settings": {
     "ble": {
@@ -41,7 +42,7 @@
       }
     },
     "matter": {
-      "enable": true
+      "enable": false
     },
     "modbus": {
       "enable": true
@@ -74,7 +75,7 @@
       "device": {
         "name": "1 Gen4",
         "mac": "A085E3BCA4C8",
-        "fw_id": "20250520-083720/1.6.2-gc8a76e2",
+        "fw_id": "20260311-095901/1.7.5-g9979d16",
         "discoverable": true,
         "eco_mode": false,
         "addon_type": null
@@ -95,13 +96,13 @@
       },
       "ui_data": {},
       "rpc_udp": {
-        "dst_addr": null,
-        "listen_port": null
+        "dst_addr": "192.168.69.100:8585",
+        "listen_port": 8585
       },
       "sntp": {
         "server": "time.cloudflare.com"
       },
-      "cfg_rev": 19
+      "cfg_rev": 27
     },
     "wifi": {
       "ap": {
@@ -157,7 +158,7 @@
     },
     "knx": {},
     "matter": {
-      "num_fabrics": 1,
+      "num_fabrics": 0,
       "commissionable": false
     },
     "modbus": {},
@@ -169,54 +170,64 @@
       "source": "init",
       "output": true,
       "temperature": {
-        "tC": 52.9,
-        "tF": 127.3
+        "tC": 58.7,
+        "tF": 137.6
       }
     },
     "sys": {
       "mac": "A085E3BCA4C8",
       "restart_required": false,
-      "time": "13:01",
-      "unixtime": 1748257269,
-      "last_sync_ts": 1748255664,
-      "uptime": 412747,
-      "ram_size": 360032,
-      "ram_free": 184756,
-      "ram_min_free": 167056,
+      "time": "10:34",
+      "unixtime": 1779352467,
+      "last_sync_ts": 1779351502,
+      "uptime": 76622,
+      "ram_size": 344840,
+      "ram_free": 202648,
+      "ram_min_free": 173220,
       "fs_size": 917504,
-      "fs_free": 442368,
-      "cfg_rev": 19,
+      "fs_free": 438272,
+      "cfg_rev": 27,
       "kvs_rev": 0,
       "schedule_rev": 1,
       "webhook_rev": 0,
       "btrelay_rev": 0,
-      "available_updates": {},
+      "bthc_rev": 0,
+      "available_updates": {
+        "beta": {
+          "version": "2.0.0-beta1"
+        }
+      },
       "alt": {
         "S1G4ZB": {
           "name": "Shelly 1 Gen4",
           "desc": "Shelly 1 with Zigbee",
+          "beta": {
+            "version": "2.0.0-beta1",
+            "build_id": "20260423-102600/2.0.0-beta1-g8c7700a"
+          },
           "stable": {
-            "version": "1.6.2",
-            "build_id": "20250520-083719/1.6.2-gc8a76e2"
+            "version": "1.7.5",
+            "build_id": "20260311-095857/1.7.5-g9979d16"
           }
         }
       },
-      "reset_reason": 3,
+      "reset_reason": 1,
       "utc_offset": 7200
     },
     "wifi": {
       "sta_ip": "192.168.70.1",
       "status": "got ip",
       "ssid": "",
-      "rssi": -53,
-      "sta_ip6": ["fe80::a285:e3ff:febc:a4c8", "fd78:cbf8:4939:746:a285:e3ff:febc:a4c8"]
+      "bssid": "20:23:51:59:e7:ac",
+      "rssi": -51,
+      "sta_ip6": ["fe80::a285:e3ff:febc:a4c8", "fd78:cbf8:4939:46e2:a285:e3ff:febc:a4c8"]
     },
     "ws": {
       "connected": false
     }
   },
   "components": [],
-  "cfg_rev": 19,
+  "cfg_rev": 27,
   "offset": 0,
   "total": 0
 }
