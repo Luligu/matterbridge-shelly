@@ -174,10 +174,7 @@ describe('ShellyPlatform', () => {
   });
 
   it('should throw because of version', () => {
-    const savedVersion = matterbridge.matterbridgeVersion;
-    matterbridge.matterbridgeVersion = '1.5.4';
-    expect(() => new ShellyPlatform(matterbridge, log, mockConfig as any)).toThrow();
-    matterbridge.matterbridgeVersion = savedVersion;
+    expect(() => new ShellyPlatform({ ...matterbridge, matterbridgeVersion: '1.5.4' }, log, mockConfig as any)).toThrow();
   });
 
   it('should call onStart with reason and start mDNS', async () => {
