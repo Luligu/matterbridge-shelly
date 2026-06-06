@@ -1402,7 +1402,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               if (isValidString(component, 5) && isValidString(event, 14) && component === 'blugw' && event === 'config_changed') {
                 const blugw = await ShellyDevice.fetch(this.shelly, mbDevice.log, device.host, 'Blugw.GetConfig');
                 const child = mbDevice.getChildEndpointById('blugw');
-                if (isValidObject(blugw, 1) && isValidBoolean(blugw.sys_led_enable)) child?.setAttribute(ModeSelect.id, 'currentMode', blugw.sys_led_enable ? 1 : 0, mbDevice.log);
+                if (isValidObject(blugw, 1) && isValidBoolean(blugw.sys_led_enable)) child?.setAttribute(ModeSelect.id, 'currentMode', blugw.sys_led_enable ? 1 : 2, mbDevice.log);
               }
             });
           }
