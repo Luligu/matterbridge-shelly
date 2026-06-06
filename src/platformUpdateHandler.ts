@@ -151,7 +151,7 @@ export function shellyUpdateHandler(
     const hue = Math.max(Math.min(Math.round((hsl.h / 360) * 254), 254), 0);
     const saturation = Math.max(Math.min(Math.round((hsl.s / 100) * 254), 254), 0);
     if (isValidNumber(hue, 0, 254)) endpoint.setAttribute(ColorControl.id, 'currentHue', hue, shellyDevice.log);
-    if (isValidNumber(hue, 0, 254)) endpoint.setAttribute(ColorControl.id, 'currentSaturation', saturation, shellyDevice.log);
+    if (isValidNumber(saturation, 0, 254)) endpoint.setAttribute(ColorControl.id, 'currentSaturation', saturation, shellyDevice.log);
     endpoint.setAttribute(ColorControl.id, 'colorMode', ColorControl.ColorMode.CurrentHueAndCurrentSaturation, shellyDevice.log);
   }
   // Update Input component with state
