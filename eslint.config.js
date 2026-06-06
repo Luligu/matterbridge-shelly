@@ -35,7 +35,7 @@ export default defineConfig([
       '**/coverage',
       '**/dist',
       '**/jest',
-      'mock',
+      '**/mock',
       '**/node_modules',
       '**/screenshots',
       '**/temp',
