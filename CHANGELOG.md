@@ -73,6 +73,8 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 - [claude]: Move CLAUDE.md in the repo root.
 - [claude]: Add .claude/settings.json with permissions configuration.
 
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+
 ## [2.3.0] - 2025-05-22
 
 ### Added
