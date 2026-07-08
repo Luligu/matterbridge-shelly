@@ -980,7 +980,7 @@ describe('Coap scanner', () => {
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`code: ${CYAN}2.05${db}`));
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`host: ${CYAN}192.168.1.100${db}`));
     expect(data_cits).toEqual({
-      sys: { cfg_rev: 0 },
+      'sys': { cfg_rev: 0 },
       'relay:0': { state: false, overpower: false },
       'emeter:0': { power: 6.62, total: 82068.3, voltage: 235.22, current: 0.07 },
       'emeter:1': { power: 0, total: 0, voltage: 235.12, current: 0.01 },

@@ -234,6 +234,22 @@
       "args": ["vitest", "run", "--coverage", "--coverage.include=src/updateHandler.ts", "vitest/updateHandler.test.ts"],
       "group": { "kind": "test", "isDefault": false },
       "problemMatcher": []
+    },
+    {
+      "label": "Test: CoapServer",
+      "type": "shell",
+      "command": "npx",
+      "args": ["vitest", "run", "--coverage", "--coverage.include=src/coapServer.ts", "vitest/coapServer.test.ts"],
+      "group": { "kind": "test", "isDefault": false },
+      "problemMatcher": []
+    },
+    {
+      "label": "Test: Shelly",
+      "type": "shell",
+      "command": "npx",
+      "args": ["vitest", "run", "--coverage", "--coverage.include=src/shelly.ts", "vitest/shelly.test.ts"],
+      "group": { "kind": "test", "isDefault": false },
+      "problemMatcher": []
     }
   ]
 }
