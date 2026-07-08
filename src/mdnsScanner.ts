@@ -182,8 +182,6 @@ export class MdnsScanner extends EventEmitter<MdnsScannerEvents> {
           this.log.debug(`[${BLUE}${a.type}${db}] Name: ${CYAN}${a.name}${db} data: ${typeof a.data === 'string' ? a.data : debugStringify(a.data)}`);
         }
         if (a.type === 'A' && (a.name.startsWith('shelly') || a.name.startsWith('Shelly'))) {
-          // const [name, mac] = a.name.replace('.local', '').split('-');
-          // const deviceId = name.toLowerCase() + '-' + mac.toUpperCase();
           const deviceId = this.normalizeShellyId(a.name);
           if (deviceId && (!this.discoveredDevices.has(deviceId) || this.discoveredDevices.get(deviceId)?.host !== a.data)) {
             this.log.debug(`MdnsScanner discovered shelly gen: ${CYAN}${gen}${nf} device id: ${hk}${deviceId}${nf} host: ${zb}${a.data}${nf} port: ${zb}${port}${nf}`);
@@ -230,8 +228,6 @@ export class MdnsScanner extends EventEmitter<MdnsScannerEvents> {
           this.log.debug(`[${idn}${a.type}${rs}${db}] Name: ${CYAN}${a.name}${db} data: ${typeof a.data === 'string' ? a.data : debugStringify(a.data)}`);
         }
         if (a.type === 'A' && (a.name.startsWith('shelly') || a.name.startsWith('Shelly'))) {
-          // const [name, mac] = a.name.replace('.local', '').split('-');
-          // const deviceId = name.toLowerCase() + '-' + mac.toUpperCase();
           const deviceId = this.normalizeShellyId(a.name);
           if (deviceId && (!this.discoveredDevices.has(deviceId) || this.discoveredDevices.get(deviceId)?.host !== a.data)) {
             this.log.debug(`MdnsScanner discovered shelly gen: ${CYAN}${gen}${nf} device id: ${hk}${deviceId}${nf} host: ${zb}${a.data}${nf} port: ${zb}${port}${nf}`);
