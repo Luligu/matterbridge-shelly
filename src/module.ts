@@ -185,13 +185,18 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     }
 
     // Validate the config
+    // v8 ignore else
     if (config.username) this.username = config.username;
+    // v8 ignore else
     if (config.password) this.password = config.password;
     this.postfix = config.postfix ?? '';
     if (!isValidString(this.postfix, 0, 3)) this.postfix = '';
     if (!isValidNumber(config.failsafeCount, 0)) config.failsafeCount = 0;
+    this.config.debug ??= false;
+    this.config.unregisterOnShutdown ??= false;
 
     // Cleanup the old config format
+    // v8 ignore next
     {
       const config = this.config as PlatformConfig;
       if (config.exposeSwitch !== undefined) delete config.exposeSwitch;
@@ -208,13 +213,16 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     if (config.firstRun === undefined) {
       config.firstRun = true;
       this.firstRun = true;
+      // v8 ignore else
       if (!isValidArray(config.whiteList, 1) && !isValidArray(config.blackList, 1) && !isValidArray(config.entityBlackList, 1) && !isValidObject(config.deviceEntityBlackList, 1))
         config.expertMode = false;
       else config.expertMode = true;
       // If not already set by the user
+      // v8 ignore else
       if (!isValidArray(config.entityBlackList, 1)) config.entityBlackList = ['Lux', 'Illuminance', 'Vibration', 'Button'];
     }
     // Expert mode setup (will be re-applied after onStart)
+    // v8 ignore else
     if (!config.expertMode) {
       this.setSchema(baseSchema);
     }

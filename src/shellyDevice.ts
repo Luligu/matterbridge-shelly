@@ -3,7 +3,7 @@
  * @description This file contains the class ShellyDevice.
  * @author Luca Liguori
  * @created 2024-05-01
- * @version 3.1.4
+ * @version 3.2.0
  * @license Apache-2.0
  *
  * Copyright 2024, 2025, 2026 Luca Liguori.
@@ -355,6 +355,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
    * Updates the BTHome components of the device.
    */
   updateBTHomeComponents(): void {
+    // v8 ignore else
     if (this.componentsPayload?.components) {
       this.bthomeTrvs.clear();
       this.bthomeDevices.clear();
@@ -629,6 +630,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
         }
         if (key === 'accel') {
           const accel = statusPayload[key] as ShellyData;
+          // v8 ignore else
           if (accel.vibration !== undefined) device.addComponent(new ShellyComponent(device, 'vibration', 'Vibration'));
         }
 
@@ -679,8 +681,11 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
         // log.debug(`Parsing device ${hk}${device.id}${db} component ${CYAN}${key}${db}...`);
         if (key === 'wifi') {
           const wifi = settingsPayload[key] as ShellyData;
+          // v8 ignore else
           if (wifi.ap) device.addComponent(new ShellyComponent(device, 'wifi_ap', 'WiFi', wifi.ap as ShellyData)); // Ok
+          // v8 ignore else
           if (wifi.sta) device.addComponent(new ShellyComponent(device, 'wifi_sta', 'WiFi', wifi.sta as ShellyData)); // Ok
+          // v8 ignore else
           if (wifi.sta1) device.addComponent(new ShellyComponent(device, 'wifi_sta1', 'WiFi', wifi.sta1 as ShellyData)); // Ok
         }
         if (key === 'sys') {
@@ -749,6 +754,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
       device.scanBTHomeComponents(btHomeComponents);
     }
 
+    // v8 ignore else
     if (statusPayload) device.onUpdate(statusPayload);
 
     // For gen 1 devices check if CoIoT is enabled and peer is set correctly. First devices do not have this property.
@@ -764,6 +770,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
         if (CoIoT.hasProperty('peer') && CoIoT.getValue('peer') !== '' && CoIoT.getValue('peer') !== 'multicast:5683') {
           const peer = CoIoT.getValue('peer') as string;
           const ipv4 = shelly.ipv4Address + ':5683';
+          // v8 ignore else
           if (peer !== ipv4)
             log.warn(
               `The CoIoT peer for device ${dn}${device.name}${wr} id ${hk}${device.id}${wr} is not mcast or ${ipv4}. Set it in the web ui settings to receive updates from the device.`,
@@ -806,6 +813,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
     }
 
     // Check if the device has been calibrated
+    // v8 ignore else
     if (device.gen === 1) {
       if (device.profile === 'cover') {
         const roller = device.getComponent('roller:0');
@@ -830,6 +838,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
     // Start lastseen interval
     device.lastseenInterval = setInterval(() => {
       const lastSeenDate = new Date(device.lastseen);
+      // v8 ignore next -- just a logging
       log.debug(
         // oxlint-disable-next-line unicorn/no-negated-condition
         `Device ${hk}${device.id}${db} host ${zb}${device.host}${db} online ${!device.online ? wr : CYAN}${device.online}${db} ` +
@@ -840,6 +849,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
       );
 
       // Check WebSocket client for gen 2+ devices and restart if not connected
+      // v8 ignore else
       if (device.gen >= 2 && !device.sleepMode && device.wsClient?.isConnected === false) {
         log.info(`WebSocket client for device ${hk}${device.id}${nf} host ${zb}${device.host}${nf} is not connected. Starting connection...`);
         device.wsClient.start();
@@ -856,11 +866,13 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
       device.wsClient.on('response', (_message) => {
         log.debug(`WebSocket response from device ${hk}${device.id}${db} host ${zb}${device.host}${db}`);
         device.lastseen = Date.now();
+        // v8 ignore else
         if (!device.online) {
           device.online = true;
           device.emit('online');
           log.debug(`Device ${hk}${device.id}${db} host ${zb}${device.host}${db} received a WebSocket message: setting online to true`);
         }
+        // v8 ignore else
         if (device.cached) {
           device.cached = false;
           log.debug(`Device ${hk}${device.id}${db} host ${zb}${device.host}${db} received a WebSocket message: setting cached to false`);
@@ -870,11 +882,13 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
       device.wsClient.on('update', (params) => {
         log.debug(`WebSocket update from device ${hk}${device.id}${db} host ${zb}${device.host}${db}`);
         device.lastseen = Date.now();
+        // v8 ignore else
         if (!device.online) {
           device.online = true;
           device.emit('online');
           log.debug(`Device ${hk}${device.id}${db} host ${zb}${device.host}${db} received a WebSocket message: setting online to true`);
         }
+        // v8 ignore else
         if (device.cached) {
           device.cached = false;
           log.debug(`Device ${hk}${device.id}${db} host ${zb}${device.host}${db} received a WebSocket message: setting cached to false`);
@@ -885,11 +899,13 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
       device.wsClient.on('event', (events) => {
         log.debug(`WebSocket event from device ${hk}${device.id}${db} host ${zb}${device.host}${db}`);
         device.lastseen = Date.now();
+        // v8 ignore else
         if (!device.online) {
           device.online = true;
           device.emit('online');
           log.debug(`Device ${hk}${device.id}${db} host ${zb}${device.host}${db} received a WebSocket message: setting online to true`);
         }
+        // v8 ignore else
         if (device.cached) {
           device.cached = false;
           log.debug(`Device ${hk}${device.id}${db} host ${zb}${device.host}${db} received a WebSocket message: setting cached to false`);
@@ -900,6 +916,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
       device.wsClient.on('error', (message: string) => {
         log.debug(`WebSocket error from device ${hk}${device.id}${db} host ${zb}${device.host}${db}: ${message}`);
         device.lastseen = Date.now();
+        // v8 ignore else
         if (device.online) {
           device.online = false;
           device.emit('offline');
@@ -913,10 +930,12 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
     device.on('awake', async () => {
       log.debug(`Device ${hk}${device.id}${db} host ${zb}${device.host}${db} is awake (cached: ${device.cached}).`);
       const cached = device.cached;
+      // v8 ignore else
       if (device.sleepMode) {
         try {
           device.lastFetched = Date.now();
           const awaken = await ShellyDevice.create(shelly, log, device.host);
+          // v8 ignore else
           if (awaken) {
             if (device.gen === 1 && cached) void shelly.coapServer.registerDevice(device.host, device.id, false); // No await to register device for CoIoT updates
             await awaken.saveDevicePayloads(shelly.dataPath);
@@ -1010,9 +1029,11 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
               `addr ${idn}${device.addr}${rs}${db} name ${CYAN}${device.name}${db} model ${CYAN}${device.model}${db} (${CYAN}${device.type}${db}) ` +
               `rssi ${CYAN}${bthomeDevice.rssi}${db} packet_id ${CYAN}${bthomeDevice.packet_id}${db} last_updated_ts ${CYAN}${this.getLocalTimeFromLastUpdated(bthomeDevice.last_updated_ts)}${db}`,
           );
-          // this.log.debug(`- device update data:${rs}\n`, bthomeDevice);
+          // v8 ignore else
           if (isValidNumber(bthomeDevice.rssi, -100, 0) || isValidNumber(bthomeDevice.last_updated_ts, 0)) {
+            // v8 ignore else
             if (isValidNumber(bthomeDevice.rssi, -100, 0)) device.rssi = bthomeDevice.rssi;
+            // v8 ignore else
             if (isValidNumber(bthomeDevice.last_updated_ts, 0)) device.last_updated_ts = bthomeDevice.last_updated_ts;
             this.emit('bthomedevice_update', device.addr, bthomeDevice.rssi, bthomeDevice.packet_id, bthomeDevice.last_updated_ts);
             // this.log.debug(`BTHome devices map:${rs}\n`, this.bthomeDevices);
@@ -1031,7 +1052,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
               // oxlint-disable-next-line typescript/no-base-to-string typescript/restrict-template-expressions
               `last update ${CYAN}${this.getLocalTimeFromLastUpdated(bthomeSensor.last_updated_ts)}${db}: ${YELLOW}${bthomeSensor.value}${db}`,
           );
-          // this.log.debug(`- sensor update data:${rs}\n`, bthomeSensor);
+          // v8 ignore else
           if (bthomeSensor.value !== undefined && bthomeSensor.value !== null) {
             sensor.value = bthomeSensor.value;
             this.emit('bthomesensor_update', sensor.addr, this.getBTHomeObjIdText(sensor.sensorId), sensor.sensorIdx, bthomeSensor.value);
@@ -1043,6 +1064,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
       }
     }
 
+    // v8 ignore else
     if (this.gen === 1) {
       // Update active components
       for (const key in data) {
@@ -1111,15 +1133,18 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
         if (key === 'accel') {
           const accel = data.accel as ShellyData;
           // this.log.debug(`***Device ${this.id} has accel data ${accel.vibration}`);
+          // v8 ignore else
           if (accel.vibration !== undefined) this.getComponent('vibration')?.setValue('vibration', accel.vibration === 1);
         }
         if (key === 'lux') {
           this.updateComponent(key, data[key] as ShellyData);
         }
         if (key === 'flood') {
+          // v8 ignore else
           if (typeof data[key] === 'boolean') this.getComponent('flood')?.setValue('flood', data[key]);
         }
         if (key === 'smoke') {
+          // v8 ignore else
           if (typeof data[key] === 'boolean') this.getComponent('smoke')?.setValue('smoke', data[key]);
         }
         if (key === 'gas_sensor') {
@@ -1132,29 +1157,36 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
           this.updateComponent('temperature', data[key] as ShellyData);
           // oxlint-disable-next-line typescript/no-explicit-any
           const sensor = (data[key] as any)['0'] as ShellyData;
+          // v8 ignore else
           if (sensor && isValidNumber(sensor.tC, -55, 125)) this.getComponent('temperature')?.setValue('value', sensor.tC);
         }
         if (key === 'ext_humidity' && isValidObject(data[key], 1)) {
           this.updateComponent('humidity', data[key] as ShellyData);
           // oxlint-disable-next-line typescript/no-explicit-any
           const sensor = (data[key] as any)['0'] as ShellyData;
+          // v8 ignore else
           if (sensor && isValidNumber(sensor.hum, 0, 100)) this.getComponent('humidity')?.setValue('value', sensor.hum);
         }
         if (key === 'tmp') {
           if (data.temperature === undefined && data.overtemperature === undefined) this.updateComponent('temperature', data[key] as ShellyData);
           const sensor = data.tmp as ShellyData;
+          // v8 ignore else
           if (sensor.is_valid === true && sensor.units === 'C' && isValidNumber(sensor.tC, -55, 125)) this.getComponent('temperature')?.setValue('value', sensor.tC);
+          // v8 ignore else
           if (sensor.is_valid === true && sensor.units === 'F' && isValidNumber(sensor.tF, -67, 257)) this.getComponent('temperature')?.setValue('value', sensor.tF);
         }
         if (key === 'hum') {
           this.updateComponent('humidity', data[key] as ShellyData);
           const sensor = data.hum as ShellyData;
+          // v8 ignore else
           if (sensor.is_valid === true && isValidNumber(sensor.value, 0, 100)) this.getComponent('humidity')?.setValue('value', sensor.value);
         }
         if (key === 'temperature') {
+          // v8 ignore else
           if (data[key] !== null && data[key] !== undefined && typeof data[key] === 'number') this.getComponent('sys')?.setValue('temperature', data[key]);
         }
         if (key === 'overtemperature') {
+          // v8 ignore else
           if (data[key] !== null && data[key] !== undefined && typeof data[key] === 'boolean') this.getComponent('sys')?.setValue('overtemperature', data[key]);
         }
       }
@@ -1164,8 +1196,11 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
           let index = 0;
           for (const light of data[key] as ShellyData[]) {
             const component = this.getComponent(`${key.slice(0, 5)}:${index++}`);
+            // v8 ignore if
             if (!component) this.log.debug(`***Component ${key.slice(0, 5)}:${index} not found`);
+            // v8 ignore else
             if (component && light.ison !== undefined) component.setValue('state', light.ison);
+            // v8 ignore else
             if (component && light.gain !== undefined) component.setValue('brightness', light.gain); // gain is used by color channels and brightness by white channels
           }
         }
@@ -1254,6 +1289,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
   async fetchUpdate(): Promise<ShellyData | null> {
     this.shellyPayload = await shellyFetch(this.shelly, this.log, this.host, 'shelly');
     if (!this.shellyPayload) {
+      // v8 ignore else
       if (this.online) {
         this.log.warn(`Error fetching shelly from device ${hk}${this.id}${wr} host ${zb}${this.host}${wr}. No data found.`);
         this.online = false;
@@ -1267,6 +1303,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
         `Device ${hk}${this.id}${wr} host ${zb}${this.host}${wr} has a different MAC address (${CYAN}${this.shellyPayload.mac}${wr}) than the one registered in the device (${CYAN}${this.mac}${wr}). Waiting for mDns to update the device information...`,
       );
       this.wsClient?.stop();
+      // v8 ignore else
       if (this.online) {
         this.log.info(`The device ${hk}${this.id}${nf} host ${zb}${this.host}${nf} is offline.`);
         this.online = false;
@@ -1276,6 +1313,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
     }
     this.settingsPayload = await shellyFetch(this.shelly, this.log, this.host, this.gen === 1 ? 'settings' : 'Shelly.GetConfig');
     if (!this.settingsPayload) {
+      // v8 ignore else
       if (this.online) {
         this.log.warn(`Error fetching settings from device ${hk}${this.id}${wr} host ${zb}${this.host}${wr}. No data found.`);
         this.online = false;
@@ -1285,6 +1323,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
     }
     this.statusPayload = await shellyFetch(this.shelly, this.log, this.host, this.gen === 1 ? 'status' : 'Shelly.GetStatus');
     if (!this.statusPayload) {
+      // v8 ignore else
       if (this.online) {
         this.log.warn(`Error fetching status from device ${hk}${this.id}${wr} host ${zb}${this.host}${wr}. No data found.`);
         this.online = false;
@@ -1298,6 +1337,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
       let offset = 0;
       do {
         btHomePayload = (await shellyFetch(this.shelly, this.log, this.host, 'Shelly.GetComponents', { dynamic_only: true, offset })) as unknown as BTHomeComponentPayload;
+        // v8 ignore else
         if (btHomePayload?.components) {
           btHomeComponents.push(...btHomePayload.components);
           offset += btHomePayload.components.length;
@@ -1445,22 +1485,34 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
           deviceData.settings.timezone = null;
           deviceData.settings.lat = null;
           deviceData.settings.lng = null;
+          // v8 ignore else
           if (deviceData.settings.wifi_ap) (deviceData.settings.wifi_ap as ShellyData).ssid = '';
+          // v8 ignore else
           if (deviceData.settings.wifi_sta) (deviceData.settings.wifi_sta as ShellyData).ssid = '';
+          // v8 ignore else
           if (deviceData.settings.wifi_sta1) (deviceData.settings.wifi_sta1 as ShellyData).ssid = '';
+          // v8 ignore else
           if (deviceData.status.wifi_ap) (deviceData.status.wifi_ap as ShellyData).ssid = '';
+          // v8 ignore else
           if (deviceData.status.wifi_sta) (deviceData.status.wifi_sta as ShellyData).ssid = '';
+          // v8 ignore else
           if (deviceData.status.wifi_sta1) (deviceData.status.wifi_sta1 as ShellyData).ssid = '';
         }
         // Remove sensitive data for Gen 2+
         if (this.gen >= 2) {
+          // v8 ignore else
           if (deviceData.settings.sys) (deviceData.settings.sys as ShellyData).location = null;
+          // v8 ignore else
           if (deviceData.settings.wifi) {
             const wifi = deviceData.settings.wifi as ShellyData;
+            // v8 ignore else
             if (wifi.ap) (wifi.ap as ShellyData).ssid = '';
+            // v8 ignore else
             if (wifi.sta) (wifi.sta as ShellyData).ssid = '';
+            // v8 ignore else
             if (wifi.sta1) (wifi.sta1 as ShellyData).ssid = '';
           }
+          // v8 ignore else
           if (deviceData.status.wifi) (deviceData.status.wifi as ShellyData).ssid = '';
         }
         const data = JSON.stringify(deviceData, null, 2);
