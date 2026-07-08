@@ -9,7 +9,7 @@ import { getMacAddress, wait } from 'matterbridge/utils';
 import { HOMEDIR, setupTest } from 'matterbridge/vitest-utils';
 
 import { Shelly } from '../src/shelly.js';
-import type { ShellyCoverComponent, ShellySwitchComponent } from '../src/shellyComponent.js';
+import { isCoverComponent, isSwitchComponent } from '../src/shellyComponent.js';
 import { ShellyDevice } from '../src/shellyDevice.js';
 import { shellyFetch } from '../src/shellyFetch.js';
 
@@ -192,9 +192,9 @@ describe('Shellies', () => {
       expect(device).not.toBeUndefined();
       if (!device) return;
 
-      const component = device.getComponent('switch:0') as ShellySwitchComponent;
+      const component = device.getComponent('switch:0');
       expect(component).not.toBeUndefined();
-      if (!component) return;
+      if (!component || !isSwitchComponent(component)) return;
 
       component.On();
       component.Off();
@@ -208,8 +208,8 @@ describe('Shellies', () => {
       expect(device).not.toBeUndefined();
       if (!device) return;
 
-      const component = device.getComponent('cover:0') as ShellyCoverComponent;
-      if (!component) return;
+      const component = device.getComponent('cover:0');
+      if (!component || !isCoverComponent(component)) return;
 
       component.Open();
       component.Stop();

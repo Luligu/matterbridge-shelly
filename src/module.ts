@@ -102,15 +102,7 @@ import { shellyCoverCommandHandler, shellyIdentifyCommandHandler, shellyLightCom
 import type { DiscoveredDevice } from './mdnsScanner.js';
 // Shelly imports
 import { Shelly } from './shelly.js';
-import {
-  isCoverComponent,
-  isLightComponent,
-  isSwitchComponent,
-  type ShellyComponent,
-  type ShellyCoverComponent,
-  type ShellyLightComponent,
-  type ShellySwitchComponent,
-} from './shellyComponent.js';
+import { isCoverComponent, isLightComponent, isSwitchComponent, type ShellyComponent } from './shellyComponent.js';
 import { ShellyDevice } from './shellyDevice.js';
 import { shellyFetch } from './shellyFetch.js';
 import type { ShellyDataType, ShellyDeviceId, ShellyEvent } from './shellyTypes.js';
@@ -1660,7 +1652,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         if (!label) continue;
         // Configure the cluster OnOff attribute onOff
         if (label.startsWith('switch') || label.startsWith('relay') || label.startsWith('light') || label.startsWith('rgb')) {
-          const switchComponent = shellyDevice.getComponent(label) as ShellySwitchComponent;
+          const switchComponent = shellyDevice.getComponent(label);
+          if (!switchComponent) return;
           // oxlint-disable-next-line typescript/no-base-to-string typescript/restrict-template-expressions
           this.log.info(`Configuring device ${dn}${mbDevice.deviceName}${nf} component ${hk}${label}${nf}:${zb}state ${YELLOW}${switchComponent.getValue('state')}${nf}`);
           const state = switchComponent.getValue('state');
@@ -1670,7 +1663,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         }
         // Configure the cluster LevelControl attribute currentLevel
         if (label.startsWith('light') || label.startsWith('rgb')) {
-          const lightComponent = shellyDevice.getComponent(label) as ShellyLightComponent;
+          const lightComponent = shellyDevice.getComponent(label);
+          if (!lightComponent) return;
           const level = lightComponent.getValue('brightness') as number;
           if (isValidNumber(level, 1, 100)) {
             const matterLevel = Math.max(Math.min(Math.round((level / 100) * 254), 254), 1);
@@ -1712,7 +1706,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         }
         // Configure the cluster WindowCovering attribute currentPositionLiftPercent100ths
         if (label.startsWith('cover') || label.startsWith('roller')) {
-          const coverComponent = shellyDevice.getComponent(label) as ShellyCoverComponent;
+          const coverComponent = shellyDevice.getComponent(label);
+          if (!coverComponent) return;
           const position = coverComponent.hasProperty('current_pos') ? (coverComponent.getValue('current_pos') as number) : undefined;
           if (isValidNumber(position, 0, 100)) {
             this.log.info(`Configuring device ${dn}${mbDevice.deviceName}${nf} component ${hk}${label}${nf}:${zb}current_pos ${YELLOW}${position}${nf}`);
@@ -1724,7 +1719,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         }
         // Configure the cluster Thermostat attribute occupiedHeatingSetpoint occupiedCoolingSetpoint
         if (label.startsWith('thermostat')) {
-          const thermostatComponent = shellyDevice.getComponent(label) as ShellyCoverComponent;
+          const thermostatComponent = shellyDevice.getComponent(label);
+          if (!thermostatComponent) return;
           const target = thermostatComponent.hasProperty('target_C') ? (thermostatComponent.getValue('target_C') as number) : undefined;
           if (isValidNumber(target, 5, 35)) {
             if (thermostatComponent.getValue('type') === 'heating') {
