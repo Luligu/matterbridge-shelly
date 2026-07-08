@@ -1,9 +1,9 @@
 /**
+ * @file src/wsClient.ts
  * @description This file contains the class WsClient.
- * @file src\wsClient.ts
  * @author Luca Liguori
  * @created 2024-05-01
- * @version 2.0.2
+ * @version 2.1.0
  * @license Apache-2.0
  *
  * Copyright 2024, 2025, 2026 Luca Liguori.
@@ -25,10 +25,11 @@ import crypto from 'node:crypto';
 import EventEmitter from 'node:events';
 
 import { AnsiLogger, CYAN, db, er, hk, LogLevel, nf, rs, TimestampFormat, wr, zb } from 'matterbridge/logger';
-import WebSocket from 'ws';
+import { getErrorMessage } from 'matterbridge/utils';
+import { WebSocket } from 'ws';
 
 import { createDigestShellyAuth } from './auth.js';
-import { ShellyDevice } from './shellyDevice.js';
+import { normalizeId } from './shellyUtils.js';
 
 interface AuthParams {
   realm: string; // device_id
@@ -55,7 +56,7 @@ interface RequestFrameWithAuth {
   auth: AuthParams;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+// oxlint-disable-next-line eslint/no-unused-vars
 interface ResponseError {
   id: number;
   src: string;
@@ -76,7 +77,7 @@ interface ResponseErrorMessage {
 
 type Params = Record<string, string | number | boolean | object>;
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+// oxlint-disable-next-line eslint/no-unused-vars
 interface ResponseNotifyStatus {
   src: string;
   dst: string;
@@ -84,7 +85,7 @@ interface ResponseNotifyStatus {
   params: Params;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+// oxlint-disable-next-line eslint/no-unused-vars
 interface Response {
   id: number;
   src: string;
@@ -93,11 +94,11 @@ interface Response {
 }
 
 interface WsClientEvent {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // oxlint-disable-next-line typescript/no-explicit-any
   response: [response: any];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // oxlint-disable-next-line typescript/no-explicit-any
   update: [params: any];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // oxlint-disable-next-line typescript/no-explicit-any
   event: [events: any];
   started: []; // Event emitted when the WebSocket client starts listening for status updates
   stopped: []; // Event emitted when the WebSocket client stops listening for status updates
@@ -113,13 +114,6 @@ interface WsClientEvent {
  * The WsClient class provides methods for establishing a WebSocket connection to a Shelly device,
  * sending requests to the device, and receiving status updates and events from the device.
  * It also includes functionality for handling ping/pong messages to ensure the connection is alive.
- *
- * @example
- * ```typescript
- * const wsClient = new WsClient('shellyplus1-E465B8F3028C', '192.168.1.237', 'password');
- * wsClient.start();
- * wsClient.sendRequest('Shelly.GetStatus');
- * ```
  */
 export class WsClient extends EventEmitter<WsClientEvent> {
   public readonly log;
@@ -131,7 +125,7 @@ export class WsClient extends EventEmitter<WsClientEvent> {
   private wsHost;
   private wsDeviceId: string;
   private wsUrl;
-  private wsPort = 80; // Default port for WebSocket connections
+  private wsPort;
   private auth = false;
   private password;
   private requestId;
@@ -185,7 +179,7 @@ export class WsClient extends EventEmitter<WsClientEvent> {
    *
    * @param {string} value - The new host value to set.
    */
-  setHost(value: string) {
+  setHost(value: string): void {
     this.wsHost = value;
     this.wsUrl = `ws://${this.wsHost}/rpc`;
   }
@@ -214,7 +208,7 @@ export class WsClient extends EventEmitter<WsClientEvent> {
    * @param {string} method - The method to be passed to the requestFrame. Defaults to 'Shelly.GetStatus'.
    * @param {object} params - The parameters to be passed to the requestFrame. Defaults to an empty object.
    */
-  async sendRequest(method: string = 'Shelly.GetStatus', params: Params = {}) {
+  sendRequest(method: string = 'Shelly.GetStatus', params: Params = {}): void {
     if (!this.wsClient || !this._isConnected) {
       this.log.error(`SendRequest error: WebSocket client is not connected to device ${hk}${this.wsDeviceId}${er} host ${zb}${this.wsHost}${er}`);
       return;
@@ -276,14 +270,12 @@ export class WsClient extends EventEmitter<WsClientEvent> {
   /**
    * Listens for status updates from the WebSocket connection.
    *
-   * @returns {Promise<void>} A promise that resolves when the WebSocket client is ready to listen for status updates.
-   *
    * @remarks
    * This method establishes a WebSocket connection and handles various events such as open, error, close, and message.
    * It sends requests and receives responses from the WebSocket server.
    * The received responses are parsed and appropriate actions are taken based on the response type.
    */
-  async listenForStatusUpdates(): Promise<void> {
+  listenForStatusUpdates(): void {
     if (this._isConnecting || this._isConnected) {
       this.log.debug(`WebSocket client is already ${this._isConnecting ? 'connecting' : 'connected'} to device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}`);
       return;
@@ -293,7 +285,7 @@ export class WsClient extends EventEmitter<WsClientEvent> {
       this.wsClient = new WebSocket(this.wsUrl);
     } catch (error) {
       this._isConnecting = false;
-      this.log.error(`Failed to create WebSocket connection to ${zb}${this.wsUrl}${er}: ${error}`);
+      this.log.error(`Failed to create WebSocket connection to ${zb}${this.wsUrl}${er}: ${getErrorMessage(error)}`);
       return;
     }
 
@@ -335,11 +327,12 @@ export class WsClient extends EventEmitter<WsClientEvent> {
     // Handle messages from the WebSocket
     this.wsClient.on('message', (data: WebSocket.RawData, _isBinary: boolean) => {
       try {
+        // oxlint-disable-next-line typescript/no-base-to-string
         const response = JSON.parse(data.toString());
-        this.id = ShellyDevice.normalizeId(response.src).id;
+        this.id = normalizeId(response.src).id;
 
         // Handle the response error code 401 (auth required)
-        if (response.error && response.error.code === 401 && response.id === this.requestId && response.dst === 'Matterbridge' + this.requestId) {
+        if (response.error?.code === 401 && response.id === this.requestId && response.dst === 'Matterbridge' + this.requestId) {
           this.auth = true;
           if (!this.password) {
             this.log.error(`Authentication required for ${response.src} but the password is not set. Exiting...`);
@@ -378,7 +371,7 @@ export class WsClient extends EventEmitter<WsClientEvent> {
           this.log.debug(`Received ${CYAN}unknown response${db} from ${hk}${this.id}${db} host ${zb}${this.wsHost}${db}:${rs}\n`, response);
         }
       } catch (error) {
-        this.log.error(`WebSocket client error parsing message from ${hk}${this.id}${er} host ${zb}${this.wsHost}${er}: ${error instanceof Error ? error.message : error}`);
+        this.log.error(`WebSocket client error parsing message from ${hk}${this.id}${er} host ${zb}${this.wsHost}${er}: ${getErrorMessage(error)}`);
       }
     });
 
@@ -392,9 +385,9 @@ export class WsClient extends EventEmitter<WsClientEvent> {
    * @remarks
    * This method initializes the WebSocket client and starts listening for status updates.
    */
-  start() {
+  start(): void {
     this.log.debug(`Starting ws client for Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}`);
-    this.listenForStatusUpdates(); // No await to start listening for status updates
+    this.listenForStatusUpdates();
     this.log.debug(`Started ws client for Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}`);
   }
 
@@ -405,14 +398,12 @@ export class WsClient extends EventEmitter<WsClientEvent> {
    * This method stops the WebSocket client and performs necessary cleanup operations.
    * If the client is currently connecting, it will wait for a maximum of 5 seconds before forcefully terminating the connection.
    */
-  stop() {
+  stop(): void {
     this.log.debug(
       `Stopping ws client for Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db} state ${this.wsClient?.readyState} connencting ${this._isConnecting} connected ${this._isConnected} `,
     );
     this.stopPingPong();
     if (!this.wsClient) return;
-    // Remved cause we cannot trap the error from websocket.terminate()
-    // try {
     if (this.wsClient.readyState === WebSocket.OPEN) {
       this.wsClient.close();
       this.log.debug(`Closed ws client for Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}`);
@@ -426,9 +417,6 @@ export class WsClient extends EventEmitter<WsClientEvent> {
     } else if (this.wsClient.readyState === WebSocket.CLOSED) {
       this.log.debug(`Ws client already closed for Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}`);
     }
-    // } catch (error) {
-    // this.log.debug(`Error stopping ws client for Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}: ${error}`);
-    // } finally {
     this._isConnecting = false;
     this._isConnected = false;
     this.wsClient.removeAllListeners();
@@ -437,6 +425,5 @@ export class WsClient extends EventEmitter<WsClientEvent> {
 
     // Emit stopped event
     this.emit('stopped');
-    // }
   }
 }

@@ -1,12 +1,12 @@
 /**
+ * @file src/shellyProperty.ts
  * @description This file contains the class ShellyProperty.
- * @file src\shellyProperty.ts
  * @author Luca Liguori
  * @created 2024-05-01
- * @version 1.0.0
+ * @version 1.1.0
  * @license Apache-2.0
  *
- * Copyright 2024, 2025 Luca Liguori.
+ * Copyright 2024, 2025, 2026 Luca Liguori.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@
  * limitations under the License.
  */
 
-import { ShellyComponent } from './shellyComponent.js';
-import { ShellyDataType } from './shellyTypes.js';
+import type { ShellyComponent } from './shellyComponent.js';
+import type { ShellyDataType } from './shellyTypes.js';
 
 /**
  * Creates a new instance of the ShellyProperty class.

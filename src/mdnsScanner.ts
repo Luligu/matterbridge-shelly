@@ -1,9 +1,9 @@
 /**
+ * @file src/mdnsScanner.ts
  * @description This file contains the class MdnsScanner.
- * @file src\mdnsScanner.ts
  * @author Luca Liguori
  * @created 2024-05-01
- * @version 1.2.4
+ * @version 1.3.0
  * @license Apache-2.0
  *
  * Copyright 2024, 2025, 2026 Luca Liguori.
@@ -21,15 +21,16 @@
  * limitations under the License.
  */
 
-import { RemoteInfo, SocketType } from 'node:dgram';
+import type { RemoteInfo, SocketType } from 'node:dgram';
 import EventEmitter from 'node:events';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 
 import { AnsiLogger, BLUE, CYAN, db, debugStringify, er, hk, idn, ign, LogLevel, nf, rs, TimestampFormat, zb } from 'matterbridge/logger';
-import mdns, { QueryPacket, ResponsePacket } from 'multicast-dns';
+import { getErrorMessage } from 'matterbridge/utils';
+import mdns, { type QueryPacket, type ResponsePacket } from 'multicast-dns';
 
-import { ShellyDeviceId } from './shellyTypes.js';
+import type { ShellyDeviceId } from './shellyTypes.js';
 
 export interface DiscoveredDevice {
   id: ShellyDeviceId;
@@ -87,7 +88,7 @@ export class MdnsScanner extends EventEmitter<MdnsScannerEvents> {
   /**
    * Sends an mDNS query for shelly devices.
    */
-  sendQuery() {
+  sendQuery(): void {
     this.scanner?.query([
       { name: '_http._tcp.local', type: 'PTR' },
       { name: '_shelly._tcp.local', type: 'PTR' },
@@ -106,7 +107,7 @@ export class MdnsScanner extends EventEmitter<MdnsScannerEvents> {
    * @param {SocketType} type - Explicitly specify a socket type: "udp4" | "udp6". Default is "udp4".
    * @param {boolean} debug - Indicates whether to enable debug mode (default: false).
    */
-  start(scannerTimeout?: number, queryTimeout?: number, mdnsInterface?: string, type?: SocketType, debug: boolean = false) {
+  start(scannerTimeout?: number, queryTimeout?: number, mdnsInterface?: string, type?: SocketType, debug: boolean = false): void {
     if (this._isScanning) return;
     this._isScanning = true;
 
@@ -129,7 +130,7 @@ export class MdnsScanner extends EventEmitter<MdnsScannerEvents> {
       this.scanner = mdns();
     }
 
-    this.scanner.on('response', async (response: ResponsePacket, rinfo: RemoteInfo) => {
+    this.scanner.on('response', (response, rinfo) => {
       let port = 80; // shellymotionsensor, shellymotion2 send A record before SRV
       let gen = 1;
       this.devices.set(rinfo.address, rinfo.address);
@@ -182,7 +183,7 @@ export class MdnsScanner extends EventEmitter<MdnsScannerEvents> {
             this.discoveredDevices.set(deviceId, { id: deviceId, host: a.data, port, gen });
             this.emit('discovered', { id: deviceId, host: a.data, port, gen });
             if (debug || process.argv.includes('testMdnsScanner')) {
-              this.saveResponse(deviceId, response); // No await
+              void this.saveResponse(deviceId, response); // No await
             }
           }
         }
@@ -227,7 +228,7 @@ export class MdnsScanner extends EventEmitter<MdnsScannerEvents> {
             this.discoveredDevices.set(deviceId, { id: deviceId, host: a.data, port, gen });
             this.emit('discovered', { id: deviceId, host: a.data, port, gen });
             if (debug || process.argv.includes('testMdnsScanner')) {
-              this.saveResponse(deviceId, response); // No await
+              void this.saveResponse(deviceId, response); // No await
             }
           }
         }
@@ -249,15 +250,15 @@ export class MdnsScanner extends EventEmitter<MdnsScannerEvents> {
       if (debug) this.log.debug(`--- end ---\n`);
     });
 
-    this.scanner.on('error', async (err: Error) => {
-      this.log.error(`Error in mDNS query service: ${err.message}`);
+    this.scanner.on('error', (error) => {
+      this.log.error(`Error in mDNS query service: ${error.message}`);
     });
 
-    this.scanner.on('warning', async (err: Error) => {
-      this.log.warn(`Warning in mDNS query service: ${err.message}`);
+    this.scanner.on('warning', (error) => {
+      this.log.warn(`Warning in mDNS query service: ${error.message}`);
     });
 
-    this.scanner.on('ready', async () => {
+    this.scanner.on('ready', () => {
       this.log.debug(`The mDNS socket is bound`);
       this.log.info(`MdnsScanner for shelly devices is listening on port 5353...`);
     });
@@ -337,26 +338,26 @@ export class MdnsScanner extends EventEmitter<MdnsScannerEvents> {
   logPeripheral(): number {
     this.log.debug(`Discovered ${this.devices.size} devices:`);
     // Convert the Map to an array and sort by host
-    const sortedDevices = Array.from(this.devices).sort((a, b) => {
+    const sortedDevices = Array.from(this.devices).toSorted((a, b) => {
       const hostA = a[1].toLowerCase();
       const hostB = b[1].toLowerCase();
       if (hostA >= hostB) return 1;
       else return -1;
     });
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    // oxlint-disable-next-line eslint/no-unused-vars
     for (const [name, host] of sortedDevices) {
       this.log.debug(`- host: ${zb}${host}${nf}`);
     }
 
     this.log.info(`Discovered ${this.discoveredDevices.size} shelly devices:`);
     // Convert the Map to an array and sort by id
-    const sortedDiscoveredDevices = Array.from(this.discoveredDevices).sort((a, b) => {
+    const sortedDiscoveredDevices = Array.from(this.discoveredDevices).toSorted((a, b) => {
       const idA = a[1].id;
       const idB = b[1].id;
       if (idA >= idB) return 1;
       else return -1;
     });
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    // oxlint-disable-next-line eslint/no-unused-vars
     for (const [name, { id, host, port, gen }] of sortedDiscoveredDevices) {
       this.log.info(`- id: ${hk}${name}${nf} host: ${zb}${host}${nf} port: ${zb}${port}${nf} gen: ${CYAN}${gen}${nf}`);
     }
@@ -391,9 +392,9 @@ export class MdnsScanner extends EventEmitter<MdnsScannerEvents> {
       await fs.writeFile(responseFile, JSON.stringify(response, null, 2), 'utf8');
       this.log.debug(`Saved shellyId ${hk}${shellyId}${db} response file ${CYAN}${responseFile}${db}`);
       return Promise.resolve();
-    } catch (err) {
-      this.log.error(`Error saving shellyId ${hk}${shellyId}${er} response file ${CYAN}${responseFile}${er}: ${err instanceof Error ? err.message : err}`);
-      return Promise.reject(err);
+    } catch (error: unknown) {
+      this.log.error(`Error saving shellyId ${hk}${shellyId}${er} response file ${CYAN}${responseFile}${er}: ${getErrorMessage(error)}`);
+      return Promise.reject(error);
     }
   }
 }

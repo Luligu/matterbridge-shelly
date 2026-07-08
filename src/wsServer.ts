@@ -1,12 +1,12 @@
 /**
+ * @file src/wsServer.ts
  * @description This file contains the class WsServer.
- * @file src\wsServer.ts
  * @author Luca Liguori
  * @created 2024-08-13
- * @version 1.3.1
+ * @version 1.4.0
  * @license Apache-2.0
  *
- * Copyright 2024, 2025 Luca Liguori.
+ * Copyright 2024, 2025, 2026 Luca Liguori.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,13 +22,14 @@
  */
 
 import EventEmitter from 'node:events';
-import { createServer, IncomingMessage, Server } from 'node:http';
+import { createServer, type IncomingMessage, type Server } from 'node:http';
 
 import { AnsiLogger, CYAN, db, er, hk, LogLevel, rs, TimestampFormat, wr, zb } from 'matterbridge/logger';
-import WebSocket, { WebSocketServer } from 'ws';
+import { getErrorMessage } from 'matterbridge/utils';
+import { WebSocket, WebSocketServer } from 'ws';
 
-import { ShellyDevice } from './shellyDevice.js';
-import { ShellyData } from './shellyTypes.js';
+import type { ShellyData } from './shellyTypes.js';
+import { normalizeId } from './shellyUtils.js';
 
 interface WsMessage {
   src: string;
@@ -39,7 +40,7 @@ interface WsMessage {
 
 interface WsServerEvent {
   started: [];
-  stopped: [Error | undefined];
+  stopped: [];
   error: [Error];
   wssupdate: [shellyId: string, params: ShellyData];
   wssevent: [shellyId: string, params: ShellyData];
@@ -90,16 +91,16 @@ export class WsServer extends EventEmitter<WsServerEvent> {
    * It receives updates and events from the WebSocket server.
    * The received responses are parsed and appropriate actions are taken based on the response type.
    */
-  private async listenForStatusUpdates(port: number = 8485) {
+  private listenForStatusUpdates(port: number = 8485): void {
     try {
       // Create an HTTP server
       this.httpServer = createServer();
       // Create a WebSocket server and attach it to the HTTP server
       this.wsServer = new WebSocketServer({ server: this.httpServer });
     } catch (error) {
-      // istanbul ignore next
-      this.log.error(`Failed to create the HttpServer and WebSocketServer: ${error}`);
-      // istanbul ignore next
+      /* v8 ignore next */
+      this.log.error(`Failed to create the HttpServer and WebSocketServer: ${getErrorMessage(error)}`);
+      /* v8 ignore next */
       return;
     }
 
@@ -112,15 +113,14 @@ export class WsServer extends EventEmitter<WsServerEvent> {
       this.log.debug(`Start WebSocketServer PingPong.`);
 
       // Set a timeout to wait for a ping response
-      let pongTimeout: NodeJS.Timeout | undefined = undefined;
-      let pingInterval: NodeJS.Timeout | undefined = undefined;
+      let pongTimeout: NodeJS.Timeout | undefined;
+      let pingInterval: NodeJS.Timeout | undefined;
       ws.ping();
       pingInterval = setInterval(() => {
         if (ws?.readyState === WebSocket.OPEN) {
           ws.ping();
           // Set a timeout to wait for a pong response
           pongTimeout = setTimeout(() => {
-            // istanbul ignore next
             this.log.error(`WebSocketServer pong not received.`);
           }, this.pongPeriod);
         }
@@ -132,22 +132,21 @@ export class WsServer extends EventEmitter<WsServerEvent> {
 
         // Process the message and respond if necessary
         try {
+          // oxlint-disable-next-line typescript/no-base-to-string
           const message: WsMessage = JSON.parse(data.toString());
-          // console.log(message);
-
           if (message.method && (message.method === 'NotifyStatus' || message.method === 'NotifyFullStatus') && message.src && message.dst === 'ws') {
-            message.src = ShellyDevice.normalizeId(message.src).id;
+            message.src = normalizeId(message.src).id;
             this.log.debug(`Received ${CYAN}${message.method}${db} from ${hk}${message.src}${db} host ${zb}${clientAddress}${db}:${rs}\n`, message.params);
             this.emit('wssupdate', message.src, message.params);
           } else if (message.method && message.method === 'NotifyEvent' && message.src && message.dst === 'ws') {
-            message.src = ShellyDevice.normalizeId(message.src).id;
+            message.src = normalizeId(message.src).id;
             this.log.debug(`Received ${CYAN}NotifyEvent${db} from ${hk}${message.src}${db} host ${zb}${clientAddress}${db}:${rs}\n`, message.params);
             this.emit('wssevent', message.src, message.params);
           } else {
             this.log.debug(`WebSocketServer received an unknown message from ${hk}${message.src}${db} host ${zb}${clientAddress}${wr}:${rs}\n`, message);
           }
         } catch (error) {
-          this.log.error(`WebSocketServer error parsing message from ${zb}${clientAddress}${er}: ${error instanceof Error ? error.message : error}`);
+          this.log.error(`WebSocketServer error parsing message from ${zb}${clientAddress}${er}: ${getErrorMessage(error)}`);
         }
       });
 
@@ -175,14 +174,13 @@ export class WsServer extends EventEmitter<WsServerEvent> {
 
       // Handle errors
       ws.on('error', (error) => {
-        // istanbul ignore next
-        this.log.error('WebSocketServer client error:', error);
+        this.log.error(`WebSocketServer client error: ${getErrorMessage(error)}`);
       });
     });
 
     // Handle errors
     this.wsServer.on('error', (error: Error) => {
-      this.log.error(`WebSocketServer error: ${error instanceof Error ? error.message : error}`);
+      this.log.error(`WebSocketServer error: ${getErrorMessage(error)}`);
       this._isListening = false;
     });
 
@@ -211,18 +209,18 @@ export class WsServer extends EventEmitter<WsServerEvent> {
   /**
    * Starts the WebSocket server for the Shelly devices.
    *
-   * @param {number} port - The port number on which the WebSocket server will listen. Defaults to 8485.
+   * @param {number} [port] - The port number on which the WebSocket server will listen. Defaults to 8485.
    *
    * @remarks
    * This method initializes the WebSocket server and starts listening for status updates.
    */
-  start(port: number = 8485) {
+  start(port: number = 8485): void {
     if (this._isListening) {
       this.log.debug(`WebSocketServer is already listening.`);
       return;
     }
     this.log.info(`Starting WebSocket server for shelly devices...`);
-    this.listenForStatusUpdates(port); // No await to start listening for status updates
+    this.listenForStatusUpdates(port);
   }
 
   /**
@@ -232,9 +230,9 @@ export class WsServer extends EventEmitter<WsServerEvent> {
    * This method stops the WebSocket client and performs necessary cleanup operations.
    * If the client is currently connecting, it will wait for a maximum of 5 seconds before forcefully terminating the connection.
    */
-  stop() {
+  stop(): void {
     this.log.info(`Stopping WebSocket server (listening ${this._isListening}) for shelly devices...`);
-    for (const client of this.wsServer?.clients || []) {
+    for (const client of this.wsServer?.clients ?? []) {
       client.terminate();
     }
 
@@ -252,6 +250,6 @@ export class WsServer extends EventEmitter<WsServerEvent> {
 
     this._isListening = false;
     this.log.info(`Stopped WebSocket server for shelly devices...`);
-    this.emit('stopped', undefined);
+    this.emit('stopped');
   }
 }

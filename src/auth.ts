@@ -1,12 +1,12 @@
 /**
+ * @file src/auth.ts
  * @description This file contains the auth functions.
- * @file src\auth.ts
  * @author Luca Liguori
  * @created 2024-05-01
- * @version 1.0.0
+ * @version 1.1.0
  * @license Apache-2.0
  *
- * Copyright 2024, 2025 Luca Liguori.
+ * Copyright 2024, 2025, 2026 Luca Liguori.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,9 +41,9 @@ export interface AuthParams {
  */
 export function parseBasicAuthenticateHeader(authHeader: string): Record<string, string> {
   // 'Basic realm="Shelly"'
-  authHeader = authHeader.replace('Basic ', '');
+  const header = authHeader.replace('Basic ', '');
   const authParams: Record<string, string> = {};
-  authHeader.split(', ').forEach((param) => {
+  header.split(', ').forEach((param) => {
     const eqIdx = param.indexOf('=');
     if (eqIdx === -1) return;
     const key = param.slice(0, eqIdx).trim();
@@ -61,9 +61,9 @@ export function parseBasicAuthenticateHeader(authHeader: string): Record<string,
  */
 export function parseDigestAuthenticateHeader(authHeader: string): Record<string, string> {
   // 'Digest qop="auth", realm="shellyemminig4-d885acef41a8", nonce="AAAAAGoN/xP...==", algorithm=SHA-256'
-  authHeader = authHeader.replace('Digest ', '');
+  const header = authHeader.replace('Digest ', '');
   const authParams: Record<string, string> = {};
-  authHeader.split(', ').forEach((param) => {
+  header.split(', ').forEach((param) => {
     const eqIdx = param.indexOf('=');
     if (eqIdx === -1) return;
     const key = param.slice(0, eqIdx).trim();
@@ -122,7 +122,7 @@ export function generateNonce(min: number, max: number): number {
  * @returns {string} The URL-encoded body options as a string.
  */
 export function getGen1BodyOptions(params?: Record<string, string | number | boolean | object>): string {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // oxlint-disable-next-line typescript/no-explicit-any typescript/no-unsafe-type-assertion
   return new URLSearchParams(params as any).toString();
 }
 
@@ -132,7 +132,7 @@ options: {
   "headers": {
     "Content-Type":"application/json"
   },
-  "body": "{ 
+  "body": "{
     \"jsonrpc\":\"2.0\",
     \"id\":10,
     \"src\":\"Matterbridge\",
@@ -168,6 +168,5 @@ export function getGen2BodyOptions(
   body.method = method;
   if (params) body.params = params;
   if (auth) body.auth = auth;
-  // console.log(JSON.stringify(body));
   return JSON.stringify(body);
 }
