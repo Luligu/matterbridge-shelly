@@ -42,6 +42,7 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 - [native]: Migrated the toolchain from ESLint/Prettier/Jest to oxlint/oxfmt/tsgo/Vitest.
 - [package]: Update dependencies.
 - [package]: Upgrade package.
+- [mdns]: Bump MdnsScanner v.1.4.0.
 
 <a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 

@@ -10,7 +10,7 @@ import type { RemoteInfo } from 'node:dgram';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 
-import { AnsiLogger, CYAN, db, hk, ign, LogLevel, rs } from 'matterbridge/logger';
+import { AnsiLogger, CYAN, db, hk, idn, ign, LogLevel, rs } from 'matterbridge/logger';
 import { flushAsync, loggerLogSpy, setupTest } from 'matterbridge/vitest-utils';
 import type { ResponsePacket } from 'multicast-dns';
 import type { MockedFunction } from 'vitest';
@@ -393,6 +393,42 @@ const gen3_ResponsePacket = {
 
 const gen3_RemoteInfo = { address: '192.168.1.220', family: 'IPv4', port: 5353, size: 279 };
 
+// Covers every TxtData shape (string | Buffer | Array<string | Buffer>) in both answers and additionals
+const txtVariants_ResponsePacket = {
+  id: 0,
+  type: 'response',
+  flags: 1024,
+  flag_qr: true,
+  opcode: 'QUERY',
+  flag_aa: true,
+  flag_tc: false,
+  flag_rd: false,
+  flag_ra: false,
+  flag_z: false,
+  flag_ad: false,
+  flag_cd: false,
+  rcode: 'NOERROR',
+  questions: [],
+  answers: [
+    { name: 'answer-buffer.local', type: 'TXT', ttl: 120, class: 'IN', flush: false, data: Buffer.from('answer-buffer') },
+    { name: 'answer-string.local', type: 'TXT', ttl: 120, class: 'IN', flush: false, data: 'answer-string' },
+    { name: 'answer-array.local', type: 'TXT', ttl: 120, class: 'IN', flush: false, data: [Buffer.from('answer-array-buffer'), 'answer-array-string'] },
+  ],
+  authorities: [],
+  additionals: [
+    { name: 'additional-buffer.local', type: 'TXT', ttl: 120, class: 'IN', flush: false, data: Buffer.from('additional-buffer') },
+    { name: 'additional-string.local', type: 'TXT', ttl: 120, class: 'IN', flush: false, data: 'additional-string' },
+    {
+      name: 'additional-array.local',
+      type: 'TXT',
+      ttl: 120,
+      class: 'IN',
+      flush: false,
+      data: [Buffer.from('additional-array-buffer'), 'additional-array-string'],
+    },
+  ],
+};
+
 describe('Shellies MdnsScanner test', () => {
   const mdns = new MdnsScanner(LogLevel.DEBUG);
 
@@ -442,6 +478,7 @@ describe('Shellies MdnsScanner test', () => {
     expect(mdns.normalizeShellyId('ShellySwitch25-3494546bbF7E.local')).toBe('shellyswitch25-3494546BBF7E');
     expect(mdns.normalizeShellyId('shellyPlug-S-C38Eab.local')).toBe('shellyplug-s-C38EAB');
     expect(mdns.normalizeShellyId('shellyPlugC38Eab.local')).toBe(undefined);
+    expect(mdns.normalizeShellyId('shellyplug-s-.local')).toBe(undefined);
   });
 
   test('Start discover', async () => {
@@ -456,6 +493,94 @@ describe('Shellies MdnsScanner test', () => {
       }, 1000);
     });
   }, 10000);
+
+  test('Start discover on udp4', () => {
+    mdns.start(3000, 0, '127.0.0.1', 'udp4', true);
+    expect(mdns.isScanning).toBeTruthy();
+    expect(sendQuerySpy).toHaveBeenCalled();
+    expect(loggerLogSpy).toHaveBeenCalledWith(
+      LogLevel.INFO,
+      `Starting MdnsScanner for shelly devices (interface 127.0.0.1 bind 127.0.0.1 type udp4 ip 224.0.0.251) for shelly devices...`,
+    );
+    mdns.stop();
+    expect(mdns.isScanning).toBeFalsy();
+  });
+
+  test('Start discover on udp4 without debug', () => {
+    loggerLogSpy.mockClear();
+    mdns.start(undefined, 0, '0.0.0.0', 'udp4', false);
+    expect(mdns.isScanning).toBeTruthy();
+    expect(loggerLogSpy).not.toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining('Mdns'));
+    mdns.stop();
+    expect(mdns.isScanning).toBeFalsy();
+  });
+
+  test('Start discover on udp6', () => {
+    mdns.start(3000, 0, '::1', 'udp6', true);
+    expect(mdns.isScanning).toBeTruthy();
+    expect(sendQuerySpy).toHaveBeenCalled();
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Starting MdnsScanner for shelly devices (interface ::1 bind ::1 type udp6 ip ff02::fb) for shelly devices...`);
+    mdns.stop();
+    expect(mdns.isScanning).toBeFalsy();
+  });
+
+  test('Start discover on udp6 without debug', () => {
+    loggerLogSpy.mockClear();
+    mdns.start(undefined, 0, '::', 'udp6', false);
+    expect(mdns.isScanning).toBeTruthy();
+    expect(loggerLogSpy).not.toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining('Mdns'));
+    mdns.stop();
+    expect(mdns.isScanning).toBeFalsy();
+  });
+
+  test('Start discover on udp6 with scannerTimeout', async () => {
+    vi.useFakeTimers();
+    mdns.start(3000, 0, '::1', 'udp6', true);
+    expect(mdns.isScanning).toBeTruthy();
+
+    // Let the scannerTimeout fire and stop the scanner automatically, instead of waiting 3 real seconds
+    await vi.advanceTimersByTimeAsync(3000);
+    expect(mdns.isScanning).toBeFalsy();
+    vi.useRealTimers();
+  });
+
+  test('Stop with keepAlive', () => {
+    mdns.start(undefined, 0, undefined, undefined, true);
+    expect(mdns.isScanning).toBeTruthy();
+    const scanner = (mdns as any).scanner;
+    expect(scanner).toBeDefined();
+    const removeAllListenersSpy = vi.spyOn(scanner, 'removeAllListeners');
+    const destroySpy = vi.spyOn(scanner, 'destroy');
+
+    loggerLogSpy.mockClear();
+    mdns.stop(true);
+    expect(mdns.isScanning).toBeFalsy();
+    expect((mdns as any).scanner).toBe(scanner);
+    expect(removeAllListenersSpy).not.toHaveBeenCalled();
+    expect(destroySpy).not.toHaveBeenCalled();
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, 'Stopping MdnsScanner for shelly devices...');
+    expect(loggerLogSpy).not.toHaveBeenCalledWith(LogLevel.INFO, 'Stopped MdnsScanner for shelly devices.');
+
+    // Fully stop to clean up
+    mdns.stop();
+    expect(removeAllListenersSpy).toHaveBeenCalled();
+    expect(destroySpy).toHaveBeenCalled();
+    expect((mdns as any).scanner).toBeUndefined();
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, 'Stopped MdnsScanner for shelly devices.');
+  });
+
+  test('Start discover when already scanning', () => {
+    mdns.start(3000, 0, undefined, undefined, true);
+    expect(mdns.isScanning).toBeTruthy();
+    sendQuerySpy.mockClear();
+    loggerLogSpy.mockClear();
+    mdns.start(3000, 0, undefined, undefined, true);
+    expect(mdns.isScanning).toBeTruthy();
+    expect(sendQuerySpy).not.toHaveBeenCalled();
+    expect(loggerLogSpy).not.toHaveBeenCalled();
+    mdns.stop();
+    expect(mdns.isScanning).toBeFalsy();
+  });
 
   test('Start discover with interface', async () => {
     mdns.start(3000, 0, '127.0.0.1', 'udp4', true);
@@ -494,6 +619,46 @@ describe('Shellies MdnsScanner test', () => {
     // Wait for the discovered event to be processed.
     expect(await discoveredPromise).toEqual({ id: 'shellyswitch25-3494546BBF7E', host: '192.168.1.1', port: 80, gen: 1 });
 
+    // Restart with debug disabled and emit again to cover the debug === false branches
+    mdns.stop();
+    mdns.start(undefined, 0, '127.0.0.1', 'udp4', false);
+    expect(mdns.isScanning).toBeTruthy();
+    loggerLogSpy.mockClear();
+    (mdns as any).scanner.emit('response', generic_ResponsePacket, generic_RemoteInfo);
+    expect(loggerLogSpy).not.toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining('Mdns response from'));
+    expect(loggerLogSpy).not.toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining('response.questions'));
+    expect(loggerLogSpy).not.toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining('response.answers'));
+    expect(loggerLogSpy).not.toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining('response.additionals'));
+    expect(loggerLogSpy).not.toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining('response.authorities'));
+    expect(loggerLogSpy).not.toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining('--- end ---'));
+
+    // Stop the mdns scanner
+    mdns.stop();
+    expect(mdns.isScanning).toBeFalsy();
+  }, 10000);
+
+  test('Generic response with TXT data variants (string, Buffer, Array)', async () => {
+    // Start the mdns scanner with debug enabled
+    mdns.start(undefined, 0, '127.0.0.1', 'udp4', true);
+    expect(mdns.isScanning).toBeTruthy();
+    loggerLogSpy.mockClear();
+
+    // Emit a response packet with all three TXT data shapes (string, Buffer, Array) in both answers and additionals
+    (mdns as any).scanner.emit('response', txtVariants_ResponsePacket, generic_RemoteInfo);
+
+    // answers: string, Buffer and Array data are all logged correctly
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `[${idn}TXT${rs}${db}] Name: ${CYAN}answer-buffer.local${db} data: answer-buffer`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `[${idn}TXT${rs}${db}] Name: ${CYAN}answer-string.local${db} data: answer-string`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `[${idn}TXT${rs}${db}] Name: ${CYAN}answer-array.local${db} data: answer-array-buffer, answer-array-string`);
+
+    // additionals: string, Buffer and Array data are all logged correctly
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `[${idn}TXT${rs}${db}] Name: ${CYAN}additional-buffer.local${db} data: additional-buffer`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `[${idn}TXT${rs}${db}] Name: ${CYAN}additional-string.local${db} data: additional-string`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(
+      LogLevel.DEBUG,
+      `[${idn}TXT${rs}${db}] Name: ${CYAN}additional-array.local${db} data: additional-array-buffer, additional-array-string`,
+    );
+
     // Stop the mdns scanner
     mdns.stop();
     expect(mdns.isScanning).toBeFalsy();
@@ -525,6 +690,19 @@ describe('Shellies MdnsScanner test', () => {
 
     // Wait for the discovered event to be processed.
     expect(await queryPromise).toEqual({ class: 'IN', name: '_http._tcp.local', type: 'PTR' });
+
+    // Restart with debug disabled and emit again to cover the debug === false branches
+    mdns.stop();
+    mdns.start(undefined, 0, '127.0.0.1', 'udp4', false);
+    expect(mdns.isScanning).toBeTruthy();
+    loggerLogSpy.mockClear();
+    (mdns as any).scanner.emit('query', generic_QueryPacket, generic_RemoteInfo);
+    expect(loggerLogSpy).not.toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining('Mdns query from'));
+    expect(loggerLogSpy).not.toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining('query.questions'));
+    expect(loggerLogSpy).not.toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining('query.answers'));
+    expect(loggerLogSpy).not.toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining('query.additionals'));
+    expect(loggerLogSpy).not.toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining('query.authorities'));
+    expect(loggerLogSpy).not.toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining('--- end ---'));
 
     // Stop the mdns scanner
     mdns.stop();
@@ -1058,5 +1236,21 @@ describe('Shellies MdnsScanner test', () => {
       LogLevel.DEBUG,
       `Saved shellyId ${hk}shellyswitch25-3494546BBF7E${db} response file ${CYAN}${path.join((mdns as any)._dataPath, `shellyswitch25-3494546BBF7E.mdns.json`)}${db}`,
     );
+  });
+
+  test('Save response with all TXT data variants', async () => {
+    await (mdns as any).saveResponse('txt-variants-test', txtVariants_ResponsePacket);
+
+    // Buffer data is converted to a string
+    expect(txtVariants_ResponsePacket.answers[0].data).toBe('answer-buffer');
+    expect(txtVariants_ResponsePacket.additionals[0].data).toBe('additional-buffer');
+
+    // Plain string data is left untouched (neither Buffer nor Array)
+    expect(txtVariants_ResponsePacket.answers[1].data).toBe('answer-string');
+    expect(txtVariants_ResponsePacket.additionals[1].data).toBe('additional-string');
+
+    // Array data has its Buffer elements converted to strings, and string elements left as is
+    expect(txtVariants_ResponsePacket.answers[2].data).toEqual(['answer-array-buffer', 'answer-array-string']);
+    expect(txtVariants_ResponsePacket.additionals[2].data).toEqual(['additional-array-buffer', 'additional-array-string']);
   });
 });
