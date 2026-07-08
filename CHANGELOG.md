@@ -39,6 +39,7 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 
 ### Changed
 
+- [package]: Apply uniform style.
 - [native]: Migrated the toolchain from ESLint/Prettier/Jest to oxlint/oxfmt/tsgo/Vitest.
 - [package]: Update dependencies.
 - [package]: Upgrade package.
