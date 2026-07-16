@@ -60,7 +60,7 @@ import {
   waterLeakDetector,
 } from 'matterbridge';
 import { AnsiLogger, CYAN, db, debugStringify, dn, er, GREEN, hk, idn, type LogLevel, nf, nt, rs, TimestampFormat, wr, YELLOW, zb } from 'matterbridge/logger';
-import { type AtLeastOne, NumberTag } from 'matterbridge/matter';
+import { type AtLeastOne, CommonNumberTag } from 'matterbridge/matter';
 import {
   BooleanState,
   BridgedDeviceBasicInformation,
@@ -1872,10 +1872,10 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     // if (this.matterbridge.edge) return undefined;
     // Add the tagList to the descriptor cluster
     let tagList: Semtag | undefined;
-    if (component.index === 0) tagList = { mfgCode: null, namespaceId: NumberTag.Zero.namespaceId, tag: NumberTag.Zero.tag, label: component.id };
-    else if (component.index === 1) tagList = { mfgCode: null, namespaceId: NumberTag.One.namespaceId, tag: NumberTag.One.tag, label: component.id };
-    else if (component.index === 2) tagList = { mfgCode: null, namespaceId: NumberTag.Two.namespaceId, tag: NumberTag.Two.tag, label: component.id };
-    else if (component.index === 3) tagList = { mfgCode: null, namespaceId: NumberTag.Three.namespaceId, tag: NumberTag.Three.tag, label: component.id };
+    if (component.index === 0) tagList = { mfgCode: null, namespaceId: CommonNumberTag.Zero.namespaceId, tag: CommonNumberTag.Zero.tag, label: component.id };
+    else if (component.index === 1) tagList = { mfgCode: null, namespaceId: CommonNumberTag.One.namespaceId, tag: CommonNumberTag.One.tag, label: component.id };
+    else if (component.index === 2) tagList = { mfgCode: null, namespaceId: CommonNumberTag.Two.namespaceId, tag: CommonNumberTag.Two.tag, label: component.id };
+    else if (component.index === 3) tagList = { mfgCode: null, namespaceId: CommonNumberTag.Three.namespaceId, tag: CommonNumberTag.Three.tag, label: component.id };
     return tagList ? [tagList] : undefined;
   }
 
