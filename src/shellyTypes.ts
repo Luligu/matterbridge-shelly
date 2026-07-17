@@ -1,12 +1,12 @@
 /**
+ * @file src/shellyTypes.ts
  * @description This file contains the shelly types.
- * @file src\shellyTypes.ts
  * @author Luca Liguori
  * @created 2024-05-01
  * @version 2.0.0
  * @license Apache-2.0
  *
- * Copyright 2024, 2025 Luca Liguori.
+ * Copyright 2024, 2025, 2026 Luca Liguori.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

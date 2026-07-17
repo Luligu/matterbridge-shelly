@@ -1,6 +1,6 @@
 /**
+ * @file src/shelly.ts
  * @description This file contains the class Shelly.
- * @file src\shelly.ts
  * @author Luca Liguori
  * @created 2024-05-01
  * @version 2.2.3
@@ -24,13 +24,13 @@
 import crypto from 'node:crypto';
 import EventEmitter from 'node:events';
 
-import { AnsiLogger, BRIGHT, CYAN, db, er, hk, LogLevel, MAGENTA, nf, wr, zb } from 'matterbridge/logger';
-import { isValidArray, isValidObject } from 'matterbridge/utils';
+import { type AnsiLogger, BRIGHT, CYAN, db, er, hk, LogLevel, MAGENTA, nf, wr, zb } from 'matterbridge/logger';
+import { getErrorMessage, isValidArray, isValidObject } from 'matterbridge/utils';
 
 import { CoapServer } from './coapServer.js';
-import { DiscoveredDevice, MdnsScanner } from './mdnsScanner.js';
-import { ShellyDevice } from './shellyDevice.js';
-import { ShellyData, ShellyDataType, ShellyDeviceId, ShellyEvent } from './shellyTypes.js';
+import { type DiscoveredDevice, MdnsScanner } from './mdnsScanner.js';
+import type { ShellyDevice } from './shellyDevice.js';
+import type { ShellyData, ShellyDataType, ShellyDeviceId, ShellyEvent } from './shellyTypes.js';
 import { WsClient } from './wsClient.js';
 import { WsServer } from './wsServer.js';
 
@@ -77,7 +77,7 @@ export class Shelly extends EventEmitter<ShellyEvents> {
     this.wsServer = new WsServer();
 
     // Handle wssupdate from WsServer
-    this.wsServer.on('wssupdate', async (shellyId: string, params: ShellyData) => {
+    this.wsServer.on('wssupdate', (shellyId: string, params: ShellyData) => {
       const device = this.getDevice(shellyId);
       if (!device) {
         this.log.debug(`Received wssupdate from a not registered device id ${hk}${shellyId}${db}`);
@@ -99,7 +99,7 @@ export class Shelly extends EventEmitter<ShellyEvents> {
     });
 
     // Handle wssevent from WsServer
-    this.wsServer.on('wssevent', async (shellyId: string, params: ShellyData) => {
+    this.wsServer.on('wssevent', (shellyId: string, params: ShellyData) => {
       const device = this.getDevice(shellyId);
       if (!device) {
         this.log.debug(`Received wssevent from a not registered device id ${hk}${shellyId}${db}`);
@@ -117,18 +117,20 @@ export class Shelly extends EventEmitter<ShellyEvents> {
         device.cached = false;
         this.log.debug(`Device ${hk}${device.id}${db} host ${zb}${device.host}${db} sent a WebSocket message: setting cached to false`);
       }
+      // oxlint-disable-next-line typescript/no-unsafe-type-assertion
       if (isValidObject(params, 1) && isValidArray(params.events, 1)) device.onEvent(params.events as ShellyEvent[]);
     });
 
-    this.mdnsScanner.on('discovered', async (device: DiscoveredDevice) => {
+    this.mdnsScanner.on('discovered', (device: DiscoveredDevice) => {
       this.log.info(`Discovered shelly gen ${CYAN}${device.gen}${nf} device id ${hk}${device.id}${nf} host ${zb}${device.host}${nf} port ${zb}${device.port}${nf} `);
       this.emit('discovered', device);
     });
 
-    this.coapServer.on('update', async (host: string, component: string, property: string, value: ShellyDataType) => {
+    this.coapServer.on('update', (host: string, component: string, property: string, value: ShellyDataType) => {
       const device = this.getDeviceByHost(host);
       if (device) {
         device.log.debug(
+          // oxlint-disable-next-line typescript/no-base-to-string typescript/restrict-template-expressions
           `CoIoT update from device id ${hk}${device.id}${db} host ${zb}${host}${db} component ${CYAN}${component}${db} property ${CYAN}${property}${db} value ${CYAN}${value}${db}`,
         );
         if (!device.hasComponent(component)) this.log.error(`Device ${hk}${device.id}${er} host ${zb}${host}${er} does not have component ${CYAN}${component}${nf}`);
@@ -147,7 +149,7 @@ export class Shelly extends EventEmitter<ShellyEvents> {
       }
     });
 
-    this.coapServer.on('coapupdate', async (host: string, data: ShellyData) => {
+    this.coapServer.on('coapupdate', (host: string, data: ShellyData) => {
       const device = this.getDeviceByHost(host);
       if (device) {
         device.log.debug(`CoIoT coapupdate from device id ${hk}${device.id}${db} host ${zb}${host}${db}`);
@@ -164,6 +166,7 @@ export class Shelly extends EventEmitter<ShellyEvents> {
         }
         if (isValidObject(data, 1)) {
           for (const key in data) {
+            // oxlint-disable-next-line typescript/no-unsafe-type-assertion
             device.updateComponent(key, data[key] as ShellyData);
           }
         }
@@ -207,12 +210,11 @@ export class Shelly extends EventEmitter<ShellyEvents> {
             .fetchUpdate()
             .then((data) => {
               device.lastFetched = Date.now(); // Update lastFetched timestamp even if no data is fetched to avoid multiple fetches
-              if (data) device.saveDevicePayloads(this._dataPath);
+              if (data) void device.saveDevicePayloads(this._dataPath); // No await to save device payloads to disk
               return;
             })
-            .catch((error) => {
-              // istanbul ignore next
-              device.log.error(`Error fetching data from device ${hk}${device.id}${db} host ${zb}${device.host}${db}: ${error}`);
+            .catch((error: unknown) => {
+              device.log.error(`Error fetching data from device ${hk}${device.id}${db} host ${zb}${device.host}${db}: ${getErrorMessage(error)}`);
             });
         }
       });
@@ -228,7 +230,7 @@ export class Shelly extends EventEmitter<ShellyEvents> {
    * @remarks
    * This method should be called when the instance is no longer needed to free up resources.
    */
-  destroy() {
+  destroy(): void {
     clearInterval(this.fetchInterval);
     this.fetchInterval = undefined;
     this.devices.forEach((device) => {
@@ -369,6 +371,7 @@ export class Shelly extends EventEmitter<ShellyEvents> {
    * @param {ShellyDevice} device - The ShellyDevice object to be added.
    * @returns {Promise<Shelly>} A Promise that resolves to the updated Shelly instance.
    */
+  // oxlint-disable-next-line typescript/require-await
   async addDevice(device: ShellyDevice): Promise<Shelly> {
     if (this.hasDevice(device.id)) {
       this.log.warn(`Shelly device ${hk}${device.id}${wr}: name ${CYAN}${device.name}${wr} ip ${MAGENTA}${device.host}${wr} model ${CYAN}${device.model}${wr} already exists`);
@@ -376,12 +379,15 @@ export class Shelly extends EventEmitter<ShellyEvents> {
     }
     this._devices.set(device.id, device);
     if (device.gen === 1) {
-      this.coapServer.registerDevice(device.host, device.id, device.sleepMode); // No await to register device for CoIoT updates
+      void this.coapServer.registerDevice(device.host, device.id, device.sleepMode); // No await to register device for CoIoT updates
     } else if (device.gen >= 2) {
-      if (!device.sleepMode && device.wsClient && device.wsClient.isConnected === false) {
+      if (!device.sleepMode && device.wsClient?.isConnected === false) {
         device.log.info(`WebSocket client for device ${hk}${device.id}${nf} host ${zb}${device.host}${nf} is not connected. Starting connection...`);
         device.wsClient.start();
       }
+    } else {
+      this.log.debug(`Shelly device ${hk}${device.id}${db} host ${zb}${device.host}${db} has an unsupported gen ${CYAN}${device.gen}${db}`);
+      return this;
     }
     this.emit('add', device);
     return this;
@@ -427,8 +433,8 @@ export class Shelly extends EventEmitter<ShellyEvents> {
    * @param {boolean} debugCoap - Whether to enable debug logging for CoAP.
    * @param {boolean} debugWs - Whether to enable debug logging for WebSocket.
    */
-  setLogLevel(level: LogLevel, debugMdns: boolean, debugCoap: boolean, debugWs: boolean) {
-    // Called 2 times in platform.ts: 1) at startup, 2) after onChangeLoggerLevel
+  setLogLevel(level: LogLevel, debugMdns: boolean, debugCoap: boolean, debugWs: boolean): void {
+    // Called 2 times in module.ts: 1) at startup, 2) after onChangeLoggerLevel
     this.log.logLevel = level;
     this.mdnsScanner.log.logLevel = debugMdns ? LogLevel.DEBUG : LogLevel.INFO;
     this.coapServer.log.logLevel = debugCoap ? LogLevel.DEBUG : LogLevel.INFO;
@@ -447,7 +453,7 @@ export class Shelly extends EventEmitter<ShellyEvents> {
   /**
    * Logs information about the Shellies devices.
    */
-  logDevices() {
+  logDevices(): void {
     this.log.debug(`${BRIGHT}Shellies${db} (${this.devices.length}):`);
     for (const [id, device] of this) {
       this.log.debug(`- ${hk}${id}${db}: name ${CYAN}${device.name}${db} ip ${MAGENTA}${device.host}${db} model ${CYAN}${device.model}${db} auth ${CYAN}${device.auth}${db}`);

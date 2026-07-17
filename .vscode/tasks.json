@@ -1,6 +1,7 @@
 {
   "version": "2.0.0",
   "tasks": [
+    // --DO NOT EDIT BELOW THIS LINE--
     {
       "label": "Start",
       "detail": "npm run start",
@@ -58,25 +59,23 @@
     },
     {
       "label": "Lint",
-      "detail": "Run ESLint",
+      "detail": "Run lint",
       "type": "npm",
       "script": "lint",
-      "problemMatcher": ["$eslint-stylish"]
+      "problemMatcher": []
     },
     {
       "label": "Format",
-      "detail": "Run Prettier",
+      "detail": "Run format",
       "type": "npm",
       "script": "format",
       "problemMatcher": []
     },
     {
       "label": "Test",
-      "detail": "Run Jest with coverage and verbose",
-      "type": "shell",
-      "command": "node",
-      "args": ["--no-warnings", "--experimental-vm-modules", "node_modules/jest/bin/jest.js", "--verbose", "--coverage", "--maxWorkers=100%"],
-      "group": { "kind": "test", "isDefault": true },
+      "detail": "Run test with coverage",
+      "type": "npm",
+      "script": "test:coverage",
       "problemMatcher": []
     },
     {
@@ -115,6 +114,22 @@
       "problemMatcher": []
     },
     {
+      "label": "Update",
+      "detail": "Update the package with mb-run",
+      "type": "shell",
+      "command": "mb-run",
+      "args": ["--update"],
+      "problemMatcher": []
+    },
+    {
+      "label": "Upgrade",
+      "detail": "Upgrade the package with mb-run",
+      "type": "shell",
+      "command": "mb-run",
+      "args": ["--upgrade"],
+      "problemMatcher": []
+    },
+    {
       "label": "Git Status",
       "detail": "Run Git Status Script",
       "type": "shell",
@@ -146,54 +161,93 @@
       "args": ["scripts/remove-workflows.mjs"],
       "problemMatcher": []
     },
+    // --DO NOT EDIT ABOVE THIS LINE--
     {
       "label": "Test: Auth",
       "type": "shell",
-      "command": "node",
-      "args": [
-        "--no-warnings",
-        "--experimental-vm-modules",
-        "node_modules/jest/bin/jest.js",
-        "--verbose",
-        "--coverage",
-        "--maxWorkers=100%",
-        "--collectCoverageFrom=src/auth.ts",
-        "auth.test.ts"
-      ],
+      "command": "npx",
+      "args": ["vitest", "run", "--coverage", "--coverage.include=src/auth.ts", "vitest/auth.test.ts"],
       "group": { "kind": "test", "isDefault": false },
       "problemMatcher": []
     },
     {
       "label": "Test: WsClient",
       "type": "shell",
-      "command": "node",
-      "args": [
-        "--no-warnings",
-        "--experimental-vm-modules",
-        "node_modules/jest/bin/jest.js",
-        "--verbose",
-        "--coverage",
-        "--maxWorkers=100%",
-        "--collectCoverageFrom=src/wsClient.ts",
-        "wsClient.test.ts"
-      ],
+      "command": "npx",
+      "args": ["vitest", "run", "--coverage", "--coverage.include=src/wsClient.ts", "vitest/wsClient.test.ts"],
       "group": { "kind": "test", "isDefault": false },
       "problemMatcher": []
     },
     {
       "label": "Test: MdnsScanner",
       "type": "shell",
-      "command": "node",
-      "args": [
-        "--no-warnings",
-        "--experimental-vm-modules",
-        "node_modules/jest/bin/jest.js",
-        "--verbose",
-        "--coverage",
-        "--maxWorkers=100%",
-        "--collectCoverageFrom=src/mdnsScanner.ts",
-        "mdnsScanner.test.ts"
-      ],
+      "command": "npx",
+      "args": ["vitest", "run", "--coverage", "--coverage.include=src/mdnsScanner.ts", "vitest/mdnsScanner.test.ts"],
+      "group": { "kind": "test", "isDefault": false },
+      "problemMatcher": []
+    },
+    {
+      "label": "Test: WsServer",
+      "type": "shell",
+      "command": "npx",
+      "args": ["vitest", "run", "--coverage", "--coverage.include=src/wsServer.ts", "vitest/wsServer.test.ts"],
+      "group": { "kind": "test", "isDefault": false },
+      "problemMatcher": []
+    },
+    {
+      "label": "Test: ShellyComponent",
+      "type": "shell",
+      "command": "npx",
+      "args": ["vitest", "run", "--coverage", "--coverage.include=src/shellyComponent.ts", "vitest/shellyComponent.test.ts"],
+      "group": { "kind": "test", "isDefault": false },
+      "problemMatcher": []
+    },
+    {
+      "label": "Test: ShellyProperty",
+      "type": "shell",
+      "command": "npx",
+      "args": ["vitest", "run", "--coverage", "--coverage.include=src/shellyProperty.ts", "vitest/shellyProperty.test.ts"],
+      "group": { "kind": "test", "isDefault": false },
+      "problemMatcher": []
+    },
+    {
+      "label": "Test: ShellyFetch",
+      "type": "shell",
+      "command": "npx",
+      "args": ["vitest", "run", "--coverage", "--coverage.include=src/shellyFetch.ts", "vitest/shellyFetch.test.ts"],
+      "group": { "kind": "test", "isDefault": false },
+      "problemMatcher": []
+    },
+    {
+      "label": "Test: CommandHandlers",
+      "detail": "Coverage relies on both commandHandlers.test.ts and module.test.ts",
+      "type": "shell",
+      "command": "npx",
+      "args": ["vitest", "run", "--coverage", "--coverage.include=src/commandHandlers.ts", "vitest/commandHandlers.test.ts", "vitest/module.test.ts"],
+      "group": { "kind": "test", "isDefault": false },
+      "problemMatcher": []
+    },
+    {
+      "label": "Test: UpdateHandler",
+      "type": "shell",
+      "command": "npx",
+      "args": ["vitest", "run", "--coverage", "--coverage.include=src/updateHandler.ts", "vitest/updateHandler.test.ts"],
+      "group": { "kind": "test", "isDefault": false },
+      "problemMatcher": []
+    },
+    {
+      "label": "Test: CoapServer",
+      "type": "shell",
+      "command": "npx",
+      "args": ["vitest", "run", "--coverage", "--coverage.include=src/coapServer.ts", "vitest/coapServer.test.ts"],
+      "group": { "kind": "test", "isDefault": false },
+      "problemMatcher": []
+    },
+    {
+      "label": "Test: Shelly",
+      "type": "shell",
+      "command": "npx",
+      "args": ["vitest", "run", "--coverage", "--coverage.include=src/shelly.ts", "vitest/shelly.test.ts"],
       "group": { "kind": "test", "isDefault": false },
       "problemMatcher": []
     }

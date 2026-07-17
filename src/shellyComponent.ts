@@ -1,12 +1,12 @@
 /**
+ * @file src/shellyComponent.ts
  * @description This file contains the class SwitchComponent.
- * @file src\shellyComponent.ts
  * @author Luca Liguori
  * @created 2024-05-01
- * @version 2.1.0
+ * @version 2.2.0
  * @license Apache-2.0
  *
- * Copyright 2024, 2025 Luca Liguori.
+ * Copyright 2024, 2025, 2026 Luca Liguori.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,9 +26,10 @@ import EventEmitter from 'node:events';
 import { BLUE, CYAN, db, debugStringify, er, GREEN, GREY, YELLOW } from 'matterbridge/logger';
 import { deepEqual, isValidArray, isValidNumber, isValidObject } from 'matterbridge/utils';
 
-import { ShellyDevice } from './shellyDevice.js';
+import type { ShellyDevice } from './shellyDevice.js';
+import { shellyFetch } from './shellyFetch.js';
 import { ShellyProperty } from './shellyProperty.js';
-import { ShellyData, ShellyDataType, ShellyEvent } from './shellyTypes.js';
+import type { ShellyData, ShellyDataType, ShellyEvent } from './shellyTypes.js';
 
 interface LightComponent {
   On(): void;
@@ -117,11 +118,11 @@ export class ShellyComponent extends EventEmitter<ShellyComponentEvents> {
   constructor(device: ShellyDevice, id: string, name: string, data?: ShellyData) {
     super();
     this.id = id;
-    this.index = id.includes(':') ? parseInt(id.split(':')[1]) : -1;
+    this.index = id.includes(':') ? Number.parseInt(id.split(':')[1]) : -1;
     this.name = name;
     this.device = device;
     for (const prop in data) {
-      this.addProperty(new ShellyProperty(this, prop, data[prop] as ShellyDataType));
+      this.addProperty(new ShellyProperty(this, prop, data[prop]));
 
       // Add a state property for Light, Relay, and Switch components
       if ((isSwitchComponent(this) || isLightComponent(this)) && (prop === 'ison' || prop === 'output')) this.addProperty(new ShellyProperty(this, 'state', data[prop]));
@@ -132,91 +133,111 @@ export class ShellyComponent extends EventEmitter<ShellyComponentEvents> {
 
     // Extend the ShellyComponent class prototype to include the Switch Relay Light methods dynamically
     if (isSwitchComponent(this) || isLightComponent(this)) {
-      this.On = function () {
-        if (device.gen === 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { turn: 'on' });
-        if (device.gen !== 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${this.name}.Set`, { id: this.index, on: true });
+      this.On = function (): void {
+        if (device.gen === 1) void shellyFetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { turn: 'on' });
+        if (device.gen !== 1) void shellyFetch(device.shelly, device.log, device.host, `${this.name}.Set`, { id: this.index, on: true });
       };
 
-      this.Off = function () {
-        if (device.gen === 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { turn: 'off' });
-        if (device.gen !== 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${this.name}.Set`, { id: this.index, on: false });
+      this.Off = function (): void {
+        if (device.gen === 1) void shellyFetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { turn: 'off' });
+        if (device.gen !== 1) void shellyFetch(device.shelly, device.log, device.host, `${this.name}.Set`, { id: this.index, on: false });
       };
 
-      this.Toggle = function () {
-        if (device.gen === 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { turn: 'toggle' });
-        if (device.gen !== 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${this.name}.Toggle`, { id: this.index });
+      this.Toggle = function (): void {
+        if (device.gen === 1) void shellyFetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { turn: 'toggle' });
+        if (device.gen !== 1) void shellyFetch(device.shelly, device.log, device.host, `${this.name}.Toggle`, { id: this.index });
       };
     }
 
     // Extend the ShellyComponent class prototype to include the Light methods dynamically
     if (isLightComponent(this)) {
-      this.Level = function (level: number) {
+      this.Level = function (level: number): void {
         if (!this.hasProperty('brightness')) return;
         const adjustedLevel = Math.min(Math.max(Math.round(level), 0), 100);
         if (device.gen === 1 && this.hasProperty('brightness'))
-          ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { brightness: adjustedLevel });
+          void shellyFetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { brightness: adjustedLevel });
         if (device.gen === 1 && this.hasProperty('gain'))
-          ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { gain: adjustedLevel });
-        if (device.gen !== 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${this.name}.Set`, { id: this.index, brightness: adjustedLevel });
+          void shellyFetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { gain: adjustedLevel });
+        if (device.gen !== 1) void shellyFetch(device.shelly, device.log, device.host, `${this.name}.Set`, { id: this.index, brightness: adjustedLevel });
       };
 
-      this.ColorRGB = function (red: number, green: number, blue: number) {
+      this.ColorRGB = function (red: number, green: number, blue: number): void {
+        const normalizedRed = Math.min(Math.max(Math.round(red), 0), 255);
+        const normalizedGreen = Math.min(Math.max(Math.round(green), 0), 255);
+        const normalizedBlue = Math.min(Math.max(Math.round(blue), 0), 255);
+
         if (this.hasProperty('red') && this.hasProperty('green') && this.hasProperty('blue')) {
-          red = Math.min(Math.max(Math.round(red), 0), 255);
-          green = Math.min(Math.max(Math.round(green), 0), 255);
-          blue = Math.min(Math.max(Math.round(blue), 0), 255);
           // SHCB-1
           if (device.gen === 1 && this.hasProperty('mode'))
-            ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { red, green, blue, mode: 'color' });
+            void shellyFetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, {
+              red: normalizedRed,
+              green: normalizedGreen,
+              blue: normalizedBlue,
+              mode: 'color',
+            });
           // SHBDUO-1
           if (device.gen === 1 && !this.hasProperty('mode'))
-            ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { red, green, blue });
-          if (device.gen !== 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${this.name}.Set`, { id: this.index, red, green, blue });
+            void shellyFetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, {
+              red: normalizedRed,
+              green: normalizedGreen,
+              blue: normalizedBlue,
+            });
+          if (device.gen !== 1)
+            void shellyFetch(device.shelly, device.log, device.host, `${this.name}.Set`, {
+              id: this.index,
+              red: normalizedRed,
+              green: normalizedGreen,
+              blue: normalizedBlue,
+            });
         }
         if (this.hasProperty('rgb') && isValidArray(this.getValue('rgb'), 3, 3)) {
-          red = Math.min(Math.max(Math.round(red), 0), 255);
-          green = Math.min(Math.max(Math.round(green), 0), 255);
-          blue = Math.min(Math.max(Math.round(blue), 0), 255);
-          if (device.gen === 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { red, green, blue });
-          if (device.gen !== 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${this.name}.Set`, { id: this.index, rgb: [red, green, blue] });
+          if (device.gen === 1)
+            void shellyFetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, {
+              red: normalizedRed,
+              green: normalizedGreen,
+              blue: normalizedBlue,
+            });
+          if (device.gen !== 1)
+            void shellyFetch(device.shelly, device.log, device.host, `${this.name}.Set`, { id: this.index, rgb: [normalizedRed, normalizedGreen, normalizedBlue] });
         }
       };
 
-      this.ColorTemp = function (temperature: number) {
+      this.ColorTemp = function (temperature: number): void {
         if (isValidNumber(temperature, 2700, 6500)) {
           // SHCB-1
           if (device.gen === 1 && this.hasProperty('temp') && this.hasProperty('mode'))
-            ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { temp: temperature, mode: 'white' });
+            void shellyFetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { temp: temperature, mode: 'white' });
           // SHBDUO-1
           if (device.gen === 1 && this.hasProperty('temp') && !this.hasProperty('mode'))
-            ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { temp: temperature });
+            void shellyFetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { temp: temperature });
           // shellyprorgbwwpm
-          if (device.gen !== 1 && this.hasProperty('ct')) ShellyDevice.fetch(device.shelly, device.log, device.host, `${this.name}.Set`, { id: this.index, ct: temperature });
+          if (device.gen !== 1 && this.hasProperty('ct')) void shellyFetch(device.shelly, device.log, device.host, `${this.name}.Set`, { id: this.index, ct: temperature });
         }
       };
     }
 
     // Extend the ShellyComponent class prototype to include the Cover methods dynamically
     if (isCoverComponent(this)) {
-      this.Open = function () {
-        if (device.gen === 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { go: 'open' });
-        if (device.gen !== 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${this.name}.Open`, { id: this.index });
+      this.Open = function (): void {
+        if (device.gen === 1) void shellyFetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { go: 'open' });
+        if (device.gen !== 1) void shellyFetch(device.shelly, device.log, device.host, `${this.name}.Open`, { id: this.index });
       };
 
-      this.Close = function () {
-        if (device.gen === 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { go: 'close' });
-        if (device.gen !== 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${this.name}.Close`, { id: this.index });
+      this.Close = function (): void {
+        if (device.gen === 1) void shellyFetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { go: 'close' });
+        if (device.gen !== 1) void shellyFetch(device.shelly, device.log, device.host, `${this.name}.Close`, { id: this.index });
       };
 
-      this.Stop = function () {
-        if (device.gen === 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { go: 'stop' });
-        if (device.gen !== 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${this.name}.Stop`, { id: this.index });
+      this.Stop = function (): void {
+        if (device.gen === 1) void shellyFetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { go: 'stop' });
+        if (device.gen !== 1) void shellyFetch(device.shelly, device.log, device.host, `${this.name}.Stop`, { id: this.index });
       };
 
-      this.GoToPosition = function (pos: number) {
-        pos = Math.min(Math.max(Math.round(pos), 0), 100);
-        if (device.gen === 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { go: 'to_pos', roller_pos: pos });
-        if (device.gen !== 1) ShellyDevice.fetch(device.shelly, device.log, device.host, `${this.name}.GoToPosition`, { id: this.index, pos: pos });
+      this.GoToPosition = function (pos: number): void {
+        const normalizedPos = Math.min(Math.max(Math.round(pos), 0), 100);
+        if (device.gen === 1)
+          void shellyFetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { go: 'to_pos', roller_pos: normalizedPos });
+        if (device.gen !== 1) void shellyFetch(device.shelly, device.log, device.host, `${this.name}.GoToPosition`, { id: this.index, pos: normalizedPos });
       };
     }
   }
@@ -265,19 +286,19 @@ export class ShellyComponent extends EventEmitter<ShellyComponentEvents> {
   setValue(key: string, value: ShellyDataType): ShellyComponent {
     const property = this.getProperty(key);
     if (property) {
-      if (!deepEqual(property.value, value)) {
+      if (deepEqual(property.value, value)) {
+        /*
+        this.device.log.debug(
+          `${CYAN}${this.id}:${key}${GREY} not changed from ${YELLOW}${property.value !== null && typeof property.value === 'object' ? debugStringify(property.value) : property.value}${GREY} in component ${GREEN}${this.id}${GREY} (${BLUE}${this.name}${GREY})`,
+        );
+        */
+      } else {
         this.device.log.debug(
           `*${CYAN}${this.id}:${key}${GREY} updated from ${isValidObject(property.value) ? debugStringify(property.value) : property.value}${GREY} to ${YELLOW}${isValidObject(value) ? debugStringify(value) : value}${GREY} in component ${GREEN}${this.id}${GREY} (${BLUE}${this.name}${GREY})`,
         );
         this.device.emit('update', this.id, key, value);
         this.emit('update', this.id, key, value);
         property.value = value;
-      } else {
-        /*
-        this.device.log.debug(
-          `${CYAN}${this.id}:${key}${GREY} not changed from ${YELLOW}${property.value !== null && typeof property.value === 'object' ? debugStringify(property.value) : property.value}${GREY} in component ${GREEN}${this.id}${GREY} (${BLUE}${this.name}${GREY})`,
-        );
-        */
       }
     } else {
       this.addProperty(new ShellyProperty(this, key, value));
@@ -329,7 +350,7 @@ export class ShellyComponent extends EventEmitter<ShellyComponentEvents> {
    *
    * @param {ShellyData} componentData - The data to update the component with.
    */
-  update(componentData: ShellyData) {
+  update(componentData: ShellyData): void {
     for (const key in componentData) {
       const property = this.getProperty(key);
       if (property) {
