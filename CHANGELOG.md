@@ -36,6 +36,11 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 
 - [matterbridge]: Require matterbridge v.3.10.0 with matter v.1.6.0.
 
+### Added
+
+- [chip] Add chip-test toolchain agents instruction and chip-test runner.
+- [frontend] Add plugin-frontend agents instructions.
+
 ### Changed
 
 - [package]: Bump `oxfmt` to v.0.61.0.
