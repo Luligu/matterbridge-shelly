@@ -38,8 +38,8 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 
 ### Added
 
-- [chip] Add chip-test toolchain agents instruction and chip-test runner.
-- [frontend] Add plugin-frontend agents instructions.
+- [chip]: Add chip-test toolchain agents instruction and chip-test runner.
+- [frontend]: Add plugin-frontend agents instructions.
 
 ### Changed
 
