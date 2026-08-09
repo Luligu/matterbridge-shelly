@@ -2017,7 +2017,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     );
     let definition: AtLeastOne<DeviceTypeDefinition> | undefined;
     if (bthomeDevice.model === 'Shelly BLU DoorWindow' || bthomeDevice.model === 'Shelly BLU DoorWindow ZB') definition = [bridgedNode, powerSource];
-    else if (bthomeDevice.model === 'Shelly BLU Motion') definition = [bridgedNode, powerSource];
+    else if (bthomeDevice.model === 'Shelly BLU Motion' || bthomeDevice.model === 'Shelly BLU Motion ZB') definition = [bridgedNode, powerSource];
     else if (bthomeDevice.model === 'Shelly BLU Button1' || bthomeDevice.model === 'Shelly BLU Button Tough 1 ZB') definition = [genericSwitch, bridgedNode, powerSource];
     else if (bthomeDevice.model === 'Shelly BLU HT' || bthomeDevice.model === 'Shelly BLU H&T ZB' || bthomeDevice.model === 'Shelly BLU H&T Display ZB')
       definition = [bridgedNode, powerSource];
@@ -2046,7 +2046,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         void mbDevice.addFixedLabel('composed', 'Sensor');
         mbDevice.addChildDeviceTypeWithClusterServer('Contact', [contactSensor], [], undefined, this.config.debug);
         if (this.validateEntity(bthomeDevice.addr, 'Illuminance')) mbDevice.addChildDeviceTypeWithClusterServer('Illuminance', [lightSensor], [], undefined, this.config.debug);
-      } else if (bthomeDevice.model === 'Shelly BLU Motion') {
+      } else if (bthomeDevice.model === 'Shelly BLU Motion' || bthomeDevice.model === 'Shelly BLU Motion ZB') {
         mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer();
         void mbDevice.addFixedLabel('composed', 'Sensor');
         mbDevice.addChildDeviceTypeWithClusterServer('Motion', [occupancySensor], [], undefined, this.config.debug);

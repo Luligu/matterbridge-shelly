@@ -46,10 +46,6 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 - [blu]: Verified `BLU Door Window ZB` with firmware 1.2.23.
 - [blu]: Verified `BLU H&T ZB` with firmware 1.2.12.
 
-### Fixed
-
-- [blu]: Fix BTHome device validation rejecting all `bthomedevice:*` components on gateway firmware 2.0.0+: the gateway now omits the `key` property from `config` (down to 4 properties: `id`, `name`, `addr`, `meta`) instead of sending it as `null`, even though the Shelly API docs still document `key` as part of the `BTHomeDevice` config schema. Relaxed the config validation minimum from 5 to 4 properties.
-
 ### Changed
 
 - [package]: Bump `ws` to v.8.21.3.
@@ -60,6 +56,10 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 - [package]: Update agents configs.
 - [package]: Update dependencies.
 - [package]: Upgrade package.
+
+### Fixed
+
+- [blu]: Fix BTHome device validation rejecting all `bthomedevice:*` components on gateway firmware 2.0.0+: the gateway now omits the `key` property from `config` (down to 4 properties: `id`, `name`, `addr`, `meta`) instead of sending it as `null`, even though the Shelly API docs still document `key` as part of the `BTHomeDevice` config schema. Relaxed the config validation minimum from 5 to 4 properties.
 
 <a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
