@@ -1,5 +1,3 @@
-<!-- eslint-disable markdown/no-missing-label-refs -->
-
 # <img src="https://matterbridge.io/assets/matterbridge.svg" alt="Matterbridge Logo" width="64px" height="64px">&nbsp;&nbsp;&nbsp;Matterbridge shelly plugin changelog
 
 [![npm version](https://img.shields.io/npm/v/matterbridge-shelly.svg)](https://www.npmjs.com/package/matterbridge-shelly)
@@ -12,7 +10,6 @@
 [![tested with Vitest](https://img.shields.io/badge/tested_with-Vitest-6E9F18.svg?logo=vitest&logoColor=white)](https://vitest.dev)
 [![styled with Oxc](https://img.shields.io/badge/styled_with-Oxc-9BE4E0.svg?logo=oxc&logoColor=white)](https://oxc.rs/docs/guide/usage/formatter.html)
 [![linted with Oxc](https://img.shields.io/badge/linted_with-Oxc-9BE4E0.svg?logo=oxc&logoColor=white)](https://oxc.rs/docs/guide/usage/linter.html)
-[![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![TypeScript Native](https://img.shields.io/badge/TypeScript_Native-3178C6?logo=typescript&logoColor=white)](https://github.com/microsoft/typescript-go)
 [![ESM](https://img.shields.io/badge/ESM-Node.js-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![matterbridge.io](https://img.shields.io/badge/matterbridge.io-online-brightgreen)](https://matterbridge.io)
@@ -30,6 +27,41 @@ If you like this project and find it useful, please consider giving it a star on
 <a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="120"></a>
 
 You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his invaluable contribution to this project.
+
+## [2.5.1] - 2026-08-09
+
+### Firmware 2.0.0
+
+- [shelly]: The new firmware 2.0.0 is still under test. At the moment I see very frequent websocket disconnections.
+
+### Breaking changes
+
+- [matterbridge]: Require matterbridge v.3.10.0 with matter v.1.6.0.
+
+### Added
+
+- [chip]: Add chip-test toolchain agents instruction and chip-test runner.
+- [frontend]: Add plugin-frontend agents instructions.
+- [blu]: Add `Shelly BLU Motion ZB` (`SBMO-103Z`).
+- [blu]: Verified `BLU Door Window ZB` with firmware 1.2.23.
+- [blu]: Verified `BLU H&T ZB` with firmware 1.2.12.
+
+### Changed
+
+- [package]: Bump `ws` to v.8.21.3.
+- [package]: Bump `oxfmt` to v.0.62.0.
+- [package]: Bump `oxlint` to v.1.77.0.
+- [package]: Bump `oxlint-tsgolint` to v.7.0.2001.
+- [package]: Bump `@types/node` to v.26.2.0.
+- [package]: Update agents configs.
+- [package]: Update dependencies.
+- [package]: Upgrade package.
+
+### Fixed
+
+- [blu]: Fix BTHome device validation rejecting all `bthomedevice:*` components on gateway firmware 2.0.0+: the gateway now omits the `key` property from `config` (down to 4 properties: `id`, `name`, `addr`, `meta`) instead of sending it as `null`, even though the Shelly API docs still document `key` as part of the `BTHomeDevice` config schema. Relaxed the config validation minimum from 5 to 4 properties.
+
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [2.5.0] - 2026-07-17
 

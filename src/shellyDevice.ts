@@ -331,6 +331,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
       'SBWS-90CM': 'Shelly BLU Weather Station',
       'SBHT-103C': 'Shelly BLU H&T Display ZB',
       'SBHT-203C': 'Shelly BLU H&T ZB',
+      'SBMO-103Z': 'Shelly BLU Motion ZB',
       'SBBT-104CEU': 'Shelly BLU Wall Switch 4 ZB',
       'SBBT-104CUS': 'Shelly BLU RC Button 4 ZB',
       'SBBT-102C': 'Shelly BLU Button Tough 1 ZB',
@@ -378,6 +379,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
     try {
       for (const component of components as unknown as BTHomeBluTrvComponent[]) {
         if (component.key.startsWith('blutrv:')) {
+          this.log.debug(`- blutrv:\n${debugStringify(component)}`);
           if (!isValidString(component.key, 6) || !isValidObject(component.status, 5) || !isValidObject(component.config, 5)) {
             this.log.error(
               `BTHome BLUTrv id ${CYAN}${component.config.id}${er} key ${CYAN}${component.key}${er} address ${CYAN}${component.config.addr}${er} has no valid data: ${debugStringify(component)}`,
@@ -396,44 +398,47 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
       }
       for (const component of components as unknown as BTHomeDeviceComponent[]) {
         if (component.key.startsWith('bthomedevice:')) {
+          this.log.debug(`- bthomedevice:\n${debugStringify(component)}`);
           // Shelly BLU gateway doesn't have config.meta.ui.local_name!
           // New paired BTHome devices don't have attrs.model_id
           /* v8 ignore next if cause new paired devices don't have attrs.model_id */
           if (component.attrs?.model_id === 1) {
-            component.config.meta = { ui: { view: 'regular', local_name: 'SBBT-002C', icon: null } };
+            component.config.meta = { ui: { view: 'regular', local_name: 'SBBT-002C', icon: null } }; // 1 - Shelly BLU Button1 / Button Tough 1
           } else if (component.attrs?.model_id === 2) {
-            component.config.meta = { ui: { view: 'regular', local_name: 'SBDW-002C', icon: null } };
+            component.config.meta = { ui: { view: 'regular', local_name: 'SBDW-002C', icon: null } }; // 2 - Shelly BLU Door/Window
           } else if (component.attrs?.model_id === 3) {
-            component.config.meta = { ui: { view: 'regular', local_name: 'SBHT-003C', icon: null } };
+            component.config.meta = { ui: { view: 'regular', local_name: 'SBHT-003C', icon: null } }; // 3 - Shelly BLU H&T
           } else if (component.attrs?.model_id === 5) {
-            component.config.meta = { ui: { view: 'regular', local_name: 'SBMO-003Z', icon: null } };
+            component.config.meta = { ui: { view: 'regular', local_name: 'SBMO-003Z', icon: null } }; // 5 - Shelly BLU Motion
           } else if (component.attrs?.model_id === 6) {
-            component.config.meta = { ui: { view: 'regular', local_name: 'SBBT-004CEU', icon: null } };
+            component.config.meta = { ui: { view: 'regular', local_name: 'SBBT-004CEU', icon: null } }; // 6 - Shelly BLU Wall Switch 4
           } else if (component.attrs?.model_id === 7) {
-            component.config.meta = { ui: { view: 'regular', local_name: 'SBBT-004CUS', icon: null } };
+            component.config.meta = { ui: { view: 'regular', local_name: 'SBBT-004CUS', icon: null } }; // 7 - Shelly BLU RC Button 4
           } else if (component.attrs?.model_id === 8) {
-            component.config.meta = { ui: { view: 'regular', local_name: 'TRV', icon: null } };
+            component.config.meta = { ui: { view: 'regular', local_name: 'TRV', icon: null } }; // 8 - Shelly BLU TRV (SBTR-001AEU)
           } else if (component.attrs?.model_id === 9) {
-            component.config.meta = { ui: { view: 'regular', local_name: 'SBRC-005B', icon: null } }; // 9 -Shelly BLU Remote Control ZB
+            component.config.meta = { ui: { view: 'regular', local_name: 'SBRC-005B', icon: null } }; // 9 - Shelly BLU Remote Control ZB
           } else if (component.attrs?.model_id === 0xb) {
-            component.config.meta = { ui: { view: 'regular', local_name: 'SBWS-90CM', icon: null } }; // 11 -Shelly BLU Weather Station
+            component.config.meta = { ui: { view: 'regular', local_name: 'SBWS-90CM', icon: null } }; // 11 - Shelly BLU Weather Station
           } else if (component.attrs?.model_id === 0xc) {
             component.config.meta = { ui: { view: 'regular', local_name: 'SBHT-103C', icon: null } }; // 12 - Shelly BLU H&T Display ZB
           } else if (component.attrs?.model_id === 0x11) {
             component.config.meta = { ui: { view: 'regular', local_name: 'SBHT-203C', icon: null } }; // 17 - Shelly BLU H&T ZB
+          } else if (component.attrs?.model_id === 0x13) {
+            component.config.meta = { ui: { view: 'regular', local_name: 'SBMO-103Z', icon: null } }; // 19 - Shelly BLU Motion ZB
           } else if (component.attrs?.model_id === 0x14) {
-            component.config.meta = { ui: { view: 'regular', local_name: 'SBDW-103C', icon: null } };
+            component.config.meta = { ui: { view: 'regular', local_name: 'SBDW-103C', icon: null } }; // 20 - Shelly BLU Door/Window ZB
           } else if (component.attrs?.model_id === 0x15) {
-            component.config.meta = { ui: { view: 'regular', local_name: 'SBBT-104CEU', icon: null } }; // 21 -Shelly BLU Wall Switch 4 ZB
+            component.config.meta = { ui: { view: 'regular', local_name: 'SBBT-104CEU', icon: null } }; // 21 - Shelly BLU Wall Switch 4 ZB
           } else if (component.attrs?.model_id === 0x16) {
-            component.config.meta = { ui: { view: 'regular', local_name: 'SBBT-104CUS', icon: null } }; // 22 -Shelly BLU RC Button 4 ZB
+            component.config.meta = { ui: { view: 'regular', local_name: 'SBBT-104CUS', icon: null } }; // 22 - Shelly BLU RC Button 4 ZB
           } else if (component.attrs?.model_id === 0x17) {
-            component.config.meta = { ui: { view: 'regular', local_name: 'SBBT-102C', icon: null } }; // 23 -Shelly BLU Button Tough 1 ZB
+            component.config.meta = { ui: { view: 'regular', local_name: 'SBBT-102C', icon: null } }; // 23 - Shelly BLU Button Tough 1 ZB
           }
           if (
             !isValidString(component.key, 12) ||
             !isValidObject(component.status, 5) ||
-            !isValidObject(component.config, 5) ||
+            !isValidObject(component.config, 4) ||
             !isValidObject(component.config.meta, 1) ||
             !isValidObject(component.config.meta.ui, 2) ||
             !isValidString(component.config.meta.ui.local_name)
@@ -469,6 +474,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
       }
       for (const component of components as unknown as BTHomeSensorComponent[]) {
         if (component.key.startsWith('bthomesensor:')) {
+          this.log.debug(`- bthomesensor:\n${debugStringify(component)}`);
           if (
             !isValidString(component.key, 12) ||
             !isValidObject(component.status, 1) ||

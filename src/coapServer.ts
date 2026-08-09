@@ -163,12 +163,15 @@ export class CoapServer extends EventEmitter<CoapServerEvents> {
           pathname: '/cit/d',
           retrySend: 0,
         })
-        .on('response', (msg: IncomingMessage) => {
-          this.log.debug(`CoIoT (coap) received device description ("/cit/d") code ${BLUE}${msg.code}${db} url ${BLUE}${msg.url}${db} rsinfo ${debugStringify(msg.rsinfo)}:`);
-          msg.url = '/cit/d';
-          this.parseShellyMessage(msg);
-          resolve(msg);
-        })
+        .on(
+          'response',
+          /* v8 ignore next */ (msg: IncomingMessage) => {
+            this.log.debug(`CoIoT (coap) received device description ("/cit/d") code ${BLUE}${msg.code}${db} url ${BLUE}${msg.url}${db} rsinfo ${debugStringify(msg.rsinfo)}:`);
+            msg.url = '/cit/d';
+            this.parseShellyMessage(msg);
+            resolve(msg);
+          },
+        )
         .on(
           'timeout',
           /* v8 ignore next */ (err) => {
@@ -205,11 +208,14 @@ export class CoapServer extends EventEmitter<CoapServerEvents> {
           method: 'GET',
           pathname: '/cit/s',
         })
-        .on('response', (msg: IncomingMessage) => {
-          this.log.debug(`CoIoT (coap) received device status ("/cit/s") code ${BLUE}${msg.code}${db} url ${BLUE}${msg.url}${db} rsinfo ${debugStringify(msg.rsinfo)}:`);
-          this.parseShellyMessage(msg);
-          resolve(msg);
-        })
+        .on(
+          'response',
+          /* v8 ignore next */ (msg: IncomingMessage) => {
+            this.log.debug(`CoIoT (coap) received device status ("/cit/s") code ${BLUE}${msg.code}${db} url ${BLUE}${msg.url}${db} rsinfo ${debugStringify(msg.rsinfo)}:`);
+            this.parseShellyMessage(msg);
+            resolve(msg);
+          },
+        )
         .on(
           'timeout',
           /* v8 ignore next */ (err) => {
@@ -291,7 +297,7 @@ export class CoapServer extends EventEmitter<CoapServerEvents> {
         // Handle null or incompatible types explicitly
         throw new TypeError('Expected a string for GLOBAL_DEVID');
       },
-      (buf) => buf.toString(),
+      /* v8 ignore next */ (buf) => buf.toString(),
     );
 
     coap.registerOption(
@@ -307,7 +313,7 @@ export class CoapServer extends EventEmitter<CoapServerEvents> {
         // Handle null or non-string types explicitly
         throw new TypeError('Expected a string for STATUS_VALIDITY');
       },
-      (buf) => buf.readUInt16LE(0),
+      /* v8 ignore next */ (buf) => buf.readUInt16LE(0),
     );
 
     coap.registerOption(
@@ -323,7 +329,7 @@ export class CoapServer extends EventEmitter<CoapServerEvents> {
         // Handle null or non-string types explicitly
         throw new TypeError('Expected a string for STATUS_SERIAL');
       },
-      (buf) => buf.readUInt16LE(0),
+      /* v8 ignore next */ (buf) => buf.readUInt16LE(0),
     );
   }
 

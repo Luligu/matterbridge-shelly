@@ -1,6 +1,6 @@
 {
   "name": "matterbridge-shelly",
-  "version": "2.5.0",
+  "version": "2.5.1",
   "description": "Matterbridge shelly plugin",
   "author": "https://github.com/Luligu",
   "homepage": "https://www.npmjs.com/package/matterbridge-shelly",
@@ -118,16 +118,16 @@
     "multicast-dns": "7.2.5",
     "node-ansi-logger": "3.3.0",
     "node-persist-manager": "2.1.0",
-    "ws": "8.21.1"
+    "ws": "8.21.3"
   },
   "devDependencies": {
     "@types/multicast-dns": "7.2.4",
-    "@types/node": "26.1.1",
+    "@types/node": "26.2.0",
     "@types/ws": "8.18.1",
     "@vitest/coverage-v8": "4.1.10",
-    "oxfmt": "0.59.0",
-    "oxlint": "1.74.0",
-    "oxlint-tsgolint": "0.25.0",
+    "oxfmt": "0.62.0",
+    "oxlint": "1.77.0",
+    "oxlint-tsgolint": "7.0.2001",
     "typescript": "7.0.2",
     "vitest": "4.1.10"
   }
