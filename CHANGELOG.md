@@ -28,7 +28,11 @@ If you like this project and find it useful, please consider giving it a star on
 
 You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his invaluable contribution to this project.
 
-## [2.5.1] - Dev branch
+## [2.5.1] - 2026-08-09
+
+### Firmware 2.0.0
+
+- [shelly]: The new firmware 2.0.0 is still under test. At the moment I see very frequent websocket disconnections.
 
 ### Breaking changes
 
@@ -38,15 +42,24 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 
 - [chip]: Add chip-test toolchain agents instruction and chip-test runner.
 - [frontend]: Add plugin-frontend agents instructions.
+- [blu]: Add `Shelly BLU Motion ZB` (`SBMO-103Z`).
+- [blu]: Verified `BLU Door Window ZB` with firmware 1.2.23.
+- [blu]: Verified `BLU H&T ZB` with firmware 1.2.12.
+
+### Fixed
+
+- [blu]: Fix BTHome device validation rejecting all `bthomedevice:*` components on gateway firmware 2.0.0+: the gateway now omits the `key` property from `config` (down to 4 properties: `id`, `name`, `addr`, `meta`) instead of sending it as `null`, even though the Shelly API docs still document `key` as part of the `BTHomeDevice` config schema. Relaxed the config validation minimum from 5 to 4 properties.
 
 ### Changed
 
-- [package]: Bump `ws` to v.8.21.2.
+- [package]: Bump `ws` to v.8.21.3.
 - [package]: Bump `oxfmt` to v.0.62.0.
 - [package]: Bump `oxlint` to v.1.77.0.
 - [package]: Bump `oxlint-tsgolint` to v.7.0.2001.
-- [package]: Bump `@types/node` to v.26.1.2.
+- [package]: Bump `@types/node` to v.26.2.0.
 - [package]: Update agents configs.
+- [package]: Update dependencies.
+- [package]: Upgrade package.
 
 <a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
