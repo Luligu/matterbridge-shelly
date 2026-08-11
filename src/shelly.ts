@@ -31,6 +31,7 @@ import { CoapServer } from './coapServer.js';
 import { type DiscoveredDevice, MdnsScanner } from './mdnsScanner.js';
 import type { ShellyDevice } from './shellyDevice.js';
 import type { ShellyData, ShellyDataType, ShellyDeviceId, ShellyEvent } from './shellyTypes.js';
+import { UdpServer } from './udpServer.js';
 import { WsClient } from './wsClient.js';
 import { WsServer } from './wsServer.js';
 
@@ -52,6 +53,7 @@ export class Shelly extends EventEmitter<ShellyEvents> {
   private fetchInterval?: NodeJS.Timeout;
   public mdnsScanner: MdnsScanner;
   public coapServer: CoapServer;
+  public udpServer: UdpServer;
   public wsServer: WsServer;
   public username: string | undefined;
   public password: string | undefined;
@@ -74,6 +76,7 @@ export class Shelly extends EventEmitter<ShellyEvents> {
     this.password = password;
     this.mdnsScanner = new MdnsScanner();
     this.coapServer = new CoapServer(this);
+    this.udpServer = new UdpServer(8585, password);
     this.wsServer = new WsServer();
 
     // Handle wssupdate from WsServer
@@ -116,6 +119,49 @@ export class Shelly extends EventEmitter<ShellyEvents> {
       if (device.cached) {
         device.cached = false;
         this.log.debug(`Device ${hk}${device.id}${db} host ${zb}${device.host}${db} sent a WebSocket message: setting cached to false`);
+      }
+      // oxlint-disable-next-line typescript/no-unsafe-type-assertion
+      if (isValidObject(params, 1) && isValidArray(params.events, 1)) device.onEvent(params.events as ShellyEvent[]);
+    });
+
+    // Handle udpupdate from UdpServer
+    this.udpServer.on('udpupdate', (shellyId: string, params: ShellyData) => {
+      const device = this.getDevice(shellyId);
+      if (!device) {
+        this.log.debug(`Received udpupdate from a not registered device id ${hk}${shellyId}${db}`);
+        return;
+      }
+      this.log.debug(`Received udpupdate from device id ${hk}${shellyId}${db} host ${zb}${device.host}${db}`);
+      if (device.sleepMode) device.emit('awake');
+      if (!device.online) {
+        device.online = true;
+        device.emit('online');
+        this.log.debug(`Device ${hk}${device.id}${db} host ${zb}${device.host}${db} sent a UDP RPC message: setting online to true`);
+      }
+      if (device.cached) {
+        device.cached = false;
+        this.log.debug(`Device ${hk}${device.id}${db} host ${zb}${device.host}${db} sent a UDP RPC message: setting cached to false`);
+      }
+      if (isValidObject(params, 1)) device.onUpdate(params);
+    });
+
+    // Handle udpevent from UdpServer
+    this.udpServer.on('udpevent', (shellyId: string, params: ShellyData) => {
+      const device = this.getDevice(shellyId);
+      if (!device) {
+        this.log.debug(`Received udpevent from a not registered device id ${hk}${shellyId}${db}`);
+        return;
+      }
+      this.log.debug(`Received udpevent from device id ${hk}${shellyId}${db} host ${zb}${device.host}${db}`);
+      if (device.sleepMode) device.emit('awake');
+      if (!device.online) {
+        device.online = true;
+        device.emit('online');
+        this.log.debug(`Device ${hk}${device.id}${db} host ${zb}${device.host}${db} sent a UDP RPC message: setting online to true`);
+      }
+      if (device.cached) {
+        device.cached = false;
+        this.log.debug(`Device ${hk}${device.id}${db} host ${zb}${device.host}${db} sent a UDP RPC message: setting cached to false`);
       }
       // oxlint-disable-next-line typescript/no-unsafe-type-assertion
       if (isValidObject(params, 1) && isValidArray(params.events, 1)) device.onEvent(params.events as ShellyEvent[]);
@@ -238,6 +284,8 @@ export class Shelly extends EventEmitter<ShellyEvents> {
       this.removeDevice(device);
     });
     this.removeAllListeners();
+    this.udpServer.removeAllListeners();
+    this.udpServer.stop();
     this.wsServer.removeAllListeners();
     this.wsServer.stop();
     this.mdnsScanner.removeAllListeners();
@@ -432,13 +480,15 @@ export class Shelly extends EventEmitter<ShellyEvents> {
    * @param {boolean} debugMdns - Whether to enable debug logging for mDNS.
    * @param {boolean} debugCoap - Whether to enable debug logging for CoAP.
    * @param {boolean} debugWs - Whether to enable debug logging for WebSocket.
+   * @param {boolean} debugUdp - Whether to enable debug logging for UDP.
    */
-  setLogLevel(level: LogLevel, debugMdns: boolean, debugCoap: boolean, debugWs: boolean): void {
+  setLogLevel(level: LogLevel, debugMdns: boolean, debugCoap: boolean, debugWs: boolean, debugUdp: boolean): void {
     // Called 2 times in module.ts: 1) at startup, 2) after onChangeLoggerLevel
     this.log.logLevel = level;
     this.mdnsScanner.log.logLevel = debugMdns ? LogLevel.DEBUG : LogLevel.INFO;
     this.coapServer.log.logLevel = debugCoap ? LogLevel.DEBUG : LogLevel.INFO;
     this.wsServer.log.logLevel = debugWs ? LogLevel.DEBUG : LogLevel.INFO;
+    this.udpServer.log.logLevel = debugUdp ? LogLevel.DEBUG : LogLevel.INFO;
     WsClient.logLevel = debugWs ? LogLevel.DEBUG : LogLevel.INFO; // Static property for new instances
     this.devices.forEach((device) => {
       device.setLogLevel(level);

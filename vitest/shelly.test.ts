@@ -14,6 +14,7 @@ import { flushAsync, loggerLogSpy, setupTest } from 'matterbridge/vitest-utils';
 import { CoapServer } from '../src/coapServer.js';
 import { Shelly } from '../src/shelly.js';
 import { ShellyDevice } from '../src/shellyDevice.js';
+import { UdpServer } from '../src/udpServer.js';
 import { WsClient } from '../src/wsClient.js';
 import { WsServer } from '../src/wsServer.js';
 
@@ -55,6 +56,7 @@ describe('Shellies test', () => {
   test('Constructor', () => {
     expect(shellies).not.toBeUndefined();
     expect(shellies).toBeInstanceOf(Shelly);
+    expect(shellies.udpServer).toBeInstanceOf(UdpServer);
     // expect(coapServerStartSpy).toHaveBeenCalledTimes(1);
     // expect(wsServerStartSpy).toHaveBeenCalledTimes(1);
   });
@@ -200,7 +202,7 @@ describe('Shellies test', () => {
       if (device.gen > 1 && !device.sleepMode) device.wsClient = new WsClient(device.id, device.host, 80, shellies.password);
     }
     shellies.logDevices();
-    shellies.setLogLevel(LogLevel.INFO, false, false, false);
+    shellies.setLogLevel(LogLevel.INFO, false, false, false, false);
   });
 
   test('Fetch updates for 4 devices', async () => {
@@ -415,6 +417,111 @@ describe('Shellies test', () => {
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`Received wssevent from a not registered device`));
   }, 10000);
 
+  test('udpServer on udpupdate', async () => {
+    const device = shellies.getDeviceByHost(path.join('src', 'mock', 'shelly1minig3-543204547478.json'));
+    expect(device).toBeDefined();
+    if (!device) return;
+    const onUpdateSpy = vi.spyOn(device, 'onUpdate');
+    device.sleepMode = true;
+    device.online = false;
+    device.cached = true;
+    const onAwake = vi.fn();
+    const onOnline = vi.fn();
+    device.on('awake', onAwake);
+    device.on('online', onOnline);
+    shellies.udpServer.emit('udpupdate', 'shelly1minig3-543204547478', {});
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`setting online to true`));
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`setting cached to false`));
+    expect(onAwake).toHaveBeenCalledTimes(1);
+    expect(onOnline).toHaveBeenCalledTimes(1);
+    expect(onUpdateSpy).not.toHaveBeenCalled();
+
+    device.sleepMode = true;
+    device.online = false;
+    device.cached = true;
+    shellies.udpServer.emit('udpupdate', 'shelly1minig3-543204547478', { bthome: {} });
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    expect(onAwake).toHaveBeenCalledTimes(2);
+    expect(onOnline).toHaveBeenCalledTimes(2);
+    expect(onUpdateSpy).toHaveBeenCalledTimes(1);
+    expect(onUpdateSpy).toHaveBeenCalledWith({ bthome: {} });
+    onUpdateSpy.mockRestore();
+
+    device.sleepMode = false;
+    device.online = true;
+    device.cached = false;
+    loggerLogSpy.mockClear();
+    shellies.udpServer.emit('udpupdate', 'shelly1minig3-543204547478', {});
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    expect(onAwake).toHaveBeenCalledTimes(2);
+    expect(onOnline).toHaveBeenCalledTimes(2);
+    expect(loggerLogSpy).not.toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`setting online to true`));
+    expect(loggerLogSpy).not.toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`setting cached to false`));
+
+    shellies.udpServer.emit('udpupdate', 'shellyxxx', {});
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`Received udpupdate from a not registered device`));
+  }, 10000);
+
+  test('udpServer on udpevent', async () => {
+    const device = shellies.getDeviceByHost(path.join('src', 'mock', 'shelly1minig3-543204547478.json'));
+    expect(device).toBeDefined();
+    if (!device) return;
+    const onEventSpy = vi.spyOn(device, 'onEvent');
+    device.sleepMode = true;
+    device.online = false;
+    device.cached = true;
+    const onAwake = vi.fn();
+    const onOnline = vi.fn();
+    device.on('awake', onAwake);
+    device.on('online', onOnline);
+
+    shellies.udpServer.emit('udpevent', 'shelly1minig3-543204547478', {});
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`setting online to true`));
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`setting cached to false`));
+    expect(onAwake).toHaveBeenCalledTimes(1);
+    expect(onOnline).toHaveBeenCalledTimes(1);
+    expect(onEventSpy).not.toHaveBeenCalled();
+
+    device.sleepMode = true;
+    device.online = false;
+    device.cached = true;
+    shellies.udpServer.emit('udpevent', 'shelly1minig3-543204547478', { events: [] });
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    expect(onAwake).toHaveBeenCalledTimes(2);
+    expect(onOnline).toHaveBeenCalledTimes(2);
+    expect(onEventSpy).not.toHaveBeenCalled();
+
+    device.sleepMode = true;
+    device.online = false;
+    device.cached = true;
+    const events = [{ component: 'sys', event: 'cfg_changed', ts: 1234 }];
+    shellies.udpServer.emit('udpevent', 'shelly1minig3-543204547478', { events });
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    expect(onAwake).toHaveBeenCalledTimes(3);
+    expect(onOnline).toHaveBeenCalledTimes(3);
+    expect(onEventSpy).toHaveBeenCalledTimes(1);
+    expect(onEventSpy).toHaveBeenCalledWith(events);
+    onEventSpy.mockRestore();
+
+    device.sleepMode = false;
+    device.online = true;
+    device.cached = false;
+    loggerLogSpy.mockClear();
+    shellies.udpServer.emit('udpevent', 'shelly1minig3-543204547478', {});
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    expect(onAwake).toHaveBeenCalledTimes(3);
+    expect(onOnline).toHaveBeenCalledTimes(3);
+    expect(loggerLogSpy).not.toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`setting online to true`));
+    expect(loggerLogSpy).not.toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`setting cached to false`));
+
+    shellies.udpServer.emit('udpevent', 'shellyxxx', {});
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`Received udpevent from a not registered device`));
+  }, 10000);
+
   test('mdnsScanner on discovered', async () => {
     const onDiscovered = vi.fn();
     shellies.on('discovered', onDiscovered);
@@ -567,6 +674,7 @@ describe('Shellies test', () => {
   test('Set log level', async () => {
     expect((shellies as any).log.logLevel).toBe(LogLevel.INFO);
     expect(shellies.mdnsScanner.log.logLevel).toBe(LogLevel.INFO);
+    expect(shellies.udpServer.log.logLevel).toBe(LogLevel.INFO);
     expect(shellies.wsServer.log.logLevel).toBe(LogLevel.INFO);
     expect(shellies.coapServer.log.logLevel).toBe(LogLevel.INFO);
     expect(WsClient.logLevel).toBe(LogLevel.INFO);
@@ -577,25 +685,28 @@ describe('Shellies test', () => {
     expect(await shellies.addDevice(device2g)).toBe(shellies);
     expect(device2g.wsClient).toBeDefined();
 
-    shellies.setLogLevel(LogLevel.DEBUG, true, true, true);
+    shellies.setLogLevel(LogLevel.DEBUG, true, true, true, true);
     expect((shellies as any).log.logLevel).toBe(LogLevel.DEBUG);
     expect(shellies.mdnsScanner.log.logLevel).toBe(LogLevel.DEBUG);
+    expect(shellies.udpServer.log.logLevel).toBe(LogLevel.DEBUG);
     expect(shellies.wsServer.log.logLevel).toBe(LogLevel.DEBUG);
     expect(shellies.coapServer.log.logLevel).toBe(LogLevel.DEBUG);
     expect(WsClient.logLevel).toBe(LogLevel.DEBUG);
     expect(device2g.wsClient?.log.logLevel).toBe(LogLevel.DEBUG);
 
-    shellies.setLogLevel(LogLevel.INFO, false, false, false);
+    shellies.setLogLevel(LogLevel.INFO, false, false, false, false);
     expect((shellies as any).log.logLevel).toBe(LogLevel.INFO);
     expect(shellies.mdnsScanner.log.logLevel).toBe(LogLevel.INFO);
+    expect(shellies.udpServer.log.logLevel).toBe(LogLevel.INFO);
     expect(shellies.wsServer.log.logLevel).toBe(LogLevel.INFO);
     expect(shellies.coapServer.log.logLevel).toBe(LogLevel.INFO);
     expect(WsClient.logLevel).toBe(LogLevel.INFO);
     expect(device2g.wsClient?.log.logLevel).toBe(LogLevel.INFO);
 
-    shellies.setLogLevel(LogLevel.NOTICE, false, false, false);
+    shellies.setLogLevel(LogLevel.NOTICE, false, false, false, false);
     expect((shellies as any).log.logLevel).toBe(LogLevel.NOTICE);
     expect(shellies.mdnsScanner.log.logLevel).toBe(LogLevel.INFO);
+    expect(shellies.udpServer.log.logLevel).toBe(LogLevel.INFO);
     expect(shellies.wsServer.log.logLevel).toBe(LogLevel.INFO);
     expect(shellies.coapServer.log.logLevel).toBe(LogLevel.INFO);
     expect(WsClient.logLevel).toBe(LogLevel.INFO);

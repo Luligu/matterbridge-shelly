@@ -382,6 +382,54 @@ describe('Shelly devices test', () => {
     device?.destroy();
   });
 
+  test('create gen 2+ battery with rpc over udp should use udp', async () => {
+    shelly.ipv4Address = '192.168.1.20';
+    fetchSpy.mockImplementation(async (shelly: Shelly, log: AnsiLogger, host: string, service: string, params?: Record<string, string | number | boolean | object>) => {
+      if (service === 'shelly')
+        return Promise.resolve({
+          name: 'H&T Gen3',
+          id: 'shellyhtg3-3030f9ec8468',
+          mac: '3030F9EC8468',
+          model: 'S3SN-0U12A',
+          gen: 3,
+          fw_id: '20241011-121127/1.4.5-gbf870ca',
+          ver: '1.4.5',
+          auth_en: false,
+        });
+      if (service === 'Shelly.GetConfig')
+        return Promise.resolve({
+          sys: {
+            device: {},
+            cfg_rev: 23,
+            rpc_udp: {
+              dst_addr: '192.168.1.20:8585',
+              listen_port: 8585,
+            },
+          },
+          ws: {
+            enable: false,
+            server: 'ws://192.168.1.XXX:8486',
+            ssl_ca: '*',
+          },
+        });
+      if (service === 'Shelly.GetStatus')
+        return Promise.resolve({
+          sys: {
+            available_updates: {},
+            wakeup_period: 7200,
+          },
+        });
+      return Promise.resolve({ gen: 3 });
+    });
+    const host = '192.168.100.100';
+    const device = await ShellyDevice.create(shelly, log, host);
+    expect(device).toBeDefined();
+    expect(device?.udp).toBeTruthy();
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, expect.stringContaining(`Using RPC over UDP`));
+    expect(loggerLogSpy).not.toHaveBeenCalledWith(LogLevel.WARN, expect.stringContaining(`The Outbound websocket settings is not enabled`));
+    device?.destroy();
+  });
+
   test('create gen 2+ with wrong ws should log wrong settings', async () => {
     shelly.ipv4Address = '192.168.1.20';
     fetchSpy.mockImplementation(async (shelly: Shelly, log: AnsiLogger, host: string, service: string, params?: Record<string, string | number | boolean | object>) => {
@@ -850,7 +898,34 @@ describe('Shelly devices test', () => {
     device.onUpdate(updateData);
     expect(handleBthomeDeviceUpdate).toHaveBeenCalledWith(bthomeDevice.addr, -50, 123, 1625072400);
 
+    device.onUpdate({
+      [bthomeDevice.key]: {
+        packet_id: 124,
+      },
+    });
+    expect(handleBthomeDeviceUpdate).toHaveBeenCalledTimes(1);
+
     device.destroy();
+  });
+
+  test('create should add a gen 2 rgbw component', async () => {
+    fetchSpy.mockImplementation(async (_shelly, _log, _host, path) => {
+      if (path === 'shelly') return { mac: 'AABBCCDDEEFF', model: 'RGBW', id: 'shellyrgbw-aabbccddeeff', fw_id: '20260101/1.0.0', gen: 2, auth_en: false };
+      if (path === 'Shelly.GetStatus') return { 'sys': { available_updates: {} }, 'rgbw:0': { id: 0, output: false, brightness: 50 } };
+      if (path === 'Shelly.GetConfig')
+        return {
+          'sys': { device: { name: 'RGBW Test' }, rpc_udp: { dst_addr: null, listen_port: null } },
+          'rgbw:0': { id: 0, name: null },
+        };
+      if (path === 'Shelly.GetComponents') return { components: [], cfg_rev: 0, offset: 0, total: 0 };
+      return null;
+    });
+
+    const device = await ShellyDevice.create(shelly, log, '192.168.1.250');
+    expect(device).toBeDefined();
+    expect(device?.getComponent('rgbw:0')?.name).toBe('Rgbw');
+
+    device?.destroy();
   });
 
   test('onUpdate should handle unknown bthomedevice update', async () => {

@@ -18,6 +18,7 @@ import { Shelly } from '../src/shelly.js';
 import { ShellyComponent } from '../src/shellyComponent.js';
 import { ShellyDevice } from '../src/shellyDevice.js';
 import { shellyFetch } from '../src/shellyFetch.js';
+import { UdpServer } from '../src/udpServer.js';
 import { WsClient } from '../src/wsClient.js';
 import { WsServer } from '../src/wsServer.js';
 
@@ -33,6 +34,8 @@ const wsServerStartSpy = vi.spyOn(WsServer.prototype, 'start').mockImplementatio
 const wsServerStopSpy = vi.spyOn(WsServer.prototype, 'stop').mockImplementation(() => {});
 const wsClientStartSpy = vi.spyOn(WsClient.prototype, 'start').mockImplementation(() => {});
 const wsClientStopSpy = vi.spyOn(WsClient.prototype, 'stop').mockImplementation(() => {});
+const udpServerStartSpy = vi.spyOn(UdpServer.prototype, 'start').mockImplementation(() => {});
+const udpServerStopSpy = vi.spyOn(UdpServer.prototype, 'stop').mockImplementation(() => {});
 const mdnsScannerStartSpy = vi.spyOn(MdnsScanner.prototype, 'start').mockImplementation(() => {});
 const mdnsScannerStopSpy = vi.spyOn(MdnsScanner.prototype, 'stop').mockImplementation(() => {});
 const fetchSpy = vi.mocked(shellyFetch);

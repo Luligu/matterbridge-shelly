@@ -32,6 +32,7 @@ import type { Shelly } from '../src/shelly.js';
 import { ShellyComponent } from '../src/shellyComponent.js';
 import { ShellyDevice } from '../src/shellyDevice.js';
 import { ShellyProperty } from '../src/shellyProperty.js';
+import { UdpServer } from '../src/udpServer.js';
 import { shellyUpdateHandler } from '../src/updateHandler.js';
 import { WsClient } from '../src/wsClient.js';
 import { WsServer } from '../src/wsServer.js';
@@ -66,6 +67,7 @@ const mockConfig: ShellyPlatformConfig = {
   debugMdns: true,
   debugCoap: true,
   debugWs: true,
+  debugUdp: true,
   unregisterOnShutdown: false,
 };
 
@@ -79,6 +81,8 @@ describe('ShellyPlatform', () => {
   const coapServerStartSpy = vi.spyOn(CoapServer.prototype, 'start').mockImplementation(() => {});
   const coapServerStopSpy = vi.spyOn(CoapServer.prototype, 'stop').mockImplementation(() => {});
   const coapServerRegisterDeviceSpy = vi.spyOn(CoapServer.prototype, 'registerDevice').mockImplementation(async (host: string, id: string, registerOnly: boolean) => {});
+  const udpServerStartSpy = vi.spyOn(UdpServer.prototype, 'start').mockImplementation(() => {});
+  const udpServerStopSpy = vi.spyOn(UdpServer.prototype, 'stop').mockImplementation(() => {});
   const wsServerStartSpy = vi.spyOn(WsServer.prototype, 'start').mockImplementation(() => {});
   const wsServerStopSpy = vi.spyOn(WsServer.prototype, 'stop').mockImplementation(() => {});
   const wsClientStartSpy = vi.spyOn(WsClient.prototype, 'start').mockImplementation(() => {});

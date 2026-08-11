@@ -21,7 +21,7 @@ await setupTest(NAME, false);
 describe('Shellies', () => {
   const log = new AnsiLogger({ logName: 'ShellyDeviceRealTest', logTimestampFormat: TimestampFormat.TIME_MILLIS, logLevel: LogLevel.DEBUG });
   const shelly = new Shelly(log, 'admin', 'tango');
-  shelly.setLogLevel(LogLevel.DEBUG, true, true, true);
+  shelly.setLogLevel(LogLevel.DEBUG, true, true, true, true);
   let device: ShellyDevice | undefined;
 
   const firmwareGen1 = 'v1.14.0-gcb84623';
@@ -34,7 +34,7 @@ describe('Shellies', () => {
 
   beforeAll(async () => {
     shelly.dataPath = HOMEDIR;
-    shelly.setLogLevel(LogLevel.DEBUG, true, true, true);
+    shelly.setLogLevel(LogLevel.DEBUG, true, true, true, true);
     shelly.coapServer.start();
   });
 

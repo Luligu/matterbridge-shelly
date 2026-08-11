@@ -205,6 +205,12 @@
       "type": "boolean",
       "default": false
     },
+    "debugUdp": {
+      "title": "Enable Debug Udp",
+      "description": "Enable the debug for the shelly UdpServer (development only)",
+      "type": "boolean",
+      "default": false
+    },
     "unregisterOnShutdown": {
       "title": "Unregister On Shutdown",
       "description": "Unregister all devices on shutdown (development only)",
