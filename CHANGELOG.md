@@ -40,6 +40,9 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 ### Changed
 
 - [test]: Improve test coverage to 95%.
+- [package]: Upgrade package.
+- [package]: Bump `oxfmt` to v.0.63.0.
+- [package]: Bump `oxlint` to v.1.78.0.
 
 ### Fixed
 
