@@ -394,8 +394,8 @@ See also the [Style Guide](./STYLEGUIDE.md) for JSDoc, naming, and logging conve
 | `.codex/config.toml`         | Codex project permissions, approvals, and profile |
 | `.codex/rules/default.rules` | Codex command allow, prompt, and deny rules       |
 
-## Documentation
+## Development guide
 
-Refer to the Matterbridge [documentation](https://matterbridge.io) for other guidelines.
+Refer to the Matterbridge [Development guide](https://matterbridge.io/README-DEV.html) for other guidelines.
 
 ---
