@@ -33,17 +33,19 @@ Features:
 - PowerMeters expose the electrical measurements with the electricalSensor device type (supported by Home Assistant and partially by SmartThings), waiting for the other controllers to upgrade to the Matter 1.3 specs.
 - Shellies are controlled locally, eliminating the need for cloud or MQTT (which can both be disabled).
 - Shelly Gen 1 devices are controlled using the CoIoT protocol (see the note below).
-- Shelly Gen 2, Gen 3 and Gen 4 devices are controlled using WebSocket.
+- Shelly Gen 2, Gen 3 and Gen 4 devices are controlled using WebSocket. Starting with release 2.6.0, it is possible to use [RPC over UDP](README.md#how-to-configure-rpc-over-udp) instead of websocket.
 - The Matter device takes the name configured in the Shelly device's web page (each Shelly device must have a different name).
 - Each device can be excluded or included using its name, id or mac address. Refer to the [COMPONENTS.md documentation.](https://github.com/Luligu/matterbridge-shelly/blob/main/COMPONENTS.md)
 - Device components can be blacklisted globally or on a per-device basis. Refer to the [COMPONENTS.md documentation.](https://github.com/Luligu/matterbridge-shelly/blob/main/COMPONENTS.md)
 - Devices ids can be selected from a list in the config editor or in the Devices panel on the Home page.
-- If the device has a firmware update available, a message is displayed.
+- If the device has a firmware update available, a message is displayed in the log.
 - If the device's CoIoT protocol is not correctly configured for the gen 1 devices, a message is displayed.
 - If the device's Outbound websocket settings is not correctly configured for the gen 2+ battery powered devices, a message is displayed.
 - If the device cover/roller component is not calibrated, a message is displayed.
 - If a device changes its ip address on the network, a message is displayed and the new address is stored.
 - A 1 hour timer checks if the device has reported within that time frame, fetch an update and save the cache file.
+- Support for [RPC over UDP](README.md#how-to-configure-rpc-over-udp) update protocol (alternative to websocket) for Gen2+ devices.
+- If the device's RPC over UDP settings is not correctly configured for the gen 2+ devices, a message is displayed.
 
 If you like this project and find it useful, please consider giving it a star on GitHub at https://github.com/Luligu/matterbridge-shelly and sponsoring it.
 
@@ -53,13 +55,11 @@ If you like this project and find it useful, please consider giving it a star on
 
 ## Sponsors
 
-This project is proudly sponsored by:
+This project was proudly sponsored by:
 
 <a href="https://www.shelly.com/en">
   <img src="https://matterbridge.io/assets/Shelly.svg" alt="Shelly logo" width="100" />
 </a>
-
-[Shelly Group](https://corporate.shelly.com/about-shelly-group/)
 
 ## Acknowledgements
 
@@ -79,8 +79,6 @@ A shelly device gen. 1 or 2 or 3 or 4 or BLU.
 
 Verify that enableMdnsDiscover and enableStorageDiscover are selected in the plugin configuration. Restart matterbridge in case these options were not flagged and the devices will be discovered.
 
-When all the devices have been discovered and stored, I suggest to unselect enableMdnsDiscover.
-
 Follow these guidelines for specific devices.
 
 ### Add Gen. 1 devices
@@ -91,9 +89,10 @@ Follow these guidelines for specific devices.
 
 - First check that enableMdnsDiscover and enableStorageDiscover are flagged in the plugin configuration. If they are not, enable them and restart matterbridge. Then awake the device you want to register pressing the device button. It is also possible, when CoIoT is correctly configured, to just wait for the device to awake and it will be registered automatically.
 
-### Add Gen. 2 or 3 battery-powered devices
+### Add Gen. 2 or 3 or 4 battery-powered devices
 
-- First check that enableMdnsDiscover and enableStorageDiscover are flagged in the plugin configuration. If they are not, enable them and restart matterbridge. Then awake the device you want to register pressing the device button and in the device web page go to "Settings", then "Outbound websocket" and enable it, select "TLS no validation" and put in the server field `ws://<matterbridge-ipv4>:8485` (where `<matterbridge-ipv4>` is the ipv4 address of Matterbridge e.g. ws://192.168.1.100:8485). You can find the matterbridge ipv4Address address in the frontend or in the log. It is also possible, when "Outbound websocket" is configured correctly, to just wait for the device to awake and it will be registered automatically.
+- First check that enableMdnsDiscover and enableStorageDiscover are flagged in the plugin configuration. If they are not, enable them and restart matterbridge. Then awake the device you want to register pressing the device button and in the device web page go to `Settings`, then `Outbound websocket` and enable it, select "TLS no validation" and put in the server field `ws://<matterbridge-ipv4>:8485` (where `<matterbridge-ipv4>` is the ipv4 address of Matterbridge e.g. ws://192.168.1.100:8485). You can find the matterbridge ipv4Address address in the frontend or in the log. It is also possible, when "Outbound websocket" is configured correctly, to just wait for the device to awake and it will be registered automatically.
+  Starting with release 2.6.0, it is possible to use [RPC over UDP](README.md#how-to-configure-rpc-over-udp) instead of "Outbound websocket".
 
 ### Add Gen. 4 devices
 
@@ -102,6 +101,10 @@ Follow these guidelines for specific devices.
 ### Add BLU devices
 
 - BLU devices are supported through a local Shelly device acting as a ble gateway. To enable this feature, choose one or more devices that have the ble component and support the ble gateway (e.g. PRO, Gen 3 and Gen 4 devices). In the gateway device web page, enable both "Enable Bluetooth" and "Enable Bluetooth gateway" or "Enable RPC". Then, go to the "Components" section and add your BLU devices in "Bluetooth (BTHome) devices". Give a meaningful name to your device if desired and restart Matterbridge. See the full guide here: https://github.com/Luligu/matterbridge-shelly/blob/dev/BLU.md
+
+## How to configure RPC over UDP
+
+In the Shelly device web UI go to "Settings", then "RPC over UDP", enable it and set the destination address to `<matterbridge-ipv4>:8585` (where `<matterbridge-ipv4>` is the ipv4 address of Matterbridge, e.g. 192.168.1.100:8585). Set the listening port to `8585`. You can find the Matterbridge ipv4Address in the frontend or in the log. When RPC over UDP is configured correctly, Matterbridge receives device updates and events directly over UDP and the WebSocket client is not connected for that device.
 
 ## How to make the device IP address stable
 
@@ -116,7 +119,7 @@ A stable IP address is mandatory for battery powered devices. I suggest to set i
 
 ### With the frontend (preferred method)
 
-Just open the frontend, select the matterbridge-shelly plugin and click on install. If you are using Matterbridge with Docker (I suggest you do it), all plugins are already loaded in the container image so you just need to select and add it.
+Just open the frontend, select the matterbridge-shelly plugin and click on install.
 
 ### Without the frontend
 
@@ -277,6 +280,10 @@ Should be enabled only if you want to debug some issue with CoIoT using the log.
 
 Should be enabled only if you want to debug some issue with the WebSocket client or server using the log. Only for development.
 
+### debugUdp
+
+Should be enabled only if you want to debug some issue with the RPC over UDP server using the log. Only for development.
+
 ### unregisterOnShutdown
 
 Should be enabled only if you want to remove the devices from the controllers on shutdown. Only for development.
@@ -316,6 +323,7 @@ These are the config values:
   "debugMdns": false,
   "debugCoap": false,
   "debugWs": false,
+  "debugUdp": false,
   "unregisterOnShutdown": false
 }
 ```
@@ -337,3 +345,57 @@ nano matterbridge-shelly.config.json
 ```
 
 Restart Matterbridge for the changes to take effect.
+
+## Style guide
+
+See also the [Style Guide](./STYLEGUIDE.md) for JSDoc, naming, and logging conventions used in this repository.
+
+## Repository toolchain
+
+> **Note:** This repository uses a new toolchain. It replaces the traditional TypeScript / ESLint / Prettier / Jest stack with a faster and lighter setup.
+
+- **No `typescript 6.x` package** — replaced by [TypeScript Native 7.x](https://github.com/microsoft/typescript-go).
+- **No ESLint, no Prettier** — replaced by the [oxc](https://oxc.rs) stack: [oxlint](https://oxc.rs/docs/guide/usage/linter.html) for linting and [oxfmt](https://oxc.rs/docs/guide/usage/formatter.html) for formatting.
+- **No Jest** — replaced by [Vitest](https://vitest.dev), which is much faster and natively supports ESM without extra configuration.
+- **Far fewer development dependencies** — the number of installed packages drops from **~600** to **~75**. A clean install is much faster.
+- **Much faster linting and formatting** — oxlint and oxfmt run in a fraction of the time required by the ESLint / Prettier pipeline.
+- **Much faster builds** — tsgo compiles the project in a fraction of the time required by the standard `tsc` build.
+- **Editor support** — use the VS Code extensions for tsgo and oxc to get the same experience in the editor.
+
+## Copilot instructions
+
+| File                                                                   | Notes                                                                              |
+| ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `.github/copilot-instructions.md`                                      | Main project instructions — always loaded                                          |
+| `.github/instructions/chip-tests/chip-tests.instructions.md`           | CHIP conformance test harness — scoped to CHIP test files                          |
+| `.github/instructions/matterbridge/matterbridge.instructions.md`       | Matterbridge endpoint guide — dedicated Copilot instruction file                   |
+| `.github/instructions/plugin-frontend/plugin-frontend.instructions.md` | Plugin frontend SPA and custom REST API guide — scoped to frontend and plugin code |
+| `.github/instructions/testing/unit-tests.instructions.md`              | Testing standards — scoped to `**/*.test.ts`                                       |
+
+## Claude instructions
+
+| File                                                            | Notes                                                                              |
+| --------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `CLAUDE.md`                                                     | Main project instructions — always loaded                                          |
+| `.claude/rules/chip-tests/chip-tests.instructions.md`           | CHIP conformance test harness — scoped to CHIP test files                          |
+| `.claude/rules/matterbridge/matterbridge.instructions.md`       | Matterbridge endpoint guide — loaded for all contexts                              |
+| `.claude/rules/plugin-frontend/plugin-frontend.instructions.md` | Plugin frontend SPA and custom REST API guide — scoped to frontend and plugin code |
+| `.claude/rules/testing/unit-tests.instructions.md`              | Testing standards — scoped to `**/*.test.ts`                                       |
+
+## Codex/Agents instructions
+
+| File                         | Notes                                             |
+| ---------------------------- | ------------------------------------------------- |
+| `AGENTS.md`                  | Main project instructions                         |
+| `.agents/chip-tests.md`      | CHIP conformance test harness                     |
+| `.agents/matterbridge.md`    | Matterbridge endpoint guide                       |
+| `.agents/plugin-frontend.md` | Plugin frontend SPA and custom REST API guide     |
+| `.agents/testing.md`         | Testing and validation expectations               |
+| `.codex/config.toml`         | Codex project permissions, approvals, and profile |
+| `.codex/rules/default.rules` | Codex command allow, prompt, and deny rules       |
+
+## Documentation
+
+Refer to the Matterbridge [documentation](https://matterbridge.io) for other guidelines.
+
+---

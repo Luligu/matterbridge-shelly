@@ -22,11 +22,30 @@
 
 All notable changes to this project will be documented in this file.
 
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
 If you like this project and find it useful, please consider giving it a star on [GitHub](https://github.com/Luligu/matterbridge-shelly) and sponsoring it.
 
 <a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="120"></a>
 
 You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his invaluable contribution to this project.
+
+## [2.6.0] - Dev branch
+
+### Added
+
+- [udp]: Add support for [RPC over UDP](README.md#how-to-configure-rpc-over-udp) to receive Shelly device updates. It is an alternative to the traditional WebSocket connection and is also useful for Gen 2+ battery-powered devices with sleep mode.
+- [docs]: Update README.md and CHANGELOG.md.
+
+### Changed
+
+- [test]: Improve test coverage to 95%.
+
+### Fixed
+
+- [tmp]: Fix Gen1 temperature conversion when sensor.units = 'F'.
+
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [2.5.1] - 2026-08-09
 
