@@ -1179,7 +1179,9 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
           // v8 ignore else
           if (sensor.is_valid === true && sensor.units === 'C' && isValidNumber(sensor.tC, -55, 125)) this.getComponent('temperature')?.setValue('value', sensor.tC);
           // v8 ignore else
-          if (sensor.is_valid === true && sensor.units === 'F' && isValidNumber(sensor.tF, -67, 257)) this.getComponent('temperature')?.setValue('value', sensor.tF);
+          if (sensor.is_valid === true && sensor.units === 'F' && isValidNumber(sensor.tC, -55, 125)) this.getComponent('temperature')?.setValue('value', sensor.tC);
+          else if (sensor.is_valid === true && sensor.units === 'F' && isValidNumber(sensor.tF, -67, 257))
+            this.getComponent('temperature')?.setValue('value', ((sensor.tF - 32) * 5) / 9);
         }
         if (key === 'hum') {
           this.updateComponent('humidity', data[key] as ShellyData);
