@@ -114,7 +114,7 @@
     "prepublishOnly": "npm run cleanBuildProduction && npm pkg delete devDependencies scripts automator && node scripts/prepublish-clean.mjs && npm install --no-fund --no-audit --omit=dev && npm shrinkwrap --omit=dev"
   },
   "dependencies": {
-    "coap": "1.5.0",
+    "coap": "1.6.0",
     "multicast-dns": "7.2.5",
     "node-ansi-logger": "3.3.0",
     "node-persist-manager": "2.1.0",

@@ -43,6 +43,8 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 - [package]: Upgrade package.
 - [package]: Bump `oxfmt` to v.0.63.0.
 - [package]: Bump `oxlint` to v.1.78.0.
+- [devcontainer]: Bump `Dev Container` to v.1.2.0.
+- [vscode]: Bump `settings` to v.1.0.10.
 
 ### Fixed
 
