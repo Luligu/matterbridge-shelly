@@ -7,7 +7,6 @@
 import { promises as fs, readFileSync } from 'node:fs';
 import path from 'node:path';
 
-import { parameters } from 'coap';
 import { CYAN, db, hk, LogLevel, nf, zb } from 'matterbridge/logger';
 import { flushAsync, HOMEDIR, loggerLogSpy, setupTest } from 'matterbridge/vitest-utils';
 
@@ -86,7 +85,7 @@ const msg = {
 };
 
 describe('Coap scanner', () => {
-  const coapServer = new CoapServer({ username: 'admin', password: 'tango' } as any, LogLevel.DEBUG);
+  const coapServer = new CoapServer({ username: 'admin', password: 'tango' } as any, LogLevel.DEBUG, { maxRetransmit: 1, maxLatency: 1 });
 
   function loadResponse(shellyId: string, uri: 'citd' | 'cits'): any {
     (coapServer as any).deviceDescription.clear();
@@ -112,13 +111,6 @@ describe('Coap scanner', () => {
 
   const parseShellyMessageSpy = vi.spyOn(CoapServer.prototype as any, 'parseShellyMessage');
   const dimmerIp = '192.168.70.26';
-
-  beforeAll(() => {
-    // Set the CoAP parameters to minimum values
-    parameters.maxRetransmit = 1;
-    parameters.maxLatency = 1;
-    if (parameters.refreshTiming) parameters.refreshTiming();
-  });
 
   beforeEach(() => {
     // Clear all mocks
