@@ -436,6 +436,12 @@ export function shellyUpdateHandler(
       const energy = Math.round(((value as ShellyData).total as number) * 1000) / 1000;
       void endpoint.setAttribute(ElectricalEnergyMeasurement.id, 'cumulativeEnergyImported', { energy: Math.round(energy * 1000) }, shellyDevice.log);
     }
+    // oxlint-disable-next-line typescript/no-unsafe-type-assertion
+    if (property === 'ret_aenergy' && isValidObject(value) && isValidNumber((value as ShellyData).total, 0)) {
+      // oxlint-disable-next-line typescript/no-unsafe-type-assertion
+      const energy = Math.round(((value as ShellyData).total as number) * 1000) / 1000;
+      void endpoint.setAttribute(ElectricalEnergyMeasurement.id, 'cumulativeEnergyExported', { energy: Math.round(energy * 1000) }, shellyDevice.log);
+    }
     if (property === 'total_act_energy' && isValidNumber(value, 0)) {
       const energy = Math.round(value * 1000) / 1000;
       void endpoint.setAttribute(ElectricalEnergyMeasurement.id, 'cumulativeEnergyImported', { energy: Math.round(energy * 1000) }, shellyDevice.log);

@@ -1050,13 +1050,11 @@ describe('Coap scanner', () => {
       Promise.all([desc, status])
         .then(() => {
           clearTimeout(timeout);
-          // oxlint-disable-next-line promise/no-multiple-resolved -- races the safety timeout above; only the first settlement has any effect
           resolve(true);
           return;
         })
         .catch((_err: unknown) => {
           clearTimeout(timeout);
-          // oxlint-disable-next-line promise/no-multiple-resolved -- races the safety timeout above; only the first settlement has any effect
           resolve(true);
         });
     });
