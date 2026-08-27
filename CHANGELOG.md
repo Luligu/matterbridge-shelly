@@ -53,6 +53,7 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 ### Fixed
 
 - [tmp]: Fix Gen1 temperature conversion when sensor.units = 'F'.
+- [meter]: Fix configure for `ret_aenergy` and `total_act_ret_energy`.
 
 <a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
