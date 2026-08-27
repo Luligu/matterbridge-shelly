@@ -36,15 +36,16 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 
 - [udp]: Add support for [RPC over UDP](README.md#how-to-configure-rpc-over-udp) to receive Shelly device updates. It is an alternative to the traditional WebSocket connection and is also useful for Gen 2+ battery-powered devices with sleep mode.
 - [docs]: Update README.md and CHANGELOG.md.
+- [devcontainer]: Bump `Dev Container` to v.2.0.0.
 
 ### Changed
 
 - [test]: Improve test coverage to 95%.
 - [package]: Upgrade package.
 - [package]: Bump `coap` to v.1.6.0.
-- [package]: Bump `oxfmt` to v.0.63.0.
-- [package]: Bump `oxlint` to v.1.78.0.
-- [devcontainer]: Bump `Dev Container` to v.1.2.0.
+- [package]: Bump `oxfmt` to v.0.65.0.
+- [package]: Bump `oxlint` to v.1.80.0.
+- [package]: Bump `vitest` to v.4.1.11.
 - [vscode]: Bump `settings` to v.1.0.10.
 
 ### Fixed
