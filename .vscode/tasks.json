@@ -195,6 +195,14 @@
       "problemMatcher": []
     },
     {
+      "label": "Test: UdpServer",
+      "type": "shell",
+      "command": "npx",
+      "args": ["vitest", "run", "--coverage", "--coverage.include=src/udpServer.ts", "vitest/udpServer.test.ts"],
+      "group": { "kind": "test", "isDefault": false },
+      "problemMatcher": []
+    },
+    {
       "label": "Test: ShellyComponent",
       "type": "shell",
       "command": "npx",

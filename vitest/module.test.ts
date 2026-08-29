@@ -15,10 +15,11 @@ import { mkdirSync, unlinkSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 
 import { featuresFor, type MatterbridgeEndpoint, type PlatformMatterbridge } from 'matterbridge';
-import { CYAN, db, er, hk, idn, LogLevel, nf, or, rs, wr, YELLOW, zb } from 'matterbridge/logger';
+import { CYAN, db, er, GREEN, hk, idn, LogLevel, nf, or, rs, wr, YELLOW, zb } from 'matterbridge/logger';
 import { OnOffBehavior, RelativeHumidityMeasurementBehavior, TemperatureMeasurementBehavior } from 'matterbridge/matter/behaviors';
 import {
   Binding,
+  BridgedDeviceBasicInformation,
   ColorControl,
   Descriptor,
   ElectricalEnergyMeasurement,
@@ -49,7 +50,7 @@ import {
 } from 'matterbridge/vitest-utils/matter';
 
 import { CoapServer } from '../src/coapServer.js';
-import { MdnsScanner } from '../src/mdnsScanner.js';
+import { type DiscoveredDevice, MdnsScanner } from '../src/mdnsScanner.js';
 import initializePlugin, { ShellyPlatform, type ShellyPlatformConfig } from '../src/module.js';
 import type { Shelly } from '../src/shelly.js';
 import { ShellyDevice } from '../src/shellyDevice.js';
@@ -89,6 +90,7 @@ const mockConfig: ShellyPlatformConfig = {
   debugMdns: true,
   debugCoap: true,
   debugWs: true,
+  debugUdp: true,
   unregisterOnShutdown: false,
 };
 
@@ -134,6 +136,16 @@ describe('ShellyPlatform', () => {
     });
     (shelly as any)._devices.clear();
     clearInterval((shelly as any).fetchInterval);
+  };
+
+  const emitDiscovered = async (device: DiscoveredDevice): Promise<void> => {
+    shelly.emit('discovered', device);
+    await wait(eventWaitTime);
+  };
+
+  const emitAdded = async (device: ShellyDevice): Promise<void> => {
+    shelly.emit('add', device);
+    await wait(eventWaitTime);
   };
 
   beforeAll(async () => {
@@ -285,6 +297,81 @@ describe('ShellyPlatform', () => {
     cleanup();
   });
 
+  test('should reject every invalid added-device field', async () => {
+    const createDevice = (): any => ({
+      name: 'Test device',
+      id: 'shellytest-AABBCC',
+      host: '192.168.1.100',
+      gen: 2,
+      mac: 'AABBCC',
+      model: 'TEST',
+      firmware: '1.0.0',
+      profile: undefined,
+      sleepMode: false,
+      log: { info: vi.fn() },
+      logDevice: vi.fn(),
+      getComponentNames: vi.fn(() => ['Sys']),
+      *[Symbol.iterator]() {},
+    });
+    const invalidCases: [string, (device: any) => void][] = [
+      ['name', (device) => (device.name = '')],
+      ['id', (device) => (device.id = '')],
+      ['host', (device) => (device.host = '')],
+      ['generation', (device) => (device.gen = 0)],
+      ['mac', (device) => (device.mac = '')],
+      ['model', (device) => (device.model = '')],
+      ['firmware', (device) => (device.firmware = '')],
+      ['components', (device) => device.getComponentNames.mockReturnValue([])],
+    ];
+
+    for (const [, invalidate] of invalidCases) {
+      const device = createDevice();
+      invalidate(device);
+      loggerLogSpy.mockClear();
+
+      await emitAdded(device);
+
+      expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.ERROR, expect.stringContaining('is not valid. Please put it in the blackList and open an issue.'));
+    }
+  });
+
+  test('should log optional added-device details and stop when filtered', async () => {
+    const component = { name: 'Sys' };
+    const device = {
+      name: 'Filtered device',
+      id: 'shellytest-FILTERED',
+      host: '192.168.1.101',
+      gen: 2,
+      mac: 'AABBCC',
+      model: 'TEST',
+      firmware: '1.0.0',
+      profile: 'switch',
+      sleepMode: true,
+      bthomeDevices: new Map(),
+      bthomeSensors: new Map(),
+      log: { info: vi.fn() },
+      logDevice: vi.fn(),
+      getComponentNames: vi.fn(() => ['Sys']),
+      *[Symbol.iterator]() {
+        yield ['sys', component];
+      },
+    } as any;
+    const validateDeviceSpy = vi.spyOn(shellyPlatform as any, 'validateDevice').mockReturnValue(false);
+    shellyPlatform.config.enableBleDiscover = false;
+
+    await emitAdded(device);
+
+    expect(device.log.info).toHaveBeenCalledWith(`- profile: ${CYAN}switch${nf}`);
+    expect(device.log.info).toHaveBeenCalledWith(`- sleep: ${CYAN}true${nf}`);
+    expect(device.log.info).toHaveBeenCalledWith(`  - ${CYAN}sys${nf} (${GREEN}Sys${nf})`);
+    expect(device.logDevice).toHaveBeenCalledOnce();
+    expect(validateDeviceSpy).toHaveBeenCalledWith([device.id, device.mac, device.name]);
+    expect(shellyPlatform.bridgedDevices.has(device.id)).toBe(false);
+
+    shellyPlatform.config.enableBleDiscover = true;
+    validateDeviceSpy.mockRestore();
+  });
+
   it('should add shelly1', async () => {
     expect(shellyPlatform).toBeDefined();
     shellyPlatform.config.enableMdnsDiscover = false;
@@ -330,6 +417,16 @@ describe('ShellyPlatform', () => {
     expect(device.getChildEndpointById('input:0')?.hasClusterServer(Identify)).toBeTruthy();
     expect(device.getChildEndpointById('input:0')?.hasClusterServer(Switch)).toBeTruthy();
 
+    // Test online and offline handlers installed by the add event
+    const setAttributeSpy = vi.spyOn(device, 'setAttribute');
+    const triggerEventSpy = vi.spyOn(device, 'triggerEvent');
+    shelly1.emit('online');
+    expect(setAttributeSpy).toHaveBeenCalledWith('BridgedDeviceBasicInformation', 'reachable', true, device.log);
+    expect(triggerEventSpy).toHaveBeenCalledWith(BridgedDeviceBasicInformation.id, 'reachableChanged', { reachableNewValue: true }, device.log);
+    shelly1.emit('offline');
+    expect(setAttributeSpy).toHaveBeenCalledWith('BridgedDeviceBasicInformation', 'reachable', false, device.log);
+    expect(triggerEventSpy).toHaveBeenCalledWith(BridgedDeviceBasicInformation.id, 'reachableChanged', { reachableNewValue: false }, device.log);
+
     // Test updates on switch from Shelly to Matter
     const switchEndpoint = device.getChildEndpointById('relay:0')!;
     expect(switchEndpoint).toBeDefined();
@@ -369,6 +466,23 @@ describe('ShellyPlatform', () => {
 
     cleanup();
     shelly1.destroy();
+  });
+
+  test('should handle Matterbridge registration failure for an added device', async () => {
+    const device = await ShellyDevice.create(shelly, (shellyPlatform as any).log, path.join('src', 'mock', 'shelly1-34945472A643.json'));
+    expect(device).toBeDefined();
+    if (!device) return;
+    const registerDeviceSpy = vi.spyOn(shellyPlatform, 'registerDevice').mockRejectedValue(new Error('Test registration failure'));
+
+    await shelly.addDevice(device);
+    await wait(eventWaitTime);
+
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.ERROR, expect.stringContaining('failed to register with Matterbridge: Test registration failure'));
+    expect(shellyPlatform.bridgedDevices.has(device.id)).toBe(false);
+
+    registerDeviceSpy.mockRestore();
+    cleanup();
+    device.destroy();
   });
 
   it('should add shellyht', async () => {
@@ -1127,48 +1241,136 @@ describe('ShellyPlatform', () => {
     expect(size).toBe(originalSize);
   });
 
-  it('should handle Shelly discovered event', async () => {
-    const create = vi.spyOn(ShellyDevice, 'create' as any).mockImplementation(async () => {
-      return Promise.resolve();
-    });
+  test('should ignore unsupported discovered devices', async () => {
+    const addDeviceSpy = vi.spyOn(shellyPlatform as any, 'addDevice');
+    const unsupportedDevices: DiscoveredDevice[] = [
+      { id: 'shellycustom-AABBCC', host: '192.168.1.10', port: 9000, gen: 1 },
+      { id: 'shellyspot2-AABBCC', host: '192.168.1.11', port: 80, gen: 1 },
+      { id: 'shellypresence-AABBCC', host: '192.168.1.12', port: 80, gen: 1 },
+      { id: 'shellysense-AABBCC', host: '192.168.1.13', port: 80, gen: 1 },
+    ];
 
-    shellyPlatform.discoveredDevices.clear();
-    shellyPlatform.storedDevices.clear();
-    (shelly as any).emit('discovered', { id: 'shelly1-84FCE1234', host: 'invalid', port: 80, gen: 1 });
-    expect(await (shellyPlatform as any).loadStoredDevices()).toBeTruthy();
-    expect((shellyPlatform as any).storedDevices.size).toBe(1);
+    for (const device of unsupportedDevices) await emitDiscovered(device);
 
-    create.mockRestore();
+    expect(addDeviceSpy).not.toHaveBeenCalled();
+    expect(shellyPlatform.discoveredDevices.size).toBe(0);
+    expect(shellyPlatform.storedDevices.size).toBe(0);
+
+    addDeviceSpy.mockRestore();
   });
 
-  it('should not add already discoverd Shelly', async () => {
-    const create = vi.spyOn(ShellyDevice, 'create' as any).mockImplementation(async () => {
-      return Promise.resolve();
-    });
+  test('should add new discovered devices and register only Gen 1 with CoAP', async () => {
+    const addDeviceSpy = vi.spyOn(shellyPlatform as any, 'addDevice').mockImplementation(async () => {});
+    const saveStoredDevicesSpy = vi.spyOn(shellyPlatform as any, 'saveStoredDevices').mockResolvedValue(true);
+    const devices: DiscoveredDevice[] = [
+      { id: 'shelly1-AABBCC', host: '192.168.1.20', port: 80, gen: 1 },
+      { id: 'shellyplus1pm-AABBCC', host: '192.168.1.21', port: 80, gen: 2 },
+    ];
 
-    (shelly as any).emit('discovered', { id: 'shelly1-84FCE1234', host: 'invalid', port: 80, gen: 1 });
-    expect(await (shellyPlatform as any).loadStoredDevices()).toBeTruthy();
-    expect((shellyPlatform as any).storedDevices.size).toBe(1);
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Shelly device ${hk}shelly1-84FCE1234${nf} host ${zb}invalid${nf} already discovered`);
+    for (const device of devices) await emitDiscovered(device);
 
-    create.mockRestore();
-  });
-
-  it('should not add already discoverd Shelly with different host', async () => {
-    const create = vi.spyOn(ShellyDevice, 'create' as any).mockImplementation(async () => {
-      return Promise.resolve();
-    });
-
-    (shelly as any).emit('discovered', { id: 'shelly1-84FCE1234', host: 'invalid new host', port: 80, gen: 1 });
-    expect(await (shellyPlatform as any).loadStoredDevices()).toBeTruthy();
-    expect((shellyPlatform as any).storedDevices.size).toBe(1);
-    expect(loggerLogSpy).toHaveBeenCalledWith(
-      LogLevel.WARN,
-      `Shelly device ${hk}shelly1-84FCE1234${wr} host ${zb}invalid new host${wr} has been discovered with a different host.`,
-    );
+    expect(saveStoredDevicesSpy).toHaveBeenCalledTimes(2);
+    expect(addDeviceSpy).toHaveBeenCalledTimes(2);
+    expect(coapServerRegisterDeviceSpy).toHaveBeenCalledWith('192.168.1.20', 'shelly1-AABBCC', false);
+    expect(coapServerRegisterDeviceSpy).not.toHaveBeenCalledWith('192.168.1.21', 'shellyplus1pm-AABBCC', false);
+    expect(shellyPlatform.discoveredDevices.size).toBe(2);
+    expect(shellyPlatform.storedDevices.size).toBe(2);
 
     cleanup();
-    create.mockRestore();
+    saveStoredDevicesSpy.mockRestore();
+    addDeviceSpy.mockRestore();
+  });
+
+  test('should leave an already discovered device unchanged when its host matches', async () => {
+    const device: DiscoveredDevice = { id: 'shelly1-AABBCC', host: '192.168.1.30', port: 80, gen: 1 };
+    shellyPlatform.discoveredDevices.set(device.id, device);
+    shellyPlatform.storedDevices.set(device.id, device);
+    const addDeviceSpy = vi.spyOn(shellyPlatform as any, 'addDevice');
+    const saveStoredDevicesSpy = vi.spyOn(shellyPlatform as any, 'saveStoredDevices');
+
+    await emitDiscovered(device);
+
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Shelly device ${hk}${device.id}${nf} host ${zb}${device.host}${nf} already discovered`);
+    expect(saveStoredDevicesSpy).not.toHaveBeenCalled();
+    expect(addDeviceSpy).not.toHaveBeenCalled();
+
+    cleanup();
+    saveStoredDevicesSpy.mockRestore();
+    addDeviceSpy.mockRestore();
+  });
+
+  test('should update the host and add a discovered device that is not loaded', async () => {
+    const oldDevice: DiscoveredDevice = { id: 'shellyplus1pm-AABBCC', host: '192.168.1.40', port: 80, gen: 2 };
+    const discoveredDevice: DiscoveredDevice = { ...oldDevice, host: '192.168.1.41' };
+    const bridgedDevice = { configUrl: `http://${oldDevice.host}` } as MatterbridgeEndpoint;
+    shellyPlatform.discoveredDevices.set(oldDevice.id, oldDevice);
+    shellyPlatform.storedDevices.set(oldDevice.id, oldDevice);
+    shellyPlatform.bridgedDevices.set(oldDevice.id, bridgedDevice);
+    const addDeviceSpy = vi.spyOn(shellyPlatform as any, 'addDevice').mockImplementation(async () => {});
+
+    await emitDiscovered(discoveredDevice);
+
+    expect(shellyPlatform.discoveredDevices.get(oldDevice.id)).toEqual(discoveredDevice);
+    expect(shellyPlatform.storedDevices.get(oldDevice.id)).toEqual(discoveredDevice);
+    expect(shellyPlatform.changedDevices.get(oldDevice.id)).toBe(oldDevice.id);
+    expect(bridgedDevice.configUrl).toBe(`http://${discoveredDevice.host}`);
+    expect(addDeviceSpy).toHaveBeenCalledWith(discoveredDevice.id, discoveredDevice.host);
+
+    cleanup();
+    addDeviceSpy.mockRestore();
+  });
+
+  test('should reconnect loaded devices when a discovered host changes', async () => {
+    const gen1WsClient = { stop: vi.fn(), setHost: vi.fn(), start: vi.fn() };
+    const gen1Device = { id: 'shelly1-AABBCC', host: '192.168.1.50', gen: 1, wsClient: gen1WsClient, lastseen: 0, log: { warn: vi.fn() } };
+    const gen2WsClient = { stop: vi.fn(), setHost: vi.fn(), start: vi.fn() };
+    const gen2Device = { id: 'shellyplus1pm-AABBCC', host: '192.168.1.60', gen: 2, wsClient: gen2WsClient, lastseen: 0, log: { warn: vi.fn() } };
+    for (const device of [gen1Device, gen2Device]) {
+      (shelly as any)._devices.set(device.id, device);
+      shellyPlatform.discoveredDevices.set(device.id, { id: device.id, host: device.host, port: 80, gen: device.gen });
+      shellyPlatform.storedDevices.set(device.id, { id: device.id, host: device.host, port: 80, gen: device.gen });
+    }
+
+    await emitDiscovered({ id: gen1Device.id, host: '192.168.1.51', port: 80, gen: 1 });
+    await emitDiscovered({ id: gen2Device.id, host: '192.168.1.61', port: 80, gen: 2 });
+
+    expect(gen1Device.host).toBe('192.168.1.51');
+    expect(gen1Device.lastseen).toBeGreaterThan(0);
+    expect(gen1Device.log.warn).toHaveBeenCalledWith(expect.stringContaining(`host ${zb}192.168.1.51${wr} updated`));
+    expect(coapServerRegisterDeviceSpy).toHaveBeenCalledWith('192.168.1.51', gen1Device.id, true);
+    expect(gen1WsClient.stop).not.toHaveBeenCalled();
+    expect(gen2Device.host).toBe('192.168.1.61');
+    expect(gen2Device.lastseen).toBeGreaterThan(0);
+    expect(gen2Device.log.warn).toHaveBeenCalledWith(expect.stringContaining(`host ${zb}192.168.1.61${wr} updated`));
+    expect(gen2WsClient.stop).toHaveBeenCalledOnce();
+    expect(gen2WsClient.setHost).toHaveBeenCalledWith('192.168.1.61');
+    expect(gen2WsClient.start).toHaveBeenCalledOnce();
+
+    (shelly as any)._devices.delete(gen1Device.id);
+    (shelly as any)._devices.delete(gen2Device.id);
+
+    cleanup();
+  });
+
+  test('should maintain the momentary-input list for discovered input-only devices', async () => {
+    const addDeviceSpy = vi.spyOn(shellyPlatform as any, 'addDevice').mockImplementation(async () => {});
+    const saveConfigSpy = vi.spyOn(shellyPlatform, 'saveConfig').mockImplementation(() => {});
+    const inputIds = ['shellybutton1-AABBCC', 'shellyix3-AABBCC', 'shellyplusi4-AABBCC', 'shellyi4g3-AABBCC'];
+    (shellyPlatform.config as Partial<ShellyPlatformConfig>).inputMomentaryList = undefined;
+    shellyPlatform.config.expertMode = false;
+
+    for (const [index, id] of inputIds.entries()) await emitDiscovered({ id, host: `192.168.1.${70 + index}`, port: 80, gen: 2 });
+    await emitDiscovered({ id: inputIds[0], host: '192.168.1.70', port: 80, gen: 2 });
+
+    expect(shellyPlatform.config.inputMomentaryList).toEqual(inputIds);
+    expect(saveConfigSpy).toHaveBeenCalledTimes(inputIds.length + 1);
+    expect(addDeviceSpy).toHaveBeenCalledTimes(inputIds.length);
+
+    shellyPlatform.config.expertMode = true;
+    shellyPlatform.config.inputMomentaryList = [];
+    cleanup();
+    saveConfigSpy.mockRestore();
+    addDeviceSpy.mockRestore();
   });
 
   it('should call onConfigure', async () => {

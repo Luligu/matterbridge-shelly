@@ -24,5 +24,6 @@
   "debugMdns": false,
   "debugCoap": false,
   "debugWs": false,
+  "debugUdp": false,
   "unregisterOnShutdown": false
 }

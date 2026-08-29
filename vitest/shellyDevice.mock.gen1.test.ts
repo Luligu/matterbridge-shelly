@@ -447,6 +447,56 @@ describe('Shelly gen 1 devices test', () => {
     if (device) device.destroy();
   });
 
+  test('Update a gen 1 shellyht device with Fahrenheit temperature', async () => {
+    id = 'shellyht-703523';
+    log.logName = id;
+
+    device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', id + '.json'));
+    expect(device).not.toBeUndefined();
+    if (!device) return;
+
+    device.onUpdate({
+      tmp: {
+        value: 71.6,
+        units: 'F',
+        tC: 22,
+        tF: 71.6,
+        is_valid: true,
+      },
+    });
+
+    expect(device.getComponent('temperature')?.getValue('value')).toBe(22);
+
+    device.onUpdate({
+      tmp: {
+        value: 71.6,
+        units: 'F',
+        tF: 71.6,
+        is_valid: true,
+      },
+    });
+
+    expect(device.getComponent('temperature')?.getValue('value')).toBeCloseTo(22, 5);
+
+    if (device) device.destroy();
+  });
+
+  test('Update a gen 1 battery device with empty battery data', async () => {
+    id = 'shellyflood-EC64C9C1DA9A';
+    log.logName = id;
+
+    device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', id + '.json'));
+    expect(device).not.toBeUndefined();
+    if (!device) return;
+
+    device.onUpdate({ bat: null });
+
+    expect(device.getComponent('battery')?.getValue('level')).toBe(0);
+    expect(device.getComponent('battery')?.getValue('voltage')).toBe(0);
+
+    if (device) device.destroy();
+  });
+
   test('Create a gen 1 shellysmoke device', async () => {
     id = 'shellysmoke-XXXXXXXXXXXX';
     log.logName = id;

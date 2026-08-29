@@ -99,7 +99,6 @@ describe('ShellyWsClient', () => {
       const interval = setInterval(() => {
         if (!wsClient.isConnecting && !wsClient.isConnected) {
           clearInterval(interval);
-          // oxlint-disable-next-line promise/no-multiple-resolved -- interval is cleared first, so this only ever runs once
           resolve();
         }
       }, 100).unref();

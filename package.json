@@ -1,6 +1,6 @@
 {
   "name": "matterbridge-shelly",
-  "version": "2.5.1",
+  "version": "2.6.0",
   "description": "Matterbridge shelly plugin",
   "author": "https://github.com/Luligu",
   "homepage": "https://www.npmjs.com/package/matterbridge-shelly",
@@ -114,7 +114,7 @@
     "prepublishOnly": "npm run cleanBuildProduction && npm pkg delete devDependencies scripts automator && node scripts/prepublish-clean.mjs && npm install --no-fund --no-audit --omit=dev && npm shrinkwrap --omit=dev"
   },
   "dependencies": {
-    "coap": "1.5.0",
+    "coap": "1.6.0",
     "multicast-dns": "7.2.5",
     "node-ansi-logger": "3.3.0",
     "node-persist-manager": "2.1.0",
@@ -122,13 +122,13 @@
   },
   "devDependencies": {
     "@types/multicast-dns": "7.2.4",
-    "@types/node": "26.2.0",
+    "@types/node": "26.4.0",
     "@types/ws": "8.18.1",
-    "@vitest/coverage-v8": "4.1.10",
-    "oxfmt": "0.62.0",
-    "oxlint": "1.77.0",
+    "@vitest/coverage-v8": "4.1.11",
+    "oxfmt": "0.65.0",
+    "oxlint": "1.80.0",
     "oxlint-tsgolint": "7.0.2001",
     "typescript": "7.0.2",
-    "vitest": "4.1.10"
+    "vitest": "4.1.11"
   }
 }

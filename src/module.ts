@@ -133,6 +133,7 @@ export interface ShellyPlatformConfig extends PlatformConfig {
   debugMdns: boolean;
   debugCoap: boolean;
   debugWs: boolean;
+  debugUdp: boolean;
 }
 
 /**
@@ -185,15 +186,17 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     }
 
     // Validate the config
-    // v8 ignore else
-    if (config.username) this.username = config.username;
-    // v8 ignore else
-    if (config.password) this.password = config.password;
-    this.postfix = config.postfix ?? '';
-    if (!isValidString(this.postfix, 0, 3)) this.postfix = '';
-    if (!isValidNumber(config.failsafeCount, 0)) config.failsafeCount = 0;
-    this.config.debug ??= false;
-    this.config.unregisterOnShutdown ??= false;
+    // v8 ignore next
+    {
+      if (config.username) this.username = config.username;
+      if (config.password) this.password = config.password;
+      this.postfix = config.postfix ?? '';
+      if (!isValidString(this.postfix, 0, 3)) this.postfix = '';
+      if (!isValidNumber(config.failsafeCount, 0)) config.failsafeCount = 0;
+      this.config.debug ??= false;
+      this.config.debugUdp ??= false;
+      this.config.unregisterOnShutdown ??= false;
+    }
 
     // Cleanup the old config format
     // v8 ignore next
@@ -241,6 +244,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     log.debug(`- debugMdns: ${CYAN}${config.debugMdns}`);
     log.debug(`- debugCoap: ${CYAN}${config.debugCoap}`);
     log.debug(`- debugWs: ${CYAN}${config.debugWs}`);
+    log.debug(`- debugUdp: ${CYAN}${config.debugUdp}`);
     log.debug(`- unregisterOnShutdown: ${CYAN}${config.unregisterOnShutdown}`);
 
     // Set the entity selection map for the device selection in the frontend
@@ -271,9 +275,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     }
 
     this.shelly = new Shelly(log, this.username, this.password);
-    this.shelly.setLogLevel(log.logLevel, this.config.debugMdns, this.config.debugCoap, this.config.debugWs);
+    this.shelly.setLogLevel(log.logLevel, this.config.debugMdns, this.config.debugCoap, this.config.debugWs, this.config.debugUdp);
     this.shelly.dataPath = path.join(matterbridge.matterbridgePluginDirectory, 'matterbridge-shelly');
-    // TODO: this may be wrong
     this.shelly.interfaceName = matterbridge.systemInformation.interfaceName;
     this.shelly.ipv4Address = matterbridge.systemInformation.ipv4Address;
     this.shelly.ipv6Address = matterbridge.systemInformation.ipv6Address;
@@ -294,7 +297,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       `Shelly platform v.${CYAN}${this.config.version}${db} interface ${CYAN}${this.shelly.interfaceName}${db} ipv4 ${CYAN}${this.shelly.ipv4Address}${db} ipv6 ${CYAN}${this.shelly.ipv6Address}${db}`,
     );
 
-    // handle Shelly discovered event (called from mDNS scanner)
+    // handle Shelly discovered event (emit from mDNS scanner)
     // oxlint-disable-next-line typescript/no-misused-promises
     this.shelly.on('discovered', async (discoveredDevice: DiscoveredDevice) => {
       if (discoveredDevice.port === 9000) {
@@ -1607,6 +1610,9 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     // Start the WebSocket server
     this.shelly.wsServer.start();
 
+    // Start the RPC over UDP server
+    this.shelly.udpServer.start();
+
     // Wait for the failsafe count to be met
     const config = this.config;
     if (config.failsafeCount > 0 && this.bridgedDevices.size + this.bluBridgedDevices.size < config.failsafeCount) {
@@ -1746,7 +1752,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           if (!component) return;
           this.log.info(`Configuring device ${dn}${mbDevice.deviceName}${nf} electrical component ${hk}${label}${nf}`);
           for (const property of component.properties) {
-            if (!['voltage', 'current', 'power', 'apower', 'act_power', 'total', 'aenergy', 'total_act_energy'].includes(property.key)) continue;
+            if (!['voltage', 'current', 'power', 'apower', 'act_power', 'total', 'aenergy', 'ret_aenergy', 'total_act_energy', 'total_act_ret_energy'].includes(property.key))
+              continue;
             shellyUpdateHandler(this, mbDevice, shellyDevice, component.id, property.key, property.value);
           }
         }
@@ -1805,7 +1812,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     this.log.debug(
       `Changing logger level for platform ${idn}${this.config.name}${rs}${db} to ${logLevel} with debugMdns ${this.config.debugMdns}, debugCoap ${this.config.debugCoap} and debugWs ${this.config.debugWs}`,
     );
-    this.shelly.setLogLevel(logLevel, this.config.debugMdns, this.config.debugCoap, this.config.debugWs);
+    this.shelly.setLogLevel(logLevel, this.config.debugMdns, this.config.debugCoap, this.config.debugWs, this.config.debugUdp);
     this.bridgedDevices.forEach((device) => (device.log.logLevel = logLevel));
     this.bluBridgedDevices.forEach((bluDevice) => (bluDevice.log.logLevel = logLevel));
   }

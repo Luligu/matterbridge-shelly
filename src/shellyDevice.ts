@@ -90,6 +90,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
   hasUpdate = false;
   sleepMode = false;
   cached = false;
+  udp = false;
 
   colorUpdateTimeout?: NodeJS.Timeout;
   colorUpdateTimeoutMs = 200;
@@ -787,8 +788,27 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
       }
     }
 
-    // For gen 2+ battery powered devices check if WsServer is enabled and set correctly
-    if (device.gen >= 2 && device.sleepMode) {
+    // For gen 2+ check if rpc over udp is enabled and set correctly
+    if (device.gen >= 2) {
+      const ipv4 = shelly.ipv4Address;
+      const rpc = device.getComponent('sys')?.getValue('rpc_udp') as { dst_addr: string | null; listen_port: number | null } | undefined;
+      if (rpc === undefined) {
+        log.error(`RPC over UDP sys component not found for device ${dn}${device.name}${er} id ${hk}${device.id}${er}.`);
+      }
+      if (rpc && rpc.dst_addr !== null && rpc.listen_port !== null && (rpc.dst_addr !== ipv4 + ':8585' || rpc.listen_port !== 8585)) {
+        log.warn(
+          `The RPC over UDP settings is not configured correctly for device ${dn}${device.name}${wr} id ${hk}${device.id}${wr}: ${db}${debugStringify(rpc)}${wr}. ` +
+            `Enable and configure it (i.e. Destination address: ${ipv4}:8585 Listening port: 8585) in the device settings to receive udp updates from the device.`,
+        );
+      }
+      if (rpc?.dst_addr === ipv4 + ':8585' && rpc.listen_port === 8585) {
+        device.udp = true;
+        log.info(`Using RPC over UDP for device ${dn}${device.name}${nf} id ${hk}${device.id}${nf}.`);
+      }
+    }
+
+    // For gen 2+ battery powered devices check if WsServer is enabled and set correctly unless the device enabled rpc over udp.
+    if (device.gen >= 2 && device.sleepMode && !device.udp) {
       const ws = device.getComponent('ws');
       if (ws) {
         if ((ws.getValue('enable') as boolean | undefined) === false) {
@@ -851,19 +871,19 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
           `sleep mode ${device.sleepMode ? wr : CYAN}${device.sleepMode}${db} cached ${device.cached ? wr : CYAN}${device.cached}${db} ` +
           // oxlint-disable-next-line typescript/no-unnecessary-template-expression typescript/no-unnecessary-boolean-literal-compare
           `${device.gen >= 2 && device.sleepMode === false && device.wsClient?.isConnected === false ? 'websocket ' + er + 'false ' + db : ''}` +
-          `last seen ${CYAN}${lastSeenDate.toLocaleString()}${db}.`,
+          `wsc ${device.wsClient?.isConnected === true ? wr : CYAN}${device.wsClient?.isConnected === true}${db} udp ${device.udp ? wr : CYAN}${device.udp}${db} last seen ${CYAN}${lastSeenDate.toLocaleString()}${db}.`,
       );
 
       // Check WebSocket client for gen 2+ devices and restart if not connected
       // v8 ignore else
-      if (device.gen >= 2 && !device.sleepMode && device.wsClient?.isConnected === false) {
+      if (device.gen >= 2 && !device.udp && !device.sleepMode && device.wsClient?.isConnected === false) {
         log.info(`WebSocket client for device ${hk}${device.id}${nf} host ${zb}${device.host}${nf} is not connected. Starting connection...`);
         device.wsClient.start();
       }
     }, 60 * 1000);
 
     // Start WebSocket client for gen 2+ devices if not in sleep mode
-    if (device.gen >= 2 && !device.sleepMode) {
+    if (device.gen >= 2 && !device.udp && !device.sleepMode) {
       device.wsClient = new WsClient(device.id, host, 80, shelly.password);
 
       // Start the WebSocket client for devices that are not a cache JSON file
@@ -1179,7 +1199,9 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
           // v8 ignore else
           if (sensor.is_valid === true && sensor.units === 'C' && isValidNumber(sensor.tC, -55, 125)) this.getComponent('temperature')?.setValue('value', sensor.tC);
           // v8 ignore else
-          if (sensor.is_valid === true && sensor.units === 'F' && isValidNumber(sensor.tF, -67, 257)) this.getComponent('temperature')?.setValue('value', sensor.tF);
+          if (sensor.is_valid === true && sensor.units === 'F' && isValidNumber(sensor.tC, -55, 125)) this.getComponent('temperature')?.setValue('value', sensor.tC);
+          else if (sensor.is_valid === true && sensor.units === 'F' && isValidNumber(sensor.tF, -67, 257))
+            this.getComponent('temperature')?.setValue('value', ((sensor.tF - 32) * 5) / 9);
         }
         if (key === 'hum') {
           this.updateComponent('humidity', data[key] as ShellyData);

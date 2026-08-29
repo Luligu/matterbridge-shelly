@@ -29,7 +29,7 @@ describe('Shellies', () => {
 
   beforeAll(async () => {
     shelly.dataPath = HOMEDIR;
-    shelly.setLogLevel(LogLevel.DEBUG, true, true, true);
+    shelly.setLogLevel(LogLevel.DEBUG, true, true, true, true);
   });
 
   beforeEach(async () => {

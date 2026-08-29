@@ -28,7 +28,7 @@ import EventEmitter from 'node:events';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 
-import coap, { globalAgent, type IncomingMessage, type OutgoingMessage, parameters, type Server } from 'coap';
+import coap, { Agent, type IncomingMessage, type OutgoingMessage, type ParametersUpdate, type Server } from 'coap';
 import { AnsiLogger, BLUE, CYAN, db, debugStringify, er, hk, LogLevel, MAGENTA, nf, RESET, TimestampFormat, wr, zb } from 'matterbridge/logger';
 import { getErrorMessage } from 'matterbridge/utils';
 
@@ -95,6 +95,7 @@ interface CoapServerEvents {
 export class CoapServer extends EventEmitter<CoapServerEvents> {
   public readonly log;
   private readonly shelly: Shelly;
+  private readonly coapAgent: Agent;
   private coapServer: Server | undefined;
   private _isListening = false;
   private _isReady = false;
@@ -104,16 +105,11 @@ export class CoapServer extends EventEmitter<CoapServerEvents> {
   private readonly deviceId = new Map<string, string>(); // host, deviceId
   private _dataPath = 'temp';
 
-  constructor(shelly: Shelly, logLevel: LogLevel = LogLevel.INFO) {
+  constructor(shelly: Shelly, logLevel: LogLevel = LogLevel.INFO, agentParameters?: ParametersUpdate) {
     super();
     this.shelly = shelly;
     this.log = new AnsiLogger({ logName: 'ShellyCoapServer', logTimestampFormat: TimestampFormat.TIME_MILLIS, logLevel });
-
-    // Set the CoAP parameters to minimum values
-    parameters.maxRetransmit = 3;
-    // parameters.maxLatency = 1;
-    // v8 ignore next
-    if (parameters.refreshTiming) parameters.refreshTiming();
+    this.coapAgent = new Agent({ type: 'udp4', parameters: { maxRetransmit: 3, ...agentParameters } });
 
     this.registerShellyOptions();
   }
@@ -158,6 +154,7 @@ export class CoapServer extends EventEmitter<CoapServerEvents> {
     return new Promise((resolve) => {
       coap
         .request({
+          agent: this.coapAgent,
           host,
           method: 'GET',
           pathname: '/cit/d',
@@ -204,6 +201,7 @@ export class CoapServer extends EventEmitter<CoapServerEvents> {
     return new Promise((resolve) => {
       coap
         .request({
+          agent: this.coapAgent,
           host,
           method: 'GET',
           pathname: '/cit/s',
@@ -250,6 +248,7 @@ export class CoapServer extends EventEmitter<CoapServerEvents> {
       // oxlint-disable-next-line eslint/no-unused-vars
       const response = coap
         .request({
+          agent: this.coapAgent,
           host: COAP_MULTICAST_ADDRESS,
           method: 'GET',
           pathname: '/cit/s',
@@ -793,7 +792,7 @@ export class CoapServer extends EventEmitter<CoapServerEvents> {
         this.emit('stopped', err);
       });
 
-    globalAgent.close(
+    this.coapAgent.close(
       /* v8 ignore next */ (err?: Error) => {
         this.log.debug(`CoIoT (coap) agent closed${err ? ' with error ' + err.message : ''}.`);
         this.emit('agent_stopped', err);

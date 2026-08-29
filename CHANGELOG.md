@@ -22,11 +22,40 @@
 
 All notable changes to this project will be documented in this file.
 
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
 If you like this project and find it useful, please consider giving it a star on [GitHub](https://github.com/Luligu/matterbridge-shelly) and sponsoring it.
 
 <a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="120"></a>
 
 You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his invaluable contribution to this project.
+
+## [2.6.0] - 2026-08-29
+
+### Added
+
+- [udp]: Add support for [RPC over UDP](README.md#how-to-configure-rpc-over-udp) to receive Shelly device updates. It is an alternative to the traditional WebSocket connection and is also useful for Gen 2+ battery-powered devices with sleep mode.
+- [docs]: Update README.md and CHANGELOG.md.
+- [meter]: Add `ret_aenergy` update.
+- [devcontainer]: Add `Dev Container` v.2.0.0 with dual Node and Bun runtime support.
+
+### Changed
+
+- [test]: Improve test coverage to 95%.
+- [package]: Upgrade package.
+- [package]: Bump `coap` to v.1.6.0.
+- [package]: Bump `oxfmt` to v.0.65.0.
+- [package]: Bump `oxlint` to v.1.80.0.
+- [package]: Bump `vitest` to v.4.1.11.
+- [package]: Bump `@types/node` to v.26.4.0.
+- [vscode]: Bump `settings` to v.1.0.10.
+
+### Fixed
+
+- [tmp]: Fix Gen1 temperature conversion when sensor.units = 'F'.
+- [meter]: Fix configure for `ret_aenergy` and `total_act_ret_energy`.
+
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [2.5.1] - 2026-08-09
 
@@ -1387,34 +1416,3 @@ To allow an easy update to the new version, please after the update, restart, wa
 First published release.
 
 <a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
-
-<!-- Commented out section
-## [1.1.2] - 2024-03-08
-
-### Added
-
-- [Feature 1]: Description of the feature.
-- [Feature 2]: Description of the feature.
-
-### Changed
-
-- [Feature 3]: Description of the change.
-- [Feature 4]: Description of the change.
-
-### Deprecated
-
-- [Feature 5]: Description of the deprecation.
-
-### Removed
-
-- [Feature 6]: Description of the removal.
-
-### Fixed
-
-- [Bug 1]: Description of the bug fix.
-- [Bug 2]: Description of the bug fix.
-
-### Security
-
-- [Security 1]: Description of the security improvement.
--->
