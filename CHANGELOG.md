@@ -30,14 +30,14 @@ If you like this project and find it useful, please consider giving it a star on
 
 You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his invaluable contribution to this project.
 
-## [2.6.0] - Dev branch
+## [2.6.0] - 2026-08-29
 
 ### Added
 
 - [udp]: Add support for [RPC over UDP](README.md#how-to-configure-rpc-over-udp) to receive Shelly device updates. It is an alternative to the traditional WebSocket connection and is also useful for Gen 2+ battery-powered devices with sleep mode.
 - [docs]: Update README.md and CHANGELOG.md.
-- [devcontainer]: Bump `Dev Container` to v.2.0.0.
 - [meter]: Add `ret_aenergy` update.
+- [devcontainer]: Add `Dev Container` v.2.0.0 with dual Node and Bun runtime support.
 
 ### Changed
 
