@@ -194,6 +194,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       if (!isValidString(this.postfix, 0, 3)) this.postfix = '';
       if (!isValidNumber(config.failsafeCount, 0)) config.failsafeCount = 0;
       this.config.debug ??= false;
+      this.config.debugUdp ??= false;
       this.config.unregisterOnShutdown ??= false;
     }
 
