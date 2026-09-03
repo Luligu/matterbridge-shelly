@@ -1419,7 +1419,6 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             child.addCommandHandler('changeToMode', async ({ request }) => {
               this.log.debug(`***changeToMode: request ${JSON.stringify(request)}`);
               if (isValidNumber(request.newMode, 1, 2)) {
-                await child.setAttribute(ModeSelect.id, 'currentMode', request.newMode, mbDevice.log);
                 await shellyFetch(this.shelly, mbDevice.log, device.host, 'Blugw.SetConfig', { config: { sys_led_enable: request.newMode === 1 } });
               }
             });
