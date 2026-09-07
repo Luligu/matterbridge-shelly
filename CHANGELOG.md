@@ -32,6 +32,10 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 
 ## [2.7.1] - Dev branch
 
+### Added
+
+- [cover]: Add tilt support for Gen 2+ covers with slat control enabled (e.g. venetian blinds on a Shelly 2PM Gen3). The cover endpoint exposes the `WindowCovering` cluster with the `Tilt` and `PositionAwareTilt` features (supported by Apple Home), updates the tilt position from `slat_pos` and sends `Cover.GoToPosition` with `slat_pos` on `goToTiltPercentage`.
+
 ### Changed
 
 - [test]: Replace the fixed waits in `module.test.ts` and `updateHandler.test.ts` with `waiter` and awaited event handlers (about 20 s less per CI test run).

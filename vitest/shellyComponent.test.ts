@@ -813,6 +813,37 @@ describe('ShellyComponent', () => {
     expect(fetchSpy).toHaveBeenCalledTimes(4);
   });
 
+  it('should send GoToSlatPosition when slat control is enabled on a gen 2 cover', () => {
+    const data = { key1: 'value', slat_pos: 50 };
+    const component = new ShellyComponent(device2, 'cover:1', 'Cover', data);
+    expect(isCoverComponent(component)).toBeTruthy();
+    expect((component as ShellyCoverComponent).GoToSlatPosition).not.toBeUndefined();
+
+    (component as ShellyCoverComponent).GoToSlatPosition(75);
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    expect(fetchSpy).toHaveBeenCalledWith(device2.shelly, device2.log, device2.host, 'Cover.GoToPosition', { id: 1, slat_pos: 75 });
+
+    // The slat position is clamped to the 0-100 range
+    (component as ShellyCoverComponent).GoToSlatPosition(150);
+    expect(fetchSpy).toHaveBeenCalledWith(device2.shelly, device2.log, device2.host, 'Cover.GoToPosition', { id: 1, slat_pos: 100 });
+  });
+
+  it('should not send GoToSlatPosition when slat control is not enabled on a gen 2 cover', () => {
+    const component = new ShellyComponent(device2, 'cover:1', 'Cover', { key1: 'value' });
+    expect(isCoverComponent(component)).toBeTruthy();
+
+    (component as ShellyCoverComponent).GoToSlatPosition(50);
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it('should not send GoToSlatPosition on a gen 1 roller', () => {
+    const component = new ShellyComponent(device1, 'roller:0', 'Roller', { slat_pos: 50 });
+    expect(isCoverComponent(component)).toBeTruthy();
+
+    (component as ShellyCoverComponent).GoToSlatPosition(50);
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
   it('should add property', () => {
     const component = new ShellyComponent(device1, id, name);
     const property = new ShellyProperty(component, 'key', 'value');

@@ -3,7 +3,7 @@
  * @description This file contains the class ShellyPlatform.
  * @author Luca Liguori
  * @created 2024-05-01
- * @version 2.0.4
+ * @version 2.1.0
  * @license Apache-2.0
  *
  * Copyright 2024, 2025, 2026 Luca Liguori.
@@ -952,7 +952,13 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           );
           child.log.logName = `${device.name} ${key}`;
           child.createDefaultIdentifyClusterServer();
-          child.createDefaultWindowCoveringClusterServer();
+          // Gen 2+ covers with slat control enabled (e.g. venetian blinds) report the slat_pos property: expose the tilt feature too
+          const hasSlats = component.hasProperty('slat_pos');
+          if (hasSlats) {
+            child.createDefaultLiftTiltWindowCoveringClusterServer();
+          } else {
+            child.createDefaultWindowCoveringClusterServer();
+          }
 
           // Add the electrical measurementa cluster on the same endpoint
           this.addElectricalMeasurements(mbDevice, child, device, component);
@@ -981,6 +987,12 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             else if (request.liftPercent100thsValue === 10000) shellyCoverCommandHandler(child, component, 'Close', 10000);
             else shellyCoverCommandHandler(child, component, 'GoToPosition', request.liftPercent100thsValue);
           });
+          if (hasSlats) {
+            child.addCommandHandler('goToTiltPercentage', ({ request, attributes }) => {
+              attributes.currentPositionTiltPercent100ths = request.tiltPercent100thsValue;
+              shellyCoverCommandHandler(child, component, 'GoToTiltPosition', request.tiltPercent100thsValue);
+            });
+          }
           // Add event handler
           component.on('update', (component: string, property: string, value: ShellyDataType) => {
             shellyUpdateHandler(this, mbDevice, device, component, property, value);
@@ -1735,6 +1747,14 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             await childEndpoint.setWindowCoveringCurrentTargetStatus(matterPos, matterPos, WindowCovering.MovementStatus.Stopped);
           } else {
             await childEndpoint.setWindowCoveringTargetAsCurrentAndStopped();
+          }
+          // Configure the cluster WindowCovering attribute currentPositionTiltPercent100ths for gen 2+ covers with slat control enabled
+          const slatPosition = coverComponent.hasProperty('slat_pos') ? (coverComponent.getValue('slat_pos') as number) : undefined;
+          if (isValidNumber(slatPosition, 0, 100)) {
+            this.log.info(`Configuring device ${dn}${mbDevice.deviceName}${nf} component ${hk}${label}${nf}:${zb}slat_pos ${YELLOW}${slatPosition}${nf}`);
+            const matterTiltPos = 10000 - Math.min(Math.max(Math.round(slatPosition * 100), 0), 10000);
+            await childEndpoint.setAttribute(WindowCovering.id, 'currentPositionTiltPercent100ths', matterTiltPos, shellyDevice.log);
+            await childEndpoint.setAttribute(WindowCovering.id, 'targetPositionTiltPercent100ths', matterTiltPos, shellyDevice.log);
           }
         }
         // Configure the cluster Thermostat attribute occupiedHeatingSetpoint occupiedCoolingSetpoint
