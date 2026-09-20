@@ -201,6 +201,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
    * @param {string} id - The ID of the component to retrieve.
    * @returns {ShellyComponent | ShellyLightComponent | ShellySwitchComponent | ShellyCoverComponent | undefined} The ShellyComponent with the specified ID, or undefined if not found.
    */
+  // oxlint-disable-next-line typescript/no-unnecessary-type-parameters
   getComponent<T extends ShellyComponent>(id: string): T | undefined {
     const component = this._components.get(id);
     if (!component) return undefined;
