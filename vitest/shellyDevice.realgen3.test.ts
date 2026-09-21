@@ -87,7 +87,7 @@ describe('Shellies', () => {
 
     expect(device.components.length).toBe(12);
     // prettier-ignore
-    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Devicepower', 'Humidity', 'MQTT', 'Sys', 'Sntp', 'Temperature', 'WiFi', 'WS']);
+    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Devicepower', 'Humidity', 'MQTT', 'Sys', 'Sntp', 'Temperature', 'WiFi', 'Ws']);
     // prettier-ignore
     expect(device.getComponentIds()).toStrictEqual(['ble', 'cloud', 'devicepower:0', 'humidity:0', 'mqtt', 'sys', 'sntp', 'temperature:0', 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws']);
 
@@ -136,7 +136,7 @@ describe('Shellies', () => {
     await device.saveDevicePayloads('temp');
 
     expect(device.components.length).toBe(11);
-    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Input', 'MQTT', 'Switch', 'Sys', 'Sntp', 'WiFi', 'WS']);
+    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Input', 'MQTT', 'Switch', 'Sys', 'Sntp', 'WiFi', 'Ws']);
     expect(device.getComponentIds()).toStrictEqual(['ble', 'cloud', 'input:0', 'mqtt', 'switch:0', 'sys', 'sntp', 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws']);
 
     expect(device.bthomeTrvs.size).toBe(0);
@@ -190,7 +190,7 @@ describe('Shellies', () => {
     await device.saveDevicePayloads('temp');
 
     expect(device.components.length).toBe(11);
-    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Input', 'MQTT', 'Switch', 'Sys', 'Sntp', 'WiFi', 'WS']);
+    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Input', 'MQTT', 'Switch', 'Sys', 'Sntp', 'WiFi', 'Ws']);
     expect(device.getComponentIds()).toStrictEqual(['ble', 'cloud', 'input:0', 'mqtt', 'switch:0', 'sys', 'sntp', 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws']);
 
     expect(device.bthomeTrvs.size).toBe(0);
@@ -342,7 +342,7 @@ describe('Shellies', () => {
     await device.saveDevicePayloads('temp');
 
     expect(device.components.length).toBe(11);
-    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Input', 'MQTT', 'Switch', 'Sys', 'Sntp', 'WiFi', 'WS']);
+    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Input', 'MQTT', 'Switch', 'Sys', 'Sntp', 'WiFi', 'Ws']);
     expect(device.getComponentIds()).toStrictEqual(['ble', 'cloud', 'input:0', 'mqtt', 'switch:0', 'sys', 'sntp', 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws']);
 
     expect(device.bthomeTrvs.size).toBe(0);
@@ -467,7 +467,7 @@ describe('Shellies', () => {
     await device.saveDevicePayloads('temp');
 
     expect(device.components.length).toBe(11);
-    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Input', 'MQTT', 'Switch', 'Sys', 'Sntp', 'WiFi', 'WS']);
+    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Input', 'MQTT', 'Switch', 'Sys', 'Sntp', 'WiFi', 'Ws']);
     expect(device.getComponentIds()).toStrictEqual(['ble', 'cloud', 'input:0', 'mqtt', 'switch:0', 'sys', 'sntp', 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws']);
 
     expect(device.bthomeTrvs.size).toBe(0);
@@ -522,7 +522,7 @@ describe('Shellies', () => {
     await device.saveDevicePayloads('temp');
 
     expect(device.components.length).toBe(12);
-    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Cover', 'Input', 'MQTT', 'Sys', 'Sntp', 'WiFi', 'WS']);
+    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Cover', 'Input', 'MQTT', 'Sys', 'Sntp', 'WiFi', 'Ws']);
     expect(device.getComponentIds()).toStrictEqual(['ble', 'cloud', 'cover:0', 'input:0', 'input:1', 'mqtt', 'sys', 'sntp', 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws']);
 
     expect(device.bthomeTrvs.size).toBe(0);
@@ -732,7 +732,7 @@ describe('Shellies', () => {
     await device.saveDevicePayloads('temp');
 
     expect(device.components.length).toBe(13);
-    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Input', 'MQTT', 'Switch', 'Sys', 'Sntp', 'WiFi', 'WS']);
+    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Input', 'MQTT', 'Switch', 'Sys', 'Sntp', 'WiFi', 'Ws']);
     expect(device.getComponentIds()).toStrictEqual(['ble', 'cloud', 'input:0', 'input:1', 'mqtt', 'switch:0', 'switch:1', 'sys', 'sntp', 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws']);
 
     expect(device.bthomeTrvs.size).toBe(0);
@@ -814,7 +814,7 @@ describe('Shellies', () => {
     await device.saveDevicePayloads('temp');
 
     expect(device.components.length).toBe(10);
-    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Blugw', 'Cloud', 'MQTT', 'Sys', 'Sntp', 'WiFi', 'WS']);
+    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Blugw', 'Cloud', 'MQTT', 'Sys', 'Sntp', 'WiFi', 'Ws']);
     expect(device.getComponentIds()).toStrictEqual(['ble', 'blugw', 'cloud', 'mqtt', 'sys', 'sntp', 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws']);
 
     expect(device.bthomeTrvs.size).toBe(2);
@@ -993,7 +993,7 @@ describe('Shellies', () => {
     await device.saveDevicePayloads('temp');
 
     expect(device.components.length).toBe(12);
-    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Input', 'Light', 'MQTT', 'Sys', 'Sntp', 'WiFi', 'WS']);
+    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Input', 'Light', 'MQTT', 'Sys', 'Sntp', 'WiFi', 'Ws']);
     expect(device.getComponentIds()).toStrictEqual(['ble', 'cloud', 'input:0', 'input:1', 'light:0', 'mqtt', 'sys', 'sntp', 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws']);
 
     expect(device.bthomeTrvs.size).toBe(0);
@@ -1059,7 +1059,7 @@ describe('Shellies', () => {
     await device.saveDevicePayloads('temp');
 
     expect(device.components.length).toBe(12);
-    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'PowerMeter', 'MQTT', 'Switch', 'Sys', 'Sntp', 'WiFi', 'WS']);
+    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'PowerMeter', 'MQTT', 'Switch', 'Sys', 'Sntp', 'WiFi', 'Ws']);
     expect(device.getComponentIds()).toStrictEqual(['ble', 'cloud', 'em1:0', 'em1:1', 'mqtt', 'switch:0', 'sys', 'sntp', 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws']);
 
     expect(device.bthomeTrvs.size).toBe(0);
@@ -1118,7 +1118,7 @@ describe('Shellies', () => {
     await device.saveDevicePayloads('temp');
 
     expect(device.components.length).toBe(13);
-    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Input', 'MQTT', 'Sys', 'Sntp', 'WiFi', 'WS']);
+    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Input', 'MQTT', 'Sys', 'Sntp', 'WiFi', 'Ws']);
     expect(device.getComponentIds()).toStrictEqual(['ble', 'cloud', 'input:0', 'input:1', 'input:2', 'input:3', 'mqtt', 'sys', 'sntp', 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws']);
 
     expect(device.bthomeTrvs.size).toBe(0);
@@ -1174,7 +1174,7 @@ describe('Shellies', () => {
     await device.saveDevicePayloads('temp');
 
     expect(device.components.length).toBe(10);
-    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'MQTT', 'Switch', 'Sys', 'Sntp', 'WiFi', 'WS']);
+    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'MQTT', 'Switch', 'Sys', 'Sntp', 'WiFi', 'Ws']);
     expect(device.getComponentIds()).toStrictEqual(['ble', 'cloud', 'mqtt', 'switch:0', 'sys', 'sntp', 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws']);
 
     expect(device.bthomeTrvs.size).toBe(0);
@@ -1228,7 +1228,7 @@ describe('Shellies', () => {
     await device.saveDevicePayloads('temp');
 
     expect(device.components.length).toBe(10);
-    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'MQTT', 'PowerMeter', 'Sys', 'Sntp', 'WiFi', 'WS']);
+    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'MQTT', 'PowerMeter', 'Sys', 'Sntp', 'WiFi', 'Ws']);
     expect(device.getComponentIds()).toStrictEqual(['ble', 'cloud', 'mqtt', 'pm1:0', 'sys', 'sntp', 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws']);
 
     expect(device.bthomeTrvs.size).toBe(0);

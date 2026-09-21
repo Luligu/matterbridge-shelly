@@ -3,7 +3,7 @@
  * @description This file contains the class ShellyDevice.
  * @author Luca Liguori
  * @created 2024-05-01
- * @version 3.2.0
+ * @version 3.2.1
  * @license Apache-2.0
  *
  * Copyright 2024, 2025, 2026 Luca Liguori.
@@ -707,7 +707,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
         }
         if (key === 'blugw') device.addComponent(new ShellyComponent(device, key, 'Blugw', settingsPayload[key] as ShellyData));
         if (key === 'mqtt') device.addComponent(new ShellyComponent(device, key, 'MQTT', settingsPayload[key] as ShellyData)); // Ok
-        if (key === 'ws') device.addComponent(new ShellyComponent(device, key, 'WS', settingsPayload[key] as ShellyData)); // Ok
+        if (key === 'ws') device.addComponent(new ShellyComponent(device, key, 'Ws', settingsPayload[key] as ShellyData)); // Ok
         if (key === 'cloud') device.addComponent(new ShellyComponent(device, key, 'Cloud', settingsPayload[key] as ShellyData)); // Ok
         if (key === 'ble') device.addComponent(new ShellyComponent(device, key, 'Ble', settingsPayload[key] as ShellyData)); // Ok
         if (key === 'eth') device.addComponent(new ShellyComponent(device, key, 'Eth', settingsPayload[key] as ShellyData)); // Ok

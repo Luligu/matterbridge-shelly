@@ -3,7 +3,7 @@
  * @description This file contains the class SwitchComponent.
  * @author Luca Liguori
  * @created 2024-05-01
- * @version 2.2.0
+ * @version 2.2.8
  * @license Apache-2.0
  *
  * Copyright 2024, 2025, 2026 Luca Liguori.
@@ -31,33 +31,287 @@ import { shellyFetch } from './shellyFetch.js';
 import { ShellyProperty } from './shellyProperty.js';
 import type { ShellyData, ShellyDataType, ShellyEvent } from './shellyTypes.js';
 
+/** Light control methods for supported Shelly light components. */
 interface LightComponent {
+  /**
+   * Turns the light on.
+   *
+   * @returns {void} Dispatches the request without waiting for a response.
+   */
   On(): void;
+  /**
+   * Turns the light off.
+   *
+   * @returns {void} Dispatches the request without waiting for a response.
+   */
   Off(): void;
+  /**
+   * Toggles the light state.
+   *
+   * @returns {void} Dispatches the request without waiting for a response.
+   */
   Toggle(): void;
+  /**
+   * Sets brightness when the component supports it.
+   *
+   * @param {number} level - Brightness percentage, rounded and clamped to 0–100.
+   * @returns {void} Dispatches the request without waiting for a response.
+   */
   Level(level: number): void;
+  /**
+   * Sets the RGB color when the component supports it.
+   *
+   * @param {number} red - Red channel, rounded and clamped to 0–255.
+   * @param {number} green - Green channel, rounded and clamped to 0–255.
+   * @param {number} blue - Blue channel, rounded and clamped to 0–255.
+   * @returns {void} Dispatches the request without waiting for a response.
+   */
   ColorRGB(red: number, green: number, blue: number): void;
+  /**
+   * Sets color temperature when the component supports it.
+   *
+   * @param {number} temperature - Color temperature in kelvin; values outside 2700–6500 are ignored.
+   * @returns {void} Dispatches the request without waiting for a response.
+   */
   ColorTemp(temperature: number): void;
 }
 
+/** A Shelly light component with power, brightness, and color control methods. */
+export type ShellyLightComponent = ShellyComponent & LightComponent;
+
+/** On/off control methods for Shelly switch and relay components. */
 interface SwitchComponent {
+  /**
+   * Turns the switch or relay on.
+   *
+   * @returns {void} Dispatches the request without waiting for a response.
+   */
   On(): void;
+  /**
+   * Turns the switch or relay off.
+   *
+   * @returns {void} Dispatches the request without waiting for a response.
+   */
   Off(): void;
+  /**
+   * Toggles the switch or relay state.
+   *
+   * @returns {void} Dispatches the request without waiting for a response.
+   */
   Toggle(): void;
 }
 
+/** A Shelly switch or relay component with on/off control methods. */
+export type ShellySwitchComponent = ShellyComponent & SwitchComponent;
+
+/** Movement control methods for Shelly cover and roller components. */
 interface CoverComponent {
+  /**
+   * Opens the cover or roller.
+   *
+   * @returns {void} Dispatches the request without waiting for a response.
+   */
   Open(): void;
+  /**
+   * Closes the cover or roller.
+   *
+   * @returns {void} Dispatches the request without waiting for a response.
+   */
   Close(): void;
+  /**
+   * Stops cover or roller movement.
+   *
+   * @returns {void} Dispatches the request without waiting for a response.
+   */
   Stop(): void;
+  /**
+   * Moves the cover or roller to the requested position.
+   *
+   * @param {number} pos - Open percentage, rounded and clamped to 0–100 (0 closed, 100 open).
+   * @returns {void} Dispatches the request without waiting for a response.
+   */
   GoToPosition(pos: number): void;
 }
 
-export type ShellyLightComponent = ShellyComponent & LightComponent;
-
-export type ShellySwitchComponent = ShellyComponent & SwitchComponent;
-
+/** A Shelly cover or roller component with movement and position control methods. */
 export type ShellyCoverComponent = ShellyComponent & CoverComponent;
+
+/** Cloud configuration, with Gen 1 enablement normalized and its server set to null. */
+export interface CloudConfig {
+  enable: boolean;
+  server: string | null;
+}
+
+/** Cloud connection status returned by the device. */
+export interface CloudStatus {
+  connected: boolean;
+}
+
+/** RPC over UDP configuration for Gen 2+ devices. */
+export interface SysRpcUdpConfig {
+  dst_addr: string | null;
+  listen_port: number | null;
+}
+
+/** Supported system configuration for Gen 2+ devices. */
+export interface SysConfig {
+  rpc_udp: SysRpcUdpConfig;
+}
+
+/** Supported system status for all device generations. */
+export interface SysStatus {
+  mac: string;
+  /** Undefined on Gen 1, which does not report whether a restart is required. */
+  restart_required: boolean | undefined;
+  /** Local time, null when unsynchronized, or undefined when not reported. */
+  time: string | null | undefined;
+  /** Seconds since the device booted. */
+  uptime: number;
+  /** Configuration revision, undefined on Gen 1. */
+  cfg_rev: number | undefined;
+}
+
+interface SysComponent {
+  /**
+   * Updates only the RPC over UDP settings.
+   *
+   * @param {{ rpc_udp: Partial<SysRpcUdpConfig> }} config - UDP settings to update; omitted fields remain unchanged.
+   * @returns {Promise<ShellyData | null>} The device response, or null on failure or Gen 1.
+   */
+  SetConfig(config: { rpc_udp: Partial<SysRpcUdpConfig> }): Promise<ShellyData | null>;
+  /**
+   * Retrieves only the RPC over UDP settings.
+   *
+   * @returns {Promise<SysConfig | null>} UDP configuration, or null on failure, invalid data, or Gen 1.
+   */
+  GetConfig(): Promise<SysConfig | null>;
+  /**
+   * Retrieves system status; the API provides no separate RPC over UDP status.
+   *
+   * @returns {Promise<SysStatus | null>} System status, or null on failure or invalid data.
+   */
+  GetStatus(): Promise<SysStatus | null>;
+}
+
+/** A Sys component with system status and Gen 2+ UDP configuration methods. */
+export type ShellySysComponent = ShellyComponent & SysComponent;
+
+/** Outbound WebSocket configuration for Gen 2+ devices. */
+export interface WsConfig {
+  enable: boolean;
+  /** Null when unset, or undefined when omitted by the device. */
+  server: string | null | undefined;
+  ssl_ca: '*' | 'user_ca.pem' | 'ca.pem';
+}
+
+/** Outbound WebSocket connection status. */
+export interface WsStatus {
+  connected: boolean;
+}
+
+interface WsComponent {
+  /**
+   * Updates the supplied outbound WebSocket settings.
+   *
+   * @param {Partial<WsConfig>} config - Settings to update; omitted fields remain unchanged.
+   * @returns {Promise<ShellyData | null>} The device response, or null on failure.
+   */
+  SetConfig(config: Partial<WsConfig>): Promise<ShellyData | null>;
+  /**
+   * Retrieves the outbound WebSocket configuration.
+   *
+   * @returns {Promise<WsConfig | null>} Configuration, or null on failure or invalid data.
+   */
+  GetConfig(): Promise<WsConfig | null>;
+  /**
+   * Retrieves the outbound WebSocket status.
+   *
+   * @returns {Promise<WsStatus | null>} Connection status, or null on failure or invalid data.
+   */
+  GetStatus(): Promise<WsStatus | null>;
+}
+
+/** A Gen 2+ Ws component with configuration and status methods. */
+export type ShellyWsComponent = ShellyComponent & WsComponent;
+
+/** Native Matter protocol configuration. */
+export interface MatterConfig {
+  enable: boolean;
+}
+
+/** Native Matter commissioning status. */
+export interface MatterStatus {
+  num_fabrics: number;
+  commissionable: boolean;
+}
+
+/** Native Matter pairing codes, preserved as strings. */
+export interface MatterSetupCode {
+  qr_code: string;
+  manual_code: string;
+}
+
+interface MatterComponent {
+  /**
+   * Updates native Matter enablement.
+   *
+   * @param {MatterConfig} config - Whether to enable native Matter.
+   * @returns {Promise<ShellyData | null>} The device response, or null on failure.
+   */
+  SetConfig(config: MatterConfig): Promise<ShellyData | null>;
+  /**
+   * Retrieves native Matter configuration.
+   *
+   * @returns {Promise<MatterConfig | null>} Configuration, or null on failure or invalid data.
+   */
+  GetConfig(): Promise<MatterConfig | null>;
+  /**
+   * Retrieves native Matter commissioning status.
+   *
+   * @returns {Promise<MatterStatus | null>} Status, or null on failure or invalid data.
+   */
+  GetStatus(): Promise<MatterStatus | null>;
+  /**
+   * Retrieves native Matter pairing codes.
+   *
+   * @returns {Promise<MatterSetupCode | null>} Pairing codes, or null on failure or invalid data.
+   */
+  GetSetupCode(): Promise<MatterSetupCode | null>;
+  /**
+   * Erases native Matter data and fabrics and reboots the device.
+   *
+   * @returns {Promise<null>} Null on success or fetch failure; the fetch layer does not distinguish these outcomes.
+   */
+  FactoryReset(): Promise<null>;
+}
+
+/** A native Matter component with configuration, status, pairing, and reset methods. */
+export type ShellyMatterComponent = ShellyComponent & MatterComponent;
+
+interface CloudComponent {
+  /**
+   * Sets the cloud configuration.
+   *
+   * @param {{ enable: boolean }} config - Whether to enable the cloud connection.
+   * @returns {Promise<ShellyData | null>} The device response, or null on failure.
+   */
+  SetConfig(config: { enable: boolean }): Promise<ShellyData | null>;
+  /**
+   * Retrieves the cloud configuration.
+   *
+   * @returns {Promise<CloudConfig | null>} The normalized cloud configuration, or null on failure or invalid data.
+   */
+  GetConfig(): Promise<CloudConfig | null>;
+  /**
+   * Retrieves the cloud connection status.
+   *
+   * @returns {Promise<CloudStatus | null>} The cloud status, or null on failure or invalid data.
+   */
+  GetStatus(): Promise<CloudStatus | null>;
+}
+
+/** A Shelly Cloud component with cloud configuration and status methods. */
+export type ShellyCloudComponent = ShellyComponent & CloudComponent;
 
 /**
  *  Checks if the given component is a light component.
@@ -90,6 +344,46 @@ export function isSwitchComponent(component: ShellyComponent | undefined): compo
 export function isCoverComponent(component: ShellyComponent | undefined): component is ShellyCoverComponent {
   if (component === undefined) return false;
   return ['Cover', 'Roller'].includes(component.name);
+}
+
+/**
+ * Checks if the given component is a cloud component.
+ *
+ * @param {ShellyComponent | undefined} component - The component to check.
+ * @returns {component is ShellyCloudComponent} True if the component is a cloud component.
+ */
+export function isCloudComponent(component: ShellyComponent | undefined): component is ShellyCloudComponent {
+  return component?.name === 'Cloud';
+}
+
+/**
+ * Checks if the component is a system component.
+ *
+ * @param {ShellyComponent | undefined} component - The component to check.
+ * @returns {component is ShellySysComponent} True for Sys components.
+ */
+export function isSysComponent(component: ShellyComponent | undefined): component is ShellySysComponent {
+  return component?.name === 'Sys';
+}
+
+/**
+ * Checks if the component supports outbound WebSocket RPC methods.
+ *
+ * @param {ShellyComponent | undefined} component - The component to check.
+ * @returns {component is ShellyWsComponent} True for Gen 2+ Ws components.
+ */
+export function isWsComponent(component: ShellyComponent | undefined): component is ShellyWsComponent {
+  return component?.name === 'Ws' && component.device.gen >= 2;
+}
+
+/**
+ * Checks if the component supports native Matter RPC methods.
+ *
+ * @param {ShellyComponent | undefined} component - The component to check.
+ * @returns {component is ShellyMatterComponent} True for Gen 2+ Matter components.
+ */
+export function isMatterComponent(component: ShellyComponent | undefined): component is ShellyMatterComponent {
+  return component?.name === 'Matter' && component.device.gen >= 2;
 }
 
 interface ShellyComponentEvents {
@@ -129,6 +423,120 @@ export class ShellyComponent extends EventEmitter<ShellyComponentEvents> {
 
       // Add a brightness property for Light components
       if (isLightComponent(this) && prop === 'gain') this.addProperty(new ShellyProperty(this, 'brightness', data[prop]));
+    }
+
+    // Add system status methods and Gen 2+ UDP configuration methods.
+    if (isSysComponent(this)) {
+      this.SetConfig = async function (config): Promise<ShellyData | null> {
+        if (device.gen === 1) return null;
+        const rpc_udp: Partial<SysRpcUdpConfig> = {};
+        if (config.rpc_udp.dst_addr !== undefined) rpc_udp.dst_addr = config.rpc_udp.dst_addr;
+        if (config.rpc_udp.listen_port !== undefined) rpc_udp.listen_port = config.rpc_udp.listen_port;
+        return shellyFetch(device.shelly, device.log, device.host, 'Sys.SetConfig', { config: { rpc_udp } });
+      };
+
+      this.GetConfig = async function (): Promise<SysConfig | null> {
+        if (device.gen === 1) return null;
+        const config = await shellyFetch(device.shelly, device.log, device.host, 'Sys.GetConfig');
+        const rpc = config?.rpc_udp;
+        if (!isValidObject(rpc) || !('dst_addr' in rpc) || !('listen_port' in rpc)) return null;
+        if (rpc.dst_addr !== null && typeof rpc.dst_addr !== 'string') return null;
+        if (rpc.listen_port !== null && (!isValidNumber(rpc.listen_port, 1, 65535) || !Number.isInteger(rpc.listen_port))) return null;
+        return { rpc_udp: { dst_addr: rpc.dst_addr, listen_port: rpc.listen_port } };
+      };
+
+      this.GetStatus = async function (): Promise<SysStatus | null> {
+        const status = await shellyFetch(device.shelly, device.log, device.host, device.gen === 1 ? 'status' : 'Sys.GetStatus');
+        if (typeof status?.mac !== 'string' || status.mac.length === 0) return null;
+        if (!isValidNumber(status.uptime, 0)) return null;
+        if (status.time !== undefined && status.time !== null && typeof status.time !== 'string') return null;
+        const restartRequired = device.gen === 1 ? undefined : status.restart_required;
+        if (device.gen !== 1 && typeof restartRequired !== 'boolean') return null;
+        const cfgRev = device.gen === 1 ? undefined : status.cfg_rev;
+        if (device.gen !== 1 && !isValidNumber(cfgRev, 0)) return null;
+        return {
+          mac: status.mac,
+          restart_required: typeof restartRequired === 'boolean' ? restartRequired : undefined,
+          time: status.time,
+          uptime: status.uptime,
+          cfg_rev: typeof cfgRev === 'number' ? cfgRev : undefined,
+        };
+      };
+    }
+
+    // Add native Matter methods only when the device exposes the component.
+    if (isMatterComponent(this)) {
+      this.SetConfig = async function (config): Promise<ShellyData | null> {
+        return shellyFetch(device.shelly, device.log, device.host, 'Matter.SetConfig', { config: { enable: config.enable } });
+      };
+
+      this.GetConfig = async function (): Promise<MatterConfig | null> {
+        const config = await shellyFetch(device.shelly, device.log, device.host, 'Matter.GetConfig');
+        return typeof config?.enable === 'boolean' ? { enable: config.enable } : null;
+      };
+
+      this.GetStatus = async function (): Promise<MatterStatus | null> {
+        const status = await shellyFetch(device.shelly, device.log, device.host, 'Matter.GetStatus');
+        if (!isValidNumber(status?.num_fabrics, 0) || !Number.isInteger(status.num_fabrics) || typeof status.commissionable !== 'boolean') return null;
+        return { num_fabrics: status.num_fabrics, commissionable: status.commissionable };
+      };
+
+      this.GetSetupCode = async function (): Promise<MatterSetupCode | null> {
+        const codes = await shellyFetch(device.shelly, device.log, device.host, 'Matter.GetSetupCode');
+        if (typeof codes?.qr_code !== 'string' || typeof codes.manual_code !== 'string') return null;
+        return { qr_code: codes.qr_code, manual_code: codes.manual_code };
+      };
+
+      this.FactoryReset = async function (): Promise<null> {
+        await shellyFetch(device.shelly, device.log, device.host, 'Matter.FactoryReset');
+        return null;
+      };
+    }
+
+    // Add outbound WebSocket configuration and status methods.
+    if (isWsComponent(this)) {
+      this.SetConfig = async function (config): Promise<ShellyData | null> {
+        const settings: Partial<WsConfig> = {};
+        if (config.enable !== undefined) settings.enable = config.enable;
+        if (config.server !== undefined) settings.server = config.server;
+        if (config.ssl_ca !== undefined) settings.ssl_ca = config.ssl_ca;
+        return shellyFetch(device.shelly, device.log, device.host, 'Ws.SetConfig', { config: settings });
+      };
+
+      this.GetConfig = async function (): Promise<WsConfig | null> {
+        const config = await shellyFetch(device.shelly, device.log, device.host, 'Ws.GetConfig');
+        if (typeof config?.enable !== 'boolean') return null;
+        if (config.server !== undefined && config.server !== null && typeof config.server !== 'string') return null;
+        if (config.ssl_ca !== '*' && config.ssl_ca !== 'user_ca.pem' && config.ssl_ca !== 'ca.pem') return null;
+        return { enable: config.enable, server: config.server, ssl_ca: config.ssl_ca };
+      };
+
+      this.GetStatus = async function (): Promise<WsStatus | null> {
+        const status = await shellyFetch(device.shelly, device.log, device.host, 'Ws.GetStatus');
+        return typeof status?.connected === 'boolean' ? { connected: status.connected } : null;
+      };
+    }
+
+    // Add cloud configuration and status methods dynamically.
+    if (isCloudComponent(this)) {
+      this.SetConfig = async function (config): Promise<ShellyData | null> {
+        if (device.gen === 1) return shellyFetch(device.shelly, device.log, device.host, 'settings/cloud', { enabled: config.enable });
+        return shellyFetch(device.shelly, device.log, device.host, 'Cloud.SetConfig', { config: { enable: config.enable } });
+      };
+
+      this.GetConfig = async function (): Promise<CloudConfig | null> {
+        const config = await shellyFetch(device.shelly, device.log, device.host, device.gen === 1 ? 'settings/cloud' : 'Cloud.GetConfig');
+        if (device.gen === 1) return typeof config?.enabled === 'boolean' ? { enable: config.enabled, server: null } : null;
+        if (typeof config?.enable !== 'boolean' || (typeof config.server !== 'string' && config.server !== null)) return null;
+        return { ...config, enable: config.enable, server: config.server };
+      };
+
+      this.GetStatus = async function (): Promise<CloudStatus | null> {
+        const response = await shellyFetch(device.shelly, device.log, device.host, device.gen === 1 ? 'status' : 'Cloud.GetStatus');
+        const status = device.gen === 1 ? response?.cloud : response;
+        if (!isValidObject(status) || !('connected' in status) || typeof status.connected !== 'boolean') return null;
+        return { connected: status.connected };
+      };
     }
 
     // Extend the ShellyComponent class prototype to include the Switch Relay Light methods dynamically

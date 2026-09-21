@@ -40,6 +40,10 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 
 - [devcontainer]: Add [`Dev Container`](.devcontainer/README.md) v.2.2.0 with dual Node and Bun runtime support.
 - [agents]: Add a [`shared setup`](.agents/README.md) for all agents: OpenAI Codex, Claude Code, GitHub Copilot and Google Gemini / Antigravity.
+- [cloud]: Add the typed `Cloud` component.
+- [sys]: Add the typed `Sys` component.
+- [ws]: Add the typed `Ws` component.
+- [matter]: Add the typed `Matter` component.
 
 ### Changed
 

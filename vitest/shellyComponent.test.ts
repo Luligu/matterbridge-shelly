@@ -14,9 +14,13 @@ import type { MockInstance } from 'vitest';
 
 import { Shelly } from '../src/shelly.js';
 import {
+  isCloudComponent,
   isCoverComponent,
   isLightComponent,
+  isMatterComponent,
   isSwitchComponent,
+  isSysComponent,
+  isWsComponent,
   ShellyComponent,
   type ShellyCoverComponent,
   type ShellyLightComponent,
@@ -95,11 +99,295 @@ describe('ShellyComponent', () => {
     expect(device3).not.toBeUndefined();
   });
 
+  it('should identify native Matter components and reject unsupported components', () => {
+    expect(isMatterComponent(device2.getComponent('missing'))).toBe(false);
+    expect(isMatterComponent(device2.getComponent('cloud'))).toBe(false);
+    const component = new ShellyComponent(device1, 'matter', 'Matter');
+    expect(isMatterComponent(component)).toBe(false);
+    expect('FactoryReset' in component).toBe(false);
+    expect(isMatterComponent(new ShellyComponent(device2, 'matter', 'Matter'))).toBe(true);
+  });
+
+  it('should call native Matter RPC methods and preserve pairing code strings', async () => {
+    const component = new ShellyComponent(device2, 'matter', 'Matter');
+    if (!isMatterComponent(component)) throw new Error('Missing Matter component');
+    for (const enable of [true, false]) {
+      fetchSpy.mockResolvedValueOnce({ enable });
+      expect(await component.GetConfig()).toEqual({ enable });
+      expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, 'Matter.GetConfig');
+      fetchSpy.mockResolvedValueOnce({ restart_required: false });
+      expect(await component.SetConfig({ enable })).toEqual({ restart_required: false });
+      expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, 'Matter.SetConfig', { config: { enable } });
+    }
+    for (const status of [
+      { num_fabrics: 0, commissionable: true },
+      { num_fabrics: 1, commissionable: false },
+    ]) {
+      fetchSpy.mockResolvedValueOnce(status);
+      expect(await component.GetStatus()).toEqual(status);
+      expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, 'Matter.GetStatus');
+    }
+    const codes = { qr_code: 'MT:00000O-O03.3QG5.000', manual_code: '00576700759' };
+    fetchSpy.mockResolvedValueOnce(codes);
+    expect(await component.GetSetupCode()).toEqual(codes);
+    expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, 'Matter.GetSetupCode');
+    fetchSpy.mockResolvedValueOnce(null);
+    expect(await component.FactoryReset()).toBeNull();
+    expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, 'Matter.FactoryReset');
+    fetchSpy.mockResolvedValueOnce(null);
+    expect(await component.SetConfig({ enable: false })).toBeNull();
+  });
+
+  it('should return null for invalid or missing Matter responses', async () => {
+    const component = new ShellyComponent(device2, 'matter', 'Matter');
+    if (!isMatterComponent(component)) throw new Error('Missing Matter component');
+    for (const response of [null, {}, { enable: 'true' }]) {
+      fetchSpy.mockResolvedValueOnce(response);
+      expect(await component.GetConfig()).toBeNull();
+    }
+    for (const response of [null, {}, { num_fabrics: -1, commissionable: false }, { num_fabrics: 0.5, commissionable: false }, { num_fabrics: 0, commissionable: 'true' }]) {
+      fetchSpy.mockResolvedValueOnce(response);
+      expect(await component.GetStatus()).toBeNull();
+    }
+    for (const response of [null, {}, { qr_code: 'MT:test', manual_code: 123 }]) {
+      fetchSpy.mockResolvedValueOnce(response);
+      expect(await component.GetSetupCode()).toBeNull();
+    }
+  });
+
+  it('should identify only Gen 2+ Ws components', () => {
+    expect(isWsComponent(device2.getComponent('missing'))).toBe(false);
+    expect(isWsComponent(device2.getComponent('cloud'))).toBe(false);
+    const gen1 = new ShellyComponent(device1, 'ws', 'Ws');
+    expect(isWsComponent(gen1)).toBe(false);
+    expect('GetStatus' in gen1).toBe(false);
+    expect(isWsComponent(device2.getComponent('ws'))).toBe(true);
+  });
+
+  it('should read Ws settings and status and send partial configuration', async () => {
+    const component = device2.getComponent('ws');
+    if (!isWsComponent(component)) throw new Error('Missing Ws component');
+    for (const ssl_ca of ['*', 'user_ca.pem', 'ca.pem'] as const) {
+      for (const server of ['wss://example.com/rpc', null, undefined]) {
+        fetchSpy.mockResolvedValueOnce({ enable: false, server, ssl_ca });
+        expect(await component.GetConfig()).toStrictEqual({ enable: false, server, ssl_ca });
+        expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, 'Ws.GetConfig');
+      }
+      fetchSpy.mockResolvedValueOnce({ restart_required: true });
+      expect(await component.SetConfig({ ssl_ca })).toEqual({ restart_required: true });
+      expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, 'Ws.SetConfig', { config: { ssl_ca } });
+    }
+    const config = { enable: false, server: null, ignored: true };
+    await component.SetConfig(config);
+    expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, 'Ws.SetConfig', { config: { enable: false, server: null } });
+    for (const connected of [true, false]) {
+      fetchSpy.mockResolvedValueOnce({ connected });
+      expect(await component.GetStatus()).toEqual({ connected });
+      expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, 'Ws.GetStatus');
+    }
+    fetchSpy.mockResolvedValueOnce(null);
+    expect(await component.SetConfig({ enable: true })).toBeNull();
+  });
+
+  it('should return null for missing or invalid Ws responses', async () => {
+    const component = device2.getComponent('ws');
+    if (!isWsComponent(component)) throw new Error('Missing Ws component');
+    for (const config of [null, {}, { enable: 'true' }, { enable: true, server: 42, ssl_ca: '*' }, { enable: true }, { enable: true, ssl_ca: 'invalid' }]) {
+      fetchSpy.mockResolvedValueOnce(config);
+      expect(await component.GetConfig()).toBeNull();
+    }
+    for (const status of [null, {}, { connected: 'true' }]) {
+      fetchSpy.mockResolvedValueOnce(status);
+      expect(await component.GetStatus()).toBeNull();
+    }
+  });
+
+  it('should identify system components on all generations', () => {
+    expect(isSysComponent(device2.getComponent('missing'))).toBe(false);
+    expect(isSysComponent(new ShellyComponent(device2, 'cloud', 'Cloud'))).toBe(false);
+    const gen1 = new ShellyComponent(device1, 'sys', 'Sys');
+    expect(isSysComponent(gen1)).toBe(true);
+    expect(isSysComponent(device2.getComponent('sys'))).toBe(true);
+  });
+
+  it('should read UDP configuration and system status and write only UDP settings', async () => {
+    const component = device2.getComponent('sys');
+    if (!isSysComponent(component)) throw new Error('Missing Sys component');
+    for (const rpc_udp of [
+      { dst_addr: '192.168.1.2:8485', listen_port: 5555 },
+      { dst_addr: null, listen_port: null },
+    ]) {
+      fetchSpy.mockResolvedValueOnce({ rpc_udp, device: { name: 'Ignored' } });
+      expect(await component.GetConfig()).toEqual({ rpc_udp });
+      expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, 'Sys.GetConfig');
+      fetchSpy.mockResolvedValueOnce({ restart_required: true });
+      expect(await component.SetConfig({ rpc_udp })).toEqual({ restart_required: true });
+      expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, 'Sys.SetConfig', { config: { rpc_udp } });
+    }
+    const config = { rpc_udp: { dst_addr: null, extra: true }, device: { name: 'Ignored' } };
+    await component.SetConfig(config);
+    expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, 'Sys.SetConfig', { config: { rpc_udp: { dst_addr: null } } });
+    await component.SetConfig({ rpc_udp: { listen_port: 5555 } });
+    expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, 'Sys.SetConfig', { config: { rpc_udp: { listen_port: 5555 } } });
+    fetchSpy.mockResolvedValueOnce({ mac: '441793D69718', restart_required: false, cfg_rev: 7, uptime: 15 });
+    const status = await component.GetStatus();
+    expectTypeOf(status?.mac).toEqualTypeOf<string | undefined>();
+    expectTypeOf(status?.restart_required).toEqualTypeOf<boolean | undefined>();
+    expect(status).toEqual({ mac: '441793D69718', restart_required: false, cfg_rev: 7, time: undefined, uptime: 15 });
+    expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, 'Sys.GetStatus');
+    fetchSpy.mockResolvedValueOnce(null);
+    expect(await component.GetStatus()).toBeNull();
+    fetchSpy.mockResolvedValueOnce({ mac: '441793D69718', restart_required: true, cfg_rev: 0, time: '12:30', uptime: 0 });
+    expect(await component.GetStatus()).toEqual({ mac: '441793D69718', restart_required: true, cfg_rev: 0, time: '12:30', uptime: 0 });
+    for (const invalidStatus of [{}, { mac: 123 }, { mac: '' }, { mac: '441793D69718' }, { mac: '441793D69718', restart_required: 'true' }]) {
+      fetchSpy.mockResolvedValueOnce(invalidStatus);
+      expect(await component.GetStatus()).toBeNull();
+    }
+    fetchSpy.mockResolvedValueOnce(null);
+    expect(await component.SetConfig({ rpc_udp: {} })).toBeNull();
+  });
+
+  it('should return undefined restart status on Gen 1 and skip unsupported UDP configuration', async () => {
+    const component = new ShellyComponent(device1, 'sys', 'Sys');
+    if (!isSysComponent(component)) throw new Error('Missing Sys component');
+    expect(await component.GetConfig()).toBeNull();
+    expect(await component.SetConfig({ rpc_udp: {} })).toBeNull();
+    expect(fetchSpy).not.toHaveBeenCalled();
+    fetchSpy.mockResolvedValueOnce({ mac: '98CDAC0D01BB', uptime: 15 });
+    const status = await component.GetStatus();
+    expect(status).toStrictEqual({ mac: '98CDAC0D01BB', restart_required: undefined, cfg_rev: undefined, time: undefined, uptime: 15 });
+    expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device1.log, device1.host, 'status');
+  });
+
+  it('should preserve reported time and validate uptime for both generations', async () => {
+    for (const device of [device1, device2]) {
+      const component = new ShellyComponent(device, 'sys', 'Sys');
+      if (!isSysComponent(component)) throw new Error('Missing Sys component');
+      for (const time of ['12:30', null, undefined]) {
+        fetchSpy.mockResolvedValueOnce({ mac: '441793D69718', restart_required: false, cfg_rev: 7, time, uptime: 15 });
+        const status = await component.GetStatus();
+        expectTypeOf(status?.time).toEqualTypeOf<string | null | undefined>();
+        expectTypeOf(status?.uptime).toEqualTypeOf<number | undefined>();
+        expect(status?.time).toBe(time);
+        expect(status?.uptime).toBe(15);
+      }
+      for (const fields of [{ uptime: undefined }, { uptime: null }, { uptime: '15' }, { uptime: -1 }, { uptime: Infinity }, { time: 123 }]) {
+        fetchSpy.mockResolvedValueOnce({ mac: '441793D69718', restart_required: false, cfg_rev: 7, uptime: 15, ...fields });
+        expect(await component.GetStatus()).toBeNull();
+      }
+    }
+  });
+
+  it('should validate configuration revisions on Gen 2 and omit them on Gen 1', async () => {
+    for (const device of [device1, device2]) {
+      const component = new ShellyComponent(device, 'sys', 'Sys');
+      if (!isSysComponent(component)) throw new Error('Missing Sys component');
+      for (const cfg_rev of [0, 7, undefined, null, '7', -1, Infinity]) {
+        fetchSpy.mockResolvedValueOnce({ mac: '441793D69718', restart_required: false, uptime: 15, cfg_rev });
+        const status = await component.GetStatus();
+        expectTypeOf(status?.cfg_rev).toEqualTypeOf<number | undefined>();
+        const valid = device.gen === 1 || cfg_rev === 0 || cfg_rev === 7;
+        const expected = valid
+          ? { mac: '441793D69718', restart_required: device.gen === 1 ? undefined : false, time: undefined, uptime: 15, cfg_rev: device.gen === 1 ? undefined : cfg_rev }
+          : null;
+        expect(status).toStrictEqual(expected);
+      }
+    }
+  });
+
+  it('should reject missing or invalid UDP configuration responses', async () => {
+    const component = device2.getComponent('sys');
+    if (!isSysComponent(component)) throw new Error('Missing Sys component');
+    for (const response of [
+      null,
+      {},
+      { rpc_udp: {} },
+      { rpc_udp: { dst_addr: null } },
+      { rpc_udp: { dst_addr: 5, listen_port: null } },
+      { rpc_udp: { dst_addr: null, listen_port: '5555' } },
+      { rpc_udp: { dst_addr: null, listen_port: 1.5 } },
+    ]) {
+      fetchSpy.mockResolvedValueOnce(response);
+      expect(await component.GetConfig()).toBeNull();
+    }
+  });
+
   it('should construct properly with no data', () => {
     const component = new ShellyComponent(device1, id, name);
     expect(component.device).toBe(device1);
     expect(component.id).toBe(id);
     expect(component.name).toBe(name);
+  });
+
+  it('should reject undefined and non-cloud components when checking the cloud type', () => {
+    expect(isCloudComponent(device2.getComponent('missing'))).toBe(false);
+    expect(isCloudComponent(new ShellyComponent(device2, 'switch:0', 'Switch'))).toBe(false);
+  });
+
+  it('should call cloud RPC methods and return responses when using Gen 2', async () => {
+    const component = device2.getComponent('cloud');
+    expect(isCloudComponent(component)).toBe(true);
+    if (!isCloudComponent(component)) throw new Error('Missing cloud component');
+    const config = { enable: false, server: null };
+    fetchSpy.mockResolvedValueOnce({ restart_required: false });
+    expect(await component.SetConfig({ enable: false })).toEqual({ restart_required: false });
+    expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, 'Cloud.SetConfig', { config: { enable: false } });
+    fetchSpy.mockResolvedValueOnce(config);
+    expect(await component.GetConfig()).toEqual(config);
+    expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, 'Cloud.GetConfig');
+    fetchSpy.mockResolvedValueOnce({ connected: true });
+    expect(await component.GetStatus()).toEqual({ connected: true });
+    expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, 'Cloud.GetStatus');
+    fetchSpy.mockResolvedValueOnce(null);
+    expect(await component.GetStatus()).toBeNull();
+  });
+
+  it('should validate typed cloud responses when reading configuration and status', async () => {
+    for (const device of [device1, device2]) {
+      const component = device.getComponent('cloud');
+      if (!isCloudComponent(component)) throw new Error('Missing cloud component');
+      for (const response of [null, {}, { enable: true }, { enable: true, server: 123 }, { enabled: 'true' }]) {
+        fetchSpy.mockResolvedValueOnce(response);
+        expect(await component.GetConfig()).toBeNull();
+      }
+      for (const status of [{}, { connected: 'true' }]) {
+        fetchSpy.mockResolvedValueOnce(device.gen === 1 ? { cloud: status } : status);
+        expect(await component.GetStatus()).toBeNull();
+      }
+    }
+    const component = device2.getComponent('cloud');
+    if (!isCloudComponent(component)) throw new Error('Missing cloud component');
+    fetchSpy.mockResolvedValueOnce({ enable: true, server: 'iot.shelly.cloud:6012/jrpc' });
+    const config = await component.GetConfig();
+    if (!config) throw new Error('Missing cloud configuration');
+    expectTypeOf(config.enable).toEqualTypeOf<boolean>();
+    expectTypeOf(config.server).toEqualTypeOf<string | null>();
+    expect(config.server).toBe('iot.shelly.cloud:6012/jrpc');
+    fetchSpy.mockResolvedValueOnce({ connected: false });
+    const status = await component.GetStatus();
+    expectTypeOf(status?.connected).toEqualTypeOf<boolean | undefined>();
+    expect(status?.connected).toBe(false);
+  });
+
+  it('should use legacy cloud endpoints and extract status when using Gen 1', async () => {
+    const component = device1.getComponent('cloud');
+    expect(isCloudComponent(component)).toBe(true);
+    if (!isCloudComponent(component)) throw new Error('Missing cloud component');
+    fetchSpy.mockResolvedValueOnce({ enabled: false });
+    expect(await component.SetConfig({ enable: false })).toEqual({ enabled: false });
+    expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device1.log, device1.host, 'settings/cloud', { enabled: false });
+    for (const enabled of [true, false]) {
+      fetchSpy.mockResolvedValueOnce({ enabled, connected: true });
+      expect(await component.GetConfig()).toEqual({ enable: enabled, server: null });
+    }
+    expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device1.log, device1.host, 'settings/cloud');
+    fetchSpy.mockResolvedValueOnce({ cloud: { enabled: true, connected: false } });
+    expect(await component.GetStatus()).toEqual({ connected: false });
+    expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device1.log, device1.host, 'status');
+    fetchSpy.mockResolvedValueOnce(null);
+    expect(await component.GetStatus()).toBeNull();
+    fetchSpy.mockResolvedValueOnce({});
+    expect(await component.GetStatus()).toBeNull();
   });
 
   it('should construct properly with data', () => {

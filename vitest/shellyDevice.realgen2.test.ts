@@ -91,7 +91,7 @@ describe('Shellies', () => {
     expect(device.bthomeDevices.size).toBe(0);
     expect(device.bthomeSensors.size).toBe(0);
 
-    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Input', 'MQTT', 'Rgb', 'Sys', 'Sntp', 'WiFi', 'WS']);
+    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Input', 'MQTT', 'Rgb', 'Sys', 'Sntp', 'WiFi', 'Ws']);
     // prettier-ignore
     expect(device.getComponentIds()).toStrictEqual(["ble", "cloud", "input:0", "input:1", "input:2", "input:3", "mqtt", "rgb:0", "sys", "sntp", 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws']);
 
@@ -163,7 +163,7 @@ describe('Shellies', () => {
     expect(device.bthomeDevices.size).toBe(0);
     expect(device.bthomeSensors.size).toBe(0);
 
-    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Input', 'Light', 'MQTT', 'Sys', 'Sntp', 'WiFi', 'WS']);
+    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Input', 'Light', 'MQTT', 'Sys', 'Sntp', 'WiFi', 'Ws']);
     // prettier-ignore
     expect(device.getComponentIds()).toStrictEqual(["ble", "cloud", "input:0", "input:1", "input:2", "input:3", "light:0", "light:1", "light:2", "light:3", "mqtt", "sys", "sntp", 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws']);
 
@@ -315,7 +315,7 @@ describe('Shellies', () => {
     expect(device.bthomeDevices.size).toBe(0);
     expect(device.bthomeSensors.size).toBe(0);
 
-    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Input', 'MQTT', 'Switch', 'Sys', 'Sntp', 'WiFi', 'WS']);
+    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Input', 'MQTT', 'Switch', 'Sys', 'Sntp', 'WiFi', 'Ws']);
     expect(device.getComponentIds()).toStrictEqual(['ble', 'cloud', 'input:0', 'mqtt', 'switch:0', 'sys', 'sntp', 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws']);
 
     const component = device.getComponent('switch:0');
@@ -368,7 +368,7 @@ describe('Shellies', () => {
     expect(device.bthomeDevices.size).toBe(0);
     expect(device.bthomeSensors.size).toBe(0);
 
-    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Cover', 'Input', 'MQTT', 'Sys', 'Sntp', 'WiFi', 'WS']);
+    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Cover', 'Input', 'MQTT', 'Sys', 'Sntp', 'WiFi', 'Ws']);
     expect(device.getComponentIds()).toStrictEqual(['ble', 'cloud', 'cover:0', 'input:0', 'input:1', 'mqtt', 'sys', 'sntp', 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws']);
 
     const cover = device.getComponent('cover:0');
@@ -435,7 +435,7 @@ describe('Shellies', () => {
     expect(device.bthomeDevices.size).toBe(0);
     expect(device.bthomeSensors.size).toBe(0);
 
-    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Input', 'MQTT', 'Switch', 'Sys', 'Sntp', 'WiFi', 'WS']);
+    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Input', 'MQTT', 'Switch', 'Sys', 'Sntp', 'WiFi', 'Ws']);
     // prettier-ignore
     expect(device.getComponentIds()).toStrictEqual(["ble", "cloud", "input:0", "input:1", "mqtt", "switch:0", "switch:1", "sys", "sntp", 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws']);
 
@@ -516,7 +516,7 @@ describe('Shellies', () => {
     expect(device.bthomeDevices.size).toBe(0);
     expect(device.bthomeSensors.size).toBe(0);
 
-    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Input', 'MQTT', 'Switch', 'Sys', 'Sntp', 'WiFi', 'WS']);
+    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Input', 'MQTT', 'Switch', 'Sys', 'Sntp', 'WiFi', 'Ws']);
     // prettier-ignore
     expect(device.getComponentIds()).toStrictEqual(["ble", "cloud", "input:0", "mqtt", "switch:0", "sys", "sntp", 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws']);
 
@@ -575,7 +575,7 @@ describe('Shellies', () => {
     expect(device.bthomeDevices.size).toBe(0);
     expect(device.bthomeSensors.size).toBe(0);
 
-    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'MQTT', 'Switch', 'Sys', 'Sntp', 'WiFi', 'WS']);
+    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'MQTT', 'Switch', 'Sys', 'Sntp', 'WiFi', 'Ws']);
     // prettier-ignore
     expect(device.getComponentIds()).toStrictEqual(["ble", "cloud", "mqtt", "switch:0", "sys", "sntp", 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws']);
 
@@ -635,7 +635,7 @@ describe('Shellies', () => {
     expect(device.bthomeSensors.size).toBe(0);
 
     expect(device.components.length).toBe(13);
-    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Input', 'MQTT', 'Sys', 'Sntp', 'WiFi', 'WS']);
+    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Input', 'MQTT', 'Sys', 'Sntp', 'WiFi', 'Ws']);
     expect(device.getComponentIds()).toStrictEqual(['ble', 'cloud', 'input:0', 'input:1', 'input:2', 'input:3', 'mqtt', 'sys', 'sntp', 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws']);
 
     expect(device.getComponent('input:0')).not.toBeUndefined();
@@ -692,7 +692,7 @@ describe('Shellies', () => {
     expect(device.bthomeSensors.size).toBe(0);
 
     expect(device.components.length).toBe(13);
-    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Input', 'MQTT', 'Sys', 'Sntp', 'WiFi', 'WS']);
+    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Input', 'MQTT', 'Sys', 'Sntp', 'WiFi', 'Ws']);
     expect(device.getComponentIds()).toStrictEqual(['ble', 'cloud', 'input:0', 'input:1', 'input:2', 'input:3', 'mqtt', 'sys', 'sntp', 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws']);
 
     expect(device.getComponent('input:0')).not.toBeUndefined();
@@ -749,7 +749,7 @@ describe('Shellies', () => {
     expect(device.bthomeSensors.size).toBe(0);
 
     expect(device.components.length).toBe(12);
-    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Input', 'Light', 'MQTT', 'Sys', 'Sntp', 'WiFi', 'WS']);
+    expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Input', 'Light', 'MQTT', 'Sys', 'Sntp', 'WiFi', 'Ws']);
     expect(device.getComponentIds()).toStrictEqual(['ble', 'cloud', 'input:0', 'input:1', 'light:0', 'mqtt', 'sys', 'sntp', 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws']);
 
     const component = device.getComponent('light:0');

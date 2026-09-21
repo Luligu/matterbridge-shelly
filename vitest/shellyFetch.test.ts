@@ -91,6 +91,65 @@ describe('shellyFetch', () => {
   });
 
   describe('File-based fetch', () => {
+    it('should read Matter fixture configuration and status', async () => {
+      const fixture = path.join('src', 'mock', 'shelly1g3-34B7DACAC830.json');
+      const payload = JSON.parse(await fs.readFile(fixture, 'utf8'));
+      expect(await shellyFetch(shelly, log, fixture, 'Matter.GetConfig')).toEqual(payload.settings.matter);
+      expect(await shellyFetch(shelly, log, fixture, 'Matter.GetStatus')).toEqual(payload.status.matter);
+      for (const data of [{}, { settings: {}, status: {} }]) {
+        await fs.writeFile(testFilePath, JSON.stringify(data));
+        expect(await shellyFetch(shelly, log, testFilePath, 'Matter.GetConfig')).toBeNull();
+        expect(await shellyFetch(shelly, log, testFilePath, 'Matter.GetStatus')).toBeNull();
+      }
+    });
+
+    it('should read Ws fixture data including missing Wall Display fields', async () => {
+      const fixture = path.join('src', 'mock', 'shellyplussmoke-E08CFE8BD798.json');
+      expect(await shellyFetch(shelly, log, fixture, 'Ws.GetConfig')).toEqual({ enable: true, server: 'ws://192.168.69.100:8485', ssl_ca: 'ca.pem' });
+      expect(await shellyFetch(shelly, log, fixture, 'Ws.GetStatus')).toEqual({ connected: true });
+      const wallDisplay = path.join('src', 'mock', 'shellywalldisplay-00082261E102.json');
+      expect(await shellyFetch(shelly, log, wallDisplay, 'Ws.GetConfig')).toEqual({ enable: false, ssl_ca: 'ca.pem' });
+      expect(await shellyFetch(shelly, log, wallDisplay, 'Ws.GetStatus')).toBeNull();
+      await fs.writeFile(testFilePath, '{}');
+      expect(await shellyFetch(shelly, log, testFilePath, 'Ws.GetConfig')).toBeNull();
+      expect(await shellyFetch(shelly, log, testFilePath, 'Ws.GetStatus')).toBeNull();
+    });
+
+    it('should fetch Sys data when using a Gen 2 fixture', async () => {
+      const fixture = path.join('src', 'mock', 'shellyplussmoke-E08CFE8BD798.json');
+      expect(await shellyFetch(shelly, log, fixture, 'Sys.GetConfig')).toMatchObject({ rpc_udp: { dst_addr: null, listen_port: null } });
+      expect(await shellyFetch(shelly, log, fixture, 'Sys.GetStatus')).toMatchObject({ restart_required: false, uptime: 15 });
+    });
+
+    it('should return null when Sys data is missing', async () => {
+      for (const data of [{}, { settings: {}, status: {} }]) {
+        await fs.writeFile(testFilePath, JSON.stringify(data));
+        expect(await shellyFetch(shelly, log, testFilePath, 'Sys.GetConfig')).toBeNull();
+        expect(await shellyFetch(shelly, log, testFilePath, 'Sys.GetStatus')).toBeNull();
+      }
+    });
+
+    it('should fetch cloud configuration and status when using device fixtures', async () => {
+      const gen1Path = path.join('src', 'mock', 'shellydimmer2-98CDAC0D01BB.json');
+      const gen2Path = path.join('src', 'mock', 'shellyplussmoke-E08CFE8BD798.json');
+
+      expect(await shellyFetch(shelly, log, gen1Path, 'settings/cloud')).toEqual({ enabled: true, connected: true });
+      expect(await shellyFetch(shelly, log, gen2Path, 'Cloud.GetConfig')).toEqual({
+        enable: true,
+        server: 'shelly-103-eu.shelly.cloud:6022/jrpc',
+      });
+      expect(await shellyFetch(shelly, log, gen2Path, 'Cloud.GetStatus')).toEqual({ connected: true });
+    });
+
+    it('should return null when cloud data is missing from a JSON file', async () => {
+      for (const data of [{}, { settings: {}, status: {} }]) {
+        await fs.writeFile(testFilePath, JSON.stringify(data));
+        for (const service of ['settings/cloud', 'Cloud.GetConfig', 'Cloud.GetStatus']) {
+          expect(await shellyFetch(shelly, log, testFilePath, service)).toBeNull();
+        }
+      }
+    });
+
     it('should fetch shelly data from JSON file', async () => {
       const mockFileData = {
         shelly: { id: 'test', gen: 1 },
