@@ -3,7 +3,7 @@
  * @description This file contains the class SwitchComponent.
  * @author Luca Liguori
  * @created 2024-05-01
- * @version 2.2.8
+ * @version 2.2.9
  * @license Apache-2.0
  *
  * Copyright 2024, 2025, 2026 Luca Liguori.
@@ -288,6 +288,126 @@ interface MatterComponent {
 /** A native Matter component with configuration, status, pairing, and reset methods. */
 export type ShellyMatterComponent = ShellyComponent & MatterComponent;
 
+/** WiFi access point configuration returned by the device. */
+export interface WifiApConfig {
+  ssid?: string | null;
+  is_open: boolean;
+  enable: boolean;
+  range_extender?: { enable: boolean };
+}
+
+/** WiFi station configuration returned by the device. */
+export interface WifiStaConfig {
+  ssid: string | null;
+  is_open: boolean;
+  enable: boolean;
+  ipv4mode: 'dhcp' | 'static';
+  ip: string | null;
+  netmask: string | null;
+  gw: string | null;
+  nameserver: string | null;
+}
+
+/** Gen 2+ WiFi configuration; some devices expose only the primary station. */
+export interface WifiConfig {
+  ap?: WifiApConfig;
+  sta: WifiStaConfig;
+  sta1?: WifiStaConfig;
+  roam?: { rssi_thr: number; interval: number };
+}
+
+/** Writable WiFi configuration; passwords are write-only and is_open is read-only. */
+export interface WifiSetConfig {
+  ap?: Partial<Omit<WifiApConfig, 'is_open'>> & { pass?: string | null };
+  /** Include pass when setting a password-protected SSID. */
+  sta?: Partial<Omit<WifiStaConfig, 'is_open'>> & { pass?: string | null };
+  sta1?: Partial<Omit<WifiStaConfig, 'is_open'>> & { pass?: string | null };
+  roam?: Partial<NonNullable<WifiConfig['roam']>>;
+}
+
+/** Gen 2+ WiFi connection status, including optional firmware-specific fields. */
+export interface WifiStatus {
+  sta_ip: string | null;
+  status: 'disconnected' | 'connecting' | 'connected' | 'got ip';
+  ssid: string | null;
+  rssi: number;
+  bssid?: string;
+  channel?: number;
+  ap_client_count?: number;
+  sta_ip6?: string[];
+  mac?: string;
+  netmask?: string | null;
+  gw?: string | null;
+  nameserver?: string | null;
+}
+
+/** A WiFi access point discovered by a scan. */
+export interface WifiScanResult {
+  ssid: string | null;
+  bssid: string;
+  auth: 0 | 1 | 2 | 3 | 4 | 5;
+  channel: number;
+  rssi: number;
+}
+
+/** Response from Wifi.Scan. */
+export interface WifiScanResponse {
+  results: WifiScanResult[];
+}
+
+/** A client connected to the device access point. */
+export interface WifiAPClient {
+  mac: string;
+  ip: string;
+  ip_static: boolean;
+  /** Port on the extender forwarded to the client's HTTP port, or zero when unavailable. */
+  mport: number;
+  since: number;
+}
+
+/** Response from Wifi.ListAPClients. */
+export interface WifiAPClients {
+  ts: number | null;
+  ap_clients: WifiAPClient[];
+}
+
+interface WifiComponent {
+  /**
+   * Retrieves device-wide WiFi configuration.
+   *
+   * @returns {Promise<WifiConfig | null>} Configuration, or null on failure or invalid data.
+   */
+  GetConfig(): Promise<WifiConfig | null>;
+  /**
+   * Updates supplied WiFi settings; station changes may disconnect the device.
+   *
+   * @param {WifiSetConfig} config - Partial configuration, including pass for a password-protected SSID.
+   * @returns {Promise<ShellyData | null>} Device response, or null on failure.
+   */
+  SetConfig(config: WifiSetConfig): Promise<ShellyData | null>;
+  /**
+   * Retrieves device-wide WiFi status.
+   *
+   * @returns {Promise<WifiStatus | null>} Status, or null on failure or invalid data.
+   */
+  GetStatus(): Promise<WifiStatus | null>;
+  /**
+   * Scans for nearby access points.
+   *
+   * @returns {Promise<WifiScanResponse | null>} Scan results, or null on failure or invalid data.
+   */
+  Scan(): Promise<WifiScanResponse | null>;
+  /**
+   * Lists AP clients when the device supports and enables AP and range extension.
+   *
+   * @returns {Promise<WifiAPClients | null>} Client list, or null on failure or invalid data.
+   */
+  ListAPClients(): Promise<WifiAPClients | null>;
+}
+
+/** A Gen 2+ WiFi component exposing device-wide WiFi RPC methods. */
+export type ShellyWifiComponent = ShellyComponent & WifiComponent;
+
 interface CloudComponent {
   /**
    * Sets the cloud configuration.
@@ -386,6 +506,121 @@ export function isMatterComponent(component: ShellyComponent | undefined): compo
   return component?.name === 'Matter' && component.device.gen >= 2;
 }
 
+/**
+ * Checks whether a component supports Gen 2+ WiFi RPC methods.
+ *
+ * @param {ShellyComponent | undefined} component - The component to check.
+ * @returns {component is ShellyWifiComponent} True for Gen 2+ WiFi components.
+ */
+export function isWifiComponent(component: ShellyComponent | undefined): component is ShellyWifiComponent {
+  return component?.name === 'WiFi' && component.device.gen >= 2;
+}
+
+/**
+ * Validates a nullable string from a WiFi response.
+ *
+ * @param {unknown} value - Value to check.
+ * @returns {boolean} True for strings or null.
+ */
+function isWifiString(value: unknown): boolean {
+  return value === null || typeof value === 'string';
+}
+
+/**
+ * Narrows a WiFi response object for property validation.
+ *
+ * @param {unknown} value - Value to check.
+ * @returns {value is Record<string, unknown>} True for objects.
+ */
+function isWifiObject(value: unknown): value is Record<string, unknown> {
+  return isValidObject(value);
+}
+
+/**
+ * Validates a station configuration.
+ *
+ * @param {unknown} value - Station response.
+ * @returns {value is WifiStaConfig} True for a valid station configuration.
+ */
+function isWifiStaConfig(value: unknown): value is WifiStaConfig {
+  return (
+    isWifiObject(value) &&
+    typeof value.enable === 'boolean' &&
+    typeof value.is_open === 'boolean' &&
+    (value.ipv4mode === 'dhcp' || value.ipv4mode === 'static') &&
+    ['ssid', 'ip', 'netmask', 'gw', 'nameserver'].every((key) => isWifiString(value[key]))
+  );
+}
+
+/**
+ * Validates WiFi configuration including optional AP, fallback station, and roaming.
+ *
+ * @param {unknown} value - Configuration response.
+ * @returns {value is WifiConfig} True for valid configuration.
+ */
+function isWifiConfig(value: unknown): value is WifiConfig {
+  if (!isWifiObject(value) || !isWifiStaConfig(value.sta)) return false;
+  if (value.sta1 !== undefined && !isWifiStaConfig(value.sta1)) return false;
+  if (value.ap !== undefined) {
+    const ap = value.ap;
+    if (!isWifiObject(ap) || typeof ap.enable !== 'boolean' || typeof ap.is_open !== 'boolean') return false;
+    if (ap.ssid !== undefined && !isWifiString(ap.ssid)) return false;
+    if (ap.range_extender !== undefined && (!isWifiObject(ap.range_extender) || typeof ap.range_extender.enable !== 'boolean')) return false;
+  }
+  return value.roam === undefined || (isWifiObject(value.roam) && isValidNumber(value.roam.rssi_thr) && isValidNumber(value.roam.interval));
+}
+
+/**
+ * Validates a WiFi status response, allowing fields absent on older firmware.
+ *
+ * @param {unknown} value - Status response.
+ * @returns {value is WifiStatus} True for valid status.
+ */
+function isWifiStatus(value: unknown): value is WifiStatus {
+  if (!isWifiObject(value) || !isWifiString(value.sta_ip) || !isWifiString(value.ssid) || !isValidNumber(value.rssi)) return false;
+  if (typeof value.status !== 'string' || !['disconnected', 'connecting', 'connected', 'got ip'].includes(value.status)) return false;
+  if (!['bssid', 'mac'].every((key) => value[key] === undefined || typeof value[key] === 'string')) return false;
+  if (!['channel', 'ap_client_count'].every((key) => value[key] === undefined || isValidNumber(value[key], 0))) return false;
+  if (!['netmask', 'gw', 'nameserver'].every((key) => value[key] === undefined || isWifiString(value[key]))) return false;
+  return value.sta_ip6 === undefined || (Array.isArray(value.sta_ip6) && value.sta_ip6.every((ip: unknown) => typeof ip === 'string'));
+}
+
+/**
+ * Validates a discovered WiFi network.
+ *
+ * @param {unknown} value - Scan entry.
+ * @returns {value is WifiScanResult} True for a valid entry.
+ */
+function isWifiScanResult(value: unknown): value is WifiScanResult {
+  return (
+    isWifiObject(value) &&
+    isWifiString(value.ssid) &&
+    typeof value.bssid === 'string' &&
+    isValidNumber(value.auth, 0, 5) &&
+    Number.isInteger(value.auth) &&
+    isValidNumber(value.channel, 1) &&
+    isValidNumber(value.rssi)
+  );
+}
+
+/**
+ * Validates a range extender client entry.
+ *
+ * @param {unknown} value - Client entry.
+ * @returns {value is WifiAPClient} True for a valid entry.
+ */
+function isWifiAPClient(value: unknown): value is WifiAPClient {
+  return (
+    isWifiObject(value) &&
+    typeof value.mac === 'string' &&
+    typeof value.ip === 'string' &&
+    typeof value.ip_static === 'boolean' &&
+    isValidNumber(value.mport, 0, 65535) &&
+    Number.isInteger(value.mport) &&
+    isValidNumber(value.since, 0)
+  );
+}
+
 interface ShellyComponentEvents {
   update: [component: string, key: string, data: ShellyDataType];
   event: [component: string, event: string, data: ShellyEvent];
@@ -461,6 +696,32 @@ export class ShellyComponent extends EventEmitter<ShellyComponentEvents> {
           uptime: status.uptime,
           cfg_rev: typeof cfgRev === 'number' ? cfgRev : undefined,
         };
+      };
+    }
+
+    // WiFi RPC methods operate on the entire device, including on split WiFi components.
+    if (isWifiComponent(this)) {
+      this.GetConfig = async function (): Promise<WifiConfig | null> {
+        const config = await shellyFetch(device.shelly, device.log, device.host, 'Wifi.GetConfig');
+        return isWifiConfig(config) ? config : null;
+      };
+      this.SetConfig = async function (config): Promise<ShellyData | null> {
+        return shellyFetch(device.shelly, device.log, device.host, 'Wifi.SetConfig', { config });
+      };
+      this.GetStatus = async function (): Promise<WifiStatus | null> {
+        const status = await shellyFetch(device.shelly, device.log, device.host, 'Wifi.GetStatus');
+        return isWifiStatus(status) ? status : null;
+      };
+      this.Scan = async function (): Promise<WifiScanResponse | null> {
+        const response = await shellyFetch(device.shelly, device.log, device.host, 'Wifi.Scan');
+        if (!Array.isArray(response?.results) || !response.results.every(isWifiScanResult)) return null;
+        return { results: response.results };
+      };
+      this.ListAPClients = async function (): Promise<WifiAPClients | null> {
+        const response = await shellyFetch(device.shelly, device.log, device.host, 'Wifi.ListAPClients');
+        if (!response || (response.ts !== null && !isValidNumber(response.ts, 0))) return null;
+        if (!Array.isArray(response.ap_clients) || !response.ap_clients.every(isWifiAPClient)) return null;
+        return { ts: response.ts, ap_clients: response.ap_clients };
       };
     }
 

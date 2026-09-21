@@ -3,7 +3,7 @@
  * @description This file contains the shellyFetch function to fetch data from a Shelly device.
  * @author Luca Liguori
  * @created 2026-07-05
- * @version 1.0.4
+ * @version 1.0.5
  * @license Apache-2.0
  *
  * Copyright 2026 Luca Liguori.
@@ -73,6 +73,8 @@ export async function shellyFetch(
       if (service === 'Ws.GetStatus') return deviceData.status?.ws ?? null;
       if (service === 'Matter.GetConfig') return deviceData.settings?.matter ?? null;
       if (service === 'Matter.GetStatus') return deviceData.status?.matter ?? null;
+      if (service === 'Wifi.GetConfig') return deviceData.settings?.wifi ?? null;
+      if (service === 'Wifi.GetStatus') return deviceData.status?.wifi ?? null;
       if (service === 'Shelly.GetStatus') return deviceData.status;
       if (service === 'Shelly.GetConfig') return deviceData.settings;
       if (service === 'Shelly.GetComponents') return deviceData;

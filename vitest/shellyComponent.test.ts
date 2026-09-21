@@ -6,6 +6,7 @@
 
 const NAME = 'ShellyComponent';
 
+import { promises as fs } from 'node:fs';
 import path from 'node:path';
 
 import { AnsiLogger, TimestampFormat } from 'matterbridge/logger';
@@ -21,6 +22,7 @@ import {
   isSwitchComponent,
   isSysComponent,
   isWsComponent,
+  isWifiComponent,
   ShellyComponent,
   type ShellyCoverComponent,
   type ShellyLightComponent,
@@ -97,6 +99,114 @@ describe('ShellyComponent', () => {
     expect(device1).not.toBeUndefined();
     expect(device2).not.toBeUndefined();
     expect(device3).not.toBeUndefined();
+  });
+
+  it('should expose WiFi methods only on Gen 2+ WiFi components', () => {
+    expect(isWifiComponent(device2.getComponent('missing'))).toBe(false);
+    expect(isWifiComponent(device2.getComponent('cloud'))).toBe(false);
+    const gen1 = new ShellyComponent(device1, 'wifi_sta', 'WiFi');
+    expect(isWifiComponent(gen1)).toBe(false);
+    expect('Scan' in gen1).toBe(false);
+    for (const id of ['wifi_ap', 'wifi_sta', 'wifi_sta1']) expect(isWifiComponent(device2.getComponent(id))).toBe(true);
+  });
+
+  it('should validate WiFi configuration and status from every Gen 2+ device fixture', async () => {
+    const component = device2.getComponent('wifi_sta');
+    if (!isWifiComponent(component)) throw new Error('Missing WiFi component');
+    let count = 0;
+    for (const file of await fs.readdir(path.join('src', 'mock'))) {
+      if (!file.endsWith('.json')) continue;
+      const payload = JSON.parse(await fs.readFile(path.join('src', 'mock', file), 'utf8'));
+      if (!(payload.shelly?.gen >= 2) || !payload.settings?.wifi || !payload.status?.wifi) continue;
+      fetchSpy.mockResolvedValueOnce(payload.settings.wifi);
+      expect(await component.GetConfig()).toEqual(payload.settings.wifi);
+      fetchSpy.mockResolvedValueOnce(payload.status.wifi);
+      expect(await component.GetStatus()).toEqual(payload.status.wifi);
+      count++;
+    }
+    expect(count).toBeGreaterThan(0);
+    expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, 'Wifi.GetStatus');
+  });
+
+  it('should send partial WiFi updates and read scans and range extender clients', async () => {
+    const component = device2.getComponent('wifi_ap');
+    if (!isWifiComponent(component)) throw new Error('Missing WiFi component');
+    const config = { ap: { range_extender: { enable: true } }, sta: { ssid: 'test-network', pass: 'test-password' } };
+    const payload = JSON.parse(await fs.readFile(path.join('src', 'mock', 'shellypstripg4-D885ACE52518.json'), 'utf8'));
+    const extenderConfig = { ...payload.settings.wifi, ap: { ssid: '', is_open: false, enable: true, range_extender: { enable: true } } };
+    fetchSpy.mockResolvedValueOnce(extenderConfig);
+    expect(await component.GetConfig()).toEqual(extenderConfig);
+    expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, 'Wifi.GetConfig');
+    fetchSpy.mockResolvedValueOnce({ restart_required: false });
+    expect(await component.SetConfig(config)).toEqual({ restart_required: false });
+    expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, 'Wifi.SetConfig', { config });
+    const result = { ssid: null, bssid: '00:11:22:33:44:55', auth: 3, channel: 4, rssi: -56 };
+    for (const results of [[], [result]]) {
+      fetchSpy.mockResolvedValueOnce({ results });
+      expect(await component.Scan()).toEqual({ results });
+      expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, 'Wifi.Scan');
+    }
+    const client = { mac: 'e4:b0:63:d6:45:78', ip: '192.168.33.32', ip_static: false, mport: 11400, since: 1790013819 };
+    for (const response of [
+      { ts: 1790013988, ap_clients: [client] },
+      { ts: null, ap_clients: [] },
+    ]) {
+      fetchSpy.mockResolvedValueOnce(response);
+      expect(await component.ListAPClients()).toEqual(response);
+      expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, 'Wifi.ListAPClients');
+    }
+    const status = {
+      sta_ip: '192.168.68.58',
+      status: 'got ip',
+      ssid: '',
+      channel: 4,
+      rssi: -56,
+      bssid: '20:23:51:59:e7:ac',
+      ap_client_count: 1,
+      sta_ip6: ['fe80::da85:acff:fee5:2518'],
+    };
+    fetchSpy.mockResolvedValueOnce(status);
+    expect(await component.GetStatus()).toEqual(status);
+    fetchSpy.mockResolvedValueOnce(null);
+    expect(await component.SetConfig({})).toBeNull();
+  });
+
+  it('should reject invalid WiFi responses', async () => {
+    const component = device2.getComponent('wifi_sta');
+    if (!isWifiComponent(component)) throw new Error('Missing WiFi component');
+    const station = { enable: true, is_open: false, ssid: null, ipv4mode: 'dhcp', ip: null, netmask: null, gw: null, nameserver: null };
+    for (const config of [
+      null,
+      {},
+      { sta: {} },
+      { sta: station, sta1: {} },
+      { sta: station, ap: {} },
+      { sta: station, ap: { enable: true, is_open: true, ssid: 1 } },
+      { sta: station, ap: { enable: true, is_open: true, range_extender: {} } },
+      { sta: station, roam: {} },
+    ]) {
+      fetchSpy.mockResolvedValueOnce(config);
+      expect(await component.GetConfig()).toBeNull();
+    }
+    const base = { sta_ip: null, ssid: null, status: 'disconnected', rssi: 0 };
+    for (const status of [null, {}, { ...base, status: 'invalid' }, { ...base, bssid: 1 }, { ...base, channel: '4' }, { ...base, netmask: false }, { ...base, sta_ip6: [1] }]) {
+      fetchSpy.mockResolvedValueOnce(status);
+      expect(await component.GetStatus()).toBeNull();
+    }
+    for (const response of [null, {}, { results: [null] }, { results: [{ ssid: 'test', bssid: 'test', auth: 6, channel: 4, rssi: -50 }] }]) {
+      fetchSpy.mockResolvedValueOnce(response);
+      expect(await component.Scan()).toBeNull();
+    }
+    for (const response of [
+      null,
+      {},
+      { ts: 'now', ap_clients: [] },
+      { ts: null, ap_clients: [null] },
+      { ts: null, ap_clients: [{ mac: 'test', ip: 'test', ip_static: false, mport: -1, since: 0 }] },
+    ]) {
+      fetchSpy.mockResolvedValueOnce(response);
+      expect(await component.ListAPClients()).toBeNull();
+    }
   });
 
   it('should identify native Matter components and reject unsupported components', () => {

@@ -91,6 +91,18 @@ describe('shellyFetch', () => {
   });
 
   describe('File-based fetch', () => {
+    it('should read WiFi configuration and status from fixtures', async () => {
+      const fixture = path.join('src', 'mock', 'shellypstripg4-D885ACE52518.json');
+      const payload = JSON.parse(await fs.readFile(fixture, 'utf8'));
+      expect(await shellyFetch(shelly, log, fixture, 'Wifi.GetConfig')).toEqual(payload.settings.wifi);
+      expect(await shellyFetch(shelly, log, fixture, 'Wifi.GetStatus')).toEqual(payload.status.wifi);
+      for (const data of [{}, { settings: {}, status: {} }]) {
+        await fs.writeFile(testFilePath, JSON.stringify(data));
+        expect(await shellyFetch(shelly, log, testFilePath, 'Wifi.GetConfig')).toBeNull();
+        expect(await shellyFetch(shelly, log, testFilePath, 'Wifi.GetStatus')).toBeNull();
+      }
+    });
+
     it('should read Matter fixture configuration and status', async () => {
       const fixture = path.join('src', 'mock', 'shelly1g3-34B7DACAC830.json');
       const payload = JSON.parse(await fs.readFile(fixture, 'utf8'));
