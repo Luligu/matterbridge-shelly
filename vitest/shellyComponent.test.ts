@@ -57,7 +57,7 @@ describe('ShellyComponent', () => {
 
   beforeAll(async () => {
     const mockDevice1 = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shellydimmer2-98CDAC0D01BB.json'));
-    const mockDevice2 = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shellyplus1pm-441793D69718.json'));
+    const mockDevice2 = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shellyplus1pm-441793D69718.json'), 11400);
     const mockDevice3 = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shellyplusrgbwpm-A0A3B35C7024.json'));
     if (mockDevice1) device1 = mockDevice1;
     if (mockDevice2) device2 = mockDevice2;
@@ -65,7 +65,7 @@ describe('ShellyComponent', () => {
 
     fetchSpy = vi
       .mocked(shellyFetch)
-      .mockImplementation(async (shelly: Shelly, log: AnsiLogger, host: string, service: string, params?: Record<string, string | number | boolean | object>) => {
+      .mockImplementation(async (shelly: Shelly, log: AnsiLogger, host: string, port: number, service: string, params?: Record<string, string | number | boolean | object>) => {
         // console.error(`shellyFetch: ${host} ${service} ${stringify(params ?? {})}`);
         return {};
       });
@@ -125,7 +125,7 @@ describe('ShellyComponent', () => {
       count++;
     }
     expect(count).toBeGreaterThan(0);
-    expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, 'Wifi.GetStatus');
+    expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, device2.port, 'Wifi.GetStatus');
   });
 
   it('should send partial WiFi updates and read scans and range extender clients', async () => {
@@ -136,15 +136,15 @@ describe('ShellyComponent', () => {
     const extenderConfig = { ...payload.settings.wifi, ap: { ssid: '', is_open: false, enable: true, range_extender: { enable: true } } };
     fetchSpy.mockResolvedValueOnce(extenderConfig);
     expect(await component.GetConfig()).toEqual(extenderConfig);
-    expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, 'Wifi.GetConfig');
+    expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, device2.port, 'Wifi.GetConfig');
     fetchSpy.mockResolvedValueOnce({ restart_required: false });
     expect(await component.SetConfig(config)).toEqual({ restart_required: false });
-    expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, 'Wifi.SetConfig', { config });
+    expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, device2.port, 'Wifi.SetConfig', { config });
     const result = { ssid: null, bssid: '00:11:22:33:44:55', auth: 3, channel: 4, rssi: -56 };
     for (const results of [[], [result]]) {
       fetchSpy.mockResolvedValueOnce({ results });
       expect(await component.Scan()).toEqual({ results });
-      expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, 'Wifi.Scan');
+      expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, device2.port, 'Wifi.Scan');
     }
     const client = { mac: 'e4:b0:63:d6:45:78', ip: '192.168.33.32', ip_static: false, mport: 11400, since: 1790013819 };
     for (const response of [
@@ -153,7 +153,7 @@ describe('ShellyComponent', () => {
     ]) {
       fetchSpy.mockResolvedValueOnce(response);
       expect(await component.ListAPClients()).toEqual(response);
-      expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, 'Wifi.ListAPClients');
+      expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, device2.port, 'Wifi.ListAPClients');
     }
     const status = {
       sta_ip: '192.168.68.58',
@@ -224,10 +224,10 @@ describe('ShellyComponent', () => {
     for (const enable of [true, false]) {
       fetchSpy.mockResolvedValueOnce({ enable });
       expect(await component.GetConfig()).toEqual({ enable });
-      expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, 'Matter.GetConfig');
+      expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, device2.port, 'Matter.GetConfig');
       fetchSpy.mockResolvedValueOnce({ restart_required: false });
       expect(await component.SetConfig({ enable })).toEqual({ restart_required: false });
-      expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, 'Matter.SetConfig', { config: { enable } });
+      expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, device2.port, 'Matter.SetConfig', { config: { enable } });
     }
     for (const status of [
       { num_fabrics: 0, commissionable: true },
@@ -235,15 +235,15 @@ describe('ShellyComponent', () => {
     ]) {
       fetchSpy.mockResolvedValueOnce(status);
       expect(await component.GetStatus()).toEqual(status);
-      expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, 'Matter.GetStatus');
+      expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, device2.port, 'Matter.GetStatus');
     }
     const codes = { qr_code: 'MT:00000O-O03.3QG5.000', manual_code: '00576700759' };
     fetchSpy.mockResolvedValueOnce(codes);
     expect(await component.GetSetupCode()).toEqual(codes);
-    expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, 'Matter.GetSetupCode');
+    expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, device2.port, 'Matter.GetSetupCode');
     fetchSpy.mockResolvedValueOnce(null);
     expect(await component.FactoryReset()).toBeNull();
-    expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, 'Matter.FactoryReset');
+    expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, device2.port, 'Matter.FactoryReset');
     fetchSpy.mockResolvedValueOnce(null);
     expect(await component.SetConfig({ enable: false })).toBeNull();
   });
@@ -281,19 +281,19 @@ describe('ShellyComponent', () => {
       for (const server of ['wss://example.com/rpc', null, undefined]) {
         fetchSpy.mockResolvedValueOnce({ enable: false, server, ssl_ca });
         expect(await component.GetConfig()).toStrictEqual({ enable: false, server, ssl_ca });
-        expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, 'Ws.GetConfig');
+        expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, device2.port, 'Ws.GetConfig');
       }
       fetchSpy.mockResolvedValueOnce({ restart_required: true });
       expect(await component.SetConfig({ ssl_ca })).toEqual({ restart_required: true });
-      expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, 'Ws.SetConfig', { config: { ssl_ca } });
+      expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, device2.port, 'Ws.SetConfig', { config: { ssl_ca } });
     }
     const config = { enable: false, server: null, ignored: true };
     await component.SetConfig(config);
-    expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, 'Ws.SetConfig', { config: { enable: false, server: null } });
+    expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, device2.port, 'Ws.SetConfig', { config: { enable: false, server: null } });
     for (const connected of [true, false]) {
       fetchSpy.mockResolvedValueOnce({ connected });
       expect(await component.GetStatus()).toEqual({ connected });
-      expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, 'Ws.GetStatus');
+      expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, device2.port, 'Ws.GetStatus');
     }
     fetchSpy.mockResolvedValueOnce(null);
     expect(await component.SetConfig({ enable: true })).toBeNull();
@@ -329,22 +329,22 @@ describe('ShellyComponent', () => {
     ]) {
       fetchSpy.mockResolvedValueOnce({ rpc_udp, device: { name: 'Ignored' } });
       expect(await component.GetConfig()).toEqual({ rpc_udp });
-      expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, 'Sys.GetConfig');
+      expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, device2.port, 'Sys.GetConfig');
       fetchSpy.mockResolvedValueOnce({ restart_required: true });
       expect(await component.SetConfig({ rpc_udp })).toEqual({ restart_required: true });
-      expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, 'Sys.SetConfig', { config: { rpc_udp } });
+      expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, device2.port, 'Sys.SetConfig', { config: { rpc_udp } });
     }
     const config = { rpc_udp: { dst_addr: null, extra: true }, device: { name: 'Ignored' } };
     await component.SetConfig(config);
-    expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, 'Sys.SetConfig', { config: { rpc_udp: { dst_addr: null } } });
+    expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, device2.port, 'Sys.SetConfig', { config: { rpc_udp: { dst_addr: null } } });
     await component.SetConfig({ rpc_udp: { listen_port: 5555 } });
-    expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, 'Sys.SetConfig', { config: { rpc_udp: { listen_port: 5555 } } });
+    expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, device2.port, 'Sys.SetConfig', { config: { rpc_udp: { listen_port: 5555 } } });
     fetchSpy.mockResolvedValueOnce({ mac: '441793D69718', restart_required: false, cfg_rev: 7, uptime: 15 });
     const status = await component.GetStatus();
     expectTypeOf(status?.mac).toEqualTypeOf<string | undefined>();
     expectTypeOf(status?.restart_required).toEqualTypeOf<boolean | undefined>();
     expect(status).toEqual({ mac: '441793D69718', restart_required: false, cfg_rev: 7, time: undefined, uptime: 15 });
-    expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, 'Sys.GetStatus');
+    expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, device2.port, 'Sys.GetStatus');
     fetchSpy.mockResolvedValueOnce(null);
     expect(await component.GetStatus()).toBeNull();
     fetchSpy.mockResolvedValueOnce({ mac: '441793D69718', restart_required: true, cfg_rev: 0, time: '12:30', uptime: 0 });
@@ -366,7 +366,7 @@ describe('ShellyComponent', () => {
     fetchSpy.mockResolvedValueOnce({ mac: '98CDAC0D01BB', uptime: 15 });
     const status = await component.GetStatus();
     expect(status).toStrictEqual({ mac: '98CDAC0D01BB', restart_required: undefined, cfg_rev: undefined, time: undefined, uptime: 15 });
-    expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device1.log, device1.host, 'status');
+    expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device1.log, device1.host, device1.port, 'status');
   });
 
   it('should preserve reported time and validate uptime for both generations', async () => {
@@ -441,13 +441,13 @@ describe('ShellyComponent', () => {
     const config = { enable: false, server: null };
     fetchSpy.mockResolvedValueOnce({ restart_required: false });
     expect(await component.SetConfig({ enable: false })).toEqual({ restart_required: false });
-    expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, 'Cloud.SetConfig', { config: { enable: false } });
+    expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, device2.port, 'Cloud.SetConfig', { config: { enable: false } });
     fetchSpy.mockResolvedValueOnce(config);
     expect(await component.GetConfig()).toEqual(config);
-    expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, 'Cloud.GetConfig');
+    expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, device2.port, 'Cloud.GetConfig');
     fetchSpy.mockResolvedValueOnce({ connected: true });
     expect(await component.GetStatus()).toEqual({ connected: true });
-    expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, 'Cloud.GetStatus');
+    expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, device2.port, 'Cloud.GetStatus');
     fetchSpy.mockResolvedValueOnce(null);
     expect(await component.GetStatus()).toBeNull();
   });
@@ -485,15 +485,15 @@ describe('ShellyComponent', () => {
     if (!isCloudComponent(component)) throw new Error('Missing cloud component');
     fetchSpy.mockResolvedValueOnce({ enabled: false });
     expect(await component.SetConfig({ enable: false })).toEqual({ enabled: false });
-    expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device1.log, device1.host, 'settings/cloud', { enabled: false });
+    expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device1.log, device1.host, device1.port, 'settings/cloud', { enabled: false });
     for (const enabled of [true, false]) {
       fetchSpy.mockResolvedValueOnce({ enabled, connected: true });
       expect(await component.GetConfig()).toEqual({ enable: enabled, server: null });
     }
-    expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device1.log, device1.host, 'settings/cloud');
+    expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device1.log, device1.host, device1.port, 'settings/cloud');
     fetchSpy.mockResolvedValueOnce({ cloud: { enabled: true, connected: false } });
     expect(await component.GetStatus()).toEqual({ connected: false });
-    expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device1.log, device1.host, 'status');
+    expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device1.log, device1.host, device1.port, 'status');
     fetchSpy.mockResolvedValueOnce(null);
     expect(await component.GetStatus()).toBeNull();
     fetchSpy.mockResolvedValueOnce({});
@@ -543,9 +543,9 @@ describe('ShellyComponent', () => {
     (component as ShellyLightComponent).ColorTemp(300);
 
     expect(fetchSpy).toHaveBeenCalledTimes(3);
-    expect(fetchSpy).toHaveBeenCalledWith(shelly, device1.log, device1.host, `light/0`, { turn: 'on' });
-    expect(fetchSpy).toHaveBeenCalledWith(shelly, device1.log, device1.host, `light/0`, { turn: 'off' });
-    expect(fetchSpy).toHaveBeenCalledWith(shelly, device1.log, device1.host, `light/0`, { turn: 'toggle' });
+    expect(fetchSpy).toHaveBeenCalledWith(shelly, device1.log, device1.host, device1.port, `light/0`, { turn: 'on' });
+    expect(fetchSpy).toHaveBeenCalledWith(shelly, device1.log, device1.host, device1.port, `light/0`, { turn: 'off' });
+    expect(fetchSpy).toHaveBeenCalledWith(shelly, device1.log, device1.host, device1.port, `light/0`, { turn: 'toggle' });
     expect(handleUpdate).toHaveBeenCalledTimes(0);
 
     component.setValue('key1', 'value1');
@@ -583,9 +583,9 @@ describe('ShellyComponent', () => {
     (component as ShellyLightComponent).ColorTemp(300);
 
     expect(fetchSpy).toHaveBeenCalledTimes(3);
-    expect(fetchSpy).toHaveBeenCalledWith(shelly, device2.log, device2.host, `Light.Set`, { id: 0, on: true });
-    expect(fetchSpy).toHaveBeenCalledWith(shelly, device2.log, device2.host, `Light.Set`, { id: 0, on: false });
-    expect(fetchSpy).toHaveBeenCalledWith(shelly, device2.log, device2.host, `Light.Toggle`, { id: 0 });
+    expect(fetchSpy).toHaveBeenCalledWith(shelly, device2.log, device2.host, device2.port, `Light.Set`, { id: 0, on: true });
+    expect(fetchSpy).toHaveBeenCalledWith(shelly, device2.log, device2.host, device2.port, `Light.Set`, { id: 0, on: false });
+    expect(fetchSpy).toHaveBeenCalledWith(shelly, device2.log, device2.host, device2.port, `Light.Toggle`, { id: 0 });
     expect(handleUpdate).toHaveBeenCalledTimes(0);
 
     component.setValue('key1', 'value1');

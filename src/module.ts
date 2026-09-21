@@ -1193,7 +1193,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
                   if (device.thermostatSetpointTimeout) clearTimeout(device.thermostatSetpointTimeout);
                   device.thermostatSetpointTimeout = setTimeout(() => {
                     mbDevice.log.info(`Setting thermostat occupiedHeatingSetpoint to ${newValue / 100}`);
-                    void shellyFetch(this.shelly, mbDevice.log, device.host, `settings/thermostats/0?target_t=${newValue / 100}`);
+                    void shellyFetch(this.shelly, mbDevice.log, device.host, device.port, `settings/thermostats/0?target_t=${newValue / 100}`);
                   }, 2000);
                 }
               },
@@ -1214,9 +1214,9 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
                     // Thermostat.SystemMode.Heat && newValue === Thermostat.SystemMode.Off
                     mbDevice.log.info(`Setting thermostat systemMode to ${newValue}`);
                     if (newValue === Thermostat.SystemMode.Off) {
-                      void shellyFetch(this.shelly, mbDevice.log, device.host, `settings/thermostats/0?target_t_enabled=false`);
+                      void shellyFetch(this.shelly, mbDevice.log, device.host, device.port, `settings/thermostats/0?target_t_enabled=false`);
                     } else if (newValue === Thermostat.SystemMode.Heat) {
-                      void shellyFetch(this.shelly, mbDevice.log, device.host, `settings/thermostats/0?target_t_enabled=true`);
+                      void shellyFetch(this.shelly, mbDevice.log, device.host, device.port, `settings/thermostats/0?target_t_enabled=true`);
                     }
                   }, 5000);
                 }
@@ -1259,7 +1259,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
                     if (device.thermostatSetpointTimeout) clearTimeout(device.thermostatSetpointTimeout);
                     device.thermostatSetpointTimeout = setTimeout(() => {
                       mbDevice.log.info(`Setting thermostat occupiedHeatingSetpoint to ${newValue / 100}`);
-                      void shellyFetch(this.shelly, mbDevice.log, device.host, 'Thermostat.SetConfig', { config: { id: 0, target_C: newValue / 100 } });
+                      void shellyFetch(this.shelly, mbDevice.log, device.host, device.port, 'Thermostat.SetConfig', { config: { id: 0, target_C: newValue / 100 } });
                     }, 5000);
                   }
                 },
@@ -1279,7 +1279,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
                     if (device.thermostatSetpointTimeout) clearTimeout(device.thermostatSetpointTimeout);
                     device.thermostatSetpointTimeout = setTimeout(() => {
                       mbDevice.log.info(`Setting thermostat occupiedCoolingSetpoint to ${newValue / 100}`);
-                      void shellyFetch(this.shelly, mbDevice.log, device.host, 'Thermostat.SetConfig', { config: { id: 0, target_C: newValue / 100 } });
+                      void shellyFetch(this.shelly, mbDevice.log, device.host, device.port, 'Thermostat.SetConfig', { config: { id: 0, target_C: newValue / 100 } });
                     }, 5000);
                   }
                 },
@@ -1305,11 +1305,11 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
                     // Thermostat.SystemMode.Heat && newValue === Thermostat.SystemMode.Off
                     mbDevice.log.info(`Setting thermostat systemMode to ${newValue}`);
                     if (newValue === Thermostat.SystemMode.Off) {
-                      void shellyFetch(this.shelly, mbDevice.log, device.host, 'Thermostat.SetConfig', { config: { id: 0, enable: false } });
+                      void shellyFetch(this.shelly, mbDevice.log, device.host, device.port, 'Thermostat.SetConfig', { config: { id: 0, enable: false } });
                     } else if (newValue === Thermostat.SystemMode.Heat) {
-                      void shellyFetch(this.shelly, mbDevice.log, device.host, 'Thermostat.SetConfig', { config: { id: 0, enable: true } });
+                      void shellyFetch(this.shelly, mbDevice.log, device.host, device.port, 'Thermostat.SetConfig', { config: { id: 0, enable: true } });
                     } else if (newValue === Thermostat.SystemMode.Cool) {
-                      void shellyFetch(this.shelly, mbDevice.log, device.host, 'Thermostat.SetConfig', { config: { id: 0, enable: true } });
+                      void shellyFetch(this.shelly, mbDevice.log, device.host, device.port, 'Thermostat.SetConfig', { config: { id: 0, enable: true } });
                     }
                   }, 5000);
                 }
@@ -1419,14 +1419,14 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             child.addCommandHandler('changeToMode', async ({ request }) => {
               this.log.debug(`***changeToMode: request ${JSON.stringify(request)}`);
               if (isValidNumber(request.newMode, 1, 2)) {
-                await shellyFetch(this.shelly, mbDevice.log, device.host, 'Blugw.SetConfig', { config: { sys_led_enable: request.newMode === 1 } });
+                await shellyFetch(this.shelly, mbDevice.log, device.host, device.port, 'Blugw.SetConfig', { config: { sys_led_enable: request.newMode === 1 } });
               }
             });
             // Add event handler
             // oxlint-disable-next-line typescript/no-misused-promises
             blugwComponent.on('event', async (component: string, event: string) => {
               if (isValidString(component, 5) && isValidString(event, 14) && component === 'blugw' && event === 'config_changed') {
-                const blugw = await shellyFetch(this.shelly, mbDevice.log, device.host, 'Blugw.GetConfig');
+                const blugw = await shellyFetch(this.shelly, mbDevice.log, device.host, device.port, 'Blugw.GetConfig');
                 const child = mbDevice.getChildEndpointById('blugw');
                 if (isValidObject(blugw, 1) && isValidBoolean(blugw.sys_led_enable))
                   await child?.setAttribute(ModeSelect.id, 'currentMode', blugw.sys_led_enable ? 1 : 2, mbDevice.log);
@@ -1453,13 +1453,13 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               if (isValidObject(data, 4) && isValidNumber(data.request?.newMode, 0, 1) && isValidNumber(data.endpoint?.number)) {
                 const endpoint = mbDevice.getChildEndpoint(data.endpoint.number);
                 const componentName = endpoint?.uniqueStorageKey;
-                if (componentName === 'ble') await shellyFetch(this.shelly, mbDevice.log, device.host, 'Ble.SetConfig', { config: { enable: data.request.newMode === 1 } });
+                if (componentName === 'ble') await shellyFetch(this.shelly, mbDevice.log, device.host, device.port, 'Ble.SetConfig', { config: { enable: data.request.newMode === 1 } });
               }
             });
             // Add event handler
             bleComponent.on('event', async (component: string, event: string) => {
               if (isValidString(component, 3) && isValidString(event, 14) && component === 'ble' && event === 'config_changed') {
-                const ble = await shellyFetch(this.shelly, mbDevice.log, device.host, 'Ble.GetConfig');
+                const ble = await shellyFetch(this.shelly, mbDevice.log, device.host, device.port, 'Ble.GetConfig');
                 const endpoint = mbDevice.getChildEndpointById('ble');
                 if (isValidObject(ble, 1) && isValidBoolean(ble.enable)) mbDevice.setAttribute(ModeSelectCluster.id, 'currentMode', ble.enable ? 1 : 0, mbDevice.log, endpoint);
               }
@@ -2115,7 +2115,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
               gateway.thermostatSetpointTimeout = setTimeout(() => {
                 mbDevice.log.info(`Setting thermostat occupiedHeatingSetpoint to ${newValue / 100}`);
                 // http://192.168.1.164/rpc/BluTrv.Call?id=201&method=Trv.SetTarget&params={id:0,target_C:19}
-                void shellyFetch(this.shelly, mbDevice.log, gateway.host, 'BluTrv.Call', {
+                void shellyFetch(this.shelly, mbDevice.log, gateway.host, gateway.port, 'BluTrv.Call', {
                   id: bthomeDevice.blutrv_id,
                   method: 'Trv.SetTarget',
                   params: { id: 0, target_C: newValue / 100 },

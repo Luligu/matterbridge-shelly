@@ -76,6 +76,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
   readonly password: string | undefined;
   profile: 'switch' | 'cover' | 'rgb' | 'rgbw' | 'color' | 'white' | 'light' | 'monophase' | 'triphase' | undefined = undefined;
   host: string;
+  port: number;
   id = '';
   model = '';
   mac = '';
@@ -119,11 +120,12 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
     { id: number; key: string; name: string; addr: string; sensorId: number; sensorIdx: number; value?: ShellyDataType; last_updated_ts: number }
   >();
 
-  private constructor(shelly: Shelly, log: AnsiLogger, host: string) {
+  private constructor(shelly: Shelly, log: AnsiLogger, host: string, port = 80) {
     super();
     this.shelly = shelly;
     this.log = log;
     this.host = host;
+    this.port = port;
     this.username = shelly.username;
     this.password = shelly.password;
   }
@@ -527,21 +529,22 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
    * @param {Shelly} shelly The Shelly instance.
    * @param {AnsiLogger} log The AnsiLogger instance.
    * @param {string} host The host of the device. It can be an IP address or a cache JSON file path.
+   * @param {number} port The port of the device. Defaults to 80.
    *
    * @returns {Promise<ShellyDevice | undefined>} A Promise that resolves to a ShellyDevice instance or undefined if an error occurs.
    */
-  static async create(shelly: Shelly, log: AnsiLogger, host: string): Promise<ShellyDevice | undefined> {
+  static async create(shelly: Shelly, log: AnsiLogger, host: string, port = 80): Promise<ShellyDevice | undefined> {
     let shellyPayload: ShellyData | null = null;
     let statusPayload: ShellyData | null = null;
     let settingsPayload: ShellyData | null = null;
     let componentsPayload: ShellyData | null = null;
 
-    shellyPayload = await shellyFetch(shelly, log, host, 'shelly');
+    shellyPayload = await shellyFetch(shelly, log, host, port, 'shelly');
     if (!shellyPayload) {
       log.debug(`Error creating device at host ${zb}${host}${db}. No shelly data found.`);
       return undefined;
     }
-    const device = new ShellyDevice(shelly, log, host);
+    const device = new ShellyDevice(shelly, log, host, port);
     device.mac = shellyPayload.mac as string;
     device.online = true;
     device.lastseen = Date.now();
@@ -558,8 +561,8 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
 
     // Gen 1 Shelly device
     if (!shellyPayload.gen) {
-      statusPayload = await shellyFetch(shelly, log, host, 'status');
-      settingsPayload = await shellyFetch(shelly, log, host, 'settings');
+      statusPayload = await shellyFetch(shelly, log, host, port, 'status');
+      settingsPayload = await shellyFetch(shelly, log, host, port, 'settings');
       if (!statusPayload || !settingsPayload) {
         log.debug(`Error creating device gen 1 from host ${zb}${host}${db}. No data found.`);
         return undefined;
@@ -667,8 +670,8 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
 
     // Gen 2+ Shelly device
     if (shellyPayload.gen === 2 || shellyPayload.gen === 3 || shellyPayload.gen === 4) {
-      statusPayload = await shellyFetch(shelly, log, host, 'Shelly.GetStatus');
-      settingsPayload = await shellyFetch(shelly, log, host, 'Shelly.GetConfig');
+      statusPayload = await shellyFetch(shelly, log, host, port, 'Shelly.GetStatus');
+      settingsPayload = await shellyFetch(shelly, log, host, port, 'Shelly.GetConfig');
       if (!statusPayload || !settingsPayload) {
         log.debug(`Error creating device gen 2+ from host ${zb}${host}${db}. No data found.`);
         return undefined;
@@ -751,7 +754,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
       let btHomePayload: BTHomeComponentPayload;
       let offset = 0;
       do {
-        btHomePayload = (await shellyFetch(shelly, log, host, 'Shelly.GetComponents', { dynamic_only: true, offset })) as unknown as BTHomeComponentPayload;
+        btHomePayload = (await shellyFetch(shelly, log, host, port, 'Shelly.GetComponents', { dynamic_only: true, offset })) as unknown as BTHomeComponentPayload;
         if (btHomePayload?.components) {
           btHomeComponents.push(...btHomePayload.components);
           offset += btHomePayload.components.length;
@@ -1316,7 +1319,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
    * @returns {Promise<ShellyData | null>} A Promise that resolves to the updated ShellyData or null if no data is found.
    */
   async fetchUpdate(): Promise<ShellyData | null> {
-    this.shellyPayload = await shellyFetch(this.shelly, this.log, this.host, 'shelly');
+    this.shellyPayload = await shellyFetch(this.shelly, this.log, this.host, this.port, 'shelly');
     if (!this.shellyPayload) {
       // v8 ignore else
       if (this.online) {
@@ -1340,7 +1343,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
       }
       return null;
     }
-    this.settingsPayload = await shellyFetch(this.shelly, this.log, this.host, this.gen === 1 ? 'settings' : 'Shelly.GetConfig');
+    this.settingsPayload = await shellyFetch(this.shelly, this.log, this.host, this.port, this.gen === 1 ? 'settings' : 'Shelly.GetConfig');
     if (!this.settingsPayload) {
       // v8 ignore else
       if (this.online) {
@@ -1350,7 +1353,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
       }
       return null;
     }
-    this.statusPayload = await shellyFetch(this.shelly, this.log, this.host, this.gen === 1 ? 'status' : 'Shelly.GetStatus');
+    this.statusPayload = await shellyFetch(this.shelly, this.log, this.host, this.port, this.gen === 1 ? 'status' : 'Shelly.GetStatus');
     if (!this.statusPayload) {
       // v8 ignore else
       if (this.online) {
@@ -1365,7 +1368,10 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
       let btHomePayload: BTHomeComponentPayload;
       let offset = 0;
       do {
-        btHomePayload = (await shellyFetch(this.shelly, this.log, this.host, 'Shelly.GetComponents', { dynamic_only: true, offset })) as unknown as BTHomeComponentPayload;
+        btHomePayload = (await shellyFetch(this.shelly, this.log, this.host, this.port, 'Shelly.GetComponents', {
+          dynamic_only: true,
+          offset,
+        })) as unknown as BTHomeComponentPayload;
         // v8 ignore else
         if (btHomePayload?.components) {
           btHomeComponents.push(...btHomePayload.components);

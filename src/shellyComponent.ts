@@ -667,12 +667,12 @@ export class ShellyComponent extends EventEmitter<ShellyComponentEvents> {
         const rpc_udp: Partial<SysRpcUdpConfig> = {};
         if (config.rpc_udp.dst_addr !== undefined) rpc_udp.dst_addr = config.rpc_udp.dst_addr;
         if (config.rpc_udp.listen_port !== undefined) rpc_udp.listen_port = config.rpc_udp.listen_port;
-        return shellyFetch(device.shelly, device.log, device.host, 'Sys.SetConfig', { config: { rpc_udp } });
+        return shellyFetch(device.shelly, device.log, device.host, device.port, 'Sys.SetConfig', { config: { rpc_udp } });
       };
 
       this.GetConfig = async function (): Promise<SysConfig | null> {
         if (device.gen === 1) return null;
-        const config = await shellyFetch(device.shelly, device.log, device.host, 'Sys.GetConfig');
+        const config = await shellyFetch(device.shelly, device.log, device.host, device.port, 'Sys.GetConfig');
         const rpc = config?.rpc_udp;
         if (!isValidObject(rpc) || !('dst_addr' in rpc) || !('listen_port' in rpc)) return null;
         if (rpc.dst_addr !== null && typeof rpc.dst_addr !== 'string') return null;
@@ -681,7 +681,7 @@ export class ShellyComponent extends EventEmitter<ShellyComponentEvents> {
       };
 
       this.GetStatus = async function (): Promise<SysStatus | null> {
-        const status = await shellyFetch(device.shelly, device.log, device.host, device.gen === 1 ? 'status' : 'Sys.GetStatus');
+        const status = await shellyFetch(device.shelly, device.log, device.host, device.port, device.gen === 1 ? 'status' : 'Sys.GetStatus');
         if (typeof status?.mac !== 'string' || status.mac.length === 0) return null;
         if (!isValidNumber(status.uptime, 0)) return null;
         if (status.time !== undefined && status.time !== null && typeof status.time !== 'string') return null;
@@ -702,23 +702,23 @@ export class ShellyComponent extends EventEmitter<ShellyComponentEvents> {
     // WiFi RPC methods operate on the entire device, including on split WiFi components.
     if (isWifiComponent(this)) {
       this.GetConfig = async function (): Promise<WifiConfig | null> {
-        const config = await shellyFetch(device.shelly, device.log, device.host, 'Wifi.GetConfig');
+        const config = await shellyFetch(device.shelly, device.log, device.host, device.port, 'Wifi.GetConfig');
         return isWifiConfig(config) ? config : null;
       };
       this.SetConfig = async function (config): Promise<ShellyData | null> {
-        return shellyFetch(device.shelly, device.log, device.host, 'Wifi.SetConfig', { config });
+        return shellyFetch(device.shelly, device.log, device.host, device.port, 'Wifi.SetConfig', { config });
       };
       this.GetStatus = async function (): Promise<WifiStatus | null> {
-        const status = await shellyFetch(device.shelly, device.log, device.host, 'Wifi.GetStatus');
+        const status = await shellyFetch(device.shelly, device.log, device.host, device.port, 'Wifi.GetStatus');
         return isWifiStatus(status) ? status : null;
       };
       this.Scan = async function (): Promise<WifiScanResponse | null> {
-        const response = await shellyFetch(device.shelly, device.log, device.host, 'Wifi.Scan');
+        const response = await shellyFetch(device.shelly, device.log, device.host, device.port, 'Wifi.Scan');
         if (!Array.isArray(response?.results) || !response.results.every(isWifiScanResult)) return null;
         return { results: response.results };
       };
       this.ListAPClients = async function (): Promise<WifiAPClients | null> {
-        const response = await shellyFetch(device.shelly, device.log, device.host, 'Wifi.ListAPClients');
+        const response = await shellyFetch(device.shelly, device.log, device.host, device.port, 'Wifi.ListAPClients');
         if (!response || (response.ts !== null && !isValidNumber(response.ts, 0))) return null;
         if (!Array.isArray(response.ap_clients) || !response.ap_clients.every(isWifiAPClient)) return null;
         return { ts: response.ts, ap_clients: response.ap_clients };
@@ -728,28 +728,28 @@ export class ShellyComponent extends EventEmitter<ShellyComponentEvents> {
     // Add native Matter methods only when the device exposes the component.
     if (isMatterComponent(this)) {
       this.SetConfig = async function (config): Promise<ShellyData | null> {
-        return shellyFetch(device.shelly, device.log, device.host, 'Matter.SetConfig', { config: { enable: config.enable } });
+        return shellyFetch(device.shelly, device.log, device.host, device.port, 'Matter.SetConfig', { config: { enable: config.enable } });
       };
 
       this.GetConfig = async function (): Promise<MatterConfig | null> {
-        const config = await shellyFetch(device.shelly, device.log, device.host, 'Matter.GetConfig');
+        const config = await shellyFetch(device.shelly, device.log, device.host, device.port, 'Matter.GetConfig');
         return typeof config?.enable === 'boolean' ? { enable: config.enable } : null;
       };
 
       this.GetStatus = async function (): Promise<MatterStatus | null> {
-        const status = await shellyFetch(device.shelly, device.log, device.host, 'Matter.GetStatus');
+        const status = await shellyFetch(device.shelly, device.log, device.host, device.port, 'Matter.GetStatus');
         if (!isValidNumber(status?.num_fabrics, 0) || !Number.isInteger(status.num_fabrics) || typeof status.commissionable !== 'boolean') return null;
         return { num_fabrics: status.num_fabrics, commissionable: status.commissionable };
       };
 
       this.GetSetupCode = async function (): Promise<MatterSetupCode | null> {
-        const codes = await shellyFetch(device.shelly, device.log, device.host, 'Matter.GetSetupCode');
+        const codes = await shellyFetch(device.shelly, device.log, device.host, device.port, 'Matter.GetSetupCode');
         if (typeof codes?.qr_code !== 'string' || typeof codes.manual_code !== 'string') return null;
         return { qr_code: codes.qr_code, manual_code: codes.manual_code };
       };
 
       this.FactoryReset = async function (): Promise<null> {
-        await shellyFetch(device.shelly, device.log, device.host, 'Matter.FactoryReset');
+        await shellyFetch(device.shelly, device.log, device.host, device.port, 'Matter.FactoryReset');
         return null;
       };
     }
@@ -761,11 +761,11 @@ export class ShellyComponent extends EventEmitter<ShellyComponentEvents> {
         if (config.enable !== undefined) settings.enable = config.enable;
         if (config.server !== undefined) settings.server = config.server;
         if (config.ssl_ca !== undefined) settings.ssl_ca = config.ssl_ca;
-        return shellyFetch(device.shelly, device.log, device.host, 'Ws.SetConfig', { config: settings });
+        return shellyFetch(device.shelly, device.log, device.host, device.port, 'Ws.SetConfig', { config: settings });
       };
 
       this.GetConfig = async function (): Promise<WsConfig | null> {
-        const config = await shellyFetch(device.shelly, device.log, device.host, 'Ws.GetConfig');
+        const config = await shellyFetch(device.shelly, device.log, device.host, device.port, 'Ws.GetConfig');
         if (typeof config?.enable !== 'boolean') return null;
         if (config.server !== undefined && config.server !== null && typeof config.server !== 'string') return null;
         if (config.ssl_ca !== '*' && config.ssl_ca !== 'user_ca.pem' && config.ssl_ca !== 'ca.pem') return null;
@@ -773,7 +773,7 @@ export class ShellyComponent extends EventEmitter<ShellyComponentEvents> {
       };
 
       this.GetStatus = async function (): Promise<WsStatus | null> {
-        const status = await shellyFetch(device.shelly, device.log, device.host, 'Ws.GetStatus');
+        const status = await shellyFetch(device.shelly, device.log, device.host, device.port, 'Ws.GetStatus');
         return typeof status?.connected === 'boolean' ? { connected: status.connected } : null;
       };
     }
@@ -781,19 +781,19 @@ export class ShellyComponent extends EventEmitter<ShellyComponentEvents> {
     // Add cloud configuration and status methods dynamically.
     if (isCloudComponent(this)) {
       this.SetConfig = async function (config): Promise<ShellyData | null> {
-        if (device.gen === 1) return shellyFetch(device.shelly, device.log, device.host, 'settings/cloud', { enabled: config.enable });
-        return shellyFetch(device.shelly, device.log, device.host, 'Cloud.SetConfig', { config: { enable: config.enable } });
+        if (device.gen === 1) return shellyFetch(device.shelly, device.log, device.host, device.port, 'settings/cloud', { enabled: config.enable });
+        return shellyFetch(device.shelly, device.log, device.host, device.port, 'Cloud.SetConfig', { config: { enable: config.enable } });
       };
 
       this.GetConfig = async function (): Promise<CloudConfig | null> {
-        const config = await shellyFetch(device.shelly, device.log, device.host, device.gen === 1 ? 'settings/cloud' : 'Cloud.GetConfig');
+        const config = await shellyFetch(device.shelly, device.log, device.host, device.port, device.gen === 1 ? 'settings/cloud' : 'Cloud.GetConfig');
         if (device.gen === 1) return typeof config?.enabled === 'boolean' ? { enable: config.enabled, server: null } : null;
         if (typeof config?.enable !== 'boolean' || (typeof config.server !== 'string' && config.server !== null)) return null;
         return { ...config, enable: config.enable, server: config.server };
       };
 
       this.GetStatus = async function (): Promise<CloudStatus | null> {
-        const response = await shellyFetch(device.shelly, device.log, device.host, device.gen === 1 ? 'status' : 'Cloud.GetStatus');
+        const response = await shellyFetch(device.shelly, device.log, device.host, device.port, device.gen === 1 ? 'status' : 'Cloud.GetStatus');
         const status = device.gen === 1 ? response?.cloud : response;
         if (!isValidObject(status) || !('connected' in status) || typeof status.connected !== 'boolean') return null;
         return { connected: status.connected };
@@ -803,18 +803,18 @@ export class ShellyComponent extends EventEmitter<ShellyComponentEvents> {
     // Extend the ShellyComponent class prototype to include the Switch Relay Light methods dynamically
     if (isSwitchComponent(this) || isLightComponent(this)) {
       this.On = function (): void {
-        if (device.gen === 1) void shellyFetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { turn: 'on' });
-        if (device.gen !== 1) void shellyFetch(device.shelly, device.log, device.host, `${this.name}.Set`, { id: this.index, on: true });
+        if (device.gen === 1) void shellyFetch(device.shelly, device.log, device.host, device.port, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { turn: 'on' });
+        if (device.gen !== 1) void shellyFetch(device.shelly, device.log, device.host, device.port, `${this.name}.Set`, { id: this.index, on: true });
       };
 
       this.Off = function (): void {
-        if (device.gen === 1) void shellyFetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { turn: 'off' });
-        if (device.gen !== 1) void shellyFetch(device.shelly, device.log, device.host, `${this.name}.Set`, { id: this.index, on: false });
+        if (device.gen === 1) void shellyFetch(device.shelly, device.log, device.host, device.port, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { turn: 'off' });
+        if (device.gen !== 1) void shellyFetch(device.shelly, device.log, device.host, device.port, `${this.name}.Set`, { id: this.index, on: false });
       };
 
       this.Toggle = function (): void {
-        if (device.gen === 1) void shellyFetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { turn: 'toggle' });
-        if (device.gen !== 1) void shellyFetch(device.shelly, device.log, device.host, `${this.name}.Toggle`, { id: this.index });
+        if (device.gen === 1) void shellyFetch(device.shelly, device.log, device.host, device.port, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { turn: 'toggle' });
+        if (device.gen !== 1) void shellyFetch(device.shelly, device.log, device.host, device.port, `${this.name}.Toggle`, { id: this.index });
       };
     }
 
@@ -824,10 +824,10 @@ export class ShellyComponent extends EventEmitter<ShellyComponentEvents> {
         if (!this.hasProperty('brightness')) return;
         const adjustedLevel = Math.min(Math.max(Math.round(level), 0), 100);
         if (device.gen === 1 && this.hasProperty('brightness'))
-          void shellyFetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { brightness: adjustedLevel });
+          void shellyFetch(device.shelly, device.log, device.host, device.port, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { brightness: adjustedLevel });
         if (device.gen === 1 && this.hasProperty('gain'))
-          void shellyFetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { gain: adjustedLevel });
-        if (device.gen !== 1) void shellyFetch(device.shelly, device.log, device.host, `${this.name}.Set`, { id: this.index, brightness: adjustedLevel });
+          void shellyFetch(device.shelly, device.log, device.host, device.port, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { gain: adjustedLevel });
+        if (device.gen !== 1) void shellyFetch(device.shelly, device.log, device.host, device.port, `${this.name}.Set`, { id: this.index, brightness: adjustedLevel });
       };
 
       this.ColorRGB = function (red: number, green: number, blue: number): void {
@@ -838,7 +838,7 @@ export class ShellyComponent extends EventEmitter<ShellyComponentEvents> {
         if (this.hasProperty('red') && this.hasProperty('green') && this.hasProperty('blue')) {
           // SHCB-1
           if (device.gen === 1 && this.hasProperty('mode'))
-            void shellyFetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, {
+            void shellyFetch(device.shelly, device.log, device.host, device.port, `${id.slice(0, id.indexOf(':'))}/${this.index}`, {
               red: normalizedRed,
               green: normalizedGreen,
               blue: normalizedBlue,
@@ -846,13 +846,13 @@ export class ShellyComponent extends EventEmitter<ShellyComponentEvents> {
             });
           // SHBDUO-1
           if (device.gen === 1 && !this.hasProperty('mode'))
-            void shellyFetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, {
+            void shellyFetch(device.shelly, device.log, device.host, device.port, `${id.slice(0, id.indexOf(':'))}/${this.index}`, {
               red: normalizedRed,
               green: normalizedGreen,
               blue: normalizedBlue,
             });
           if (device.gen !== 1)
-            void shellyFetch(device.shelly, device.log, device.host, `${this.name}.Set`, {
+            void shellyFetch(device.shelly, device.log, device.host, device.port, `${this.name}.Set`, {
               id: this.index,
               red: normalizedRed,
               green: normalizedGreen,
@@ -861,13 +861,13 @@ export class ShellyComponent extends EventEmitter<ShellyComponentEvents> {
         }
         if (this.hasProperty('rgb') && isValidArray(this.getValue('rgb'), 3, 3)) {
           if (device.gen === 1)
-            void shellyFetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, {
+            void shellyFetch(device.shelly, device.log, device.host, device.port, `${id.slice(0, id.indexOf(':'))}/${this.index}`, {
               red: normalizedRed,
               green: normalizedGreen,
               blue: normalizedBlue,
             });
           if (device.gen !== 1)
-            void shellyFetch(device.shelly, device.log, device.host, `${this.name}.Set`, { id: this.index, rgb: [normalizedRed, normalizedGreen, normalizedBlue] });
+            void shellyFetch(device.shelly, device.log, device.host, device.port, `${this.name}.Set`, { id: this.index, rgb: [normalizedRed, normalizedGreen, normalizedBlue] });
         }
       };
 
@@ -875,12 +875,13 @@ export class ShellyComponent extends EventEmitter<ShellyComponentEvents> {
         if (isValidNumber(temperature, 2700, 6500)) {
           // SHCB-1
           if (device.gen === 1 && this.hasProperty('temp') && this.hasProperty('mode'))
-            void shellyFetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { temp: temperature, mode: 'white' });
+            void shellyFetch(device.shelly, device.log, device.host, device.port, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { temp: temperature, mode: 'white' });
           // SHBDUO-1
           if (device.gen === 1 && this.hasProperty('temp') && !this.hasProperty('mode'))
-            void shellyFetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { temp: temperature });
+            void shellyFetch(device.shelly, device.log, device.host, device.port, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { temp: temperature });
           // shellyprorgbwwpm
-          if (device.gen !== 1 && this.hasProperty('ct')) void shellyFetch(device.shelly, device.log, device.host, `${this.name}.Set`, { id: this.index, ct: temperature });
+          if (device.gen !== 1 && this.hasProperty('ct'))
+            void shellyFetch(device.shelly, device.log, device.host, device.port, `${this.name}.Set`, { id: this.index, ct: temperature });
         }
       };
     }
@@ -888,25 +889,25 @@ export class ShellyComponent extends EventEmitter<ShellyComponentEvents> {
     // Extend the ShellyComponent class prototype to include the Cover methods dynamically
     if (isCoverComponent(this)) {
       this.Open = function (): void {
-        if (device.gen === 1) void shellyFetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { go: 'open' });
-        if (device.gen !== 1) void shellyFetch(device.shelly, device.log, device.host, `${this.name}.Open`, { id: this.index });
+        if (device.gen === 1) void shellyFetch(device.shelly, device.log, device.host, device.port, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { go: 'open' });
+        if (device.gen !== 1) void shellyFetch(device.shelly, device.log, device.host, device.port, `${this.name}.Open`, { id: this.index });
       };
 
       this.Close = function (): void {
-        if (device.gen === 1) void shellyFetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { go: 'close' });
-        if (device.gen !== 1) void shellyFetch(device.shelly, device.log, device.host, `${this.name}.Close`, { id: this.index });
+        if (device.gen === 1) void shellyFetch(device.shelly, device.log, device.host, device.port, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { go: 'close' });
+        if (device.gen !== 1) void shellyFetch(device.shelly, device.log, device.host, device.port, `${this.name}.Close`, { id: this.index });
       };
 
       this.Stop = function (): void {
-        if (device.gen === 1) void shellyFetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { go: 'stop' });
-        if (device.gen !== 1) void shellyFetch(device.shelly, device.log, device.host, `${this.name}.Stop`, { id: this.index });
+        if (device.gen === 1) void shellyFetch(device.shelly, device.log, device.host, device.port, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { go: 'stop' });
+        if (device.gen !== 1) void shellyFetch(device.shelly, device.log, device.host, device.port, `${this.name}.Stop`, { id: this.index });
       };
 
       this.GoToPosition = function (pos: number): void {
         const normalizedPos = Math.min(Math.max(Math.round(pos), 0), 100);
         if (device.gen === 1)
-          void shellyFetch(device.shelly, device.log, device.host, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { go: 'to_pos', roller_pos: normalizedPos });
-        if (device.gen !== 1) void shellyFetch(device.shelly, device.log, device.host, `${this.name}.GoToPosition`, { id: this.index, pos: normalizedPos });
+          void shellyFetch(device.shelly, device.log, device.host, device.port, `${id.slice(0, id.indexOf(':'))}/${this.index}`, { go: 'to_pos', roller_pos: normalizedPos });
+        if (device.gen !== 1) void shellyFetch(device.shelly, device.log, device.host, device.port, `${this.name}.GoToPosition`, { id: this.index, pos: normalizedPos });
       };
     }
   }

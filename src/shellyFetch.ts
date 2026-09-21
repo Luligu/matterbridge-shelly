@@ -44,6 +44,7 @@ import type { ShellyData } from './shellyTypes.js';
  * @param {Shelly} shelly - The Shelly instance.
  * @param {AnsiLogger} log - The logger instance.
  * @param {string} host - The host to fetch the data from. It can be an IP address or the cache JSON file path.
+ * @param {number} port - The HTTP port of the device, normally 80. Ignored for JSON files.
  * @param {string} service - The service to fetch the data from.
  * @param {Record<string, string | number | boolean>} params - Additional parameters for the request (default: {}).
  * @returns {Promise<ShellyData | null>} A promise that resolves to the fetched device data or null if an error occurs.
@@ -52,6 +53,7 @@ export async function shellyFetch(
   shelly: Shelly,
   log: AnsiLogger,
   host: string,
+  port: number,
   service: string,
   params: Record<string, string | number | boolean | object> = {},
 ): Promise<ShellyData | null> {
@@ -93,7 +95,7 @@ export async function shellyFetch(
   }, 20000);
 
   const gen = /^[^A-Z]*$/.test(service) ? 1 : 2;
-  const url = gen === 1 ? `http://${host}/${service}` : `http://${host}/rpc`;
+  const url = gen === 1 ? `http://${host}:${port}/${service}` : `http://${host}:${port}/rpc`;
   try {
     const options: RequestInit = {
       method: 'POST',
@@ -108,7 +110,7 @@ export async function shellyFetch(
     );
     log.debug(`${GREY}options: ${JSON.stringify(options)}${RESET}`);
     let response;
-    if (service === 'shelly') response = await fetch(`http://${host}/${service}`, { signal: controller.signal });
+    if (service === 'shelly') response = await fetch(`http://${host}:${port}/${service}`, { signal: controller.signal });
     else response = await fetch(url, options);
     clearTimeout(fetchTimeout);
     log.debug(`${GREY}response ok: ${response.ok}${RESET}`);
