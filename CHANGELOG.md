@@ -44,6 +44,7 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 - [sys]: Add the typed `Sys` component.
 - [ws]: Add the typed `Ws` component.
 - [matter]: Add the typed `Matter` component.
+- [port]: Add `port` to ShellyDevice.
 
 ### Changed
 
