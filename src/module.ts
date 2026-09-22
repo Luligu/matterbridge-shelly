@@ -112,6 +112,8 @@ import { shellyUpdateHandler } from './updateHandler.js';
 export interface ShellyPlatformConfig extends PlatformConfig {
   username: string;
   password: string;
+  caBundlePath: string;
+  rejectUnauthorized: boolean;
   switchList: string[];
   lightList: string[];
   inputContactList: string[];
@@ -190,6 +192,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     {
       if (config.username) this.username = config.username;
       if (config.password) this.password = config.password;
+      this.config.caBundlePath ??= '';
+      this.config.rejectUnauthorized ??= false;
       this.postfix = config.postfix ?? '';
       if (!isValidString(this.postfix, 0, 3)) this.postfix = '';
       if (!isValidNumber(config.failsafeCount, 0)) config.failsafeCount = 0;
@@ -233,6 +237,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     log.debug(`Initializing platform: ${idn}${config.name}${rs}${db} v.${CYAN}${config.version}`);
     log.debug(`- username: ${CYAN}${config.username ? '********' : 'undefined'}`);
     log.debug(`- password: ${CYAN}${config.password ? '********' : 'undefined'}`);
+    log.debug(`- caBundlePath: ${CYAN}${config.caBundlePath}`);
+    log.debug(`- rejectUnauthorized: ${CYAN}${config.rejectUnauthorized}`);
     log.debug(`- mdnsDiscover: ${CYAN}${config.enableMdnsDiscover}`);
     log.debug(`- storageDiscover: ${CYAN}${config.enableStorageDiscover}`);
     log.debug(`- bleDiscover: ${CYAN}${config.enableBleDiscover}`);
@@ -274,7 +280,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       this.setSelectEntity(entity.name, entity.description, entity.icon);
     }
 
-    this.shelly = new Shelly(log, this.username, this.password);
+    this.shelly = new Shelly(log, this.username, this.password, this.config.caBundlePath, this.config.rejectUnauthorized);
     this.shelly.setLogLevel(log.logLevel, this.config.debugMdns, this.config.debugCoap, this.config.debugWs, this.config.debugUdp);
     this.shelly.dataPath = path.join(matterbridge.matterbridgePluginDirectory, 'matterbridge-shelly');
     this.shelly.interfaceName = matterbridge.systemInformation.interfaceName;
@@ -312,10 +318,10 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       }
       if (this.discoveredDevices.has(discoveredDevice.id)) {
         const stored = this.storedDevices.get(discoveredDevice.id);
-        if (stored?.host === discoveredDevice.host) {
+        if (stored?.host === discoveredDevice.host && (stored.port ?? 80) === discoveredDevice.port) {
           this.log.info(`Shelly device ${hk}${discoveredDevice.id}${nf} host ${zb}${discoveredDevice.host}${nf} already discovered`);
         } else {
-          this.log.warn(`Shelly device ${hk}${discoveredDevice.id}${wr} host ${zb}${discoveredDevice.host}${wr} has been discovered with a different host.`);
+          this.log.warn(`Shelly device ${hk}${discoveredDevice.id}${wr} host ${zb}${discoveredDevice.host}${wr} has been discovered with a different host or port.`);
           this.log.warn(`Setting the new address for shelly device ${hk}${discoveredDevice.id}${wr} from ${zb}${stored?.host}${wr} to ${zb}${discoveredDevice.host}${wr}...`);
           this.discoveredDevices.set(discoveredDevice.id, discoveredDevice);
           this.storedDevices.set(discoveredDevice.id, discoveredDevice);
@@ -324,22 +330,23 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           if (this.bridgedDevices.has(discoveredDevice.id)) {
             // oxlint-disable-next-line typescript/non-nullable-type-assertion-style
             const bridgedDevice = this.bridgedDevices.get(discoveredDevice.id) as MatterbridgeEndpoint;
-            bridgedDevice.configUrl = 'http://' + discoveredDevice.host;
+            bridgedDevice.configUrl = `${discoveredDevice.port === 443 ? 'https' : 'http'}://${discoveredDevice.host}:${discoveredDevice.port}`;
           }
           if (this.shelly.hasDevice(discoveredDevice.id)) {
             // oxlint-disable-next-line typescript/non-nullable-type-assertion-style
             const device = this.shelly.getDevice(discoveredDevice.id) as ShellyDevice;
             device.host = discoveredDevice.host;
+            device.port = discoveredDevice.port;
             if (device.gen === 1) {
               void this.shelly.coapServer.registerDevice(device.host, device.id, true); // No await do it in the background
             } else {
               device.wsClient?.stop();
-              device.wsClient?.setHost(device.host);
+              device.wsClient?.setHost(device.host, device.port);
               device.wsClient?.start();
             }
             device.log.warn(`Shelly device ${hk}${discoveredDevice.id}${wr} host ${zb}${discoveredDevice.host}${wr} updated`);
           } else {
-            await this.addDevice(discoveredDevice.id, discoveredDevice.host);
+            await this.addDevice(discoveredDevice.id, discoveredDevice.host, discoveredDevice.port);
           }
         }
       } else {
@@ -347,7 +354,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         this.storedDevices.set(discoveredDevice.id, discoveredDevice);
         await this.saveStoredDevices();
         if (discoveredDevice.gen === 1) void this.shelly.coapServer.registerDevice(discoveredDevice.host, discoveredDevice.id, false); // No await do it in the background
-        await this.addDevice(discoveredDevice.id, discoveredDevice.host);
+        await this.addDevice(discoveredDevice.id, discoveredDevice.host, discoveredDevice.port);
       }
       // Mark the device as seen
       if (this.shelly.hasDevice(discoveredDevice.id)) {
@@ -411,7 +418,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           // Register the BLU devices
           for (const [, bthomeDevice] of device.bthomeDevices) {
             // Set the device in the selectDevice map for the frontend device selection
-            this.setSelectDevice(bthomeDevice.addr, bthomeDevice.name, 'http://' + device.host, 'ble');
+            this.setSelectDevice(bthomeDevice.addr, bthomeDevice.name, `${device.port === 443 ? 'https' : 'http'}://${device.host}:${device.port}`, 'ble');
             if (!this.validateDevice([bthomeDevice.addr, bthomeDevice.name])) continue;
             await this.addBluDevice(device, bthomeDevice);
           }
@@ -628,7 +635,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       const deviceTypes: AtLeastOne<DeviceTypeDefinition> = [bridgedNode];
       if (this.validateEntity(device.id, 'PowerSource')) deviceTypes.push(powerSource);
       const mbDevice = new MatterbridgeEndpoint(deviceTypes, { id: device.name }, config.debug);
-      mbDevice.configUrl = `http://${device.host}`;
+      mbDevice.configUrl = `${device.port === 443 ? 'https' : 'http'}://${device.host}:${device.port}`;
       mbDevice.log.logName = device.name;
       mbDevice.createDefaultBridgedDeviceBasicInformationClusterServer(
         device.name,
@@ -640,7 +647,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         device.firmware,
       );
       // Set the device in the selectDevice map for the frontend device selection
-      this.setSelectDevice(device.id, device.name, 'http://' + device.host, 'wifi', []); // We clear the entities!
+      this.setSelectDevice(device.id, device.name, `${device.port === 443 ? 'https' : 'http'}://${device.host}:${device.port}`, 'wifi', []); // We clear the entities!
 
       // Set the powerSource cluster
       if (this.validateEntity(device.id, 'PowerSource')) {
@@ -1588,7 +1595,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         );
         // Add the device to the discoveredDevices map
         this.discoveredDevices.set(storedDevice.id, storedDevice);
-        const device = await this.addDevice(storedDevice.id, storedDevice.host);
+        const device = await this.addDevice(storedDevice.id, storedDevice.host, storedDevice.port);
         // Update the device generation in the storage
         if (device) {
           storedDevice.gen = device.gen;
@@ -1657,7 +1664,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         continue;
       }
       // Set configUrl for the device
-      mbDevice.configUrl = `http://${shellyDevice.host}`;
+      mbDevice.configUrl = `${shellyDevice.port === 443 ? 'https' : 'http'}://${shellyDevice.host}:${shellyDevice.port}`;
       this.log.debug(`Configuring device ${dn}${mbDevice.deviceName}${db} configUrl ${YELLOW}${mbDevice.configUrl}${db}`);
 
       for (const childEndpoint of mbDevice.getChildEndpoints()) {
@@ -1818,22 +1825,26 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
 
   override async onAction(action: string, value?: string): Promise<void> {
     if (action === 'addDevice' && value && isValidString(value)) {
-      // oxlint-disable-next-line no-param-reassign
-      value = value.replace('http://', '').replace('https://', '').replaceAll('/', '');
-      if (!isValidIpv4Address(value)) {
+      const address = value
+        .trim()
+        .replace(/^https?:\/\//i, '')
+        .replace(/\/+$/, '');
+      const [host, portValue, ...unexpectedParts] = address.split(':');
+      const port = portValue === undefined ? 80 : Number(portValue);
+      if (unexpectedParts.length > 0 || !isValidIpv4Address(host) || !Number.isInteger(port) || !isValidNumber(port, 1, 65_535)) {
         this.log.error(`Failed to add device on IP address ${value}. Please check the IP address.`);
         return;
       }
-      this.log.info(`Adding device on IP address ${zb}${value}${nf}`);
-      const device = await ShellyDevice.create(this.shelly, this.log, value);
+      this.log.info(`Adding device on IP address ${zb}${host}${nf} port ${CYAN}${port}${nf}`);
+      const device = await ShellyDevice.create(this.shelly, this.log, host, port);
       if (device) {
-        this.discoveredDevices.set(device.id, { id: device.id, host: device.host, port: 80, gen: device.gen });
-        this.storedDevices.set(device.id, { id: device.id, host: device.host, port: 80, gen: device.gen });
+        this.discoveredDevices.set(device.id, { id: device.id, host: device.host, port: device.port, gen: device.gen });
+        this.storedDevices.set(device.id, { id: device.id, host: device.host, port: device.port, gen: device.gen });
         await this.saveStoredDevices();
-        await this.addDevice(device.id, device.host);
+        await this.addDevice(device.id, device.host, device.port);
         device.destroy();
       } else {
-        this.log.error(`Failed to add device on IP address ${zb}${value}${er}`);
+        this.log.error(`Failed to add device on IP address ${zb}${address}${er}`);
       }
     }
     if (action === 'removeDevice' && value && isValidString(value)) {
@@ -1932,12 +1943,12 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
   }
 
   // Called from onStart to add a device from storedDevice, from discovered shelly event and from onAction()
-  private async addDevice(deviceId: string, host: string): Promise<ShellyDevice | undefined> {
-    if (this.shelly.hasDevice(deviceId) || this.shelly.hasDeviceHost(host)) {
+  private async addDevice(deviceId: string, host: string, port = 80): Promise<ShellyDevice | undefined> {
+    if (this.shelly.hasDevice(deviceId) || this.shelly.devices.some((device) => device.host === host && device.port === port)) {
       this.log.info(`Shelly device ${hk}${deviceId}${nf} host ${zb}${host}${nf} already added`);
       return undefined;
     }
-    this.log.info(`Adding shelly device ${hk}${deviceId}${nf} host ${zb}${host}${nf}`);
+    this.log.info(`Adding shelly device ${hk}${deviceId}${nf} host ${zb}${host}${nf} port ${CYAN}${port}${nf}`);
     const log = new AnsiLogger({ logName: deviceId, logTimestampFormat: TimestampFormat.TIME_MILLIS, logLevel: this.log.logLevel });
     const cacheFileName = path.join(this.matterbridge.matterbridgePluginDirectory, 'matterbridge-shelly', `${deviceId}.json`);
     let device: ShellyDevice | undefined;
@@ -1954,27 +1965,27 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     }
 
     if (loadFromCache && fs.existsSync(cacheFileName)) {
-      this.log.info(`Loading from cache Shelly device ${hk}${deviceId}${nf} host ${zb}${host}${nf}`);
-      device = await ShellyDevice.create(this.shelly, log, cacheFileName);
+      this.log.info(`Loading from cache Shelly device ${hk}${deviceId}${nf} host ${zb}${host}${nf} port ${CYAN}${port}${nf}`);
+      device = await ShellyDevice.create(this.shelly, log, cacheFileName, port);
       if (device) {
         this.log.info(`Loaded from cache Shelly device ${hk}${deviceId}${nf} host ${zb}${host}${nf}`);
-        device.setHost(host); // Set the real host for device and wsClient
+        device.setHost(host, port); // Set the real host for device and wsClient
         device.cached = true;
         device.online = true;
       }
     } else {
       this.log.info(`Creating Shelly device ${hk}${deviceId}${nf} host ${zb}${host}${nf}`);
-      device = await ShellyDevice.create(this.shelly, log, host);
+      device = await ShellyDevice.create(this.shelly, log, host, port);
       if (device) {
         this.log.info(`Created Shelly device ${hk}${deviceId}${nf} host ${zb}${host}${nf}`);
         await device.saveDevicePayloads(this.shelly.dataPath);
       } else {
         // This fix when the device is not reachable but the cache file exist: like config changed from sleep mode devices
         if (fs.existsSync(cacheFileName)) {
-          device = await ShellyDevice.create(this.shelly, log, cacheFileName);
+          device = await ShellyDevice.create(this.shelly, log, cacheFileName, port);
           if (device) {
             this.log.info(`Loaded from cache (device unreachable) Shelly device ${hk}${deviceId}${nf} host ${zb}${host}${nf}`);
-            device.setHost(host); // Set the real host for device and wsClient
+            device.setHost(host, port); // Set the real host for device and wsClient
             device.cached = true;
             device.online = true;
           }
@@ -1989,7 +2000,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     }
 
     // Set the device in the selectDevice map for the frontend device selection
-    this.setSelectDevice(device.id, device.name, 'http://' + host, 'wifi');
+    this.setSelectDevice(device.id, device.name, `${port === 443 ? 'https' : 'http'}://${host}:${port}`, 'wifi');
 
     // Destroy the device if it is not a gateway device and it is not validated
     if (!this.gatewayDevices.has(device.id) && !this.validateDevice([device.id, device.mac, device.name])) {
@@ -2039,7 +2050,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     if (definition) {
       const mbDevice = new MatterbridgeEndpoint(definition, { id: bthomeDevice.name }, this.config.debug);
       this.bluBridgedDevices.set(bthomeDevice.addr, mbDevice);
-      mbDevice.configUrl = `http://${gateway.host}`;
+      mbDevice.configUrl = `${gateway.port === 443 ? 'https' : 'http'}://${gateway.host}:${gateway.port}`;
       mbDevice.createDefaultBridgedDeviceBasicInformationClusterServer(
         bthomeDevice.name,
         bthomeDevice.addr + (this.postfix ? '-' + this.postfix : ''),

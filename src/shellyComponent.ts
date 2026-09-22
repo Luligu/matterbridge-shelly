@@ -345,7 +345,7 @@ export interface WifiStatus {
 export interface WifiScanResult {
   ssid: string | null;
   bssid: string;
-  auth: 0 | 1 | 2 | 3 | 4 | 5;
+  auth: 0 | 1 | 2 | 3 | 4 | 5 | 6;
   channel: number;
   rssi: number;
 }
@@ -596,7 +596,7 @@ function isWifiScanResult(value: unknown): value is WifiScanResult {
     isWifiObject(value) &&
     isWifiString(value.ssid) &&
     typeof value.bssid === 'string' &&
-    isValidNumber(value.auth, 0, 5) &&
+    isValidNumber(value.auth, 0, 6) &&
     Number.isInteger(value.auth) &&
     isValidNumber(value.channel, 1) &&
     isValidNumber(value.rssi)

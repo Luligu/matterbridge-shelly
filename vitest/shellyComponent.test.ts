@@ -95,6 +95,12 @@ describe('ShellyComponent', () => {
     vi.restoreAllMocks();
   });
 
+  it('should send a Gen 2 color temperature command when ct is available', () => {
+    const component = new ShellyComponent(device2, 'cct:0', 'Cct', { ct: 2700 }) as ShellyLightComponent;
+    component.ColorTemp(4000);
+    expect(fetchSpy).toHaveBeenCalledWith(device2.shelly, device2.log, device2.host, device2.port, 'Cct.Set', { id: 0, ct: 4000 });
+  });
+
   it('should have mock gen 1 and gen 2', () => {
     expect(device1).not.toBeUndefined();
     expect(device2).not.toBeUndefined();
@@ -141,7 +147,7 @@ describe('ShellyComponent', () => {
     expect(await component.SetConfig(config)).toEqual({ restart_required: false });
     expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, device2.port, 'Wifi.SetConfig', { config });
     const result = { ssid: null, bssid: '00:11:22:33:44:55', auth: 3, channel: 4, rssi: -56 };
-    for (const results of [[], [result]]) {
+    for (const results of [[], [result], [result, { ...result, auth: 6 }]]) {
       fetchSpy.mockResolvedValueOnce({ results });
       expect(await component.Scan()).toEqual({ results });
       expect(fetchSpy).toHaveBeenLastCalledWith(shelly, device2.log, device2.host, device2.port, 'Wifi.Scan');
@@ -193,7 +199,7 @@ describe('ShellyComponent', () => {
       fetchSpy.mockResolvedValueOnce(status);
       expect(await component.GetStatus()).toBeNull();
     }
-    for (const response of [null, {}, { results: [null] }, { results: [{ ssid: 'test', bssid: 'test', auth: 6, channel: 4, rssi: -50 }] }]) {
+    for (const response of [null, {}, { results: [null] }, { results: [{ ssid: 'test', bssid: 'test', auth: 7, channel: 4, rssi: -50 }] }]) {
       fetchSpy.mockResolvedValueOnce(response);
       expect(await component.Scan()).toBeNull();
     }
@@ -349,7 +355,7 @@ describe('ShellyComponent', () => {
     expect(await component.GetStatus()).toBeNull();
     fetchSpy.mockResolvedValueOnce({ mac: '441793D69718', restart_required: true, cfg_rev: 0, time: '12:30', uptime: 0 });
     expect(await component.GetStatus()).toEqual({ mac: '441793D69718', restart_required: true, cfg_rev: 0, time: '12:30', uptime: 0 });
-    for (const invalidStatus of [{}, { mac: 123 }, { mac: '' }, { mac: '441793D69718' }, { mac: '441793D69718', restart_required: 'true' }]) {
+    for (const invalidStatus of [{}, { mac: 123 }, { mac: '' }, { mac: '441793D69718' }, { mac: '441793D69718', restart_required: 'true', uptime: 15 }]) {
       fetchSpy.mockResolvedValueOnce(invalidStatus);
       expect(await component.GetStatus()).toBeNull();
     }

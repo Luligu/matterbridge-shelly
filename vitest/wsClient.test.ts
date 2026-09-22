@@ -8,7 +8,11 @@
 
 const NAME = 'WsClient';
 
-import { db, er, hk, LogLevel, nf, wr, zb } from 'matterbridge/logger';
+import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
+
+import { CYAN, db, er, hk, LogLevel, nf, wr, zb } from 'matterbridge/logger';
 import { wait, waiter } from 'matterbridge/utils';
 import { consoleDebugSpy, flushAsync, loggerLogSpy, setupTest } from 'matterbridge/vitest-utils';
 import { WebSocket, WebSocketServer } from 'ws';
@@ -104,9 +108,12 @@ describe('ShellyWsClient', () => {
       }, 100).unref();
     });
 
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Starting ws client for Shelly device ${hk}Jest${db} host ${zb}xxxxxx${db}`);
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Started ws client for Shelly device ${hk}Jest${db} host ${zb}xxxxxx${db}`);
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.ERROR, expect.stringContaining(`WebSocket error with Shelly device ${hk}Jest${er} host ${zb}xxxxxx${er}`));
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Starting ws client for Shelly device ${hk}Jest${db} host ${zb}xxxxxx${db} port ${CYAN}8080${db}`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Started ws client for Shelly device ${hk}Jest${db} host ${zb}xxxxxx${db} port ${CYAN}8080${db}`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(
+      LogLevel.ERROR,
+      expect.stringContaining(`WebSocket error with Shelly device ${hk}Jest${er} host ${zb}xxxxxx${er} port ${CYAN}8080${er}`),
+    );
     wsClient.stop();
   }, 10000);
 
@@ -120,7 +127,10 @@ describe('ShellyWsClient', () => {
       });
       wsClient.start();
     });
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, expect.stringContaining(`WebSocket connection opened with Shelly device ${hk}Jest${nf} host ${zb}localhost${nf}`));
+    expect(loggerLogSpy).toHaveBeenCalledWith(
+      LogLevel.INFO,
+      expect.stringContaining(`WebSocket connection opened with Shelly device ${hk}Jest${nf} host ${zb}localhost${nf} port ${CYAN}8080${nf}`),
+    );
 
     vi.clearAllMocks();
     wsClient.start();
@@ -135,7 +145,10 @@ describe('ShellyWsClient', () => {
     });
     expect(wsClient.isConnected).toBeFalsy();
     expect(wsClient.isConnecting).toBeFalsy();
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`Closed ws client for Shelly device ${hk}Jest${db} host ${zb}localhost${db}`));
+    expect(loggerLogSpy).toHaveBeenCalledWith(
+      LogLevel.DEBUG,
+      expect.stringContaining(`Closed ws client for Shelly device ${hk}Jest${db} host ${zb}localhost${db} port ${CYAN}8080${db}`),
+    );
   }, 10000);
 
   test('should terminate before connected', async () => {
@@ -150,7 +163,7 @@ describe('ShellyWsClient', () => {
         resolve();
       }, 2000),
     );
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Terminated ws client for Shelly device ${hk}Jest${db} host ${zb}localhost${db}`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Terminated ws client for Shelly device ${hk}Jest${db} host ${zb}localhost${db} port ${CYAN}8080${db}`);
   }, 10000);
 
   test('should fail to create', async () => {
@@ -163,15 +176,36 @@ describe('ShellyWsClient', () => {
     expect(wsClient.isConnecting).toBeFalsy();
   }, 10000);
 
+  test.each([false, true])('should construct a WSS URL and apply CA settings (bundle: %s)', (withBundle) => {
+    const directory = mkdtempSync(path.join(tmpdir(), 'shelly-wss-'));
+    const caPath = path.join(directory, 'ca.pem');
+    writeFileSync(caPath, 'test CA');
+    const client = new WsClient('TLS', 'invalid host', 443, undefined, withBundle ? caPath : '', true);
+    try {
+      expect((client as any).wsUrl).toBe('wss://invalid host:443/rpc');
+      client.start();
+      expect(client.isConnecting).toBe(false);
+      expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.ERROR, expect.stringContaining('Failed to create WebSocket connection'));
+    } finally {
+      client.stop();
+      rmSync(directory, { recursive: true, force: true });
+    }
+  });
+
   test('create the wsClient', () => {
     expect(server).toBeDefined();
     wsClient = new WsClient('Jest', 'localhost', 8080);
     expect(wsClient).toBeDefined();
     expect(wsClient).toBeInstanceOf(WsClient);
 
-    wsClient.setHost('localhost');
+    wsClient.setHost('localhost', 443);
+    expect((wsClient as any).wsUrl).toBe('wss://localhost:443/rpc');
+    wsClient.setHost('localhost', 8080);
     expect((wsClient as any).wsHost).toBe('localhost');
-    expect((wsClient as any).wsUrl).toBe(`ws://localhost/rpc`);
+    expect((wsClient as any).wsUrl).toBe('ws://localhost:8080/rpc');
+    wsClient.setHost('192.168.68.58', 11400);
+    expect((wsClient as any).wsUrl).toBe('ws://192.168.68.58:11400/rpc');
+    wsClient.setHost('localhost', 8080);
 
     expect(wsClient.isConnected).toBeFalsy();
     expect(wsClient.isConnecting).toBeFalsy();
@@ -180,7 +214,10 @@ describe('ShellyWsClient', () => {
   test('should log error if not connected', () => {
     expect(server).toBeDefined();
     wsClient.sendRequest('Shelly.GetStatus');
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.ERROR, `SendRequest error: WebSocket client is not connected to device ${hk}Jest${er} host ${zb}localhost${er}`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(
+      LogLevel.ERROR,
+      `SendRequest error: WebSocket client is not connected to device ${hk}Jest${er} host ${zb}localhost${er} port ${CYAN}8080${er}`,
+    );
   });
 
   test('should connect to the server', async () => {
@@ -205,8 +242,8 @@ describe('ShellyWsClient', () => {
     wsClient = new WsClient('Jest', 'localhost', 8080);
     wsClient.log.logLevel = LogLevel.DEBUG;
     wsClient.start();
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Starting ws client for Shelly device ${hk}Jest${db} host ${zb}localhost${db}`);
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Started ws client for Shelly device ${hk}Jest${db} host ${zb}localhost${db}`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Starting ws client for Shelly device ${hk}Jest${db} host ${zb}localhost${db} port ${CYAN}8080${db}`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Started ws client for Shelly device ${hk}Jest${db} host ${zb}localhost${db} port ${CYAN}8080${db}`);
     expect(wsClient.isConnecting).toBeTruthy();
     expect(wsClient.isConnected).toBeFalsy();
 
@@ -216,7 +253,7 @@ describe('ShellyWsClient', () => {
     expect(wsClient.isConnected).toBeTruthy();
 
     (wsClient as any).stopPingPong();
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Stop PingPong with device ${hk}Jest${db} host ${zb}localhost${db}.`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Stop PingPong with device ${hk}Jest${db} host ${zb}localhost${db} port ${CYAN}8080${db}.`);
     expect((wsClient as any).pingInterval).toBeUndefined();
     expect((wsClient as any).pongTimeout).toBeUndefined();
   }, 10000);
@@ -226,13 +263,13 @@ describe('ShellyWsClient', () => {
     (wsClient as any).startPingPong(250);
     expect((wsClient as any).pingInterval).toBeDefined();
     expect((wsClient as any).pongTimeout).toBeUndefined();
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Start PingPong with device ${hk}Jest${db} host ${zb}localhost${db}.`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Start PingPong with device ${hk}Jest${db} host ${zb}localhost${db} port ${CYAN}8080${db}.`);
     await wait(500);
     expect(consoleDebugSpy).toHaveBeenCalledWith('Ping received');
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Pong received from device ${hk}Jest${db} host ${zb}localhost${db}, connection is alive.`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Pong received from device ${hk}Jest${db} host ${zb}localhost${db} port ${CYAN}8080${db}, connection is alive.`);
 
     (wsClient as any).stopPingPong();
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Stop PingPong with device ${hk}Jest${db} host ${zb}localhost${db}.`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Stop PingPong with device ${hk}Jest${db} host ${zb}localhost${db} port ${CYAN}8080${db}.`);
     expect((wsClient as any).pingInterval).toBeUndefined();
     expect((wsClient as any).pongTimeout).toBeUndefined();
   }, 10000);
@@ -244,14 +281,20 @@ describe('ShellyWsClient', () => {
     });
     (wsClient as any).wsClient?.emit('error', new Error('Test error'));
     expect(wsClient.isConnecting).toBeFalsy();
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.ERROR, expect.stringContaining(`WebSocket error with Shelly device ${hk}Jest${er} host ${zb}localhost${er}`));
+    expect(loggerLogSpy).toHaveBeenCalledWith(
+      LogLevel.ERROR,
+      expect.stringContaining(`WebSocket error with Shelly device ${hk}Jest${er} host ${zb}localhost${er} port ${CYAN}8080${er}`),
+    );
   }, 10000);
 
   test('should respond to close event', async () => {
     expect(server).toBeDefined();
     (wsClient as any).wsClient?.emit('close', 1000, Buffer.from('Test close'));
     expect(wsClient.isConnected).toBeFalsy();
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, expect.stringContaining(`WebSocket connection closed with Shelly device ${hk}Jest${nf} host ${zb}localhost${nf}`));
+    expect(loggerLogSpy).toHaveBeenCalledWith(
+      LogLevel.INFO,
+      expect.stringContaining(`WebSocket connection closed with Shelly device ${hk}Jest${nf} host ${zb}localhost${nf} port ${CYAN}8080${nf}`),
+    );
     (wsClient as any)._isConnected = true;
   }, 10000);
 
@@ -268,20 +311,23 @@ describe('ShellyWsClient', () => {
     (wsClient as any).startPingPong(500);
     (wsClient as any).wsClient.removeAllListeners('pong');
     expect((wsClient as any).pingInterval).toBeDefined();
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Start PingPong with device ${hk}Jest${db} host ${zb}localhost${db}.`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Start PingPong with device ${hk}Jest${db} host ${zb}localhost${db} port ${CYAN}8080${db}.`);
     // prettier-ignore
     await waiter('WsClient pong timeout', () => { return (wsClient as any).pongTimeout; }, true);
     expect((wsClient as any).pongTimeout).toBeDefined();
     await wait(500);
     expect(consoleDebugSpy).toHaveBeenCalledWith('Ping received');
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.WARN, `Pong not received from device ${hk}Jest${wr} host ${zb}localhost${wr}, closing connection.`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.WARN, `Pong not received from device ${hk}Jest${wr} host ${zb}localhost${wr} port ${CYAN}8080${wr}, closing connection.`);
     sendPong = true;
   }, 10000);
 
   test('should close the connection', async () => {
     expect(server).toBeDefined();
     wsClient.stop();
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`Stopping ws client for Shelly device ${hk}Jest${db} host ${zb}localhost${db}`));
+    expect(loggerLogSpy).toHaveBeenCalledWith(
+      LogLevel.DEBUG,
+      expect.stringContaining(`Stopping ws client for Shelly device ${hk}Jest${db} host ${zb}localhost${db} port ${CYAN}8080${db}`),
+    );
     // prettier-ignore
     await waiter('WsClient close isConnecting timeout', () => { return !wsClient.isConnecting; }, true);
     expect(wsClient.isConnecting).toBeFalsy();
@@ -328,8 +374,8 @@ describe('ShellyWsClient', () => {
     });
     wsClient.log.logLevel = LogLevel.DEBUG;
     wsClient.start();
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Starting ws client for Shelly device ${hk}Jest${db} host ${zb}localhost${db}`);
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Started ws client for Shelly device ${hk}Jest${db} host ${zb}localhost${db}`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Starting ws client for Shelly device ${hk}Jest${db} host ${zb}localhost${db} port ${CYAN}8080${db}`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Started ws client for Shelly device ${hk}Jest${db} host ${zb}localhost${db} port ${CYAN}8080${db}`);
     expect(wsClient.isConnecting).toBeTruthy();
     expect(wsClient.isConnected).toBeFalsy();
     const ws = await connectPromise;
@@ -340,7 +386,10 @@ describe('ShellyWsClient', () => {
     expect(wsClient.isConnected).toBeTruthy();
 
     wsClient.stop();
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`Stopping ws client for Shelly device ${hk}Jest${db} host ${zb}localhost${db}`));
+    expect(loggerLogSpy).toHaveBeenCalledWith(
+      LogLevel.DEBUG,
+      expect.stringContaining(`Stopping ws client for Shelly device ${hk}Jest${db} host ${zb}localhost${db} port ${CYAN}8080${db}`),
+    );
     // prettier-ignore
     await waiter('WsClient close isConnecting timeout', () => { return !wsClient.isConnecting; }, true);
     expect(wsClient.isConnecting).toBeFalsy();
@@ -396,8 +445,8 @@ describe('ShellyWsClient', () => {
     wsClient = new WsClient('Jest', 'localhost', 8080);
     wsClient.log.logLevel = LogLevel.DEBUG;
     wsClient.start();
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Starting ws client for Shelly device ${hk}Jest${db} host ${zb}localhost${db}`);
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Started ws client for Shelly device ${hk}Jest${db} host ${zb}localhost${db}`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Starting ws client for Shelly device ${hk}Jest${db} host ${zb}localhost${db} port ${CYAN}8080${db}`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Started ws client for Shelly device ${hk}Jest${db} host ${zb}localhost${db} port ${CYAN}8080${db}`);
     expect(wsClient.isConnecting).toBeTruthy();
     expect(wsClient.isConnected).toBeFalsy();
     const ws = await connectPromise;
@@ -413,7 +462,10 @@ describe('ShellyWsClient', () => {
     // Stop the WebSocket client
     (wsClient as any).wsDeviceId = 'Jest';
     wsClient.stop();
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`Stopping ws client for Shelly device ${hk}Jest${db} host ${zb}localhost${db}`));
+    expect(loggerLogSpy).toHaveBeenCalledWith(
+      LogLevel.DEBUG,
+      expect.stringContaining(`Stopping ws client for Shelly device ${hk}Jest${db} host ${zb}localhost${db} port ${CYAN}8080${db}`),
+    );
     // prettier-ignore
     await waiter('WsClient close isConnecting timeout', () => { return !wsClient.isConnecting; }, true, 5000, 100);
     expect(wsClient.isConnecting).toBeFalsy();
@@ -489,8 +541,8 @@ describe('ShellyWsClient', () => {
     wsClient = new WsClient('Jest', 'localhost', 8080, 'password');
     wsClient.log.logLevel = LogLevel.DEBUG;
     wsClient.start();
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Starting ws client for Shelly device ${hk}Jest${db} host ${zb}localhost${db}`);
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Started ws client for Shelly device ${hk}Jest${db} host ${zb}localhost${db}`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Starting ws client for Shelly device ${hk}Jest${db} host ${zb}localhost${db} port ${CYAN}8080${db}`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Started ws client for Shelly device ${hk}Jest${db} host ${zb}localhost${db} port ${CYAN}8080${db}`);
     expect(wsClient.isConnecting).toBeTruthy();
     expect(wsClient.isConnected).toBeFalsy();
     const ws = await connectPromise;
@@ -502,14 +554,21 @@ describe('ShellyWsClient', () => {
 
     await wait(100);
     expect(loggerLogSpy).not.toHaveBeenCalledWith(LogLevel.ERROR, `Authentication required for Jest but the password is not set. Exiting...`);
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Sending auth request to Shelly device ${hk}Jest${db} host ${zb}localhost${db}`, expect.anything());
+    expect(loggerLogSpy).toHaveBeenCalledWith(
+      LogLevel.DEBUG,
+      `Sending auth request to Shelly device ${hk}Jest${db} host ${zb}localhost${db} port ${CYAN}8080${db}`,
+      expect.anything(),
+    );
 
     wsClient.sendRequest('Shelly.GetStatus');
 
     // Stop the WebSocket client
     (wsClient as any).wsDeviceId = 'Jest';
     wsClient.stop();
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining(`Stopping ws client for Shelly device ${hk}Jest${db} host ${zb}localhost${db}`));
+    expect(loggerLogSpy).toHaveBeenCalledWith(
+      LogLevel.DEBUG,
+      expect.stringContaining(`Stopping ws client for Shelly device ${hk}Jest${db} host ${zb}localhost${db} port ${CYAN}8080${db}`),
+    );
     // prettier-ignore
     await waiter('WsClient close isConnecting timeout', () => { return !wsClient.isConnecting; }, true, 5000, 100);
     expect(wsClient.isConnecting).toBeFalsy();
@@ -570,7 +629,7 @@ describe('ShellyWsClient', () => {
     const terminateSpy = vi.spyOn(realSocket, 'terminate');
 
     wsClient.stop();
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Terminated ws client for Shelly device ${hk}Jest${db} host ${zb}localhost${db}`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Terminated ws client for Shelly device ${hk}Jest${db} host ${zb}localhost${db} port ${CYAN}8080${db}`);
 
     // The socket is neither open nor connecting/closing anymore once the deferred timeout fires
     Object.defineProperty(realSocket, 'readyState', { value: WebSocket.CLOSED, configurable: true });

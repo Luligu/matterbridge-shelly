@@ -41,6 +41,8 @@ import { WsServer } from '../src/wsServer.js';
 await setupTest(NAME, false);
 
 const mockConfig: ShellyPlatformConfig = {
+  caBundlePath: '',
+  rejectUnauthorized: false,
   name: 'matterbridge-shelly',
   type: 'DynamicPlatform',
   version: '1.1.2',

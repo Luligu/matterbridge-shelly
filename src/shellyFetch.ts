@@ -25,6 +25,8 @@
 
 import crypto from 'node:crypto';
 import { promises as fs } from 'node:fs';
+import { request as httpRequest } from 'node:http';
+import { request as httpsRequest } from 'node:https';
 
 import { type AnsiLogger, BLUE, CYAN, GREY, RESET } from 'matterbridge/logger';
 import { getErrorMessage } from 'matterbridge/utils';
@@ -32,6 +34,54 @@ import { getErrorMessage } from 'matterbridge/utils';
 import { createBasicShellyAuth, createDigestShellyAuth, getGen1BodyOptions, getGen2BodyOptions, parseBasicAuthenticateHeader, parseDigestAuthenticateHeader } from './auth.js';
 import type { Shelly } from './shelly.js';
 import type { ShellyData } from './shellyTypes.js';
+
+/**
+ * Sends an HTTP or HTTPS request using the device TLS settings.
+ *
+ * @param {Shelly} shelly - The device manager with TLS settings.
+ * @param {string} url - The request URL.
+ * @param {RequestInit} options - The request options; bodies must be strings.
+ * @returns {Promise<Response>} The HTTP response.
+ */
+async function fetch(shelly: Shelly, url: string, options: RequestInit): Promise<Response> {
+  const isHttps = url.startsWith('https:');
+  const request = isHttps ? httpsRequest : httpRequest;
+  const ca = isHttps && shelly.caBundlePath ? await fs.readFile(shelly.caBundlePath) : undefined;
+  return new Promise((resolve, reject) => {
+    const req = request(
+      url,
+      {
+        method: options.method,
+        headers: Object.fromEntries(new Headers(options.headers)),
+        // Every caller supplies an AbortController signal.
+        /* v8 ignore next */
+        signal: options.signal ?? undefined,
+        ...(isHttps ? { ca, rejectUnauthorized: shelly.rejectUnauthorized } : {}),
+      },
+      (res) => {
+        const chunks: Buffer[] = [];
+        res.on('data', (chunk: Buffer) => chunks.push(chunk));
+        res.on('error', reject);
+        res.on('end', () => {
+          const headers = new Headers();
+          for (let i = 0; i < res.rawHeaders.length; i += 2) headers.append(res.rawHeaders[i], res.rawHeaders[i + 1]);
+          // Incoming HTTP client responses always have a status code.
+          /* v8 ignore next */
+          const status = res.statusCode ?? 500;
+          resolve(
+            new Response([204, 205, 304].includes(status) ? null : Buffer.concat(chunks), {
+              status,
+              statusText: res.statusMessage,
+              headers,
+            }),
+          );
+        });
+      },
+    );
+    req.on('error', reject);
+    req.end(options.body);
+  });
+}
 
 /**
  * Fetches device data from the specified host and service.
@@ -95,7 +145,8 @@ export async function shellyFetch(
   }, 20000);
 
   const gen = /^[^A-Z]*$/.test(service) ? 1 : 2;
-  const url = gen === 1 ? `http://${host}:${port}/${service}` : `http://${host}:${port}/rpc`;
+  const protocol = port === 443 ? 'https' : 'http';
+  const url = gen === 1 ? `${protocol}://${host}:${port}/${service}` : `${protocol}://${host}:${port}/rpc`;
   try {
     const options: RequestInit = {
       method: 'POST',
@@ -110,8 +161,8 @@ export async function shellyFetch(
     );
     log.debug(`${GREY}options: ${JSON.stringify(options)}${RESET}`);
     let response;
-    if (service === 'shelly') response = await fetch(`http://${host}:${port}/${service}`, { signal: controller.signal });
-    else response = await fetch(url, options);
+    if (service === 'shelly') response = await fetch(shelly, `${protocol}://${host}:${port}/${service}`, { signal: controller.signal });
+    else response = await fetch(shelly, url, options);
     clearTimeout(fetchTimeout);
     log.debug(`${GREY}response ok: ${response.ok}${RESET}`);
     if (!response.ok) {
@@ -144,7 +195,7 @@ export async function shellyFetch(
           options.body = getGen2BodyOptions('2.0', 10, 'Matterbridge', service, params, auth);
         }
         log.debug(`${GREY}options: ${JSON.stringify(options)}${RESET}`);
-        response = await fetch(url, options);
+        response = await fetch(shelly, url, options);
         log.debug(`${GREY}response ok: ${response.ok}${RESET}`);
         if (response.ok) {
           const data = await response.json();

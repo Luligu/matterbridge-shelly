@@ -110,8 +110,9 @@ describe('Shelly devices test', () => {
 
   test('Set host', async () => {
     const newHost = '192.168.1.100';
-    device.setHost(newHost);
+    device.setHost(newHost, 11400);
     expect(device.host).toBe(newHost);
+    expect(device.port).toBe(11400);
   });
 
   test('SetLogLevels', async () => {

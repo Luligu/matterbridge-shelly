@@ -23,6 +23,7 @@
 
 import crypto from 'node:crypto';
 import EventEmitter from 'node:events';
+import { readFileSync } from 'node:fs';
 
 import { AnsiLogger, CYAN, db, er, hk, LogLevel, nf, rs, TimestampFormat, wr, zb } from 'matterbridge/logger';
 import { getErrorMessage } from 'matterbridge/utils';
@@ -128,6 +129,8 @@ export class WsClient extends EventEmitter<WsClientEvent> {
   private wsPort;
   private auth = false;
   private password;
+  private caBundlePath: string;
+  private rejectUnauthorized: boolean;
   private requestId;
 
   // PingPong
@@ -158,15 +161,19 @@ export class WsClient extends EventEmitter<WsClientEvent> {
    * @param {string} wsHost - The host of the WebSocket server.
    * @param {number} wsPort - The port of the WebSocket server. Defaults to 80.
    * @param {string} [password] - The optional password for authentication.
+   * @param {string} [caBundlePath] - The optional PEM CA bundle path.
+   * @param {boolean} [rejectUnauthorized] - Whether to verify the server certificate. Defaults to false.
    */
-  constructor(wsDeviceId: string, wsHost: string, wsPort: number = 80, password?: string) {
+  constructor(wsDeviceId: string, wsHost: string, wsPort: number = 80, password?: string, caBundlePath = '', rejectUnauthorized = false) {
     super();
     this.log = new AnsiLogger({ logName: 'ShellyWsClient', logTimestampFormat: TimestampFormat.TIME_MILLIS, logLevel: WsClient.logLevel });
     this.wsHost = wsHost;
     this.wsPort = wsPort;
     this.wsDeviceId = wsDeviceId;
-    this.wsUrl = `ws://${this.wsHost}:${this.wsPort}/rpc`;
+    this.wsUrl = `${this.wsPort === 443 ? 'wss' : 'ws'}://${this.wsHost}:${this.wsPort}/rpc`;
     this.password = password;
+    this.caBundlePath = caBundlePath;
+    this.rejectUnauthorized = rejectUnauthorized;
     this.requestId = crypto.randomInt(0, 999999);
     this.requestFrame.id = this.requestId;
     this.requestFrame.src = 'Matterbridge' + this.requestId;
@@ -175,13 +182,15 @@ export class WsClient extends EventEmitter<WsClientEvent> {
   }
 
   /**
-   * Sets the host value for the WebSocket client.
+   * Sets the host and port for the WebSocket client.
    *
-   * @param {string} value - The new host value to set.
+   * @param {string} host - The server host.
+   * @param {number} port - The server port.
    */
-  setHost(value: string): void {
-    this.wsHost = value;
-    this.wsUrl = `ws://${this.wsHost}/rpc`;
+  setHost(host: string, port: number): void {
+    this.wsHost = host;
+    this.wsPort = port;
+    this.wsUrl = `${this.wsPort === 443 ? 'wss' : 'ws'}://${this.wsHost}:${this.wsPort}/rpc`;
   }
 
   /**
@@ -210,7 +219,7 @@ export class WsClient extends EventEmitter<WsClientEvent> {
    */
   sendRequest(method: string = 'Shelly.GetStatus', params: Params = {}): void {
     if (!this.wsClient || !this._isConnected) {
-      this.log.error(`SendRequest error: WebSocket client is not connected to device ${hk}${this.wsDeviceId}${er} host ${zb}${this.wsHost}${er}`);
+      this.log.error(`SendRequest error: WebSocket client is not connected to device ${hk}${this.wsDeviceId}${er} host ${zb}${this.wsHost}${er} port ${CYAN}${this.wsPort}${er}`);
       return;
     }
     this.requestFrame.method = method;
@@ -227,14 +236,14 @@ export class WsClient extends EventEmitter<WsClientEvent> {
    * This method starts the ping interval and pong timeout.
    */
   private startPingPong(pingTimeout: number = 30000): void {
-    this.log.debug(`Start PingPong with device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}.`);
+    this.log.debug(`Start PingPong with device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db} port ${CYAN}${this.wsPort}${db}.`);
     this.pingInterval = setInterval(() => {
       if (this.wsClient?.readyState === WebSocket.OPEN) {
         this.wsClient.ping(); // Send a ping message
 
         // Set a timeout to wait for a pong response
         this.pongTimeout = setTimeout(() => {
-          this.log.warn(`Pong not received from device ${hk}${this.wsDeviceId}${wr} host ${zb}${this.wsHost}${wr}, closing connection.`);
+          this.log.warn(`Pong not received from device ${hk}${this.wsDeviceId}${wr} host ${zb}${this.wsHost}${wr} port ${CYAN}${this.wsPort}${wr}, closing connection.`);
           this.wsClient?.terminate(); // Close the connection if pong is not received
         }, pingTimeout);
       }
@@ -244,7 +253,7 @@ export class WsClient extends EventEmitter<WsClientEvent> {
     this.wsClient?.on('pong', () => {
       clearTimeout(this.pongTimeout);
       this.pongTimeout = undefined;
-      this.log.debug(`Pong received from device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}, connection is alive.`);
+      this.log.debug(`Pong received from device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db} port ${CYAN}${this.wsPort}${db}, connection is alive.`);
     });
   }
 
@@ -255,7 +264,7 @@ export class WsClient extends EventEmitter<WsClientEvent> {
    * This method clears the ping interval and pong timeout if they are set.
    */
   private stopPingPong(): void {
-    this.log.debug(`Stop PingPong with device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}.`);
+    this.log.debug(`Stop PingPong with device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db} port ${CYAN}${this.wsPort}${db}.`);
     if (this.pingInterval) {
       clearInterval(this.pingInterval);
       this.pingInterval = undefined;
@@ -277,12 +286,29 @@ export class WsClient extends EventEmitter<WsClientEvent> {
    */
   listenForStatusUpdates(): void {
     if (this._isConnecting || this._isConnected) {
-      this.log.debug(`WebSocket client is already ${this._isConnecting ? 'connecting' : 'connected'} to device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}`);
+      this.log.debug(
+        `WebSocket client is already ${this._isConnecting ? 'connecting' : 'connected'} to device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db} port ${CYAN}${this.wsPort}${db}`,
+      );
       return;
     }
     try {
       this._isConnecting = true;
-      this.wsClient = new WebSocket(this.wsUrl);
+      if (this.wsPort === 443) {
+        const ca = this.caBundlePath ? readFileSync(this.caBundlePath) : undefined;
+        // Node's `ws` reads `ca`/`rejectUnauthorized` as top-level options (same shape as `https.request`).
+        // Bun's native WebSocket implementation, which `ws` delegates to when running on Bun, only reads
+        // TLS options nested under `tls` and silently ignores the top-level ones. Passing both shapes at
+        // once keeps this working identically on Node and Bun without runtime detection: each runtime
+        // reads the fields it understands and ignores the other.
+        const wsOptions: WebSocket.ClientOptions & { tls?: { ca?: typeof ca; rejectUnauthorized?: boolean } } = {
+          ca,
+          rejectUnauthorized: this.rejectUnauthorized,
+          tls: { ca, rejectUnauthorized: this.rejectUnauthorized },
+        };
+        this.wsClient = new WebSocket(this.wsUrl, wsOptions);
+      } else {
+        this.wsClient = new WebSocket(this.wsUrl);
+      }
     } catch (error) {
       this._isConnecting = false;
       this.log.error(`Failed to create WebSocket connection to ${zb}${this.wsUrl}${er}: ${getErrorMessage(error)}`);
@@ -291,11 +317,11 @@ export class WsClient extends EventEmitter<WsClientEvent> {
 
     // Handle the open event
     this.wsClient.on('open', () => {
-      this.log.info(`WebSocket connection opened with Shelly device ${hk}${this.wsDeviceId}${nf} host ${zb}${this.wsHost}${nf}`);
+      this.log.info(`WebSocket connection opened with Shelly device ${hk}${this.wsDeviceId}${nf} host ${zb}${this.wsHost}${nf} port ${CYAN}${this.wsPort}${nf}`);
       this._isConnecting = false;
       this._isConnected = true;
       if (this.wsClient?.readyState === WebSocket.OPEN) {
-        this.log.debug(`Sending request to Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}`, this.requestFrame);
+        this.log.debug(`Sending request to Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db} port ${CYAN}${this.wsPort}${db}`, this.requestFrame);
         this.wsClient?.send(JSON.stringify(this.requestFrame));
       }
 
@@ -308,7 +334,9 @@ export class WsClient extends EventEmitter<WsClientEvent> {
 
     // Handle errors
     this.wsClient.on('error', (error: Error) => {
-      this.log.error(`WebSocket error with Shelly device ${hk}${this.wsDeviceId}${er} host ${zb}${this.wsHost}${er}: ${error instanceof Error ? error.message : error}`);
+      this.log.error(
+        `WebSocket error with Shelly device ${hk}${this.wsDeviceId}${er} host ${zb}${this.wsHost}${er} port ${CYAN}${this.wsPort}${er}: ${error instanceof Error ? error.message : error}`,
+      );
       this._isConnecting = false;
       this.emit('error', error.message);
     });
@@ -316,7 +344,7 @@ export class WsClient extends EventEmitter<WsClientEvent> {
     // Handle the close event
     this.wsClient.on('close', (code: number, reason: Buffer) => {
       this.log.info(
-        `WebSocket connection closed with Shelly device ${hk}${this.wsDeviceId}${nf} host ${zb}${this.wsHost}${nf}: code ${code} ${reason.toString('utf-8') === '' ? '' : 'reason ' + reason.toString('utf-8')}`,
+        `WebSocket connection closed with Shelly device ${hk}${this.wsDeviceId}${nf} host ${zb}${this.wsHost}${nf} port ${CYAN}${this.wsPort}${nf}: code ${code} ${reason.toString('utf-8') === '' ? '' : 'reason ' + reason.toString('utf-8')}`,
       );
       this._isConnecting = false;
       this._isConnected = false;
@@ -343,13 +371,22 @@ export class WsClient extends EventEmitter<WsClientEvent> {
           const auth: ResponseErrorMessage = JSON.parse(response.error.message);
           this.log.debug(`Auth requested: ${response.error.message}`);
           this.requestFrameWithAuth.auth = createDigestShellyAuth('admin', this.password, auth.nonce, crypto.randomInt(0, 999999999), auth.realm, auth.nc);
-          this.log.debug(`Sending auth request to Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}`, this.requestFrameWithAuth);
+          this.log.debug(
+            `Sending auth request to Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db} port ${CYAN}${this.wsPort}${db}`,
+            this.requestFrameWithAuth,
+          );
           this.wsClient?.send(JSON.stringify(this.requestFrameWithAuth));
         } else if (response.result && response.id === this.requestId && response.dst === 'Matterbridge' + this.requestId) {
-          this.log.debug(`Received ${CYAN}Shelly.GetStatus${db} response from ${hk}${this.id}${db} host ${zb}${this.wsHost}${db}:${rs}\n`, response.result);
+          this.log.debug(
+            `Received ${CYAN}Shelly.GetStatus${db} response from ${hk}${this.id}${db} host ${zb}${this.wsHost}${db} port ${CYAN}${this.wsPort}${db}:${rs}\n`,
+            response.result,
+          );
           this.emit('response', response.result);
         } else if (response.method && (response.method === 'NotifyStatus' || response.method === 'NotifyFullStatus') && response.dst === 'Matterbridge' + this.requestId) {
-          this.log.debug(`Received ${CYAN}${response.method}${db} from ${hk}${this.id}${db} host ${zb}${this.wsHost}${db}:${rs}\n`, response.params);
+          this.log.debug(
+            `Received ${CYAN}${response.method}${db} from ${hk}${this.id}${db} host ${zb}${this.wsHost}${db} port ${CYAN}${this.wsPort}${db}:${rs}\n`,
+            response.params,
+          );
           this.emit('update', response.params);
         } else if (
           response.method &&
@@ -357,21 +394,30 @@ export class WsClient extends EventEmitter<WsClientEvent> {
           response.dst === 'user_1' &&
           this.wsDeviceId.startsWith('shellywalldisplay')
         ) {
-          this.log.debug(`Received ${CYAN}${response.method}${db} from ${hk}${this.id}${db} host ${zb}${this.wsHost}${db}:${rs}\n`, response.params);
+          this.log.debug(
+            `Received ${CYAN}${response.method}${db} from ${hk}${this.id}${db} host ${zb}${this.wsHost}${db} port ${CYAN}${this.wsPort}${db}:${rs}\n`,
+            response.params,
+          );
           this.emit('update', response.params);
         } else if (response.method && response.method === 'NotifyEvent' && response.dst === 'Matterbridge' + this.requestId) {
-          this.log.debug(`Received ${CYAN}${response.method}${db} from ${hk}${this.id}${db} host ${zb}${this.wsHost}${db}:${rs}\n`, response.params.events);
+          this.log.debug(
+            `Received ${CYAN}${response.method}${db} from ${hk}${this.id}${db} host ${zb}${this.wsHost}${db} port ${CYAN}${this.wsPort}${db}:${rs}\n`,
+            response.params.events,
+          );
           this.emit('event', response.params.events);
         } else if (response.method && response.method === 'NotifyEvent' && response.dst === 'user_1' && this.wsDeviceId.startsWith('shellywalldisplay')) {
-          this.log.debug(`Received ${CYAN}${response.method}${db} from ${hk}${this.id}${db} host ${zb}${this.wsHost}${db}:${rs}\n`, response.params.events);
+          this.log.debug(
+            `Received ${CYAN}${response.method}${db} from ${hk}${this.id}${db} host ${zb}${this.wsHost}${db} port ${CYAN}${this.wsPort}${db}:${rs}\n`,
+            response.params.events,
+          );
           this.emit('event', response.params.events);
         } else if (response.error && response.id === this.requestId && response.dst === 'Matterbridge' + this.requestId) {
-          this.log.error(`Received ${CYAN}error response${er} from ${hk}${this.id}${er} host ${zb}${this.wsHost}${er}:${rs}\n`, response);
+          this.log.error(`Received ${CYAN}error response${er} from ${hk}${this.id}${er} host ${zb}${this.wsHost}${er} port ${CYAN}${this.wsPort}${er}:${rs}\n`, response);
         } else {
-          this.log.debug(`Received ${CYAN}unknown response${db} from ${hk}${this.id}${db} host ${zb}${this.wsHost}${db}:${rs}\n`, response);
+          this.log.debug(`Received ${CYAN}unknown response${db} from ${hk}${this.id}${db} host ${zb}${this.wsHost}${db} port ${CYAN}${this.wsPort}${db}:${rs}\n`, response);
         }
       } catch (error) {
-        this.log.error(`WebSocket client error parsing message from ${hk}${this.id}${er} host ${zb}${this.wsHost}${er}: ${getErrorMessage(error)}`);
+        this.log.error(`WebSocket client error parsing message from ${hk}${this.id}${er} host ${zb}${this.wsHost}${er} port ${CYAN}${this.wsPort}${er}: ${getErrorMessage(error)}`);
       }
     });
 
@@ -386,9 +432,9 @@ export class WsClient extends EventEmitter<WsClientEvent> {
    * This method initializes the WebSocket client and starts listening for status updates.
    */
   start(): void {
-    this.log.debug(`Starting ws client for Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}`);
+    this.log.debug(`Starting ws client for Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db} port ${CYAN}${this.wsPort}${db}`);
     this.listenForStatusUpdates();
-    this.log.debug(`Started ws client for Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}`);
+    this.log.debug(`Started ws client for Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db} port ${CYAN}${this.wsPort}${db}`);
   }
 
   /**
@@ -400,28 +446,28 @@ export class WsClient extends EventEmitter<WsClientEvent> {
    */
   stop(): void {
     this.log.debug(
-      `Stopping ws client for Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db} state ${this.wsClient?.readyState} connencting ${this._isConnecting} connected ${this._isConnected} `,
+      `Stopping ws client for Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db} port ${CYAN}${this.wsPort}${db} state ${this.wsClient?.readyState} connencting ${this._isConnecting} connected ${this._isConnected} `,
     );
     this.stopPingPong();
     if (!this.wsClient) return;
     if (this.wsClient.readyState === WebSocket.OPEN) {
       this.wsClient.close();
-      this.log.debug(`Closed ws client for Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}`);
+      this.log.debug(`Closed ws client for Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db} port ${CYAN}${this.wsPort}${db}`);
     } else if (this.wsClient.readyState === WebSocket.CONNECTING || this.wsClient.readyState === WebSocket.CLOSING) {
       const wsClient = this.wsClient;
       setTimeout(() => {
         if (wsClient.readyState === WebSocket.OPEN) wsClient.close();
         if (wsClient.readyState === WebSocket.CONNECTING || wsClient.readyState === WebSocket.CLOSING) wsClient.terminate();
       }, 1000).unref();
-      this.log.debug(`Terminated ws client for Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}`);
+      this.log.debug(`Terminated ws client for Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db} port ${CYAN}${this.wsPort}${db}`);
     } else if (this.wsClient.readyState === WebSocket.CLOSED) {
-      this.log.debug(`Ws client already closed for Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}`);
+      this.log.debug(`Ws client already closed for Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db} port ${CYAN}${this.wsPort}${db}`);
     }
     this._isConnecting = false;
     this._isConnected = false;
     this.wsClient.removeAllListeners();
     this.wsClient = undefined;
-    this.log.debug(`Stopped ws client for Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db}`);
+    this.log.debug(`Stopped ws client for Shelly device ${hk}${this.wsDeviceId}${db} host ${zb}${this.wsHost}${db} port ${CYAN}${this.wsPort}${db}`);
 
     // Emit stopped event
     this.emit('stopped');

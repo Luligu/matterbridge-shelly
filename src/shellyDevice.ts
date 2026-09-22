@@ -169,13 +169,15 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
   }
 
   /**
-   * Sets the host value for the device.
+   * Sets the host and port for the device.
    *
-   * @param {string} value - The new host value to set.
+   * @param {string} host - The device host.
+   * @param {number} port - The device port.
    */
-  setHost(value: string): void {
-    this.host = value;
-    this.wsClient?.setHost(value);
+  setHost(host: string, port: number): void {
+    this.host = host;
+    this.port = port;
+    this.wsClient?.setHost(host, port);
   }
 
   /**
@@ -888,7 +890,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
 
     // Start WebSocket client for gen 2+ devices if not in sleep mode
     if (device.gen >= 2 && !device.udp && !device.sleepMode) {
-      device.wsClient = new WsClient(device.id, host, 80, shelly.password);
+      device.wsClient = new WsClient(device.id, host, device.port, shelly.password, shelly.caBundlePath, shelly.rejectUnauthorized);
 
       // Start the WebSocket client for devices that are not a cache JSON file
       if (!host.endsWith('.json')) device.wsClient.start();
@@ -964,7 +966,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
       if (device.sleepMode) {
         try {
           device.lastFetched = Date.now();
-          const awaken = await ShellyDevice.create(shelly, log, device.host);
+          const awaken = await ShellyDevice.create(shelly, log, device.host, device.port);
           // v8 ignore else
           if (awaken) {
             if (device.gen === 1 && cached) void shelly.coapServer.registerDevice(device.host, device.id, false); // No await to register device for CoIoT updates

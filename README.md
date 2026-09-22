@@ -46,6 +46,8 @@ Features:
 - A 1 hour timer checks if the device has reported within that time frame, fetch an update and save the cache file.
 - Support for [RPC over UDP](README.md#how-to-configure-rpc-over-udp) update protocol (alternative to websocket) for Gen2+ devices.
 - If the device's RPC over UDP settings is not correctly configured for the gen 2+ devices, a message is displayed.
+- Support for [Secure Connection](https://shelly-api-docs.shelly.cloud/gen2/General/CustomHTTPSCertificates) with `https://` and `wss://` for Gen2+ devices. Use [`caBundlePath`](README.md#cabundlepath) and [`rejectUnauthorized`](README.md#rejectunauthorized).
+- Support for [Range Extender](https://shelly-api-docs.shelly.cloud/gen2/ComponentsAndServices/WiFi#rangeextender) for Gen2+ devices. It is also possible to manually add a device in the config.
 
 If you like this project and find it useful, please consider giving it a star on GitHub at https://github.com/Luligu/matterbridge-shelly and sponsoring it.
 
@@ -157,11 +159,23 @@ Wait that the plugin has been configured before changing the config.
 
 If your devices are password protected put here the username. It must be unique for all the devices.
 
-It is only used for gen 1 devices. Gen 2 and 3 devices have always admin.
+It is only used for gen 1 devices. Gen 2+ devices have always admin.
 
 ### password
 
 If your devices are password protected put here the password. It must be unique for all the devices.
+
+### caBundlePath
+
+Optional path to a PEM file containing the CA certificates used to verify your devices' server certificates. The file must be accessible to the Matterbridge process. Defaults to an empty string, which uses the runtime's default trusted CAs when verification is enabled. It must be unique for all the devices.
+
+Use this when your devices use certificates issued by a private CA and `rejectUnauthorized` is `true`. This is a CA certificate bundle, not a client certificate or private key; it does not enable mutual TLS.
+
+### rejectUnauthorized
+
+Controls server certificate verification for HTTPS and WSS connections to devices on port 443. Defaults to `false`, allowing connections without verifying the server certificate, including self-signed certificates. Connections remain encrypted, but the server's identity is not verified. It must be unique for all the devices.
+
+Set to `true` to verify the certificate's hostname, validity, and trust chain. If your devices use a private CA, also set `caBundlePath` to its PEM bundle. These settings apply to the plugin's device connections with `https` and `wss` only; HTTP and WS connections on other ports are unaffected.
 
 ### switchList
 
@@ -430,6 +444,8 @@ Codex reads the shared rules and skills from `.agents/` directly; the skill is i
 The shared rules under `.agents/rules/` apply on demand for the relevant tasks, and `.agents/skills/` is discovered automatically as `/verify-agent-context`.
 
 ## Development guide
+
+The typed WiFi component's `Scan()` method accepts authentication values from `0` through `6`, including `auth: 6` returned by Gen 4 devices.
 
 Refer to the Matterbridge [Development guide](https://matterbridge.io/README-DEV.html) for other guidelines.
 

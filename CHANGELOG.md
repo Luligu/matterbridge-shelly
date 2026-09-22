@@ -30,7 +30,7 @@ If you like this project and find it useful, please consider giving it a star on
 
 You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his invaluable contribution to this project.
 
-## [2.6.1] - Dev branch
+## [2.7.0] - Dev branch
 
 ### Breaking changes
 
@@ -40,11 +40,17 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 
 - [devcontainer]: Add [`Dev Container`](.devcontainer/README.md) v.2.2.0 with dual Node and Bun runtime support.
 - [agents]: Add a [`shared setup`](.agents/README.md) for all agents: OpenAI Codex, Claude Code, GitHub Copilot and Google Gemini / Antigravity.
-- [cloud]: Add the typed `Cloud` component.
-- [sys]: Add the typed `Sys` component.
-- [ws]: Add the typed `Ws` component.
-- [matter]: Add the typed `Matter` component.
-- [port]: Add `port` to ShellyDevice.
+- [cloud]: Add the typed `Cloud` component (Cloud in the device UI).
+- [sys]: Add the typed `Sys` component (used for RPC over UDP in the device UI).
+- [ws]: Add the typed `Ws` component (Outbound websocket in the device UI).
+- [wifi]: Add the typed `WiFi` component (Wi-Fi in the device UI).
+- [matter]: Add the typed `Matter` component (Matter in the device UI).
+- [port]: Add `port` to ShellyDevice to allow connections with `https` and `wss`.
+- [config]: Add [`caBundlePath`](README.md#cabundlepath) to the config to allow connections with `https` and `wss`.
+- [config]: Add [`rejectUnauthorized`](README.md#rejectunauthorized) to the config to allow connections with `https` and `wss`.
+- [config]: Add device now supports a full URL http(s)://ip_address:port if necessary.
+- [shelly]: Add support for [Secure Connection](https://shelly-api-docs.shelly.cloud/gen2/General/CustomHTTPSCertificates) with `https://` and `wss://` for Gen2+ devices.
+- [shelly]: Add support for [Range Extender](https://shelly-api-docs.shelly.cloud/gen2/ComponentsAndServices/WiFi#rangeextender) for Gen2+ devices.
 
 ### Changed
 

@@ -64,6 +64,8 @@ await setupTest(NAME, false);
 vi.mock('../src/shellyFetch.js', { spy: true });
 
 const mockConfig: ShellyPlatformConfig = {
+  caBundlePath: '',
+  rejectUnauthorized: false,
   name: 'matterbridge-shelly',
   type: 'DynamicPlatform',
   version: '1.1.2',
@@ -1299,9 +1301,13 @@ describe('ShellyPlatform', () => {
     addDeviceSpy.mockRestore();
   });
 
-  test('should update the host and add a discovered device that is not loaded', async () => {
+  test.each([
+    { host: '192.168.1.41', port: 80 },
+    { host: '192.168.1.40', port: 11400 },
+    { host: '192.168.1.40', port: 443 },
+  ])('should update a discovered endpoint to $host:$port', async ({ host, port }) => {
     const oldDevice: DiscoveredDevice = { id: 'shellyplus1pm-AABBCC', host: '192.168.1.40', port: 80, gen: 2 };
-    const discoveredDevice: DiscoveredDevice = { ...oldDevice, host: '192.168.1.41' };
+    const discoveredDevice: DiscoveredDevice = { ...oldDevice, host, port };
     const bridgedDevice = { configUrl: `http://${oldDevice.host}` } as MatterbridgeEndpoint;
     shellyPlatform.discoveredDevices.set(oldDevice.id, oldDevice);
     shellyPlatform.storedDevices.set(oldDevice.id, oldDevice);
@@ -1313,8 +1319,8 @@ describe('ShellyPlatform', () => {
     expect(shellyPlatform.discoveredDevices.get(oldDevice.id)).toEqual(discoveredDevice);
     expect(shellyPlatform.storedDevices.get(oldDevice.id)).toEqual(discoveredDevice);
     expect(shellyPlatform.changedDevices.get(oldDevice.id)).toBe(oldDevice.id);
-    expect(bridgedDevice.configUrl).toBe(`http://${discoveredDevice.host}`);
-    expect(addDeviceSpy).toHaveBeenCalledWith(discoveredDevice.id, discoveredDevice.host);
+    expect(bridgedDevice.configUrl).toBe(`${discoveredDevice.port === 443 ? 'https' : 'http'}://${discoveredDevice.host}:${discoveredDevice.port}`);
+    expect(addDeviceSpy).toHaveBeenCalledWith(discoveredDevice.id, discoveredDevice.host, discoveredDevice.port);
 
     cleanup();
     addDeviceSpy.mockRestore();
@@ -1343,7 +1349,7 @@ describe('ShellyPlatform', () => {
     expect(gen2Device.lastseen).toBeGreaterThan(0);
     expect(gen2Device.log.warn).toHaveBeenCalledWith(expect.stringContaining(`host ${zb}192.168.1.61${wr} updated`));
     expect(gen2WsClient.stop).toHaveBeenCalledOnce();
-    expect(gen2WsClient.setHost).toHaveBeenCalledWith('192.168.1.61');
+    expect(gen2WsClient.setHost).toHaveBeenCalledWith('192.168.1.61', 80);
     expect(gen2WsClient.start).toHaveBeenCalledOnce();
 
     (shelly as any)._devices.delete(gen1Device.id);
@@ -1402,17 +1408,20 @@ describe('ShellyPlatform', () => {
     const createSpy = vi.spyOn(ShellyDevice, 'create' as any).mockResolvedValue(undefined);
     loggerLogSpy.mockClear();
     await shellyPlatform.onAction('addDevice', '192.168.1.100');
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Adding device on IP address ${zb}192.168.1.100${nf}`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Adding device on IP address ${zb}192.168.1.100${nf} port ${CYAN}80${nf}`);
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.ERROR, expect.stringContaining('Failed to add device on IP address'));
+    expect(createSpy).toHaveBeenLastCalledWith(shelly, expect.anything(), '192.168.1.100', 80);
 
-    // addDevice with valid IP and ShellyDevice.create returns a device (strips url prefix/suffix)
-    const mockDevice = { id: 'shellymock-AABBCCDD', host: '192.168.1.100', gen: 2, destroy: vi.fn() };
+    // addDevice with valid IP and ShellyDevice.create returns a device (strips url prefix/suffix and derives the port)
+    const mockDevice = { id: 'shellymock-AABBCCDD', host: '192.168.1.100', port: 8080, gen: 2, destroy: vi.fn() };
     createSpy.mockResolvedValue(mockDevice as any);
     // oxlint-disable-next-line unicorn/no-useless-undefined -- explicit undefined required because the spied target is cast to any
     const addDeviceSpy = vi.spyOn(shellyPlatform as any, 'addDevice').mockResolvedValue(undefined);
     loggerLogSpy.mockClear();
-    await shellyPlatform.onAction('addDevice', 'http://192.168.1.100/');
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Adding device on IP address ${zb}192.168.1.100${nf}`);
+    await shellyPlatform.onAction('addDevice', 'http://192.168.1.100:8080/');
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Adding device on IP address ${zb}192.168.1.100${nf} port ${CYAN}8080${nf}`);
+    expect(createSpy).toHaveBeenLastCalledWith(shelly, expect.anything(), '192.168.1.100', 8080);
+    expect(addDeviceSpy).toHaveBeenCalledWith(mockDevice.id, mockDevice.host, mockDevice.port);
     expect(shellyPlatform.storedDevices.has('shellymock-AABBCCDD')).toBe(true);
     expect(mockDevice.destroy).toHaveBeenCalled();
     createSpy.mockRestore();
@@ -1552,7 +1561,7 @@ describe('ShellyPlatform', () => {
     createSpy.mockResolvedValue(cacheDevice);
     loggerLogSpy.mockClear();
     expect(await (shellyPlatform as any).addDevice('shellytest-CACHE', '10.0.0.11')).toBe(cacheDevice);
-    expect(cacheDevice.setHost).toHaveBeenCalledWith('10.0.0.11');
+    expect(cacheDevice.setHost).toHaveBeenCalledWith('10.0.0.11', 80);
     expect(cacheDevice.cached).toBe(true);
     expect(cacheDevice.online).toBe(true);
     expect(shellyAddSpy).toHaveBeenCalledWith(cacheDevice);
@@ -1609,7 +1618,7 @@ describe('ShellyPlatform', () => {
     createSpy.mockResolvedValueOnce(undefined).mockResolvedValue(fallbackDevice);
     loggerLogSpy.mockClear();
     expect(await (shellyPlatform as any).addDevice('shellytest-FALLBACK', '10.0.0.14')).toBe(fallbackDevice);
-    expect(fallbackDevice.setHost).toHaveBeenCalledWith('10.0.0.14');
+    expect(fallbackDevice.setHost).toHaveBeenCalledWith('10.0.0.14', 80);
     expect(fallbackDevice.cached).toBe(true);
     expect(fallbackDevice.online).toBe(true);
     expect(shellyAddSpy).toHaveBeenCalledWith(fallbackDevice);

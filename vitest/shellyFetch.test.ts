@@ -6,8 +6,10 @@
 
 const NAME = 'ShellyFetch';
 
+import { EventEmitter } from 'node:events';
 import { promises as fs } from 'node:fs';
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http';
+import { request } from 'node:https';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
@@ -20,6 +22,8 @@ import { shellyFetch } from '../src/shellyFetch.js';
 // Setup the test environment
 await setupTest(NAME, false);
 
+vi.mock('node:https', { spy: true });
+
 describe('shellyFetch', () => {
   let shelly: Shelly;
   let log: AnsiLogger;
@@ -27,6 +31,61 @@ describe('shellyFetch', () => {
   let serverPort: number;
   let testFilePath: string;
   let requestHandler: (req: IncomingMessage, res: ServerResponse) => void;
+
+  test('should use device TLS settings for HTTPS RPC and discovery', async () => {
+    shelly.caBundlePath = testFilePath;
+    shelly.rejectUnauthorized = false;
+    await fs.writeFile(testFilePath, 'test CA bundle');
+    const end = vi.fn();
+    const req = new EventEmitter();
+    Object.assign(req, { end });
+    const requestSpy = vi.mocked(request).mockImplementation(((_url, _options, callback) => {
+      const res = new EventEmitter();
+      Object.assign(res, { statusCode: 200, statusMessage: 'OK', rawHeaders: ['Content-Type', 'application/json'] });
+      queueMicrotask(() => {
+        callback?.(res as IncomingMessage);
+        res.emit('data', Buffer.from(JSON.stringify({ result: { connected: true }, gen: 3 })));
+        res.emit('end');
+      });
+      return req;
+    }) as typeof request);
+    try {
+      expect(await shellyFetch(shelly, log, '192.168.68.60', 443, 'Ws.GetStatus')).toEqual({ connected: true });
+      expect(requestSpy).toHaveBeenLastCalledWith(
+        'https://192.168.68.60:443/rpc',
+        expect.objectContaining({
+          method: 'POST',
+          ca: Buffer.from('test CA bundle'),
+          rejectUnauthorized: false,
+        }),
+        expect.any(Function),
+      );
+      expect(await shellyFetch(shelly, log, '192.168.68.60', 443, 'shelly')).toMatchObject({ gen: 3 });
+      expect(requestSpy).toHaveBeenLastCalledWith(
+        'https://192.168.68.60:443/shelly',
+        expect.objectContaining({
+          rejectUnauthorized: false,
+        }),
+        expect.any(Function),
+      );
+    } finally {
+      requestSpy.mockRestore();
+    }
+  });
+
+  test('should return null when the HTTPS CA file cannot be read', async () => {
+    shelly.caBundlePath = testFilePath + '.missing';
+    shelly.rejectUnauthorized = true;
+    expect(await shellyFetch(shelly, log, '192.168.68.60', 443, 'Ws.GetStatus')).toBeNull();
+  });
+
+  test.each([204, 205, 304])('should return null for an HTTP response without JSON (status %i)', async (status) => {
+    requestHandler = (_req, res): void => {
+      res.statusCode = status;
+      res.end();
+    };
+    expect(await shellyFetch(shelly, log, 'localhost', serverPort, 'status')).toBeNull();
+  });
 
   beforeAll(() => {});
 

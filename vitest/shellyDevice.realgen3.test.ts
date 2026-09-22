@@ -49,8 +49,6 @@ describe('Shellies', () => {
   afterAll(async () => {
     shelly.destroy();
     await wait(1000);
-
-    // Restore all mocks
     vi.restoreAllMocks();
   });
 
@@ -671,7 +669,7 @@ describe('Shellies', () => {
 
       cover.Close();
       await waiter('Close() AI', () => { return (cover.getValue('state') === 'closing') }, true, 30000);
-      
+
       cover.Stop();
       // console.error(`Stop() I state ${cover.getValue('state')} pos ${cover.getValue('current_pos')}`);
       await waiter('Stop() I', () => { return (cover.getValue('state') === 'stopped') }, true, 30000);
@@ -1015,7 +1013,7 @@ describe('Shellies', () => {
       await waiter('Off', () => { return component.getValue('state') === false; }, true);
 
       component.Level(50);
-      await waiter('Level(50)', () => { return component.getValue('brightness') === 50; }, true); 
+      await waiter('Level(50)', () => { return component.getValue('brightness') === 50; }, true);
 
       component.Toggle();
       await waiter('Toggle', () => { return component.getValue('state') === true; }, true);

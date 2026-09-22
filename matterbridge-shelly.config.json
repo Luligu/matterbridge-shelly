@@ -3,6 +3,8 @@
   "type": "DynamicPlatform",
   "username": "",
   "password": "",
+  "caBundlePath": "",
+  "rejectUnauthorized": false,
   "switchList": [],
   "lightList": [],
   "inputContactList": [],
