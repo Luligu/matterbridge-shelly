@@ -57,8 +57,8 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 - [package]: Upgrade package.
 - [package]: Bump `node-ansi-logger` to v.3.3.1.
 - [package]: Bump `node-persist-manager` to v.2.1.1.
-- [package]: Bump `oxfmt` to v.0.68.0.
-- [package]: Bump `oxlint` to v.1.83.0.
+- [package]: Bump `oxfmt` to v.0.70.0.
+- [package]: Bump `oxlint` to v.1.85.0.
 - [package]: Bump `oxlint-tsgolint` to v.7.0.2002.
 - [package]: Bump `vitest` to v.5.0.1.
 - [package]: Bump `@vitest/coverage-v8` to v.5.0.1.
