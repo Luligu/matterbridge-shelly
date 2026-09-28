@@ -84,9 +84,9 @@ describe('Shellies', () => {
     await device.saveDevicePayloads('temp');
 
     expect(device.components.length).toBe(12);
-    // prettier-ignore
+    // oxfmt-ignore
     expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Devicepower', 'Humidity', 'MQTT', 'Sys', 'Sntp', 'Temperature', 'WiFi', 'Ws']);
-    // prettier-ignore
+    // oxfmt-ignore
     expect(device.getComponentIds()).toStrictEqual(['ble', 'cloud', 'devicepower:0', 'humidity:0', 'mqtt', 'sys', 'sntp', 'temperature:0', 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws']);
 
     expect(device.getComponent('devicepower:0')).not.toBeUndefined();
@@ -144,7 +144,7 @@ describe('Shellies', () => {
     const component = device.getComponent('switch:0');
     expect(component).not.toBeUndefined();
 
-    // prettier-ignore
+    // oxfmt-ignore
     if (isSwitchComponent(component)) {
         component.On();
         await waiter('On', () => { return component.getValue('state') === true; }, true);
@@ -296,7 +296,7 @@ describe('Shellies', () => {
     const component = device.getComponent('switch:0');
     expect(component).not.toBeUndefined();
 
-    // prettier-ignore
+    // oxfmt-ignore
     if (isSwitchComponent(component)) {
       component.On();
       await waiter('On', () => { return component.getValue('state') === true; }, true);
@@ -421,7 +421,7 @@ describe('Shellies', () => {
     const component = device.getComponent('switch:0');
     expect(component).not.toBeUndefined();
 
-    // prettier-ignore
+    // oxfmt-ignore
     if (isSwitchComponent(component)) {
         component.On();
         await waiter('On', () => { return component.getValue('state') === true; }, true);
@@ -475,7 +475,7 @@ describe('Shellies', () => {
     const component = device.getComponent('switch:0');
     expect(component).not.toBeUndefined();
 
-    // prettier-ignore
+    // oxfmt-ignore
     if (isSwitchComponent(component)) {
         component.On();
         await waiter('On', () => { return component.getValue('state') === true; }, true);
@@ -660,7 +660,7 @@ describe('Shellies', () => {
 
     expect(cover?.getValue('current_pos')).toBe(0);
 
-    // prettier-ignore
+    // oxfmt-ignore
     if (isCoverComponent(cover)) {
       cover.Open();
       await waiter('Open()', () => { return (cover.getValue('state') === 'opening') }, true, 30000);
@@ -745,7 +745,7 @@ describe('Shellies', () => {
     expect(component?.hasProperty('aenergy')).toBe(true);
     expect(component?.hasProperty('freq')).toBe(true);
 
-    // prettier-ignore
+    // oxfmt-ignore
     if (isSwitchComponent(component)) {
       component.On();
       await waiter('On', () => { return component.getValue('state') === true; }, true);
@@ -768,7 +768,7 @@ describe('Shellies', () => {
     expect(component1?.hasProperty('aenergy')).toBe(true);
     expect(component1?.hasProperty('freq')).toBe(true);
 
-    // prettier-ignore
+    // oxfmt-ignore
     if (isSwitchComponent(component1)) {
       component1.On();
       await waiter('On', () => { return component1.getValue('state') === true; }, true);
@@ -1001,7 +1001,7 @@ describe('Shellies', () => {
     const component = device.getComponent('light:0');
     expect(component).not.toBeUndefined();
 
-    // prettier-ignore
+    // oxfmt-ignore
     if (isLightComponent(component)) {
       component.On();
       await waiter('On', () => { return component.getValue('state') === true; }, true);
@@ -1069,7 +1069,7 @@ describe('Shellies', () => {
     const component = device.getComponent('switch:0');
     expect(component).not.toBeUndefined();
 
-    // prettier-ignore
+    // oxfmt-ignore
     if (isSwitchComponent(component)) {
       component.On();
       await waiter('On', () => { return component.getValue('state') === true; }, true);
@@ -1182,7 +1182,7 @@ describe('Shellies', () => {
     const component = device.getComponent('switch:0');
     expect(component).not.toBeUndefined();
 
-    // prettier-ignore
+    // oxfmt-ignore
     if (isSwitchComponent(component)) {
         component.On();
         await waiter('On', () => { return component.getValue('state') === true; }, true);

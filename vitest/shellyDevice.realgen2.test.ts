@@ -92,7 +92,7 @@ describe('Shellies', () => {
     expect(device.bthomeSensors.size).toBe(0);
 
     expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Input', 'MQTT', 'Rgb', 'Sys', 'Sntp', 'WiFi', 'Ws']);
-    // prettier-ignore
+    // oxfmt-ignore
     expect(device.getComponentIds()).toStrictEqual(["ble", "cloud", "input:0", "input:1", "input:2", "input:3", "mqtt", "rgb:0", "sys", "sntp", 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws']);
 
     const component = device.getComponent('rgb:0');
@@ -101,7 +101,7 @@ describe('Shellies', () => {
     expect(component?.hasProperty('temp')).toBe(false);
     expect(component?.hasProperty('mode')).toBe(false);
 
-    // prettier-ignore
+    // oxfmt-ignore
     if (isLightComponent(component)) {
       let rgb: number[];
 
@@ -164,7 +164,7 @@ describe('Shellies', () => {
     expect(device.bthomeSensors.size).toBe(0);
 
     expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Input', 'Light', 'MQTT', 'Sys', 'Sntp', 'WiFi', 'Ws']);
-    // prettier-ignore
+    // oxfmt-ignore
     expect(device.getComponentIds()).toStrictEqual(["ble", "cloud", "input:0", "input:1", "input:2", "input:3", "light:0", "light:1", "light:2", "light:3", "mqtt", "sys", "sntp", 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws']);
 
     let component: ShellyComponent = device.getComponent('light:0')!;
@@ -173,7 +173,7 @@ describe('Shellies', () => {
     expect(component?.hasProperty('temp')).toBe(false);
     expect(component?.hasProperty('mode')).toBe(false);
 
-    // prettier-ignore
+    // oxfmt-ignore
     if (isLightComponent(component)) {
       if (!component) return;
       let rgb: number[];
@@ -203,7 +203,7 @@ describe('Shellies', () => {
     expect(component?.hasProperty('temp')).toBe(false);
     expect(component?.hasProperty('mode')).toBe(false);
 
-    // prettier-ignore
+    // oxfmt-ignore
     if (isLightComponent(component)) {
       let rgb: number[];
 
@@ -232,7 +232,7 @@ describe('Shellies', () => {
     expect(component?.hasProperty('temp')).toBe(false);
     expect(component?.hasProperty('mode')).toBe(false);
 
-    // prettier-ignore
+    // oxfmt-ignore
     if (isLightComponent(component)) {
       let rgb: number[];
 
@@ -261,7 +261,7 @@ describe('Shellies', () => {
     expect(component?.hasProperty('temp')).toBe(false);
     expect(component?.hasProperty('mode')).toBe(false);
 
-    // prettier-ignore
+    // oxfmt-ignore
     if (isLightComponent(component)) {
       let rgb: number[];
 
@@ -321,7 +321,7 @@ describe('Shellies', () => {
     const component = device.getComponent('switch:0');
     expect(component).not.toBeUndefined();
 
-    // prettier-ignore
+    // oxfmt-ignore
     if (isSwitchComponent(component)) {
       component.On();
       await waiter('On', () => { return component.getValue('state') === true; }, true);
@@ -374,7 +374,7 @@ describe('Shellies', () => {
     const cover = device.getComponent('cover:0');
     expect(cover).not.toBeUndefined();
 
-    // prettier-ignore
+    // oxfmt-ignore
     if (isCoverComponent(cover)) {
       cover.Open();
       await waiter('Open()', () => { return cover.getValue('state') === 'opening'; }, true, 30000);
@@ -436,7 +436,7 @@ describe('Shellies', () => {
     expect(device.bthomeSensors.size).toBe(0);
 
     expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Input', 'MQTT', 'Switch', 'Sys', 'Sntp', 'WiFi', 'Ws']);
-    // prettier-ignore
+    // oxfmt-ignore
     expect(device.getComponentIds()).toStrictEqual(["ble", "cloud", "input:0", "input:1", "mqtt", "switch:0", "switch:1", "sys", "sntp", 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws']);
 
     let component = device.getComponent('switch:0')!;
@@ -446,7 +446,7 @@ describe('Shellies', () => {
     expect(component?.hasProperty('temp')).toBe(false);
     expect(component?.hasProperty('mode')).toBe(false);
 
-    // prettier-ignore
+    // oxfmt-ignore
     if (isSwitchComponent(component)) {
       component.On();
       await waiter('On', () => { return component.getValue('state') === true; }, true);
@@ -468,7 +468,7 @@ describe('Shellies', () => {
     expect(component?.hasProperty('temp')).toBe(false);
     expect(component?.hasProperty('mode')).toBe(false);
 
-    // prettier-ignore
+    // oxfmt-ignore
     if (isSwitchComponent(component)) {
       component.On();
       await waiter('On', () => { return component.getValue('state') === true; }, true);
@@ -517,7 +517,7 @@ describe('Shellies', () => {
     expect(device.bthomeSensors.size).toBe(0);
 
     expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'Input', 'MQTT', 'Switch', 'Sys', 'Sntp', 'WiFi', 'Ws']);
-    // prettier-ignore
+    // oxfmt-ignore
     expect(device.getComponentIds()).toStrictEqual(["ble", "cloud", "input:0", "mqtt", "switch:0", "sys", "sntp", 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws']);
 
     const component = device.getComponent('switch:0')!;
@@ -527,7 +527,7 @@ describe('Shellies', () => {
     expect(component?.hasProperty('temp')).toBe(false);
     expect(component?.hasProperty('mode')).toBe(false);
 
-    // prettier-ignore
+    // oxfmt-ignore
     if (isSwitchComponent(component)) {
       component.On();
       await waiter('On', () => { return component.getValue('state') === true; }, true);
@@ -576,7 +576,7 @@ describe('Shellies', () => {
     expect(device.bthomeSensors.size).toBe(0);
 
     expect(device.getComponentNames()).toStrictEqual(['Ble', 'Cloud', 'MQTT', 'Switch', 'Sys', 'Sntp', 'WiFi', 'Ws']);
-    // prettier-ignore
+    // oxfmt-ignore
     expect(device.getComponentIds()).toStrictEqual(["ble", "cloud", "mqtt", "switch:0", "sys", "sntp", 'wifi_ap', 'wifi_sta', 'wifi_sta1', 'ws']);
 
     const component = device.getComponent('switch:0')!;
@@ -586,7 +586,7 @@ describe('Shellies', () => {
     expect(component?.hasProperty('temp')).toBe(false);
     expect(component?.hasProperty('mode')).toBe(false);
 
-    // prettier-ignore
+    // oxfmt-ignore
     if (isSwitchComponent(component)) {
       component.On();
       await waiter('On', () => { return component.getValue('state') === true; }, true);
@@ -755,7 +755,7 @@ describe('Shellies', () => {
     const component = device.getComponent('light:0');
     expect(component).not.toBeUndefined();
 
-    // prettier-ignore
+    // oxfmt-ignore
     if (isLightComponent(component)) {
       component.On();
       await waiter('On', () => { return component.getValue('state') === true; }, true);

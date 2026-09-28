@@ -1623,7 +1623,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     const config = this.config;
     if (config.failsafeCount > 0 && this.bridgedDevices.size + this.bluBridgedDevices.size < config.failsafeCount) {
       this.log.notice(`Waiting for the configured number of ${this.bridgedDevices.size + this.bluBridgedDevices.size}/${config.failsafeCount} devices to be loaded.`);
-      /* prettier-ignore */
+      /* oxfmt-ignore */
       const isSafe = await waiter('failsafeCount', () => this.bridgedDevices.size + this.bluBridgedDevices.size >= config.failsafeCount, false, this.failsafeCountSeconds*1000, 1000, config.debug);
       if (isSafe) {
         this.log.notice(`The plugin added the configured number of ${config.failsafeCount} devices.`);

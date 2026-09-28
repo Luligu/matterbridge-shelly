@@ -728,7 +728,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
         if (key.startsWith('pm1:')) device.addComponent(new ShellyComponent(device, key, 'PowerMeter', settingsPayload[key] as ShellyData));
         if (key.startsWith('em1:')) device.addComponent(new ShellyComponent(device, key, 'PowerMeter', settingsPayload[key] as ShellyData));
         if (key.startsWith('em:')) device.addComponent(new ShellyComponent(device, key, 'PowerMeter', settingsPayload[key] as ShellyData));
-        // prettier-ignore
+        // oxfmt-ignore
         if (device.profile === 'triphase' && key === 'em:0') {
           // For triphase devices (shellypro3em and shelly3em63g3) we have em:0 and emdata:0. We add phase A, B and C components as well and we use em:0 as total. The em:1, em:2 and em:3 need to be updated from the em:0 phases.
           device.addComponent(new ShellyComponent(device, 'em:0', 'PowerMeter', { voltage: null, current: 0, act_power: 0, aprt_power: 0, freq: 0, total_act_energy: 0, total_act_ret_energy: 0 }));
@@ -1266,7 +1266,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
         if (key.startsWith('em1data:')) this.updateComponent(key.replace('em1data:', 'em1:'), data[key] as ShellyData);
         if (key.startsWith('em:')) this.updateComponent(key, data[key] as ShellyData);
         if (key.startsWith('emdata:')) this.updateComponent(key.replace('emdata:', 'em:'), data[key] as ShellyData);
-        // prettier-ignore
+        // oxfmt-ignore
         if (this.profile === 'triphase' && key === 'em:0') {
           const em0 = data[key] as ShellyData;
           this.updateComponent('em:0', { voltage: null, current: em0.total_current, act_power: em0.total_act_power, aprt_power: em0.total_aprt_power, freq: null });
@@ -1274,7 +1274,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
           this.updateComponent('em:2', { voltage: em0.b_voltage, current: em0.b_current, act_power: em0.b_act_power, aprt_power: em0.b_aprt_power, freq: em0.b_freq });
           this.updateComponent('em:3', { voltage: em0.c_voltage, current: em0.c_current, act_power: em0.c_act_power, aprt_power: em0.c_aprt_power, freq: em0.c_freq });
         }
-        // prettier-ignore
+        // oxfmt-ignore
         if (this.profile === 'triphase' && key === 'emdata:0') {
           const emdata0 = data[key] as ShellyData;
           this.updateComponent('em:0', { total_act_energy: emdata0.total_act, total_act_ret_energy: emdata0.total_act_ret });

@@ -312,7 +312,7 @@ describe('ShellyWsClient', () => {
     (wsClient as any).wsClient.removeAllListeners('pong');
     expect((wsClient as any).pingInterval).toBeDefined();
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, `Start PingPong with device ${hk}Jest${db} host ${zb}localhost${db} port ${CYAN}8080${db}.`);
-    // prettier-ignore
+    // oxfmt-ignore
     await waiter('WsClient pong timeout', () => { return (wsClient as any).pongTimeout; }, true);
     expect((wsClient as any).pongTimeout).toBeDefined();
     await wait(500);
@@ -328,10 +328,10 @@ describe('ShellyWsClient', () => {
       LogLevel.DEBUG,
       expect.stringContaining(`Stopping ws client for Shelly device ${hk}Jest${db} host ${zb}localhost${db} port ${CYAN}8080${db}`),
     );
-    // prettier-ignore
+    // oxfmt-ignore
     await waiter('WsClient close isConnecting timeout', () => { return !wsClient.isConnecting; }, true);
     expect(wsClient.isConnecting).toBeFalsy();
-    // prettier-ignore
+    // oxfmt-ignore
     await waiter('WsClient close isConnected timeout', () => { return !wsClient.isConnected; }, true);
     expect(wsClient.isConnected).toBeFalsy();
   }, 10000);
@@ -379,7 +379,7 @@ describe('ShellyWsClient', () => {
     expect(wsClient.isConnecting).toBeTruthy();
     expect(wsClient.isConnected).toBeFalsy();
     const ws = await connectPromise;
-    // prettier-ignore
+    // oxfmt-ignore
     await waiter('WsClient connection timeout', () => { return wsClient.isConnected; }, true);
     expect((wsClient as any).auth).toBeFalsy();
     expect(wsClient.isConnecting).toBeFalsy();
@@ -390,10 +390,10 @@ describe('ShellyWsClient', () => {
       LogLevel.DEBUG,
       expect.stringContaining(`Stopping ws client for Shelly device ${hk}Jest${db} host ${zb}localhost${db} port ${CYAN}8080${db}`),
     );
-    // prettier-ignore
+    // oxfmt-ignore
     await waiter('WsClient close isConnecting timeout', () => { return !wsClient.isConnecting; }, true);
     expect(wsClient.isConnecting).toBeFalsy();
-    // prettier-ignore
+    // oxfmt-ignore
     await waiter('WsClient close isConnected timeout', () => { return !wsClient.isConnected; }, true);
     expect(wsClient.isConnected).toBeFalsy();
   }, 10000);
@@ -450,7 +450,7 @@ describe('ShellyWsClient', () => {
     expect(wsClient.isConnecting).toBeTruthy();
     expect(wsClient.isConnected).toBeFalsy();
     const ws = await connectPromise;
-    // prettier-ignore
+    // oxfmt-ignore
     await waiter('WsClient connection timeout', () => { return wsClient.isConnected; }, true, 5000, 100);
     expect(wsClient.isConnecting).toBeFalsy();
     expect(wsClient.isConnected).toBeTruthy();
@@ -466,10 +466,10 @@ describe('ShellyWsClient', () => {
       LogLevel.DEBUG,
       expect.stringContaining(`Stopping ws client for Shelly device ${hk}Jest${db} host ${zb}localhost${db} port ${CYAN}8080${db}`),
     );
-    // prettier-ignore
+    // oxfmt-ignore
     await waiter('WsClient close isConnecting timeout', () => { return !wsClient.isConnecting; }, true, 5000, 100);
     expect(wsClient.isConnecting).toBeFalsy();
-    // prettier-ignore
+    // oxfmt-ignore
     await waiter('WsClient close isConnected timeout', () => { return !wsClient.isConnected; }, true, 5000, 100);
     expect(wsClient.isConnected).toBeFalsy();
   }, 10000);
@@ -546,7 +546,7 @@ describe('ShellyWsClient', () => {
     expect(wsClient.isConnecting).toBeTruthy();
     expect(wsClient.isConnected).toBeFalsy();
     const ws = await connectPromise;
-    // prettier-ignore
+    // oxfmt-ignore
     await waiter('WsClient connection timeout', () => { return wsClient.isConnected; }, true, 5000, 100);
     expect((wsClient as any).auth).toBeTruthy();
     expect(wsClient.isConnecting).toBeFalsy();
@@ -569,10 +569,10 @@ describe('ShellyWsClient', () => {
       LogLevel.DEBUG,
       expect.stringContaining(`Stopping ws client for Shelly device ${hk}Jest${db} host ${zb}localhost${db} port ${CYAN}8080${db}`),
     );
-    // prettier-ignore
+    // oxfmt-ignore
     await waiter('WsClient close isConnecting timeout', () => { return !wsClient.isConnecting; }, true, 5000, 100);
     expect(wsClient.isConnecting).toBeFalsy();
-    // prettier-ignore
+    // oxfmt-ignore
     await waiter('WsClient close isConnected timeout', () => { return !wsClient.isConnected; }, true, 5000, 100);
     expect(wsClient.isConnected).toBeFalsy();
   }, 10000);
