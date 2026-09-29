@@ -26,7 +26,7 @@
 import { lstatSync, existsSync, readdirSync, readFileSync, rmSync } from 'node:fs';
 import path from 'node:path';
 
-const version = '1.3.0';
+const version = '1.3.1';
 const scriptName = path.basename(import.meta.filename);
 
 /**
