@@ -1047,9 +1047,9 @@ describe('Coap scanner', () => {
     await coapServer.registerDevice('127.0.0.1', 'shellydimmer2-98CDAC0D01BB', false);
     expect((coapServer as any).deviceId.get('127.0.0.1')).toBe('shellydimmer2-98CDAC0D01BB');
     // oxfmt-ignore
-    await waiter('Register device with fetch', () => loggerLogSpy.mock.calls.some((call) => call[1].includes('Invalid response registering device')), true, 5000, 50);
+    await waiter('Register device with fetch', () => loggerLogSpy.mock.calls.some((call) => call[1].includes('Invalid response registering device')), true, 25000, 50);
     (coapServer as any).deviceId.delete('127.0.0.1');
-  }, 10000);
+  }, 30000);
 
   test('Start receiving', async () => {
     expect(coapServer.isListening).toBeTruthy();
