@@ -32,7 +32,7 @@ import {
   Switch,
   TemperatureMeasurement,
 } from 'matterbridge/matter/clusters';
-import { wait } from 'matterbridge/utils';
+import { wait, waiter } from 'matterbridge/utils';
 import { log, loggerLogSpy, setDebug, setupTest } from 'matterbridge/vitest-utils';
 import {
   addMatterbridge,
@@ -1146,17 +1146,20 @@ describe('ShellyPlatform', () => {
     shelly2PMGen3.getComponent('cover:0')?.setValue('target_pos', 50);
 
     shelly.wsServer.emit('wssupdate', shelly2PMGen3.id, { 'cover:0': { current_pos: 0, target_pos: 0 } }); // Fully closed
-    await wait(eventWaitTime);
+    // oxfmt-ignore
+    await waiter('Cover position 10000', () => coverEndpoint.getAttribute('windowCovering', 'currentPositionLiftPercent100ths') === 10000 && coverEndpoint.getAttribute('windowCovering', 'targetPositionLiftPercent100ths') === 10000, true, 5000, 20);
     expect(coverEndpoint.getAttribute('windowCovering', 'currentPositionLiftPercent100ths')).toBe(10000);
     expect(coverEndpoint.getAttribute('windowCovering', 'targetPositionLiftPercent100ths')).toBe(10000);
 
     shelly.wsServer.emit('wssupdate', shelly2PMGen3.id, { 'cover:0': { current_pos: 50, target_pos: 50 } }); // Fully open
-    await wait(eventWaitTime);
+    // oxfmt-ignore
+    await waiter('Cover position 5000', () => coverEndpoint.getAttribute('windowCovering', 'currentPositionLiftPercent100ths') === 5000 && coverEndpoint.getAttribute('windowCovering', 'targetPositionLiftPercent100ths') === 5000, true, 5000, 20);
     expect(coverEndpoint.getAttribute('windowCovering', 'currentPositionLiftPercent100ths')).toBe(5000);
     expect(coverEndpoint.getAttribute('windowCovering', 'targetPositionLiftPercent100ths')).toBe(5000);
 
     shelly.wsServer.emit('wssupdate', shelly2PMGen3.id, { 'cover:0': { current_pos: 100, target_pos: 100 } }); // Fully open
-    await wait(eventWaitTime);
+    // oxfmt-ignore
+    await waiter('Cover position 0', () => coverEndpoint.getAttribute('windowCovering', 'currentPositionLiftPercent100ths') === 0 && coverEndpoint.getAttribute('windowCovering', 'targetPositionLiftPercent100ths') === 0, true, 5000, 20);
     expect(coverEndpoint.getAttribute('windowCovering', 'currentPositionLiftPercent100ths')).toBe(0);
     expect(coverEndpoint.getAttribute('windowCovering', 'targetPositionLiftPercent100ths')).toBe(0);
 
@@ -1314,7 +1317,9 @@ describe('ShellyPlatform', () => {
     shellyPlatform.bridgedDevices.set(oldDevice.id, bridgedDevice);
     const addDeviceSpy = vi.spyOn(shellyPlatform as any, 'addDevice').mockImplementation(async () => {});
 
+    const configUrl = `${discoveredDevice.port === 443 ? 'https' : 'http'}://${discoveredDevice.host}:${discoveredDevice.port}`;
     await emitDiscovered(discoveredDevice);
+    await waiter('Discovered endpoint updated', () => bridgedDevice.configUrl === configUrl && addDeviceSpy.mock.calls.length > 0, true, 5000, 20);
 
     expect(shellyPlatform.discoveredDevices.get(oldDevice.id)).toEqual(discoveredDevice);
     expect(shellyPlatform.storedDevices.get(oldDevice.id)).toEqual(discoveredDevice);
