@@ -21,6 +21,8 @@
  * Unknown arguments are rejected with exit code 1, so a mistyped flag never starts a clean.
  */
 
+/* oxlint-disable no-console */
+
 import { lstatSync, existsSync, readdirSync, readFileSync, rmSync } from 'node:fs';
 import path from 'node:path';
 
@@ -37,20 +39,17 @@ const handleArgs = () => {
   const knownArgs = new Set(['--workspaces', '--version', '-v', '--help', '-h']);
   const unknownArgs = args.filter((arg) => !knownArgs.has(arg));
   if (unknownArgs.length > 0) {
-    // oxlint-disable-next-line no-console
     console.error(`Unknown argument${unknownArgs.length === 1 ? '' : 's'}: ${unknownArgs.join(', ')}. Run with --help for usage.`);
     process.exitCode = 1;
     return false;
   }
 
   if (args.includes('--version') || args.includes('-v')) {
-    // oxlint-disable-next-line no-console
     console.log(version);
     return false;
   }
 
   if (args.includes('--help') || args.includes('-h')) {
-    // oxlint-disable-next-line no-console
     console.log(`${scriptName} v.${version}
 
 Remove every *.tsbuildinfo file and the dist and build directories.
@@ -71,7 +70,6 @@ Options:
 const shouldClean = handleArgs();
 
 if (shouldClean) {
-  // oxlint-disable-next-line no-console
   console.log(`${scriptName} v.${version}`);
 }
 
@@ -80,7 +78,7 @@ const root = process.cwd();
 
 // Colors follow the NO_COLOR convention and are left out when the output is redirected,
 // so a piped or captured log stays free of escape sequences.
-const useColor = process.env.NO_COLOR === undefined && (process.stdout.isTTY === true || process.env.FORCE_COLOR !== undefined);
+const useColor = process.env.NO_COLOR === undefined && (process.stdout.isTTY || process.env.FORCE_COLOR !== undefined);
 const red = (text) => (useColor ? `\u001B[31m${text}\u001B[0m` : text);
 
 let removed = 0;
@@ -91,11 +89,9 @@ const logRemoved = (dir, entry) => {
   if (loggedDir !== dir) {
     loggedDir = dir;
     const name = path.relative(root, dir);
-    // oxlint-disable-next-line no-console
     console.log(name === '' ? path.basename(dir) : name);
   }
   removed += 1;
-  // oxlint-disable-next-line no-console
   console.log(`  ${red('-')} ${entry}`);
 };
 
@@ -114,7 +110,6 @@ const rm = (dir, target) => {
     rmSync(path.resolve(dir, target), { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   } catch (error) {
     if (error.code === 'EPERM' || error.code === 'EBUSY' || error.code === 'ENOTEMPTY') {
-      // oxlint-disable-next-line no-console
       console.warn(`Skipped locked path (${error.code}): ${error.path ?? target} — likely held by a running process.`);
       return;
     }
@@ -177,6 +172,5 @@ if (shouldClean) {
   }
 
   const elapsed = `${Math.round(performance.now() - start)}ms`;
-  // oxlint-disable-next-line no-console
   console.log(removed === 0 ? `Nothing to clean in ${elapsed}.` : `Cleaned ${removed} path${removed === 1 ? '' : 's'} in ${elapsed}.`);
 }

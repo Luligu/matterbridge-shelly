@@ -1,6 +1,6 @@
 /**
  * prepublish-clean.mjs
- * Version: 1.1.0
+ * Version: 1.1.1
  *
  * Dependency-free replacement for:
  *   npx shx rm -rf node_modules/* node_modules/.[!.]* node_modules/..?* package-lock.json npm-shrinkwrap.json
@@ -18,8 +18,10 @@
  *   node scripts/prepublish-clean.mjs --workspaces
  */
 
+/* oxlint-disable no-console */
+
 import { existsSync, readdirSync, readFileSync, rmSync } from 'node:fs';
-import { resolve } from 'node:path';
+import path from 'node:path';
 
 const root = process.cwd();
 
@@ -29,10 +31,9 @@ const root = process.cwd();
 // so warn and continue instead of aborting the whole clean.
 const rm = (dir, target) => {
   try {
-    rmSync(resolve(dir, target), { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+    rmSync(path.resolve(dir, target), { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   } catch (error) {
     if (error.code === 'EPERM' || error.code === 'EBUSY' || error.code === 'ENOTEMPTY') {
-      // eslint-disable-next-line no-console
       console.warn(`Skipped locked path (${error.code}): ${error.path ?? target} — likely held by a running process.`);
       return;
     }
@@ -43,8 +44,8 @@ const rm = (dir, target) => {
 const clean = (dir) => {
   // Empty the contents (including dotfiles) of node_modules but keep the directory itself.
   try {
-    for (const entry of readdirSync(resolve(dir, 'node_modules'))) {
-      rm(resolve(dir, 'node_modules'), entry);
+    for (const entry of readdirSync(path.resolve(dir, 'node_modules'))) {
+      rm(path.resolve(dir, 'node_modules'), entry);
     }
   } catch {
     // node_modules does not exist, nothing to empty.
@@ -56,18 +57,18 @@ const clean = (dir) => {
 };
 
 const getWorkspaceDirs = () => {
-  const { workspaces = [] } = JSON.parse(readFileSync(resolve(root, 'package.json'), 'utf8'));
+  const { workspaces = [] } = JSON.parse(readFileSync(path.resolve(root, 'package.json'), 'utf8'));
   const patterns = Array.isArray(workspaces) ? workspaces : (workspaces.packages ?? []);
   const dirs = [];
 
   for (const pattern of patterns) {
     if (!pattern.endsWith('/*')) {
-      const dir = resolve(root, pattern);
-      if (existsSync(resolve(dir, 'package.json'))) dirs.push(dir);
+      const dir = path.resolve(root, pattern);
+      if (existsSync(path.resolve(dir, 'package.json'))) dirs.push(dir);
       continue;
     }
 
-    const parentDir = resolve(root, pattern.slice(0, -2));
+    const parentDir = path.resolve(root, pattern.slice(0, -2));
     let entries;
     try {
       entries = readdirSync(parentDir, { withFileTypes: true });
@@ -77,8 +78,8 @@ const getWorkspaceDirs = () => {
 
     for (const entry of entries) {
       if (!entry.isDirectory()) continue;
-      const dir = resolve(parentDir, entry.name);
-      if (existsSync(resolve(dir, 'package.json'))) dirs.push(dir);
+      const dir = path.resolve(parentDir, entry.name);
+      if (existsSync(path.resolve(dir, 'package.json'))) dirs.push(dir);
     }
   }
 

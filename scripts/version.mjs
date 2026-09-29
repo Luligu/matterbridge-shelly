@@ -1,6 +1,6 @@
 /**
  * version.mjs
- * Version: 1.0.2
+ * Version: 1.0.3
  *
  * Updates package.json version to:
  *   <baseVersion>-<dev|edge|git|local|bun>-<yyyymmdd>-<7charSha>
@@ -9,8 +9,7 @@
  *   node scripts/version.mjs <dev|edge|git|local|bun> [--dry-run]
  */
 
-/* eslint-disable no-console */
-/* eslint-disable jsdoc/require-jsdoc */
+/* oxlint-disable no-console */
 
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs/promises';
@@ -43,7 +42,7 @@ function shortSha7FromGit(repoRoot) {
     encoding: 'utf8',
     stdio: ['ignore', 'pipe', 'ignore'],
   });
-  const sha = String(out).trim();
+  const sha = out.trim();
   if (!/^[0-9a-f]{7}$/i.test(sha)) {
     throw new Error(`Unexpected git short SHA output: ${JSON.stringify(sha)}`);
   }
@@ -77,8 +76,7 @@ if (unknownFlags.length > 0) {
 }
 
 const dryRun = args.includes('--dry-run') || args.includes('-n');
-const positional = args.filter((a) => !a.startsWith('-'));
-const tag = positional[0]?.toLowerCase();
+const tag = args.find((a) => !a.startsWith('-'))?.toLowerCase();
 if (tag !== 'dev' && tag !== 'edge' && tag !== 'git' && tag !== 'local' && tag !== 'bun') {
   console.error(usage());
   process.exitCode = 1;

@@ -10,6 +10,8 @@
  *   node scripts/git-sync-dev.mjs rebase
  */
 
+/* oxlint-disable no-console */
+
 import { execFileSync } from 'node:child_process';
 
 /**

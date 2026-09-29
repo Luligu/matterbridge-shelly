@@ -1,6 +1,6 @@
 /**
  * prune-tags.mjs
- * Version: 1.0.2
+ * Version: 1.0.3
  *
  * Deletes old remote git tags that do not match a given prefix.
  *
@@ -8,8 +8,7 @@
  *   node scripts/prune-tags.mjs [--dry-run|-n] <tag-prefix-to-keep> [remote]
  */
 
-/* eslint-disable jsdoc/require-jsdoc */
-/* eslint-disable no-console */
+/* oxlint-disable no-console */
 
 import { spawnSync } from 'node:child_process';
 import { createInterface } from 'node:readline';
@@ -71,6 +70,13 @@ function section(title) {
   hr();
 }
 
+/**
+ * Throw an ExitError.
+ *
+ * @param {string} message - Error message.
+ * @param {number} [code] - Exit code.
+ * @returns {never} Never returns.
+ */
 function fail(message, code = 1) {
   throw new ExitError(message, code);
 }
@@ -78,6 +84,7 @@ function fail(message, code = 1) {
 function parseArgs(argv) {
   if (argv.includes('--help') || argv.includes('-h')) {
     console.log(usage());
+    // oxlint-disable-next-line unicorn/no-useless-undefined
     return undefined;
   }
 
@@ -98,6 +105,7 @@ function parseArgs(argv) {
   return { dryRun, keepPrefix, remote };
 }
 
+// oxlint-disable-next-line typescript/consistent-return -- ends with fail(), which always throws
 function runGit(args, options = {}) {
   const { allowFailure = false, input, inherit = false } = options;
   const result = spawnSync('git', args, {
@@ -161,7 +169,7 @@ function parseTagNames(raw) {
     tags.add(ref.replace(/^refs\/tags\//, '').replace(/\^\{\}$/, ''));
   }
 
-  return Array.from(tags).sort((left, right) => left.localeCompare(right));
+  return Array.from(tags).toSorted((left, right) => left.localeCompare(right));
 }
 
 function printTagTable(tags, colorizer = (value) => value) {
@@ -309,7 +317,7 @@ async function main() {
     ? localTagsRaw
         .split('\n')
         .filter(Boolean)
-        .sort((left, right) => left.localeCompare(right))
+        .toSorted((left, right) => left.localeCompare(right))
     : [];
   printTagTable(localTags, colors.green);
 }

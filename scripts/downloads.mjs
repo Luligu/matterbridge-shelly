@@ -1,6 +1,6 @@
 /**
  * downloads.mjs
- * Version: 1.0.1
+ * Version: 1.0.2
  *
  * Prints daily npm downloads for the last month for the package in ../package.json.
  *
@@ -11,7 +11,11 @@
  *   Node.js 18+ (for global fetch)
  */
 
-/* eslint-disable no-console */
+/* oxlint-disable no-console */
+/* oxlint-disable typescript/no-unnecessary-type-conversion */
+/* oxlint-disable typescript/use-unknown-in-catch-callback-variable */
+/* oxlint-disable typescript/prefer-nullish-coalescing */
+/* oxlint-disable typescript/no-unsafe-type-assertion */
 
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
@@ -96,7 +100,7 @@ async function fetchCurrentDayDownloads(pkgName) {
  */
 function sumDownloads(rows) {
   let total = 0;
-  for (const r of rows) total += Number(r.downloads) || 0;
+  for (const r of rows) total += r.downloads || 0;
   return total;
 }
 
@@ -108,8 +112,7 @@ function sumDownloads(rows) {
  * @returns {string} Left-padded string.
  */
 function padLeft(s, width) {
-  const str = String(s);
-  return str.length >= width ? str : ' '.repeat(width - str.length) + str;
+  return s.length >= width ? s : ' '.repeat(width - s.length) + s;
 }
 
 /**
@@ -120,8 +123,7 @@ function padLeft(s, width) {
  * @returns {string} Right-padded string.
  */
 function padRight(s, width) {
-  const str = String(s);
-  return str.length >= width ? str : str + ' '.repeat(width - str.length);
+  return s.length >= width ? s : s + ' '.repeat(width - s.length);
 }
 
 /**
@@ -131,7 +133,7 @@ function padRight(s, width) {
  * @returns {string} Formatted number.
  */
 function formatNumber(n) {
-  return new Intl.NumberFormat(undefined, { maximumFractionDigits: 0 }).format(Number(n) || 0);
+  return new Intl.NumberFormat(undefined, { maximumFractionDigits: 0 }).format(n || 0);
 }
 
 /**
@@ -232,10 +234,14 @@ async function main() {
   const total = sumDownloads(summaryRows);
   const days = summaryRows.length || 1;
   const avg = Math.round(total / days);
-  const minRow = summaryRows.reduce((m, r) => (r.downloads < m.downloads ? r : m), summaryRows[0] ?? { day: '-', downloads: 0 });
-  const maxRow = summaryRows.reduce((m, r) => (r.downloads > m.downloads ? r : m), summaryRows[0] ?? { day: '-', downloads: 0 });
+  let minRow = summaryRows[0] ?? { day: '-', downloads: 0 };
+  let maxRow = minRow;
+  for (const r of summaryRows) {
+    if (r.downloads < minRow.downloads) minRow = r;
+    if (r.downloads > maxRow.downloads) maxRow = r;
+  }
 
-  const dayWidth = Math.max(3, ...rows.map((r) => String(r.day).length));
+  const dayWidth = Math.max(3, ...rows.map((r) => r.day.length));
   const downloadStrings = rows.map((r) => formatNumber(r.downloads));
   const downloadsWidth = Math.max('DOWNLOADS'.length, ...downloadStrings.map((s) => s.length));
   const rangeStart = rows[0]?.day ?? lastMonthData.start;

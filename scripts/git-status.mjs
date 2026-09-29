@@ -1,6 +1,6 @@
 /**
  * git-status.mjs
- * Version: 1.0.1
+ * Version: 1.0.2
  *
  * Prints a summary of the current git repository status.
  *
@@ -8,8 +8,8 @@
  *   node scripts/git-status.mjs
  */
 
-/* eslint-disable jsdoc/require-jsdoc */
-/* eslint-disable no-console */
+/* oxlint-disable no-console */
+/* oxlint-disable typescript/prefer-nullish-coalescing */
 
 import { spawnSync } from 'node:child_process';
 
@@ -70,6 +70,13 @@ function section(title) {
   hr();
 }
 
+/**
+ * Throw an ExitError.
+ *
+ * @param {string} message - Error message.
+ * @param {number} [code] - Exit code.
+ * @returns {never} Never returns.
+ */
 function fail(message, code = 1) {
   throw new ExitError(message, code);
 }
@@ -77,6 +84,7 @@ function fail(message, code = 1) {
 function parseArgs(argv) {
   if (argv.includes('--help') || argv.includes('-h')) {
     console.log(usage());
+    // oxlint-disable-next-line unicorn/no-useless-undefined
     return undefined;
   }
 
@@ -91,6 +99,7 @@ function parseArgs(argv) {
   };
 }
 
+// oxlint-disable-next-line typescript/consistent-return -- ends with fail(), which always throws
 function git(args, options = {}) {
   const { allowFailure = false, input } = options;
   const result = spawnSync('git', args, {
@@ -109,6 +118,7 @@ function git(args, options = {}) {
   }
 
   if (allowFailure) {
+    // oxlint-disable-next-line unicorn/no-useless-undefined
     return undefined;
   }
 
@@ -135,6 +145,7 @@ function printKeyValue(key, value, colorizer) {
 function parseRemoteTagCount(remote) {
   const raw = git(['ls-remote', '--tags', remote], { allowFailure: true });
   if (raw === undefined) {
+    // oxlint-disable-next-line unicorn/no-useless-undefined
     return undefined;
   }
 
@@ -266,7 +277,7 @@ function main() {
 
   section('Repository status');
   const repoRoot = git(['rev-parse', '--show-toplevel']);
-  const repoName = repoRoot.split(/[\\/]/).filter(Boolean).pop() || repoRoot;
+  const repoName = repoRoot.split(/[\\/]/).findLast(Boolean) ?? repoRoot;
   const branch = git(['branch', '--show-current'], { allowFailure: true }) || '(detached)';
   const head = git(['rev-parse', '--short', 'HEAD']);
   const dirty = git(['status', '--porcelain']) ? 'yes' : 'no';
@@ -284,11 +295,11 @@ function main() {
   section('Tag reachability');
   const tagOnlyCount = git(['rev-list', '--tags', '--not', '--branches', '--count'], { allowFailure: true }) || '0';
   printKeyValue('Tag-only commits (should be 0):', tagOnlyCount, Number(tagOnlyCount) === 0 ? colors.green : colors.yellow);
-  if (git(['remote', 'get-url', remote], { allowFailure: true }) !== undefined) {
+  if (git(['remote', 'get-url', remote], { allowFailure: true }) === undefined) {
+    printKeyValue('Remote tag count:', '(remote not found)', colors.yellow);
+  } else {
     const remoteTagCount = parseRemoteTagCount(remote);
     printKeyValue(`Remote tag count (${remote}):`, remoteTagCount ?? '(remote query failed)');
-  } else {
-    printKeyValue('Remote tag count:', '(remote not found)', colors.yellow);
   }
   console.log();
 

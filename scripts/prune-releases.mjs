@@ -1,6 +1,6 @@
 /**
  * prune-releases.mjs
- * Version: 1.0.1
+ * Version: 1.0.2
  *
  * Prunes old releases for a given tag prefix.
  *
@@ -8,8 +8,8 @@
  *   node scripts/prune-releases.mjs [--help|-h] [--dry-run|-n] <tag-prefix-to-keep>
  */
 
-/* eslint-disable jsdoc/require-jsdoc */
-/* eslint-disable no-console */
+/* oxlint-disable no-console */
+/* oxlint-disable typescript/prefer-nullish-coalescing */
 
 import { spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
@@ -73,6 +73,13 @@ function section(title) {
   hr();
 }
 
+/**
+ * Throw an ExitError.
+ *
+ * @param {string} message - Error message.
+ * @param {number} [code] - Exit code.
+ * @returns {never} Never returns.
+ */
 function fail(message, code = 1) {
   throw new ExitError(message, code);
 }
@@ -80,6 +87,7 @@ function fail(message, code = 1) {
 function parseArgs(argv) {
   if (argv.includes('--help') || argv.includes('-h')) {
     console.log(usage());
+    // oxlint-disable-next-line unicorn/no-useless-undefined
     return undefined;
   }
 
@@ -91,8 +99,7 @@ function parseArgs(argv) {
     fail(`Unknown option(s): ${unknownFlags.join(', ')}\n\n${usage()}`);
   }
 
-  const positional = argv.filter((value) => !value.startsWith('-'));
-  const [keepPrefix] = positional;
+  const keepPrefix = argv.find((value) => !value.startsWith('-'));
   if (!keepPrefix) {
     fail(usage());
   }
@@ -100,6 +107,7 @@ function parseArgs(argv) {
   return { dryRun, keepPrefix };
 }
 
+// oxlint-disable-next-line typescript/consistent-return -- ends with fail(), which always throws
 function runCapture(command, args, options = {}) {
   const { allowFailure = false } = options;
   const result = spawnSync(command, args, {
@@ -181,7 +189,7 @@ function normalizeRepositoryUrl(remoteUrl) {
 /**
  * Read the repository from git remote.origin.url.
  *
- * @returns {Promise<string | null>} Repository in owner/repo form, or null.
+ * @returns {string | null} Repository in owner/repo form, or null.
  */
 function getRepositoryFromGit() {
   const result = runCapture('git', ['remote', 'get-url', 'origin'], { allowFailure: true });
@@ -194,7 +202,7 @@ function getRepositoryFromGit() {
 /**
  * Read the repository from package.json.
  *
- * @returns {Promise<string | null>} Repository in owner/repo form, or null.
+ * @returns {string | null} Repository in owner/repo form, or null.
  */
 function getRepositoryFromPackageJson() {
   try {
@@ -211,7 +219,7 @@ function getRepositoryFromPackageJson() {
 /**
  * Determine the current GitHub repository.
  *
- * @returns {Promise<string>} Repository in owner/repo form.
+ * @returns {string} Repository in owner/repo form.
  */
 function getRepositoryNameWithOwner() {
   const fromGit = getRepositoryFromGit();
@@ -231,7 +239,7 @@ function getRepositoryNameWithOwner() {
  * Call the GitHub API and parse a JSON response.
  *
  * @param {string} pathname - GitHub API path.
- * @returns {Promise<unknown>} Parsed JSON payload.
+ * @returns {unknown} Parsed JSON payload.
  */
 function ghApiJson(pathname) {
   const { stdout } = runCapture('gh', ['api', '--method', 'GET', pathname]);

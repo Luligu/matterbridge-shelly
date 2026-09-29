@@ -1,6 +1,6 @@
 /**
  * create-release.mjs
- * Version: 1.0.2
+ * Version: 1.0.3
  *
  * Create a GitHub release from the current package.json version and CHANGELOG.md entry.
  *
@@ -16,14 +16,13 @@
  * - Print tag/title/description and pause for user confirmation before creating
  */
 
-/* eslint-disable jsdoc/require-jsdoc */
+/* oxlint-disable no-console */
 
 import { spawn } from 'node:child_process';
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import process from 'node:process';
-// eslint-disable-next-line n/no-unsupported-features/node-builtins
 import readline from 'node:readline/promises';
 import { fileURLToPath } from 'node:url';
 
@@ -89,17 +88,12 @@ async function promptToContinue({ tag, title, description }) {
   // Print exactly what will be used, then pause.
   // User can hit Enter to proceed or type anything else to abort.
   // (Keeps it simple and explicit.)
-  // eslint-disable-next-line no-console
   console.log('---');
-  // eslint-disable-next-line no-console
   console.log(`Tag: ${tag}`);
-  // eslint-disable-next-line no-console
   console.log(`Title: ${title}`);
-  // eslint-disable-next-line no-console
   console.log('Description:');
-  // eslint-disable-next-line no-console
+  // oxlint-disable-next-line typescript/prefer-nullish-coalescing
   console.log(description || '(empty)');
-  // eslint-disable-next-line no-console
   console.log('---');
 
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
@@ -115,7 +109,7 @@ async function promptToContinue({ tag, title, description }) {
   }
 }
 
-function runGhReleaseCreate({ tag, title, notesFilePath }) {
+async function runGhReleaseCreate({ tag, title, notesFilePath }) {
   return new Promise((resolve, reject) => {
     const args = ['release', 'create', tag, '--title', title, '--notes-file', notesFilePath, '--target', 'main'];
     const child = spawn('gh', args, {
@@ -166,10 +160,9 @@ async function main() {
   }
 }
 
+// oxlint-disable-next-line typescript/use-unknown-in-catch-callback-variable
 main().catch((err) => {
-  // eslint-disable-next-line no-console
   console.error(`create-release: ${err?.message ?? err}`);
-  // eslint-disable-next-line no-console
   console.error('Make sure you are authenticated with GitHub CLI: gh auth status');
   process.exitCode = 1;
 });
