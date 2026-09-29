@@ -3,7 +3,7 @@
  * @description This file contains the class ShellyDevice.
  * @author Luca Liguori
  * @created 2024-05-01
- * @version 3.2.0
+ * @version 3.2.1
  * @license Apache-2.0
  *
  * Copyright 2024, 2025, 2026 Luca Liguori.
@@ -76,6 +76,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
   readonly password: string | undefined;
   profile: 'switch' | 'cover' | 'rgb' | 'rgbw' | 'color' | 'white' | 'light' | 'monophase' | 'triphase' | undefined = undefined;
   host: string;
+  port: number;
   id = '';
   model = '';
   mac = '';
@@ -119,11 +120,12 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
     { id: number; key: string; name: string; addr: string; sensorId: number; sensorIdx: number; value?: ShellyDataType; last_updated_ts: number }
   >();
 
-  private constructor(shelly: Shelly, log: AnsiLogger, host: string) {
+  private constructor(shelly: Shelly, log: AnsiLogger, host: string, port = 80) {
     super();
     this.shelly = shelly;
     this.log = log;
     this.host = host;
+    this.port = port;
     this.username = shelly.username;
     this.password = shelly.password;
   }
@@ -167,13 +169,15 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
   }
 
   /**
-   * Sets the host value for the device.
+   * Sets the host and port for the device.
    *
-   * @param {string} value - The new host value to set.
+   * @param {string} host - The device host.
+   * @param {number} port - The device port.
    */
-  setHost(value: string): void {
-    this.host = value;
-    this.wsClient?.setHost(value);
+  setHost(host: string, port: number): void {
+    this.host = host;
+    this.port = port;
+    this.wsClient?.setHost(host, port);
   }
 
   /**
@@ -201,6 +205,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
    * @param {string} id - The ID of the component to retrieve.
    * @returns {ShellyComponent | ShellyLightComponent | ShellySwitchComponent | ShellyCoverComponent | undefined} The ShellyComponent with the specified ID, or undefined if not found.
    */
+  // oxlint-disable-next-line typescript/no-unnecessary-type-parameters
   getComponent<T extends ShellyComponent>(id: string): T | undefined {
     const component = this._components.get(id);
     if (!component) return undefined;
@@ -526,21 +531,22 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
    * @param {Shelly} shelly The Shelly instance.
    * @param {AnsiLogger} log The AnsiLogger instance.
    * @param {string} host The host of the device. It can be an IP address or a cache JSON file path.
+   * @param {number} port The port of the device. Defaults to 80.
    *
    * @returns {Promise<ShellyDevice | undefined>} A Promise that resolves to a ShellyDevice instance or undefined if an error occurs.
    */
-  static async create(shelly: Shelly, log: AnsiLogger, host: string): Promise<ShellyDevice | undefined> {
+  static async create(shelly: Shelly, log: AnsiLogger, host: string, port = 80): Promise<ShellyDevice | undefined> {
     let shellyPayload: ShellyData | null = null;
     let statusPayload: ShellyData | null = null;
     let settingsPayload: ShellyData | null = null;
     let componentsPayload: ShellyData | null = null;
 
-    shellyPayload = await shellyFetch(shelly, log, host, 'shelly');
+    shellyPayload = await shellyFetch(shelly, log, host, port, 'shelly');
     if (!shellyPayload) {
       log.debug(`Error creating device at host ${zb}${host}${db}. No shelly data found.`);
       return undefined;
     }
-    const device = new ShellyDevice(shelly, log, host);
+    const device = new ShellyDevice(shelly, log, host, port);
     device.mac = shellyPayload.mac as string;
     device.online = true;
     device.lastseen = Date.now();
@@ -557,8 +563,8 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
 
     // Gen 1 Shelly device
     if (!shellyPayload.gen) {
-      statusPayload = await shellyFetch(shelly, log, host, 'status');
-      settingsPayload = await shellyFetch(shelly, log, host, 'settings');
+      statusPayload = await shellyFetch(shelly, log, host, port, 'status');
+      settingsPayload = await shellyFetch(shelly, log, host, port, 'settings');
       if (!statusPayload || !settingsPayload) {
         log.debug(`Error creating device gen 1 from host ${zb}${host}${db}. No data found.`);
         return undefined;
@@ -666,8 +672,8 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
 
     // Gen 2+ Shelly device
     if (shellyPayload.gen === 2 || shellyPayload.gen === 3 || shellyPayload.gen === 4) {
-      statusPayload = await shellyFetch(shelly, log, host, 'Shelly.GetStatus');
-      settingsPayload = await shellyFetch(shelly, log, host, 'Shelly.GetConfig');
+      statusPayload = await shellyFetch(shelly, log, host, port, 'Shelly.GetStatus');
+      settingsPayload = await shellyFetch(shelly, log, host, port, 'Shelly.GetConfig');
       if (!statusPayload || !settingsPayload) {
         log.debug(`Error creating device gen 2+ from host ${zb}${host}${db}. No data found.`);
         return undefined;
@@ -706,7 +712,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
         }
         if (key === 'blugw') device.addComponent(new ShellyComponent(device, key, 'Blugw', settingsPayload[key] as ShellyData));
         if (key === 'mqtt') device.addComponent(new ShellyComponent(device, key, 'MQTT', settingsPayload[key] as ShellyData)); // Ok
-        if (key === 'ws') device.addComponent(new ShellyComponent(device, key, 'WS', settingsPayload[key] as ShellyData)); // Ok
+        if (key === 'ws') device.addComponent(new ShellyComponent(device, key, 'Ws', settingsPayload[key] as ShellyData)); // Ok
         if (key === 'cloud') device.addComponent(new ShellyComponent(device, key, 'Cloud', settingsPayload[key] as ShellyData)); // Ok
         if (key === 'ble') device.addComponent(new ShellyComponent(device, key, 'Ble', settingsPayload[key] as ShellyData)); // Ok
         if (key === 'eth') device.addComponent(new ShellyComponent(device, key, 'Eth', settingsPayload[key] as ShellyData)); // Ok
@@ -722,7 +728,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
         if (key.startsWith('pm1:')) device.addComponent(new ShellyComponent(device, key, 'PowerMeter', settingsPayload[key] as ShellyData));
         if (key.startsWith('em1:')) device.addComponent(new ShellyComponent(device, key, 'PowerMeter', settingsPayload[key] as ShellyData));
         if (key.startsWith('em:')) device.addComponent(new ShellyComponent(device, key, 'PowerMeter', settingsPayload[key] as ShellyData));
-        // prettier-ignore
+        // oxfmt-ignore
         if (device.profile === 'triphase' && key === 'em:0') {
           // For triphase devices (shellypro3em and shelly3em63g3) we have em:0 and emdata:0. We add phase A, B and C components as well and we use em:0 as total. The em:1, em:2 and em:3 need to be updated from the em:0 phases.
           device.addComponent(new ShellyComponent(device, 'em:0', 'PowerMeter', { voltage: null, current: 0, act_power: 0, aprt_power: 0, freq: 0, total_act_energy: 0, total_act_ret_energy: 0 }));
@@ -750,7 +756,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
       let btHomePayload: BTHomeComponentPayload;
       let offset = 0;
       do {
-        btHomePayload = (await shellyFetch(shelly, log, host, 'Shelly.GetComponents', { dynamic_only: true, offset })) as unknown as BTHomeComponentPayload;
+        btHomePayload = (await shellyFetch(shelly, log, host, port, 'Shelly.GetComponents', { dynamic_only: true, offset })) as unknown as BTHomeComponentPayload;
         if (btHomePayload?.components) {
           btHomeComponents.push(...btHomePayload.components);
           offset += btHomePayload.components.length;
@@ -884,7 +890,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
 
     // Start WebSocket client for gen 2+ devices if not in sleep mode
     if (device.gen >= 2 && !device.udp && !device.sleepMode) {
-      device.wsClient = new WsClient(device.id, host, 80, shelly.password);
+      device.wsClient = new WsClient(device.id, host, device.port, shelly.password, shelly.caBundlePath, shelly.rejectUnauthorized);
 
       // Start the WebSocket client for devices that are not a cache JSON file
       if (!host.endsWith('.json')) device.wsClient.start();
@@ -960,7 +966,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
       if (device.sleepMode) {
         try {
           device.lastFetched = Date.now();
-          const awaken = await ShellyDevice.create(shelly, log, device.host);
+          const awaken = await ShellyDevice.create(shelly, log, device.host, device.port);
           // v8 ignore else
           if (awaken) {
             if (device.gen === 1 && cached) void shelly.coapServer.registerDevice(device.host, device.id, false); // No await to register device for CoIoT updates
@@ -1260,7 +1266,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
         if (key.startsWith('em1data:')) this.updateComponent(key.replace('em1data:', 'em1:'), data[key] as ShellyData);
         if (key.startsWith('em:')) this.updateComponent(key, data[key] as ShellyData);
         if (key.startsWith('emdata:')) this.updateComponent(key.replace('emdata:', 'em:'), data[key] as ShellyData);
-        // prettier-ignore
+        // oxfmt-ignore
         if (this.profile === 'triphase' && key === 'em:0') {
           const em0 = data[key] as ShellyData;
           this.updateComponent('em:0', { voltage: null, current: em0.total_current, act_power: em0.total_act_power, aprt_power: em0.total_aprt_power, freq: null });
@@ -1268,7 +1274,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
           this.updateComponent('em:2', { voltage: em0.b_voltage, current: em0.b_current, act_power: em0.b_act_power, aprt_power: em0.b_aprt_power, freq: em0.b_freq });
           this.updateComponent('em:3', { voltage: em0.c_voltage, current: em0.c_current, act_power: em0.c_act_power, aprt_power: em0.c_aprt_power, freq: em0.c_freq });
         }
-        // prettier-ignore
+        // oxfmt-ignore
         if (this.profile === 'triphase' && key === 'emdata:0') {
           const emdata0 = data[key] as ShellyData;
           this.updateComponent('em:0', { total_act_energy: emdata0.total_act, total_act_ret_energy: emdata0.total_act_ret });
@@ -1315,7 +1321,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
    * @returns {Promise<ShellyData | null>} A Promise that resolves to the updated ShellyData or null if no data is found.
    */
   async fetchUpdate(): Promise<ShellyData | null> {
-    this.shellyPayload = await shellyFetch(this.shelly, this.log, this.host, 'shelly');
+    this.shellyPayload = await shellyFetch(this.shelly, this.log, this.host, this.port, 'shelly');
     if (!this.shellyPayload) {
       // v8 ignore else
       if (this.online) {
@@ -1339,7 +1345,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
       }
       return null;
     }
-    this.settingsPayload = await shellyFetch(this.shelly, this.log, this.host, this.gen === 1 ? 'settings' : 'Shelly.GetConfig');
+    this.settingsPayload = await shellyFetch(this.shelly, this.log, this.host, this.port, this.gen === 1 ? 'settings' : 'Shelly.GetConfig');
     if (!this.settingsPayload) {
       // v8 ignore else
       if (this.online) {
@@ -1349,7 +1355,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
       }
       return null;
     }
-    this.statusPayload = await shellyFetch(this.shelly, this.log, this.host, this.gen === 1 ? 'status' : 'Shelly.GetStatus');
+    this.statusPayload = await shellyFetch(this.shelly, this.log, this.host, this.port, this.gen === 1 ? 'status' : 'Shelly.GetStatus');
     if (!this.statusPayload) {
       // v8 ignore else
       if (this.online) {
@@ -1364,7 +1370,10 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
       let btHomePayload: BTHomeComponentPayload;
       let offset = 0;
       do {
-        btHomePayload = (await shellyFetch(this.shelly, this.log, this.host, 'Shelly.GetComponents', { dynamic_only: true, offset })) as unknown as BTHomeComponentPayload;
+        btHomePayload = (await shellyFetch(this.shelly, this.log, this.host, this.port, 'Shelly.GetComponents', {
+          dynamic_only: true,
+          offset,
+        })) as unknown as BTHomeComponentPayload;
         // v8 ignore else
         if (btHomePayload?.components) {
           btHomeComponents.push(...btHomePayload.components);

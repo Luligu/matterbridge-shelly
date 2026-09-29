@@ -57,6 +57,8 @@ export class Shelly extends EventEmitter<ShellyEvents> {
   public wsServer: WsServer;
   public username: string | undefined;
   public password: string | undefined;
+  public caBundlePath: string;
+  public rejectUnauthorized: boolean;
   private _dataPath = '';
   private _interfaceName: string | undefined;
   private _ipv4Address: string | undefined;
@@ -68,12 +70,16 @@ export class Shelly extends EventEmitter<ShellyEvents> {
    * @param {AnsiLogger} log - The logger instance.
    * @param {string} [username] - The username for authentication or undefined if no authentication is needed.
    * @param {string} [password] - The password for authentication or undefined if no authentication is needed.
+   * @param {string} [caBundlePath] - The path to the CA bundle for SSL verification.
+   * @param {boolean} [rejectUnauthorized] - Whether to reject unauthorized SSL certificates.
    */
-  constructor(log: AnsiLogger, username?: string, password?: string) {
+  constructor(log: AnsiLogger, username?: string, password?: string, caBundlePath = '', rejectUnauthorized = false) {
     super();
     this.log = log;
     this.username = username;
     this.password = password;
+    this.caBundlePath = caBundlePath;
+    this.rejectUnauthorized = rejectUnauthorized;
     this.mdnsScanner = new MdnsScanner();
     this.coapServer = new CoapServer(this);
     this.udpServer = new UdpServer(8585, password);

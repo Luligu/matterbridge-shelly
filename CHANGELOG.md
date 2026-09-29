@@ -30,6 +30,47 @@ If you like this project and find it useful, please consider giving it a star on
 
 You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his invaluable contribution to this project.
 
+## [2.7.0] - 2026-09-29
+
+### Breaking changes
+
+- [matterbridge]: Require matterbridge v.3.10.10 with matter v.1.6.0.
+
+### Added
+
+- [devcontainer]: Add [`Dev Container`](.devcontainer/README.md) v.2.2.0 with dual Node and Bun runtime support.
+- [agents]: Add a [`shared setup`](.agents/README.md) for all agents: OpenAI Codex, Claude Code, GitHub Copilot and Google Gemini / Antigravity.
+- [cloud]: Add the typed `Cloud` component (Cloud in the device UI).
+- [sys]: Add the typed `Sys` component (used for RPC over UDP in the device UI).
+- [ws]: Add the typed `Ws` component (Outbound websocket in the device UI).
+- [wifi]: Add the typed `WiFi` component (Wi-Fi in the device UI).
+- [matter]: Add the typed `Matter` component (Matter in the device UI).
+- [port]: Add `port` to ShellyDevice to allow connections with `https` and `wss`.
+- [config]: Add [`caBundlePath`](README.md#cabundlepath) to the config to allow connections with `https` and `wss`.
+- [config]: Add [`rejectUnauthorized`](README.md#rejectunauthorized) to the config to allow connections with `https` and `wss`.
+- [config]: Add device now supports a full URL http(s)://ip_address:port if necessary.
+- [shelly]: Add support for [Secure Connection](https://shelly-api-docs.shelly.cloud/gen2/General/CustomHTTPSCertificates) with `https://` and `wss://` for Gen2+ devices.
+- [shelly]: Add support for [Range Extender](https://shelly-api-docs.shelly.cloud/gen2/ComponentsAndServices/WiFi#rangeextender) for Gen2+ devices.
+- [agents]: Add [`commit message instructions`](.github/commit-message-instructions.md) v.1.0.0 for the VS Code Copilot "Generate Commit Message" button (Conventional Commits).
+
+### Changed
+
+- [vscode]: Update `.vscode/settings.json` to v.1.0.13: point the Copilot "Generate Commit Message" button to `.github/commit-message-instructions.md`.
+- [styleguide]: Update [`STYLEGUIDE.md`](STYLEGUIDE.md) to v.1.1.0: align it with the lint and format config and add the Commit Messages and Changelog sections.
+- [scripts]: Update `scripts/clean.mjs` and `scripts/deep-clean.mjs` to v.1.3.0: log every removed path, add `--help` and `--version` and reject unknown arguments.
+- [package]: Upgrade package.
+- [package]: Bump `node-ansi-logger` to v.3.3.1.
+- [package]: Bump `node-persist-manager` to v.2.1.1.
+- [package]: Bump `oxfmt` to v.0.71.0.
+- [package]: Bump `oxlint` to v.1.86.0.
+- [package]: Bump `oxlint-tsgolint` to v.7.0.2003.
+- [package]: Bump `vitest` to v.5.0.2.
+- [package]: Bump `@vitest/coverage-v8` to v.5.0.2.
+- [package]: Bump `@types/node` to v.26.6.3.
+- [package]: Bump `typescript` to v.7.0.2.
+
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+
 ## [2.6.0] - 2026-08-29
 
 ### Added

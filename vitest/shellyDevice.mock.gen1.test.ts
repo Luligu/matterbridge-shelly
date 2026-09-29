@@ -157,7 +157,7 @@ describe('Shelly gen 1 devices test', () => {
 
     expect(device.components.length).toBe(13);
     expect(device.getComponentNames()).toStrictEqual(['WiFi', 'MQTT', 'CoIoT', 'Sntp', 'Cloud', 'Relay', 'PowerMeter', 'Input', 'Temperature', 'Humidity', 'Sys']);
-    // prettier-ignore
+    // oxfmt-ignore
     expect(device.getComponentIds()).toStrictEqual(['wifi_ap', 'wifi_sta', 'wifi_sta1', 'mqtt', 'coiot', 'sntp', 'cloud', 'relay:0', 'meter:0', 'input:0', 'temperature', 'humidity', 'sys']);
 
     expect(device.getComponent('sys')?.getValue('temperature')).toBe(undefined);

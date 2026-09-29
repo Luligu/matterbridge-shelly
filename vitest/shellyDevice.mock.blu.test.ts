@@ -37,6 +37,8 @@ vi.spyOn(MdnsScanner.prototype, 'start').mockImplementation(() => {});
 vi.spyOn(MdnsScanner.prototype, 'stop').mockImplementation(() => {});
 
 const mockConfig: ShellyPlatformConfig = {
+  caBundlePath: '',
+  rejectUnauthorized: false,
   name: 'matterbridge-shelly',
   type: 'DynamicPlatform',
   version: '1.1.2',

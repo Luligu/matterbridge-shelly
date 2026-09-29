@@ -32,7 +32,7 @@ import {
   Switch,
   TemperatureMeasurement,
 } from 'matterbridge/matter/clusters';
-import { wait } from 'matterbridge/utils';
+import { wait, waiter } from 'matterbridge/utils';
 import { log, loggerLogSpy, setDebug, setupTest } from 'matterbridge/vitest-utils';
 import {
   addMatterbridge,
@@ -64,6 +64,8 @@ await setupTest(NAME, false);
 vi.mock('../src/shellyFetch.js', { spy: true });
 
 const mockConfig: ShellyPlatformConfig = {
+  caBundlePath: '',
+  rejectUnauthorized: false,
   name: 'matterbridge-shelly',
   type: 'DynamicPlatform',
   version: '1.1.2',
@@ -673,15 +675,15 @@ describe('ShellyPlatform', () => {
 
     await rgbEndpoint.executeCommandHandler('on', {}, 'onOff', {} as any, rgbEndpoint);
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `${db}Sent command ${hk}Rgb${db}:${hk}rgb:0${db}:${hk}On()${db} to shelly device ${idn}${shellyPro.id}${rs}${db}`);
-    expect(fetch).toHaveBeenCalledWith(shellyPro.shelly, shellyPro.log, shellyPro.host, 'Rgb.Set', { id: 0, on: true });
+    expect(fetch).toHaveBeenCalledWith(shellyPro.shelly, shellyPro.log, shellyPro.host, shellyPro.port, 'Rgb.Set', { id: 0, on: true });
 
     await rgbEndpoint.executeCommandHandler('off', {}, 'onOff', {} as any, rgbEndpoint);
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `${db}Sent command ${hk}Rgb${db}:${hk}rgb:0${db}:${hk}Off()${db} to shelly device ${idn}${shellyPro.id}${rs}${db}`);
-    expect(fetch).toHaveBeenCalledWith(shellyPro.shelly, shellyPro.log, shellyPro.host, 'Rgb.Set', { id: 0, on: false });
+    expect(fetch).toHaveBeenCalledWith(shellyPro.shelly, shellyPro.log, shellyPro.host, shellyPro.port, 'Rgb.Set', { id: 0, on: false });
 
     await rgbEndpoint.executeCommandHandler('toggle', {}, 'onOff', {} as any, rgbEndpoint);
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `${db}Sent command ${hk}Rgb${db}:${hk}rgb:0${db}:${hk}Toggle()${db} to shelly device ${idn}${shellyPro.id}${rs}${db}`);
-    expect(fetch).toHaveBeenCalledWith(shellyPro.shelly, shellyPro.log, shellyPro.host, 'Rgb.Toggle', { id: 0 });
+    expect(fetch).toHaveBeenCalledWith(shellyPro.shelly, shellyPro.log, shellyPro.host, shellyPro.port, 'Rgb.Toggle', { id: 0 });
 
     await rgbEndpoint.executeCommandHandler(
       'moveToLevel',
@@ -694,7 +696,7 @@ describe('ShellyPlatform', () => {
       LogLevel.INFO,
       `${db}Sent command ${hk}Rgb${db}:${hk}rgb:0${db}:${hk}Level(${YELLOW}20${hk})${db} to shelly device ${idn}${shellyPro.id}${rs}${db}`,
     );
-    expect(fetch).toHaveBeenCalledWith(shellyPro.shelly, shellyPro.log, shellyPro.host, 'Rgb.Set', { id: 0, brightness: 20 });
+    expect(fetch).toHaveBeenCalledWith(shellyPro.shelly, shellyPro.log, shellyPro.host, shellyPro.port, 'Rgb.Set', { id: 0, brightness: 20 });
 
     await rgbEndpoint.executeCommandHandler(
       'moveToHueAndSaturation',
@@ -707,7 +709,7 @@ describe('ShellyPlatform', () => {
       LogLevel.INFO,
       `${db}Sent command ${hk}Rgb${db}:${hk}rgb:0${db}:${hk}ColorRGB(${YELLOW}144${hk}, ${YELLOW}153${hk}, ${YELLOW}103${hk})${db} to shelly device ${idn}${shellyPro.id}${rs}${db}`,
     );
-    expect(fetch).toHaveBeenCalledWith(shellyPro.shelly, shellyPro.log, shellyPro.host, 'Rgb.Set', { id: 0, rgb: [144, 153, 103] });
+    expect(fetch).toHaveBeenCalledWith(shellyPro.shelly, shellyPro.log, shellyPro.host, shellyPro.port, 'Rgb.Set', { id: 0, rgb: [144, 153, 103] });
 
     await rgbEndpoint.executeCommandHandler(
       'moveToColorTemperature',
@@ -720,19 +722,19 @@ describe('ShellyPlatform', () => {
       LogLevel.INFO,
       `${db}Sent command ${hk}Rgb${db}:${hk}rgb:0${db}:${hk}ColorRGB(${YELLOW}255${hk}, ${YELLOW}206${hk}, ${YELLOW}166${hk})${db} to shelly device ${idn}${shellyPro.id}${rs}${db}`,
     );
-    expect(fetch).toHaveBeenCalledWith(shellyPro.shelly, shellyPro.log, shellyPro.host, 'Rgb.Set', { id: 0, rgb: [255, 206, 166] });
+    expect(fetch).toHaveBeenCalledWith(shellyPro.shelly, shellyPro.log, shellyPro.host, shellyPro.port, 'Rgb.Set', { id: 0, rgb: [255, 206, 166] });
 
     await cctEndpoint.executeCommandHandler('on', {}, 'onOff', {} as any, cctEndpoint);
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `${db}Sent command ${hk}Cct${db}:${hk}cct:0${db}:${hk}On()${db} to shelly device ${idn}${shellyPro.id}${rs}${db}`);
-    expect(fetch).toHaveBeenCalledWith(shellyPro.shelly, shellyPro.log, shellyPro.host, 'Cct.Set', { id: 0, on: true });
+    expect(fetch).toHaveBeenCalledWith(shellyPro.shelly, shellyPro.log, shellyPro.host, shellyPro.port, 'Cct.Set', { id: 0, on: true });
 
     await cctEndpoint.executeCommandHandler('off', {}, 'onOff', {} as any, cctEndpoint);
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `${db}Sent command ${hk}Cct${db}:${hk}cct:0${db}:${hk}Off()${db} to shelly device ${idn}${shellyPro.id}${rs}${db}`);
-    expect(fetch).toHaveBeenCalledWith(shellyPro.shelly, shellyPro.log, shellyPro.host, 'Cct.Set', { id: 0, on: false });
+    expect(fetch).toHaveBeenCalledWith(shellyPro.shelly, shellyPro.log, shellyPro.host, shellyPro.port, 'Cct.Set', { id: 0, on: false });
 
     await cctEndpoint.executeCommandHandler('toggle', {}, 'onOff', {} as any, cctEndpoint);
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `${db}Sent command ${hk}Cct${db}:${hk}cct:0${db}:${hk}Toggle()${db} to shelly device ${idn}${shellyPro.id}${rs}${db}`);
-    expect(fetch).toHaveBeenCalledWith(shellyPro.shelly, shellyPro.log, shellyPro.host, 'Cct.Toggle', { id: 0 });
+    expect(fetch).toHaveBeenCalledWith(shellyPro.shelly, shellyPro.log, shellyPro.host, shellyPro.port, 'Cct.Toggle', { id: 0 });
 
     await cctEndpoint.executeCommandHandler(
       'moveToLevel',
@@ -745,7 +747,7 @@ describe('ShellyPlatform', () => {
       LogLevel.INFO,
       `${db}Sent command ${hk}Cct${db}:${hk}cct:0${db}:${hk}Level(${YELLOW}20${hk})${db} to shelly device ${idn}${shellyPro.id}${rs}${db}`,
     );
-    expect(fetch).toHaveBeenCalledWith(shellyPro.shelly, shellyPro.log, shellyPro.host, 'Cct.Set', { id: 0, brightness: 20 });
+    expect(fetch).toHaveBeenCalledWith(shellyPro.shelly, shellyPro.log, shellyPro.host, shellyPro.port, 'Cct.Set', { id: 0, brightness: 20 });
 
     loggerLogSpy.mockClear();
     await cctEndpoint.executeCommandHandler(
@@ -759,7 +761,7 @@ describe('ShellyPlatform', () => {
       LogLevel.INFO,
       `${db}Sent command ${hk}Cct${db}:${hk}cct:0${db}:${hk}ColorTemp(for model ${shellyPro.model} range 2700-5000 ${YELLOW}250${hk}->${YELLOW}4329${hk})${db} to shelly device ${idn}${shellyPro.id}${rs}${db}`,
     );
-    expect(fetch).toHaveBeenCalledWith(shellyPro.shelly, shellyPro.log, shellyPro.host, 'Cct.Set', { id: 0, ct: 4329 });
+    expect(fetch).toHaveBeenCalledWith(shellyPro.shelly, shellyPro.log, shellyPro.host, shellyPro.port, 'Cct.Set', { id: 0, ct: 4329 });
 
     loggerLogSpy.mockClear();
     await cctEndpoint.executeCommandHandler(
@@ -773,7 +775,7 @@ describe('ShellyPlatform', () => {
       LogLevel.INFO,
       `${db}Sent command ${hk}Cct${db}:${hk}cct:0${db}:${hk}ColorTemp(for model ${shellyPro.model} range 2700-5000 ${YELLOW}500${hk}->${YELLOW}2700${hk})${db} to shelly device ${idn}${shellyPro.id}${rs}${db}`,
     );
-    expect(fetch).toHaveBeenCalledWith(shellyPro.shelly, shellyPro.log, shellyPro.host, 'Cct.Set', { id: 0, ct: 2700 });
+    expect(fetch).toHaveBeenCalledWith(shellyPro.shelly, shellyPro.log, shellyPro.host, shellyPro.port, 'Cct.Set', { id: 0, ct: 2700 });
 
     loggerLogSpy.mockClear();
     await cctEndpoint.executeCommandHandler(
@@ -787,7 +789,7 @@ describe('ShellyPlatform', () => {
       LogLevel.INFO,
       `${db}Sent command ${hk}Cct${db}:${hk}cct:0${db}:${hk}ColorTemp(for model ${shellyPro.model} range 2700-5000 ${YELLOW}147${hk}->${YELLOW}5000${hk})${db} to shelly device ${idn}${shellyPro.id}${rs}${db}`,
     );
-    expect(fetch).toHaveBeenCalledWith(shellyPro.shelly, shellyPro.log, shellyPro.host, 'Cct.Set', { id: 0, ct: 5000 });
+    expect(fetch).toHaveBeenCalledWith(shellyPro.shelly, shellyPro.log, shellyPro.host, shellyPro.port, 'Cct.Set', { id: 0, ct: 5000 });
 
     fetch.mockRestore();
 
@@ -943,21 +945,21 @@ describe('ShellyPlatform', () => {
       LogLevel.INFO,
       `${db}Sent command ${hk}Rgb${db}:${hk}rgb:0${db}:${hk}On()${db} to shelly device ${idn}${shellyPlusRgbwPm.id}${rs}${db}`,
     );
-    expect(fetch).toHaveBeenCalledWith(shellyPlusRgbwPm.shelly, shellyPlusRgbwPm.log, shellyPlusRgbwPm.host, 'Rgb.Set', { id: 0, on: true });
+    expect(fetch).toHaveBeenCalledWith(shellyPlusRgbwPm.shelly, shellyPlusRgbwPm.log, shellyPlusRgbwPm.host, shellyPlusRgbwPm.port, 'Rgb.Set', { id: 0, on: true });
 
     await rgbEndpoint.executeCommandHandler('off', {}, 'onOff', {} as any, rgbEndpoint);
     expect(loggerLogSpy).toHaveBeenCalledWith(
       LogLevel.INFO,
       `${db}Sent command ${hk}Rgb${db}:${hk}rgb:0${db}:${hk}Off()${db} to shelly device ${idn}${shellyPlusRgbwPm.id}${rs}${db}`,
     );
-    expect(fetch).toHaveBeenCalledWith(shellyPlusRgbwPm.shelly, shellyPlusRgbwPm.log, shellyPlusRgbwPm.host, 'Rgb.Set', { id: 0, on: false });
+    expect(fetch).toHaveBeenCalledWith(shellyPlusRgbwPm.shelly, shellyPlusRgbwPm.log, shellyPlusRgbwPm.host, shellyPlusRgbwPm.port, 'Rgb.Set', { id: 0, on: false });
 
     await rgbEndpoint.executeCommandHandler('toggle', {}, 'onOff', {} as any, rgbEndpoint);
     expect(loggerLogSpy).toHaveBeenCalledWith(
       LogLevel.INFO,
       `${db}Sent command ${hk}Rgb${db}:${hk}rgb:0${db}:${hk}Toggle()${db} to shelly device ${idn}${shellyPlusRgbwPm.id}${rs}${db}`,
     );
-    expect(fetch).toHaveBeenCalledWith(shellyPlusRgbwPm.shelly, shellyPlusRgbwPm.log, shellyPlusRgbwPm.host, 'Rgb.Toggle', { id: 0 });
+    expect(fetch).toHaveBeenCalledWith(shellyPlusRgbwPm.shelly, shellyPlusRgbwPm.log, shellyPlusRgbwPm.host, shellyPlusRgbwPm.port, 'Rgb.Toggle', { id: 0 });
 
     await rgbEndpoint.executeCommandHandler(
       'moveToLevel',
@@ -970,7 +972,7 @@ describe('ShellyPlatform', () => {
       LogLevel.INFO,
       `${db}Sent command ${hk}Rgb${db}:${hk}rgb:0${db}:${hk}Level(${YELLOW}20${hk})${db} to shelly device ${idn}${shellyPlusRgbwPm.id}${rs}${db}`,
     );
-    expect(fetch).toHaveBeenCalledWith(shellyPlusRgbwPm.shelly, shellyPlusRgbwPm.log, shellyPlusRgbwPm.host, 'Rgb.Set', { id: 0, brightness: 20 });
+    expect(fetch).toHaveBeenCalledWith(shellyPlusRgbwPm.shelly, shellyPlusRgbwPm.log, shellyPlusRgbwPm.host, shellyPlusRgbwPm.port, 'Rgb.Set', { id: 0, brightness: 20 });
 
     await rgbEndpoint.executeCommandHandler(
       'moveToHueAndSaturation',
@@ -983,7 +985,7 @@ describe('ShellyPlatform', () => {
       LogLevel.INFO,
       `${db}Sent command ${hk}Rgb${db}:${hk}rgb:0${db}:${hk}ColorRGB(${YELLOW}144${hk}, ${YELLOW}153${hk}, ${YELLOW}103${hk})${db} to shelly device ${idn}${shellyPlusRgbwPm.id}${rs}${db}`,
     );
-    expect(fetch).toHaveBeenCalledWith(shellyPlusRgbwPm.shelly, shellyPlusRgbwPm.log, shellyPlusRgbwPm.host, 'Rgb.Set', { id: 0, rgb: [144, 153, 103] });
+    expect(fetch).toHaveBeenCalledWith(shellyPlusRgbwPm.shelly, shellyPlusRgbwPm.log, shellyPlusRgbwPm.host, shellyPlusRgbwPm.port, 'Rgb.Set', { id: 0, rgb: [144, 153, 103] });
 
     await rgbEndpoint.executeCommandHandler(
       'moveToColorTemperature',
@@ -996,7 +998,7 @@ describe('ShellyPlatform', () => {
       LogLevel.INFO,
       `${db}Sent command ${hk}Rgb${db}:${hk}rgb:0${db}:${hk}ColorRGB(${YELLOW}255${hk}, ${YELLOW}206${hk}, ${YELLOW}166${hk})${db} to shelly device ${idn}${shellyPlusRgbwPm.id}${rs}${db}`,
     );
-    expect(fetch).toHaveBeenCalledWith(shellyPlusRgbwPm.shelly, shellyPlusRgbwPm.log, shellyPlusRgbwPm.host, 'Rgb.Set', { id: 0, rgb: [255, 206, 166] });
+    expect(fetch).toHaveBeenCalledWith(shellyPlusRgbwPm.shelly, shellyPlusRgbwPm.log, shellyPlusRgbwPm.host, shellyPlusRgbwPm.port, 'Rgb.Set', { id: 0, rgb: [255, 206, 166] });
 
     await rgbEndpoint.executeCommandHandler('identify', { identifyTime: 0 }, 'identify', {} as any, rgbEndpoint);
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, expect.stringContaining('Identify command received for endpoint'));
@@ -1006,7 +1008,7 @@ describe('ShellyPlatform', () => {
       LogLevel.INFO,
       `${db}Sent command ${hk}Rgb${db}:${hk}rgb:0${db}:${hk}Level(${YELLOW}50${hk})${db} to shelly device ${idn}${shellyPlusRgbwPm.id}${rs}${db}`,
     );
-    expect(fetch).toHaveBeenCalledWith(shellyPlusRgbwPm.shelly, shellyPlusRgbwPm.log, shellyPlusRgbwPm.host, 'Rgb.Set', { id: 0, brightness: 50 });
+    expect(fetch).toHaveBeenCalledWith(shellyPlusRgbwPm.shelly, shellyPlusRgbwPm.log, shellyPlusRgbwPm.host, shellyPlusRgbwPm.port, 'Rgb.Set', { id: 0, brightness: 50 });
 
     await rgbEndpoint.executeCommandHandler('moveToHue', getMoveToHueRequest(50, 0, false), 'colorControl', {} as any, rgbEndpoint);
     await wait(1000);
@@ -1014,7 +1016,7 @@ describe('ShellyPlatform', () => {
       LogLevel.INFO,
       `${db}Sent command ${hk}Rgb${db}:${hk}rgb:0${db}:${hk}ColorRGB(${YELLOW}209${hk}, ${YELLOW}255${hk}, ${YELLOW}0${hk})${db} to shelly device ${idn}${shellyPlusRgbwPm.id}${rs}${db}`,
     );
-    expect(fetch).toHaveBeenCalledWith(shellyPlusRgbwPm.shelly, shellyPlusRgbwPm.log, shellyPlusRgbwPm.host, 'Rgb.Set', { id: 0, rgb: [209, 255, 0] });
+    expect(fetch).toHaveBeenCalledWith(shellyPlusRgbwPm.shelly, shellyPlusRgbwPm.log, shellyPlusRgbwPm.host, shellyPlusRgbwPm.port, 'Rgb.Set', { id: 0, rgb: [209, 255, 0] });
 
     await rgbEndpoint.executeCommandHandler('moveToSaturation', getMoveToSaturationRequest(50, 0, false), 'colorControl', {} as any, rgbEndpoint);
     await wait(1000);
@@ -1022,14 +1024,14 @@ describe('ShellyPlatform', () => {
       LogLevel.INFO,
       `${db}Sent command ${hk}Rgb${db}:${hk}rgb:0${db}:${hk}ColorRGB(${YELLOW}153${hk}, ${YELLOW}103${hk}, ${YELLOW}109${hk})${db} to shelly device ${idn}${shellyPlusRgbwPm.id}${rs}${db}`,
     );
-    expect(fetch).toHaveBeenCalledWith(shellyPlusRgbwPm.shelly, shellyPlusRgbwPm.log, shellyPlusRgbwPm.host, 'Rgb.Set', { id: 0, rgb: [153, 103, 109] });
+    expect(fetch).toHaveBeenCalledWith(shellyPlusRgbwPm.shelly, shellyPlusRgbwPm.log, shellyPlusRgbwPm.host, shellyPlusRgbwPm.port, 'Rgb.Set', { id: 0, rgb: [153, 103, 109] });
 
     await rgbEndpoint.executeCommandHandler('moveToColor', getMoveToColorRequest(16384, 16384, 0, false), 'colorControl', {} as any, rgbEndpoint);
     expect(loggerLogSpy).toHaveBeenCalledWith(
       LogLevel.INFO,
       `${db}Sent command ${hk}Rgb${db}:${hk}rgb:0${db}:${hk}ColorRGB(${YELLOW}171${hk}, ${YELLOW}191${hk}, ${YELLOW}255${hk})${db} to shelly device ${idn}${shellyPlusRgbwPm.id}${rs}${db}`,
     );
-    expect(fetch).toHaveBeenCalledWith(shellyPlusRgbwPm.shelly, shellyPlusRgbwPm.log, shellyPlusRgbwPm.host, 'Rgb.Set', { id: 0, rgb: [171, 191, 255] });
+    expect(fetch).toHaveBeenCalledWith(shellyPlusRgbwPm.shelly, shellyPlusRgbwPm.log, shellyPlusRgbwPm.host, shellyPlusRgbwPm.port, 'Rgb.Set', { id: 0, rgb: [171, 191, 255] });
 
     fetch.mockRestore();
 
@@ -1144,17 +1146,20 @@ describe('ShellyPlatform', () => {
     shelly2PMGen3.getComponent('cover:0')?.setValue('target_pos', 50);
 
     shelly.wsServer.emit('wssupdate', shelly2PMGen3.id, { 'cover:0': { current_pos: 0, target_pos: 0 } }); // Fully closed
-    await wait(eventWaitTime);
+    // oxfmt-ignore
+    await waiter('Cover position 10000', () => coverEndpoint.getAttribute('windowCovering', 'currentPositionLiftPercent100ths') === 10000 && coverEndpoint.getAttribute('windowCovering', 'targetPositionLiftPercent100ths') === 10000, true, 5000, 20);
     expect(coverEndpoint.getAttribute('windowCovering', 'currentPositionLiftPercent100ths')).toBe(10000);
     expect(coverEndpoint.getAttribute('windowCovering', 'targetPositionLiftPercent100ths')).toBe(10000);
 
     shelly.wsServer.emit('wssupdate', shelly2PMGen3.id, { 'cover:0': { current_pos: 50, target_pos: 50 } }); // Fully open
-    await wait(eventWaitTime);
+    // oxfmt-ignore
+    await waiter('Cover position 5000', () => coverEndpoint.getAttribute('windowCovering', 'currentPositionLiftPercent100ths') === 5000 && coverEndpoint.getAttribute('windowCovering', 'targetPositionLiftPercent100ths') === 5000, true, 5000, 20);
     expect(coverEndpoint.getAttribute('windowCovering', 'currentPositionLiftPercent100ths')).toBe(5000);
     expect(coverEndpoint.getAttribute('windowCovering', 'targetPositionLiftPercent100ths')).toBe(5000);
 
     shelly.wsServer.emit('wssupdate', shelly2PMGen3.id, { 'cover:0': { current_pos: 100, target_pos: 100 } }); // Fully open
-    await wait(eventWaitTime);
+    // oxfmt-ignore
+    await waiter('Cover position 0', () => coverEndpoint.getAttribute('windowCovering', 'currentPositionLiftPercent100ths') === 0 && coverEndpoint.getAttribute('windowCovering', 'targetPositionLiftPercent100ths') === 0, true, 5000, 20);
     expect(coverEndpoint.getAttribute('windowCovering', 'currentPositionLiftPercent100ths')).toBe(0);
     expect(coverEndpoint.getAttribute('windowCovering', 'targetPositionLiftPercent100ths')).toBe(0);
 
@@ -1173,42 +1178,42 @@ describe('ShellyPlatform', () => {
       LogLevel.INFO,
       `${db}Sent command ${hk}Cover${db}:${hk}cover:0${db}:${hk}Close()${db} to shelly device ${idn}${shelly2PMGen3.id}${rs}${db}`,
     );
-    expect(fetch).toHaveBeenCalledWith(shelly2PMGen3.shelly, shelly2PMGen3.log, shelly2PMGen3.host, 'Cover.Close', { id: 0 });
+    expect(fetch).toHaveBeenCalledWith(shelly2PMGen3.shelly, shelly2PMGen3.log, shelly2PMGen3.host, shelly2PMGen3.port, 'Cover.Close', { id: 0 });
 
     await coverEndpoint.executeCommandHandler('upOrOpen', {}, 'windowCovering', {} as any, coverEndpoint);
     expect(loggerLogSpy).toHaveBeenCalledWith(
       LogLevel.INFO,
       `${db}Sent command ${hk}Cover${db}:${hk}cover:0${db}:${hk}Open()${db} to shelly device ${idn}${shelly2PMGen3.id}${rs}${db}`,
     );
-    expect(fetch).toHaveBeenCalledWith(shelly2PMGen3.shelly, shelly2PMGen3.log, shelly2PMGen3.host, 'Cover.Open', { id: 0 });
+    expect(fetch).toHaveBeenCalledWith(shelly2PMGen3.shelly, shelly2PMGen3.log, shelly2PMGen3.host, shelly2PMGen3.port, 'Cover.Open', { id: 0 });
 
     await coverEndpoint.executeCommandHandler('stopMotion', {}, 'windowCovering', {} as any, coverEndpoint);
     expect(loggerLogSpy).toHaveBeenCalledWith(
       LogLevel.INFO,
       `${db}Sent command ${hk}Cover${db}:${hk}cover:0${db}:${hk}Stop()${db} to shelly device ${idn}${shelly2PMGen3.id}${rs}${db}`,
     );
-    expect(fetch).toHaveBeenCalledWith(shelly2PMGen3.shelly, shelly2PMGen3.log, shelly2PMGen3.host, 'Cover.Stop', { id: 0 });
+    expect(fetch).toHaveBeenCalledWith(shelly2PMGen3.shelly, shelly2PMGen3.log, shelly2PMGen3.host, shelly2PMGen3.port, 'Cover.Stop', { id: 0 });
 
     await coverEndpoint.executeCommandHandler('goToLiftPercentage', { liftPercent100thsValue: 5000 }, 'windowCovering', {} as any, coverEndpoint);
     expect(loggerLogSpy).toHaveBeenCalledWith(
       LogLevel.INFO,
       `${db}Sent command ${hk}Cover${db}:${hk}cover:0${db}:${hk}GoToPosition(${YELLOW}50${hk})${db} to shelly device ${idn}${shelly2PMGen3.id}${rs}${db}`,
     );
-    expect(fetch).toHaveBeenCalledWith(shelly2PMGen3.shelly, shelly2PMGen3.log, shelly2PMGen3.host, 'Cover.GoToPosition', { id: 0, pos: 50 });
+    expect(fetch).toHaveBeenCalledWith(shelly2PMGen3.shelly, shelly2PMGen3.log, shelly2PMGen3.host, shelly2PMGen3.port, 'Cover.GoToPosition', { id: 0, pos: 50 });
 
     await coverEndpoint.executeCommandHandler('goToLiftPercentage', { liftPercent100thsValue: 0 }, 'windowCovering', {} as any, coverEndpoint);
     expect(loggerLogSpy).toHaveBeenCalledWith(
       LogLevel.INFO,
       `${db}Sent command ${hk}Cover${db}:${hk}cover:0${db}:${hk}Open()${db} to shelly device ${idn}${shelly2PMGen3.id}${rs}${db}`,
     );
-    expect(fetch).toHaveBeenCalledWith(shelly2PMGen3.shelly, shelly2PMGen3.log, shelly2PMGen3.host, 'Cover.Open', { id: 0 });
+    expect(fetch).toHaveBeenCalledWith(shelly2PMGen3.shelly, shelly2PMGen3.log, shelly2PMGen3.host, shelly2PMGen3.port, 'Cover.Open', { id: 0 });
 
     await coverEndpoint.executeCommandHandler('goToLiftPercentage', { liftPercent100thsValue: 10000 }, 'windowCovering', {} as any, coverEndpoint);
     expect(loggerLogSpy).toHaveBeenCalledWith(
       LogLevel.INFO,
       `${db}Sent command ${hk}Cover${db}:${hk}cover:0${db}:${hk}Close()${db} to shelly device ${idn}${shelly2PMGen3.id}${rs}${db}`,
     );
-    expect(fetch).toHaveBeenCalledWith(shelly2PMGen3.shelly, shelly2PMGen3.log, shelly2PMGen3.host, 'Cover.Close', { id: 0 });
+    expect(fetch).toHaveBeenCalledWith(shelly2PMGen3.shelly, shelly2PMGen3.log, shelly2PMGen3.host, shelly2PMGen3.port, 'Cover.Close', { id: 0 });
 
     fetch.mockRestore();
 
@@ -1299,22 +1304,28 @@ describe('ShellyPlatform', () => {
     addDeviceSpy.mockRestore();
   });
 
-  test('should update the host and add a discovered device that is not loaded', async () => {
+  test.each([
+    { host: '192.168.1.41', port: 80 },
+    { host: '192.168.1.40', port: 11400 },
+    { host: '192.168.1.40', port: 443 },
+  ])('should update a discovered endpoint to $host:$port', async ({ host, port }) => {
     const oldDevice: DiscoveredDevice = { id: 'shellyplus1pm-AABBCC', host: '192.168.1.40', port: 80, gen: 2 };
-    const discoveredDevice: DiscoveredDevice = { ...oldDevice, host: '192.168.1.41' };
+    const discoveredDevice: DiscoveredDevice = { ...oldDevice, host, port };
     const bridgedDevice = { configUrl: `http://${oldDevice.host}` } as MatterbridgeEndpoint;
     shellyPlatform.discoveredDevices.set(oldDevice.id, oldDevice);
     shellyPlatform.storedDevices.set(oldDevice.id, oldDevice);
     shellyPlatform.bridgedDevices.set(oldDevice.id, bridgedDevice);
     const addDeviceSpy = vi.spyOn(shellyPlatform as any, 'addDevice').mockImplementation(async () => {});
 
+    const configUrl = `${discoveredDevice.port === 443 ? 'https' : 'http'}://${discoveredDevice.host}:${discoveredDevice.port}`;
     await emitDiscovered(discoveredDevice);
+    await waiter('Discovered endpoint updated', () => bridgedDevice.configUrl === configUrl && addDeviceSpy.mock.calls.length > 0, true, 5000, 20);
 
     expect(shellyPlatform.discoveredDevices.get(oldDevice.id)).toEqual(discoveredDevice);
     expect(shellyPlatform.storedDevices.get(oldDevice.id)).toEqual(discoveredDevice);
     expect(shellyPlatform.changedDevices.get(oldDevice.id)).toBe(oldDevice.id);
-    expect(bridgedDevice.configUrl).toBe(`http://${discoveredDevice.host}`);
-    expect(addDeviceSpy).toHaveBeenCalledWith(discoveredDevice.id, discoveredDevice.host);
+    expect(bridgedDevice.configUrl).toBe(`${discoveredDevice.port === 443 ? 'https' : 'http'}://${discoveredDevice.host}:${discoveredDevice.port}`);
+    expect(addDeviceSpy).toHaveBeenCalledWith(discoveredDevice.id, discoveredDevice.host, discoveredDevice.port);
 
     cleanup();
     addDeviceSpy.mockRestore();
@@ -1343,7 +1354,7 @@ describe('ShellyPlatform', () => {
     expect(gen2Device.lastseen).toBeGreaterThan(0);
     expect(gen2Device.log.warn).toHaveBeenCalledWith(expect.stringContaining(`host ${zb}192.168.1.61${wr} updated`));
     expect(gen2WsClient.stop).toHaveBeenCalledOnce();
-    expect(gen2WsClient.setHost).toHaveBeenCalledWith('192.168.1.61');
+    expect(gen2WsClient.setHost).toHaveBeenCalledWith('192.168.1.61', 80);
     expect(gen2WsClient.start).toHaveBeenCalledOnce();
 
     (shelly as any)._devices.delete(gen1Device.id);
@@ -1402,17 +1413,20 @@ describe('ShellyPlatform', () => {
     const createSpy = vi.spyOn(ShellyDevice, 'create' as any).mockResolvedValue(undefined);
     loggerLogSpy.mockClear();
     await shellyPlatform.onAction('addDevice', '192.168.1.100');
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Adding device on IP address ${zb}192.168.1.100${nf}`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Adding device on IP address ${zb}192.168.1.100${nf} port ${CYAN}80${nf}`);
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.ERROR, expect.stringContaining('Failed to add device on IP address'));
+    expect(createSpy).toHaveBeenLastCalledWith(shelly, expect.anything(), '192.168.1.100', 80);
 
-    // addDevice with valid IP and ShellyDevice.create returns a device (strips url prefix/suffix)
-    const mockDevice = { id: 'shellymock-AABBCCDD', host: '192.168.1.100', gen: 2, destroy: vi.fn() };
+    // addDevice with valid IP and ShellyDevice.create returns a device (strips url prefix/suffix and derives the port)
+    const mockDevice = { id: 'shellymock-AABBCCDD', host: '192.168.1.100', port: 8080, gen: 2, destroy: vi.fn() };
     createSpy.mockResolvedValue(mockDevice as any);
     // oxlint-disable-next-line unicorn/no-useless-undefined -- explicit undefined required because the spied target is cast to any
     const addDeviceSpy = vi.spyOn(shellyPlatform as any, 'addDevice').mockResolvedValue(undefined);
     loggerLogSpy.mockClear();
-    await shellyPlatform.onAction('addDevice', 'http://192.168.1.100/');
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Adding device on IP address ${zb}192.168.1.100${nf}`);
+    await shellyPlatform.onAction('addDevice', 'http://192.168.1.100:8080/');
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Adding device on IP address ${zb}192.168.1.100${nf} port ${CYAN}8080${nf}`);
+    expect(createSpy).toHaveBeenLastCalledWith(shelly, expect.anything(), '192.168.1.100', 8080);
+    expect(addDeviceSpy).toHaveBeenCalledWith(mockDevice.id, mockDevice.host, mockDevice.port);
     expect(shellyPlatform.storedDevices.has('shellymock-AABBCCDD')).toBe(true);
     expect(mockDevice.destroy).toHaveBeenCalled();
     createSpy.mockRestore();
@@ -1552,7 +1566,7 @@ describe('ShellyPlatform', () => {
     createSpy.mockResolvedValue(cacheDevice);
     loggerLogSpy.mockClear();
     expect(await (shellyPlatform as any).addDevice('shellytest-CACHE', '10.0.0.11')).toBe(cacheDevice);
-    expect(cacheDevice.setHost).toHaveBeenCalledWith('10.0.0.11');
+    expect(cacheDevice.setHost).toHaveBeenCalledWith('10.0.0.11', 80);
     expect(cacheDevice.cached).toBe(true);
     expect(cacheDevice.online).toBe(true);
     expect(shellyAddSpy).toHaveBeenCalledWith(cacheDevice);
@@ -1609,7 +1623,7 @@ describe('ShellyPlatform', () => {
     createSpy.mockResolvedValueOnce(undefined).mockResolvedValue(fallbackDevice);
     loggerLogSpy.mockClear();
     expect(await (shellyPlatform as any).addDevice('shellytest-FALLBACK', '10.0.0.14')).toBe(fallbackDevice);
-    expect(fallbackDevice.setHost).toHaveBeenCalledWith('10.0.0.14');
+    expect(fallbackDevice.setHost).toHaveBeenCalledWith('10.0.0.14', 80);
     expect(fallbackDevice.cached).toBe(true);
     expect(fallbackDevice.online).toBe(true);
     expect(shellyAddSpy).toHaveBeenCalledWith(fallbackDevice);

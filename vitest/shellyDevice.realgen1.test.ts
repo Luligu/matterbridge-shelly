@@ -93,7 +93,7 @@ describe('Shellies', () => {
     const component = device.getComponent('relay:0');
     expect(component).not.toBeUndefined();
 
-    // prettier-ignore
+    // oxfmt-ignore
     if (isSwitchComponent(component)) {
       component.Off();
       await flushAsync();
@@ -141,7 +141,7 @@ describe('Shellies', () => {
     const component = device.getComponent('relay:0');
     expect(component).not.toBeUndefined();
 
-    // prettier-ignore
+    // oxfmt-ignore
     if (isSwitchComponent(component)) {
       component.Off();
       await flushAsync();
@@ -189,7 +189,7 @@ describe('Shellies', () => {
     const component = device.getComponent('light:0');
     expect(component).not.toBeUndefined();
 
-    // prettier-ignore
+    // oxfmt-ignore
     if (isLightComponent(component)) {
         component.Off();
         component.On();
@@ -246,7 +246,7 @@ describe('Shellies', () => {
     expect(component?.hasProperty('temp')).toBe(true);
     expect(component?.hasProperty('mode')).toBe(false);
 
-    // prettier-ignore
+    // oxfmt-ignore
     if (isLightComponent(component)) {
         component.Off();
         component.On();
@@ -300,7 +300,7 @@ describe('Shellies', () => {
     expect(component?.hasProperty('temp')).toBe(true);
     expect(component?.hasProperty('mode')).toBe(true);
 
-    // prettier-ignore
+    // oxfmt-ignore
     if (isLightComponent(component)) {
         component.Off();
         component.On();
@@ -371,7 +371,7 @@ describe('Shellies', () => {
     expect(component?.hasProperty('mode')).toBe(true);
     expect(component?.getValue('mode')).toBe('color');
 
-    // prettier-ignore
+    // oxfmt-ignore
     if (isLightComponent(component)) {
         component.Off();
         component.On();
@@ -453,7 +453,7 @@ describe('Shellies', () => {
     expect(component?.hasProperty('mode')).toBe(true);
     expect(component?.getValue('mode')).toBe('white');
 
-    // prettier-ignore
+    // oxfmt-ignore
     if (isLightComponent(component)) {
         component.Off();
         component.On();
@@ -505,7 +505,7 @@ describe('Shellies', () => {
     const component = device.getComponent('relay:0');
     expect(component).not.toBeUndefined();
 
-    // prettier-ignore
+    // oxfmt-ignore
     if (isSwitchComponent(component)) {
         component.On();
         await waiter('On', () => { return component.getValue('state') === true; }, true);
@@ -569,7 +569,7 @@ describe('Shellies', () => {
     const component0 = device.getComponent('relay:0');
     expect(component0).not.toBeUndefined();
 
-    // prettier-ignore
+    // oxfmt-ignore
     if (isSwitchComponent(component0)) {
         component0.On();
         await waiter('On', () => { return component0.getValue('state') === true; }, true);
@@ -587,7 +587,7 @@ describe('Shellies', () => {
     const component1 = device.getComponent('relay:1');
     expect(component1).not.toBeUndefined();
 
-    // prettier-ignore
+    // oxfmt-ignore
     if (isSwitchComponent(component1)) {
         component1.On();
         await waiter('On', () => { return component1.getValue('state') === true; }, true);
@@ -650,7 +650,7 @@ describe('Shellies', () => {
     const component0 = device.getComponent('roller:0');
     expect(component0).not.toBeUndefined();
 
-    // prettier-ignore
+    // oxfmt-ignore
     if (isCoverComponent(component0)) {
         component0.Open();
         await waiter('Open', () => { return component0.getValue('state') === 'stop'; }, true, 30000);

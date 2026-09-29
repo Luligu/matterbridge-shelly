@@ -24,6 +24,17 @@
       "type": "string",
       "ui:widget": "password"
     },
+    "caBundlePath": {
+      "title": "CA Bundle Path",
+      "description": "Fully qualified path to the SSL ca certificate file. This is only needed if you use a self-signed certificate and rejectUnauthorized is enabled.",
+      "type": "string"
+    },
+    "rejectUnauthorized": {
+      "title": "Reject Unauthorized",
+      "description": "Ignore SSL certificate errors. It allows to connect to Home Assistant with self-signed certificates.",
+      "type": "boolean",
+      "default": false
+    },
     "switchList": {
       "description": "The devices in the list will be exposed as switches (don't use it for Alexa).",
       "type": "array",
@@ -156,7 +167,7 @@
       "default": false
     },
     "addDevice": {
-      "description": "Manually add a device that has not been discovered with mdns:",
+      "description": "Manually add a device that has not been discovered with mdns. Use the IP address or the full URL (http(s)://<ip_address>:<port>) if necessary.",
       "type": "boolean",
       "buttonField": "ADD",
       "buttonClose": false,

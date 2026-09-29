@@ -46,6 +46,8 @@ Features:
 - A 1 hour timer checks if the device has reported within that time frame, fetch an update and save the cache file.
 - Support for [RPC over UDP](README.md#how-to-configure-rpc-over-udp) update protocol (alternative to websocket) for Gen2+ devices.
 - If the device's RPC over UDP settings is not correctly configured for the gen 2+ devices, a message is displayed.
+- Support for [Secure Connection](https://shelly-api-docs.shelly.cloud/gen2/General/CustomHTTPSCertificates) with `https://` and `wss://` for Gen2+ devices. Use [`caBundlePath`](README.md#cabundlepath) and [`rejectUnauthorized`](README.md#rejectunauthorized).
+- Support for [Range Extender](https://shelly-api-docs.shelly.cloud/gen2/ComponentsAndServices/WiFi#rangeextender) for Gen2+ devices. It is also possible to manually add a device in the config.
 
 If you like this project and find it useful, please consider giving it a star on GitHub at https://github.com/Luligu/matterbridge-shelly and sponsoring it.
 
@@ -157,11 +159,23 @@ Wait that the plugin has been configured before changing the config.
 
 If your devices are password protected put here the username. It must be unique for all the devices.
 
-It is only used for gen 1 devices. Gen 2 and 3 devices have always admin.
+It is only used for gen 1 devices. Gen 2+ devices have always admin.
 
 ### password
 
 If your devices are password protected put here the password. It must be unique for all the devices.
+
+### caBundlePath
+
+Optional path to a PEM file containing the CA certificates used to verify your devices' server certificates. The file must be accessible to the Matterbridge process. Defaults to an empty string, which uses the runtime's default trusted CAs when verification is enabled. It must be unique for all the devices.
+
+Use this when your devices use certificates issued by a private CA and `rejectUnauthorized` is `true`. This is a CA certificate bundle, not a client certificate or private key; it does not enable mutual TLS.
+
+### rejectUnauthorized
+
+Controls server certificate verification for HTTPS and WSS connections to devices on port 443. Defaults to `false`, allowing connections without verifying the server certificate, including self-signed certificates. Connections remain encrypted, but the server's identity is not verified. It must be unique for all the devices.
+
+Set to `true` to verify the certificate's hostname, validity, and trust chain. If your devices use a private CA, also set `caBundlePath` to its PEM bundle. These settings apply to the plugin's device connections with `https` and `wss` only; HTTP and WS connections on other ports are unaffected.
 
 ### switchList
 
@@ -206,6 +220,8 @@ For shelly BLU devices use the device name (i.e. the name defined in the device 
 ### entityBlackList
 
 The components in the list will not be exposed for all devices. Use the component name (i.e. Temperature).
+
+The WebSocket component name is `Ws` (previously `WS`); update any manually configured `WS` blacklist entries to `Ws`. Its component ID remains `ws`.
 
 For detailed examples, refer to the [COMPONENTS.md documentation.](https://github.com/Luligu/matterbridge-shelly/blob/main/COMPONENTS.md)
 
@@ -362,39 +378,74 @@ See also the [Style Guide](./STYLEGUIDE.md) for JSDoc, naming, and logging conve
 - **Much faster builds** — tsgo compiles the project in a fraction of the time required by the standard `tsc` build.
 - **Editor support** — use the VS Code extensions for tsgo and oxc to get the same experience in the editor.
 
-## Copilot instructions
+## Shared agent instructions
+
+All coding agents read the same guidance. [AGENTS.md](./AGENTS.md) and [.agents/](./.agents/) are the **single source of truth**; everything under `.github/`, `.claude/`, `.codex/` and `.antigravity/` are pointers and mirrors. Edit `.agents/` (or `AGENTS.md`), never the copies. See [.agents/README.md](./.agents/README.md) for the full layout.
+
+| File                                            | Notes                                                                                                        |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `AGENTS.md`                                     | Main project instructions — shared by every agent                                                            |
+| `.agents/README.md`                             | Layout and versioning of the shared instructions                                                             |
+| `.agents/rules/testing.instructions.md`         | Testing standards for unit tests                                                                             |
+| `.agents/rules/matterbridge.instructions.md`    | Creating endpoints and using the single-class devices                                                        |
+| `.agents/rules/plugin-frontend.instructions.md` | Serving a plugin's own frontend SPA and REST API                                                             |
+| `.agents/rules/chip-tests.instructions.md`      | The CHIP conformance test harness                                                                            |
+| `.agents/skills/verify-agent-context/SKILL.md`  | Verify the agent loaded this context — `$verify-agent-context` (Codex), `/verify-agent-context` (all others) |
+
+Content lives only in `.agents/`. The per-agent folders exist because each tool discovers rules and skills from its own hardcoded location, so they hold stubs that point back here — except where the tool reads `.agents/` natively.
+
+| Tool                               | Instructions                                    | Rules                                                 | Skills                                              |
+| ---------------------------------- | ----------------------------------------------- | ----------------------------------------------------- | --------------------------------------------------- |
+| Codex                              | `AGENTS.md` — read natively                     | `.agents/rules/` — linked from `AGENTS.md`, on demand | `.agents/skills/` — native, `$verify-agent-context` |
+| Copilot (VS Code and coding agent) | `.github/copilot-instructions.md` → `AGENTS.md` | stubs in `.github/instructions/` — `applyTo` globs    | stub in `.github/skills/` — `/verify-agent-context` |
+| Claude Code                        | `CLAUDE.md` imports `AGENTS.md`                 | stubs in `.claude/rules/` — `paths` globs             | stub in `.claude/skills/` — `/verify-agent-context` |
+| Gemini / Antigravity               | `GEMINI.md` imports `AGENTS.md`                 | `.agents/rules/` — on demand                          | `.agents/skills/` — native, `/verify-agent-context` |
+
+### Copilot instructions
 
 | File                                                                   | Notes                                                                              |
 | ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| `.github/copilot-instructions.md`                                      | Main project instructions — always loaded                                          |
+| `.github/copilot-instructions.md`                                      | Pointer to AGENTS.md — always loaded                                               |
 | `.github/instructions/chip-tests/chip-tests.instructions.md`           | CHIP conformance test harness — scoped to CHIP test files                          |
 | `.github/instructions/matterbridge/matterbridge.instructions.md`       | Matterbridge endpoint guide — dedicated Copilot instruction file                   |
 | `.github/instructions/plugin-frontend/plugin-frontend.instructions.md` | Plugin frontend SPA and custom REST API guide — scoped to frontend and plugin code |
-| `.github/instructions/testing/unit-tests.instructions.md`              | Testing standards — scoped to `**/*.test.ts`                                       |
+| `.github/instructions/testing/testing.instructions.md`                 | Testing standards — scoped to `**/*.test.ts`                                       |
+| `.github/skills/verify-agent-context/SKILL.md`                         | Skill invocable as `/verify-agent-context`                                         |
 
-## Claude instructions
+### Claude instructions
 
 | File                                                            | Notes                                                                              |
 | --------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| `CLAUDE.md`                                                     | Main project instructions — always loaded                                          |
+| `CLAUDE.md`                                                     | Pointer to AGENTS.md — always loaded                                               |
+| `.claude/settings.json`                                         | Claude permissions: allow, ask and deny rules                                      |
 | `.claude/rules/chip-tests/chip-tests.instructions.md`           | CHIP conformance test harness — scoped to CHIP test files                          |
 | `.claude/rules/matterbridge/matterbridge.instructions.md`       | Matterbridge endpoint guide — loaded for all contexts                              |
 | `.claude/rules/plugin-frontend/plugin-frontend.instructions.md` | Plugin frontend SPA and custom REST API guide — scoped to frontend and plugin code |
-| `.claude/rules/testing/unit-tests.instructions.md`              | Testing standards — scoped to `**/*.test.ts`                                       |
+| `.claude/rules/testing/testing.instructions.md`                 | Testing standards — scoped to `**/*.test.ts`                                       |
+| `.claude/skills/verify-agent-context/SKILL.md`                  | Skill invocable as `/verify-agent-context`                                         |
 
-## Codex/Agents instructions
+### Codex instructions
 
-| File                         | Notes                                             |
-| ---------------------------- | ------------------------------------------------- |
-| `AGENTS.md`                  | Main project instructions                         |
-| `.agents/chip-tests.md`      | CHIP conformance test harness                     |
-| `.agents/matterbridge.md`    | Matterbridge endpoint guide                       |
-| `.agents/plugin-frontend.md` | Plugin frontend SPA and custom REST API guide     |
-| `.agents/testing.md`         | Testing and validation expectations               |
-| `.codex/config.toml`         | Codex project permissions, approvals, and profile |
-| `.codex/rules/default.rules` | Codex command allow, prompt, and deny rules       |
+| File                         | Notes                                                             |
+| ---------------------------- | ----------------------------------------------------------------- |
+| `AGENTS.md`                  | Main project instructions — read directly, no pointer file needed |
+| `.codex/config.toml`         | Codex project permissions, approvals, and profile                 |
+| `.codex/rules/default.rules` | Codex command allow, prompt, and deny rules                       |
+
+Codex reads the shared rules and skills from `.agents/` directly; the skill is invoked as `$verify-agent-context`.
+
+### Gemini / Antigravity instructions
+
+| File                         | Notes                                                 |
+| ---------------------------- | ----------------------------------------------------- |
+| `GEMINI.md`                  | Pointer to AGENTS.md — always loaded                  |
+| `.antigravity/settings.json` | Sandboxing and permissions: allow, ask and deny rules |
+
+The shared rules under `.agents/rules/` apply on demand for the relevant tasks, and `.agents/skills/` is discovered automatically as `/verify-agent-context`.
 
 ## Development guide
+
+The typed WiFi component's `Scan()` method accepts authentication values from `0` through `6`, including `auth: 6` returned by Gen 4 devices.
 
 Refer to the Matterbridge [Development guide](https://matterbridge.io/README-DEV.html) for other guidelines.
 

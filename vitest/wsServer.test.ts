@@ -34,7 +34,7 @@ describe('ShellyWsServer', () => {
   afterAll(async () => {
     // Stop the WebSocket client
     wsServer.stop();
-    // prettier-ignore
+    // oxfmt-ignore
     await waiter('wsServer not listening', () => { return !(wsServer as any)._isListening; }, true);
 
     // Wait a bit to ensure all async operations are done
@@ -108,7 +108,7 @@ describe('ShellyWsServer', () => {
     const wsServer = new WsServer(LogLevel.DEBUG);
     await new Promise<void>((resolve) => {
       wsServer.on('error', (error) => {
-        expect(error.message).toContain('EADDRINUSE');
+        expect((error as NodeJS.ErrnoException).code).toBe('EADDRINUSE');
         resolve();
       });
       wsServer.start();
@@ -133,9 +133,9 @@ describe('ShellyWsServer', () => {
       });
       wsServer.stop();
     });
-    // prettier-ignore
+    // oxfmt-ignore
     await waiter('wsServer closed', () => { return (wsServer as any).wsServer === undefined }, true, 5000, 100);
-    // prettier-ignore
+    // oxfmt-ignore
     await waiter('httpServer closed', () => { return (wsServer as any).httpServer === undefined }, true, 5000, 100);
     expect((wsServer as any).httpServer).toBeUndefined();
     expect((wsServer as any).wsServer).toBeUndefined();
@@ -147,7 +147,7 @@ describe('ShellyWsServer', () => {
     (wsServer as any).pingPeriod = 500;
     (wsServer as any).pongPeriod = 600;
     wsServer.start(8989);
-    // prettier-ignore
+    // oxfmt-ignore
     await waiter('wsServer listening', () => { return wsServer.isListening; }, true);
     expect((wsServer as any).httpServer).toBeDefined();
     expect((wsServer as any).wsServer).toBeDefined();

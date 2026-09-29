@@ -716,7 +716,7 @@ export class CoapServer extends EventEmitter<CoapServerEvents> {
     if (registerOnly) return;
     // SHMOS-01, SHMOS-02, SHTRV-01 and SHRGBWW-01 don't answer to the /cit/d and /cit/s requests
     this.log.debug(`*Registering device ${hk}${id}${db} host ${zb}${host}${db} with fetch...`);
-    shellyFetch(this.shelly, this.log, host, 'cit/d')
+    shellyFetch(this.shelly, this.log, host, 80, 'cit/d')
       .then((msg) => {
         /* v8 ignore next else */
         if (msg?.blk && msg.sen) {

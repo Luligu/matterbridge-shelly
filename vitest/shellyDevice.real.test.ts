@@ -127,7 +127,7 @@ describe('Shellies', () => {
       const output = outputProp?.value;
       // console.log(`state: ${state} output: ${output}`);
       expect(state === output).toBeTruthy();
-      const response = await shellyFetch(shelly, log, 'shellyplus1pm-441793D69718.local', 'relay/0', { turn: 'toggle' });
+      const response = await shellyFetch(shelly, log, 'shellyplus1pm-441793D69718.local', 80, 'relay/0', { turn: 'toggle' });
       expect(response).not.toBeUndefined();
       await device.fetchUpdate();
       const stateProp2 = component.getProperty('state');
@@ -151,16 +151,16 @@ describe('Shellies', () => {
       expect(component).not.toBeUndefined();
       if (!component) return;
 
-      let response = await shellyFetch(shelly, log, 'shellyplus1pm-441793D69718.local', 'Switch.Toggle', { id: 0 });
+      let response = await shellyFetch(shelly, log, 'shellyplus1pm-441793D69718.local', 80, 'Switch.Toggle', { id: 0 });
       expect(response).not.toBeUndefined();
       await device.fetchUpdate();
-      response = await shellyFetch(shelly, log, 'shellyplus1pm-441793D69718.local', 'Switch.Set', { id: 0, on: false });
+      response = await shellyFetch(shelly, log, 'shellyplus1pm-441793D69718.local', 80, 'Switch.Set', { id: 0, on: false });
       expect(response).not.toBeUndefined();
       await device.fetchUpdate();
-      response = await shellyFetch(shelly, log, 'shellyplus1pm-441793D69718.local', 'Switch.Set', { id: 0, on: true });
+      response = await shellyFetch(shelly, log, 'shellyplus1pm-441793D69718.local', 80, 'Switch.Set', { id: 0, on: true });
       expect(response).not.toBeUndefined();
       await device.fetchUpdate();
-      response = await shellyFetch(shelly, log, 'shellyplus1pm-441793D69718.local', 'Switch.Set', { id: 0, on: false });
+      response = await shellyFetch(shelly, log, 'shellyplus1pm-441793D69718.local', 80, 'Switch.Set', { id: 0, on: false });
       expect(response).not.toBeUndefined();
       await device.fetchUpdate();
       device.destroy();
@@ -175,13 +175,13 @@ describe('Shellies', () => {
       expect(component).not.toBeUndefined();
       if (!component) return;
 
-      let response = await shellyFetch(shelly, log, 'shellyplus1pm-441793D69718.local', 'relay/0', { turn: 'toggle' });
+      let response = await shellyFetch(shelly, log, 'shellyplus1pm-441793D69718.local', 80, 'relay/0', { turn: 'toggle' });
       expect(response).not.toBeUndefined();
       await device.fetchUpdate();
-      response = await shellyFetch(shelly, log, 'shellyplus1pm-441793D69718.local', 'relay/0', { turn: 'on' });
+      response = await shellyFetch(shelly, log, 'shellyplus1pm-441793D69718.local', 80, 'relay/0', { turn: 'on' });
       expect(response).not.toBeUndefined();
       await device.fetchUpdate();
-      response = await shellyFetch(shelly, log, 'shellyplus1pm-441793D69718.local', 'relay/0', { turn: 'off' });
+      response = await shellyFetch(shelly, log, 'shellyplus1pm-441793D69718.local', 80, 'relay/0', { turn: 'off' });
       expect(response).not.toBeUndefined();
       await device.fetchUpdate();
       device.destroy();
@@ -243,7 +243,7 @@ describe('Shellies', () => {
       const output = outputP?.value;
       // console.log(`state: ${state} output: ${output}`);
       expect(state === output).toBeTruthy();
-      const res = await shellyFetch(shelly, log, 'shellyplus2pm-5443B23D81F8.local', 'relay/1', { turn: 'toggle' });
+      const res = await shellyFetch(shelly, log, 'shellyplus2pm-5443B23D81F8.local', 80, 'relay/1', { turn: 'toggle' });
       expect(res).not.toBeUndefined();
       await device.fetchUpdate();
       const state2 = component.getProperty('state');
@@ -262,10 +262,10 @@ describe('Shellies', () => {
       if (!device) return;
 
       // console.log('send wrong command to a gen 2 device and update');
-      let res = await shellyFetch(shelly, log, 'shellyplus2pm-5443B23D81F8.local', 'relay/5', { turn: 'toggle' });
+      let res = await shellyFetch(shelly, log, 'shellyplus2pm-5443B23D81F8.local', 80, 'relay/5', { turn: 'toggle' });
       expect(res).toBeNull();
       // console.log('send wrong command to a gen 2 device and update');
-      res = await shellyFetch(shelly, log, 'shellyplus2pm-5443B23D81F8.local', 'relay/0', { turn: 'toggle' });
+      res = await shellyFetch(shelly, log, 'shellyplus2pm-5443B23D81F8.local', 80, 'relay/0', { turn: 'toggle' });
       expect(res).toBeNull();
       device.destroy();
     }, 60000);

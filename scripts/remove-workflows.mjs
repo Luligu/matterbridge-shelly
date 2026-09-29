@@ -1,6 +1,6 @@
 /**
  * remove-workflows.mjs
- * Version: 1.0.1
+ * Version: 1.0.2
  *
  * Removes GitHub Actions workflow runs that are older than one week, plus all
  * cancelled workflow runs regardless of age.
@@ -13,7 +13,8 @@
  *   git remote.origin.url configured, or package.json repository.url set
  */
 
-/* eslint-disable no-console */
+/* oxlint-disable no-console */
+/* oxlint-disable typescript/prefer-nullish-coalescing */
 
 import { spawn } from 'node:child_process';
 import { readFile } from 'node:fs/promises';
@@ -94,7 +95,7 @@ function parseArgs(argv) {
  * @param {string[]} args - Command arguments.
  * @returns {Promise<{ stdout: string, stderr: string }>} Captured output.
  */
-function execCapture(command, args) {
+async function execCapture(command, args) {
   return new Promise((resolve, reject) => {
     const child = spawn(command, args, {
       shell: false,
@@ -413,6 +414,7 @@ async function main() {
   }
 }
 
+// oxlint-disable-next-line typescript/use-unknown-in-catch-callback-variable
 main().catch((error) => {
   console.error(`remove-workflows: ${error?.message || error}`);
   console.error('Make sure GitHub CLI is installed and authenticated: gh auth status');
