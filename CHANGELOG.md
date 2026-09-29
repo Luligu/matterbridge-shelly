@@ -32,6 +32,17 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 
 ## [2.7.1] - Dev branch
 
+### Changed
+
+- [test]: Replace the fixed waits in `module.test.ts` and `updateHandler.test.ts` with `waiter` and awaited event handlers (about 20 s less per CI test run).
+
+### Fixed
+
+- [temperature]: Set the initial `measuredValue` of temperature sensors in `onConfigure` (https://github.com/Luligu/matterbridge-shelly/issues/202).
+- [humidity]: Set the initial `measuredValue` of humidity sensors in `onConfigure`.
+- [platform]: Fix `onConfigure` stopping at the first child endpoint without a matching Shelly component.
+- [coap]: Fix `CoapServer.stop()` removing the `stopped` listeners when the agent closes before the server, so `stopped` was never received.
+
 <a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [2.7.0] - 2026-09-29

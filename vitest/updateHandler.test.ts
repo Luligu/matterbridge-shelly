@@ -12,7 +12,7 @@ import path from 'node:path';
 
 import type { MatterbridgeEndpoint, PlatformMatterbridge } from 'matterbridge';
 import { CYAN, db, dn, hk, idn, LogLevel, nf, rs, zb } from 'matterbridge/logger';
-import { wait } from 'matterbridge/utils';
+import { waiter } from 'matterbridge/utils';
 import { flushAsync, log, loggerDebugSpy, loggerInfoSpy, loggerLogSpy, setDebug, setupTest } from 'matterbridge/vitest-utils';
 import {
   addMatterbridge,
@@ -251,7 +251,8 @@ describe('ShellyPlatform', () => {
       expect(device).not.toBeUndefined();
       if (!device) return;
       await shelly.addDevice(device);
-      await wait(100);
+      const id = device.id;
+      await waiter(`Shelly ${id} added`, () => shellyPlatform.bridgedDevices.has(id), true, 5000, 10);
       expect(loggerInfoSpy).toHaveBeenCalledWith(`Shelly added ${idn}${device.name}${rs} device id ${hk}${device.id}${rs}${nf} host ${zb}${device.host}${nf}`);
       expect(shelly.hasDevice(device.id)).toBe(true);
       expect(shellyPlatform.bridgedDevices.has(device.id)).toBe(true);

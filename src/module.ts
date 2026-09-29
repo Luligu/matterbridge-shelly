@@ -1673,7 +1673,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         // Configure the cluster OnOff attribute onOff
         if (label.startsWith('switch') || label.startsWith('relay') || label.startsWith('light') || label.startsWith('rgb')) {
           const switchComponent = shellyDevice.getComponent(label);
-          if (!switchComponent) return;
+          if (!switchComponent) continue;
           // oxlint-disable-next-line typescript/no-base-to-string typescript/restrict-template-expressions
           this.log.info(`Configuring device ${dn}${mbDevice.deviceName}${nf} component ${hk}${label}${nf}:${zb}state ${YELLOW}${switchComponent.getValue('state')}${nf}`);
           const state = switchComponent.getValue('state');
@@ -1684,7 +1684,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         // Configure the cluster LevelControl attribute currentLevel
         if (label.startsWith('light') || label.startsWith('rgb')) {
           const lightComponent = shellyDevice.getComponent(label);
-          if (!lightComponent) return;
+          if (!lightComponent) continue;
           const level = lightComponent.getValue('brightness') as number;
           if (isValidNumber(level, 1, 100)) {
             const matterLevel = Math.max(Math.min(Math.round((level / 100) * 254), 254), 1);
@@ -1727,7 +1727,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         // Configure the cluster WindowCovering attribute currentPositionLiftPercent100ths
         if (label.startsWith('cover') || label.startsWith('roller')) {
           const coverComponent = shellyDevice.getComponent(label);
-          if (!coverComponent) return;
+          if (!coverComponent) continue;
           const position = coverComponent.hasProperty('current_pos') ? (coverComponent.getValue('current_pos') as number) : undefined;
           if (isValidNumber(position, 0, 100)) {
             this.log.info(`Configuring device ${dn}${mbDevice.deviceName}${nf} component ${hk}${label}${nf}:${zb}current_pos ${YELLOW}${position}${nf}`);
@@ -1740,7 +1740,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         // Configure the cluster Thermostat attribute occupiedHeatingSetpoint occupiedCoolingSetpoint
         if (label.startsWith('thermostat')) {
           const thermostatComponent = shellyDevice.getComponent(label);
-          if (!thermostatComponent) return;
+          if (!thermostatComponent) continue;
           const target = thermostatComponent.hasProperty('target_C') ? (thermostatComponent.getValue('target_C') as number) : undefined;
           if (isValidNumber(target, 5, 35)) {
             if (thermostatComponent.getValue('type') === 'heating') {
@@ -1752,10 +1752,32 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             }
           }
         }
+        // Configure the cluster TemperatureMeasurement attribute measuredValue
+        if (childEndpoint.hasClusterServer(TemperatureMeasurement)) {
+          const tempComponent = shellyDevice.getComponent(label);
+          if (!tempComponent) continue;
+          const temperature = tempComponent.hasProperty('tC') ? tempComponent.getValue('tC') : tempComponent.getValue('value');
+          if (isValidNumber(temperature, -100, 100)) {
+            const matterTemp = Math.min(Math.max(Math.round(temperature * 100), -10000), 10000);
+            this.log.info(`Configuring device ${dn}${mbDevice.deviceName}${nf} component ${hk}${label}${nf}:${zb}measuredValue ${YELLOW}${matterTemp}${nf}`);
+            await childEndpoint.setAttribute(TemperatureMeasurement.id, 'measuredValue', matterTemp, shellyDevice.log);
+          }
+        }
+        // Configure the cluster RelativeHumidityMeasurement attribute measuredValue
+        if (childEndpoint.hasClusterServer(RelativeHumidityMeasurement)) {
+          const humidityComponent = shellyDevice.getComponent(label);
+          if (!humidityComponent) continue;
+          const humidity = humidityComponent.hasProperty('value') ? humidityComponent.getValue('value') : humidityComponent.getValue('rh');
+          if (isValidNumber(humidity, 0, 100)) {
+            const matterHumidity = Math.min(Math.max(Math.round(humidity * 100), 0), 10000);
+            this.log.info(`Configuring device ${dn}${mbDevice.deviceName}${nf} component ${hk}${label}${nf}:${zb}measuredValue ${YELLOW}${matterHumidity}${nf}`);
+            await childEndpoint.setAttribute(RelativeHumidityMeasurement.id, 'measuredValue', matterHumidity, shellyDevice.log);
+          }
+        }
         // Update the electrical attributes
         if (childEndpoint.getDeviceTypes().includes(electricalSensor)) {
           const component = shellyDevice.getComponent(label);
-          if (!component) return;
+          if (!component) continue;
           this.log.info(`Configuring device ${dn}${mbDevice.deviceName}${nf} electrical component ${hk}${label}${nf}`);
           for (const property of component.properties) {
             if (!['voltage', 'current', 'power', 'apower', 'act_power', 'total', 'aenergy', 'ret_aenergy', 'total_act_energy', 'total_act_ret_energy'].includes(property.key))
