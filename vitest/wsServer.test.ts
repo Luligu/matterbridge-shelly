@@ -108,7 +108,7 @@ describe('ShellyWsServer', () => {
     const wsServer = new WsServer(LogLevel.DEBUG);
     await new Promise<void>((resolve) => {
       wsServer.on('error', (error) => {
-        expect(error.message).toContain('EADDRINUSE');
+        expect((error as NodeJS.ErrnoException).code).toBe('EADDRINUSE');
         resolve();
       });
       wsServer.start();

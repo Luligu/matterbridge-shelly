@@ -8,6 +8,7 @@ import { promises as fs, readFileSync } from 'node:fs';
 import path from 'node:path';
 
 import { CYAN, db, hk, LogLevel, nf, zb } from 'matterbridge/logger';
+import { waiter } from 'matterbridge/utils';
 import { flushAsync, HOMEDIR, loggerLogSpy, setupTest } from 'matterbridge/vitest-utils';
 
 import { CoapServer } from '../src/coapServer.js';
@@ -85,7 +86,7 @@ const msg = {
 };
 
 describe('Coap scanner', () => {
-  const coapServer = new CoapServer({ username: 'admin', password: 'tango' } as any, LogLevel.DEBUG, { maxRetransmit: 1, maxLatency: 1 });
+  const coapServer = new CoapServer({ username: 'admin', password: 'tango' } as any, LogLevel.DEBUG, { ackTimeout: 0.1, maxRetransmit: 1, maxLatency: 0.1 });
 
   function loadResponse(shellyId: string, uri: 'citd' | 'cits'): any {
     (coapServer as any).deviceDescription.clear();
@@ -154,6 +155,12 @@ describe('Coap scanner', () => {
       throw new Error('Test error');
     });
     await expect((coapServer as any).saveResponse('test.json', {})).rejects.toThrow();
+  });
+
+  test('Parse message from an unknown host', () => {
+    msg.rsinfo.address = '192.168.70.254';
+    expect((coapServer as any).parseShellyMessage(msg)).toBeUndefined();
+    expect(loggerLogSpy).not.toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining('Parsing CoIoT (coap) response from device'));
   });
 
   test('Parse status message', async () => {
@@ -1033,6 +1040,16 @@ describe('Coap scanner', () => {
     expect((coapServer as any).deviceId.get(dimmerIp)).toBe('shellydimmer2-98CDAC0D01BB');
     expect(loggerLogSpy).not.toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining('Registering device'));
   });
+
+  test('Register device with fetch', async () => {
+    loggerLogSpy.mockClear();
+    // Nothing listens on port 80 of the loopback, so the fetch fails fast and resolves with null
+    await coapServer.registerDevice('127.0.0.1', 'shellydimmer2-98CDAC0D01BB', false);
+    expect((coapServer as any).deviceId.get('127.0.0.1')).toBe('shellydimmer2-98CDAC0D01BB');
+    // oxfmt-ignore
+    await waiter('Register device with fetch', () => loggerLogSpy.mock.calls.some((call) => call[1].includes('Invalid response registering device')), true, 5000, 50);
+    (coapServer as any).deviceId.delete('127.0.0.1');
+  }, 10000);
 
   test('Start receiving', async () => {
     expect(coapServer.isListening).toBeTruthy();

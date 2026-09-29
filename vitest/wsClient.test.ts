@@ -274,6 +274,21 @@ describe('ShellyWsClient', () => {
     expect((wsClient as any).pongTimeout).toBeUndefined();
   }, 10000);
 
+  test('should not ping if the socket is not open', async () => {
+    expect(server).toBeDefined();
+    const realSocket = (wsClient as any).wsClient;
+    const pingSpy = vi.spyOn(realSocket, 'ping');
+    Object.defineProperty(realSocket, 'readyState', { value: WebSocket.CLOSING, configurable: true });
+    (wsClient as any).startPingPong(50);
+    await wait(150);
+    expect(pingSpy).not.toHaveBeenCalled();
+    expect((wsClient as any).pongTimeout).toBeUndefined();
+
+    (wsClient as any).stopPingPong();
+    delete realSocket.readyState;
+    pingSpy.mockRestore();
+  }, 10000);
+
   test('should respond to error event', async () => {
     expect(server).toBeDefined();
     wsClient.once('error', (error) => {
@@ -295,6 +310,13 @@ describe('ShellyWsClient', () => {
       LogLevel.INFO,
       expect.stringContaining(`WebSocket connection closed with Shelly device ${hk}Jest${nf} host ${zb}localhost${nf} port ${CYAN}8080${nf}`),
     );
+    (wsClient as any)._isConnected = true;
+  }, 10000);
+
+  test('should respond to close event without reason', async () => {
+    (wsClient as any).wsClient?.emit('close', 1000, Buffer.from(''));
+    expect(wsClient.isConnected).toBeFalsy();
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, expect.stringMatching(/code 1000 $/));
     (wsClient as any)._isConnected = true;
   }, 10000);
 
