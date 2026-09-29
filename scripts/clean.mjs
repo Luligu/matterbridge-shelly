@@ -1,6 +1,6 @@
 /**
  * clean.mjs
- * Version: 1.3.0
+ * Version: 1.3.1
  *
  * Dependency-free replacement for `npx shx rm -rf *.tsbuildinfo dist build`.
  * Removes every *.tsbuildinfo file in the current directory and the dist and build directories.
@@ -102,8 +102,10 @@ const rm = (dir, target) => {
   let stats;
   try {
     stats = lstatSync(path.resolve(dir, target));
-  } catch {
-    return; // Path does not exist, nothing to remove and nothing to log.
+  } catch (error) {
+    if (error.code === 'ENOENT') return; // Path does not exist, nothing to remove and nothing to log.
+    console.warn(`Skipped unreadable path (${error.code}): ${error.path ?? target}`);
+    return;
   }
 
   try {
