@@ -3,7 +3,7 @@
  * @description This file contains the commandHandler for ShellyPlatform.
  * @author Luca Liguori
  * @created 2024-12-03
- * @version 1.1.0
+ * @version 1.2.0
  * @license Apache-2.0
  *
  * Copyright 2024, 2025, 2026 Luca Liguori.
@@ -366,6 +366,12 @@ export function shellyUpdateHandler(
     } else if (property === 'target_pos' && isValidNumber(value, 0, 100)) {
       const matterPos = 10000 - Math.min(Math.max(Math.round(value * 100), 0), 10000);
       void endpoint.setAttribute(WindowCovering.id, 'targetPositionLiftPercent100ths', matterPos, shellyDevice.log);
+    } else if (property === 'slat_pos' && isValidNumber(value, 0, 100)) {
+      // Gen 2+ covers with slat control enabled report the slat position (Shelly 0 = closed 100 = open): the endpoint has the tilt feature.
+      // Shelly doesn't report a target slat position, so the target is kept in sync with the reported position.
+      const matterTiltPos = 10000 - Math.min(Math.max(Math.round(value * 100), 0), 10000);
+      void endpoint.setAttribute(WindowCovering.id, 'currentPositionTiltPercent100ths', matterTiltPos, shellyDevice.log);
+      void endpoint.setAttribute(WindowCovering.id, 'targetPositionTiltPercent100ths', matterTiltPos, shellyDevice.log);
     }
     // const statusLookup = ['stopped', 'opening', 'closing', 'unknown'];
   }

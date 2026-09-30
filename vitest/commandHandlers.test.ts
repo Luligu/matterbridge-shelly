@@ -202,6 +202,24 @@ describe('ShellyPlatform', () => {
     device.destroy();
   });
 
+  it('should send GoToTiltPosition with an invalid position to a cover component without invoking any action', async () => {
+    const device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shelly2pmg3-34CDB0770C4E.json'));
+    expect(device).not.toBeUndefined();
+    if (!device) return;
+    const component = device.getComponent('cover:0');
+    expect(component).toBeDefined();
+    if (!component || !isCoverComponent(component)) return;
+    expect(component.hasProperty('slat_pos')).toBe(true);
+
+    const endpoint = new MatterbridgeEndpoint(onOffLight, { id: 'CommandHandlerCoverTiltTest' }).createDefaultIdentifyClusterServer();
+
+    loggerLogSpy.mockClear();
+    shellyCoverCommandHandler(endpoint, component, 'GoToTiltPosition', 20000);
+    expect(loggerLogSpy).not.toHaveBeenCalledWith(LogLevel.INFO, expect.stringContaining('Sent command'));
+
+    device.destroy();
+  });
+
   it('should call onShutdown with reason', async () => {
     await shellyPlatform.onShutdown('Test reason');
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Shutting down platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
