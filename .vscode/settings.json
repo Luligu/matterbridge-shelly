@@ -1,4 +1,4 @@
-// VS Code settings v.1.0.14
+// VS Code settings v.1.0.15
 {
   "eslint.enable": false,
   "prettier.enable": false,
@@ -20,6 +20,7 @@
     "source.format.oxc": "always",
     "source.fixAll.oxc": "always"
   },
+  "vitest.configSearchPatternExclude": "{**/node_modules/**,**/template/**}",
   "diffEditor.ignoreTrimWhitespace": false,
   "files.eol": "\n",
   "files.insertFinalNewline": true,
