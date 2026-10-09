@@ -14,7 +14,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 
 import { AnsiLogger, LogLevel, TimestampFormat } from 'matterbridge/logger';
-import { loggerLogSpy, setupTest } from 'matterbridge/vitest-utils';
+import { loggerLogSpy, setupTest } from 'matterbridge/test-utils/vitest';
 
 import type { Shelly } from '../src/shelly.js';
 import { shellyFetch } from '../src/shellyFetch.js';

@@ -12,8 +12,7 @@ import path from 'node:path';
 
 import type { MatterbridgeEndpoint, PlatformMatterbridge } from 'matterbridge';
 import { CYAN, db, dn, hk, idn, LogLevel, nf, rs, zb } from 'matterbridge/logger';
-import { waiter } from 'matterbridge/utils';
-import { flushAsync, log, loggerDebugSpy, loggerInfoSpy, loggerLogSpy, setDebug, setupTest } from 'matterbridge/vitest-utils';
+import { flushAsync } from 'matterbridge/test-utils';
 import {
   addMatterbridge,
   createServerNode,
@@ -21,9 +20,16 @@ import {
   destroyTestEnvironment,
   flushServerNode,
   getMatterbridge,
+  log,
+  loggerDebugSpy,
+  loggerInfoSpy,
+  loggerLogSpy,
+  setDebug,
+  setupTest,
   startServerNode,
   stopServerNode,
-} from 'matterbridge/vitest-utils/matter';
+} from 'matterbridge/test-utils/vitest';
+import { waiter } from 'matterbridge/utils';
 
 import { CoapServer } from '../src/coapServer.js';
 import { MdnsScanner } from '../src/mdnsScanner.js';

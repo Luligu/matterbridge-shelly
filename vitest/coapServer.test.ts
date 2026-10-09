@@ -8,8 +8,9 @@ import { promises as fs, readFileSync } from 'node:fs';
 import path from 'node:path';
 
 import { CYAN, db, hk, LogLevel, nf, zb } from 'matterbridge/logger';
+import { flushAsync } from 'matterbridge/test-utils';
+import { HOMEDIR, loggerLogSpy, setupTest } from 'matterbridge/test-utils/vitest';
 import { waiter } from 'matterbridge/utils';
-import { flushAsync, HOMEDIR, loggerLogSpy, setupTest } from 'matterbridge/vitest-utils';
 
 import { CoapServer } from '../src/coapServer.js';
 

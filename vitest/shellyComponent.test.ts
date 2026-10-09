@@ -10,7 +10,7 @@ import { promises as fs } from 'node:fs';
 import path from 'node:path';
 
 import { AnsiLogger, TimestampFormat } from 'matterbridge/logger';
-import { setupTest } from 'matterbridge/vitest-utils';
+import { setupTest } from 'matterbridge/test-utils/vitest';
 import type { MockInstance } from 'vitest';
 
 import { Shelly } from '../src/shelly.js';

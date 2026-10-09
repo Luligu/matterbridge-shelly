@@ -11,7 +11,8 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 
 import { AnsiLogger, CYAN, db, hk, idn, ign, LogLevel, rs } from 'matterbridge/logger';
-import { flushAsync, loggerLogSpy, setupTest } from 'matterbridge/vitest-utils';
+import { flushAsync } from 'matterbridge/test-utils';
+import { loggerLogSpy, setupTest } from 'matterbridge/test-utils/vitest';
 import type { ResponsePacket } from 'multicast-dns';
 import type { MockedFunction } from 'vitest';
 

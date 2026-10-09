@@ -6,8 +6,8 @@
  */
 
 import { AnsiLogger, LogLevel, TimestampFormat } from 'matterbridge/logger';
+import { HOMEDIR, setupTest } from 'matterbridge/test-utils/vitest';
 import { getMacAddress, wait } from 'matterbridge/utils';
-import { HOMEDIR, setupTest } from 'matterbridge/vitest-utils';
 
 import { Shelly } from '../src/shelly.js';
 import { isCloudComponent, isMatterComponent, isSwitchComponent, isSysComponent, isWifiComponent, isWsComponent } from '../src/shellyComponent.js';

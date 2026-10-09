@@ -32,8 +32,7 @@ import {
   Switch,
   TemperatureMeasurement,
 } from 'matterbridge/matter/clusters';
-import { waiter } from 'matterbridge/utils';
-import { log, loggerLogSpy, setDebug, setupTest } from 'matterbridge/vitest-utils';
+import { getMoveToColorRequest, getMoveToHueRequest, getMoveToLevelRequest, getMoveToSaturationRequest } from 'matterbridge/test-utils/matter';
 import {
   addMatterbridge,
   createServerNode,
@@ -41,13 +40,14 @@ import {
   destroyTestEnvironment,
   flushServerNode,
   getMatterbridge,
-  getMoveToColorRequest,
-  getMoveToHueRequest,
-  getMoveToLevelRequest,
-  getMoveToSaturationRequest,
+  log,
+  loggerLogSpy,
+  setDebug,
+  setupTest,
   startServerNode,
   stopServerNode,
-} from 'matterbridge/vitest-utils/matter';
+} from 'matterbridge/test-utils/vitest';
+import { waiter } from 'matterbridge/utils';
 
 import { CoapServer } from '../src/coapServer.js';
 import { type DiscoveredDevice, MdnsScanner } from '../src/mdnsScanner.js';

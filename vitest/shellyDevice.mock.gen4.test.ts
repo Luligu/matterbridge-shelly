@@ -11,8 +11,8 @@ const NAME = 'ShellyDeviceMockGen4';
 import path from 'node:path';
 
 import { AnsiLogger, TimestampFormat } from 'matterbridge/logger';
+import { setupTest } from 'matterbridge/test-utils/vitest';
 import { wait } from 'matterbridge/utils';
-import { setupTest } from 'matterbridge/vitest-utils';
 
 import { CoapServer } from '../src/coapServer.js';
 import { MdnsScanner } from '../src/mdnsScanner.js';

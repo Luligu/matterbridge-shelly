@@ -9,7 +9,7 @@ const NAME = 'UdpServer';
 import { createSocket, type Socket } from 'node:dgram';
 
 import { LogLevel } from 'matterbridge/logger';
-import { setupTest } from 'matterbridge/vitest-utils';
+import { setupTest } from 'matterbridge/test-utils/vitest';
 
 import type { UdpRequestFrame } from '../src/udpServer.js';
 import { UdpServer } from '../src/udpServer.js';
