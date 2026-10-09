@@ -426,6 +426,13 @@ export function shellyUpdateHandler(
         void endpoint.setAttribute(ElectricalPowerMeasurement.id, 'activeCurrent', Math.round(current * 1000), shellyDevice.log);
       }
     }
+    // frequency
+    if (property === 'freq' && isValidNumber(value, 0)) {
+      // Matter ElectricalPowerMeasurement.frequency is expressed in mHz
+      const frequency = Math.round(value * 1000);
+      void endpoint.setAttribute(ElectricalPowerMeasurement.id, 'frequency', frequency, shellyDevice.log);
+      return;
+    }
     if (property === 'total' && isValidNumber(value, 0)) {
       const energy = Math.round(value * 1000) / 1000;
       void endpoint.setAttribute(ElectricalEnergyMeasurement.id, 'cumulativeEnergyImported', { energy: Math.round(energy * 1000) }, shellyDevice.log);
