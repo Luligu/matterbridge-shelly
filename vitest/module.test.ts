@@ -154,7 +154,7 @@ describe('ShellyPlatform', () => {
 
   beforeAll(async () => {
     // Create Matterbridge environment
-    await createTestEnvironment();
+    await createTestEnvironment('warn');
     await createServerNode(MATTER_PORT);
     if (!MATTER_CREATE_ONLY) await startServerNode();
     matterbridge = getMatterbridge();
@@ -913,7 +913,7 @@ describe('ShellyPlatform', () => {
     );
     expect(child?.getAttribute('Descriptor', 'tagList')).toEqual([{ mfgCode: null, namespaceId: 7, tag: 0, label: 'rgb:0' }]);
     expect(child?.getAttribute('Descriptor', 'deviceTypeList')).toEqual([
-      { deviceType: 269, revision: 4 },
+      { deviceType: 269, revision: 5 },
       { deviceType: 1296, revision: 1 },
     ]);
     expectUnorderedNumberArray(child?.getAttribute('Identify', 'acceptedCommandList'), [0, 64]);

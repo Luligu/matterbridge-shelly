@@ -326,7 +326,7 @@ export function shellyUpdateHandler(
       // Gen 1 devices send stop. Gen 2 devices send stopped.
       if ((shellyDevice.gen === 1 && value === 'stop') || (shellyDevice.gen > 1 && value === 'stopped')) {
         const status = WindowCovering.MovementStatus.Stopped;
-        void endpoint.setAttribute(WindowCovering.id, 'operationalStatus', { global: status, lift: status, tilt: status }, shellyDevice.log);
+        void endpoint.setAttribute(WindowCovering.id, 'operationalStatus', { global: status, lift: status }, shellyDevice.log);
         shellyDevice.coverUpdateTimeout = setTimeout(() => {
           shellyDevice.log.debug(`Setting target position to current position on endpoint ${or}${endpoint?.name}:${endpoint?.number}${db}`);
           const current = endpoint?.getAttribute(WindowCovering.id, 'currentPositionLiftPercent100ths', shellyDevice.log);
@@ -343,22 +343,22 @@ export function shellyUpdateHandler(
         void endpoint.setAttribute(WindowCovering.id, 'targetPositionLiftPercent100ths', 0, shellyDevice.log);
         void endpoint.setAttribute(WindowCovering.id, 'currentPositionLiftPercent100ths', 0, shellyDevice.log);
         const status = WindowCovering.MovementStatus.Stopped;
-        void endpoint.setAttribute(WindowCovering.id, 'operationalStatus', { global: status, lift: status, tilt: status }, shellyDevice.log);
+        void endpoint.setAttribute(WindowCovering.id, 'operationalStatus', { global: status, lift: status }, shellyDevice.log);
       }
       // Gen 2 devices send closed for fully closed
       if (shellyDevice.gen > 1 && value === 'closed') {
         void endpoint.setAttribute(WindowCovering.id, 'targetPositionLiftPercent100ths', 10000, shellyDevice.log);
         void endpoint.setAttribute(WindowCovering.id, 'currentPositionLiftPercent100ths', 10000, shellyDevice.log);
         const status = WindowCovering.MovementStatus.Stopped;
-        void endpoint.setAttribute(WindowCovering.id, 'operationalStatus', { global: status, lift: status, tilt: status }, shellyDevice.log);
+        void endpoint.setAttribute(WindowCovering.id, 'operationalStatus', { global: status, lift: status }, shellyDevice.log);
       }
       if ((shellyDevice.gen === 1 && value === 'open') || (shellyDevice.gen > 1 && value === 'opening')) {
         const status = WindowCovering.MovementStatus.Opening;
-        void endpoint.setAttribute(WindowCovering.id, 'operationalStatus', { global: status, lift: status, tilt: status }, shellyDevice.log);
+        void endpoint.setAttribute(WindowCovering.id, 'operationalStatus', { global: status, lift: status }, shellyDevice.log);
       }
       if ((shellyDevice.gen === 1 && value === 'close') || (shellyDevice.gen > 1 && value === 'closing')) {
         const status = WindowCovering.MovementStatus.Closing;
-        void endpoint.setAttribute(WindowCovering.id, 'operationalStatus', { global: status, lift: status, tilt: status }, shellyDevice.log);
+        void endpoint.setAttribute(WindowCovering.id, 'operationalStatus', { global: status, lift: status }, shellyDevice.log);
       }
     } else if (property === 'current_pos' && isValidNumber(value, 0, 100)) {
       const matterPos = 10000 - Math.min(Math.max(Math.round(value * 100), 0), 10000);
