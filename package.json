@@ -75,6 +75,7 @@
     "git": false,
     "version": false,
     "publish": false,
+    "workflow": "dev",
     "coverage": {
       "lines": 90,
       "functions": 80,
