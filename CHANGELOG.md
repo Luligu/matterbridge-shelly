@@ -32,24 +32,29 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 
 ## [2.7.1] - Dev branch
 
-### Added
-
-- [scripts]: Add `scripts/bun-bundle.mjs` for Bun JavaScript and declaration bundles with workspace, production, watch and dry-run support.
-
 ### Changed
 
 - [test]: Migrate tests from `matterbridge/vitest-utils` to the unified `matterbridge/test-utils`.
 - [test]: Replace the fixed waits in `module.test.ts` and `updateHandler.test.ts` with `waiter` and awaited event handlers (about 20 s less per CI test run).
-- [vscode]: Update `.vscode/settings.json` to v.1.0.15: configure commit message instructions, exclude templates from Vitest discovery and refine terminal command approvals.
+- [agents]: Update the shared agent setup: `AGENTS.md`, `CLAUDE.md` and `.github/copilot-instructions.md` to v.1.0.7, `GEMINI.md` to v.1.0.1 and `.agents/README.md` to v.1.0.4.
+- [agents]: Update the `testing` rules to v.1.0.7, the `matterbridge` rules to v.1.0.3 and the `verify-agent-context` skill to v.1.0.5.
+- [agents]: Update `.claude/settings.json` to v.1.0.9, `.antigravity/settings.json` to v.1.0.6 and `.codex/rules/default.rules` to v.1.0.7.
+- [vscode]: Update `.vscode/settings.json` to v.1.0.16: configure commit message instructions, exclude templates from Vitest discovery and refine terminal command approvals.
+- [vscode]: Add Bundle, Minify, Obfuscate, Pack and Docker install tasks to `.vscode/tasks.json`.
 - [gitignore]: Update `.gitignore` to v.1.0.5: ignore `tmp/`, `.DS_Store` and Windows `Zone.Identifier` files.
 - [lint]: Update `.oxlintrc.json` and `.oxfmtrc.json` to v.1.1.0: align shared ignore patterns.
 - [vitest]: Replace `vite.config.ts` with `vitest.config.ts` v.2.0.8 and update test and coverage exclusions.
 - [scripts]: Update `scripts/clean.mjs` and `scripts/deep-clean.mjs` to v.2.0.0: log removed paths, add dry-run support and expose importable entry points.
 - [scripts]: Update release, download, Git status, Git sync, prepublish, pruning, workflow cleanup and version helpers to v.2.0.0 with CLI previews and importable entry points.
-- [package]: Remove unsupported npm flags from `bun link` in `softReset:bun`.
-- [package]: Bump `@types/node` to v.26.6.4.
-- [package]: Bump `@vitest/coverage-v8` to v.5.0.3.
-- [package]: Bump `vitest` to v.5.0.3.
+- [scripts]: Update `scripts/deep-clean.mjs` and `scripts/prepublish-clean.mjs` to v.2.1.0: also remove `tmp/` and `bun.lock`.
+- [package]: Remove the `softReset:bun` script.
+- [package]: Run `checkDependencies` and `updateDependencies` with `npx npm-check-updates@latest`.
+- [package]: Bump `@types/node` to v.26.6.5.
+- [package]: Bump `@vitest/coverage-v8` to v.5.0.5.
+- [package]: Bump `oxfmt` to v.0.74.0.
+- [package]: Bump `oxlint` to v.1.89.0.
+- [package]: Bump `oxlint-tsgolint` to v.7.0.2004.
+- [package]: Bump `vitest` to v.5.0.5.
 
 ### Fixed
 
