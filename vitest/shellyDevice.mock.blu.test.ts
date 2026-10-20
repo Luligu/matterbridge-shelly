@@ -75,7 +75,7 @@ describe('Shelly BLU gateway mock device', () => {
   let device: ShellyDevice;
 
   beforeAll(async () => {
-    await createTestEnvironment();
+    await createTestEnvironment('warn');
     matterbridge = getMatterbridge();
     platform = new ShellyPlatform(matterbridge, log, mockConfig);
     shelly = (platform as unknown as { shelly: Shelly }).shelly;

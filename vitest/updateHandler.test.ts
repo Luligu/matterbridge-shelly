@@ -120,7 +120,7 @@ describe('ShellyPlatform', () => {
 
   beforeAll(async () => {
     // Create Matterbridge environment
-    await createTestEnvironment();
+    await createTestEnvironment('warn');
     await createServerNode(MATTER_PORT);
     if (!MATTER_CREATE_ONLY) await startServerNode();
     matterbridge = getMatterbridge();
