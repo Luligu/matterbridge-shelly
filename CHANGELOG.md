@@ -62,6 +62,7 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 - [humidity]: Set the initial `measuredValue` of humidity sensors in `onConfigure`.
 - [platform]: Fix `onConfigure` stopping at the first child endpoint without a matching Shelly component.
 - [coap]: Fix `CoapServer.stop()` removing the `stopped` listeners when the agent closes before the server, so `stopped` was never received.
+- [cover]: Drop the `tilt` field from `operationalStatus` on lift-only covers: Matter 1.6.1 allows it only with the Tilt feature.
 
 <a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
