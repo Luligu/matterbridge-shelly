@@ -27,11 +27,13 @@ import {
   Groups,
   Identify,
   OnOff,
+  PowerSource,
   PowerTopology,
   RelativeHumidityMeasurement,
   Switch,
   TemperatureMeasurement,
 } from 'matterbridge/matter/clusters';
+import { flushAsync } from 'matterbridge/test-utils';
 import { getMoveToColorRequest, getMoveToHueRequest, getMoveToLevelRequest, getMoveToSaturationRequest } from 'matterbridge/test-utils/matter';
 import {
   addMatterbridge,
@@ -154,7 +156,7 @@ describe('ShellyPlatform', () => {
 
   beforeAll(async () => {
     // Create Matterbridge environment
-    await createTestEnvironment('warn');
+    await createTestEnvironment();
     await createServerNode(MATTER_PORT);
     if (!MATTER_CREATE_ONLY) await startServerNode();
     matterbridge = getMatterbridge();
@@ -556,6 +558,39 @@ describe('ShellyPlatform', () => {
     shellyHt.destroy();
   });
 
+  it('should keep the smoke alarm PowerSource updated with the PowerSource entity blacklisted', async () => {
+    expect(shellyPlatform).toBeDefined();
+    shellyPlatform.config.enableMdnsDiscover = false;
+    shellyPlatform.config.deviceEntityBlackList = { 'shellyplussmoke-E08CFE8BD798': ['PowerSource'] };
+
+    await shellyPlatform.onStart('Test reason');
+
+    const shellySmoke = await ShellyDevice.create(shelly, (shellyPlatform as any).log, path.join('src', 'mock', 'shellyplussmoke-E08CFE8BD798.json'));
+    expect(shellySmoke).not.toBeUndefined();
+    if (!shellySmoke) return;
+
+    await shelly.addDevice(shellySmoke);
+    await waitBridged(shellySmoke);
+    const device = shellyPlatform.bridgedDevices.get('shellyplussmoke-E08CFE8BD798');
+    expect(device).toBeDefined();
+    if (!device) return;
+
+    // The bridged node has no PowerSource, the smoke alarm endpoint has its mandatory one
+    expect(device.hasClusterServer(PowerSource)).toBe(false);
+    const smoke = device.getChildEndpointById('smoke:0');
+    expect(smoke?.hasClusterServer(PowerSource)).toBe(true);
+
+    shellySmoke.getComponent('devicepower:0')?.setValue('battery', { V: 2.9, percent: 15 });
+    await flushAsync();
+    expect(smoke?.getAttribute(PowerSource.id, 'batPercentRemaining')).toBe(30);
+    expect(smoke?.getAttribute(PowerSource.id, 'batChargeLevel')).toBe(PowerSource.BatChargeLevel.Warning);
+    expect(smoke?.getAttribute(PowerSource.id, 'batVoltage')).toBe(2900);
+
+    shellyPlatform.config.deviceEntityBlackList = {};
+    cleanup();
+    shellySmoke.destroy();
+  });
+
   it('should add shellyprorgbwwpm mode rgbctt', async () => {
     expect(shellyPlatform).toBeDefined();
     shellyPlatform.config.enableMdnsDiscover = false;
@@ -598,6 +633,7 @@ describe('ShellyPlatform', () => {
       'matterbridge',
       'identify',
       'groups',
+      'scenesManagement',
       'onOff',
       'levelControl',
       'colorControl',
@@ -614,6 +650,7 @@ describe('ShellyPlatform', () => {
       'matterbridge',
       'identify',
       'groups',
+      'scenesManagement',
       'onOff',
       'levelControl',
       'colorControl',
@@ -868,6 +905,7 @@ describe('ShellyPlatform', () => {
       'matterbridge',
       'identify',
       'groups',
+      'scenesManagement',
       'onOff',
       'levelControl',
       'colorControl',

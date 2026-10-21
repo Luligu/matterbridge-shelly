@@ -193,15 +193,21 @@ export function shellyUpdateHandler(
       }
     }
   }
+  // The smoke alarm child endpoints carry their own PowerSource (Matter 1.6.1 Device Library § 7.9.4): keep them in sync with the bridged node
+  // With the PowerSource entity blacklisted the bridged node has no PowerSource, so only the smoke alarm endpoints are updated
+  const powerSourceEndpoints =
+    endpointName === 'PowerSource' ? [endpoint, ...matterbridgeDevice.getChildEndpoints()].filter((target) => target.hasClusterServer(PowerSource.id)) : [endpoint];
   // Update for Battery
   if (shellyComponent.name === 'Battery' && property === 'level' && isValidNumber(value, 0, 100)) {
-    void endpoint.setAttribute(PowerSource.id, 'batPercentRemaining', Math.min(Math.max(value * 2, 0), 200), shellyDevice.log);
-    if (value < 10) void endpoint.setAttribute(PowerSource.id, 'batChargeLevel', PowerSource.BatChargeLevel.Critical, shellyDevice.log);
-    else if (value < 20) void endpoint.setAttribute(PowerSource.id, 'batChargeLevel', PowerSource.BatChargeLevel.Warning, shellyDevice.log);
-    else void endpoint.setAttribute(PowerSource.id, 'batChargeLevel', PowerSource.BatChargeLevel.Ok, shellyDevice.log);
+    for (const target of powerSourceEndpoints) {
+      void target.setAttribute(PowerSource.id, 'batPercentRemaining', Math.min(Math.max(value * 2, 0), 200), shellyDevice.log);
+      if (value < 10) void target.setAttribute(PowerSource.id, 'batChargeLevel', PowerSource.BatChargeLevel.Critical, shellyDevice.log);
+      else if (value < 20) void target.setAttribute(PowerSource.id, 'batChargeLevel', PowerSource.BatChargeLevel.Warning, shellyDevice.log);
+      else void target.setAttribute(PowerSource.id, 'batChargeLevel', PowerSource.BatChargeLevel.Ok, shellyDevice.log);
+    }
   }
   if (shellyComponent.name === 'Battery' && property === 'voltage' && isValidNumber(value, 0)) {
-    void endpoint.setAttribute(PowerSource.id, 'batVoltage', value * 1000, shellyDevice.log);
+    for (const target of powerSourceEndpoints) void target.setAttribute(PowerSource.id, 'batVoltage', value * 1000, shellyDevice.log);
   }
   if (shellyComponent.name === 'Battery' && property === 'charging' && isValidNumber(value)) {
     void endpoint.setAttribute(PowerSource.id, 'batChargeState', value ? PowerSource.BatChargeState.IsCharging : PowerSource.BatChargeState.IsNotCharging, matterbridgeDevice.log);
@@ -211,11 +217,13 @@ export function shellyUpdateHandler(
     // oxlint-disable-next-line typescript/no-unsafe-type-assertion
     const battery = value as { V: number; percent: number };
     if (isValidNumber(battery.V, 0, 12) && isValidNumber(battery.percent, 0, 100)) {
-      void endpoint.setAttribute(PowerSource.id, 'batPercentRemaining', battery.percent * 2, shellyDevice.log);
-      if (battery.percent < 10) void endpoint.setAttribute(PowerSource.id, 'batChargeLevel', PowerSource.BatChargeLevel.Critical, shellyDevice.log);
-      else if (battery.percent < 20) void endpoint.setAttribute(PowerSource.id, 'batChargeLevel', PowerSource.BatChargeLevel.Warning, shellyDevice.log);
-      else void endpoint.setAttribute(PowerSource.id, 'batChargeLevel', PowerSource.BatChargeLevel.Ok, shellyDevice.log);
-      void endpoint.setAttribute(PowerSource.id, 'batVoltage', battery.V * 1000, shellyDevice.log);
+      for (const target of powerSourceEndpoints) {
+        void target.setAttribute(PowerSource.id, 'batPercentRemaining', battery.percent * 2, shellyDevice.log);
+        if (battery.percent < 10) void target.setAttribute(PowerSource.id, 'batChargeLevel', PowerSource.BatChargeLevel.Critical, shellyDevice.log);
+        else if (battery.percent < 20) void target.setAttribute(PowerSource.id, 'batChargeLevel', PowerSource.BatChargeLevel.Warning, shellyDevice.log);
+        else void target.setAttribute(PowerSource.id, 'batChargeLevel', PowerSource.BatChargeLevel.Ok, shellyDevice.log);
+        void target.setAttribute(PowerSource.id, 'batVoltage', battery.V * 1000, shellyDevice.log);
+      }
     }
   }
 
