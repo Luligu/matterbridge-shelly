@@ -32,6 +32,10 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 
 ## [2.7.1] - Dev branch
 
+### Breaking changes
+
+- [matterbridge]: Require matterbridge v.3.11.0 with matter v.1.6.1.
+
 ### Changed
 
 - [test]: Migrate tests from `matterbridge/vitest-utils` to the unified `matterbridge/test-utils`.
@@ -70,7 +74,7 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 
 ### Breaking changes
 
-- [matterbridge]: Require matterbridge v.3.10.10 with matter v.1.6.0.
+- [matterbridge]: Require matterbridge v.3.11.0 with matter v.1.6.1.
 
 ### Added
 
