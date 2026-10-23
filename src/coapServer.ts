@@ -783,6 +783,12 @@ export class CoapServer extends EventEmitter<CoapServerEvents> {
   stop(): void {
     this.log.info('Stopping CoIoT (coap) server for shelly devices...');
     this._isListening = false;
+    // The server and the agent close in any order: remove the listeners only when both are closed, so 'stopped' and 'agent_stopped' always reach them
+    let pendingCloses = this.coapServer ? 2 : 1;
+    const onClosed = (): void => {
+      pendingCloses -= 1;
+      if (pendingCloses === 0) this.removeAllListeners();
+    };
     /* v8 ignore else */
     if (this.coapServer)
       this.coapServer.close((err?: Error) => {
@@ -790,13 +796,14 @@ export class CoapServer extends EventEmitter<CoapServerEvents> {
         /* v8 ignore next */
         this.log.debug(`CoIoT (coap) server closed${err ? ' with error ' + err.message : ''}.`);
         this.emit('stopped', err);
+        onClosed();
       });
 
     this.coapAgent.close(
       /* v8 ignore next */ (err?: Error) => {
         this.log.debug(`CoIoT (coap) agent closed${err ? ' with error ' + err.message : ''}.`);
         this.emit('agent_stopped', err);
-        this.removeAllListeners();
+        onClosed();
       },
     );
     this.deviceDescription.clear();

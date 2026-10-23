@@ -12,7 +12,6 @@ import path from 'node:path';
 
 import { MatterbridgeEndpoint, onOffLight, type PlatformMatterbridge } from 'matterbridge';
 import { CYAN, db, hk, idn, LogLevel, nf, rs } from 'matterbridge/logger';
-import { log, loggerLogSpy, setDebug, setupTest } from 'matterbridge/vitest-utils';
 import {
   addMatterbridge,
   createServerNode,
@@ -20,9 +19,13 @@ import {
   destroyTestEnvironment,
   flushServerNode,
   getMatterbridge,
+  log,
+  loggerLogSpy,
+  setDebug,
+  setupTest,
   startServerNode,
   stopServerNode,
-} from 'matterbridge/vitest-utils/matter';
+} from 'matterbridge/test-utils/vitest';
 
 import { CoapServer } from '../src/coapServer.js';
 import { shellyCoverCommandHandler, shellyLightCommandHandler, shellySwitchCommandHandler } from '../src/commandHandlers.js';

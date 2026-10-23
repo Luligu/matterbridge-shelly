@@ -6,7 +6,7 @@
 
 const NAME = 'Auth';
 
-import { setupTest } from 'matterbridge/vitest-utils';
+import { setupTest } from 'matterbridge/test-utils/vitest';
 
 import {
   createBasicShellyAuth,

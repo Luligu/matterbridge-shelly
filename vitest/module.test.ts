@@ -15,7 +15,7 @@ import { mkdirSync, unlinkSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 
 import { featuresFor, type MatterbridgeEndpoint, type PlatformMatterbridge } from 'matterbridge';
-import { CYAN, db, er, GREEN, hk, idn, LogLevel, nf, or, rs, wr, YELLOW, zb } from 'matterbridge/logger';
+import { CYAN, db, dn, er, GREEN, hk, idn, LogLevel, nf, or, rs, wr, YELLOW, zb } from 'matterbridge/logger';
 import { OnOffBehavior, RelativeHumidityMeasurementBehavior, TemperatureMeasurementBehavior } from 'matterbridge/matter/behaviors';
 import {
   Binding,
@@ -27,13 +27,14 @@ import {
   Groups,
   Identify,
   OnOff,
+  PowerSource,
   PowerTopology,
   RelativeHumidityMeasurement,
   Switch,
   TemperatureMeasurement,
 } from 'matterbridge/matter/clusters';
-import { wait, waiter } from 'matterbridge/utils';
-import { log, loggerLogSpy, setDebug, setupTest } from 'matterbridge/vitest-utils';
+import { flushAsync } from 'matterbridge/test-utils';
+import { getMoveToColorRequest, getMoveToHueRequest, getMoveToLevelRequest, getMoveToSaturationRequest } from 'matterbridge/test-utils/matter';
 import {
   addMatterbridge,
   createServerNode,
@@ -41,13 +42,14 @@ import {
   destroyTestEnvironment,
   flushServerNode,
   getMatterbridge,
-  getMoveToColorRequest,
-  getMoveToHueRequest,
-  getMoveToLevelRequest,
-  getMoveToSaturationRequest,
+  log,
+  loggerLogSpy,
+  setDebug,
+  setupTest,
   startServerNode,
   stopServerNode,
-} from 'matterbridge/vitest-utils/matter';
+} from 'matterbridge/test-utils/vitest';
+import { waiter } from 'matterbridge/utils';
 
 import { CoapServer } from '../src/coapServer.js';
 import { type DiscoveredDevice, MdnsScanner } from '../src/mdnsScanner.js';
@@ -106,7 +108,6 @@ describe('ShellyPlatform', () => {
   let shellyPlatform: ShellyPlatform;
   let shelly: Shelly;
 
-  const eventWaitTime = process.env.GITHUB_ACTIONS ? 250 : 100; // Time to wait for events to be processed
   // const address = 'c4:cb:76:b3:cd:1f';
 
   const coapServerStartSpy = vi.spyOn(CoapServer.prototype, 'start').mockImplementation(() => {});
@@ -140,14 +141,17 @@ describe('ShellyPlatform', () => {
     clearInterval((shelly as any).fetchInterval);
   };
 
+  // Call the async platform listeners directly and await them, so the test resumes as soon as the handlers are done
   const emitDiscovered = async (device: DiscoveredDevice): Promise<void> => {
-    shelly.emit('discovered', device);
-    await wait(eventWaitTime);
+    await Promise.all(shelly.listeners('discovered').map(async (listener) => (listener as (device: DiscoveredDevice) => Promise<void>)(device)));
   };
 
   const emitAdded = async (device: ShellyDevice): Promise<void> => {
-    shelly.emit('add', device);
-    await wait(eventWaitTime);
+    await Promise.all(shelly.listeners('add').map(async (listener) => (listener as (device: ShellyDevice) => Promise<void>)(device)));
+  };
+
+  const waitBridged = async (device: ShellyDevice): Promise<void> => {
+    await waiter(`Shelly ${device.id} bridged`, () => shellyPlatform.bridgedDevices.has(device.id), true, 5000, 10);
   };
 
   beforeAll(async () => {
@@ -290,8 +294,7 @@ describe('ShellyPlatform', () => {
       return Promise.resolve();
     });
 
-    (shelly as any).emit('discovered', { id: 'shelly1l-E8DB84AAD781', host: '192.168.1.241', port: 80, gen: 1 });
-    await wait(eventWaitTime);
+    await emitDiscovered({ id: 'shelly1l-E8DB84AAD781', host: '192.168.1.241', port: 80, gen: 1 });
     expect((shellyPlatform as any).discoveredDevices.size).toBe(1);
     expect((shelly as any)._devices.size).toBe(0);
 
@@ -387,7 +390,7 @@ describe('ShellyPlatform', () => {
     if (!shelly1) return;
 
     await shelly.addDevice(shelly1);
-    await wait(eventWaitTime);
+    await waitBridged(shelly1);
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Shelly added ${idn}${shelly1.name}${rs} device id ${hk}${shelly1.id}${rs}${nf} host ${zb}${shelly1.host}${nf}`);
     expect(shellyPlatform.discoveredDevices.size).toBe(0);
     expect(shellyPlatform.storedDevices.size).toBe(0);
@@ -439,7 +442,7 @@ describe('ShellyPlatform', () => {
     await switchEndpoint.setStateOf(OnOffBehavior, { onOff: false });
     expect(switchEndpoint.stateOf(OnOffBehavior).onOff).toBe(false);
     shelly.coapServer.emit('coapupdate', shelly1.host, { 'relay:0': { state: true } });
-    await wait(eventWaitTime);
+    await waiter('Switch on', () => switchEndpoint.stateOf(OnOffBehavior).onOff, true, 5000, 10);
     expect(switchEndpoint.stateOf(OnOffBehavior).onOff).toBe(true);
 
     // Test commands for switch from Matter to Shelly
@@ -477,7 +480,8 @@ describe('ShellyPlatform', () => {
     const registerDeviceSpy = vi.spyOn(shellyPlatform, 'registerDevice').mockRejectedValue(new Error('Test registration failure'));
 
     await shelly.addDevice(device);
-    await wait(eventWaitTime);
+    // oxfmt-ignore
+    await waiter('Registration failure logged', () => loggerLogSpy.mock.calls.some((call) => call[0] === LogLevel.ERROR && call[1].includes('failed to register with Matterbridge: Test registration failure')), true, 5000, 10);
 
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.ERROR, expect.stringContaining('failed to register with Matterbridge: Test registration failure'));
     expect(shellyPlatform.bridgedDevices.has(device.id)).toBe(false);
@@ -500,7 +504,7 @@ describe('ShellyPlatform', () => {
     if (!shellyHt) return;
 
     await shelly.addDevice(shellyHt);
-    await wait(eventWaitTime);
+    await waitBridged(shellyHt);
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Shelly added ${idn}${shellyHt.name}${rs} device id ${hk}${shellyHt.id}${rs}${nf} host ${zb}${shellyHt.host}${nf}`);
     expect(shellyPlatform.discoveredDevices.size).toBe(0);
     expect(shellyPlatform.storedDevices.size).toBe(0);
@@ -526,16 +530,65 @@ describe('ShellyPlatform', () => {
 
     // Test updates on switch from Shelly to Matter
     shelly.coapServer.emit('coapupdate', shellyHt.host, { temperature: { tC: 20.75, tF: 71.15 }, humidity: { value: 60.5 } });
-    await wait(eventWaitTime);
+    // oxfmt-ignore
+    await waiter('Temperature and humidity', () => device.getChildEndpointById('temperature')?.stateOf(TemperatureMeasurementBehavior).measuredValue === 2075 && device.getChildEndpointById('humidity')?.stateOf(RelativeHumidityMeasurementBehavior).measuredValue === 6050, true, 5000, 10);
     const temperatureEndpoint = device.getChildEndpointById('temperature')!;
     expect(temperatureEndpoint.stateOf(TemperatureMeasurementBehavior).measuredValue).toBe(2075);
     const humidityEndpoint = device.getChildEndpointById('humidity')!;
     expect(humidityEndpoint.stateOf(RelativeHumidityMeasurementBehavior).measuredValue).toBe(6050);
 
+    // Test onConfigure restores measuredValue from the Shelly components
+    await temperatureEndpoint.setAttribute(TemperatureMeasurement.id, 'measuredValue', null);
+    await humidityEndpoint.setAttribute(RelativeHumidityMeasurement.id, 'measuredValue', null);
+    expect(temperatureEndpoint.stateOf(TemperatureMeasurementBehavior).measuredValue).toBeNull();
+    expect(humidityEndpoint.stateOf(RelativeHumidityMeasurementBehavior).measuredValue).toBeNull();
     await shellyPlatform.onConfigure();
+    expect(temperatureEndpoint.stateOf(TemperatureMeasurementBehavior).measuredValue).toBe(2075);
+    expect(humidityEndpoint.stateOf(RelativeHumidityMeasurementBehavior).measuredValue).toBe(6050);
+    expect(loggerLogSpy).toHaveBeenCalledWith(
+      LogLevel.INFO,
+      `Configuring device ${dn}${device.deviceName}${nf} component ${hk}temperature${nf}:${zb}measuredValue ${YELLOW}2075${nf}`,
+    );
+    expect(loggerLogSpy).toHaveBeenCalledWith(
+      LogLevel.INFO,
+      `Configuring device ${dn}${device.deviceName}${nf} component ${hk}humidity${nf}:${zb}measuredValue ${YELLOW}6050${nf}`,
+    );
 
     cleanup();
     shellyHt.destroy();
+  });
+
+  it('should keep the smoke alarm PowerSource updated with the PowerSource entity blacklisted', async () => {
+    expect(shellyPlatform).toBeDefined();
+    shellyPlatform.config.enableMdnsDiscover = false;
+    shellyPlatform.config.deviceEntityBlackList = { 'shellyplussmoke-E08CFE8BD798': ['PowerSource'] };
+
+    await shellyPlatform.onStart('Test reason');
+
+    const shellySmoke = await ShellyDevice.create(shelly, (shellyPlatform as any).log, path.join('src', 'mock', 'shellyplussmoke-E08CFE8BD798.json'));
+    expect(shellySmoke).not.toBeUndefined();
+    if (!shellySmoke) return;
+
+    await shelly.addDevice(shellySmoke);
+    await waitBridged(shellySmoke);
+    const device = shellyPlatform.bridgedDevices.get('shellyplussmoke-E08CFE8BD798');
+    expect(device).toBeDefined();
+    if (!device) return;
+
+    // The bridged node has no PowerSource, the smoke alarm endpoint has its mandatory one
+    expect(device.hasClusterServer(PowerSource)).toBe(false);
+    const smoke = device.getChildEndpointById('smoke:0');
+    expect(smoke?.hasClusterServer(PowerSource)).toBe(true);
+
+    shellySmoke.getComponent('devicepower:0')?.setValue('battery', { V: 2.9, percent: 15 });
+    await flushAsync();
+    expect(smoke?.getAttribute(PowerSource.id, 'batPercentRemaining')).toBe(30);
+    expect(smoke?.getAttribute(PowerSource.id, 'batChargeLevel')).toBe(PowerSource.BatChargeLevel.Warning);
+    expect(smoke?.getAttribute(PowerSource.id, 'batVoltage')).toBe(2900);
+
+    shellyPlatform.config.deviceEntityBlackList = {};
+    cleanup();
+    shellySmoke.destroy();
   });
 
   it('should add shellyprorgbwwpm mode rgbctt', async () => {
@@ -551,7 +604,7 @@ describe('ShellyPlatform', () => {
     if (!shellyPro) return;
 
     await shelly.addDevice(shellyPro);
-    await wait(eventWaitTime);
+    await waitBridged(shellyPro);
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Shelly added ${idn}${shellyPro.name}${rs} device id ${hk}${shellyPro.id}${rs}${nf} host ${zb}${shellyPro.host}${nf}`);
     expect(shellyPlatform.discoveredDevices.size).toBe(0);
     expect(shellyPlatform.storedDevices.size).toBe(0);
@@ -580,6 +633,7 @@ describe('ShellyPlatform', () => {
       'matterbridge',
       'identify',
       'groups',
+      'scenesManagement',
       'onOff',
       'levelControl',
       'colorControl',
@@ -596,6 +650,7 @@ describe('ShellyPlatform', () => {
       'matterbridge',
       'identify',
       'groups',
+      'scenesManagement',
       'onOff',
       'levelControl',
       'colorControl',
@@ -617,32 +672,33 @@ describe('ShellyPlatform', () => {
     expect(cctEndpoint.getAttribute('levelControl', 'currentLevel')).toBe(100);
     expect(cctEndpoint.getAttribute('colorControl', 'colorTemperatureMireds')).toBe(300);
     shelly.wsServer.emit('wssupdate', shellyPro.id, { 'cct:0': { state: true, brightness: 50, ct: 3000 } });
-    await wait(eventWaitTime);
+    // oxfmt-ignore
+    await waiter('Cct on', () => cctEndpoint.getAttribute('onOff', 'onOff') === true && cctEndpoint.getAttribute('levelControl', 'currentLevel') === 127 && cctEndpoint.getAttribute('colorControl', 'colorTemperatureMireds') === 454, true, 5000, 10);
     expect(cctEndpoint.getAttribute('onOff', 'onOff')).toBe(true);
     expect(cctEndpoint.getAttribute('levelControl', 'currentLevel')).toBe(127);
     expect(cctEndpoint.getAttribute('colorControl', 'colorTemperatureMireds')).toBe(454);
     expect(cctEndpoint.getAttribute('colorControl', 'colorMode')).toBe(ColorControl.ColorMode.ColorTemperatureMireds);
     expect(cctEndpoint.getAttribute('colorControl', 'enhancedColorMode')).toBe(ColorControl.ColorMode.ColorTemperatureMireds);
     shelly.wsServer.emit('wssupdate', shellyPro.id, { 'cct:0': { ct: 2700 } });
-    await wait(eventWaitTime);
+    await waiter('Cct ct 2700', () => cctEndpoint.getAttribute('colorControl', 'colorTemperatureMireds') === 500, true, 5000, 10);
     expect(cctEndpoint.getAttribute('colorControl', 'colorTemperatureMireds')).toBe(500);
     shelly.wsServer.emit('wssupdate', shellyPro.id, { 'cct:0': { ct: 6500 } });
-    await wait(eventWaitTime);
+    await waiter('Cct ct 6500', () => cctEndpoint.getAttribute('colorControl', 'colorTemperatureMireds') === 147, true, 5000, 10);
     expect(cctEndpoint.getAttribute('colorControl', 'colorTemperatureMireds')).toBe(147);
     shelly.wsServer.emit('wssupdate', shellyPro.id, { 'cct:0': { ct: 6600 } });
-    await wait(eventWaitTime);
+    await waiter('Cct ct 6600', () => cctEndpoint.getAttribute('colorControl', 'colorTemperatureMireds') === 147, true, 5000, 10);
     expect(cctEndpoint.getAttribute('colorControl', 'colorTemperatureMireds')).toBe(147);
     shelly.wsServer.emit('wssupdate', shellyPro.id, { 'cct:0': { ct: 1600 } });
-    await wait(eventWaitTime);
+    await waiter('Cct ct 1600', () => cctEndpoint.getAttribute('colorControl', 'colorTemperatureMireds') === 147, true, 5000, 10);
     expect(cctEndpoint.getAttribute('colorControl', 'colorTemperatureMireds')).toBe(147);
     shelly.wsServer.emit('wssupdate', shellyPro.id, { 'cct:0': { ct: 1600 } });
-    await wait(eventWaitTime);
+    await waiter('Cct ct 1600', () => cctEndpoint.getAttribute('colorControl', 'colorTemperatureMireds') === 147, true, 5000, 10);
     expect(cctEndpoint.getAttribute('colorControl', 'colorTemperatureMireds')).toBe(147);
     shelly.wsServer.emit('wssupdate', shellyPro.id, { 'cct:0': { ct: 1600 } });
-    await wait(eventWaitTime);
+    await waiter('Cct ct 1600', () => cctEndpoint.getAttribute('colorControl', 'colorTemperatureMireds') === 147, true, 5000, 10);
     expect(cctEndpoint.getAttribute('colorControl', 'colorTemperatureMireds')).toBe(147);
     shelly.wsServer.emit('wssupdate', shellyPro.id, { 'cct:0': { ct: 4329 } });
-    await wait(eventWaitTime);
+    await waiter('Cct ct 4329', () => cctEndpoint.getAttribute('colorControl', 'colorTemperatureMireds') === 250, true, 5000, 10);
     expect(cctEndpoint.getAttribute('colorControl', 'colorTemperatureMireds')).toBe(250);
 
     // Test updates on rgb
@@ -658,7 +714,8 @@ describe('ShellyPlatform', () => {
     expect(rgbEndpoint.getAttribute('colorControl', 'currentHue')).toBe(100);
     expect(rgbEndpoint.getAttribute('colorControl', 'currentSaturation')).toBe(100);
     shelly.wsServer.emit('wssupdate', shellyPro.id, { 'rgb:0': { state: true, brightness: 50, rgb: [100, 200, 255] } });
-    await wait(eventWaitTime * 2);
+    // oxfmt-ignore
+    await waiter('Rgb on', () => rgbEndpoint.getAttribute('onOff', 'onOff') === true && rgbEndpoint.getAttribute('levelControl', 'currentLevel') === 127 && rgbEndpoint.getAttribute('colorControl', 'currentHue') === 142 && rgbEndpoint.getAttribute('colorControl', 'currentSaturation') === 254, true, 5000, 10);
     expect(rgbEndpoint.getAttribute('onOff', 'onOff')).toBe(true);
     expect(rgbEndpoint.getAttribute('levelControl', 'currentLevel')).toBe(127);
     expect(rgbEndpoint.getAttribute('colorControl', 'currentHue')).toBe(142);
@@ -812,7 +869,7 @@ describe('ShellyPlatform', () => {
     if (!shellyPlusRgbwPm) return;
 
     await shelly.addDevice(shellyPlusRgbwPm);
-    await wait(eventWaitTime);
+    await waitBridged(shellyPlusRgbwPm);
     expect(loggerLogSpy).toHaveBeenCalledWith(
       LogLevel.INFO,
       `Shelly added ${idn}${shellyPlusRgbwPm.name}${rs} device id ${hk}${shellyPlusRgbwPm.id}${rs}${nf} host ${zb}${shellyPlusRgbwPm.host}${nf}`,
@@ -848,6 +905,7 @@ describe('ShellyPlatform', () => {
       'matterbridge',
       'identify',
       'groups',
+      'scenesManagement',
       'onOff',
       'levelControl',
       'colorControl',
@@ -893,7 +951,7 @@ describe('ShellyPlatform', () => {
     );
     expect(child?.getAttribute('Descriptor', 'tagList')).toEqual([{ mfgCode: null, namespaceId: 7, tag: 0, label: 'rgb:0' }]);
     expect(child?.getAttribute('Descriptor', 'deviceTypeList')).toEqual([
-      { deviceType: 269, revision: 4 },
+      { deviceType: 269, revision: 5 },
       { deviceType: 1296, revision: 1 },
     ]);
     expectUnorderedNumberArray(child?.getAttribute('Identify', 'acceptedCommandList'), [0, 64]);
@@ -916,7 +974,8 @@ describe('ShellyPlatform', () => {
     expect(rgbEndpoint.getAttribute('colorControl', 'currentSaturation')).toBe(100);
     expect(rgbEndpoint.getAttribute('colorControl', 'colorTemperatureMireds')).toBe(250);
     shelly.wsServer.emit('wssupdate', shellyPlusRgbwPm.id, { 'rgb:0': { id: 0, state: true, brightness: 50, rgb: [255, 111, 128] } });
-    await wait(eventWaitTime);
+    // oxfmt-ignore
+    await waiter('Rgb on', () => rgbEndpoint.getAttribute('onOff', 'onOff') === true && rgbEndpoint.getAttribute('levelControl', 'currentLevel') === 127 && rgbEndpoint.getAttribute('colorControl', 'currentHue') === 249 && rgbEndpoint.getAttribute('colorControl', 'currentSaturation') === 254, true, 5000, 10);
     expect(rgbEndpoint.getAttribute('onOff', 'onOff')).toBe(true);
     expect(rgbEndpoint.getAttribute('levelControl', 'currentLevel')).toBe(127);
     expect(rgbEndpoint.getAttribute('colorControl', 'currentHue')).toBe(249);
@@ -928,7 +987,8 @@ describe('ShellyPlatform', () => {
     shelly.wsServer.emit('wssupdate', shellyPlusRgbwPm.id, {
       'rgb:0': { id: 0, aenergy: { total: 55.774, by_minute: [Array], minute_ts: 1745084640 }, apower: 12.85, current: 0.15, voltage: 12.8 },
     });
-    await wait(eventWaitTime);
+    // oxfmt-ignore
+    await waiter('Rgb power', () => rgbEndpoint.getAttribute('ElectricalPowerMeasurement', 'voltage') === 12800 && rgbEndpoint.getAttribute('ElectricalPowerMeasurement', 'activeCurrent') === 150 && rgbEndpoint.getAttribute('ElectricalPowerMeasurement', 'activePower') === 12850 && rgbEndpoint.getAttribute('ElectricalEnergyMeasurement', 'cumulativeEnergyImported')?.energy === 55774, true, 5000, 10);
     expect(rgbEndpoint.getAttribute('ElectricalPowerMeasurement', 'voltage')).toBe(12800);
     expect(rgbEndpoint.getAttribute('ElectricalPowerMeasurement', 'activeCurrent')).toBe(150);
     expect(rgbEndpoint.getAttribute('ElectricalPowerMeasurement', 'activePower')).toBe(12850);
@@ -1011,7 +1071,8 @@ describe('ShellyPlatform', () => {
     expect(fetch).toHaveBeenCalledWith(shellyPlusRgbwPm.shelly, shellyPlusRgbwPm.log, shellyPlusRgbwPm.host, shellyPlusRgbwPm.port, 'Rgb.Set', { id: 0, brightness: 50 });
 
     await rgbEndpoint.executeCommandHandler('moveToHue', getMoveToHueRequest(50, 0, false), 'colorControl', {} as any, rgbEndpoint);
-    await wait(1000);
+    // oxfmt-ignore
+    await waiter('moveToHue sent', () => loggerLogSpy.mock.calls.some((call) => call[1].includes(`ColorRGB(${YELLOW}209${hk}, ${YELLOW}255${hk}, ${YELLOW}0${hk})`)), true, 5000, 10);
     expect(loggerLogSpy).toHaveBeenCalledWith(
       LogLevel.INFO,
       `${db}Sent command ${hk}Rgb${db}:${hk}rgb:0${db}:${hk}ColorRGB(${YELLOW}209${hk}, ${YELLOW}255${hk}, ${YELLOW}0${hk})${db} to shelly device ${idn}${shellyPlusRgbwPm.id}${rs}${db}`,
@@ -1019,7 +1080,8 @@ describe('ShellyPlatform', () => {
     expect(fetch).toHaveBeenCalledWith(shellyPlusRgbwPm.shelly, shellyPlusRgbwPm.log, shellyPlusRgbwPm.host, shellyPlusRgbwPm.port, 'Rgb.Set', { id: 0, rgb: [209, 255, 0] });
 
     await rgbEndpoint.executeCommandHandler('moveToSaturation', getMoveToSaturationRequest(50, 0, false), 'colorControl', {} as any, rgbEndpoint);
-    await wait(1000);
+    // oxfmt-ignore
+    await waiter('moveToSaturation sent', () => loggerLogSpy.mock.calls.some((call) => call[1].includes(`ColorRGB(${YELLOW}153${hk}, ${YELLOW}103${hk}, ${YELLOW}109${hk})`)), true, 5000, 10);
     expect(loggerLogSpy).toHaveBeenCalledWith(
       LogLevel.INFO,
       `${db}Sent command ${hk}Rgb${db}:${hk}rgb:0${db}:${hk}ColorRGB(${YELLOW}153${hk}, ${YELLOW}103${hk}, ${YELLOW}109${hk})${db} to shelly device ${idn}${shellyPlusRgbwPm.id}${rs}${db}`,
@@ -1096,7 +1158,7 @@ describe('ShellyPlatform', () => {
     if (!shelly2PMGen3) return;
 
     await shelly.addDevice(shelly2PMGen3);
-    await wait(eventWaitTime);
+    await waitBridged(shelly2PMGen3);
     expect(loggerLogSpy).toHaveBeenCalledWith(
       LogLevel.INFO,
       `Shelly added ${idn}${shelly2PMGen3.name}${rs} device id ${hk}${shelly2PMGen3.id}${rs}${nf} host ${zb}${shelly2PMGen3.host}${nf}`,
@@ -1226,7 +1288,8 @@ describe('ShellyPlatform', () => {
     coverComponent.emit('update', 'cover:0', 'voltage', 233.8);
     coverComponent.emit('update', 'cover:0', 'current', 1.5);
     coverComponent.emit('update', 'cover:0', 'aenergy', { total: 55.774 });
-    await wait(eventWaitTime);
+    // oxfmt-ignore
+    await waiter('Cover power', () => coverEndpoint.getAttribute('ElectricalPowerMeasurement', 'activePower') === 12850 && coverEndpoint.getAttribute('ElectricalPowerMeasurement', 'voltage') === 233800 && coverEndpoint.getAttribute('ElectricalPowerMeasurement', 'activeCurrent') === 1500 && coverEndpoint.getAttribute('ElectricalEnergyMeasurement', 'cumulativeEnergyImported')?.energy === 55774, true, 5000, 10);
     expect(coverEndpoint.getAttribute('ElectricalPowerMeasurement', 'activePower')).toBe(12850);
     expect(coverEndpoint.getAttribute('ElectricalPowerMeasurement', 'voltage')).toBe(233800);
     expect(coverEndpoint.getAttribute('ElectricalPowerMeasurement', 'activeCurrent')).toBe(1500);
@@ -1317,9 +1380,7 @@ describe('ShellyPlatform', () => {
     shellyPlatform.bridgedDevices.set(oldDevice.id, bridgedDevice);
     const addDeviceSpy = vi.spyOn(shellyPlatform as any, 'addDevice').mockImplementation(async () => {});
 
-    const configUrl = `${discoveredDevice.port === 443 ? 'https' : 'http'}://${discoveredDevice.host}:${discoveredDevice.port}`;
     await emitDiscovered(discoveredDevice);
-    await waiter('Discovered endpoint updated', () => bridgedDevice.configUrl === configUrl && addDeviceSpy.mock.calls.length > 0, true, 5000, 20);
 
     expect(shellyPlatform.discoveredDevices.get(oldDevice.id)).toEqual(discoveredDevice);
     expect(shellyPlatform.storedDevices.get(oldDevice.id)).toEqual(discoveredDevice);
