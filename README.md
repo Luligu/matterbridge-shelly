@@ -30,6 +30,7 @@ Features:
 - Shelly BLU devices are supported through local devices configured as ble gateway.
 - Discovered shellies are stored in local storage and cached for fast loading on startup.
 - The components exposed are Light (with brightness and RGB color), Switch, Relay, Roller, Cover, PowerMeter, Temperature, Humidity, Illuminance, Thermostat, Button and Input.
+- Gen 2+ covers with slat control enabled (e.g. venetian blinds on a Shelly 2PM Gen3) also expose the tilt position. Enable and calibrate the slat control in the Shelly app or web page first, then restart Matterbridge.
 - PowerMeters expose the electrical measurements with the electricalSensor device type (supported by Home Assistant and partially by SmartThings), waiting for the other controllers to upgrade to the Matter 1.3 specs.
 - Shellies are controlled locally, eliminating the need for cloud or MQTT (which can both be disabled).
 - Shelly Gen 1 devices are controlled using the CoIoT protocol (see the note below).
