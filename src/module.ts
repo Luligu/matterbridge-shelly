@@ -42,6 +42,7 @@ import {
   electricalSensor,
   extendedColorLight,
   genericSwitch,
+  getSemtag,
   humiditySensor,
   lightSensor,
   MatterbridgeDynamicPlatform,
@@ -181,9 +182,9 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     super(matterbridge, log, config);
 
     // Verify that Matterbridge is the correct version
-    if (typeof this.verifyMatterbridgeVersion !== 'function' || !this.verifyMatterbridgeVersion('3.10.10')) {
+    if (typeof this.verifyMatterbridgeVersion !== 'function' || !this.verifyMatterbridgeVersion('3.11.0')) {
       throw new Error(
-        `This plugin requires Matterbridge version >= "3.10.10". Please update Matterbridge from ${this.matterbridge.matterbridgeVersion} to the latest version in the frontend.`,
+        `This plugin requires Matterbridge version >= "3.11.0". Please update Matterbridge from ${this.matterbridge.matterbridgeVersion} to the latest version in the frontend.`,
       );
     }
 
@@ -825,6 +826,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           child.log.logName = `${device.name} ${key}`;
           child.createDefaultIdentifyClusterServer();
           child.createDefaultGroupsClusterServer();
+          child.createDefaultScenesManagementClusterServer();
           child.createDefaultOnOffClusterServer();
           if (deviceType.code === dimmableLight.code || deviceType.code === colorTemperatureLight.code || deviceType.code === extendedColorLight.code) {
             child.createDefaultLevelControlClusterServer();
@@ -919,6 +921,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           child.log.logName = `${device.name} ${key}`;
           child.createDefaultIdentifyClusterServer();
           child.createDefaultGroupsClusterServer();
+          child.createDefaultScenesManagementClusterServer();
           child.createDefaultOnOffClusterServer();
 
           // Add the electrical measurementa cluster on the same endpoint
@@ -1387,10 +1390,20 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           }
         } else if (component.name === 'Smoke') {
           const smokeComponent = device.getComponent(key);
+          // The smoke alarm PowerSource is mandatory (Matter 1.6.1 Device Library § 7.9.4): follow the battery also when the PowerSource entity is blacklisted
+          if (!this.validateEntity(device.id, 'PowerSource')) {
+            for (const batteryComponent of [device.getComponent('battery'), device.getComponent('devicepower:0')]) {
+              batteryComponent?.on('update', (component: string, property: string, value: ShellyDataType) => {
+                shellyUpdateHandler(this, mbDevice, device, component, property, value, 'PowerSource');
+              });
+            }
+          }
           if (smokeComponent?.hasProperty('alarm') && isValidBoolean(smokeComponent.getValue('alarm'))) {
-            const child = mbDevice.addChildDeviceType(key, [smokeCoAlarm], undefined, config.debug);
+            const child = mbDevice.addChildDeviceType(key, [smokeCoAlarm, powerSource], undefined, config.debug);
             child.log.logName = `${device.name} ${key}`;
             child.createSmokeOnlySmokeCOAlarmClusterServer(smokeComponent.getValue('alarm') ? SmokeCoAlarm.AlarmState.Critical : SmokeCoAlarm.AlarmState.Normal);
+            const battery = this.batteryOf(device);
+            child.createDefaultPowerSourceReplaceableBatteryClusterServer(battery.level, battery.status, battery.voltage);
             child.addRequiredClusterServers();
             // Add event handler
             smokeComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
@@ -1398,9 +1411,11 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             });
           }
           if (smokeComponent?.hasProperty('smoke') && isValidBoolean(smokeComponent.getValue('smoke'))) {
-            const child = mbDevice.addChildDeviceType(key, [smokeCoAlarm], undefined, config.debug);
+            const child = mbDevice.addChildDeviceType(key, [smokeCoAlarm, powerSource], undefined, config.debug);
             child.log.logName = `${device.name} ${key}`;
             child.createSmokeOnlySmokeCOAlarmClusterServer(smokeComponent.getValue('smoke') ? SmokeCoAlarm.AlarmState.Critical : SmokeCoAlarm.AlarmState.Normal);
+            const battery = this.batteryOf(device);
+            child.createDefaultPowerSourceReplaceableBatteryClusterServer(battery.level, battery.status, battery.voltage);
             child.addRequiredClusterServers();
             // Add event handler
             smokeComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
@@ -1800,7 +1815,9 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           if (!component) continue;
           this.log.info(`Configuring device ${dn}${mbDevice.deviceName}${nf} electrical component ${hk}${label}${nf}`);
           for (const property of component.properties) {
-            if (!['voltage', 'current', 'power', 'apower', 'act_power', 'total', 'aenergy', 'ret_aenergy', 'total_act_energy', 'total_act_ret_energy'].includes(property.key))
+            if (
+              !['voltage', 'current', 'power', 'apower', 'act_power', 'freq', 'total', 'aenergy', 'ret_aenergy', 'total_act_energy', 'total_act_ret_energy'].includes(property.key)
+            )
               continue;
             shellyUpdateHandler(this, mbDevice, shellyDevice, component.id, property.key, property.value);
           }
@@ -1927,6 +1944,34 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     }
   }
 
+  /**
+   * Read the battery of a Shelly device as the bridged node PowerSource reports it, to start a smoke alarm PowerSource with the same values.
+   *
+   * @param {ShellyDevice} device - The Shelly device.
+   * @returns {{ level: number | null; status: PowerSource.BatChargeLevel; voltage: number | null }} The level in percent, the charge level and the voltage in mV (null when unknown).
+   */
+  private batteryOf(device: ShellyDevice): { level: number | null; status: PowerSource.BatChargeLevel; voltage: number | null } {
+    let level: number | null = null;
+    let voltage: number | null = null;
+    const batteryComponent = device.getComponent('battery');
+    const devicepower = device.getComponent('devicepower:0')?.getValue('battery');
+    if (batteryComponent) {
+      const batteryLevel = batteryComponent.getValue('level');
+      const batteryVoltage = batteryComponent.getValue('voltage');
+      if (isValidNumber(batteryLevel, 0, 100)) level = batteryLevel;
+      if (isValidNumber(batteryVoltage, 0, 12)) voltage = Math.round(batteryVoltage * 1000);
+    } else if (isValidObject(devicepower, 2)) {
+      // oxlint-disable-next-line typescript/no-unsafe-type-assertion
+      const battery = devicepower as { V: number; percent: number };
+      if (isValidNumber(battery.percent, 0, 100)) level = battery.percent;
+      if (isValidNumber(battery.V, 0, 12)) voltage = Math.round(battery.V * 1000);
+    }
+    let status = PowerSource.BatChargeLevel.Ok;
+    if (level !== null && level < 10) status = PowerSource.BatChargeLevel.Critical;
+    else if (level !== null && level < 20) status = PowerSource.BatChargeLevel.Warning;
+    return { level, status, voltage };
+  }
+
   private addTagList(component: ShellyComponent): Semtag[] | undefined {
     // if (this.matterbridge.edge) return undefined;
     // Add the tagList to the descriptor cluster
@@ -1935,6 +1980,7 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     else if (component.index === 1) tagList = { mfgCode: null, namespaceId: CommonNumberTag.One.namespaceId, tag: CommonNumberTag.One.tag, label: component.id };
     else if (component.index === 2) tagList = { mfgCode: null, namespaceId: CommonNumberTag.Two.namespaceId, tag: CommonNumberTag.Two.tag, label: component.id };
     else if (component.index === 3) tagList = { mfgCode: null, namespaceId: CommonNumberTag.Three.namespaceId, tag: CommonNumberTag.Three.tag, label: component.id };
+    else if (component.index === 4) tagList = getSemtag(CommonNumberTag.Four, component.id);
     return tagList ? [tagList] : undefined;
   }
 
@@ -2123,17 +2169,17 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       } else if (bthomeDevice.model === 'Shelly BLU RC Button 4' || bthomeDevice.model === 'Shelly BLU RC Button 4 ZB') {
         mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer();
         void mbDevice.addFixedLabel('composed', 'Input');
-        mbDevice.addChildDeviceTypeWithClusterServer('Button0', [genericSwitch], [Switch.id], undefined, this.config.debug);
-        mbDevice.addChildDeviceTypeWithClusterServer('Button1', [genericSwitch], [Switch.id], undefined, this.config.debug);
-        mbDevice.addChildDeviceTypeWithClusterServer('Button2', [genericSwitch], [Switch.id], undefined, this.config.debug);
-        mbDevice.addChildDeviceTypeWithClusterServer('Button3', [genericSwitch], [Switch.id], undefined, this.config.debug);
+        mbDevice.addChildDeviceTypeWithClusterServer('Button0', [genericSwitch], [Switch.id], { tagList: [getSemtag(CommonNumberTag.Zero, 'Button0')] }, this.config.debug);
+        mbDevice.addChildDeviceTypeWithClusterServer('Button1', [genericSwitch], [Switch.id], { tagList: [getSemtag(CommonNumberTag.One, 'Button1')] }, this.config.debug);
+        mbDevice.addChildDeviceTypeWithClusterServer('Button2', [genericSwitch], [Switch.id], { tagList: [getSemtag(CommonNumberTag.Two, 'Button2')] }, this.config.debug);
+        mbDevice.addChildDeviceTypeWithClusterServer('Button3', [genericSwitch], [Switch.id], { tagList: [getSemtag(CommonNumberTag.Three, 'Button3')] }, this.config.debug);
       } else if (bthomeDevice.model === 'Shelly BLU Wall Switch 4' || bthomeDevice.model === 'Shelly BLU Wall Switch 4 ZB') {
         mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer();
         void mbDevice.addFixedLabel('composed', 'Input');
-        mbDevice.addChildDeviceTypeWithClusterServer('Button0', [genericSwitch], [Switch.id], undefined, this.config.debug);
-        mbDevice.addChildDeviceTypeWithClusterServer('Button1', [genericSwitch], [Switch.id], undefined, this.config.debug);
-        mbDevice.addChildDeviceTypeWithClusterServer('Button2', [genericSwitch], [Switch.id], undefined, this.config.debug);
-        mbDevice.addChildDeviceTypeWithClusterServer('Button3', [genericSwitch], [Switch.id], undefined, this.config.debug);
+        mbDevice.addChildDeviceTypeWithClusterServer('Button0', [genericSwitch], [Switch.id], { tagList: [getSemtag(CommonNumberTag.Zero, 'Button0')] }, this.config.debug);
+        mbDevice.addChildDeviceTypeWithClusterServer('Button1', [genericSwitch], [Switch.id], { tagList: [getSemtag(CommonNumberTag.One, 'Button1')] }, this.config.debug);
+        mbDevice.addChildDeviceTypeWithClusterServer('Button2', [genericSwitch], [Switch.id], { tagList: [getSemtag(CommonNumberTag.Two, 'Button2')] }, this.config.debug);
+        mbDevice.addChildDeviceTypeWithClusterServer('Button3', [genericSwitch], [Switch.id], { tagList: [getSemtag(CommonNumberTag.Three, 'Button3')] }, this.config.debug);
       } else if (bthomeDevice.model === 'Shelly BLU Trv') {
         mbDevice.createDefaultPowerSourceReplaceableBatteryClusterServer(100, PowerSource.BatChargeLevel.Ok, 3000, 'Type AA', 2);
         mbDevice.createDefaultIdentifyClusterServer();

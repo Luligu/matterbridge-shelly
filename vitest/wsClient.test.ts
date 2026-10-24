@@ -13,8 +13,9 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 
 import { CYAN, db, er, hk, LogLevel, nf, wr, zb } from 'matterbridge/logger';
+import { flushAsync } from 'matterbridge/test-utils';
+import { consoleDebugSpy, loggerLogSpy, setupTest } from 'matterbridge/test-utils/vitest';
 import { wait, waiter } from 'matterbridge/utils';
-import { consoleDebugSpy, flushAsync, loggerLogSpy, setupTest } from 'matterbridge/vitest-utils';
 import { WebSocket, WebSocketServer } from 'ws';
 
 import { WsClient } from '../src/wsClient.js';

@@ -7,8 +7,8 @@
 /* oxlint-disable typescript/no-non-null-assertion -- components are known to exist at these points in the test flow */
 
 import { AnsiLogger, LogLevel, TimestampFormat } from 'matterbridge/logger';
+import { HOMEDIR, setupTest } from 'matterbridge/test-utils/vitest';
 import { getMacAddress, wait, waiter } from 'matterbridge/utils';
-import { HOMEDIR, setupTest } from 'matterbridge/vitest-utils';
 
 import { Shelly } from '../src/shelly.js';
 import { isCoverComponent, isLightComponent, isSwitchComponent, type ShellyComponent } from '../src/shellyComponent.js';

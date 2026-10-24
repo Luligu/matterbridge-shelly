@@ -9,8 +9,9 @@ const NAME = 'WsServer';
 import EventEmitter from 'node:events';
 
 import { LogLevel } from 'matterbridge/logger';
+import { flushAsync } from 'matterbridge/test-utils';
+import { loggerLogSpy, setupTest } from 'matterbridge/test-utils/vitest';
 import { wait, waiter } from 'matterbridge/utils';
-import { flushAsync, loggerLogSpy, setupTest } from 'matterbridge/vitest-utils';
 import { WebSocket } from 'ws';
 
 import type { ShellyData } from '../src/shellyTypes.js';

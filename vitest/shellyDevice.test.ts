@@ -9,8 +9,9 @@ const NAME = 'ShellyDevice';
 import path from 'node:path';
 
 import { AnsiLogger, BLUE, db, dn, er, hk, LogLevel, MAGENTA, nf, nt, TimestampFormat, YELLOW, zb } from 'matterbridge/logger';
+import { flushAsync } from 'matterbridge/test-utils';
+import { loggerLogSpy, setDebug, setupTest } from 'matterbridge/test-utils/vitest';
 import { wait } from 'matterbridge/utils';
-import { flushAsync, loggerLogSpy, setDebug, setupTest } from 'matterbridge/vitest-utils';
 
 import { CoapServer } from '../src/coapServer.js';
 import { MdnsScanner } from '../src/mdnsScanner.js';

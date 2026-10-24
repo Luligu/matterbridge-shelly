@@ -12,8 +12,8 @@ import path from 'node:path';
 
 import type { MatterbridgeEndpoint, PlatformMatterbridge } from 'matterbridge';
 import { CYAN, db, dn, hk, idn, LogLevel, nf, rs, zb } from 'matterbridge/logger';
-import { waiter } from 'matterbridge/utils';
-import { flushAsync, log, loggerDebugSpy, loggerInfoSpy, loggerLogSpy, setDebug, setupTest } from 'matterbridge/vitest-utils';
+import { PowerSource } from 'matterbridge/matter/clusters';
+import { flushAsync } from 'matterbridge/test-utils';
 import {
   addMatterbridge,
   createServerNode,
@@ -21,9 +21,16 @@ import {
   destroyTestEnvironment,
   flushServerNode,
   getMatterbridge,
+  log,
+  loggerDebugSpy,
+  loggerInfoSpy,
+  loggerLogSpy,
+  setDebug,
+  setupTest,
   startServerNode,
   stopServerNode,
-} from 'matterbridge/vitest-utils/matter';
+} from 'matterbridge/test-utils/vitest';
+import { waiter } from 'matterbridge/utils';
 
 import { CoapServer } from '../src/coapServer.js';
 import { MdnsScanner } from '../src/mdnsScanner.js';
@@ -346,6 +353,18 @@ describe('ShellyPlatform', () => {
         expect(endpoint.getChildEndpointByOriginalId('smoke')).not.toBeUndefined();
         shellyUpdateHandler(shellyPlatform, endpoint, device, 'smoke', 'alarm', false);
         shellyUpdateHandler(shellyPlatform, endpoint, device, 'smoke', 'alarm', true);
+
+        // The smoke child PowerSource starts from the device battery and follows the bridged node PowerSource
+        const smoke = endpoint.getChildEndpointByOriginalId('smoke');
+        expect(smoke?.hasClusterServer(PowerSource)).toBe(true);
+        expect(smoke?.getAttribute(PowerSource.id, 'batPercentRemaining')).toBe(endpoint.getAttribute(PowerSource.id, 'batPercentRemaining'));
+        shellyUpdateHandler(shellyPlatform, endpoint, device, 'battery', 'level', 15, 'PowerSource');
+        shellyUpdateHandler(shellyPlatform, endpoint, device, 'battery', 'voltage', 2.9, 'PowerSource');
+        await flushAsync();
+        expect(smoke?.getAttribute(PowerSource.id, 'batPercentRemaining')).toBe(30);
+        expect(smoke?.getAttribute(PowerSource.id, 'batChargeLevel')).toBe(PowerSource.BatChargeLevel.Warning);
+        expect(smoke?.getAttribute(PowerSource.id, 'batVoltage')).toBe(2900);
+        expect(endpoint.getAttribute(PowerSource.id, 'batPercentRemaining')).toBe(30);
       });
     }
 
@@ -359,6 +378,17 @@ describe('ShellyPlatform', () => {
         expect(endpoint.getChildEndpointByOriginalId('smoke:0')).not.toBeUndefined();
         shellyUpdateHandler(shellyPlatform, endpoint, device, 'smoke:0', 'alarm', false);
         shellyUpdateHandler(shellyPlatform, endpoint, device, 'smoke:0', 'alarm', true);
+
+        // The smoke child PowerSource starts from the device battery and follows the bridged node PowerSource
+        const smoke = endpoint.getChildEndpointByOriginalId('smoke:0');
+        expect(smoke?.hasClusterServer(PowerSource)).toBe(true);
+        expect(smoke?.getAttribute(PowerSource.id, 'batPercentRemaining')).toBe(endpoint.getAttribute(PowerSource.id, 'batPercentRemaining'));
+        shellyUpdateHandler(shellyPlatform, endpoint, device, 'devicepower:0', 'battery', { V: 2.9, percent: 15 }, 'PowerSource');
+        await flushAsync();
+        expect(smoke?.getAttribute(PowerSource.id, 'batPercentRemaining')).toBe(30);
+        expect(smoke?.getAttribute(PowerSource.id, 'batChargeLevel')).toBe(PowerSource.BatChargeLevel.Warning);
+        expect(smoke?.getAttribute(PowerSource.id, 'batVoltage')).toBe(2900);
+        expect(endpoint.getAttribute(PowerSource.id, 'batPercentRemaining')).toBe(30);
       });
     }
 
@@ -521,6 +551,30 @@ describe('ShellyPlatform', () => {
     }
 
     if (shellyId.id === 'shellyemminig4-D885ACEF41A8') {
+      it('should update frequency only when the reading is between 0 and 100 Hz', () => {
+        expect(device).toBeDefined();
+        expect(endpoint).toBeDefined();
+        if (!device || !endpoint) return;
+        const meter = endpoint.getChildEndpointByOriginalId('em1:0');
+        expect(meter).toBeDefined();
+        if (!meter) return;
+        const setAttributeSpy = vi.spyOn(meter, 'setAttribute').mockResolvedValue(true);
+        try {
+          for (const value of [0, 50.1, 100]) {
+            setAttributeSpy.mockClear();
+            shellyUpdateHandler(shellyPlatform, endpoint, device, 'em1:0', 'freq', value);
+            expect(setAttributeSpy).toHaveBeenCalledWith(expect.any(Number), 'frequency', Math.round(value * 1000), device.log);
+          }
+          for (const value of [-0.1, 100.1]) {
+            setAttributeSpy.mockClear();
+            shellyUpdateHandler(shellyPlatform, endpoint, device, 'em1:0', 'freq', value);
+            expect(setAttributeSpy).not.toHaveBeenCalled();
+          }
+        } finally {
+          setAttributeSpy.mockRestore();
+        }
+      });
+
       it(`should update power for shellyemminig4`, async () => {
         expect(device).not.toBeUndefined();
         if (!device) return;
@@ -570,15 +624,15 @@ describe('ShellyPlatform', () => {
         // Matter uses 10000 = fully closed   0 = fully opened
         // Shelly uses 0 = fully closed   100 = fully opened
         shellyUpdateHandler(shellyPlatform, endpoint, device, 'cover:0', 'slat_pos', 50);
-        await flushAsync(undefined, undefined, 10);
+        await waiter('Cover tilt target', () => coverEndpoint.getAttribute('WindowCovering', 'targetPositionTiltPercent100ths') === 5000, true, 5000, 10);
         expect(coverEndpoint.getAttribute('WindowCovering', 'currentPositionTiltPercent100ths')).toBe(5000);
         expect(coverEndpoint.getAttribute('WindowCovering', 'targetPositionTiltPercent100ths')).toBe(5000);
         shellyUpdateHandler(shellyPlatform, endpoint, device, 'cover:0', 'slat_pos', 100); // Slats fully open
-        await flushAsync(undefined, undefined, 10);
+        await waiter('Cover tilt target', () => coverEndpoint.getAttribute('WindowCovering', 'targetPositionTiltPercent100ths') === 0, true, 5000, 10);
         expect(coverEndpoint.getAttribute('WindowCovering', 'currentPositionTiltPercent100ths')).toBe(0);
         expect(coverEndpoint.getAttribute('WindowCovering', 'targetPositionTiltPercent100ths')).toBe(0);
         shellyUpdateHandler(shellyPlatform, endpoint, device, 'cover:0', 'slat_pos', 0); // Slats fully closed
-        await flushAsync(undefined, undefined, 10);
+        await waiter('Cover tilt target', () => coverEndpoint.getAttribute('WindowCovering', 'targetPositionTiltPercent100ths') === 10000, true, 5000, 10);
         expect(coverEndpoint.getAttribute('WindowCovering', 'currentPositionTiltPercent100ths')).toBe(10000);
         expect(coverEndpoint.getAttribute('WindowCovering', 'targetPositionTiltPercent100ths')).toBe(10000);
         // Invalid slat_pos values are ignored

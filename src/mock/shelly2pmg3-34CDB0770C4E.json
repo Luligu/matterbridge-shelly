@@ -200,11 +200,7 @@
       "freq": 50,
       "aenergy": {
         "total": 3,
-        "by_minute": [
-          0,
-          0,
-          0
-        ],
+        "by_minute": [0, 0, 0],
         "minute_ts": 1779361260
       },
       "temperature": {
@@ -264,10 +260,7 @@
       "ssid": "",
       "bssid": "20:23:51:59:e7:ac",
       "rssi": -58,
-      "sta_ip6": [
-        "fe80::36cd:b0ff:fe77:c4c",
-        "fd78:cbf8:4939:46e2:36cd:b0ff:fe77:c4c"
-      ]
+      "sta_ip6": ["fe80::36cd:b0ff:fe77:c4c", "fd78:cbf8:4939:46e2:36cd:b0ff:fe77:c4c"]
     },
     "ws": {
       "connected": false

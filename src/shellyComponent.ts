@@ -131,6 +131,12 @@ interface CoverComponent {
    * @returns {void} Dispatches the request without waiting for a response.
    */
   GoToPosition(pos: number): void;
+  /**
+   * Moves the slats on a Gen 2+ cover with slat control enabled.
+   *
+   * @param {number} pos - Open percentage, rounded and clamped to 0–100 (0 closed, 100 open).
+   * @returns {void} Dispatches the request without waiting for a response.
+   */
   GoToSlatPosition(pos: number): void;
 }
 
@@ -915,7 +921,7 @@ export class ShellyComponent extends EventEmitter<ShellyComponentEvents> {
         // Slats are supported only on gen 2+ covers with slat control enabled (the status then reports the slat_pos property)
         if (device.gen === 1 || !this.hasProperty('slat_pos')) return;
         const normalizedPos = Math.min(Math.max(Math.round(pos), 0), 100);
-        void shellyFetch(device.shelly, device.log, device.host, `${this.name}.GoToPosition`, { id: this.index, slat_pos: normalizedPos });
+        void shellyFetch(device.shelly, device.log, device.host, device.port, `${this.name}.GoToPosition`, { id: this.index, slat_pos: normalizedPos });
       };
     }
   }

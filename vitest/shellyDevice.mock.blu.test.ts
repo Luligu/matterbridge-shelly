@@ -10,9 +10,8 @@ import path from 'node:path';
 
 import { MatterbridgeEndpoint, type PlatformMatterbridge } from 'matterbridge';
 import { LogLevel } from 'matterbridge/logger';
+import { createTestEnvironment, destroyTestEnvironment, getMatterbridge, log, loggerLogSpy, setupTest } from 'matterbridge/test-utils/vitest';
 import { wait } from 'matterbridge/utils';
-import { log, loggerLogSpy, setupTest } from 'matterbridge/vitest-utils';
-import { createTestEnvironment, destroyTestEnvironment, getMatterbridge } from 'matterbridge/vitest-utils/matter';
 
 import { CoapServer } from '../src/coapServer.js';
 import { MdnsScanner } from '../src/mdnsScanner.js';

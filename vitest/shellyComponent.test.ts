@@ -10,7 +10,7 @@ import { promises as fs } from 'node:fs';
 import path from 'node:path';
 
 import { AnsiLogger, TimestampFormat } from 'matterbridge/logger';
-import { setupTest } from 'matterbridge/vitest-utils';
+import { setupTest } from 'matterbridge/test-utils/vitest';
 import type { MockInstance } from 'vitest';
 
 import { Shelly } from '../src/shelly.js';
@@ -821,11 +821,11 @@ describe('ShellyComponent', () => {
 
     (component as ShellyCoverComponent).GoToSlatPosition(75);
     expect(fetchSpy).toHaveBeenCalledTimes(1);
-    expect(fetchSpy).toHaveBeenCalledWith(device2.shelly, device2.log, device2.host, 'Cover.GoToPosition', { id: 1, slat_pos: 75 });
+    expect(fetchSpy).toHaveBeenCalledWith(device2.shelly, device2.log, device2.host, device2.port, 'Cover.GoToPosition', { id: 1, slat_pos: 75 });
 
     // The slat position is clamped to the 0-100 range
     (component as ShellyCoverComponent).GoToSlatPosition(150);
-    expect(fetchSpy).toHaveBeenCalledWith(device2.shelly, device2.log, device2.host, 'Cover.GoToPosition', { id: 1, slat_pos: 100 });
+    expect(fetchSpy).toHaveBeenCalledWith(device2.shelly, device2.log, device2.host, device2.port, 'Cover.GoToPosition', { id: 1, slat_pos: 100 });
   });
 
   it('should not send GoToSlatPosition when slat control is not enabled on a gen 2 cover', () => {

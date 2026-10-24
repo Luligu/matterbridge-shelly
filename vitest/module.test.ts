@@ -27,13 +27,14 @@ import {
   Groups,
   Identify,
   OnOff,
+  PowerSource,
   PowerTopology,
   RelativeHumidityMeasurement,
   Switch,
   TemperatureMeasurement,
 } from 'matterbridge/matter/clusters';
-import { waiter } from 'matterbridge/utils';
-import { log, loggerLogSpy, setDebug, setupTest } from 'matterbridge/vitest-utils';
+import { flushAsync } from 'matterbridge/test-utils';
+import { getMoveToColorRequest, getMoveToHueRequest, getMoveToLevelRequest, getMoveToSaturationRequest } from 'matterbridge/test-utils/matter';
 import {
   addMatterbridge,
   createServerNode,
@@ -41,13 +42,14 @@ import {
   destroyTestEnvironment,
   flushServerNode,
   getMatterbridge,
-  getMoveToColorRequest,
-  getMoveToHueRequest,
-  getMoveToLevelRequest,
-  getMoveToSaturationRequest,
+  log,
+  loggerLogSpy,
+  setDebug,
+  setupTest,
   startServerNode,
   stopServerNode,
-} from 'matterbridge/vitest-utils/matter';
+} from 'matterbridge/test-utils/vitest';
+import { waiter } from 'matterbridge/utils';
 
 import { CoapServer } from '../src/coapServer.js';
 import { type DiscoveredDevice, MdnsScanner } from '../src/mdnsScanner.js';
@@ -556,6 +558,39 @@ describe('ShellyPlatform', () => {
     shellyHt.destroy();
   });
 
+  it('should keep the smoke alarm PowerSource updated with the PowerSource entity blacklisted', async () => {
+    expect(shellyPlatform).toBeDefined();
+    shellyPlatform.config.enableMdnsDiscover = false;
+    shellyPlatform.config.deviceEntityBlackList = { 'shellyplussmoke-E08CFE8BD798': ['PowerSource'] };
+
+    await shellyPlatform.onStart('Test reason');
+
+    const shellySmoke = await ShellyDevice.create(shelly, (shellyPlatform as any).log, path.join('src', 'mock', 'shellyplussmoke-E08CFE8BD798.json'));
+    expect(shellySmoke).not.toBeUndefined();
+    if (!shellySmoke) return;
+
+    await shelly.addDevice(shellySmoke);
+    await waitBridged(shellySmoke);
+    const device = shellyPlatform.bridgedDevices.get('shellyplussmoke-E08CFE8BD798');
+    expect(device).toBeDefined();
+    if (!device) return;
+
+    // The bridged node has no PowerSource, the smoke alarm endpoint has its mandatory one
+    expect(device.hasClusterServer(PowerSource)).toBe(false);
+    const smoke = device.getChildEndpointById('smoke:0');
+    expect(smoke?.hasClusterServer(PowerSource)).toBe(true);
+
+    shellySmoke.getComponent('devicepower:0')?.setValue('battery', { V: 2.9, percent: 15 });
+    await flushAsync();
+    expect(smoke?.getAttribute(PowerSource.id, 'batPercentRemaining')).toBe(30);
+    expect(smoke?.getAttribute(PowerSource.id, 'batChargeLevel')).toBe(PowerSource.BatChargeLevel.Warning);
+    expect(smoke?.getAttribute(PowerSource.id, 'batVoltage')).toBe(2900);
+
+    shellyPlatform.config.deviceEntityBlackList = {};
+    cleanup();
+    shellySmoke.destroy();
+  });
+
   it('should add shellyprorgbwwpm mode rgbctt', async () => {
     expect(shellyPlatform).toBeDefined();
     shellyPlatform.config.enableMdnsDiscover = false;
@@ -598,6 +633,7 @@ describe('ShellyPlatform', () => {
       'matterbridge',
       'identify',
       'groups',
+      'scenesManagement',
       'onOff',
       'levelControl',
       'colorControl',
@@ -614,6 +650,7 @@ describe('ShellyPlatform', () => {
       'matterbridge',
       'identify',
       'groups',
+      'scenesManagement',
       'onOff',
       'levelControl',
       'colorControl',
@@ -868,6 +905,7 @@ describe('ShellyPlatform', () => {
       'matterbridge',
       'identify',
       'groups',
+      'scenesManagement',
       'onOff',
       'levelControl',
       'colorControl',
@@ -913,7 +951,7 @@ describe('ShellyPlatform', () => {
     );
     expect(child?.getAttribute('Descriptor', 'tagList')).toEqual([{ mfgCode: null, namespaceId: 7, tag: 0, label: 'rgb:0' }]);
     expect(child?.getAttribute('Descriptor', 'deviceTypeList')).toEqual([
-      { deviceType: 269, revision: 4 },
+      { deviceType: 269, revision: 5 },
       { deviceType: 1296, revision: 1 },
     ]);
     expectUnorderedNumberArray(child?.getAttribute('Identify', 'acceptedCommandList'), [0, 64]);
@@ -1280,7 +1318,7 @@ describe('ShellyPlatform', () => {
     expect(shelly2PMGen3.getComponent('cover:0')?.hasProperty('slat_pos')).toBe(true);
 
     await shelly.addDevice(shelly2PMGen3);
-    await wait(eventWaitTime);
+    await waitBridged(shelly2PMGen3);
     expect(shellyPlatform.bridgedDevices.has('shelly2pmg3-34CDB0770C4E')).toBe(true);
 
     const device = shellyPlatform.bridgedDevices.get('shelly2pmg3-34CDB0770C4E');
@@ -1309,17 +1347,17 @@ describe('ShellyPlatform', () => {
     // Matter uses 10000 = fully closed   0 = fully opened
     // Shelly uses 0 = fully closed   100 = fully opened
     shelly.wsServer.emit('wssupdate', shelly2PMGen3.id, { 'cover:0': { slat_pos: 0 } }); // Slats fully closed
-    await wait(eventWaitTime);
+    await flushAsync();
     expect(coverEndpoint.getAttribute('windowCovering', 'currentPositionTiltPercent100ths')).toBe(10000);
     expect(coverEndpoint.getAttribute('windowCovering', 'targetPositionTiltPercent100ths')).toBe(10000);
 
     shelly.wsServer.emit('wssupdate', shelly2PMGen3.id, { 'cover:0': { slat_pos: 50 } });
-    await wait(eventWaitTime);
+    await flushAsync();
     expect(coverEndpoint.getAttribute('windowCovering', 'currentPositionTiltPercent100ths')).toBe(5000);
     expect(coverEndpoint.getAttribute('windowCovering', 'targetPositionTiltPercent100ths')).toBe(5000);
 
     shelly.wsServer.emit('wssupdate', shelly2PMGen3.id, { 'cover:0': { slat_pos: 100 } }); // Slats fully open
-    await wait(eventWaitTime);
+    await flushAsync();
     expect(coverEndpoint.getAttribute('windowCovering', 'currentPositionTiltPercent100ths')).toBe(0);
     expect(coverEndpoint.getAttribute('windowCovering', 'targetPositionTiltPercent100ths')).toBe(0);
 
@@ -1335,23 +1373,23 @@ describe('ShellyPlatform', () => {
       LogLevel.INFO,
       `${db}Sent command ${hk}Cover${db}:${hk}cover:0${db}:${hk}GoToTiltPosition(${YELLOW}50${hk})${db} to shelly device ${idn}${shelly2PMGen3.id}${rs}${db}`,
     );
-    expect(fetch).toHaveBeenCalledWith(shelly2PMGen3.shelly, shelly2PMGen3.log, shelly2PMGen3.host, 'Cover.GoToPosition', { id: 0, slat_pos: 50 });
+    expect(fetch).toHaveBeenCalledWith(shelly2PMGen3.shelly, shelly2PMGen3.log, shelly2PMGen3.host, shelly2PMGen3.port, 'Cover.GoToPosition', { id: 0, slat_pos: 50 });
 
     await coverEndpoint.executeCommandHandler('goToTiltPercentage', { tiltPercent100thsValue: 0 }, 'windowCovering', {} as any, coverEndpoint);
-    expect(fetch).toHaveBeenCalledWith(shelly2PMGen3.shelly, shelly2PMGen3.log, shelly2PMGen3.host, 'Cover.GoToPosition', { id: 0, slat_pos: 100 });
+    expect(fetch).toHaveBeenCalledWith(shelly2PMGen3.shelly, shelly2PMGen3.log, shelly2PMGen3.host, shelly2PMGen3.port, 'Cover.GoToPosition', { id: 0, slat_pos: 100 });
 
     await coverEndpoint.executeCommandHandler('goToTiltPercentage', { tiltPercent100thsValue: 10000 }, 'windowCovering', {} as any, coverEndpoint);
-    expect(fetch).toHaveBeenCalledWith(shelly2PMGen3.shelly, shelly2PMGen3.log, shelly2PMGen3.host, 'Cover.GoToPosition', { id: 0, slat_pos: 0 });
+    expect(fetch).toHaveBeenCalledWith(shelly2PMGen3.shelly, shelly2PMGen3.log, shelly2PMGen3.host, shelly2PMGen3.port, 'Cover.GoToPosition', { id: 0, slat_pos: 0 });
 
     // The lift command still targets the lift position
     await coverEndpoint.executeCommandHandler('goToLiftPercentage', { liftPercent100thsValue: 5000 }, 'windowCovering', {} as any, coverEndpoint);
-    expect(fetch).toHaveBeenCalledWith(shelly2PMGen3.shelly, shelly2PMGen3.log, shelly2PMGen3.host, 'Cover.GoToPosition', { id: 0, pos: 50 });
+    expect(fetch).toHaveBeenCalledWith(shelly2PMGen3.shelly, shelly2PMGen3.log, shelly2PMGen3.host, shelly2PMGen3.port, 'Cover.GoToPosition', { id: 0, pos: 50 });
 
     fetch.mockRestore();
 
     // Test the tilt restore in onConfigure
     shelly2PMGen3.getComponent('cover:0')?.setValue('slat_pos', 25);
-    await wait(eventWaitTime);
+    await flushAsync();
     await coverEndpoint.setAttribute('windowCovering', 'currentPositionTiltPercent100ths', 0);
     await coverEndpoint.setAttribute('windowCovering', 'targetPositionTiltPercent100ths', 0);
     await shellyPlatform.onConfigure();
