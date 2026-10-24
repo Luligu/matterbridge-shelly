@@ -6,7 +6,7 @@
 
 const NAME = 'ShellyProperty';
 
-import { setupTest } from 'matterbridge/vitest-utils';
+import { setupTest } from 'matterbridge/test-utils/vitest';
 
 import { ShellyComponent } from '../src/shellyComponent.js';
 import type { ShellyDevice } from '../src/shellyDevice.js';

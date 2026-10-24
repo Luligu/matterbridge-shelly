@@ -9,7 +9,8 @@ const NAME = 'Shelly';
 import path from 'node:path';
 
 import { AnsiLogger, CYAN, db, hk, LogLevel, MAGENTA, TimestampFormat, wr } from 'matterbridge/logger';
-import { flushAsync, loggerLogSpy, setupTest } from 'matterbridge/vitest-utils';
+import { flushAsync } from 'matterbridge/test-utils';
+import { loggerLogSpy, setupTest } from 'matterbridge/test-utils/vitest';
 
 import { CoapServer } from '../src/coapServer.js';
 import { Shelly } from '../src/shelly.js';

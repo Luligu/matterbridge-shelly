@@ -193,15 +193,21 @@ export function shellyUpdateHandler(
       }
     }
   }
+  // The smoke alarm child endpoints carry their own PowerSource (Matter 1.6.1 Device Library § 7.9.4): keep them in sync with the bridged node
+  // With the PowerSource entity blacklisted the bridged node has no PowerSource, so only the smoke alarm endpoints are updated
+  const powerSourceEndpoints =
+    endpointName === 'PowerSource' ? [endpoint, ...matterbridgeDevice.getChildEndpoints()].filter((target) => target.hasClusterServer(PowerSource.id)) : [endpoint];
   // Update for Battery
   if (shellyComponent.name === 'Battery' && property === 'level' && isValidNumber(value, 0, 100)) {
-    void endpoint.setAttribute(PowerSource.id, 'batPercentRemaining', Math.min(Math.max(value * 2, 0), 200), shellyDevice.log);
-    if (value < 10) void endpoint.setAttribute(PowerSource.id, 'batChargeLevel', PowerSource.BatChargeLevel.Critical, shellyDevice.log);
-    else if (value < 20) void endpoint.setAttribute(PowerSource.id, 'batChargeLevel', PowerSource.BatChargeLevel.Warning, shellyDevice.log);
-    else void endpoint.setAttribute(PowerSource.id, 'batChargeLevel', PowerSource.BatChargeLevel.Ok, shellyDevice.log);
+    for (const target of powerSourceEndpoints) {
+      void target.setAttribute(PowerSource.id, 'batPercentRemaining', Math.min(Math.max(value * 2, 0), 200), shellyDevice.log);
+      if (value < 10) void target.setAttribute(PowerSource.id, 'batChargeLevel', PowerSource.BatChargeLevel.Critical, shellyDevice.log);
+      else if (value < 20) void target.setAttribute(PowerSource.id, 'batChargeLevel', PowerSource.BatChargeLevel.Warning, shellyDevice.log);
+      else void target.setAttribute(PowerSource.id, 'batChargeLevel', PowerSource.BatChargeLevel.Ok, shellyDevice.log);
+    }
   }
   if (shellyComponent.name === 'Battery' && property === 'voltage' && isValidNumber(value, 0)) {
-    void endpoint.setAttribute(PowerSource.id, 'batVoltage', value * 1000, shellyDevice.log);
+    for (const target of powerSourceEndpoints) void target.setAttribute(PowerSource.id, 'batVoltage', value * 1000, shellyDevice.log);
   }
   if (shellyComponent.name === 'Battery' && property === 'charging' && isValidNumber(value)) {
     void endpoint.setAttribute(PowerSource.id, 'batChargeState', value ? PowerSource.BatChargeState.IsCharging : PowerSource.BatChargeState.IsNotCharging, matterbridgeDevice.log);
@@ -211,11 +217,13 @@ export function shellyUpdateHandler(
     // oxlint-disable-next-line typescript/no-unsafe-type-assertion
     const battery = value as { V: number; percent: number };
     if (isValidNumber(battery.V, 0, 12) && isValidNumber(battery.percent, 0, 100)) {
-      void endpoint.setAttribute(PowerSource.id, 'batPercentRemaining', battery.percent * 2, shellyDevice.log);
-      if (battery.percent < 10) void endpoint.setAttribute(PowerSource.id, 'batChargeLevel', PowerSource.BatChargeLevel.Critical, shellyDevice.log);
-      else if (battery.percent < 20) void endpoint.setAttribute(PowerSource.id, 'batChargeLevel', PowerSource.BatChargeLevel.Warning, shellyDevice.log);
-      else void endpoint.setAttribute(PowerSource.id, 'batChargeLevel', PowerSource.BatChargeLevel.Ok, shellyDevice.log);
-      void endpoint.setAttribute(PowerSource.id, 'batVoltage', battery.V * 1000, shellyDevice.log);
+      for (const target of powerSourceEndpoints) {
+        void target.setAttribute(PowerSource.id, 'batPercentRemaining', battery.percent * 2, shellyDevice.log);
+        if (battery.percent < 10) void target.setAttribute(PowerSource.id, 'batChargeLevel', PowerSource.BatChargeLevel.Critical, shellyDevice.log);
+        else if (battery.percent < 20) void target.setAttribute(PowerSource.id, 'batChargeLevel', PowerSource.BatChargeLevel.Warning, shellyDevice.log);
+        else void target.setAttribute(PowerSource.id, 'batChargeLevel', PowerSource.BatChargeLevel.Ok, shellyDevice.log);
+        void target.setAttribute(PowerSource.id, 'batVoltage', battery.V * 1000, shellyDevice.log);
+      }
     }
   }
 
@@ -326,7 +334,7 @@ export function shellyUpdateHandler(
       // Gen 1 devices send stop. Gen 2 devices send stopped.
       if ((shellyDevice.gen === 1 && value === 'stop') || (shellyDevice.gen > 1 && value === 'stopped')) {
         const status = WindowCovering.MovementStatus.Stopped;
-        void endpoint.setAttribute(WindowCovering.id, 'operationalStatus', { global: status, lift: status, tilt: status }, shellyDevice.log);
+        void endpoint.setAttribute(WindowCovering.id, 'operationalStatus', { global: status, lift: status }, shellyDevice.log);
         shellyDevice.coverUpdateTimeout = setTimeout(() => {
           shellyDevice.log.debug(`Setting target position to current position on endpoint ${or}${endpoint?.name}:${endpoint?.number}${db}`);
           const current = endpoint?.getAttribute(WindowCovering.id, 'currentPositionLiftPercent100ths', shellyDevice.log);
@@ -343,22 +351,22 @@ export function shellyUpdateHandler(
         void endpoint.setAttribute(WindowCovering.id, 'targetPositionLiftPercent100ths', 0, shellyDevice.log);
         void endpoint.setAttribute(WindowCovering.id, 'currentPositionLiftPercent100ths', 0, shellyDevice.log);
         const status = WindowCovering.MovementStatus.Stopped;
-        void endpoint.setAttribute(WindowCovering.id, 'operationalStatus', { global: status, lift: status, tilt: status }, shellyDevice.log);
+        void endpoint.setAttribute(WindowCovering.id, 'operationalStatus', { global: status, lift: status }, shellyDevice.log);
       }
       // Gen 2 devices send closed for fully closed
       if (shellyDevice.gen > 1 && value === 'closed') {
         void endpoint.setAttribute(WindowCovering.id, 'targetPositionLiftPercent100ths', 10000, shellyDevice.log);
         void endpoint.setAttribute(WindowCovering.id, 'currentPositionLiftPercent100ths', 10000, shellyDevice.log);
         const status = WindowCovering.MovementStatus.Stopped;
-        void endpoint.setAttribute(WindowCovering.id, 'operationalStatus', { global: status, lift: status, tilt: status }, shellyDevice.log);
+        void endpoint.setAttribute(WindowCovering.id, 'operationalStatus', { global: status, lift: status }, shellyDevice.log);
       }
       if ((shellyDevice.gen === 1 && value === 'open') || (shellyDevice.gen > 1 && value === 'opening')) {
         const status = WindowCovering.MovementStatus.Opening;
-        void endpoint.setAttribute(WindowCovering.id, 'operationalStatus', { global: status, lift: status, tilt: status }, shellyDevice.log);
+        void endpoint.setAttribute(WindowCovering.id, 'operationalStatus', { global: status, lift: status }, shellyDevice.log);
       }
       if ((shellyDevice.gen === 1 && value === 'close') || (shellyDevice.gen > 1 && value === 'closing')) {
         const status = WindowCovering.MovementStatus.Closing;
-        void endpoint.setAttribute(WindowCovering.id, 'operationalStatus', { global: status, lift: status, tilt: status }, shellyDevice.log);
+        void endpoint.setAttribute(WindowCovering.id, 'operationalStatus', { global: status, lift: status }, shellyDevice.log);
       }
     } else if (property === 'current_pos' && isValidNumber(value, 0, 100)) {
       const matterPos = 10000 - Math.min(Math.max(Math.round(value * 100), 0), 10000);

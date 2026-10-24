@@ -30,11 +30,61 @@ If you like this project and find it useful, please consider giving it a star on
 
 You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his invaluable contribution to this project.
 
+## [2.8.0] - 2026-10-23
+
+### Breaking changes
+
+- [matterbridge]: Require matterbridge v.3.11.0 with matter v.1.6.1.
+- [node]: Drop Node.js 20 support, matching matterbridge v.3.11.0. Supported versions are Node.js 22.13, 24 and 26.
+
+### Added
+
+- [agents]: Add the Copilot `Matterbridge` custom agent (`.github/agents/matterbridge.agent.md`) that works without subagents.
+
+### Changed
+
+- [test]: Migrate tests from `matterbridge/vitest-utils` to the unified `matterbridge/test-utils`.
+- [test]: Replace the fixed waits in `module.test.ts` and `updateHandler.test.ts` with `waiter` and awaited event handlers (about 20 s less per CI test run).
+- [test]: Run `module.test.ts` and `updateHandler.test.ts` under strict validation (matter.js 0.18).
+- [agents]: Update the shared agent setup: `AGENTS.md`, `CLAUDE.md` and `.github/copilot-instructions.md` to v.1.0.7, `GEMINI.md` to v.1.0.1 and `.agents/README.md` to v.1.0.4.
+- [agents]: Update the `testing` rules to v.1.0.7, the `matterbridge` rules to v.1.0.3 and the `verify-agent-context` skill to v.1.0.5.
+- [agents]: Update `.claude/settings.json` to v.1.0.9, `.antigravity/settings.json` to v.1.0.6 and `.codex/rules/default.rules` to v.1.0.7.
+- [vscode]: Update `.vscode/settings.json` to v.1.0.16: configure commit message instructions, exclude templates from Vitest discovery and refine terminal command approvals.
+- [vscode]: Add Bundle, Minify, Obfuscate, Pack and Docker install tasks to `.vscode/tasks.json`.
+- [gitignore]: Update `.gitignore` to v.1.0.5: ignore `tmp/`, `.DS_Store` and Windows `Zone.Identifier` files.
+- [lint]: Update `.oxlintrc.json` and `.oxfmtrc.json` to v.1.2.0: align shared ignore patterns.
+- [vitest]: Replace `vite.config.ts` with `vitest.config.ts` v.2.0.9 and update test and coverage exclusions.
+- [scripts]: Update `scripts/clean.mjs` and `scripts/deep-clean.mjs` to v.2.0.0: log removed paths, add dry-run support and expose importable entry points.
+- [scripts]: Update release, download, Git status, Git sync, prepublish, pruning, workflow cleanup and version helpers to v.2.0.0 with CLI previews and importable entry points.
+- [scripts]: Update `scripts/deep-clean.mjs` and `scripts/prepublish-clean.mjs` to v.2.1.0: also remove `tmp/` and `bun.lock`.
+- [package]: Remove the `softReset:bun` script.
+- [package]: Run `checkDependencies` and `updateDependencies` with `npx npm-check-updates@latest`.
+- [package]: Bump `@types/node` to v.26.6.5.
+- [package]: Bump `@vitest/coverage-v8` to v.5.0.5.
+- [package]: Bump `oxfmt` to v.0.74.0.
+- [package]: Bump `oxlint` to v.1.89.0.
+- [package]: Bump `oxlint-tsgolint` to v.7.0.2004.
+- [package]: Bump `vitest` to v.5.0.5.
+
+### Fixed
+
+- [temperature]: Set the initial `measuredValue` of temperature sensors in `onConfigure` (https://github.com/Luligu/matterbridge-shelly/issues/202).
+- [humidity]: Set the initial `measuredValue` of humidity sensors in `onConfigure`.
+- [platform]: Fix `onConfigure` stopping at the first child endpoint without a matching Shelly component.
+- [coap]: Fix `CoapServer.stop()` removing the `stopped` listeners when the agent closes before the server, so `stopped` was never received.
+- [cover]: Drop the `tilt` field from `operationalStatus` on lift-only covers: Matter 1.6.1 allows it only with the Tilt feature.
+- [switch]: Add the mandatory ScenesManagement cluster to relay, switch and light endpoints.
+- [input]: Add a Common Number tag to the fifth input (`input:4`), which strict validation refused next to its sibling inputs.
+- [blu]: Add Common Number tags to the four buttons of the BLU RC Button 4 and BLU Wall Switch 4.
+- [smoke]: Add the mandatory PowerSource device type and a replaceable-battery PowerSource cluster to smoke alarm endpoints, started from and kept in sync with the device battery. It is required also when the PowerSource entity is blacklisted.
+
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+
 ## [2.7.0] - 2026-09-29
 
 ### Breaking changes
 
-- [matterbridge]: Require matterbridge v.3.10.10 with matter v.1.6.0.
+- [matterbridge]: Require matterbridge v.3.11.0 with matter v.1.6.1.
 
 ### Added
 

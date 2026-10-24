@@ -12,8 +12,8 @@ import path from 'node:path';
 
 import type { MatterbridgeEndpoint, PlatformMatterbridge } from 'matterbridge';
 import { CYAN, db, dn, hk, idn, LogLevel, nf, rs, zb } from 'matterbridge/logger';
-import { wait } from 'matterbridge/utils';
-import { flushAsync, log, loggerDebugSpy, loggerInfoSpy, loggerLogSpy, setDebug, setupTest } from 'matterbridge/vitest-utils';
+import { PowerSource } from 'matterbridge/matter/clusters';
+import { flushAsync } from 'matterbridge/test-utils';
 import {
   addMatterbridge,
   createServerNode,
@@ -21,9 +21,16 @@ import {
   destroyTestEnvironment,
   flushServerNode,
   getMatterbridge,
+  log,
+  loggerDebugSpy,
+  loggerInfoSpy,
+  loggerLogSpy,
+  setDebug,
+  setupTest,
   startServerNode,
   stopServerNode,
-} from 'matterbridge/vitest-utils/matter';
+} from 'matterbridge/test-utils/vitest';
+import { waiter } from 'matterbridge/utils';
 
 import { CoapServer } from '../src/coapServer.js';
 import { MdnsScanner } from '../src/mdnsScanner.js';
@@ -251,7 +258,8 @@ describe('ShellyPlatform', () => {
       expect(device).not.toBeUndefined();
       if (!device) return;
       await shelly.addDevice(device);
-      await wait(100);
+      const id = device.id;
+      await waiter(`Shelly ${id} added`, () => shellyPlatform.bridgedDevices.has(id), true, 5000, 10);
       expect(loggerInfoSpy).toHaveBeenCalledWith(`Shelly added ${idn}${device.name}${rs} device id ${hk}${device.id}${rs}${nf} host ${zb}${device.host}${nf}`);
       expect(shelly.hasDevice(device.id)).toBe(true);
       expect(shellyPlatform.bridgedDevices.has(device.id)).toBe(true);
@@ -344,6 +352,18 @@ describe('ShellyPlatform', () => {
         expect(endpoint.getChildEndpointByOriginalId('smoke')).not.toBeUndefined();
         shellyUpdateHandler(shellyPlatform, endpoint, device, 'smoke', 'alarm', false);
         shellyUpdateHandler(shellyPlatform, endpoint, device, 'smoke', 'alarm', true);
+
+        // The smoke child PowerSource starts from the device battery and follows the bridged node PowerSource
+        const smoke = endpoint.getChildEndpointByOriginalId('smoke');
+        expect(smoke?.hasClusterServer(PowerSource)).toBe(true);
+        expect(smoke?.getAttribute(PowerSource.id, 'batPercentRemaining')).toBe(endpoint.getAttribute(PowerSource.id, 'batPercentRemaining'));
+        shellyUpdateHandler(shellyPlatform, endpoint, device, 'battery', 'level', 15, 'PowerSource');
+        shellyUpdateHandler(shellyPlatform, endpoint, device, 'battery', 'voltage', 2.9, 'PowerSource');
+        await flushAsync();
+        expect(smoke?.getAttribute(PowerSource.id, 'batPercentRemaining')).toBe(30);
+        expect(smoke?.getAttribute(PowerSource.id, 'batChargeLevel')).toBe(PowerSource.BatChargeLevel.Warning);
+        expect(smoke?.getAttribute(PowerSource.id, 'batVoltage')).toBe(2900);
+        expect(endpoint.getAttribute(PowerSource.id, 'batPercentRemaining')).toBe(30);
       });
     }
 
@@ -357,6 +377,17 @@ describe('ShellyPlatform', () => {
         expect(endpoint.getChildEndpointByOriginalId('smoke:0')).not.toBeUndefined();
         shellyUpdateHandler(shellyPlatform, endpoint, device, 'smoke:0', 'alarm', false);
         shellyUpdateHandler(shellyPlatform, endpoint, device, 'smoke:0', 'alarm', true);
+
+        // The smoke child PowerSource starts from the device battery and follows the bridged node PowerSource
+        const smoke = endpoint.getChildEndpointByOriginalId('smoke:0');
+        expect(smoke?.hasClusterServer(PowerSource)).toBe(true);
+        expect(smoke?.getAttribute(PowerSource.id, 'batPercentRemaining')).toBe(endpoint.getAttribute(PowerSource.id, 'batPercentRemaining'));
+        shellyUpdateHandler(shellyPlatform, endpoint, device, 'devicepower:0', 'battery', { V: 2.9, percent: 15 }, 'PowerSource');
+        await flushAsync();
+        expect(smoke?.getAttribute(PowerSource.id, 'batPercentRemaining')).toBe(30);
+        expect(smoke?.getAttribute(PowerSource.id, 'batChargeLevel')).toBe(PowerSource.BatChargeLevel.Warning);
+        expect(smoke?.getAttribute(PowerSource.id, 'batVoltage')).toBe(2900);
+        expect(endpoint.getAttribute(PowerSource.id, 'batPercentRemaining')).toBe(30);
       });
     }
 
