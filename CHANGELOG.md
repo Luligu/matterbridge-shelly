@@ -34,7 +34,7 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 
 ### Added
 
-- [cover]: Add tilt support for Gen 2+ covers with slat control enabled, including tilt commands and position updates (https://github.com/Luligu/matterbridge-shelly/pull/204).
+- [cover]: Add tilt support for Gen 2+ covers with slat control enabled, including tilt commands and position updates (https://github.com/Luligu/matterbridge-shelly/pull/204). Thanks to https://github.com/sin0light.
 - [frequency]: Add electrical frequency readings for supported devices (https://github.com/Luligu/matterbridge-shelly/pull/209). Thanks to https://github.com/lboue.
 
 <a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
