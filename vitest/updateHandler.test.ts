@@ -550,6 +550,30 @@ describe('ShellyPlatform', () => {
     }
 
     if (shellyId.id === 'shellyemminig4-D885ACEF41A8') {
+      it('should update frequency only when the reading is between 0 and 100 Hz', () => {
+        expect(device).toBeDefined();
+        expect(endpoint).toBeDefined();
+        if (!device || !endpoint) return;
+        const meter = endpoint.getChildEndpointByOriginalId('em1:0');
+        expect(meter).toBeDefined();
+        if (!meter) return;
+        const setAttributeSpy = vi.spyOn(meter, 'setAttribute').mockResolvedValue(true);
+        try {
+          for (const value of [0, 50.1, 100]) {
+            setAttributeSpy.mockClear();
+            shellyUpdateHandler(shellyPlatform, endpoint, device, 'em1:0', 'freq', value);
+            expect(setAttributeSpy).toHaveBeenCalledWith(expect.any(Number), 'frequency', Math.round(value * 1000), device.log);
+          }
+          for (const value of [-0.1, 100.1]) {
+            setAttributeSpy.mockClear();
+            shellyUpdateHandler(shellyPlatform, endpoint, device, 'em1:0', 'freq', value);
+            expect(setAttributeSpy).not.toHaveBeenCalled();
+          }
+        } finally {
+          setAttributeSpy.mockRestore();
+        }
+      });
+
       it(`should update power for shellyemminig4`, async () => {
         expect(device).not.toBeUndefined();
         if (!device) return;

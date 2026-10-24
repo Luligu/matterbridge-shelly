@@ -1795,7 +1795,9 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           if (!component) continue;
           this.log.info(`Configuring device ${dn}${mbDevice.deviceName}${nf} electrical component ${hk}${label}${nf}`);
           for (const property of component.properties) {
-            if (!['voltage', 'current', 'power', 'apower', 'act_power', 'freq', 'total', 'aenergy', 'ret_aenergy', 'total_act_energy', 'total_act_ret_energy'].includes(property.key))
+            if (
+              !['voltage', 'current', 'power', 'apower', 'act_power', 'freq', 'total', 'aenergy', 'ret_aenergy', 'total_act_energy', 'total_act_ret_energy'].includes(property.key)
+            )
               continue;
             shellyUpdateHandler(this, mbDevice, shellyDevice, component.id, property.key, property.value);
           }

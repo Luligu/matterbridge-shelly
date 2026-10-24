@@ -435,7 +435,7 @@ export function shellyUpdateHandler(
       }
     }
     // frequency
-    if (property === 'freq' && isValidNumber(value, 0)) {
+    if (property === 'freq' && isValidNumber(value, 0, 100)) {
       // Matter ElectricalPowerMeasurement.frequency is expressed in mHz
       const frequency = Math.round(value * 1000);
       void endpoint.setAttribute(ElectricalPowerMeasurement.id, 'frequency', frequency, shellyDevice.log);

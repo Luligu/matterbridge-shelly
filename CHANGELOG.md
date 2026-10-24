@@ -32,6 +32,10 @@ You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his inva
 
 ## [2.8.1] - Dev branch
 
+### Added
+
+- [frequency]: Add electrical frequency readings for supported devices (https://github.com/Luligu/matterbridge-shelly/pull/209). Thanks to https://github.com/lboue.
+
 <a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [2.8.0] - 2026-10-23
