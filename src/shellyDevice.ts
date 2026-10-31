@@ -79,6 +79,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
   port: number;
   id = '';
   model = '';
+  batch = '';
   mac = '';
   firmware = '';
   auth = false;
@@ -681,6 +682,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
       // Set sleep mode for gen 2 and 3 devices
       if ((statusPayload.sys as ShellyData).wakeup_period) device.sleepMode = true;
       device.model = shellyPayload.model as string;
+      device.batch = (shellyPayload.batch as string) ?? '';
       device.id = normalizeId(shellyPayload.id as string).id;
       device.firmware = (shellyPayload.fw_id as string).split('/')[1];
       device.auth = shellyPayload.auth_en as boolean;

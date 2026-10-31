@@ -646,6 +646,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         device.model,
         1,
         device.firmware,
+        1,
+        device.batch || '1.0.0',
       );
       // Set the device in the selectDevice map for the frontend device selection
       this.setSelectDevice(device.id, device.name, `${device.port === 443 ? 'https' : 'http'}://${device.host}:${device.port}`, 'wifi', []); // We clear the entities!
