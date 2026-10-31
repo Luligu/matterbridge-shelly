@@ -32,6 +32,12 @@ If you like this project and find it useful, please consider giving it a star on
 
 ---
 
+## [2.8.2] - Dev branch
+
+### Added
+
+- [homeAssistant]: Report a friendly ha_entitylabel (Total, Phase A/B/C) on the em:0-3 endpoints of triphase devices (shellypro3em, shelly3em63g3), so Home Assistant's Matter integration can override the entity name (https://github.com/Luligu/matterbridge-shelly/pull/213). Thanks to https://github.com/lboue.
+
 ## [2.8.1] - 2026-10-31
 
 ### Added
