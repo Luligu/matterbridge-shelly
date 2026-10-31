@@ -3,7 +3,7 @@
  * @description This file contains the commandHandler for ShellyPlatform.
  * @author Luca Liguori
  * @created 2024-12-03
- * @version 1.2.0
+ * @version 1.3.0
  * @license Apache-2.0
  *
  * Copyright 2024, 2025, 2026 Luca Liguori.
@@ -130,12 +130,12 @@ export function shellyLightCommandHandler(
 }
 
 /**
- * Handles cover commands (Stop, Open, Close, GoToPosition) for a Shelly cover component.
+ * Handles cover commands (Stop, Open, Close, GoToPosition, GoToTiltPosition) for a Shelly cover component.
  *
  * @param {MatterbridgeDevice} endpoint - The Matterbridge device endpoint.
  * @param {ShellyCoverComponent} coverComponent - The Shelly cover component.
  * @param {string} command - The command to execute.
- * @param {number} [pos] - The position for the command.
+ * @param {number} [pos] - The lift position (0-10000) for GoToPosition or the tilt position (0-10000) for GoToTiltPosition.
  */
 export function shellyCoverCommandHandler(endpoint: MatterbridgeEndpoint, coverComponent: ShellyCoverComponent, command: string, pos?: number): void {
   // Matter uses 10000 = fully closed   0 = fully opened
@@ -161,5 +161,11 @@ export function shellyCoverCommandHandler(endpoint: MatterbridgeEndpoint, coverC
       `${db}Sent command ${hk}${coverComponent.name}${db}:${hk}${coverComponent.id}${db}:${hk}${command}(${YELLOW}${shellyPos}${hk})${db} to shelly device ${idn}${coverComponent.device.id}${rs}${db}`,
     );
     coverComponent.GoToPosition(shellyPos);
+  } else if (command === 'GoToTiltPosition' && isValidNumber(pos, 0, 10000)) {
+    const shellySlatPos = 100 - Math.max(Math.min(Math.round(pos / 100), 100), 0);
+    endpoint.log.info(
+      `${db}Sent command ${hk}${coverComponent.name}${db}:${hk}${coverComponent.id}${db}:${hk}${command}(${YELLOW}${shellySlatPos}${hk})${db} to shelly device ${idn}${coverComponent.device.id}${rs}${db}`,
+    );
+    coverComponent.GoToSlatPosition(shellySlatPos);
   }
 }

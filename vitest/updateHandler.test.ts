@@ -220,6 +220,7 @@ describe('ShellyPlatform', () => {
     { id: 'shelly1pmg3-34B7DAC68344', host: '192.168.68.89', port: 80, gen: 3 },
     { id: 'shelly1pmminig3-543204519264', host: '192.168.68.96', port: 80, gen: 3 },
     { id: 'shelly2pmg3-34CDB0770C4C', host: '192.168.68.91', port: 80, gen: 3 },
+    { id: 'shelly2pmg3-34CDB0770C4E', host: '192.168.68.92', port: 80, gen: 3 },
     { id: 'shellyblugwg3-34CDB077BCD4', host: '192.168.68.90', port: 80, gen: 3 },
     { id: 'shellyddimmerg3-84FCE636832C', host: '192.168.68.80', port: 80, gen: 3 },
     { id: 'shellyemg3-84FCE636582C', host: '192.168.68.83', port: 80, gen: 3 },
@@ -550,6 +551,30 @@ describe('ShellyPlatform', () => {
     }
 
     if (shellyId.id === 'shellyemminig4-D885ACEF41A8') {
+      it('should update frequency only when the reading is between 0 and 100 Hz', () => {
+        expect(device).toBeDefined();
+        expect(endpoint).toBeDefined();
+        if (!device || !endpoint) return;
+        const meter = endpoint.getChildEndpointByOriginalId('em1:0');
+        expect(meter).toBeDefined();
+        if (!meter) return;
+        const setAttributeSpy = vi.spyOn(meter, 'setAttribute').mockResolvedValue(true);
+        try {
+          for (const value of [0, 50.1, 100]) {
+            setAttributeSpy.mockClear();
+            shellyUpdateHandler(shellyPlatform, endpoint, device, 'em1:0', 'freq', value);
+            expect(setAttributeSpy).toHaveBeenCalledWith(expect.any(Number), 'frequency', Math.round(value * 1000), device.log);
+          }
+          for (const value of [-0.1, 100.1]) {
+            setAttributeSpy.mockClear();
+            shellyUpdateHandler(shellyPlatform, endpoint, device, 'em1:0', 'freq', value);
+            expect(setAttributeSpy).not.toHaveBeenCalled();
+          }
+        } finally {
+          setAttributeSpy.mockRestore();
+        }
+      });
+
       it(`should update power for shellyemminig4`, async () => {
         expect(device).not.toBeUndefined();
         if (!device) return;
@@ -580,6 +605,40 @@ describe('ShellyPlatform', () => {
         shellyUpdateHandler(shellyPlatform, endpoint, device, 'cover:0', 'state', 'closing');
         shellyUpdateHandler(shellyPlatform, endpoint, device, 'cover:0', 'current_pos', 50);
         shellyUpdateHandler(shellyPlatform, endpoint, device, 'cover:0', 'target_pos', 50);
+      });
+    }
+
+    if (shellyId.id === 'shelly2pmg3-34CDB0770C4E') {
+      it(`should update cover tilt for shelly2pmg3 with slat control enabled`, async () => {
+        expect(device).not.toBeUndefined();
+        if (!device) return;
+        expect(endpoint).not.toBeUndefined();
+        if (!endpoint) return;
+        expect(device.getComponent('cover:0')).not.toBeUndefined();
+        expect(device.getComponent('cover:0')?.hasProperty('slat_pos')).toBe(true);
+        const coverEndpoint = endpoint.getChildEndpointByOriginalId('cover:0');
+        expect(coverEndpoint).not.toBeUndefined();
+        if (!coverEndpoint) return;
+        expect(coverEndpoint.hasAttributeServer('WindowCovering', 'currentPositionTiltPercent100ths')).toBe(true);
+        expect(coverEndpoint.hasAttributeServer('WindowCovering', 'targetPositionTiltPercent100ths')).toBe(true);
+        // Matter uses 10000 = fully closed   0 = fully opened
+        // Shelly uses 0 = fully closed   100 = fully opened
+        shellyUpdateHandler(shellyPlatform, endpoint, device, 'cover:0', 'slat_pos', 50);
+        await waiter('Cover tilt target', () => coverEndpoint.getAttribute('WindowCovering', 'targetPositionTiltPercent100ths') === 5000, true, 5000, 10);
+        expect(coverEndpoint.getAttribute('WindowCovering', 'currentPositionTiltPercent100ths')).toBe(5000);
+        expect(coverEndpoint.getAttribute('WindowCovering', 'targetPositionTiltPercent100ths')).toBe(5000);
+        shellyUpdateHandler(shellyPlatform, endpoint, device, 'cover:0', 'slat_pos', 100); // Slats fully open
+        await waiter('Cover tilt target', () => coverEndpoint.getAttribute('WindowCovering', 'targetPositionTiltPercent100ths') === 0, true, 5000, 10);
+        expect(coverEndpoint.getAttribute('WindowCovering', 'currentPositionTiltPercent100ths')).toBe(0);
+        expect(coverEndpoint.getAttribute('WindowCovering', 'targetPositionTiltPercent100ths')).toBe(0);
+        shellyUpdateHandler(shellyPlatform, endpoint, device, 'cover:0', 'slat_pos', 0); // Slats fully closed
+        await waiter('Cover tilt target', () => coverEndpoint.getAttribute('WindowCovering', 'targetPositionTiltPercent100ths') === 10000, true, 5000, 10);
+        expect(coverEndpoint.getAttribute('WindowCovering', 'currentPositionTiltPercent100ths')).toBe(10000);
+        expect(coverEndpoint.getAttribute('WindowCovering', 'targetPositionTiltPercent100ths')).toBe(10000);
+        // Invalid slat_pos values are ignored
+        shellyUpdateHandler(shellyPlatform, endpoint, device, 'cover:0', 'slat_pos', null);
+        await flushAsync(undefined, undefined, 10);
+        expect(coverEndpoint.getAttribute('WindowCovering', 'currentPositionTiltPercent100ths')).toBe(10000);
       });
     }
 
