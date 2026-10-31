@@ -32,7 +32,7 @@ If you like this project and find it useful, please consider giving it a star on
 
 ---
 
-## [2.8.1] - Dev branch
+## [2.8.1] - 2026-10-31
 
 ### Added
 
