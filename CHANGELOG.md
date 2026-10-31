@@ -3,7 +3,7 @@
 [![npm version](https://img.shields.io/npm/v/matterbridge-shelly.svg)](https://www.npmjs.com/package/matterbridge-shelly)
 [![npm downloads](https://img.shields.io/npm/dt/matterbridge-shelly.svg)](https://www.npmjs.com/package/matterbridge-shelly)
 [![Docker Version](https://img.shields.io/docker/v/luligu/matterbridge/latest?label=docker%20version)](https://hub.docker.com/r/luligu/matterbridge)
-[![Docker Pulls](https://img.shields.io/docker/pulls/luligu/matterbridge?label=docker%20pulls)](https://hub.docker.com/r/luligu/matterbridge)
+[![Docker Pulls](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/Luligu/b21088ab9c9f2b119b42c33f0fef218d/raw/docker.json)](https://hub.docker.com/r/luligu/matterbridge)
 ![Node.js CI](https://github.com/Luligu/matterbridge-shelly/actions/workflows/build.yml/badge.svg)
 ![CodeQL](https://github.com/Luligu/matterbridge-shelly/actions/workflows/codeql.yml/badge.svg)
 [![codecov](https://codecov.io/gh/Luligu/matterbridge-shelly/branch/main/graph/badge.svg)](https://codecov.io/gh/Luligu/matterbridge-shelly)
@@ -18,6 +18,8 @@
 [![powered by](https://img.shields.io/badge/powered%20by-node--ansi--logger-blue)](https://www.npmjs.com/package/node-ansi-logger)
 [![powered by](https://img.shields.io/badge/powered%20by-node--persist--manager-blue)](https://www.npmjs.com/package/node-persist-manager)
 
+You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his invaluable contribution to this project.
+
 ---
 
 All notable changes to this project will be documented in this file.
@@ -28,7 +30,38 @@ If you like this project and find it useful, please consider giving it a star on
 
 <a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="120"></a>
 
-You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his invaluable contribution to this project.
+---
+
+## [2.8.1] - 2026-10-31
+
+### Added
+
+- [cover]: Add tilt support for Gen 2+ covers with slat control enabled, including tilt commands and position updates (https://github.com/Luligu/matterbridge-shelly/pull/204). Thanks to https://github.com/sin0light.
+- [frequency]: Add electrical frequency readings for supported devices (https://github.com/Luligu/matterbridge-shelly/pull/209). Thanks to https://github.com/lboue.
+- [agents]: Add `SHARED-AGENTS.md` documenting the shared agent instruction setup.
+- [toolchain]: Add `TOOLCHAIN.md` v.1.0.1 documenting the repository toolchain.
+
+### Changed
+
+- [platform]: Uniform the constructor, onStart, onConfigure, onShutdown, onChangeLoggerLevel and onAction log messages.
+- [agents]: Update `AGENTS.md` to v.1.0.8: document commit sign-off and sensitive data rules.
+- [agents]: Update `.github/commit-message-instructions.md` to v.1.0.1: let Git add the sign-off trailer.
+- [vscode]: Update `.vscode/settings.json` to v.1.0.17: enable automatic commit sign-off.
+- [docs]: Update `CODE_OF_CONDUCT.md` to v.1.0.0 and `CONTRIBUTING.md` to v.1.0.1.
+- [scripts]: Update `scripts/downloads.mjs` to v.2.2.0: query explicit dates and mark unpublished download counts as pending.
+- [agents]: Update the mirrored plugin frontend rules to v.1.0.2: document base paths and trailing slashes for Home Assistant Ingress.
+- [codex]: Update `.codex/config.toml` to v.1.0.6: clarify the default workspace permissions and opt-in profiles.
+- [vscode]: Update `.vscode/tasks.json`: pack local sources and download Docker installer scripts before running them.
+- [scripts]: Update `scripts/git-sync-dev.mjs` to v.2.1.0: guard against overwriting remote dev commits.
+- [scripts]: Update `scripts/prepublish-clean.mjs` to v.2.2.0: remove development fields from `package.json`, preserving indentation and line endings.
+- [package]: Delegate development-field removal in `prepublishOnly` to `scripts/prepublish-clean.mjs`.
+- [package]: Bump `@types/node` to v.26.6.6.
+- [package]: Bump `oxfmt` to v.0.75.0.
+- [package]: Bump `oxlint` to v.1.90.0.
+- [package]: Bump `oxlint-tsgolint` to v.7.0.2005.
+- [package]: Bump `ws` to v.8.22.1.
+
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [2.8.0] - 2026-10-23
 

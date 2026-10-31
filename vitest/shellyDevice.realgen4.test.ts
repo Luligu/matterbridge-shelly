@@ -1,9 +1,10 @@
-// oxlint-disable vitest/no-conditional-expect
 /**
  * @file vitest/shellyDevice.realgen4.test.ts
  * @description This file contains the tests for real gen 4 Shelly devices and typed components.
  * @author Luca Liguori
  */
+
+/* oxlint-disable vitest/no-conditional-expect */
 
 import { AnsiLogger, LogLevel, TimestampFormat } from 'matterbridge/logger';
 import { HOMEDIR, setupTest } from 'matterbridge/test-utils/vitest';

@@ -3,7 +3,7 @@
  * @description This file contains the class ShellyPlatform.
  * @author Luca Liguori
  * @created 2024-05-01
- * @version 2.0.4
+ * @version 2.1.0
  * @license Apache-2.0
  *
  * Copyright 2024, 2025, 2026 Luca Liguori.
@@ -187,6 +187,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         `This plugin requires Matterbridge version >= "3.11.0". Please update Matterbridge from ${this.matterbridge.matterbridgeVersion} to the latest version in the frontend.`,
       );
     }
+
+    this.log.info(`Initializing platform ${this.config.name}...`);
 
     // Validate the config
     // v8 ignore next
@@ -955,7 +957,13 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           );
           child.log.logName = `${device.name} ${key}`;
           child.createDefaultIdentifyClusterServer();
-          child.createDefaultWindowCoveringClusterServer();
+          // Gen 2+ covers with slat control enabled (e.g. venetian blinds) report the slat_pos property: expose the tilt feature too
+          const hasSlats = component.hasProperty('slat_pos');
+          if (hasSlats) {
+            child.createDefaultLiftTiltWindowCoveringClusterServer();
+          } else {
+            child.createDefaultWindowCoveringClusterServer();
+          }
 
           // Add the electrical measurementa cluster on the same endpoint
           this.addElectricalMeasurements(mbDevice, child, device, component);
@@ -984,6 +992,12 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             else if (request.liftPercent100thsValue === 10000) shellyCoverCommandHandler(child, component, 'Close', 10000);
             else shellyCoverCommandHandler(child, component, 'GoToPosition', request.liftPercent100thsValue);
           });
+          if (hasSlats) {
+            child.addCommandHandler('goToTiltPercentage', ({ request, attributes }) => {
+              attributes.currentPositionTiltPercent100ths = request.tiltPercent100thsValue;
+              shellyCoverCommandHandler(child, component, 'GoToTiltPosition', request.tiltPercent100thsValue);
+            });
+          }
           // Add event handler
           component.on('update', (component: string, property: string, value: ShellyDataType) => {
             shellyUpdateHandler(this, mbDevice, device, component, property, value);
@@ -1517,10 +1531,12 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         this.log.error(`Shelly device ${hk}${device.id}${er} host ${zb}${device.host}${er} failed to register with Matterbridge: ${getErrorMessage(error)}`);
       }
     });
+
+    this.log.info(`Platform ${this.config.name} initialized successfully`);
   }
 
   override async onStart(reason?: string): Promise<void> {
-    this.log.info(`Starting platform ${idn}${this.config.name}${rs}${nf}: ${reason ?? ''}`);
+    this.log.info(`Starting platform ${this.config.name} with reason: ${reason ?? 'no reason provided'}...`);
 
     // Create NodeStorageManager
     this.nodeStorageManager = new NodeStorageManager({
@@ -1659,13 +1675,13 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       this.setSchema(baseSchema);
     }
 
-    this.log.info(`Started platform ${idn}${this.config.name}${rs}${nf}: ${reason ?? ''}`);
+    this.log.info(`Platform ${this.config.name} started successfully`);
   }
 
   override async onConfigure(): Promise<void> {
     await super.onConfigure();
 
-    this.log.info(`Configuring platform ${idn}${this.config.name}${rs}${nf}`);
+    this.log.info(`Configuring platform ${this.config.name}...`);
     for (const mbDevice of this.bridgedDevices.values()) {
       if (!mbDevice.serialNumber) {
         this.log.error(`Shelly device ${dn}${mbDevice.deviceName}${er} has no serial number`);
@@ -1751,6 +1767,14 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           } else {
             await childEndpoint.setWindowCoveringTargetAsCurrentAndStopped();
           }
+          // Configure the cluster WindowCovering attribute currentPositionTiltPercent100ths for gen 2+ covers with slat control enabled
+          const slatPosition = coverComponent.hasProperty('slat_pos') ? (coverComponent.getValue('slat_pos') as number) : undefined;
+          if (isValidNumber(slatPosition, 0, 100)) {
+            this.log.info(`Configuring device ${dn}${mbDevice.deviceName}${nf} component ${hk}${label}${nf}:${zb}slat_pos ${YELLOW}${slatPosition}${nf}`);
+            const matterTiltPos = 10000 - Math.min(Math.max(Math.round(slatPosition * 100), 0), 10000);
+            await childEndpoint.setAttribute(WindowCovering.id, 'currentPositionTiltPercent100ths', matterTiltPos, shellyDevice.log);
+            await childEndpoint.setAttribute(WindowCovering.id, 'targetPositionTiltPercent100ths', matterTiltPos, shellyDevice.log);
+          }
         }
         // Configure the cluster Thermostat attribute occupiedHeatingSetpoint occupiedCoolingSetpoint
         if (label.startsWith('thermostat')) {
@@ -1795,7 +1819,9 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           if (!component) continue;
           this.log.info(`Configuring device ${dn}${mbDevice.deviceName}${nf} electrical component ${hk}${label}${nf}`);
           for (const property of component.properties) {
-            if (!['voltage', 'current', 'power', 'apower', 'act_power', 'total', 'aenergy', 'ret_aenergy', 'total_act_energy', 'total_act_ret_energy'].includes(property.key))
+            if (
+              !['voltage', 'current', 'power', 'apower', 'act_power', 'freq', 'total', 'aenergy', 'ret_aenergy', 'total_act_energy', 'total_act_ret_energy'].includes(property.key)
+            )
               continue;
             shellyUpdateHandler(this, mbDevice, shellyDevice, component.id, property.key, property.value);
           }
@@ -1821,11 +1847,13 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         });
       }
     }
+
+    this.log.info(`Platform ${this.config.name} configured successfully`);
   }
 
   override async onShutdown(reason?: string): Promise<void> {
     await super.onShutdown(reason);
-    this.log.info(`Shutting down platform ${idn}${this.config.name}${rs}${nf}: ${reason ?? ''}`);
+    this.log.info(`Shutting down platform ${this.config.name} with reason: ${reason ?? 'no reason provided'}...`);
 
     if (this.nodeStorage) {
       this.log.info(`Saving ${CYAN}${this.changedDevices.size}${nf} changed Shelly devices to the storage`);
@@ -1848,19 +1876,24 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     this.bluBridgedDevices.clear();
 
     if (this.config.unregisterOnShutdown) await this.unregisterAllDevices();
+
+    this.log.info(`Platform ${this.config.name} shut down successfully`);
   }
 
   // oxlint-disable-next-line typescript/require-await
   override async onChangeLoggerLevel(logLevel: LogLevel): Promise<void> {
+    this.log.info(`Changing logger level of platform ${this.config.name} to ${logLevel}...`);
     this.log.debug(
       `Changing logger level for platform ${idn}${this.config.name}${rs}${db} to ${logLevel} with debugMdns ${this.config.debugMdns}, debugCoap ${this.config.debugCoap} and debugWs ${this.config.debugWs}`,
     );
     this.shelly.setLogLevel(logLevel, this.config.debugMdns, this.config.debugCoap, this.config.debugWs, this.config.debugUdp);
     this.bridgedDevices.forEach((device) => (device.log.logLevel = logLevel));
     this.bluBridgedDevices.forEach((bluDevice) => (bluDevice.log.logLevel = logLevel));
+    this.log.info(`Platform ${this.config.name} logger level changed successfully to ${logLevel}`);
   }
 
   override async onAction(action: string, value?: string): Promise<void> {
+    this.log.info(`Executing action ${action} on platform ${this.config.name} with value: ${value ?? 'no value provided'}...`);
     if (action === 'addDevice' && value && isValidString(value)) {
       const address = value
         .trim()
@@ -1920,6 +1953,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       this.log.info(`Scanning the network for Shelly devices`);
       this.shelly.mdnsScanner.sendQuery();
     }
+
+    this.log.info(`Platform ${this.config.name} action ${action} executed successfully`);
   }
 
   /**
