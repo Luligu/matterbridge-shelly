@@ -61,7 +61,7 @@ import {
   waterLeakDetector,
 } from 'matterbridge';
 import { AnsiLogger, CYAN, db, debugStringify, dn, er, GREEN, hk, idn, type LogLevel, nf, nt, rs, TimestampFormat, wr, YELLOW, zb } from 'matterbridge/logger';
-import { type AtLeastOne, CommonNumberTag } from 'matterbridge/matter';
+import { type AtLeastOne, CommonNumberTag, PowerSourceTag } from 'matterbridge/matter';
 import {
   BooleanState,
   BridgedDeviceBasicInformation,
@@ -634,8 +634,26 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
 
       // Create a new Matterbridge device
       const deviceTypes: AtLeastOne<DeviceTypeDefinition> = [bridgedNode];
-      if (this.validateEntity(device.id, 'PowerSource')) deviceTypes.push(powerSource);
-      const mbDevice = new MatterbridgeEndpoint(deviceTypes, { id: device.name }, config.debug);
+      const batteryComponent = device.getComponent('battery');
+      const devicepowerComponent = device.getComponent('devicepower:0');
+      let powerSourceTagList: Semtag[] | undefined;
+      if (this.validateEntity(device.id, 'PowerSource')) {
+        deviceTypes.push(powerSource);
+        // Tag the PowerSource cluster with the Matter PowerSource namespace (Grid for wired, Battery for battery powered)
+        if (batteryComponent) {
+          powerSourceTagList = [getSemtag(PowerSourceTag.Battery)];
+        } else if (devicepowerComponent) {
+          if (devicepowerComponent.hasProperty('battery') && isValidObject(devicepowerComponent.getValue('battery'), 2)) {
+            powerSourceTagList = [getSemtag(PowerSourceTag.Battery)];
+          } else if (devicepowerComponent.hasProperty('external') && isValidObject(devicepowerComponent.getValue('external'), 1)) {
+            const external = devicepowerComponent.getValue('external') as { present: boolean };
+            if (isValidBoolean(external.present) && external.present) powerSourceTagList = [getSemtag(PowerSourceTag.Grid)];
+          }
+        } else {
+          powerSourceTagList = [getSemtag(PowerSourceTag.Grid)];
+        }
+      }
+      const mbDevice = new MatterbridgeEndpoint(deviceTypes, { id: device.name, tagList: powerSourceTagList }, config.debug);
       mbDevice.configUrl = `${device.port === 443 ? 'https' : 'http'}://${device.host}:${device.port}`;
       mbDevice.log.logName = device.name;
       mbDevice.createDefaultBridgedDeviceBasicInformationClusterServer(
@@ -652,8 +670,6 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
 
       // Set the powerSource cluster
       if (this.validateEntity(device.id, 'PowerSource')) {
-        const batteryComponent = device.getComponent('battery');
-        const devicepowerComponent = device.getComponent('devicepower:0');
         if (batteryComponent) {
           let level = batteryComponent.hasProperty('level') ? batteryComponent.getValue('level') : undefined;
           level = isValidNumber(level, 0, 100) ? level : undefined;
@@ -1004,11 +1020,14 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
           const pmComponent = device.getComponent(key);
           if (pmComponent) {
             const tagList = this.addTagList(component);
+            // For triphase devices (shellypro3em and shelly3em63g3), em:0 is the total grid measurement point: tag it as a Matter PowerSource (Grid) in addition to the electricalSensor
+            const isTriphaseTotal = device.profile === 'triphase' && key === 'em:0';
+            if (isTriphaseTotal) tagList?.push(getSemtag(PowerSourceTag.Grid));
             // Add the Matter 1.3 electricalSensor device type with the ElectricalPowerMeasurement and ElectricalEnergyMeasurement clusters
             const child = mbDevice.addChildDeviceTypeWithClusterServer(
               key,
-              [electricalSensor],
-              [ElectricalPowerMeasurement.id, ElectricalEnergyMeasurement.id],
+              isTriphaseTotal ? [electricalSensor, powerSource] : [electricalSensor],
+              isTriphaseTotal ? [ElectricalPowerMeasurement.id, ElectricalEnergyMeasurement.id, PowerSource.id] : [ElectricalPowerMeasurement.id, ElectricalEnergyMeasurement.id],
               tagList ? { tagList } : undefined,
               config.debug,
             );
