@@ -152,6 +152,9 @@ export default function initializePlugin(matterbridge: PlatformMatterbridge, log
   return new ShellyPlatform(matterbridge, log, config);
 }
 
+/** Friendly ha_entitylabel values for the em:0-3 endpoints of triphase devices (shellypro3em, shelly3em63g3). em:0 is the total, em:1/2/3 are phases A/B/C. */
+const triphaseEmLabels = { 'em:0': 'Total', 'em:1': 'Phase A', 'em:2': 'Phase B', 'em:3': 'Phase C' } as const;
+
 export class ShellyPlatform extends MatterbridgeDynamicPlatform {
   public discoveredDevices = new Map<ShellyDeviceId, DiscoveredDevice>();
   public storedDevices = new Map<ShellyDeviceId, DiscoveredDevice>();
@@ -648,6 +651,14 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         device.model,
         1,
         device.firmware,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        // Report productId 0x8000 (Matter test ProductId, paired with the default vendorId 0xfff1) on triphase devices
+        // so Home Assistant's (vendorId, productId) allowlist can match the ha_entitylabel FixedLabels on em:0-3 below.
+        device.profile === 'triphase' ? 0x8000 : undefined,
       );
       // Set the device in the selectDevice map for the frontend device selection
       this.setSelectDevice(device.id, device.name, `${device.port === 443 ? 'https' : 'http'}://${device.host}:${device.port}`, 'wifi', []); // We clear the entities!
@@ -1018,6 +1029,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
             device.log.debug(
               `Added ElectricalPowerMeasurement and ElectricalEnergyMeasurement clusters to endpoint ${hk}${child.name}${db} component ${hk}${component.name}:${component.id}${db}`,
             );
+            // For triphase devices, report a friendly ha_entitylabel so Home Assistant's Matter integration can override the entity name for em:0-3
+            if (device.profile === 'triphase' && key in triphaseEmLabels) void child.addFixedLabel('ha_entitylabel', triphaseEmLabels[key as keyof typeof triphaseEmLabels]);
             // Add event handler
             pmComponent.on('update', (component: string, property: string, value: ShellyDataType) => {
               shellyUpdateHandler(this, mbDevice, device, component, property, value);
