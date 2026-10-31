@@ -30,6 +30,16 @@ If you like this project and find it useful, please consider giving it a star on
 
 You can also sponsor Tamer here https://buymeacoffee.com/6sjde6vkzl for his invaluable contribution to this project.
 
+## [2.8.1] - Dev branch
+
+### Added
+
+- [cover]: Add tilt support for Gen 2+ covers with slat control enabled, including tilt commands and position updates (https://github.com/Luligu/matterbridge-shelly/pull/204). Thanks to https://github.com/sin0light.
+- [frequency]: Add electrical frequency readings for supported devices (https://github.com/Luligu/matterbridge-shelly/pull/209). Thanks to https://github.com/lboue.
+- [tags]: Add Matter PowerSource semantic tags (Grid/Battery) to the bridged device PowerSource cluster and, for triphase devices (shellypro3em, shelly3em63g3), to the em:0 total measurement endpoint (https://github.com/Luligu/matterbridge-shelly/pull/211). Thanks to https://github.com/lboue.
+
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+
 ## [2.8.0] - 2026-10-23
 
 ### Breaking changes
