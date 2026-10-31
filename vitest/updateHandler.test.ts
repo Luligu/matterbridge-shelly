@@ -735,6 +735,6 @@ describe('ShellyPlatform', () => {
 
   it('should call onShutdown with reason', async () => {
     await shellyPlatform.onShutdown('Test reason');
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Shutting down platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Shutting down platform ${mockConfig.name} with reason: Test reason...`);
   });
 });

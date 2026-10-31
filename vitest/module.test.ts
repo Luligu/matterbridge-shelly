@@ -212,7 +212,7 @@ describe('ShellyPlatform', () => {
     shellyPlatform.config.enableMdnsDiscover = true;
 
     await shellyPlatform.onStart('Test reason');
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Starting platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Starting platform ${mockConfig.name} with reason: Test reason...`);
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, 'Started MdnsScanner for shelly devices.');
     expect((shellyPlatform as any).nodeStorageManager).toBeDefined();
     expect((shelly as any).mdnsScanner).toBeDefined();
@@ -232,7 +232,7 @@ describe('ShellyPlatform', () => {
     shellyPlatform.config.enableStorageDiscover = false;
     shellyPlatform.config.resetStorageDiscover = true;
     await shellyPlatform.onStart('Test reason');
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Starting platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Starting platform ${mockConfig.name} with reason: Test reason...`);
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Resetting the Shellies storage...`);
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Reset of Shellies storage done!`);
     expect((shellyPlatform as any).nodeStorageManager).toBeDefined();
@@ -256,7 +256,7 @@ describe('ShellyPlatform', () => {
     });
     await shellyPlatform.onStart('Test reason');
 
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Starting platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Starting platform ${mockConfig.name} with reason: Test reason...`);
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Loading from storage 2 Shelly devices`);
     expect(loggerLogSpy).toHaveBeenCalledWith(
       LogLevel.ERROR,
@@ -279,7 +279,7 @@ describe('ShellyPlatform', () => {
 
     await expect(shellyPlatform.onStart('Test reason')).rejects.toThrow();
 
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Starting platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Starting platform ${mockConfig.name} with reason: Test reason...`);
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.NOTICE, `Waiting for the configured number of 0/2 devices to be loaded.`);
     shellyPlatform.config.failsafeCount = 0;
 
@@ -288,7 +288,7 @@ describe('ShellyPlatform', () => {
 
   it('should call onStart with reason and add discovered devices', async () => {
     await shellyPlatform.onStart('Test reason');
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Starting platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Starting platform ${mockConfig.name} with reason: Test reason...`);
 
     const create = vi.spyOn(ShellyDevice, 'create' as any).mockImplementation(async () => {
       return Promise.resolve();
@@ -383,7 +383,7 @@ describe('ShellyPlatform', () => {
     shellyPlatform.config.inputMomentaryList = ['shelly1-34945472A643'];
 
     await shellyPlatform.onStart('Test reason');
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Starting platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Starting platform ${mockConfig.name} with reason: Test reason...`);
 
     const shelly1 = await ShellyDevice.create(shelly, (shellyPlatform as any).log, path.join('src', 'mock', 'shelly1-34945472A643.json'));
     expect(shelly1).not.toBeUndefined();
@@ -497,7 +497,7 @@ describe('ShellyPlatform', () => {
     shellyPlatform.config.inputMomentaryList = ['shellyht-703523'];
 
     await shellyPlatform.onStart('Test reason');
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Starting platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Starting platform ${mockConfig.name} with reason: Test reason...`);
 
     const shellyHt = await ShellyDevice.create(shelly, (shellyPlatform as any).log, path.join('src', 'mock', 'shellyht-703523.json'));
     expect(shellyHt).not.toBeUndefined();
@@ -597,7 +597,7 @@ describe('ShellyPlatform', () => {
     shellyPlatform.config.inputMomentaryList = ['shellyprorgbwwpm-AC1518784844'];
 
     await shellyPlatform.onStart('Test reason');
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Starting platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Starting platform ${mockConfig.name} with reason: Test reason...`);
 
     const shellyPro = await ShellyDevice.create(shelly, (shellyPlatform as any).log, path.join('src', 'mock', 'shellyprorgbwwpm-AC1518784844.json'));
     expect(shellyPro).not.toBeUndefined();
@@ -862,7 +862,7 @@ describe('ShellyPlatform', () => {
     shellyPlatform.config.inputMomentaryList = ['shellyplusrgbwpm-A0A3B35C7024'];
 
     await shellyPlatform.onStart('Test reason');
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Starting platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Starting platform ${mockConfig.name} with reason: Test reason...`);
 
     const shellyPlusRgbwPm = await ShellyDevice.create(shelly, (shellyPlatform as any).log, path.join('src', 'mock', 'shellyplusrgbwpm-A0A3B35C7024.json'));
     expect(shellyPlusRgbwPm).not.toBeUndefined();
@@ -1151,7 +1151,7 @@ describe('ShellyPlatform', () => {
     shellyPlatform.config.inputMomentaryList = [];
 
     await shellyPlatform.onStart('Test reason');
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Starting platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Starting platform ${mockConfig.name} with reason: Test reason...`);
 
     const shelly2PMGen3 = await ShellyDevice.create(shelly, (shellyPlatform as any).log, path.join('src', 'mock', 'shelly2pmg3-34CDB0770C4C.json'));
     expect(shelly2PMGen3).not.toBeUndefined();
@@ -1310,7 +1310,7 @@ describe('ShellyPlatform', () => {
     shellyPlatform.config.inputMomentaryList = [];
 
     await shellyPlatform.onStart('Test reason');
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Starting platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Starting platform ${mockConfig.name} with reason: Test reason...`);
 
     const shelly2PMGen3 = await ShellyDevice.create(shelly, (shellyPlatform as any).log, path.join('src', 'mock', 'shelly2pmg3-34CDB0770C4E.json'));
     expect(shelly2PMGen3).not.toBeUndefined();
@@ -1546,7 +1546,7 @@ describe('ShellyPlatform', () => {
 
   it('should call onConfigure', async () => {
     await shellyPlatform.onConfigure();
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Configuring platform ${idn}${mockConfig.name}${rs}${nf}`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Configuring platform ${mockConfig.name}...`);
   });
 
   it('should call onChangeLoggerLevel and log a partial message', async () => {
@@ -1818,13 +1818,13 @@ describe('ShellyPlatform', () => {
 
   it('should call onShutdown with reason', async () => {
     await shellyPlatform.onShutdown('Test reason');
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Shutting down platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Shutting down platform ${mockConfig.name} with reason: Test reason...`);
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, 'Stopped MdnsScanner for shelly devices.');
   });
 
   it('should call onShutdown with reason and unregister', async () => {
     mockConfig.unregisterOnShutdown = true;
     await shellyPlatform.onShutdown('Test reason');
-    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Shutting down platform ${idn}${mockConfig.name}${rs}${nf}: Test reason`);
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Shutting down platform ${mockConfig.name} with reason: Test reason...`);
   });
 });
