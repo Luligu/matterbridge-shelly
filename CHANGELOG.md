@@ -42,6 +42,7 @@ If you like this project and find it useful, please consider giving it a star on
 
 ### Changed
 
+- [basicInformation]: Report Matter test productId 0x8000 for all Shelly devices to support Home Assistant entity labels.
 - [agents]: Update `.antigravity/settings.json` to v.1.0.6.
 - [agents]: Update `.claude/settings.json` to v.1.0.9.
 - [codex]: Update `.codex/rules/default.rules` to v.1.0.7.

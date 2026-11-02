@@ -32,6 +32,7 @@ Features:
 - The components exposed are Light (with brightness and RGB color), Switch, Relay, Roller, Cover, PowerMeter, Temperature, Humidity, Illuminance, Thermostat, Button and Input.
 - Gen 2+ covers with slat control enabled (e.g. venetian blinds on a Shelly 2PM Gen3) also expose the tilt position. Enable and calibrate the slat control in the Shelly app or web page first, then restart Matterbridge.
 - PowerMeters expose electrical measurements with the electricalSensor device type, supported by Home Assistant and partially by SmartThings and Apple Home. Available readings depend on the controller and its software version.
+- Shelly devices report Matter test vendor ID `0xfff1` and product ID `0x8000`, allowing Home Assistant to use `ha_entitylabel` endpoint labels when provided.
 - Devices expose Grid/Battery semantic tags for their own power supply. These tags do not classify the circuits measured by power meters.
 - Shellies are controlled locally, eliminating the need for cloud or MQTT (which can both be disabled).
 - Shelly Gen 1 devices are controlled using the CoIoT protocol (see the note below).
