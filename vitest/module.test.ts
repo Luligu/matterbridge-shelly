@@ -16,6 +16,7 @@ import path from 'node:path';
 
 import { featuresFor, type MatterbridgeEndpoint, type PlatformMatterbridge } from 'matterbridge';
 import { CYAN, db, dn, er, GREEN, hk, idn, LogLevel, nf, or, rs, wr, YELLOW, zb } from 'matterbridge/logger';
+import { PowerSourceTag } from 'matterbridge/matter';
 import { OnOffBehavior, RelativeHumidityMeasurementBehavior, TemperatureMeasurementBehavior } from 'matterbridge/matter/behaviors';
 import {
   Binding,
@@ -471,6 +472,47 @@ describe('ShellyPlatform', () => {
 
     cleanup();
     shelly1.destroy();
+  });
+
+  it.each([
+    { file: 'shelly1-34945472A643.json', battery: false, excluded: false },
+    { file: 'shellyht-703523.json', battery: true, excluded: false },
+    { file: 'shellyplusht-FCB467261FD4.json', battery: true, excluded: false },
+    { file: 'shellywalldisplay-00082261E102.json', battery: false, excluded: false },
+    { file: 'shellypro3em-A0DD6CA0C27C.json', battery: false, excluded: false },
+    { file: 'shellypro3em-A0DD6CA0C27C.json', battery: false, excluded: true },
+  ])('should tag the device power supply and preserve meter roles for $file (excluded: $excluded)', async ({ file, battery, excluded }) => {
+    const previousBlacklist = shellyPlatform.config.entityBlackList;
+    const device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', file));
+    expect(device).toBeDefined();
+    if (!device) return;
+    device.name = `${device.name} semantic tags ${excluded ? 'excluded' : 'enabled'}`;
+    try {
+      shellyPlatform.config.entityBlackList = excluded ? ['PowerSource'] : [];
+      await shelly.addDevice(device);
+      await waitBridged(device);
+      const endpoint = shellyPlatform.bridgedDevices.get(device.id);
+      expect(endpoint).toBeDefined();
+      if (!endpoint) return;
+      expect(endpoint.hasClusterServer(PowerSource)).toBe(!excluded);
+      const tag = battery ? PowerSourceTag.Battery : PowerSourceTag.Grid;
+      const expectedTag = expect.objectContaining({ namespaceId: tag.namespaceId, tag: tag.tag });
+      const expectedTags = excluded ? undefined : [expectedTag];
+      expect(endpoint.getAttribute('descriptor', 'tagList')).toEqual(expectedTags);
+      const powerFeatures = excluded ? undefined : featuresFor(endpoint, 'powerSource');
+      expect(powerFeatures?.[battery ? 'battery' : 'wired']).toBe(excluded ? undefined : true);
+      const meterIds = device.profile === 'triphase' ? ['em:0', 'em:1', 'em:2', 'em:3'] : [];
+      for (const id of meterIds) {
+        const meter = endpoint.getChildEndpointById(id);
+        expect(meter).toBeDefined();
+        expect(meter?.hasClusterServer(PowerSource)).toBe(false);
+        expect(meter?.getAttribute('descriptor', 'tagList') ?? []).not.toContainEqual(expect.objectContaining({ namespaceId: PowerSourceTag.Grid.namespaceId }));
+      }
+    } finally {
+      shellyPlatform.config.entityBlackList = previousBlacklist;
+      cleanup();
+      device.destroy();
+    }
   });
 
   test('should handle Matterbridge registration failure for an added device', async () => {

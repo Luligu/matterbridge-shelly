@@ -34,6 +34,10 @@ If you like this project and find it useful, please consider giving it a star on
 
 ## [2.8.2] - Dev branch
 
+### Added
+
+- [tags]: Add Grid/Battery semantic tags to device power supplies without classifying measured circuits (https://github.com/Luligu/matterbridge-shelly/pull/211). Thanks to https://github.com/lboue.
+
 ### Changed
 
 - [agents]: Update `.antigravity/settings.json` to v.1.0.6.
