@@ -61,7 +61,7 @@ import {
   waterLeakDetector,
 } from 'matterbridge';
 import { AnsiLogger, CYAN, db, debugStringify, dn, er, GREEN, hk, idn, type LogLevel, nf, nt, rs, TimestampFormat, wr, YELLOW, zb } from 'matterbridge/logger';
-import { type AtLeastOne, CommonNumberTag } from 'matterbridge/matter';
+import { type AtLeastOne, CommonNumberTag, PowerSourceTag } from 'matterbridge/matter';
 import {
   BooleanState,
   BridgedDeviceBasicInformation,
@@ -187,6 +187,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         `This plugin requires Matterbridge version >= "3.11.0". Please update Matterbridge from ${this.matterbridge.matterbridgeVersion} to the latest version in the frontend.`,
       );
     }
+
+    this.log.info(`Initializing platform ${this.config.name}...`);
 
     // Validate the config
     // v8 ignore next
@@ -634,8 +636,26 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
 
       // Create a new Matterbridge device
       const deviceTypes: AtLeastOne<DeviceTypeDefinition> = [bridgedNode];
-      if (this.validateEntity(device.id, 'PowerSource')) deviceTypes.push(powerSource);
-      const mbDevice = new MatterbridgeEndpoint(deviceTypes, { id: device.name }, config.debug);
+      const batteryComponent = device.getComponent('battery');
+      const devicepowerComponent = device.getComponent('devicepower:0');
+      let powerSourceTagList: Semtag[] | undefined;
+      if (this.validateEntity(device.id, 'PowerSource')) {
+        deviceTypes.push(powerSource);
+        // Tag the PowerSource cluster with the Matter PowerSource namespace (Grid for wired, Battery for battery powered)
+        if (batteryComponent) {
+          powerSourceTagList = [getSemtag(PowerSourceTag.Battery)];
+        } else if (devicepowerComponent) {
+          if (devicepowerComponent.hasProperty('battery') && isValidObject(devicepowerComponent.getValue('battery'), 2)) {
+            powerSourceTagList = [getSemtag(PowerSourceTag.Battery)];
+          } else if (devicepowerComponent.hasProperty('external') && isValidObject(devicepowerComponent.getValue('external'), 1)) {
+            const external = devicepowerComponent.getValue('external') as { present: boolean };
+            if (isValidBoolean(external.present) && external.present) powerSourceTagList = [getSemtag(PowerSourceTag.Grid)];
+          }
+        } else {
+          powerSourceTagList = [getSemtag(PowerSourceTag.Grid)];
+        }
+      }
+      const mbDevice = new MatterbridgeEndpoint(deviceTypes, { id: device.name, tagList: powerSourceTagList }, config.debug);
       mbDevice.configUrl = `${device.port === 443 ? 'https' : 'http'}://${device.host}:${device.port}`;
       mbDevice.log.logName = device.name;
       mbDevice.createDefaultBridgedDeviceBasicInformationClusterServer(
@@ -654,8 +674,6 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
 
       // Set the powerSource cluster
       if (this.validateEntity(device.id, 'PowerSource')) {
-        const batteryComponent = device.getComponent('battery');
-        const devicepowerComponent = device.getComponent('devicepower:0');
         if (batteryComponent) {
           let level = batteryComponent.hasProperty('level') ? batteryComponent.getValue('level') : undefined;
           level = isValidNumber(level, 0, 100) ? level : undefined;
@@ -1531,10 +1549,12 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         this.log.error(`Shelly device ${hk}${device.id}${er} host ${zb}${device.host}${er} failed to register with Matterbridge: ${getErrorMessage(error)}`);
       }
     });
+
+    this.log.info(`Platform ${this.config.name} initialized successfully`);
   }
 
   override async onStart(reason?: string): Promise<void> {
-    this.log.info(`Starting platform ${idn}${this.config.name}${rs}${nf}: ${reason ?? ''}`);
+    this.log.info(`Starting platform ${this.config.name} with reason: ${reason ?? 'no reason provided'}...`);
 
     // Create NodeStorageManager
     this.nodeStorageManager = new NodeStorageManager({
@@ -1673,13 +1693,13 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       this.setSchema(baseSchema);
     }
 
-    this.log.info(`Started platform ${idn}${this.config.name}${rs}${nf}: ${reason ?? ''}`);
+    this.log.info(`Platform ${this.config.name} started successfully`);
   }
 
   override async onConfigure(): Promise<void> {
     await super.onConfigure();
 
-    this.log.info(`Configuring platform ${idn}${this.config.name}${rs}${nf}`);
+    this.log.info(`Configuring platform ${this.config.name}...`);
     for (const mbDevice of this.bridgedDevices.values()) {
       if (!mbDevice.serialNumber) {
         this.log.error(`Shelly device ${dn}${mbDevice.deviceName}${er} has no serial number`);
@@ -1845,11 +1865,13 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
         });
       }
     }
+
+    this.log.info(`Platform ${this.config.name} configured successfully`);
   }
 
   override async onShutdown(reason?: string): Promise<void> {
     await super.onShutdown(reason);
-    this.log.info(`Shutting down platform ${idn}${this.config.name}${rs}${nf}: ${reason ?? ''}`);
+    this.log.info(`Shutting down platform ${this.config.name} with reason: ${reason ?? 'no reason provided'}...`);
 
     if (this.nodeStorage) {
       this.log.info(`Saving ${CYAN}${this.changedDevices.size}${nf} changed Shelly devices to the storage`);
@@ -1872,19 +1894,24 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
     this.bluBridgedDevices.clear();
 
     if (this.config.unregisterOnShutdown) await this.unregisterAllDevices();
+
+    this.log.info(`Platform ${this.config.name} shut down successfully`);
   }
 
   // oxlint-disable-next-line typescript/require-await
   override async onChangeLoggerLevel(logLevel: LogLevel): Promise<void> {
+    this.log.info(`Changing logger level of platform ${this.config.name} to ${logLevel}...`);
     this.log.debug(
       `Changing logger level for platform ${idn}${this.config.name}${rs}${db} to ${logLevel} with debugMdns ${this.config.debugMdns}, debugCoap ${this.config.debugCoap} and debugWs ${this.config.debugWs}`,
     );
     this.shelly.setLogLevel(logLevel, this.config.debugMdns, this.config.debugCoap, this.config.debugWs, this.config.debugUdp);
     this.bridgedDevices.forEach((device) => (device.log.logLevel = logLevel));
     this.bluBridgedDevices.forEach((bluDevice) => (bluDevice.log.logLevel = logLevel));
+    this.log.info(`Platform ${this.config.name} logger level changed successfully to ${logLevel}`);
   }
 
   override async onAction(action: string, value?: string): Promise<void> {
+    this.log.info(`Executing action ${action} on platform ${this.config.name} with value: ${value ?? 'no value provided'}...`);
     if (action === 'addDevice' && value && isValidString(value)) {
       const address = value
         .trim()
@@ -1944,6 +1971,8 @@ export class ShellyPlatform extends MatterbridgeDynamicPlatform {
       this.log.info(`Scanning the network for Shelly devices`);
       this.shelly.mdnsScanner.sendQuery();
     }
+
+    this.log.info(`Platform ${this.config.name} action ${action} executed successfully`);
   }
 
   /**

@@ -491,17 +491,16 @@ export class Shelly extends EventEmitter<ShellyEvents> {
   setLogLevel(level: LogLevel, debugMdns: boolean, debugCoap: boolean, debugWs: boolean, debugUdp: boolean): void {
     // Called 2 times in module.ts: 1) at startup, 2) after onChangeLoggerLevel
     this.log.logLevel = level;
-    this.mdnsScanner.log.logLevel = debugMdns ? LogLevel.DEBUG : LogLevel.INFO;
-    this.coapServer.log.logLevel = debugCoap ? LogLevel.DEBUG : LogLevel.INFO;
-    this.wsServer.log.logLevel = debugWs ? LogLevel.DEBUG : LogLevel.INFO;
-    this.udpServer.log.logLevel = debugUdp ? LogLevel.DEBUG : LogLevel.INFO;
-    WsClient.logLevel = debugWs ? LogLevel.DEBUG : LogLevel.INFO; // Static property for new instances
+    this.mdnsScanner.log.logLevel = debugMdns ? LogLevel.DEBUG : level;
+    this.coapServer.log.logLevel = debugCoap ? LogLevel.DEBUG : level;
+    this.wsServer.log.logLevel = debugWs ? LogLevel.DEBUG : level;
+    this.udpServer.log.logLevel = debugUdp ? LogLevel.DEBUG : level;
+    WsClient.logLevel = debugWs ? LogLevel.DEBUG : level; // Static property for new instances
     this.devices.forEach((device) => {
       device.setLogLevel(level);
       if (device.wsClient) {
         // Set log level for existing WebSocket clients
-        if (debugWs) device.wsClient.log.logLevel = LogLevel.DEBUG;
-        else device.wsClient.log.logLevel = LogLevel.INFO;
+        device.wsClient.log.logLevel = debugWs ? LogLevel.DEBUG : level;
       }
     });
   }
