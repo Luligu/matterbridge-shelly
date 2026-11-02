@@ -495,6 +495,7 @@ describe('ShellyPlatform', () => {
       expect(endpoint).toBeDefined();
       expect(endpoint?.getAttribute('bridgedDeviceBasicInformation', 'hardwareVersionString')).toBe(build || '1.0.0');
       expect(endpoint?.getAttribute('bridgedDeviceBasicInformation', 'softwareVersionString')).toBe(version);
+      expect(endpoint?.getAttribute('bridgedDeviceBasicInformation', 'productId')).toBe(0x8000);
     } finally {
       cleanup();
       device.destroy();
@@ -528,12 +529,23 @@ describe('ShellyPlatform', () => {
       expect(endpoint.getAttribute('descriptor', 'tagList')).toEqual(expectedTags);
       const powerFeatures = excluded ? undefined : featuresFor(endpoint, 'powerSource');
       expect(powerFeatures?.[battery ? 'battery' : 'wired']).toBe(excluded ? undefined : true);
-      const meterIds = device.profile === 'triphase' ? ['em:0', 'em:1', 'em:2', 'em:3'] : [];
-      for (const id of meterIds) {
+      const meterLabels =
+        device.profile === 'triphase'
+          ? ([
+              ['em:0', [{ label: 'ha_entitylabel', value: 'Total' }]],
+              ['em:1', [{ label: 'ha_entitylabel', value: 'Phase A' }]],
+              ['em:2', [{ label: 'ha_entitylabel', value: 'Phase B' }]],
+              ['em:3', [{ label: 'ha_entitylabel', value: 'Phase C' }]],
+            ] as const)
+          : file === 'shelly1-34945472A643.json'
+            ? ([['meter:0', undefined]] as const)
+            : [];
+      for (const [id, labels] of meterLabels) {
         const meter = endpoint.getChildEndpointById(id);
         expect(meter).toBeDefined();
         expect(meter?.hasClusterServer(PowerSource)).toBe(false);
         expect(meter?.getAttribute('descriptor', 'tagList') ?? []).not.toContainEqual(expect.objectContaining({ namespaceId: PowerSourceTag.Grid.namespaceId }));
+        expect(meter?.getAttribute('fixedLabel', 'labelList')).toEqual(labels);
       }
     } finally {
       shellyPlatform.config.entityBlackList = previousBlacklist;
