@@ -39,10 +39,12 @@ If you like this project and find it useful, please consider giving it a star on
 - [homeAssistant]: Report a friendly ha_entitylabel (Total, Phase A/B/C) on the em:0-3 endpoints of triphase devices (shellypro3em, shelly3em63g3), so Home Assistant's Matter integration can override the entity name (https://github.com/Luligu/matterbridge-shelly/pull/213). Thanks to https://github.com/lboue.
 - [basicInformation]: Report the firmware build identifier as hardwareVersionString on the BridgedDeviceBasicInformation cluster (https://github.com/Luligu/matterbridge-shelly/pull/212). Thanks to https://github.com/lboue.
 - [tags]: Add Grid/Battery semantic tags to device power supplies without classifying measured circuits (https://github.com/Luligu/matterbridge-shelly/pull/211). Thanks to https://github.com/lboue.
+- [test]: Improve `module.test.ts` coverage for component update/event handlers and `shellyblugwg3` BLU gateway and BTHome devices.
 
 ### Changed
 
 - [basicInformation]: Report Matter test productId 0x8000 for all Shelly devices to support Home Assistant entity labels.
+- [agents]: Update `AGENTS.md` to v.1.0.9: add context and reading guidance.
 - [agents]: Update `.antigravity/settings.json` to v.1.0.6.
 - [agents]: Update `.claude/settings.json` to v.1.0.9.
 - [codex]: Update `.codex/rules/default.rules` to v.1.0.7.
@@ -54,6 +56,8 @@ If you like this project and find it useful, please consider giving it a star on
 - [config]: Update `.oxfmtrc.json` to v.1.2.0.
 - [config]: Update `.oxlintrc.json` to v.1.2.0.
 - [config]: Update `vitest.config.ts` to v.2.0.9.
+- [package]: Bump `@vitest/coverage-v8` to v.5.1.0.
+- [package]: Bump `vitest` to v.5.1.0.
 
 ### Fixed
 

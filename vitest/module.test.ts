@@ -20,6 +20,7 @@ import { PowerSourceTag } from 'matterbridge/matter';
 import { OnOffBehavior, RelativeHumidityMeasurementBehavior, TemperatureMeasurementBehavior } from 'matterbridge/matter/behaviors';
 import {
   Binding,
+  BooleanState,
   BridgedDeviceBasicInformation,
   ColorControl,
   Descriptor,
@@ -27,10 +28,13 @@ import {
   ElectricalPowerMeasurement,
   Groups,
   Identify,
+  IlluminanceMeasurement,
+  ModeSelect,
   OnOff,
   PowerSource,
   PowerTopology,
   RelativeHumidityMeasurement,
+  SmokeCoAlarm,
   Switch,
   TemperatureMeasurement,
 } from 'matterbridge/matter/clusters';
@@ -433,7 +437,7 @@ describe('ShellyPlatform', () => {
     expect(setAttributeSpy).toHaveBeenCalledWith('BridgedDeviceBasicInformation', 'reachable', false, device.log);
     expect(triggerEventSpy).toHaveBeenCalledWith(BridgedDeviceBasicInformation.id, 'reachableChanged', { reachableNewValue: false }, device.log);
 
-    // Test updates on switch from Shelly to Matter
+    // Test updates on switch and power meter from Shelly to Matter
     const switchEndpoint = device.getChildEndpointById('relay:0')!;
     expect(switchEndpoint).toBeDefined();
     if (!switchEndpoint) return;
@@ -445,6 +449,9 @@ describe('ShellyPlatform', () => {
     shelly.coapServer.emit('coapupdate', shelly1.host, { 'relay:0': { state: true } });
     await waiter('Switch on', () => switchEndpoint.stateOf(OnOffBehavior).onOff, true, 5000, 10);
     expect(switchEndpoint.stateOf(OnOffBehavior).onOff).toBe(true);
+    shelly1.getComponent('meter:0')?.setValue('power', 50);
+    await flushAsync();
+    expect(device.getChildEndpointById('meter:0')?.getAttribute(ElectricalPowerMeasurement.id, 'activePower')).toBe(50000);
 
     // Test commands for switch from Matter to Shelly
     const fetch = vi.mocked(shellyFetch).mockImplementation(async () => {
@@ -547,6 +554,25 @@ describe('ShellyPlatform', () => {
         expect(meter?.getAttribute('descriptor', 'tagList') ?? []).not.toContainEqual(expect.objectContaining({ namespaceId: PowerSourceTag.Grid.namespaceId }));
         expect(meter?.getAttribute('fixedLabel', 'labelList')).toEqual(labels);
       }
+      if (!excluded && file === 'shellyplusht-FCB467261FD4.json') {
+        device.getComponent('devicepower:0')?.setValue('battery', { V: 5.5, percent: 50 });
+        device.getComponent('temperature:0')?.setValue('tC', 21.5);
+        device.getComponent('humidity:0')?.setValue('rh', 60);
+        await flushAsync();
+      }
+      if (!excluded && file === 'shellywalldisplay-00082261E102.json') {
+        device.getComponent('illuminance:0')?.setValue('lux', 100);
+        await flushAsync();
+      }
+      expect(endpoint.getChildEndpointById('temperature:0')?.getAttribute(TemperatureMeasurement.id, 'measuredValue')).toBe(
+        file === 'shellyplusht-FCB467261FD4.json' ? 2150 : file === 'shellypro3em-A0DD6CA0C27C.json' || file === 'shellywalldisplay-00082261E102.json' ? null : undefined,
+      );
+      expect(endpoint.getChildEndpointById('humidity:0')?.getAttribute(RelativeHumidityMeasurement.id, 'measuredValue')).toBe(
+        file === 'shellyplusht-FCB467261FD4.json' ? 6000 : file === 'shellywalldisplay-00082261E102.json' ? null : undefined,
+      );
+      expect(endpoint.getChildEndpointById('illuminance:0')?.getAttribute(IlluminanceMeasurement.id, 'measuredValue')).toBe(
+        file === 'shellywalldisplay-00082261E102.json' ? 20000 : undefined,
+      );
     } finally {
       shellyPlatform.config.entityBlackList = previousBlacklist;
       cleanup();
@@ -618,6 +644,11 @@ describe('ShellyPlatform', () => {
     const humidityEndpoint = device.getChildEndpointById('humidity')!;
     expect(humidityEndpoint.stateOf(RelativeHumidityMeasurementBehavior).measuredValue).toBe(6050);
 
+    // Test battery update on PowerSource
+    shellyHt.getComponent('battery')?.setValue('level', 50);
+    await flushAsync();
+    expect(device.getAttribute(PowerSource.id, 'batPercentRemaining')).toBe(100);
+
     // Test onConfigure restores measuredValue from the Shelly components
     await temperatureEndpoint.setAttribute(TemperatureMeasurement.id, 'measuredValue', null);
     await humidityEndpoint.setAttribute(RelativeHumidityMeasurement.id, 'measuredValue', null);
@@ -662,10 +693,12 @@ describe('ShellyPlatform', () => {
     expect(smoke?.hasClusterServer(PowerSource)).toBe(true);
 
     shellySmoke.getComponent('devicepower:0')?.setValue('battery', { V: 2.9, percent: 15 });
+    shellySmoke.getComponent('smoke:0')?.setValue('alarm', true);
     await flushAsync();
     expect(smoke?.getAttribute(PowerSource.id, 'batPercentRemaining')).toBe(30);
     expect(smoke?.getAttribute(PowerSource.id, 'batChargeLevel')).toBe(PowerSource.BatChargeLevel.Warning);
     expect(smoke?.getAttribute(PowerSource.id, 'batVoltage')).toBe(2900);
+    expect(smoke?.getAttribute(SmokeCoAlarm.id, 'smokeState')).toBe(SmokeCoAlarm.AlarmState.Critical);
 
     shellyPlatform.config.deviceEntityBlackList = {};
     cleanup();
@@ -1220,6 +1253,32 @@ describe('ShellyPlatform', () => {
     sysComponent.emit('event', 'sys', 'sleep', { component: 'sys', event: 'sleep', ts: 0 });
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, expect.stringContaining('is sleeping'));
 
+    // Test Ble component event handler
+    const bleComponent = shellyPlusRgbwPm.getComponent('ble');
+    expect(bleComponent).toBeDefined();
+    loggerLogSpy.mockClear();
+    bleComponent?.emit('event', 'ble', 'config_changed', { component: 'ble', event: 'config_changed', ts: 0 });
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining('Received event'));
+
+    // Test Input button component event handler (single_push, double_push, long_push, and missing child endpoint error)
+    const input0Component = shellyPlusRgbwPm.getComponent('input:0');
+    expect(input0Component).toBeDefined();
+    const input0Endpoint = device.getChildEndpointById('input:0')!;
+    const triggerSwitchEventSpy = vi.spyOn(input0Endpoint, 'triggerSwitchEvent');
+    input0Component?.emit('event', 'input:0', 'single_push', { component: 'input:0', event: 'single_push', ts: 0 });
+    input0Component?.emit('event', 'input:0', 'double_push', { component: 'input:0', event: 'double_push', ts: 0 });
+    input0Component?.emit('event', 'input:0', 'long_push', { component: 'input:0', event: 'long_push', ts: 0 });
+    expect(triggerSwitchEventSpy).toHaveBeenCalledWith('Single', shellyPlusRgbwPm.log);
+    expect(triggerSwitchEventSpy).toHaveBeenCalledWith('Double', shellyPlusRgbwPm.log);
+    expect(triggerSwitchEventSpy).toHaveBeenCalledWith('Long', shellyPlusRgbwPm.log);
+    triggerSwitchEventSpy.mockRestore();
+
+    const getChildSpy = vi.spyOn(device, 'getChildEndpointById').mockImplementationOnce(() => {});
+    loggerLogSpy.mockClear();
+    input0Component?.emit('event', 'input:0', 'single_push', { component: 'input:0', event: 'single_push', ts: 0 });
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.ERROR, expect.stringContaining('getChildEndpointById(input:0)'));
+    getChildSpy.mockRestore();
+
     await shellyPlatform.onConfigure();
 
     cleanup();
@@ -1479,6 +1538,105 @@ describe('ShellyPlatform', () => {
 
     cleanup();
     shelly2PMGen3.destroy();
+  });
+
+  it('should add shelly2pmg3 with contact, momentary and latching inputs', async () => {
+    shellyPlatform.config.enableMdnsDiscover = false;
+    shellyPlatform.config.inputContactList = ['shelly2pmg3-34CDB0770C4C'];
+    shellyPlatform.config.inputMomentaryList = [];
+    shellyPlatform.config.inputLatchingList = [];
+
+    const shellyContact = await ShellyDevice.create(shelly, (shellyPlatform as any).log, path.join('src', 'mock', 'shelly2pmg3-34CDB0770C4C.json'));
+    expect(shellyContact).toBeDefined();
+    if (!shellyContact) return;
+    shellyContact.name = `${shellyContact.name} contact`;
+    await shelly.addDevice(shellyContact);
+    await waitBridged(shellyContact);
+    const contactDevice = shellyPlatform.bridgedDevices.get('shelly2pmg3-34CDB0770C4C')!;
+    expect(contactDevice.getChildEndpointById('input:0')?.hasClusterServer(BooleanState)).toBe(true);
+    shellyContact.getComponent('input:0')?.setValue('state', false);
+    await flushAsync();
+    expect(contactDevice.getChildEndpointById('input:0')?.getAttribute(BooleanState.id, 'stateValue')).toBe(false);
+    cleanup();
+    shellyContact.destroy();
+
+    shellyPlatform.config.inputContactList = [];
+    shellyPlatform.config.inputMomentaryList = ['shelly2pmg3-34CDB0770C4C'];
+    const shellyMomentary = await ShellyDevice.create(shelly, (shellyPlatform as any).log, path.join('src', 'mock', 'shelly2pmg3-34CDB0770C4C.json'));
+    expect(shellyMomentary).toBeDefined();
+    if (!shellyMomentary) return;
+    shellyMomentary.name = `${shellyMomentary.name} momentary`;
+    await shelly.addDevice(shellyMomentary);
+    await waitBridged(shellyMomentary);
+    const momentaryDevice = shellyPlatform.bridgedDevices.get('shelly2pmg3-34CDB0770C4C')!;
+    expect(momentaryDevice.getChildEndpointById('input:0')?.hasClusterServer(Switch)).toBe(true);
+    shellyMomentary.getComponent('input:0')?.setValue('state', false);
+    await flushAsync();
+    cleanup();
+    shellyMomentary.destroy();
+
+    shellyPlatform.config.inputMomentaryList = [];
+    shellyPlatform.config.inputLatchingList = ['shelly2pmg3-34CDB0770C4C'];
+    const shellyLatching = await ShellyDevice.create(shelly, (shellyPlatform as any).log, path.join('src', 'mock', 'shelly2pmg3-34CDB0770C4C.json'));
+    expect(shellyLatching).toBeDefined();
+    if (!shellyLatching) return;
+    shellyLatching.name = `${shellyLatching.name} latching`;
+    await shelly.addDevice(shellyLatching);
+    await waitBridged(shellyLatching);
+    const latchingDevice = shellyPlatform.bridgedDevices.get('shelly2pmg3-34CDB0770C4C')!;
+    expect(latchingDevice.getChildEndpointById('input:0')?.hasClusterServer(Switch)).toBe(true);
+    shellyLatching.getComponent('input:0')?.setValue('state', false);
+    await flushAsync();
+    shellyPlatform.config.inputLatchingList = [];
+    cleanup();
+    shellyLatching.destroy();
+  });
+
+  it('should add shellyblugwg3 and handle Blugw commands, events and paired BLU devices', async () => {
+    expect(shellyPlatform).toBeDefined();
+    shellyPlatform.config.enableMdnsDiscover = false;
+    shellyPlatform.config.enableBleDiscover = true;
+
+    await shellyPlatform.onStart('Test reason');
+
+    const shellyBluGw = await ShellyDevice.create(shelly, (shellyPlatform as any).log, path.join('src', 'mock', 'shellyblugwg3-34CDB077BCD4.json'));
+    expect(shellyBluGw).toBeDefined();
+    if (!shellyBluGw) return;
+
+    await shelly.addDevice(shellyBluGw);
+    await waitBridged(shellyBluGw);
+    expect(shellyPlatform.bridgedDevices.has('shellyblugwg3-34CDB077BCD4')).toBe(true);
+    expect(shellyPlatform.gatewayDevices.has('shellyblugwg3-34CDB077BCD4')).toBe(true);
+    expect(shellyPlatform.bluBridgedDevices.size).toBe(5);
+
+    const device = shellyPlatform.bridgedDevices.get('shellyblugwg3-34CDB077BCD4')!;
+    expect(device).toBeDefined();
+    expect(device.getAttribute('fixedLabel', 'labelList')).toEqual([{ label: 'composed', value: 'BLU Gateway' }]);
+
+    const blugwEndpoint = device.getChildEndpointById('blugw');
+    expect(blugwEndpoint).toBeDefined();
+    if (!blugwEndpoint) return;
+    expect(blugwEndpoint.hasClusterServer(ModeSelect)).toBe(true);
+    expect(blugwEndpoint.getAttribute(ModeSelect.id, 'currentMode')).toBe(1);
+
+    const fetch = vi.mocked(shellyFetch).mockResolvedValue({ sys_led_enable: false });
+
+    await blugwEndpoint.executeCommandHandler('changeToMode', { newMode: 2 }, 'modeSelect', {} as any, blugwEndpoint);
+    expect(fetch).toHaveBeenCalledWith(shellyBluGw.shelly, device.log, shellyBluGw.host, shellyBluGw.port, 'Blugw.SetConfig', { config: { sys_led_enable: false } });
+
+    const blugwComponent = shellyBluGw.getComponent('blugw');
+    expect(blugwComponent).toBeDefined();
+    blugwComponent?.emit('event', 'blugw', 'config_changed', { component: 'blugw', event: 'config_changed', ts: 0 });
+    await waiter('Blugw currentMode 2', () => blugwEndpoint.getAttribute(ModeSelect.id, 'currentMode') === 2, true, 5000, 10);
+    expect(fetch).toHaveBeenCalledWith(shellyBluGw.shelly, device.log, shellyBluGw.host, shellyBluGw.port, 'Blugw.GetConfig');
+    expect(blugwEndpoint.getAttribute(ModeSelect.id, 'currentMode')).toBe(2);
+
+    fetch.mockRestore();
+
+    await shellyPlatform.onConfigure();
+
+    cleanup();
+    shellyBluGw.destroy();
   });
 
   it('should load and save the stored devices', async () => {
