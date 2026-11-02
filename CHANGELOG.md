@@ -37,6 +37,28 @@ If you like this project and find it useful, please consider giving it a star on
 ### Added
 
 - [homeAssistant]: Report a friendly ha_entitylabel (Total, Phase A/B/C) on the em:0-3 endpoints of triphase devices (shellypro3em, shelly3em63g3), so Home Assistant's Matter integration can override the entity name (https://github.com/Luligu/matterbridge-shelly/pull/213). Thanks to https://github.com/lboue.
+- [basicInformation]: Report the firmware build identifier as hardwareVersionString on the BridgedDeviceBasicInformation cluster (https://github.com/Luligu/matterbridge-shelly/pull/212). Thanks to https://github.com/lboue.
+- [tags]: Add Grid/Battery semantic tags to device power supplies without classifying measured circuits (https://github.com/Luligu/matterbridge-shelly/pull/211). Thanks to https://github.com/lboue.
+
+### Changed
+
+- [agents]: Update `.antigravity/settings.json` to v.1.0.6.
+- [agents]: Update `.claude/settings.json` to v.1.0.9.
+- [codex]: Update `.codex/rules/default.rules` to v.1.0.7.
+- [workflows]: Update `.github/workflows/build.yml` to v.2.0.8.
+- [workflows]: Update `.github/workflows/codecov.yml` to v.2.0.8.
+- [workflows]: Update `.github/workflows/codeql.yml` to v.2.0.0.
+- [workflows]: Update `.github/workflows/publish.yml` to v.2.0.7.
+- [config]: Update `.gitignore` to v.1.0.5.
+- [config]: Update `.oxfmtrc.json` to v.1.2.0.
+- [config]: Update `.oxlintrc.json` to v.1.2.0.
+- [config]: Update `vitest.config.ts` to v.2.0.9.
+
+### Fixed
+
+- [logging]: Use the configured log level when protocol debug logging is disabled.
+
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [2.8.1] - 2026-10-31
 

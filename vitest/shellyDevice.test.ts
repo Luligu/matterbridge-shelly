@@ -81,6 +81,45 @@ describe('Shelly devices test', () => {
     vi.restoreAllMocks();
   });
 
+  describe.each([
+    { gen: 1, file: 'shelly1-34945472A643.json', field: 'fw', statusService: 'status', configService: 'settings' },
+    { gen: 2, file: 'shellyplus1pm-441793D69718.json', field: 'fw_id', statusService: 'Shelly.GetStatus', configService: 'Shelly.GetConfig' },
+  ])('firmware parsing for Gen $gen', ({ gen, file, field, statusService, configService }) => {
+    test.each([
+      { value: undefined, build: '', version: '' },
+      { value: null, build: '', version: '' },
+      { value: 123, build: '', version: '' },
+      { value: '', build: '', version: '' },
+      { value: '20261026-122228', build: '20261026-122228', version: '' },
+      { value: '20261026-122228/', build: '20261026-122228', version: '' },
+      { value: '/2.0.3-g4601943', build: '', version: '2.0.3-g4601943' },
+      { value: '20261026-122228/2.0.3-g4601943/extra', build: '20261026-122228', version: '2.0.3-g4601943' },
+    ])('should safely parse $value', async ({ value, build, version }) => {
+      const host = path.join('src', 'mock', file);
+      const info = await shellyFetch(shelly, log, host, 80, 'shelly');
+      const status = await shellyFetch(shelly, log, host, 80, statusService);
+      const config = await shellyFetch(shelly, log, host, 80, configService);
+      expect(info).not.toBeNull();
+      expect(status).not.toBeNull();
+      expect(config).not.toBeNull();
+      fetchSpy.mockImplementation(async (_shelly, _log, _host, _port, service) => {
+        if (service === 'shelly') return { ...info, [field]: value };
+        if (service === statusService) return status;
+        if (service === configService) return config;
+        return null;
+      });
+      const parsedDevice = await ShellyDevice.create(shelly, log, host);
+      try {
+        expect(parsedDevice).toBeDefined();
+        expect(parsedDevice?.gen).toBe(gen);
+        expect(parsedDevice?.firmwareBuild).toBe(build);
+        expect(parsedDevice?.firmware).toBe(version);
+      } finally {
+        parsedDevice?.destroy();
+      }
+    });
+  });
+
   test('Instance created async', async () => {
     // The constructor of ShellyDevice is async, so we need to force
     // oxlint-disable-next-line typescript/ban-ts-comment
@@ -222,6 +261,7 @@ describe('Shelly devices test', () => {
     device.colorUpdateTimeout = setTimeout(() => {}, 1000); // Prevent timeout in tests
     device.colorCommandTimeout = setTimeout(() => {}, 1000); // Prevent timeout in tests
     device.thermostatSystemModeTimeout = setTimeout(() => {}, 1000); // Prevent timeout in tests
+    device.coverUpdateTimeout = setTimeout(() => {}, 1000); // Verify pending cover updates are cleared on destruction
     device.thermostatSetpointTimeout = setTimeout(() => {}, 1000); // Prevent timeout in tests
     (device as any).startWsClientTimeout = setTimeout(() => {}, 1000); // Prevent timeout in tests
     device.destroy();
@@ -877,7 +917,8 @@ describe('Shelly devices test', () => {
   });
 
   test('onEvent should handle regular component event', async () => {
-    const device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shelly2pmg3-34CDB0770C4C.json'));
+    const device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shellyplus1pm-441793D69718.json'));
+    expect(device).toBeDefined();
     if (!device) return;
 
     const event = {
@@ -888,10 +929,14 @@ describe('Shelly devices test', () => {
 
     const component = device.getComponent('switch:0');
     const componentEventHandler = vi.fn();
+    expect(component).toBeDefined();
     if (!component) return;
     component.on('event', componentEventHandler);
     device.onEvent([event]);
     expect(componentEventHandler).toHaveBeenCalledWith('switch:0', 'toggle', event);
+
+    device.onEvent([{ component: 'missing:0', event: 'toggle', ts: 1625072400 }]);
+    expect(componentEventHandler).toHaveBeenCalledTimes(1);
 
     device.destroy();
   });
@@ -1296,14 +1341,14 @@ describe('Shelly devices test', () => {
     device.destroy();
   });
 
-  test('gen 2+ device should respond to awake', async () => {
+  test.each([true, false])('should refresh a sleepy Gen 1 device when cached is %s', async (cached) => {
     const device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', 'shelly2pmg3-34CDB0770C4C.json'));
     expect(device).toBeDefined();
     if (!device) return;
     vi.clearAllMocks();
 
     device.sleepMode = true;
-    device.cached = true;
+    device.cached = cached;
     device.gen = 1;
     createSpy.mockImplementationOnce(async () => ({ gen: 1, saveDevicePayloads: vi.fn(), destroy: vi.fn() }) as any);
     device.emit('awake');
