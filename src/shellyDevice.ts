@@ -79,9 +79,10 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
   port: number;
   id = '';
   model = '';
-  batch = '';
   mac = '';
   firmware = '';
+  /** Firmware build identifier before the slash in the Shelly firmware string. */
+  firmwareBuild = '';
   auth = false;
   name = '';
   online = false;
@@ -572,7 +573,9 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
       }
       device.model = shellyPayload.type as string;
       device.id = normalizeId((settingsPayload.device as ShellyData).hostname as string).id;
-      device.firmware = (shellyPayload.fw as string).split('/')[1];
+      const firmware = isValidString(shellyPayload.fw, 1) ? shellyPayload.fw : '';
+      device.firmwareBuild = firmware.split('/')[0];
+      device.firmware = firmware.split('/')[1] ?? '';
       device.auth = shellyPayload.auth as boolean;
       device.name = settingsPayload.name ? (settingsPayload.name as string) : device.id;
       device.gen = 1;
@@ -682,9 +685,10 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
       // Set sleep mode for gen 2 and 3 devices
       if ((statusPayload.sys as ShellyData).wakeup_period) device.sleepMode = true;
       device.model = shellyPayload.model as string;
-      device.batch = (shellyPayload.batch as string) ?? '';
       device.id = normalizeId(shellyPayload.id as string).id;
-      device.firmware = (shellyPayload.fw_id as string).split('/')[1];
+      const firmware = isValidString(shellyPayload.fw_id, 1) ? shellyPayload.fw_id : '';
+      device.firmwareBuild = firmware.split('/')[0];
+      device.firmware = firmware.split('/')[1] ?? '';
       device.auth = shellyPayload.auth_en as boolean;
       device.gen = shellyPayload.gen;
       // "available_updates": { }

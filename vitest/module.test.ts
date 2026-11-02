@@ -475,6 +475,33 @@ describe('ShellyPlatform', () => {
   });
 
   it.each([
+    { file: 'shelly1-34945472A643.json', build: '20230913-112003', version: 'v1.14.0-gcb84623' },
+    { file: 'shellyplus1pm-441793D69718.json', build: '20260311-095847', version: '1.7.5-g9979d16' },
+    { file: 'shelly0110dimg3-34B7DA902E24.json', build: '20240807-142723', version: '1.4.2-beta1-g84969a6' },
+    { file: 'shelly1g4-A085E3BCA4C8.json', build: '20260311-095901', version: '1.7.5-g9979d16' },
+    { file: 'shelly1g4-A085E3BCA4C8.json', build: '', version: '1.7.5-g9979d16' },
+  ])('should report firmware build and software version for $file (build: $build)', async ({ file, build, version }) => {
+    const device = await ShellyDevice.create(shelly, log, path.join('src', 'mock', file));
+    expect(device).toBeDefined();
+    if (!device) return;
+    try {
+      expect(device.firmwareBuild).toBe(file.startsWith('shelly1g4') ? '20260311-095901' : build);
+      expect(device.firmware).toBe(version);
+      device.firmwareBuild = build;
+      device.name = `${device.name} firmware build ${build || 'fallback'}`;
+      await shelly.addDevice(device);
+      await waitBridged(device);
+      const endpoint = shellyPlatform.bridgedDevices.get(device.id);
+      expect(endpoint).toBeDefined();
+      expect(endpoint?.getAttribute('bridgedDeviceBasicInformation', 'hardwareVersionString')).toBe(build || '1.0.0');
+      expect(endpoint?.getAttribute('bridgedDeviceBasicInformation', 'softwareVersionString')).toBe(version);
+    } finally {
+      cleanup();
+      device.destroy();
+    }
+  });
+
+  it.each([
     { file: 'shelly1-34945472A643.json', battery: false, excluded: false },
     { file: 'shellyht-703523.json', battery: true, excluded: false },
     { file: 'shellyplusht-FCB467261FD4.json', battery: true, excluded: false },
