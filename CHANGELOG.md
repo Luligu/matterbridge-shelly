@@ -52,6 +52,10 @@ If you like this project and find it useful, please consider giving it a star on
 - [config]: Update `.oxlintrc.json` to v.1.2.0.
 - [config]: Update `vitest.config.ts` to v.2.0.9.
 
+### Fixed
+
+- [logging]: Use the configured log level when protocol debug logging is disabled.
+
 <a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [2.8.1] - 2026-10-31
