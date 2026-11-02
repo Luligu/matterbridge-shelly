@@ -36,6 +36,7 @@ If you like this project and find it useful, please consider giving it a star on
 
 ### Added
 
+- [basicInformation]: Report the firmware build identifier as hardwareVersionString on the BridgedDeviceBasicInformation cluster (https://github.com/Luligu/matterbridge-shelly/pull/212). Thanks to https://github.com/lboue.
 - [tags]: Add Grid/Battery semantic tags to device power supplies without classifying measured circuits (https://github.com/Luligu/matterbridge-shelly/pull/211). Thanks to https://github.com/lboue.
 
 ### Changed
