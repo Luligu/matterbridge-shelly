@@ -31,8 +31,8 @@ Features:
 - Discovered shellies are stored in local storage and cached for fast loading on startup.
 - The components exposed are Light (with brightness and RGB color), Switch, Relay, Roller, Cover, PowerMeter, Temperature, Humidity, Illuminance, Thermostat, Button and Input.
 - Gen 2+ covers with slat control enabled (e.g. venetian blinds on a Shelly 2PM Gen3) also expose the tilt position. Enable and calibrate the slat control in the Shelly app or web page first, then restart Matterbridge.
-- PowerMeters expose the electrical measurements with the electricalSensor device type (supported by Home Assistant and partially by SmartThings), waiting for the other controllers to upgrade to the Matter 1.3 specs.
-- Device power supplies expose Grid/Battery semantic tags. Meter endpoints retain their measurement role because the measured circuit may be a grid connection, solar production, or a load.
+- PowerMeters expose electrical measurements with the electricalSensor device type, supported by Home Assistant and partially by SmartThings and Apple Home. Available readings depend on the controller and its software version.
+- Devices expose Grid/Battery semantic tags for their own power supply. These tags do not classify the circuits measured by power meters.
 - Shellies are controlled locally, eliminating the need for cloud or MQTT (which can both be disabled).
 - Shelly Gen 1 devices are controlled using the CoIoT protocol (see the note below).
 - Shelly Gen 2, Gen 3 and Gen 4 devices are controlled using WebSocket. Starting with release 2.6.0, it is possible to use [RPC over UDP](README.md#how-to-configure-rpc-over-udp) instead of websocket.
