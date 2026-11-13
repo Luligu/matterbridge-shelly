@@ -1054,7 +1054,7 @@ export class ShellyDevice extends EventEmitter<ShellyDeviceEvents> {
     // Scan for BTHome devices and components
     for (const key in data) {
       if (key.startsWith('bthomedevice:')) {
-        let device = undefined;
+        let device;
         for (const bthomedevice of this.bthomeDevices.values()) {
           if (bthomedevice.key === key) {
             device = bthomedevice;
