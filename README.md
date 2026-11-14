@@ -31,7 +31,9 @@ Features:
 - Discovered shellies are stored in local storage and cached for fast loading on startup.
 - The components exposed are Light (with brightness and RGB color), Switch, Relay, Roller, Cover, PowerMeter, Temperature, Humidity, Illuminance, Thermostat, Button and Input.
 - Gen 2+ covers with slat control enabled (e.g. venetian blinds on a Shelly 2PM Gen3) also expose the tilt position. Enable and calibrate the slat control in the Shelly app or web page first, then restart Matterbridge.
-- PowerMeters expose the electrical measurements with the electricalSensor device type (supported by Home Assistant and partially by SmartThings), waiting for the other controllers to upgrade to the Matter 1.3 specs.
+- PowerMeters expose electrical measurements with the electricalSensor device type, supported by Home Assistant and partially by SmartThings and Apple Home. Available readings depend on the controller and its software version.
+- Shelly devices report Matter test vendor ID `0xfff1` and product ID `0x8000`, allowing Home Assistant to use `ha_entitylabel` endpoint labels when provided.
+- Devices expose Grid/Battery semantic tags for their own power supply. These tags do not classify the circuits measured by power meters.
 - Shellies are controlled locally, eliminating the need for cloud or MQTT (which can both be disabled).
 - Shelly Gen 1 devices are controlled using the CoIoT protocol (see the note below).
 - Shelly Gen 2, Gen 3 and Gen 4 devices are controlled using WebSocket. Starting with release 2.6.0, it is possible to use [RPC over UDP](README.md#how-to-configure-rpc-over-udp) instead of websocket.
@@ -350,8 +352,6 @@ Restart Matterbridge for the changes to take effect.
 
 ## Development guide
 
-The typed WiFi component's `Scan()` method accepts authentication values from `0` through `6`, including `auth: 6` returned by Gen 4 devices.
-
 Refer to the Matterbridge [Development guide](https://matterbridge.io/README-DEV.html) for other guidelines.
 
 ## Repository toolchain
@@ -390,6 +390,6 @@ Licensed under the [Apache License 2.0](./LICENSE).
 
 ## Support the project
 
-If you find this project useful, please consider giving it a star on GitHub and sponsoring it. Your support helps maintain and improve the project.
+If you find this project useful, please consider giving it a star on [GitHub](https://github.com/Luligu/matterbridge-shelly) and sponsoring it. Your support helps maintain and improve the project.
 
 [!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/yellow_img.png)](https://www.buymeacoffee.com/luligugithub)

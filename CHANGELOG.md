@@ -32,6 +32,57 @@ If you like this project and find it useful, please consider giving it a star on
 
 ---
 
+## [2.8.2] - 2026-11-14
+
+### Added
+
+- [homeAssistant]: Report a friendly ha_entitylabel (Total, Phase A/B/C) on the em:0-3 endpoints of triphase devices (shellypro3em, shelly3em63g3), so Home Assistant's Matter integration can override the entity name (https://github.com/Luligu/matterbridge-shelly/pull/213). Thanks to https://github.com/lboue.
+- [basicInformation]: Report the firmware build identifier as hardwareVersionString on the BridgedDeviceBasicInformation cluster (https://github.com/Luligu/matterbridge-shelly/pull/212). Thanks to https://github.com/lboue.
+- [tags]: Add Grid/Battery semantic tags to device power supplies without classifying measured circuits (https://github.com/Luligu/matterbridge-shelly/pull/211). Thanks to https://github.com/lboue.
+- [test]: Improve `module.test.ts` coverage for component update/event handlers and `shellyblugwg3` BLU gateway and BTHome devices.
+
+### Changed
+
+- [basicInformation]: Report Matter test productId 0x8000 for all Shelly devices to support Home Assistant entity labels.
+- [agents]: Update `AGENTS.md` to v.1.0.12.
+- [agents]: Update `.antigravity/settings.json` to v.1.0.6.
+- [agents]: Update `.claude/settings.json` to v.1.0.12.
+- [codex]: Update `.codex/rules/default.rules` to v.1.0.8.
+- [workflows]: Update `.github/workflows/build.yml` to v.2.0.8.
+- [workflows]: Update `.github/workflows/codecov.yml` to v.2.0.8.
+- [workflows]: Update `.github/workflows/codeql.yml` to v.2.0.0.
+- [workflows]: Update `.github/workflows/publish.yml` to v.2.0.7.
+- [config]: Update `.gitignore` to v.1.0.5.
+- [config]: Update `.oxfmtrc.json` to v.1.2.0.
+- [config]: Update `.oxlintrc.json` to v.1.2.0.
+- [config]: Update `vitest.config.ts` to v.2.0.9.
+- [package]: Bump `@vitest/coverage-v8` to v.5.1.0.
+- [package]: Bump `vitest` to v.5.1.0.
+- [package]: Bump `node-ansi-logger` to v.3.3.2.
+- [package]: Bump `node-persist-manager` to v.2.1.2.
+- [package]: Bump `ws` to v.8.23.0.
+- [package]: Bump `oxfmt` to v.0.78.0.
+- [package]: Bump `oxlint` to v.1.93.0.
+- [package]: Bump `oxlint-tsgolint` to v.7.0.2007.
+- [agents]: Update `.agents/README.md` to v.1.0.6.
+- [agents]: Update `.agents/rules/chip-tests.instructions.md`, `.claude/rules/chip-tests/chip-tests.instructions.md` and `.github/instructions/chip-tests/chip-tests.instructions.md` to v.1.0.1.
+- [agents]: Update `.agents/rules/matterbridge.instructions.md`, `.claude/rules/matterbridge/matterbridge.instructions.md` and `.github/instructions/matterbridge/matterbridge.instructions.md` to v.1.0.4.
+- [agents]: Update `.agents/rules/plugin-frontend.instructions.md`, `.claude/rules/plugin-frontend/plugin-frontend.instructions.md` and `.github/instructions/plugin-frontend/plugin-frontend.instructions.md` to v.1.0.3.
+- [agents]: Update `.agents/rules/testing.instructions.md`, `.claude/rules/testing/testing.instructions.md` and `.github/instructions/testing/testing.instructions.md` to v.1.0.8.
+- [agents]: Update `.agents/skills/verify-agent-context/SKILL.md`, `.claude/skills/verify-agent-context/SKILL.md` and `.github/skills/verify-agent-context/SKILL.md` to v.1.0.6.
+- [codex]: Update `.codex/config.toml` to v.1.0.8.
+- [vscode]: Update `.vscode/extensions.json` to v.1.0.6.
+- [vscode]: Update `.vscode/settings.json` to v.1.0.21.
+- [config]: Update `SHARED-AGENTS.md` to v.1.0.0.
+- [styleguide]: Update `STYLEGUIDE.md` to v.1.1.1.
+- [config]: Update `src/shellyDevice.ts`.
+
+### Fixed
+
+- [logging]: Use the configured log level when protocol debug logging is disabled.
+
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
+
 ## [2.8.1] - 2026-10-31
 
 ### Added

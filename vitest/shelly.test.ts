@@ -706,12 +706,12 @@ describe('Shellies test', () => {
 
     shellies.setLogLevel(LogLevel.NOTICE, false, false, false, false);
     expect((shellies as any).log.logLevel).toBe(LogLevel.NOTICE);
-    expect(shellies.mdnsScanner.log.logLevel).toBe(LogLevel.INFO);
-    expect(shellies.udpServer.log.logLevel).toBe(LogLevel.INFO);
-    expect(shellies.wsServer.log.logLevel).toBe(LogLevel.INFO);
-    expect(shellies.coapServer.log.logLevel).toBe(LogLevel.INFO);
-    expect(WsClient.logLevel).toBe(LogLevel.INFO);
-    expect(device2g.wsClient?.log.logLevel).toBe(LogLevel.INFO);
+    expect(shellies.mdnsScanner.log.logLevel).toBe(LogLevel.NOTICE);
+    expect(shellies.udpServer.log.logLevel).toBe(LogLevel.NOTICE);
+    expect(shellies.wsServer.log.logLevel).toBe(LogLevel.NOTICE);
+    expect(shellies.coapServer.log.logLevel).toBe(LogLevel.NOTICE);
+    expect(WsClient.logLevel).toBe(LogLevel.NOTICE);
+    expect(device2g.wsClient?.log.logLevel).toBe(LogLevel.NOTICE);
 
     device2g.destroy();
   });
